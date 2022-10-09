@@ -1,0 +1,271 @@
+(* LETTERS & DIGITS *)
+
+character = ? all ascii characters ? ;
+
+letter = ? all ascii alphabetical characters ? ;
+
+decimal_digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ;
+
+hexadecimal_digit = decimal_digit | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' ;
+
+octal_digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' ;
+
+binary_digit = '0' | '1' ;
+
+(* WORDS & LITERALS *)
+
+identifier = letter , { letter | decimal_digit | '_' } ;
+
+literal_decimal_integer = decimal_digit , { decimal_digit } ;
+
+literal_hexadecimal_integer = '0' , ( 'x' | 'X' ) , hexadecimal_digit , { hexadecimal_digit } ;
+
+literal_octal_integer = '0' , ( 'o' | 'O' ) , octal_digit , { octal_digit } ;
+
+literal_binary_integer = '0' , ( 'b' | 'B' ) , binary_digit , { binary_digit } ;
+
+literal_integer = literal_decimal_integer | literal_hexadecimal_integer | literal_octal_integer | literal_binary_integer ;
+
+literal_decimal_floating_point = decimal_digit , { decimal_digit } , '.' , decimal_digit , { decimal_digit } , [ ( 'e' | 'E' ) , [ '+' | '-' ] , decimal_digit , { decimal_digit } ] ;
+
+literal_hexadecimal_floating_point = hexadecimal_digit , { hexadecimal_digit } , '.' , hexadecimal_digit , { hexadecimal_digit } , [ ( 'p' | 'P' ) , [ '+' | '-' ] , hexadecimal_digit , { hexadecimal_digit } ] ;
+
+literal_floating_point = literal_decimal_floating_point | literal_hexadecimal_floating_point ;
+
+escape_sequence = '\\' , ( '\\' | 'b' | 'f' | 'n' | 'r' | 't' | ( ( 'x' | 'X' ) , hexadecimal_digit , { hexadecimal_digit } ) ) ;
+
+literal_string = '"' , { character | escape_sequence } , '"' ;
+
+literal_character = '\'' , [ character | escape_sequence ] , '\'' ;
+
+literal_null = "null" ;
+
+literal_bool = "true" | "false" ;
+
+literal = literal_integer | literal_floating_point | literal_string | literal_character | literal_null | literal_bool ;
+
+(* OPERATORS *)
+
+operator_type_check = "is" , type ;
+
+operator_type_check_not = "!is" , type ;
+
+operator_type_cast = "as" , type ;
+
+operator_safe_type_cast = "as?" , type ;
+
+operator_sizeof = "sizeof" ;
+
+operator_alignof = "alignof" ;
+
+operator_typeof = "typeof" ;
+
+operator_contains = "in" ;
+
+operator_contains_not = "!in" ;
+
+operator_range = ".." ;
+
+operator_comma = ',' ;
+
+operator_prefix_increment = "++" ;
+
+operator_prefix_decrement = "--" ;
+
+operator_postfix_increment = "++" ;
+
+operator_postfix_decrement = "--" ;
+
+operator_positive = '+' ;
+
+operator_negative = '-' ;
+
+operator_add = '+' ;
+
+operator_subtract = '-' ;
+
+operator_multiply = '*' ;
+
+operator_divide = '/' ;
+
+operator_modulo = '%' ;
+
+operator_bitwise_and = '&' ;
+
+operator_bitwise_or = '|' ;
+
+operator_bitwise_xor = '^' ;
+
+operator_bitwise_not = '~' ;
+
+operator_bitwise_shift_left = "<<" ;
+
+operator_bitwise_shift_right = ">>" ;
+
+operator_logic_and = "&&" ;
+
+operator_logic_or = "||" ;
+
+operator_logic_not = '!' ;
+
+operator_indirection = '*' ;
+
+operator_address = '&' ;
+
+operator_direct_access = '.' ;
+
+operator_indirect_access = "*." ;
+
+operator_safe_indirect_access = "?." ;
+
+operator_assign = '=' ;
+
+operator_add_assign = "+=" ;
+
+operator_subtract_assign = "-=" ;
+
+operator_multiply_assign = "*=" ;
+
+operator_divide_assign = "/=" ;
+
+operator_modulo_assign = "%=" ;
+
+operator_bitwise_and_assign = "&=" ;
+
+operator_bitwise_or_assign = "|=" ;
+
+operator_bitwise_xor_assign = "^=" ;
+
+operator_bitwise_shift_left_assign = "<<=" ;
+
+operator_bitwise_shift_right_assign = ">>=" ;
+
+operator_equals = "==" ;
+
+operator_not_equals = "!=" ;
+
+operator_less_than = '<' ;
+
+operator_greater_than = '>' ;
+
+operator_less_than_equals = "<=" ;
+
+operator_greater_than_equals = ">=" ;
+
+operator_call = '(' , [ expression , { ',' , expression } ] , ')' ;
+
+operator_subscript = '[' , expression , ']' ;
+
+operator_unary_left = operator_type_check | operator_type_check_not | operator_type_cast | operator_safe_type_cast | operator_postfix_increment | operator_postfix_decrement | operator_call | operator_subscript ;
+
+operator_unary_right = operator_sizeof | operator_alignof | operator_typeof | operator_prefix_increment | operator_prefix_decrement | operator_positive | operator_negative | operator_logic_not | operator_bitwise_not | operator_indirection | operator_address ;
+
+operator_binary = operator_contains | operator_range | operator_comma | operator_add | operator_subtract | operator_multiply | directive | operator_modulo | operator_bitwise_and | operator_bitwise_or | operator_bitwise_xor | operator_bitwise_shift_left | operator_bitwise_shift_right | operator_logic_and | operator_logic_or | operator_assign | operator_add_assign | operator_subtract_assign | operator_multiply_assign | operator_divide_assign | operator_modulo_assign | operator_bitwise_and_assign | operator_bitwise_or_assign | operator_bitwise_xor_assign | operator_bitwise_shift_left_assign | operator_bitwise_shift_right_assign | operator_equals | operator_not_equals | operator_less_than | operator_greater_than | operator_less_than_equals | operator_greater_than_equals | operator_direct_access | operator_indirect_access | operator_safe_indirect_access ;
+
+(* EXPRESSIONS *)
+
+expression_atom = identifier | literal | type ;
+
+expression_unary_left = expression , operator_unary_left ;
+
+expression_unary_right = operator_unary_right , expression ;
+
+expression_binary = expression , operator_binary , expression ;
+
+expression_group = '(' , expression , ')' ;
+
+expression_lambda = "fun" , [ '(' , [ function_parameter , { ',' , function_parameter } ]  , ')' ] , [ ':' , type ] , statement ;
+
+expression_if = "if" , expression , "then" , statement , { "elif" , expression , "then" , statement } , [ "else" , statement ] ;
+
+expression_for = "for" , identifier , [ ':' , type ] , "in" , expression , "do" , statement ;
+
+expression_while = "while" , expression , "do" , expression ;
+
+expression_do_while = "do" , expression , "while" , expression ;
+
+when_case_equal = expression , "do" , expression ;
+
+when_case_range = [ '!' ] , "in" , expression , "do" , expression ;
+
+when_case_type = [ '!' ] , "is" , type , "do" , expression ;
+
+when_case = when_case_equal | when_case_range | when_case_type ;
+
+expression_when = "when" , [ expression ] , '{' , { when_case } , [ "else" , expression ] , '}' ; 
+
+expression_return = "return" , expression ;
+
+expression_yield = "yield" , expression ;
+
+expression_block = '{' , { expression } , '}' ;
+
+expression = expression_atom | expression_unary_left | expression_unary_right | expression_binary | expression_group | expression_lambda | expression_if | expression_for | expression_while | expression_do_while | expression_when | expression_return | expression_yield | expression_block ;
+
+(* TYPES *)
+
+type_builtin = "i8" | "i16" | "i32" | "i64" | "isize" | "u8" | "u16" | "u32" | "u64" | "usize" | "bool" | "unit" | "type" | "Self" ;
+
+type_nullable = '?' , type ;
+
+type_pointer = '*' , type ;
+
+type_reference = '&' , type ;
+
+type_mutable = "mut" , type ;
+
+type_compile_time = "const" , type ;
+
+type_static_storage = "static" , type ;
+
+type_array = '[' , [ expression ] , ']' , type ;
+
+type_function = "fun" , '(' , [ type , { ',' , type } ] , ')' , type ;
+
+type_generator = "gen" , '(' , [ type , { ',' , type } ] , ')' , type ;
+
+type = expression | type_builtin | type_nullable | type_pointer | type_reference | type_mutable | type_compile_time | type_static_storage | type_array | type_function | type_generator ;
+
+(* DECLARATIONS *)
+
+declaration_variable = "var" , identifier , ':' , ( ( [ type ] , '=' , expression ) | type ) ;
+
+parameter_function = identifier , ':' , type ;
+
+declaration_function = "fun" , identifier , [ '(' , [ parameter_function , { ',' , parameter_function } ]  , ')' ] , [ ':' , type ] , statement ;
+
+parameter_generator = identifier , ':' , type ;
+
+declaration_generator = "gen" , identifier , [ '(' , [ parameter_generator , { ',' , parameter_generator } ]  , ')' ] , [ ':' , type ] , statement ;
+
+declaration_struct_member = [ "pub" ] , [ "static" ] , ( declaration_variable | declaration_function | declaration_generator | struct_declaration ) ;
+
+declaration_struct = "struct" , identifier , '{' , { declaration_struct_member } , '}' ;
+
+declaration_union_member = identifier , ':' , type ;
+
+declaration_union = "union" , identifier , '{' , { declaration_union_member } , '}' ;
+
+declaration_enum_member = identifier ;
+
+declaration_enum = "enum" , identifier , '{' , { declaration_enum_member } , '}' ;
+
+declaration_module_member = [ "pub" ] , declaration ;
+
+member_resolution = identifier , { '.' , identifier } ;
+
+declaration_module = "mod" , member_resolution , '{' , { declaration_module_member } , '}' ;
+
+declaration = declaration_variable | declaration_function | declaration_generator | declaration_struct | declaration_union | declaration_enum | declaration_module ;
+
+(* DIRECTIVES *)
+
+directive_use = "use" , member_resolution , { ',' , member_resolution } ;
+
+directive_from_use = "from" , member_resolution , "use" , identifier , { ',' , identifier } ;
+
+directive = directive_use | directive_from_use ;
+
+(* PROGRAM *)
+
+program = { directive } , { declaration } ;
