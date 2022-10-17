@@ -21,6 +21,9 @@ typedef struct location_s
 
   /// Location column number in source string.
   size_t col;
+
+  /// Character length of the word.
+  size_t len;
 } location_t;
 
 #endif

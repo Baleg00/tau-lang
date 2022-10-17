@@ -208,7 +208,7 @@ token_t* token_list_top(token_list_t* list);
 /// @return The number of tokens in the list.
 size_t token_list_size(token_list_t* list);
 
-/// Determine wether the list is empty.
+/// Determine whether the list is empty.
 /// @param list The list to be checked.
 /// @return True if the list is empty, false otherwise.
 bool token_list_empty(token_list_t* list);
@@ -218,27 +218,27 @@ bool token_list_empty(token_list_t* list);
 /// @return The matching string.
 const char* token_kind_to_string(token_kind_t kind);
 
-/// Determine wether a token kind is a literal kind.
+/// Determine whether a token kind is a literal kind.
 /// @param kind The kind to be tested.
 /// @return True if the token kind is a literal kind, false otherwise.
 bool token_is_literal(token_kind_t kind);
 
-/// Determine wether a token kind is a literal integer kind.
+/// Determine whether a token kind is a literal integer kind.
 /// @param kind The kind to be tested.
 /// @return True if the token kind is a literal integer kind, false otherwise.
 bool token_is_literal_integer(token_kind_t kind);
 
-/// Determine wether a token kind is a literal float kind.
+/// Determine whether a token kind is a literal float kind.
 /// @param kind The kind to be tested.
 /// @return True if the token kind is a literal float kind, false otherwise.
 bool token_is_literal_float(token_kind_t kind);
 
-/// Determine wether a token kind is a keyword kind.
+/// Determine whether a token kind is a keyword kind.
 /// @param kind The kind to be tested.
 /// @return True if the token kind is a keyword kind, false otherwise.
 bool token_is_keyword(token_kind_t kind);
 
-/// Determine wether a token kind is a punctuation kind.
+/// Determine whether a token kind is a punctuation kind.
 /// @param kind The kind to be tested.
 /// @return True if the token kind is a punctuation kind, false otherwise.
 bool token_is_punctuation(token_kind_t kind);
