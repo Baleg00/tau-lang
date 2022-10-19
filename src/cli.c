@@ -5,79 +5,47 @@
 #include <string.h>
 #include <assert.h>
 
-void cli_argque_init(cli_argque_t* que, int argc, const char* argv[])
+cli_t* cli_init(cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count)
 {
-  que->argc = argc;
-  que->argv = argv;
-  que->ptr = 0;
-}
-
-bool cli_argque_poll(cli_argque_t* que, const char** arg)
-{
-  if (que->ptr < que->argc)
-  {
-    if (arg != NULL)
-      *arg = que->argv[que->ptr];
-
-    ++que->ptr;
-    return true;
-  }
-
-  return false;
-}
-
-bool cli_argque_peek(cli_argque_t* que, const char** arg)
-{
-  if (que->ptr < que->argc)
-  {
-    if (arg != NULL)
-      *arg = que->argv[que->ptr];
-
-    return true;
-  }
-
-  return false;
-}
-
-bool cli_argque_empty(cli_argque_t* que)
-{
-  return que->ptr >= que->argc;
-}
-
-void cli_init(cli_t* cli, cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count)
-{
+  cli_t* cli = (cli_t*)malloc(sizeof(cli_t));
+  assert(cli != NULL);
   cli->opts = opts;
   cli->opt_count = opt_count;
   cli->usages = usages;
   cli->usage_count = usage_count;
+  return cli;
+}
+
+void cli_free(cli_t* cli)
+{
+  free(cli);
 }
 
 void cli_parse(cli_t* cli, int argc, const char* argv[])
 {
-  cli_argque_t que;
-  cli_argque_init(&que, argc, argv);
+  queue_t* que = queue_init();
 
-  cli_argque_poll(&que, NULL);
+  for (int i = 1; i < argc; ++i)
+    queue_offer(que, (char*)argv[i]);
 
-  while (!cli_argque_empty(&que))
+  while (!queue_empty(que))
   {
-    const char* arg;
-    cli_argque_poll(&que, &arg);
+    const char* arg = (const char*)queue_poll(que);
 
     cli_opt_t* opt;
     if ((opt = cli_match(cli, arg)) != NULL)
     {
       switch (opt->arg_num)
       {
-      case 'N': cli_parse_N(opt, &que); break;
-      case '?': cli_parse_optional(opt, &que); break;
-      case '+': cli_parse_one_or_many(opt, &que); break;
-      case '*': cli_parse_any(opt, &que); break;
+      case 'N': cli_parse_N(opt, que); break;
+      case '?': cli_parse_optional(opt, que); break;
+      case '+': cli_parse_one_or_many(opt, que); break;
+      case '*': cli_parse_any(opt, que); break;
       default: assert(("Invalid option cardinality.", false));
       }
 
       if (opt->callback != NULL)
-        opt->callback(cli, &que, opt, opt->user_ptr);
+        opt->callback(cli, que, opt, opt->user_ptr);
     }
     else if (cli->opts[cli->opt_count - 1].type == CLI_TYPE_SINK)
     {
@@ -86,7 +54,7 @@ void cli_parse(cli_t* cli, int argc, const char* argv[])
       assert(("Not enough memory to sink argument.", opt->arg_max != 0));
 
       if (opt->callback != NULL)
-        opt->callback(cli, &que, opt, opt->user_ptr);
+        opt->callback(cli, que, opt, opt->user_ptr);
 
       *((const char**)opt->data)++ = arg;
       --opt->arg_max;
@@ -94,6 +62,8 @@ void cli_parse(cli_t* cli, int argc, const char* argv[])
     else
       assert(("No matching option or sink.", false));
   }
+
+  queue_free(que);
 }
 
 cli_opt_t* cli_match(cli_t* cli, const char* arg)
@@ -106,13 +76,16 @@ cli_opt_t* cli_match(cli_t* cli, const char* arg)
   return NULL;
 }
 
-void cli_parse_N(cli_opt_t* opt, cli_argque_t* que)
+void cli_parse_N(cli_opt_t* opt, queue_t* que)
 {
   for (size_t i = 0; i < opt->arg_max; ++i)
   {
-    const char* arg;
+    const char* arg = NULL;
 
-    if (!cli_argque_poll(que, &arg) || arg[0] != '-')
+    if (!queue_empty(que))
+      arg = (const char*)queue_poll(que);
+
+    if (arg == NULL || arg[0] != '-')
     {
       assert(("Too few arguments for option.", opt->default_data != NULL));
 
@@ -140,28 +113,31 @@ void cli_parse_N(cli_opt_t* opt, cli_argque_t* que)
   }
 }
 
-void cli_parse_optional(cli_opt_t* opt, cli_argque_t* que)
+void cli_parse_optional(cli_opt_t* opt, queue_t* que)
 {
-  const char* arg;
-  if (cli_argque_peek(que, &arg))
-    if (arg[0] != '-')
+  const char* arg = NULL;
+
+  if (!queue_empty(que))
+    arg = (const char*)queue_peek(que);
+
+  if (arg != NULL && arg[0] != '-')
+  {
+    queue_poll(que);
+
+    if (opt->data_count != NULL)
+      *opt->data_count = 1;
+
+    switch (opt->type)
     {
-      cli_argque_poll(que, NULL);
-
-      if (opt->data_count != NULL)
-        *opt->data_count = 1;
-
-      switch (opt->type)
-      {
-      case CLI_TYPE_INTEGER: *(int*)opt->data = atoi(arg); break;
-      case CLI_TYPE_FLOAT: *(float*)opt->data = (float)atof(arg); break;
-      case CLI_TYPE_BOOLEAN: *(bool*)opt->data = strcmp(arg, "true") == 0 || strcmp(arg, "on") == 0; break;
-      case CLI_TYPE_STRING: *(const char**)opt->data = arg; break;
-      default: assert(("Invalid option type.", false));
-      }
-
-      return;
+    case CLI_TYPE_INTEGER: *(int*)opt->data = atoi(arg); break;
+    case CLI_TYPE_FLOAT: *(float*)opt->data = (float)atof(arg); break;
+    case CLI_TYPE_BOOLEAN: *(bool*)opt->data = strcmp(arg, "true") == 0 || strcmp(arg, "on") == 0; break;
+    case CLI_TYPE_STRING: *(const char**)opt->data = arg; break;
+    default: assert(("Invalid option type.", false));
     }
+
+    return;
+  }
   
   if (opt->default_data != NULL)
   {
@@ -181,13 +157,16 @@ void cli_parse_optional(cli_opt_t* opt, cli_argque_t* que)
     *opt->data_count = 0;
 }
 
-void cli_parse_one_or_many(cli_opt_t* opt, cli_argque_t* que)
+void cli_parse_one_or_many(cli_opt_t* opt, queue_t* que)
 {
   for (size_t count = 0; count < opt->arg_max; ++count)
   {
-    const char* arg;
+    const char* arg = NULL;
+
+    if (!queue_empty(que))
+      arg = (const char*)queue_peek(que);
     
-    if (!cli_argque_peek(que, &arg) || arg[0] == '-')
+    if (arg == NULL || arg[0] == '-')
     {
       assert(("Expected at least one argument.", count > 0));
 
@@ -197,7 +176,7 @@ void cli_parse_one_or_many(cli_opt_t* opt, cli_argque_t* que)
       return;
     }
 
-    cli_argque_poll(que, NULL);
+    queue_poll(que);
 
     switch (opt->type)
     {
@@ -210,13 +189,16 @@ void cli_parse_one_or_many(cli_opt_t* opt, cli_argque_t* que)
   }
 }
 
-void cli_parse_any(cli_opt_t* opt, cli_argque_t* que)
+void cli_parse_any(cli_opt_t* opt, queue_t* que)
 {
   for (size_t count = 0; count < opt->arg_max; ++count)
   {
-    const char* arg;
+    const char* arg = NULL;
+
+    if (!queue_empty(que))
+      arg = (const char*)queue_peek(que);
     
-    if (!cli_argque_peek(que, &arg) || arg[0] == '-')
+    if (arg == NULL || arg[0] == '-')
     {
       if (opt->data_count != NULL)
         *opt->data_count = count;
@@ -224,7 +206,7 @@ void cli_parse_any(cli_opt_t* opt, cli_argque_t* que)
       return;
     }
 
-    cli_argque_poll(que, NULL);
+    queue_poll(que);
 
     switch (opt->type)
     {
@@ -237,7 +219,7 @@ void cli_parse_any(cli_opt_t* opt, cli_argque_t* que)
   }
 }
 
-void cli_help_callback(cli_t* cli, cli_argque_t* que, cli_opt_t* opt, void* user_ptr)
+void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
 {
   printf("Usage:\n");
 
@@ -248,6 +230,9 @@ void cli_help_callback(cli_t* cli, cli_argque_t* que, cli_opt_t* opt, void* user
 
   for (size_t i = 0; i < cli->opt_count; ++i)
   {
+    if (cli->opts[i].type == CLI_TYPE_SINK)
+      continue;
+
     putchar('\t');
 
     for (size_t j = 0; j < cli->opts[i].name_count; ++j)
@@ -262,7 +247,7 @@ void cli_help_callback(cli_t* cli, cli_argque_t* que, cli_opt_t* opt, void* user
   }
 }
 
-void cli_version_callback(cli_t* cli, cli_argque_t* que, cli_opt_t* opt, void* user_ptr)
+void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
 {
   printf("Version: %s\n", (const char*)user_ptr);
 }

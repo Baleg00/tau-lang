@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include "queue.h"
+
 typedef enum cli_type_e
 {
   CLI_TYPE_INTEGER,
@@ -14,10 +16,9 @@ typedef enum cli_type_e
 } cli_type_t;
 
 typedef struct cli_s cli_t;
-typedef struct cli_argque_s cli_argque_t;
 typedef struct cli_opt_s cli_opt_t;
 
-typedef void(*cli_callback_t)(cli_t*, cli_argque_t*, cli_opt_t*, void*);
+typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, void*);
 
 struct cli_opt_s
 {
@@ -48,30 +49,19 @@ struct cli_s
   size_t usage_count;
 };
 
-struct cli_argque_s
-{
-  const char** argv;
-  int argc;
-  int ptr;
-};
-
-void cli_argque_init(cli_argque_t* que, int argc, const char* argv[]);
-bool cli_argque_poll(cli_argque_t* que, const char** arg);
-bool cli_argque_peek(cli_argque_t* que, const char** arg);
-bool cli_argque_empty(cli_argque_t* que);
-
-void cli_init(cli_t* cli, cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count);
+cli_t* cli_init(cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count);
+void cli_free(cli_t* cli);
 void cli_parse(cli_t* cli, int argc, const char* argv[]);
 
 cli_opt_t* cli_match(cli_t* cli, const char* arg);
 
-void cli_parse_N(cli_opt_t* opt, cli_argque_t* que);
-void cli_parse_optional(cli_opt_t* opt, cli_argque_t* que);
-void cli_parse_one_or_many(cli_opt_t* opt, cli_argque_t* que);
-void cli_parse_any(cli_opt_t* opt, cli_argque_t* que);
+void cli_parse_N(cli_opt_t* opt, queue_t* que);
+void cli_parse_optional(cli_opt_t* opt, queue_t* que);
+void cli_parse_one_or_many(cli_opt_t* opt, queue_t* que);
+void cli_parse_any(cli_opt_t* opt, queue_t* que);
 
-void cli_help_callback(cli_t* cli, cli_argque_t* que, cli_opt_t* opt, void* user_ptr);
-void cli_version_callback(cli_t* cli, cli_argque_t* que, cli_opt_t* opt, void* user_ptr);
+void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
+void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
 
 #define cli_opt_integer(...) (cli_opt_t){ CLI_TYPE_INTEGER, __VA_ARGS__ }
 #define cli_opt_float(...)   (cli_opt_t){ CLI_TYPE_FLOAT  , __VA_ARGS__ }
