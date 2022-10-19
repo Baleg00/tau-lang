@@ -10,6 +10,7 @@ void stack_free(stack_t* stack);
 
 void stack_push(stack_t* stack, void* data);
 void* stack_pop(stack_t* stack);
+void* stack_peek(stack_t* stack);
 
 bool stack_empty(stack_t* stack);
 
