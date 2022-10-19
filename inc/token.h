@@ -2,7 +2,9 @@
 #define TAU_TOKEN_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
+#include "list.h"
 #include "location.h"
 
 typedef enum token_kind_e
@@ -140,107 +142,19 @@ typedef struct token_s
       size_t len;
     } lit_str, lit_char, id;
   };
-  
-  struct token_s *prev, *next;
 } token_t;
 
-/// Doubly-linked list of tokens.
-typedef struct token_list_s
-{
-  token_t *root, *tail;
-  size_t len;
-} token_list_t;
-
-/// Initialize a new token with a given token kind.
-/// @param[in] kind The kind of the new token.
-/// @return Pointer to the new token.
 token_t* token_init(token_kind_t kind);
-
-/// Free a token previously returned by token_init.
-/// @param tok The token to be freed.
 void token_free(token_t* tok);
 
-/// Return the kind of the token.
-/// @param tok The token.
-/// @return The token kind.
-token_kind_t token_kind(token_t* tok);
+void token_list_json_dump(FILE* stream, list_t* list);
 
-/// Get the next token in the list.
-/// @param tok The token.
-/// @return Pointer to the next token, or NULL if there isn't a next token.
-token_t* token_next(token_t* tok);
-
-/// Get the previous token in the list.
-/// @param tok The token.
-/// @return Pointer to the previous token, or NULL if there isn't a previous token.
-token_t* token_prev(token_t* tok);
-
-/// Get the location information of the token.
-/// @param tok The token.
-/// @return The location information.
-location_t token_location(token_t* tok);
-
-/// Initialize a new token list.
-/// @return Pointer to the new token list.
-token_list_t* token_list_init(void);
-
-/// Free a token list previously returned by token_list_init.
-/// @param list The token list to be freed.
-void token_list_free(token_list_t* list);
-
-/// Insert a token onto the end of the list.
-/// @param list The list onto which the token will be pushed. 
-/// @param tok The token to be pushed onto the list.
-void token_list_push(token_list_t* list, token_t* tok);
-
-/// Remove and return the last token from the list.
-/// @param list The list from which the last token will be removed.
-/// @return The removed token or NULL if the list is empty.
-token_t* token_list_pop(token_list_t* list);
-
-/// Return the last token from the list.
-/// @param list The list whose last token will be returned.
-/// @return The last token or NULL if the list is empty.
-token_t* token_list_top(token_list_t* list);
-
-/// Return the size of the token list.
-/// @param list The token list.
-/// @return The number of tokens in the list.
-size_t token_list_size(token_list_t* list);
-
-/// Determine whether the list is empty.
-/// @param list The list to be checked.
-/// @return True if the list is empty, false otherwise.
-bool token_list_empty(token_list_t* list);
-
-/// Convert a token kind to a matching string.
-/// @param kind The kind to be converted.
-/// @return The matching string.
 const char* token_kind_to_string(token_kind_t kind);
 
-/// Determine whether a token kind is a literal kind.
-/// @param kind The kind to be tested.
-/// @return True if the token kind is a literal kind, false otherwise.
 bool token_is_literal(token_kind_t kind);
-
-/// Determine whether a token kind is a literal integer kind.
-/// @param kind The kind to be tested.
-/// @return True if the token kind is a literal integer kind, false otherwise.
 bool token_is_literal_integer(token_kind_t kind);
-
-/// Determine whether a token kind is a literal float kind.
-/// @param kind The kind to be tested.
-/// @return True if the token kind is a literal float kind, false otherwise.
 bool token_is_literal_float(token_kind_t kind);
-
-/// Determine whether a token kind is a keyword kind.
-/// @param kind The kind to be tested.
-/// @return True if the token kind is a keyword kind, false otherwise.
 bool token_is_keyword(token_kind_t kind);
-
-/// Determine whether a token kind is a punctuation kind.
-/// @param kind The kind to be tested.
-/// @return True if the token kind is a punctuation kind, false otherwise.
 bool token_is_punctuation(token_kind_t kind);
 
 #endif

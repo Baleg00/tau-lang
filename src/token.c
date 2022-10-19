@@ -16,93 +16,55 @@ void token_free(token_t* tok)
   free(tok);
 }
 
-token_kind_t token_kind(token_t* tok)
+void token_list_json_dump(FILE* stream, list_t* list)
 {
-  return tok->kind;
-}
+  fputc('[', stream);
 
-token_t* token_next(token_t* tok)
-{
-  return tok->next;
-}
-
-token_t* token_prev(token_t* tok)
-{
-  return tok->prev;
-}
-
-location_t token_location(token_t* tok)
-{
-  return tok->loc;
-}
-
-token_list_t* token_list_init(void)
-{
-  token_list_t* list = (token_list_t*)calloc(1, sizeof(token_list_t));
-  assert(list != NULL);
-  return list;
-}
-
-void token_list_free(token_list_t* list)
-{
-  for (token_t *tok = list->root, *next; tok != NULL; tok = next)
+  for (list_elem_t* elem = list->root; elem != NULL; elem = elem->next)
   {
-    next = tok->next;
-    free(tok);
+    token_t* tok = (token_t*)list_elem_data(elem);
+
+    fprintf(stream, "{\"kind\":\"%s\"", token_kind_to_string(tok->kind));
+
+    if (token_is_literal(tok->kind) || tok->kind == TOK_ID)
+    {
+      fprintf(stream, ",\"value\":");
+
+      switch (tok->kind)
+      {
+      case TOK_LIT_INT_DEC:
+      case TOK_LIT_INT_HEX:
+      case TOK_LIT_INT_OCT:
+      case TOK_LIT_INT_BIN:
+        fprintf(stream, "%llu", tok->lit_int.value); break;
+
+      case TOK_LIT_FLT_DEC:
+      case TOK_LIT_FLT_HEX:
+        fprintf(stream, "%lf", tok->lit_flt.value); break;
+
+      case TOK_ID:
+      case TOK_LIT_STR:
+      case TOK_LIT_CHAR:
+        fprintf(stream, "\"%s\",\"len\":%zu", tok->lit_str.value, tok->lit_str.len); break;
+
+      case TOK_LIT_BOOL_TRUE:
+        fprintf(stream, "true"); break;
+
+      case TOK_LIT_BOOL_FALSE:
+        fprintf(stream, "false"); break;
+
+      case TOK_LIT_NULL:
+        fprintf(stream, "null"); break;
+      }
+    }
+
+    fputc('}', stream);
+
+    if (elem->next != NULL)
+      fputc(',', stream);
   }
 
-  free(list);
-}
-
-void token_list_push(token_list_t* list, token_t* tok)
-{
-  tok->prev = list->tail;
-
-  if (list->root == NULL)
-    list->root = tok;
-  else
-    list->tail->next = tok;
-
-  list->tail = tok;
-
-  ++list->len;
-}
-
-token_t* token_list_pop(token_list_t* list)
-{
-  if (list->len == 0)
-    return NULL;
-
-  token_t* top = list->tail;
-
-  if (list->root == list->tail)
-    list->root = list->tail = NULL;
-  else
-  {
-    list->tail = list->tail->prev;
-    list->tail->next = NULL;
-  }
-
-  top->prev = NULL;
-
-  --list->len;
-
-  return top;
-}
-
-token_t* token_list_top(token_list_t* list)
-{
-  return list->len == 0 ? NULL : list->tail;
-}
-
-size_t token_list_size(token_list_t* list)
-{
-  return list->len;
-}
-
-bool token_list_empty(token_list_t* list)
-{
-  return list->len == 0;
+  fputc(']', stream);
 }
 
 const char* token_kind_to_string(token_kind_t kind)
