@@ -8,10 +8,12 @@
 
 lexer_t* lexer_init(const char* filepath)
 {
-  lexer_t* lex = (lexer_t*)calloc(1, sizeof(lexer_t));
+  lexer_t* lex = (lexer_t*)malloc(sizeof(lexer_t));
   assert(lex != NULL);
 
   lex->filepath = filepath;
+  lex->row = 0;
+  lex->col = 0;
 
   FILE* file = fopen(filepath, "r");
   assert(file != NULL);
@@ -29,14 +31,17 @@ lexer_t* lexer_init(const char* filepath)
 
   lex->cur = lex->src;
 
-  lex->toks = token_list_init();
+  lex->toks = list_init();
 
   return lex;
 }
 
 void lexer_free(lexer_t* lex)
 {
-  token_list_free(lex->toks);
+  for (list_elem_t* elem = list_front_elem(lex->toks); elem != NULL; elem = list_elem_next(elem))
+    token_free((token_t*)list_elem_data(elem));
+
+  list_free(lex->toks);
   free(lex);
 }
 
@@ -55,7 +60,7 @@ token_t* lexer_token_init(lexer_t* lex, token_kind_t kind)
 
 void lexer_token_push(lexer_t* lex, token_t* tok)
 {
-  token_list_push(lex->toks, tok);
+  list_push_back(lex->toks, tok);
 }
 
 int lexer_is_space(lexer_t* lex)
@@ -617,6 +622,6 @@ void lexer_read_next(lexer_t* lex)
 
 void lexer_lex(lexer_t* lex)
 {
-  while (token_list_empty(lex->toks) || token_list_top(lex->toks)->kind != TOK_EOF)
+  while (list_empty(lex->toks) || ((token_t*)list_back(lex->toks))->kind != TOK_EOF)
     lexer_read_next(lex);
 }
