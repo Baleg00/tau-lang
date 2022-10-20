@@ -72,24 +72,24 @@ list_t* list_copy(list_t* list)
 
 void* list_front(list_t* list)
 {
+  assert(!list_empty(list));
   return list_elem_data(list_front_elem(list));
 }
 
 void* list_back(list_t* list)
 {
+  assert(!list_empty(list));
   return list_elem_data(list_back_elem(list));
 }
 
 list_elem_t* list_front_elem(list_t* list)
 {
-  assert(!list_empty(list));
-  return list->root;
+  return list_empty(list) ? NULL : list->root;
 }
 
 list_elem_t* list_back_elem(list_t* list)
 {
-  assert(!list_empty(list));
-  return list->tail;
+  return list_empty(list) ? NULL : list->tail;
 }
 
 list_elem_t* list_push_front(list_t* list, void* data)
