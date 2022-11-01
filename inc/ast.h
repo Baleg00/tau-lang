@@ -7,12 +7,11 @@
 
 #include "token.h"
 #include "op.h"
+#include "list.h"
 
 typedef enum ast_kind_e
 {
   AST_UNKNOWN = 0, // unknown node
-
-  AST_NODE_LIST, // list of ast nodes
 
   AST_ID, // identifier
 
@@ -46,23 +45,21 @@ typedef enum ast_kind_e
   AST_EXPR_LIT_CHAR, // expression literal character
   AST_EXPR_LIT_BOOL, // expression literal boolean
   AST_EXPR_LIT_NULL, // expression literal null
-  AST_EXPR_OP_UNARY, // expression operation unary
-  AST_EXPR_OP_BINARY, // expression operation binary
-  AST_EXPR_OP_CALL, // expression operation function call
+  AST_EXPR_OP, // expression operation
   AST_EXPR_LAMBDA_FUN, // expression lambda function
   AST_EXPR_LAMBDA_GEN, // expression lambda generator
-  AST_EXPR_IF, // expression if
-  AST_EXPR_FOR, // expression for
-  AST_EXPR_WHILE, // expression while
-  AST_EXPR_DO_WHILE, // expression do while
-  AST_EXPR_WHEN, // expression when
-  AST_EXPR_BREAK, // expression break
-  AST_EXPR_CONTINUE, // expression continue
-  AST_EXPR_RETURN, // expression return
-  AST_EXPR_YIELD, // expression yield
-  AST_EXPR_BLOCK, // expression block
-
-  AST_WHEN_CASE, // when case
+  
+  AST_STMT_IF, // statement if
+  AST_STMT_FOR, // statement for
+  AST_STMT_WHILE, // statement while
+  AST_STMT_WHEN, // statement when
+  AST_STMT_WHEN_CASE, // statement when case
+  AST_STMT_BREAK, // statement break
+  AST_STMT_CONTINUE, // statement continue
+  AST_STMT_RETURN, // statement return
+  AST_STMT_YIELD, // statement yield
+  AST_STMT_BLOCK, // statement block
+  AST_STMT_EXPR, // statement expression
   
   AST_DECL_VAR, // declaration variable
   AST_DECL_FUN, // declaration function
@@ -74,6 +71,8 @@ typedef enum ast_kind_e
   AST_DECL_MEMBER, // declaration member
 
   AST_ARG, // function/generator argument
+
+  AST_PROG, // program
 } ast_kind_t;
 
 typedef struct ast_node_s
@@ -83,10 +82,6 @@ typedef struct ast_node_s
   token_t* tok;
 
   union {
-    struct {
-      struct ast_node_s *node, *next;
-    } node_list;
-
     struct {
       struct ast_node_s* base_type;
     } type_mut,
@@ -101,74 +96,66 @@ typedef struct ast_node_s
     } type_array;
 
     struct {
-      struct ast_node_s *args, *ret_type;
+      list_t* args;
+      struct ast_node_s *ret_type;
     } type_fun,
       type_gen;
 
     struct {
       op_kind_t kind;
-      struct ast_node_s* child;
-    } op_unary;
+      list_t* args;
+    } expr_op;
 
     struct {
-      op_kind_t kind;
-      struct ast_node_s *lhs, *rhs;
-    } op_binary;
-    
-    struct {
-      struct ast_node_s *callee, *args;
-    } op_call;
+      list_t* args;
+      struct ast_node_s *ret_type, *stmt;
+    } expr_lambda_fun,
+      expr_lambda_gen;
 
     struct {
-      struct ast_node_s *args, *ret_type, *expr;
-    } lambda_fun,
-      lambda_gen;
+      struct ast_node_s *cond, *stmt, *stmt_else;
+    } stmt_if;
 
     struct {
-      struct ast_node_s *cond, *expr, *expr_else;
-    } expr_if;
+      struct ast_node_s *var, *range, *stmt;
+    } stmt_for;
 
     struct {
-      struct ast_node_s *var, *range, *expr;
-    } expr_for;
+      struct ast_node_s *cond, *stmt;
+    } stmt_while;
 
     struct {
-      struct ast_node_s *cond, *expr;
-    } expr_while;
+      struct ast_node_s *expr;
+      list_t* cases;
+    } stmt_when;
 
     struct {
-      struct ast_node_s *cond, *expr;
-    } expr_do_while;
-
-    struct {
-      struct ast_node_s *expr, *cases;
-    } expr_when;
+      struct ast_node_s *cond, *stmt;
+    } stmt_when_case;
 
     struct {
       struct ast_node_s* expr;
-    } expr_break,
-      expr_return,
-      expr_yield;
+    } stmt_return,
+      stmt_yield,
+      stmt_expr;
 
     struct {
-      struct ast_node_s *exprs;
-    } expr_block;
-
-    struct {
-      struct ast_node_s *cond, *expr;
-    } when_case;
+      list_t* stmts;
+    } stmt_block;
 
     struct {
       struct ast_node_s *id, *type, *init;
     } decl_var;
 
     struct {
-      struct ast_node_s *id, *args, *ret_type, *expr;
+      list_t* args;
+      struct ast_node_s *id, *ret_type, *stmt;
     } decl_fun,
       decl_gen;
 
     struct {
-      struct ast_node_s *id, *members;
+      struct ast_node_s *id;
+      list_t* members;
     } decl_struct,
       decl_union,
       decl_enum,
@@ -182,6 +169,10 @@ typedef struct ast_node_s
     struct {
       struct ast_node_s *id, *type;
     } arg;
+
+    struct {
+      list_t* decls;
+    } prog;
   };
 } ast_node_t;
 

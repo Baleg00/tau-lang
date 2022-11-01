@@ -7,9 +7,9 @@
 
 static FILE* crumb_global_file = NULL;
 
-void crumb_log(crumb_kind_t kind, bool show_sur_lines, const location_t* loc, const char* fmt, ...)
+void crumb_log(crumb_kind_t kind, const location_t* loc, const char* fmt, ...)
 {
-  fprintf(crumb_global_file, ESC_FG_BRIGHT_BLACK "[%s:%zu:%zu]" ESC_RESET "\n", loc->filepath, loc->row, loc->col);
+  fprintf(crumb_global_file, "[" ESC_FG_BRIGHT_BLACK "%s:%zu:%zu" ESC_RESET "]\n", loc->filepath, loc->row + 1, loc->col + 1);
 
   const char *line_begin = loc->cur, *line_end = loc->cur;
 
@@ -19,18 +19,6 @@ void crumb_log(crumb_kind_t kind, bool show_sur_lines, const location_t* loc, co
   while (*line_end != '\0' && *line_end != '\n')
     ++line_end;
 
-  if (show_sur_lines && loc->row > 0)
-  {
-    const char* prev_line_begin = line_begin - 1;
-
-    while (prev_line_begin > loc->src && *(prev_line_begin - 1) != '\n')
-      --prev_line_begin;
-
-    fprintf(crumb_global_file, "    %zu | %.*s\n",
-      loc->row,
-      line_begin - prev_line_begin - 1, prev_line_begin);
-  }
-  
   fprintf(crumb_global_file, "    %zu | %.*s%s%.*s" ESC_RESET "%.*s\n", 
     loc->row + 1, 
     loc->cur - line_begin, line_begin,
@@ -62,18 +50,6 @@ void crumb_log(crumb_kind_t kind, bool show_sur_lines, const location_t* loc, co
   va_end(args);
 
   fprintf(crumb_global_file, ESC_RESET "\n");
-
-  if (show_sur_lines && *line_end != '\0')
-  {
-    const char* next_line_end = line_end + 1;
-
-    while (*next_line_end != '\0' && *next_line_end != '\n')
-      ++next_line_end;
-
-    fprintf(crumb_global_file, "    %zu | %.*s\n",
-      loc->row + 2,
-      next_line_end - line_end - 1, line_end + 1);
-  }
 }
 
 void crumb_set_file(FILE* file)

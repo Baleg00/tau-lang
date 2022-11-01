@@ -20,10 +20,6 @@ void ast_node_free(ast_node_t* node)
   {
   case AST_UNKNOWN:
     break;
-  case AST_NODE_LIST:
-    ast_node_free(node->node_list.next);
-    ast_node_free(node->node_list.node);
-    break;
   case AST_ID:
     break;
   case AST_TYPE_MUT:
@@ -49,11 +45,13 @@ void ast_node_free(ast_node_t* node)
     ast_node_free(node->type_nullable.base_type);
     break;
   case AST_TYPE_FUN:
-    ast_node_free(node->type_fun.args);
+    list_for_each(node->type_fun.args, ast_node_free);
+    list_free(node->type_fun.args);
     ast_node_free(node->type_fun.ret_type);
     break;
   case AST_TYPE_GEN:
-    ast_node_free(node->type_gen.args);
+    list_for_each(node->type_gen.args, ast_node_free);
+    list_free(node->type_gen.args);
     ast_node_free(node->type_gen.ret_type);
     break;
   case AST_TYPE_BUILTIN_I8:
@@ -78,61 +76,57 @@ void ast_node_free(ast_node_t* node)
   case AST_EXPR_LIT_BOOL:
   case AST_EXPR_LIT_NULL:
     break;
-  case AST_EXPR_OP_UNARY:
-    ast_node_free(node->op_unary.child);
-    break;
-  case AST_EXPR_OP_BINARY:
-    ast_node_free(node->op_binary.lhs);
-    ast_node_free(node->op_binary.rhs);
-    break;
-  case AST_EXPR_OP_CALL:
-    ast_node_free(node->op_call.args);
-    ast_node_free(node->op_call.callee);
+  case AST_EXPR_OP:
+    list_for_each(node->expr_op.args, ast_node_free);
+    list_free(node->expr_op.args);
     break;
   case AST_EXPR_LAMBDA_FUN:
-    ast_node_free(node->lambda_fun.args);
-    ast_node_free(node->lambda_fun.ret_type);
-    ast_node_free(node->lambda_fun.expr);
+    list_for_each(node->expr_lambda_fun.args, ast_node_free);
+    list_free(node->expr_lambda_fun.args);
+    ast_node_free(node->expr_lambda_fun.ret_type);
+    ast_node_free(node->expr_lambda_fun.stmt);
     break;
   case AST_EXPR_LAMBDA_GEN:
-    ast_node_free(node->lambda_gen.args);
-    ast_node_free(node->lambda_gen.ret_type);
-    ast_node_free(node->lambda_gen.expr);
+    list_for_each(node->expr_lambda_gen.args, ast_node_free);
+    list_free(node->expr_lambda_gen.args);
+    ast_node_free(node->expr_lambda_gen.ret_type);
+    ast_node_free(node->expr_lambda_gen.stmt);
     break;
-  case AST_EXPR_IF:
-    ast_node_free(node->expr_if.cond);
-    ast_node_free(node->expr_if.expr);
-    ast_node_free(node->expr_if.expr_else);
+  case AST_STMT_IF:
+    ast_node_free(node->stmt_if.cond);
+    ast_node_free(node->stmt_if.stmt);
+    ast_node_free(node->stmt_if.stmt_else);
     break;
-  case AST_EXPR_FOR:
-    ast_node_free(node->expr_for.var);
-    ast_node_free(node->expr_for.range);
-    ast_node_free(node->expr_for.expr);
+  case AST_STMT_FOR:
+    ast_node_free(node->stmt_for.var);
+    ast_node_free(node->stmt_for.range);
+    ast_node_free(node->stmt_for.stmt);
     break;
-  case AST_EXPR_WHILE:
-    ast_node_free(node->expr_while.cond);
-    ast_node_free(node->expr_while.expr);
+  case AST_STMT_WHILE:
+    ast_node_free(node->stmt_while.cond);
+    ast_node_free(node->stmt_while.stmt);
     break;
-  case AST_EXPR_DO_WHILE:
-    ast_node_free(node->expr_do_while.cond);
-    ast_node_free(node->expr_do_while.expr);
+  case AST_STMT_WHEN:
+    ast_node_free(node->stmt_when.expr);
+    list_for_each(node->stmt_when.cases, ast_node_free);
+    list_free(node->stmt_when.cases);
     break;
-  case AST_EXPR_WHEN:
-    ast_node_free(node->expr_when.expr);
-    ast_node_free(node->expr_when.cases);
+  case AST_STMT_WHEN_CASE:
+    ast_node_free(node->stmt_when_case.cond);
+    ast_node_free(node->stmt_when_case.stmt);
     break;
-  case AST_EXPR_RETURN:
-    ast_node_free(node->expr_return.expr);
+  case AST_STMT_RETURN:
+    ast_node_free(node->stmt_return.expr);
     break;
-  case AST_EXPR_YIELD:
-    ast_node_free(node->expr_yield.expr);
+  case AST_STMT_YIELD:
+    ast_node_free(node->stmt_yield.expr);
     break;
-  case AST_EXPR_BLOCK:
-    ast_node_free(node->expr_block.exprs);
+  case AST_STMT_BLOCK:
+    list_for_each(node->stmt_block.stmts, ast_node_free);
+    list_free(node->stmt_block.stmts);
     break;
-  case AST_WHEN_CASE:
-    ast_node_free(node->when_case.cond);
-    ast_node_free(node->when_case.expr);
+  case AST_STMT_EXPR:
+    ast_node_free(node->stmt_expr.expr);
     break;
   case AST_DECL_VAR:
     ast_node_free(node->decl_var.id);
@@ -141,31 +135,37 @@ void ast_node_free(ast_node_t* node)
     break;
   case AST_DECL_FUN:
     ast_node_free(node->decl_fun.id);
-    ast_node_free(node->decl_fun.args);
+    list_for_each(node->decl_fun.args, ast_node_free);
+    list_free(node->decl_fun.args);
     ast_node_free(node->decl_fun.ret_type);
-    ast_node_free(node->decl_fun.expr);
+    ast_node_free(node->decl_fun.stmt);
     break;
   case AST_DECL_GEN:
     ast_node_free(node->decl_gen.id);
-    ast_node_free(node->decl_gen.args);
+    list_for_each(node->decl_gen.args, ast_node_free);
+    list_free(node->decl_gen.args);
     ast_node_free(node->decl_gen.ret_type);
-    ast_node_free(node->decl_gen.expr);
+    ast_node_free(node->decl_gen.stmt);
     break;
   case AST_DECL_STRUCT:
     ast_node_free(node->decl_struct.id);
-    ast_node_free(node->decl_struct.members);
+    list_for_each(node->decl_struct.members, ast_node_free);
+    list_free(node->decl_struct.members);
     break;
   case AST_DECL_UNION:
     ast_node_free(node->decl_union.id);
-    ast_node_free(node->decl_union.members);
+    list_for_each(node->decl_union.members, ast_node_free);
+    list_free(node->decl_union.members);
     break;
   case AST_DECL_ENUM:
     ast_node_free(node->decl_enum.id);
-    ast_node_free(node->decl_enum.members);
+    list_for_each(node->decl_enum.members, ast_node_free);
+    list_free(node->decl_enum.members);
     break;
   case AST_DECL_MOD:
     ast_node_free(node->decl_mod.id);
-    ast_node_free(node->decl_mod.members);
+    list_for_each(node->decl_mod.members, ast_node_free);
+    list_free(node->decl_mod.members);
     break;
   case AST_DECL_MEMBER:
     ast_node_free(node->decl_member.decl);
@@ -174,6 +174,9 @@ void ast_node_free(ast_node_t* node)
     ast_node_free(node->arg.id);
     ast_node_free(node->arg.type);
     break;
+  case AST_PROG:
+    list_for_each(node->prog.decls, ast_node_free);
+    list_free(node->prog.decls);
   }
 
   free(node);
@@ -184,7 +187,6 @@ const char* ast_kind_to_string(ast_kind_t kind)
   switch (kind)
   {
   case AST_UNKNOWN: return "AST_UNKNOWN";
-  case AST_NODE_LIST: return "AST_NODE_LIST";
   case AST_ID: return "AST_ID";
   case AST_TYPE_MUT: return "AST_TYPE_MUT";
   case AST_TYPE_CONST: return "AST_TYPE_CONST";
@@ -215,20 +217,18 @@ const char* ast_kind_to_string(ast_kind_t kind)
   case AST_EXPR_LIT_CHAR: return "AST_EXPR_LIT_CHAR";
   case AST_EXPR_LIT_BOOL: return "AST_EXPR_LIT_BOOL";
   case AST_EXPR_LIT_NULL: return "AST_EXPR_LIT_NULL";
-  case AST_EXPR_OP_UNARY: return "AST_EXPR_OP_UNARY";
-  case AST_EXPR_OP_BINARY: return "AST_EXPR_OP_BINARY";
-  case AST_EXPR_OP_CALL: return "AST_EXPR_OP_CALL";
+  case AST_EXPR_OP: return "AST_EXPR_OP";
   case AST_EXPR_LAMBDA_FUN: return "AST_EXPR_LAMBDA_FUN";
   case AST_EXPR_LAMBDA_GEN: return "AST_EXPR_LAMBDA_GEN";
-  case AST_EXPR_IF: return "AST_EXPR_IF";
-  case AST_EXPR_FOR: return "AST_EXPR_FOR";
-  case AST_EXPR_WHILE: return "AST_EXPR_WHILE";
-  case AST_EXPR_DO_WHILE: return "AST_EXPR_DO_WHILE";
-  case AST_EXPR_WHEN: return "AST_EXPR_WHEN";
-  case AST_EXPR_RETURN: return "AST_EXPR_RETURN";
-  case AST_EXPR_YIELD: return "AST_EXPR_YIELD";
-  case AST_EXPR_BLOCK: return "AST_EXPR_BLOCK";
-  case AST_WHEN_CASE: return "AST_WHEN_CASE";
+  case AST_STMT_IF: return "AST_STMT_IF";
+  case AST_STMT_FOR: return "AST_STMT_FOR";
+  case AST_STMT_WHILE: return "AST_STMT_WHILE";
+  case AST_STMT_WHEN: return "AST_STMT_WHEN";
+  case AST_STMT_WHEN_CASE: return "AST_STMT_WHEN_CASE";
+  case AST_STMT_RETURN: return "AST_STMT_RETURN";
+  case AST_STMT_YIELD: return "AST_STMT_YIELD";
+  case AST_STMT_BLOCK: return "AST_STMT_BLOCK";
+  case AST_STMT_EXPR: return "AST_STMT_EXPR";
   case AST_DECL_VAR: return "AST_DECL_VAR";
   case AST_DECL_FUN: return "AST_DECL_FUN";
   case AST_DECL_GEN: return "AST_DECL_GEN";
@@ -238,8 +238,21 @@ const char* ast_kind_to_string(ast_kind_t kind)
   case AST_DECL_MOD: return "AST_DECL_MOD";
   case AST_DECL_MEMBER: return "AST_DECL_MEMBER";
   case AST_ARG: return "AST_ARG";
+  case AST_PROG: return "AST_PROG";
   default: return "";
   }  
+}
+
+void ast_list_json_dump(FILE* stream, list_t* list)
+{
+  fputc('[', stream);
+  for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
+  {
+    ast_json_dump(stream, (ast_node_t*)list_elem_data(elem));
+    if (list_elem_next(elem) != NULL)
+      fputc(',', stream);
+  }
+  fputc(']', stream);
 }
 
 void ast_json_dump(FILE* stream, ast_node_t* root)
@@ -255,16 +268,6 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   switch (root->kind)
   {
   case AST_UNKNOWN:
-    break;
-  case AST_NODE_LIST:
-    fprintf(stream, ",\"nodes\":[");
-    for (ast_node_t* node = root; node != NULL; node = node->node_list.next)
-    {
-      ast_json_dump(stream, node->node_list.node);
-      if (node->node_list.next != NULL)
-        fputc(',', stream);
-    }
-    fputc(']', stream);
     break;
   case AST_ID:
     fprintf(stream, ",\"id\":\"%s\"", root->tok->id.value);
@@ -301,13 +304,13 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     break;
   case AST_TYPE_FUN:
     fprintf(stream, ",\"args\":");
-    ast_json_dump(stream, root->type_fun.args);
+    ast_list_json_dump(stream, root->type_fun.args);
     fprintf(stream, ",\"ret_type\":");
     ast_json_dump(stream, root->type_fun.ret_type);
     break;
   case AST_TYPE_GEN:
     fprintf(stream, ",\"args\":");
-    ast_json_dump(stream, root->type_gen.args);
+    ast_list_json_dump(stream, root->type_gen.args);
     fprintf(stream, ",\"ret_type\":");
     ast_json_dump(stream, root->type_gen.ret_type);
     break;
@@ -339,95 +342,84 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     fprintf(stream, ",\"value\":\"%s\"", root->tok->lit_char.value);
     break;
   case AST_EXPR_LIT_BOOL:
-    // TODO
+    fprintf(stream, ",\"value\":%s", root->tok->kind == TOK_LIT_BOOL_TRUE ? "true" : "false");
     break;
   case AST_EXPR_LIT_NULL:
     break;
-  case AST_EXPR_OP_UNARY:
-    fprintf(stream, ",\"op\":\"%s\"", op_kind_to_string(root->op_unary.kind));
-    fprintf(stream, ",\"child\":");
-    ast_json_dump(stream, root->op_unary.child);
-    break;
-  case AST_EXPR_OP_BINARY: 
-    fprintf(stream, ",\"op\":\"%s\"", op_kind_to_string(root->op_binary.kind));
-    fprintf(stream, ",\"lhs\":");
-    ast_json_dump(stream, root->op_binary.lhs);
-    fprintf(stream, ",\"rhs\":");
-    ast_json_dump(stream, root->op_binary.rhs);
-    break;
-  case AST_EXPR_OP_CALL:
-    fprintf(stream, ",\"callee\":");
-    ast_json_dump(stream, root->op_call.callee);
+  case AST_EXPR_OP:
+    fprintf(stream, ",\"op\":\"%s\"", op_kind_to_string(root->expr_op.kind));
     fprintf(stream, ",\"args\":");
-    ast_json_dump(stream, root->op_call.args);
+    ast_list_json_dump(stream, root->expr_op.args);
     break;
   case AST_EXPR_LAMBDA_FUN:
     fprintf(stream, ",\"args\":");
-    ast_json_dump(stream, root->lambda_fun.args);
+    ast_list_json_dump(stream, root->expr_lambda_fun.args);
     fprintf(stream, ",\"ret_type\":");
-    ast_json_dump(stream, root->lambda_fun.ret_type);
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->lambda_fun.expr);
+    ast_json_dump(stream, root->expr_lambda_fun.ret_type);
+    fprintf(stream, ",\"stmt\":");
+    ast_json_dump(stream, root->expr_lambda_fun.stmt);
     break;
   case AST_EXPR_LAMBDA_GEN:
     fprintf(stream, ",\"args\":");
-    ast_json_dump(stream, root->lambda_gen.args);
+    ast_list_json_dump(stream, root->expr_lambda_gen.args);
     fprintf(stream, ",\"ret_type\":");
-    ast_json_dump(stream, root->lambda_gen.ret_type);
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->lambda_gen.expr);
+    ast_json_dump(stream, root->expr_lambda_gen.ret_type);
+    fprintf(stream, ",\"stmt\":");
+    ast_json_dump(stream, root->expr_lambda_gen.stmt);
     break;
-  case AST_EXPR_IF:
+  case AST_STMT_IF:
     fprintf(stream, ",\"cond\":");
-    ast_json_dump(stream, root->expr_if.cond);
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->expr_if.expr);
-    fprintf(stream, ",\"expr_else\":");
-    ast_json_dump(stream, root->expr_if.expr_else);
+    ast_json_dump(stream, root->stmt_if.cond);
+    fprintf(stream, ",\"stmt\":");
+    ast_json_dump(stream, root->stmt_if.stmt);
+    fprintf(stream, ",\"stmt_else\":");
+    ast_json_dump(stream, root->stmt_if.stmt_else);
     break;
-  case AST_EXPR_FOR:
+  case AST_STMT_FOR:
     fprintf(stream, ",\"var\":");
-    ast_json_dump(stream, root->expr_for.var);
+    ast_json_dump(stream, root->stmt_for.var);
     fprintf(stream, ",\"range\":");
-    ast_json_dump(stream, root->expr_for.range);
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->expr_for.expr);
+    ast_json_dump(stream, root->stmt_for.range);
+    fprintf(stream, ",\"stmt\":");
+    ast_json_dump(stream, root->stmt_for.stmt);
     break;
-  case AST_EXPR_WHILE:
+  case AST_STMT_WHILE:
     fprintf(stream, ",\"cond\":");
-    ast_json_dump(stream, root->expr_while.cond);
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->expr_while.expr);
+    ast_json_dump(stream, root->stmt_while.cond);
+    fprintf(stream, ",\"stmt\":");
+    ast_json_dump(stream, root->stmt_while.stmt);
     break;
-  case AST_EXPR_DO_WHILE:
-    fprintf(stream, ",\"cond\":");
-    ast_json_dump(stream, root->expr_do_while.cond);
+  case AST_STMT_WHEN:
     fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->expr_do_while.expr);
-    break;
-  case AST_EXPR_WHEN:
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->expr_when.expr);
+    ast_json_dump(stream, root->stmt_when.expr);
     fprintf(stream, ",\"cases\":");
-    ast_json_dump(stream, root->expr_when.cases);
+    ast_list_json_dump(stream, root->stmt_when.cases);
     break;
-  case AST_EXPR_RETURN:
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->expr_return.expr);
-    break;
-  case AST_EXPR_YIELD:
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->expr_yield.expr);
-    break;
-  case AST_EXPR_BLOCK:
-    fprintf(stream, ",\"exprs\":");
-    ast_json_dump(stream, root->expr_block.exprs);
-    break;
-  case AST_WHEN_CASE:
+  case AST_STMT_WHEN_CASE:
     fprintf(stream, ",\"cond\":");
-    ast_json_dump(stream, root->when_case.cond);
+    ast_json_dump(stream, root->stmt_when_case.cond);
+    fprintf(stream, ",\"stmt\":");
+    ast_json_dump(stream, root->stmt_when_case.stmt);
+    break;
+  case AST_STMT_BREAK:
+    break;
+  case AST_STMT_CONTINUE:
+    break;
+  case AST_STMT_RETURN:
     fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->when_case.expr);
+    ast_json_dump(stream, root->stmt_return.expr);
+    break;
+  case AST_STMT_YIELD:
+    fprintf(stream, ",\"expr\":");
+    ast_json_dump(stream, root->stmt_yield.expr);
+    break;
+  case AST_STMT_BLOCK:
+    fprintf(stream, ",\"stmts\":");
+    ast_list_json_dump(stream, root->stmt_block.stmts);
+    break;
+  case AST_STMT_EXPR:
+    fprintf(stream, ",\"expr\":");
+    ast_json_dump(stream, root->stmt_expr.expr);
     break;
   case AST_DECL_VAR:
     fprintf(stream, ",\"id\":");
@@ -441,45 +433,45 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, root->decl_fun.id);
     fprintf(stream, ",\"args\":");
-    ast_json_dump(stream, root->decl_fun.args);
+    ast_list_json_dump(stream, root->decl_fun.args);
     fprintf(stream, ",\"ret_type\":");
     ast_json_dump(stream, root->decl_fun.ret_type);
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->decl_fun.expr);
+    fprintf(stream, ",\"stmt\":");
+    ast_json_dump(stream, root->decl_fun.stmt);
     break;
   case AST_DECL_GEN:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, root->decl_gen.id);
     fprintf(stream, ",\"args\":");
-    ast_json_dump(stream, root->decl_gen.args);
+    ast_list_json_dump(stream, root->decl_gen.args);
     fprintf(stream, ",\"ret_type\":");
     ast_json_dump(stream, root->decl_gen.ret_type);
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, root->decl_gen.expr);
+    fprintf(stream, ",\"stmt\":");
+    ast_json_dump(stream, root->decl_gen.stmt);
     break;
   case AST_DECL_STRUCT:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, root->decl_struct.id);
     fprintf(stream, ",\"members\":");
-    ast_json_dump(stream, root->decl_struct.members);
+    ast_list_json_dump(stream, root->decl_struct.members);
     break;
   case AST_DECL_UNION:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, root->decl_union.id);
     fprintf(stream, ",\"members\":");
-    ast_json_dump(stream, root->decl_union.members);
+    ast_list_json_dump(stream, root->decl_union.members);
     break;
   case AST_DECL_ENUM:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, root->decl_enum.id);
     fprintf(stream, ",\"members\":");
-    ast_json_dump(stream, root->decl_enum.members);
+    ast_list_json_dump(stream, root->decl_enum.members);
     break;
   case AST_DECL_MOD:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, root->decl_mod.id);
     fprintf(stream, ",\"members\":");
-    ast_json_dump(stream, root->decl_mod.members);
+    ast_list_json_dump(stream, root->decl_mod.members);
     break;
   case AST_DECL_MEMBER:
     fprintf(stream, ",\"is_pub\":%s", root->decl_member.is_pub ? "true" : "false");
@@ -491,6 +483,10 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     ast_json_dump(stream, root->arg.id);
     fprintf(stream, ",\"type\":");
     ast_json_dump(stream, root->arg.type);
+    break;
+  case AST_PROG:
+    fprintf(stream, ",\"decls\":");
+    ast_list_json_dump(stream, root->prog.decls);
     break;
   default:
     assert(false);

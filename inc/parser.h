@@ -24,8 +24,8 @@ token_t* parser_peek(parser_t* par);
 bool parser_consume(parser_t* par, token_kind_t kind);
 token_t* parser_expect(parser_t* par, token_kind_t kind);
 
-ast_node_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, ast_node_t*(*parse_func)(parser_t*));
-ast_node_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, ast_node_t*(*parse_func)(parser_t*));
+list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, ast_node_t*(*parse_func)(parser_t*));
+list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, ast_node_t*(*parse_func)(parser_t*));
 
 ast_node_t* parser_parse_id(parser_t* par);
 
@@ -43,7 +43,23 @@ ast_node_t* parser_parse_type_gen(parser_t* par);
 ast_node_t* parser_parse_type_id(parser_t* par);
 ast_node_t* parser_parse_type(parser_t* par);
 
+ast_node_t* parser_parse_expr_lambda_fun(parser_t* par);
+ast_node_t* parser_parse_expr_lambda_gen(parser_t* par);
 ast_node_t* parser_parse_expr(parser_t* par);
+
+ast_node_t* parser_parse_stmt_if(parser_t* par);
+ast_node_t* parser_parse_stmt_for_var(parser_t* par);
+ast_node_t* parser_parse_stmt_for(parser_t* par);
+ast_node_t* parser_parse_stmt_while(parser_t* par);
+ast_node_t* parser_parse_stmt_when(parser_t* par);
+ast_node_t* parser_parse_stmt_when_case(parser_t* par);
+ast_node_t* parser_parse_stmt_break(parser_t* par);
+ast_node_t* parser_parse_stmt_continue(parser_t* par);
+ast_node_t* parser_parse_stmt_return(parser_t* par);
+ast_node_t* parser_parse_stmt_yield(parser_t* par);
+ast_node_t* parser_parse_stmt_block(parser_t* par);
+ast_node_t* parser_parse_stmt_expr(parser_t* par);
+ast_node_t* parser_parse_stmt(parser_t* par);
 
 ast_node_t* parser_parse_decl_var(parser_t* par);
 ast_node_t* parser_parse_decl_fun(parser_t* par);

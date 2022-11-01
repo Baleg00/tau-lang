@@ -1,31 +1,36 @@
 #include "log.h"
 
+#include <stdarg.h>
+#include <time.h>
+#include <string.h>
+
 #include "esc_seq.h"
 
 static log_level_t log_global_level = LOG_LEVEL_TRACE;
 static FILE* log_global_file = NULL;
 static bool log_global_verbose = false;
 
-void log_log(log_level_t lvl, const char* file, int line, const char* fmt, ...)
+void log_log(log_level_t lvl, const char* file, int line, const char* func, const char* name, const char* fmt, ...)
 {
   if (lvl < log_global_level || log_global_file == NULL)
     return;
+
+  file = (const char*)strrchr(file, '\\') + 1;
   
   if (log_global_verbose)
   {
     time_t tm = time(NULL);
     
-    char time_buf[20];
-    size_t len = strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", localtime(&tm));
+    char time_buf[9];
+    size_t len = strftime(time_buf, sizeof(time_buf), "%H:%M:%S", localtime(&tm));
     time_buf[len] = '\0';
 
-    fprintf(log_global_file, 
-      ESC_FG_BRIGHT_BLACK "%s:%d %s" ESC_RESET " [%s%s" ESC_RESET "]> ",
-      file, line, time_buf, log_level_to_color(lvl), log_level_to_string(lvl));
+    fprintf(log_global_file, ESC_FG_BRIGHT_BLACK "%s:%d %s " ESC_RESET,
+      file, line, time_buf);
   }
-  else
-    fprintf(log_global_file, "[%s%s" ESC_RESET "]> ", 
-      log_level_to_color(lvl), log_level_to_string(lvl));
+
+  fprintf(log_global_file, "[%s%s:%s" ESC_RESET "]> ", 
+    log_level_to_color(lvl), log_level_to_string(lvl), name);
 
   va_list args;
   va_start(args, fmt);
@@ -47,7 +52,7 @@ const char* log_level_to_string(log_level_t lvl)
   case LOG_LEVEL_WARN: return "WARN";
   case LOG_LEVEL_ERROR: return "ERROR";
   case LOG_LEVEL_FATAL: return "FATAL";
-  default: return "UNKNOWN";
+  default: return "";
   }
 }
 

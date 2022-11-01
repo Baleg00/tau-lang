@@ -58,6 +58,9 @@ void cli_parse(cli_t* cli, int argc, const char* argv[])
 
       *((const char**)opt->data)++ = arg;
       --opt->arg_max;
+
+      if (opt->data_count != NULL)
+        ++(*opt->data_count);
     }
     else
       assert(("No matching option or sink.", false));
@@ -85,7 +88,7 @@ void cli_parse_N(cli_opt_t* opt, queue_t* que)
     if (!queue_empty(que))
       arg = (const char*)queue_poll(que);
 
-    if (arg == NULL || arg[0] != '-')
+    if (arg == NULL || arg[0] == '-')
     {
       assert(("Too few arguments for option.", opt->default_data != NULL));
 
@@ -250,4 +253,14 @@ void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
 void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
 {
   printf("Version: %s\n", (const char*)user_ptr);
+}
+
+void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
+{
+  *(bool*)user_ptr = true;
+}
+
+void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
+{
+  *(bool*)user_ptr = true;
 }

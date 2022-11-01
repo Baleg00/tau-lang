@@ -150,6 +150,7 @@ void token_free(token_t* tok);
 void token_list_json_dump(FILE* stream, list_t* list);
 
 const char* token_kind_to_string(token_kind_t kind);
+const char* token_kind_to_name(token_kind_t kind);
 
 bool token_is_literal(token_kind_t kind);
 bool token_is_literal_integer(token_kind_t kind);

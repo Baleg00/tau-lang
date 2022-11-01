@@ -62,6 +62,8 @@ void cli_parse_any(cli_opt_t* opt, queue_t* que);
 
 void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
 void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
+void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
+void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
 
 #define cli_opt_integer(...) (cli_opt_t){ CLI_TYPE_INTEGER, __VA_ARGS__ }
 #define cli_opt_float(...)   (cli_opt_t){ CLI_TYPE_FLOAT  , __VA_ARGS__ }
@@ -70,7 +72,8 @@ void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_p
 
 #define cli_opt_help() (cli_opt_t){ CLI_TYPE_BOOLEAN, (char*[]){ "-h", "--help" }, 2, 'N', 0, NULL, NULL, NULL, "Display this message.", cli_help_callback, NULL }
 #define cli_opt_version(VER) (cli_opt_t){ CLI_TYPE_BOOLEAN, (char*[]){ "--version" }, 1, 'N', 0, NULL, NULL, NULL, "Display version.", cli_version_callback, VER }
-#define cli_opt_verbose(DATA) (cli_opt_t){ CLI_TYPE_BOOLEAN, (char*[]){ "-v", "--verbose" }, 2, 'N', 0, DATA, NULL, NULL, "Enable verbose mode.", NULL, NULL }
-#define cli_opt_sink(DATA, MAX_ARGS, CALLBACK, USER_PTR) (cli_opt_t){ CLI_TYPE_SINK, NULL, 0, '\0', MAX_ARGS, DATA, NULL, NULL, NULL, CALLBACK, USER_PTR }
+#define cli_opt_verbose(DATA) (cli_opt_t){ CLI_TYPE_BOOLEAN, (char*[]){ "-v", "--verbose" }, 2, 'N', 0, NULL, NULL, NULL, "Enable verbose mode.", cli_verbose_callback, DATA }
+#define cli_opt_sink(ARG_MAX, DATA, DATA_COUNT, CALLBACK, USER_PTR) (cli_opt_t){ CLI_TYPE_SINK, NULL, 0, '\0', ARG_MAX, DATA, NULL, DATA_COUNT, NULL, CALLBACK, USER_PTR }
+#define cli_opt_flag(NAMES, NAME_COUNT, DESC, FLAG) (cli_opt_t){ CLI_TYPE_BOOLEAN, NAMES, NAME_COUNT, 'N', 0, NULL, NULL, NULL, DESC, cli_flag_callback, FLAG }
 
 #endif

@@ -55,4 +55,6 @@ bool list_empty(list_t* list);
 
 size_t list_size(list_t* list);
 
+void list_for_each(list_t* list, void(*func)(void*));
+
 #endif

@@ -253,3 +253,9 @@ size_t list_size(list_t* list)
 {
   return list->len;
 }
+
+void list_for_each(list_t* list, void(*func)(void*))
+{
+    for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
+      func(list_elem_data(elem));
+}

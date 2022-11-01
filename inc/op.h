@@ -10,6 +10,12 @@ typedef enum op_kind_e
   OP_TYPEOF, // "typeof" operation type of expression
   OP_IN, // "in" operation in range
   
+  OP_ARIT_INC_PRE, // "++" operation arithmetic pre increment
+  OP_ARIT_INC_POST, // "++" operation arithmetic post increment
+  OP_ARIT_DEC_PRE, // "--" operation arithmetic pre decrement
+  OP_ARIT_DEC_POST, // "--" operation arithmetic post decrement
+  OP_ARIT_POS, // "+" operation arithmetic positive
+  OP_ARIT_NEG, // "-" operation arithmetic negative
   OP_ARIT_ADD, // "+" operation arithmetic add
   OP_ARIT_SUB, // "-" operation arithmetic subtract
   OP_ARIT_MUL, // "*" operation arithmetic multiply
@@ -54,8 +60,10 @@ typedef enum op_kind_e
   OP_SAFE_IND_MEMBER, // "?." operation safe indirect member access
   OP_RANGE, // ".." operation generate range
   OP_COMMA, // "," operation comma
+  OP_CALL, // "()" operation function call
 } op_kind_t;
 
 const char* op_kind_to_string(op_kind_t kind);
+int op_precedence(op_kind_t kind);
 
 #endif
