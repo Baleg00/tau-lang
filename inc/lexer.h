@@ -3,17 +3,16 @@
 
 #include <stdio.h>
 
+#include "list.h"
 #include "token.h"
 
 typedef struct lexer_s
 {
-  const char* filepath;
-  char *src, *cur;
-  size_t row, col;
+  location_t* loc;
   list_t* toks;
 } lexer_t;
 
-lexer_t* lexer_init(const char* filepath);
+lexer_t* lexer_init(const char* path);
 void lexer_free(lexer_t* lex);
 
 token_t* lexer_token_init(lexer_t* lex, token_kind_t kind);

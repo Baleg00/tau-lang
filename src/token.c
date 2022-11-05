@@ -1,18 +1,19 @@
 #include "token.h"
 
 #include <stdlib.h>
-#include <assert.h>
 
-token_t* token_init(token_kind_t kind)
+#include "util.h"
+
+token_t* token_init(void)
 {
-  token_t* tok = (token_t*)calloc(1, sizeof(token_t));
+  token_t* tok = (token_t*)malloc(sizeof(token_t));
   assert(tok != NULL);
-  tok->kind = kind;
   return tok;
 }
 
 void token_free(token_t* tok)
 {
+  location_free(tok->loc);
   free(tok);
 }
 
@@ -26,7 +27,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
 
     fprintf(stream, "{\"kind\":\"%s\"", token_kind_to_string(tok->kind));
 
-    if (token_is_literal(tok->kind) || tok->kind == TOK_ID)
+    if (token_is_literal(tok) || tok->kind == TOK_ID)
     {
       fprintf(stream, ",\"value\":");
 
@@ -36,25 +37,26 @@ void token_list_json_dump(FILE* stream, list_t* list)
       case TOK_LIT_INT_HEX:
       case TOK_LIT_INT_OCT:
       case TOK_LIT_INT_BIN:
-        fprintf(stream, "%llu", tok->lit_int.value); break;
-
+        fprintf(stream, "%llu", tok->lit_int.value);
+        break;
       case TOK_LIT_FLT_DEC:
       case TOK_LIT_FLT_HEX:
-        fprintf(stream, "%lf", tok->lit_flt.value); break;
-
+        fprintf(stream, "%lf", tok->lit_flt.value);
+        break;
       case TOK_ID:
       case TOK_LIT_STR:
       case TOK_LIT_CHAR:
-        fprintf(stream, "\"%s\",\"len\":%zu", tok->lit_str.value, tok->lit_str.len); break;
-
+        fprintf(stream, "\"%s\"", tok->lit_str.value);
+        break;
       case TOK_LIT_BOOL_TRUE:
-        fprintf(stream, "true"); break;
-
+        fprintf(stream, "true");
+        break;
       case TOK_LIT_BOOL_FALSE:
-        fprintf(stream, "false"); break;
-
+        fprintf(stream, "false");
+        break;
       case TOK_LIT_NULL:
-        fprintf(stream, "null"); break;
+        fprintf(stream, "null");
+        break;
       }
     }
 
@@ -71,250 +73,139 @@ const char* token_kind_to_string(token_kind_t kind)
 {
   switch (kind)
   {
-    case TOK_UNKNOWN: return "TOK_UNKNOWN";
-    case TOK_ID: return "TOK_ID";
-    case TOK_LIT_INT_DEC: return "TOK_LIT_INT_DEC";
-    case TOK_LIT_INT_HEX: return "TOK_LIT_INT_HEX";
-    case TOK_LIT_INT_OCT: return "TOK_LIT_INT_OCT";
-    case TOK_LIT_INT_BIN: return "TOK_LIT_INT_BIN";
-    case TOK_LIT_FLT_DEC: return "TOK_LIT_FLT_DEC";
-    case TOK_LIT_FLT_HEX: return "TOK_LIT_FLT_HEX";
-    case TOK_LIT_STR: return "TOK_LIT_STR";
-    case TOK_LIT_CHAR: return "TOK_LIT_CHAR";
-    case TOK_LIT_BOOL_TRUE: return "TOK_LIT_BOOL_TRUE";
-    case TOK_LIT_BOOL_FALSE: return "TOK_LIT_BOOL_FALSE";
-    case TOK_LIT_NULL: return "TOK_LIT_NULL";
-    case TOK_KW_IS: return "TOK_KW_IS";
-    case TOK_KW_AS: return "TOK_KW_AS";
-    case TOK_KW_SIZEOF: return "TOK_KW_SIZEOF";
-    case TOK_KW_ALIGNOF: return "TOK_KW_ALIGNOF";
-    case TOK_KW_TYPEOF: return "TOK_KW_TYPEOF";
-    case TOK_KW_IN: return "TOK_KW_IN";
-    case TOK_KW_VAR: return "TOK_KW_VAR";
-    case TOK_KW_FUN: return "TOK_KW_FUN";
-    case TOK_KW_GEN: return "TOK_KW_GEN";
-    case TOK_KW_STRUCT: return "TOK_KW_STRUCT";
-    case TOK_KW_UNION: return "TOK_KW_UNION";
-    case TOK_KW_ENUM: return "TOK_KW_ENUM";
-    case TOK_KW_MOD: return "TOK_KW_MOD";
-    case TOK_KW_USE: return "TOK_KW_USE";
-    case TOK_KW_FROM: return "TOK_KW_FROM";
-    case TOK_KW_IF: return "TOK_KW_IF";
-    case TOK_KW_THEN: return "TOK_KW_THEN";
-    case TOK_KW_ELSE: return "TOK_KW_ELSE";
-    case TOK_KW_ELIF: return "TOK_KW_ELIF";
-    case TOK_KW_FOR: return "TOK_KW_FOR";
-    case TOK_KW_WHILE: return "TOK_KW_WHILE";
-    case TOK_KW_WHEN: return "TOK_KW_WHEN";
-    case TOK_KW_DO: return "TOK_KW_DO";
-    case TOK_KW_BREAK: return "TOK_KW_BREAK";
-    case TOK_KW_CONTINUE: return "TOK_KW_CONTINUE";
-    case TOK_KW_RETURN: return "TOK_KW_RETURN";
-    case TOK_KW_YIELD: return "TOK_KW_YIELD";
-    case TOK_KW_PUB: return "TOK_KW_PUB";
-    case TOK_KW_MUT: return "TOK_KW_MUT";
-    case TOK_KW_CONST: return "TOK_KW_CONST";
-    case TOK_KW_STATIC: return "TOK_KW_STATIC";
-    case TOK_KW_I8: return "TOK_KW_I8";
-    case TOK_KW_I16: return "TOK_KW_I16";
-    case TOK_KW_I32: return "TOK_KW_I32";
-    case TOK_KW_I64: return "TOK_KW_I64";
-    case TOK_KW_ISIZE: return "TOK_KW_ISIZE";
-    case TOK_KW_U8: return "TOK_KW_U8";
-    case TOK_KW_U16: return "TOK_KW_U16";
-    case TOK_KW_U32: return "TOK_KW_U32";
-    case TOK_KW_U64: return "TOK_KW_U64";
-    case TOK_KW_USIZE: return "TOK_KW_USIZE";
-    case TOK_KW_F32: return "TOK_KW_F32";
-    case TOK_KW_F64: return "TOK_KW_F64";
-    case TOK_KW_BOOL: return "TOK_KW_BOOL";
-    case TOK_KW_UNIT: return "TOK_KW_UNIT";
-    case TOK_PUNCT_PLUS: return "TOK_PUNCT_PLUS";
-    case TOK_PUNCT_PLUS_PLUS: return "TOK_PUNCT_PLUS_PLUS";
-    case TOK_PUNCT_PLUS_EQUAL: return "TOK_PUNCT_PLUS_EQUAL";
-    case TOK_PUNCT_MINUS: return "TOK_PUNCT_MINUS";
-    case TOK_PUNCT_MINUS_MINUS: return "TOK_PUNCT_MINUS_MINUS";
-    case TOK_PUNCT_MINUS_EQUAL: return "TOK_PUNCT_MINUS_EQUAL";
-    case TOK_PUNCT_ASTERISK: return "TOK_PUNCT_ASTERISK";
-    case TOK_PUNCT_ASTERISK_EQUAL: return "TOK_PUNCT_ASTERISK_EQUAL";
-    case TOK_PUNCT_ASTERISK_DOT: return "TOK_PUNCT_ASTERISK_DOT";
-    case TOK_PUNCT_SLASH: return "TOK_PUNCT_SLASH";
-    case TOK_PUNCT_SLASH_EQUAL: return "TOK_PUNCT_SLASH_EQUAL";
-    case TOK_PUNCT_PERCENT: return "TOK_PUNCT_PERCENT";
-    case TOK_PUNCT_PERCENT_EQUAL: return "TOK_PUNCT_PERCENT_EQUAL";
-    case TOK_PUNCT_AMPERSAND: return "TOK_PUNCT_AMPERSAND";
-    case TOK_PUNCT_AMPERSAND_AMPERSAND: return "TOK_PUNCT_AMPERSAND_AMPERSAND";
-    case TOK_PUNCT_AMPERSAND_EQUAL: return "TOK_PUNCT_AMPERSAND_EQUAL";
-    case TOK_PUNCT_BAR: return "TOK_PUNCT_BAR";
-    case TOK_PUNCT_BAR_BAR: return "TOK_PUNCT_BAR_BAR";
-    case TOK_PUNCT_BAR_EQUAL: return "TOK_PUNCT_BAR_EQUAL";
-    case TOK_PUNCT_HAT: return "TOK_PUNCT_HAT";
-    case TOK_PUNCT_HAT_EQUAL: return "TOK_PUNCT_HAT_EQUAL";
-    case TOK_PUNCT_TILDE: return "TOK_PUNCT_TILDE";
-    case TOK_PUNCT_LESS: return "TOK_PUNCT_LESS";
-    case TOK_PUNCT_LESS_LESS: return "TOK_PUNCT_LESS_LESS";
-    case TOK_PUNCT_LESS_LESS_EQUAL: return "TOK_PUNCT_LESS_LESS_EQUAL";
-    case TOK_PUNCT_LESS_EQUAL: return "TOK_PUNCT_LESS_EQUAL";
-    case TOK_PUNCT_GREATER: return "TOK_PUNCT_GREATER";
-    case TOK_PUNCT_GREATER_GREATER: return "TOK_PUNCT_GREATER_GREATER";
+    case TOK_UNKNOWN:                     return "TOK_UNKNOWN";
+    case TOK_ID:                          return "TOK_ID";
+    case TOK_LIT_INT_DEC:                 return "TOK_LIT_INT_DEC";
+    case TOK_LIT_INT_HEX:                 return "TOK_LIT_INT_HEX";
+    case TOK_LIT_INT_OCT:                 return "TOK_LIT_INT_OCT";
+    case TOK_LIT_INT_BIN:                 return "TOK_LIT_INT_BIN";
+    case TOK_LIT_FLT_DEC:                 return "TOK_LIT_FLT_DEC";
+    case TOK_LIT_FLT_HEX:                 return "TOK_LIT_FLT_HEX";
+    case TOK_LIT_STR:                     return "TOK_LIT_STR";
+    case TOK_LIT_CHAR:                    return "TOK_LIT_CHAR";
+    case TOK_LIT_BOOL_TRUE:               return "TOK_LIT_BOOL_TRUE";
+    case TOK_LIT_BOOL_FALSE:              return "TOK_LIT_BOOL_FALSE";
+    case TOK_LIT_NULL:                    return "TOK_LIT_NULL";
+    case TOK_KW_IS:                       return "TOK_KW_IS";
+    case TOK_KW_AS:                       return "TOK_KW_AS";
+    case TOK_KW_SIZEOF:                   return "TOK_KW_SIZEOF";
+    case TOK_KW_ALIGNOF:                  return "TOK_KW_ALIGNOF";
+    case TOK_KW_TYPEOF:                   return "TOK_KW_TYPEOF";
+    case TOK_KW_IN:                       return "TOK_KW_IN";
+    case TOK_KW_VAR:                      return "TOK_KW_VAR";
+    case TOK_KW_FUN:                      return "TOK_KW_FUN";
+    case TOK_KW_GEN:                      return "TOK_KW_GEN";
+    case TOK_KW_STRUCT:                   return "TOK_KW_STRUCT";
+    case TOK_KW_UNION:                    return "TOK_KW_UNION";
+    case TOK_KW_ENUM:                     return "TOK_KW_ENUM";
+    case TOK_KW_MOD:                      return "TOK_KW_MOD";
+    case TOK_KW_USE:                      return "TOK_KW_USE";
+    case TOK_KW_FROM:                     return "TOK_KW_FROM";
+    case TOK_KW_IF:                       return "TOK_KW_IF";
+    case TOK_KW_THEN:                     return "TOK_KW_THEN";
+    case TOK_KW_ELSE:                     return "TOK_KW_ELSE";
+    case TOK_KW_ELIF:                     return "TOK_KW_ELIF";
+    case TOK_KW_FOR:                      return "TOK_KW_FOR";
+    case TOK_KW_WHILE:                    return "TOK_KW_WHILE";
+    case TOK_KW_WHEN:                     return "TOK_KW_WHEN";
+    case TOK_KW_DO:                       return "TOK_KW_DO";
+    case TOK_KW_BREAK:                    return "TOK_KW_BREAK";
+    case TOK_KW_CONTINUE:                 return "TOK_KW_CONTINUE";
+    case TOK_KW_RETURN:                   return "TOK_KW_RETURN";
+    case TOK_KW_YIELD:                    return "TOK_KW_YIELD";
+    case TOK_KW_PUB:                      return "TOK_KW_PUB";
+    case TOK_KW_MUT:                      return "TOK_KW_MUT";
+    case TOK_KW_CONST:                    return "TOK_KW_CONST";
+    case TOK_KW_STATIC:                   return "TOK_KW_STATIC";
+    case TOK_KW_I8:                       return "TOK_KW_I8";
+    case TOK_KW_I16:                      return "TOK_KW_I16";
+    case TOK_KW_I32:                      return "TOK_KW_I32";
+    case TOK_KW_I64:                      return "TOK_KW_I64";
+    case TOK_KW_ISIZE:                    return "TOK_KW_ISIZE";
+    case TOK_KW_U8:                       return "TOK_KW_U8";
+    case TOK_KW_U16:                      return "TOK_KW_U16";
+    case TOK_KW_U32:                      return "TOK_KW_U32";
+    case TOK_KW_U64:                      return "TOK_KW_U64";
+    case TOK_KW_USIZE:                    return "TOK_KW_USIZE";
+    case TOK_KW_F32:                      return "TOK_KW_F32";
+    case TOK_KW_F64:                      return "TOK_KW_F64";
+    case TOK_KW_BOOL:                     return "TOK_KW_BOOL";
+    case TOK_KW_UNIT:                     return "TOK_KW_UNIT";
+    case TOK_PUNCT_PLUS:                  return "TOK_PUNCT_PLUS";
+    case TOK_PUNCT_PLUS_PLUS:             return "TOK_PUNCT_PLUS_PLUS";
+    case TOK_PUNCT_PLUS_EQUAL:            return "TOK_PUNCT_PLUS_EQUAL";
+    case TOK_PUNCT_MINUS:                 return "TOK_PUNCT_MINUS";
+    case TOK_PUNCT_MINUS_MINUS:           return "TOK_PUNCT_MINUS_MINUS";
+    case TOK_PUNCT_MINUS_EQUAL:           return "TOK_PUNCT_MINUS_EQUAL";
+    case TOK_PUNCT_ASTERISK:              return "TOK_PUNCT_ASTERISK";
+    case TOK_PUNCT_ASTERISK_EQUAL:        return "TOK_PUNCT_ASTERISK_EQUAL";
+    case TOK_PUNCT_ASTERISK_DOT:          return "TOK_PUNCT_ASTERISK_DOT";
+    case TOK_PUNCT_SLASH:                 return "TOK_PUNCT_SLASH";
+    case TOK_PUNCT_SLASH_EQUAL:           return "TOK_PUNCT_SLASH_EQUAL";
+    case TOK_PUNCT_PERCENT:               return "TOK_PUNCT_PERCENT";
+    case TOK_PUNCT_PERCENT_EQUAL:         return "TOK_PUNCT_PERCENT_EQUAL";
+    case TOK_PUNCT_AMPERSAND:             return "TOK_PUNCT_AMPERSAND";
+    case TOK_PUNCT_AMPERSAND_AMPERSAND:   return "TOK_PUNCT_AMPERSAND_AMPERSAND";
+    case TOK_PUNCT_AMPERSAND_EQUAL:       return "TOK_PUNCT_AMPERSAND_EQUAL";
+    case TOK_PUNCT_BAR:                   return "TOK_PUNCT_BAR";
+    case TOK_PUNCT_BAR_BAR:               return "TOK_PUNCT_BAR_BAR";
+    case TOK_PUNCT_BAR_EQUAL:             return "TOK_PUNCT_BAR_EQUAL";
+    case TOK_PUNCT_HAT:                   return "TOK_PUNCT_HAT";
+    case TOK_PUNCT_HAT_EQUAL:             return "TOK_PUNCT_HAT_EQUAL";
+    case TOK_PUNCT_TILDE:                 return "TOK_PUNCT_TILDE";
+    case TOK_PUNCT_LESS:                  return "TOK_PUNCT_LESS";
+    case TOK_PUNCT_LESS_LESS:             return "TOK_PUNCT_LESS_LESS";
+    case TOK_PUNCT_LESS_LESS_EQUAL:       return "TOK_PUNCT_LESS_LESS_EQUAL";
+    case TOK_PUNCT_LESS_EQUAL:            return "TOK_PUNCT_LESS_EQUAL";
+    case TOK_PUNCT_GREATER:               return "TOK_PUNCT_GREATER";
+    case TOK_PUNCT_GREATER_GREATER:       return "TOK_PUNCT_GREATER_GREATER";
     case TOK_PUNCT_GREATER_GREATER_EQUAL: return "TOK_PUNCT_GREATER_GREATER_EQUAL";
-    case TOK_PUNCT_GREATER_EQUAL: return "TOK_PUNCT_GREATER_EQUAL";
-    case TOK_PUNCT_BANG: return "TOK_PUNCT_BANG";
-    case TOK_PUNCT_BANG_EQUAL: return "TOK_PUNCT_BANG_EQUAL";
-    case TOK_PUNCT_DOT: return "TOK_PUNCT_DOT";
-    case TOK_PUNCT_DOT_DOT: return "TOK_PUNCT_DOT_DOT";
-    case TOK_PUNCT_DOT_DOT_DOT: return "TOK_PUNCT_DOT_DOT_DOT";
-    case TOK_PUNCT_QUESTION: return "TOK_PUNCT_QUESTION";
-    case TOK_PUNCT_QUESTION_DOT: return "TOK_PUNCT_QUESTION_DOT";
-    case TOK_PUNCT_EQUAL: return "TOK_PUNCT_EQUAL";
-    case TOK_PUNCT_EQUAL_EQUAL: return "TOK_PUNCT_EQUAL_EQUAL";
-    case TOK_PUNCT_COMMA: return "TOK_PUNCT_COMMA";
-    case TOK_PUNCT_COLON: return "TOK_PUNCT_COLON";
-    case TOK_PUNCT_PAREN_LEFT: return "TOK_PUNCT_PAREN_LEFT";
-    case TOK_PUNCT_PAREN_RIGHT: return "TOK_PUNCT_PAREN_RIGHT";
-    case TOK_PUNCT_BRACKET_LEFT: return "TOK_PUNCT_BRACKET_LEFT";
-    case TOK_PUNCT_BRACKET_RIGHT: return "TOK_PUNCT_BRACKET_RIGHT";
-    case TOK_PUNCT_BRACE_LEFT: return "TOK_PUNCT_BRACE_LEFT";
-    case TOK_PUNCT_BRACE_RIGHT: return "TOK_PUNCT_BRACE_RIGHT";
-    case TOK_EOF: return "TOK_EOF";
-    default: return "";
+    case TOK_PUNCT_GREATER_EQUAL:         return "TOK_PUNCT_GREATER_EQUAL";
+    case TOK_PUNCT_BANG:                  return "TOK_PUNCT_BANG";
+    case TOK_PUNCT_BANG_EQUAL:            return "TOK_PUNCT_BANG_EQUAL";
+    case TOK_PUNCT_DOT:                   return "TOK_PUNCT_DOT";
+    case TOK_PUNCT_DOT_DOT:               return "TOK_PUNCT_DOT_DOT";
+    case TOK_PUNCT_DOT_DOT_DOT:           return "TOK_PUNCT_DOT_DOT_DOT";
+    case TOK_PUNCT_QUESTION:              return "TOK_PUNCT_QUESTION";
+    case TOK_PUNCT_QUESTION_DOT:          return "TOK_PUNCT_QUESTION_DOT";
+    case TOK_PUNCT_EQUAL:                 return "TOK_PUNCT_EQUAL";
+    case TOK_PUNCT_EQUAL_EQUAL:           return "TOK_PUNCT_EQUAL_EQUAL";
+    case TOK_PUNCT_COMMA:                 return "TOK_PUNCT_COMMA";
+    case TOK_PUNCT_COLON:                 return "TOK_PUNCT_COLON";
+    case TOK_PUNCT_PAREN_LEFT:            return "TOK_PUNCT_PAREN_LEFT";
+    case TOK_PUNCT_PAREN_RIGHT:           return "TOK_PUNCT_PAREN_RIGHT";
+    case TOK_PUNCT_BRACKET_LEFT:          return "TOK_PUNCT_BRACKET_LEFT";
+    case TOK_PUNCT_BRACKET_RIGHT:         return "TOK_PUNCT_BRACKET_RIGHT";
+    case TOK_PUNCT_BRACE_LEFT:            return "TOK_PUNCT_BRACE_LEFT";
+    case TOK_PUNCT_BRACE_RIGHT:           return "TOK_PUNCT_BRACE_RIGHT";
+    case TOK_EOF:                         return "TOK_EOF";
+    default: unreachable();
   }
+
+  return NULL;
 }
 
-const char* token_kind_to_name(token_kind_t kind)
+bool token_is_literal(token_t* tok)
 {
-  switch (kind)
-  {
-    case TOK_ID: return "identifier";
-    case TOK_LIT_INT_DEC:
-    case TOK_LIT_INT_HEX:
-    case TOK_LIT_INT_OCT:
-    case TOK_LIT_INT_BIN: return "integer literal";
-    case TOK_LIT_FLT_DEC: 
-    case TOK_LIT_FLT_HEX: return "float literal";
-    case TOK_LIT_STR: return "string literal";
-    case TOK_LIT_CHAR: return "character literal";
-    case TOK_LIT_BOOL_TRUE:
-    case TOK_LIT_BOOL_FALSE: return "boolean literal";
-    case TOK_LIT_NULL: return "null";
-    case TOK_KW_IS: return "is";
-    case TOK_KW_AS: return "as";
-    case TOK_KW_SIZEOF: return "sizeof";
-    case TOK_KW_ALIGNOF: return "alignof";
-    case TOK_KW_TYPEOF: return "typeof";
-    case TOK_KW_IN: return "in";
-    case TOK_KW_VAR: return "var";
-    case TOK_KW_FUN: return "fun";
-    case TOK_KW_GEN: return "gen";
-    case TOK_KW_STRUCT: return "struct";
-    case TOK_KW_UNION: return "union";
-    case TOK_KW_ENUM: return "enum";
-    case TOK_KW_MOD: return "mod";
-    case TOK_KW_USE: return "use";
-    case TOK_KW_FROM: return "from";
-    case TOK_KW_IF: return "if";
-    case TOK_KW_THEN: return "then";
-    case TOK_KW_ELSE: return "else";
-    case TOK_KW_ELIF: return "elif";
-    case TOK_KW_FOR: return "for";
-    case TOK_KW_WHILE: return "while";
-    case TOK_KW_WHEN: return "when";
-    case TOK_KW_DO: return "do";
-    case TOK_KW_BREAK: return "break";
-    case TOK_KW_CONTINUE: return "continue";
-    case TOK_KW_RETURN: return "return";
-    case TOK_KW_YIELD: return "yield";
-    case TOK_KW_PUB: return "pub";
-    case TOK_KW_MUT: return "mut";
-    case TOK_KW_CONST: return "const";
-    case TOK_KW_STATIC: return "static";
-    case TOK_KW_I8: return "i8";
-    case TOK_KW_I16: return "i16";
-    case TOK_KW_I32: return "i32";
-    case TOK_KW_I64: return "i64";
-    case TOK_KW_ISIZE: return "isize";
-    case TOK_KW_U8: return "u8";
-    case TOK_KW_U16: return "u16";
-    case TOK_KW_U32: return "u32";
-    case TOK_KW_U64: return "u64";
-    case TOK_KW_USIZE: return "usize";
-    case TOK_KW_F32: return "f32";
-    case TOK_KW_F64: return "f64";
-    case TOK_KW_BOOL: return "bool";
-    case TOK_KW_UNIT: return "unit";
-    case TOK_PUNCT_PLUS: return "+";
-    case TOK_PUNCT_PLUS_PLUS: return "++";
-    case TOK_PUNCT_PLUS_EQUAL: return "+=";
-    case TOK_PUNCT_MINUS: return "-";
-    case TOK_PUNCT_MINUS_MINUS: return "--";
-    case TOK_PUNCT_MINUS_EQUAL: return "-=";
-    case TOK_PUNCT_ASTERISK: return "*";
-    case TOK_PUNCT_ASTERISK_EQUAL: return "*=";
-    case TOK_PUNCT_ASTERISK_DOT: return "*.";
-    case TOK_PUNCT_SLASH: return "/";
-    case TOK_PUNCT_SLASH_EQUAL: return "/=";
-    case TOK_PUNCT_PERCENT: return "%";
-    case TOK_PUNCT_PERCENT_EQUAL: return "%=";
-    case TOK_PUNCT_AMPERSAND: return "&";
-    case TOK_PUNCT_AMPERSAND_AMPERSAND: return "&&";
-    case TOK_PUNCT_AMPERSAND_EQUAL: return "&=";
-    case TOK_PUNCT_BAR: return "|";
-    case TOK_PUNCT_BAR_BAR: return "||";
-    case TOK_PUNCT_BAR_EQUAL: return "|=";
-    case TOK_PUNCT_HAT: return "^";
-    case TOK_PUNCT_HAT_EQUAL: return "^=";
-    case TOK_PUNCT_TILDE: return "~";
-    case TOK_PUNCT_LESS: return "<";
-    case TOK_PUNCT_LESS_LESS: return "<<";
-    case TOK_PUNCT_LESS_LESS_EQUAL: return "<<=";
-    case TOK_PUNCT_LESS_EQUAL: return "<=";
-    case TOK_PUNCT_GREATER: return ">";
-    case TOK_PUNCT_GREATER_GREATER: return ">>";
-    case TOK_PUNCT_GREATER_GREATER_EQUAL: return ">>=";
-    case TOK_PUNCT_GREATER_EQUAL: return ">=";
-    case TOK_PUNCT_BANG: return "!";
-    case TOK_PUNCT_BANG_EQUAL: return "!=";
-    case TOK_PUNCT_DOT: return ".";
-    case TOK_PUNCT_DOT_DOT: return "..";
-    case TOK_PUNCT_DOT_DOT_DOT: return "...";
-    case TOK_PUNCT_QUESTION: return "?";
-    case TOK_PUNCT_QUESTION_DOT: return "?.";
-    case TOK_PUNCT_EQUAL: return "=";
-    case TOK_PUNCT_EQUAL_EQUAL: return "==";
-    case TOK_PUNCT_COMMA: return ",";
-    case TOK_PUNCT_COLON: return ":";
-    case TOK_PUNCT_PAREN_LEFT: return "(";
-    case TOK_PUNCT_PAREN_RIGHT: return ")";
-    case TOK_PUNCT_BRACKET_LEFT: return "[";
-    case TOK_PUNCT_BRACKET_RIGHT: return "]";
-    case TOK_PUNCT_BRACE_LEFT: return "{";
-    case TOK_PUNCT_BRACE_RIGHT: return "}";
-    case TOK_EOF: return "end of file";
-    default: return "unknown token";
-  }
+  return TOK_LIT_INT_DEC <= tok->kind && TOK_LIT_NULL >= tok->kind;
 }
 
-bool token_is_literal(token_kind_t kind)
+bool token_is_literal_integer(token_t* tok)
 {
-  return TOK_LIT_INT_DEC <= kind && TOK_LIT_NULL >= kind;
+  return TOK_LIT_INT_DEC <= tok->kind && TOK_LIT_INT_BIN >= tok->kind;
 }
 
-bool token_is_literal_integer(token_kind_t kind)
+bool token_is_literal_float(token_t* tok)
 {
-  return TOK_LIT_INT_DEC <= kind && TOK_LIT_INT_BIN >= kind;
+  return TOK_LIT_FLT_DEC == tok->kind || TOK_LIT_FLT_HEX == tok->kind;
 }
 
-bool token_is_literal_float(token_kind_t kind)
+bool token_is_keyword(token_t* tok)
 {
-  return TOK_LIT_FLT_DEC == kind || TOK_LIT_FLT_HEX == kind;
+  return TOK_KW_IS <= tok->kind && TOK_KW_STATIC >= tok->kind;
 }
 
-bool token_is_keyword(token_kind_t kind)
+bool token_is_punctuation(token_t* tok)
 {
-  return TOK_KW_IS <= kind && TOK_KW_STATIC >= kind;
-}
-
-bool token_is_punctuation(token_kind_t kind)
-{
-  return TOK_PUNCT_PLUS <= kind && TOK_PUNCT_BRACE_RIGHT >= kind;
+  return TOK_PUNCT_PLUS <= tok->kind && TOK_PUNCT_BRACE_RIGHT >= tok->kind;
 }

@@ -2,8 +2,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
+#include "util.h"
 #include "log.h"
 #include "crumb.h"
 #include "shyd.h"
@@ -67,7 +67,7 @@ token_t* parser_expect(parser_t* par, token_kind_t kind)
 
   if (tok->kind != kind)
   {
-    crumb_error(&tok->loc, "Unexpected token! Expected: %s", token_kind_to_name(kind));
+    crumb_error(tok->loc, "Unexpected token! Expected: %s", token_kind_to_string(kind));
     exit(EXIT_FAILURE);
   }
 
@@ -267,7 +267,7 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_KW_UNIT:            node = parser_node_init(par, AST_TYPE_BUILTIN_UNIT ); parser_expect(par, TOK_KW_UNIT ); return node;
   case TOK_ID:                 return parser_parse_type_id(par);
   default:
-    crumb_error(&parser_current(par)->loc, "Unexpected token! Expected type.");
+    crumb_error(parser_current(par)->loc, "Unexpected token! Expected type.");
     exit(EXIT_FAILURE);
   }
 
@@ -550,7 +550,7 @@ ast_node_t* parser_parse_decl(parser_t* par)
   case TOK_KW_ENUM:   return parser_parse_decl_enum(par);
   case TOK_KW_MOD:    return parser_parse_decl_mod(par);
   default:
-    crumb_error(&parser_current(par)->loc, "Unexpected token! Expected declaration.");
+    crumb_error(parser_current(par)->loc, "Unexpected token! Expected declaration.");
     exit(EXIT_FAILURE);
   }
 

@@ -1,6 +1,7 @@
 add_executable(${PROJECT_NAME} 
   main.c
   
+  location.c
   token.c
   lexer.c
   op.c
@@ -8,6 +9,7 @@ add_executable(${PROJECT_NAME}
   shyd.c
   parser.c
 
+  file.c
   cli.c
   log.c
   crumb.c

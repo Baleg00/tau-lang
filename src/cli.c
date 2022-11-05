@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
+
+#include "util.h"
 
 cli_t* cli_init(cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count)
 {

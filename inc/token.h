@@ -2,6 +2,7 @@
 #define TAU_TOKEN_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include "list.h"
@@ -125,7 +126,7 @@ typedef enum token_kind_e
 typedef struct token_s
 {
   token_kind_t kind;
-  location_t loc;
+  location_t* loc;
 
   union
   {
@@ -139,23 +140,21 @@ typedef struct token_s
 
     struct {
       char* value;
-      size_t len;
     } lit_str, lit_char, id;
   };
 } token_t;
 
-token_t* token_init(token_kind_t kind);
+token_t* token_init(void);
 void token_free(token_t* tok);
 
 void token_list_json_dump(FILE* stream, list_t* list);
 
 const char* token_kind_to_string(token_kind_t kind);
-const char* token_kind_to_name(token_kind_t kind);
 
-bool token_is_literal(token_kind_t kind);
-bool token_is_literal_integer(token_kind_t kind);
-bool token_is_literal_float(token_kind_t kind);
-bool token_is_keyword(token_kind_t kind);
-bool token_is_punctuation(token_kind_t kind);
+bool token_is_literal(token_t* tok);
+bool token_is_literal_integer(token_t* tok);
+bool token_is_literal_float(token_t* tok);
+bool token_is_keyword(token_t* tok);
+bool token_is_punctuation(token_t* tok);
 
 #endif

@@ -1,7 +1,6 @@
 #include "shyd.h"
 
-#include <assert.h>
-
+#include "util.h"
 #include "crumb.h"
 
 shyd_elem_t* shyd_elem_init(parser_t* par, shyd_kind_t kind)
@@ -19,7 +18,7 @@ void shyd_elem_free(shyd_elem_t* elem)
 
 bool shyd_to_postfix_step(parser_t* par, queue_t* out_queue, stack_t* op_stack, bool* prev_term)
 {
-  if (parser_current(par)->kind == TOK_ID || token_is_literal(parser_current(par)->kind))
+  if (parser_current(par)->kind == TOK_ID || token_is_literal(parser_current(par)))
   {
     if (*prev_term)
       return false;
@@ -27,6 +26,54 @@ bool shyd_to_postfix_step(parser_t* par, queue_t* out_queue, stack_t* op_stack, 
     shyd_elem_t* elem = shyd_elem_init(par, SHYD_TERM);
     queue_offer(out_queue, elem);
     *prev_term = true;
+  }
+  else if (parser_current(par)->kind == TOK_KW_IS)
+  {
+    if (!*prev_term)
+      return false;
+
+    shyd_elem_t* elem = shyd_elem_init(par, SHYD_OP);
+    elem->op = OP_IS;
+    parser_next(par);
+    elem->node = parser_parse_type(par);
+    stack_push(op_stack, elem);
+    return true;
+  }
+  else if (parser_current(par)->kind == TOK_KW_AS)
+  {
+    if (!*prev_term)
+      return false;
+
+    shyd_elem_t* elem = shyd_elem_init(par, SHYD_OP);
+    elem->op = OP_AS;
+    parser_next(par);
+    elem->node = parser_parse_type(par);
+    stack_push(op_stack, elem);
+    return true;
+  }
+  else if (parser_current(par)->kind == TOK_KW_SIZEOF)
+  {
+    if (!*prev_term)
+      return false;
+
+    shyd_elem_t* elem = shyd_elem_init(par, SHYD_OP);
+    elem->op = OP_SIZEOF;
+    parser_next(par);
+    elem->node = parser_parse_type(par);
+    stack_push(op_stack, elem);
+    return true;
+  }
+  else if (parser_current(par)->kind == TOK_KW_ALIGNOF)
+  {
+    if (!*prev_term)
+      return false;
+
+    shyd_elem_t* elem = shyd_elem_init(par, SHYD_OP);
+    elem->op = OP_ALIGNOF;
+    parser_next(par);
+    elem->node = parser_parse_type(par);
+    stack_push(op_stack, elem);
+    return true;
   }
   else if (parser_current(par)->kind == TOK_PUNCT_PAREN_LEFT)
   {
@@ -81,50 +128,50 @@ bool shyd_to_postfix_step(parser_t* par, queue_t* out_queue, stack_t* op_stack, 
 
     *prev_term = true;
   }
-  else if (token_is_punctuation(parser_current(par)->kind))
+  else if (token_is_punctuation(parser_current(par)))
   {
     op_kind_t op;
 
     switch (parser_current(par)->kind)
     {
-    case TOK_PUNCT_PLUS: op = *prev_term ? OP_ARIT_ADD : OP_ARIT_POS; break;
-    case TOK_PUNCT_PLUS_PLUS: op = *prev_term ? OP_ARIT_INC_POST : OP_ARIT_INC_PRE; break;
-    case TOK_PUNCT_PLUS_EQUAL: op = OP_ARIT_ADD_ASSIGN; break;
-    case TOK_PUNCT_MINUS: op = *prev_term ? OP_ARIT_SUB : OP_ARIT_NEG; break;
-    case TOK_PUNCT_MINUS_MINUS: op = *prev_term ? OP_ARIT_DEC_POST : OP_ARIT_DEC_PRE; break;
-    case TOK_PUNCT_MINUS_EQUAL: op = OP_ARIT_SUB_ASSIGN; break;
-    case TOK_PUNCT_ASTERISK: op = *prev_term ? OP_ARIT_MUL : OP_IND; break;
-    case TOK_PUNCT_ASTERISK_EQUAL: op = OP_ARIT_MUL_ASSIGN; break;
-    case TOK_PUNCT_ASTERISK_DOT: op = OP_IND_MEMBER; break;
-    case TOK_PUNCT_SLASH: op = OP_ARIT_DIV; break;
-    case TOK_PUNCT_SLASH_EQUAL: op = OP_ARIT_DIV_ASSIGN; break;
-    case TOK_PUNCT_PERCENT: op = OP_ARIT_MOD; break;
-    case TOK_PUNCT_PERCENT_EQUAL: op = OP_ARIT_MOD_ASSIGN; break;
-    case TOK_PUNCT_AMPERSAND: op = *prev_term ? OP_BIT_AND : OP_ADDR; break;
-    case TOK_PUNCT_AMPERSAND_AMPERSAND: op = OP_LOGIC_AND; break;
-    case TOK_PUNCT_AMPERSAND_EQUAL: op = OP_BIT_AND_ASSIGN; break;
-    case TOK_PUNCT_BAR: op = OP_BIT_OR; break;
-    case TOK_PUNCT_BAR_BAR: op = OP_LOGIC_OR; break;
-    case TOK_PUNCT_BAR_EQUAL: op = OP_BIT_OR_ASSIGN; break;
-    case TOK_PUNCT_HAT: op = OP_BIT_XOR; break;
-    case TOK_PUNCT_HAT_EQUAL: op = OP_BIT_XOR_ASSIGN; break;
-    case TOK_PUNCT_TILDE: op = OP_BIT_NOT; break;
-    case TOK_PUNCT_LESS: op = OP_COMP_LT; break;
-    case TOK_PUNCT_LESS_LESS: op = OP_BIT_LSH; break;
-    case TOK_PUNCT_LESS_LESS_EQUAL: op = OP_BIT_LSH_ASSIGN; break;
-    case TOK_PUNCT_LESS_EQUAL: op = OP_COMP_LE; break;
-    case TOK_PUNCT_GREATER: op = OP_COMP_GT; break;
-    case TOK_PUNCT_GREATER_GREATER: op = OP_BIT_RSH; break;
+    case TOK_PUNCT_PLUS:                  op = *prev_term ? OP_ARIT_ADD : OP_ARIT_POS; break;
+    case TOK_PUNCT_PLUS_PLUS:             op = *prev_term ? OP_ARIT_INC_POST : OP_ARIT_INC_PRE; break;
+    case TOK_PUNCT_PLUS_EQUAL:            op = OP_ARIT_ADD_ASSIGN; break;
+    case TOK_PUNCT_MINUS:                 op = *prev_term ? OP_ARIT_SUB : OP_ARIT_NEG; break;
+    case TOK_PUNCT_MINUS_MINUS:           op = *prev_term ? OP_ARIT_DEC_POST : OP_ARIT_DEC_PRE; break;
+    case TOK_PUNCT_MINUS_EQUAL:           op = OP_ARIT_SUB_ASSIGN; break;
+    case TOK_PUNCT_ASTERISK:              op = *prev_term ? OP_ARIT_MUL : OP_IND; break;
+    case TOK_PUNCT_ASTERISK_EQUAL:        op = OP_ARIT_MUL_ASSIGN; break;
+    case TOK_PUNCT_ASTERISK_DOT:          op = OP_IND_MEMBER; break;
+    case TOK_PUNCT_SLASH:                 op = OP_ARIT_DIV; break;
+    case TOK_PUNCT_SLASH_EQUAL:           op = OP_ARIT_DIV_ASSIGN; break;
+    case TOK_PUNCT_PERCENT:               op = OP_ARIT_MOD; break;
+    case TOK_PUNCT_PERCENT_EQUAL:         op = OP_ARIT_MOD_ASSIGN; break;
+    case TOK_PUNCT_AMPERSAND:             op = *prev_term ? OP_BIT_AND : OP_ADDR; break;
+    case TOK_PUNCT_AMPERSAND_AMPERSAND:   op = OP_LOGIC_AND; break;
+    case TOK_PUNCT_AMPERSAND_EQUAL:       op = OP_BIT_AND_ASSIGN; break;
+    case TOK_PUNCT_BAR:                   op = OP_BIT_OR; break;
+    case TOK_PUNCT_BAR_BAR:               op = OP_LOGIC_OR; break;
+    case TOK_PUNCT_BAR_EQUAL:             op = OP_BIT_OR_ASSIGN; break;
+    case TOK_PUNCT_HAT:                   op = OP_BIT_XOR; break;
+    case TOK_PUNCT_HAT_EQUAL:             op = OP_BIT_XOR_ASSIGN; break;
+    case TOK_PUNCT_TILDE:                 op = OP_BIT_NOT; break;
+    case TOK_PUNCT_LESS:                  op = OP_COMP_LT; break;
+    case TOK_PUNCT_LESS_LESS:             op = OP_BIT_LSH; break;
+    case TOK_PUNCT_LESS_LESS_EQUAL:       op = OP_BIT_LSH_ASSIGN; break;
+    case TOK_PUNCT_LESS_EQUAL:            op = OP_COMP_LE; break;
+    case TOK_PUNCT_GREATER:               op = OP_COMP_GT; break;
+    case TOK_PUNCT_GREATER_GREATER:       op = OP_BIT_RSH; break;
     case TOK_PUNCT_GREATER_GREATER_EQUAL: op = OP_BIT_RSH_ASSIGN; break;
-    case TOK_PUNCT_GREATER_EQUAL: op = OP_COMP_GE; break;
-    case TOK_PUNCT_BANG: op = OP_LOGIC_NOT; break;
-    case TOK_PUNCT_BANG_EQUAL: op = OP_COMP_NE; break;
-    case TOK_PUNCT_DOT: op = OP_MEMBER; break;
-    case TOK_PUNCT_DOT_DOT: op = OP_RANGE; break;
-    case TOK_PUNCT_QUESTION_DOT: op = OP_SAFE_IND_MEMBER; break;
-    case TOK_PUNCT_EQUAL: op = OP_ASSIGN; break;
-    case TOK_PUNCT_EQUAL_EQUAL: op = OP_COMP_EQ; break;
-    case TOK_PUNCT_COMMA: op = OP_COMMA; break;
+    case TOK_PUNCT_GREATER_EQUAL:         op = OP_COMP_GE; break;
+    case TOK_PUNCT_BANG:                  op = OP_LOGIC_NOT; break;
+    case TOK_PUNCT_BANG_EQUAL:            op = OP_COMP_NE; break;
+    case TOK_PUNCT_DOT:                   op = OP_MEMBER; break;
+    case TOK_PUNCT_DOT_DOT:               op = OP_RANGE; break;
+    case TOK_PUNCT_QUESTION_DOT:          op = OP_SAFE_IND_MEMBER; break;
+    case TOK_PUNCT_EQUAL:                 op = OP_ASSIGN; break;
+    case TOK_PUNCT_EQUAL_EQUAL:           op = OP_COMP_EQ; break;
+    case TOK_PUNCT_COMMA:                 op = OP_COMMA; break;
     default: return false;
     }
 
@@ -170,13 +217,13 @@ queue_t* shyd_to_postfix(parser_t* par)
     
     if (elem->kind == SHYD_PAREN_OPEN)
     {
-      crumb_error(&elem->tok->loc, "Missing closing parenthesis!");
+      crumb_error(elem->tok->loc, "Missing closing parenthesis!");
       exit(EXIT_FAILURE);
     }
     
     if (elem->kind == SHYD_BRACKET_OPEN)
     {
-      crumb_error(&elem->tok->loc, "Missing closing bracket!");
+      crumb_error(elem->tok->loc, "Missing closing bracket!");
       exit(EXIT_FAILURE);
     }
 
@@ -203,20 +250,34 @@ ast_node_t* shyd_to_ast(parser_t* par)
 
       switch (elem->tok->kind)
       {
-      case TOK_ID: kind = AST_ID; break;
+      case TOK_ID:
+        kind = AST_ID;
+        break;
       case TOK_LIT_INT_DEC:
       case TOK_LIT_INT_HEX:
       case TOK_LIT_INT_OCT:
-      case TOK_LIT_INT_BIN: kind = AST_EXPR_LIT_INT; break;
+      case TOK_LIT_INT_BIN:
+        kind = AST_EXPR_LIT_INT;
+        break;
       case TOK_LIT_FLT_DEC:
-      case TOK_LIT_FLT_HEX: kind = AST_EXPR_LIT_INT; break;
-      case TOK_LIT_STR: kind = AST_EXPR_LIT_INT; break;
-      case TOK_LIT_CHAR: kind = AST_EXPR_LIT_INT; break;
+      case TOK_LIT_FLT_HEX:
+        kind = AST_EXPR_LIT_INT;
+        break;
+      case TOK_LIT_STR:
+        kind = AST_EXPR_LIT_INT;
+        break;
+      case TOK_LIT_CHAR:
+        kind = AST_EXPR_LIT_INT;
+        break;
       case TOK_LIT_BOOL_TRUE:
-      case TOK_LIT_BOOL_FALSE: kind = AST_EXPR_LIT_INT; break;
-      case TOK_LIT_NULL: kind = AST_EXPR_LIT_INT; break;
+      case TOK_LIT_BOOL_FALSE:
+        kind = AST_EXPR_LIT_INT;
+        break;
+      case TOK_LIT_NULL:
+        kind = AST_EXPR_LIT_INT;
+        break;
       default:
-        crumb_error(&elem->tok->loc, "Unexpected token! Expected term!");
+        crumb_error(elem->tok->loc, "Unexpected token! Expected term!");
         exit(EXIT_FAILURE);
       }
 
@@ -234,12 +295,12 @@ ast_node_t* shyd_to_ast(parser_t* par)
 
       switch (elem->op)
       {
-      case OP_IS: break; // TODO
-      case OP_AS: break; // TODO
-      case OP_SIZEOF: break; // TODO
-      case OP_ALIGNOF: break; // TODO
-      case OP_TYPEOF: break; // TODO
-      
+      case OP_IS:
+      case OP_AS:
+      case OP_SIZEOF:
+      case OP_ALIGNOF:
+        list_push_back(node->expr_op.args, elem->node);
+      case OP_TYPEOF:
       case OP_ARIT_INC_PRE:
       case OP_ARIT_INC_POST:
       case OP_ARIT_DEC_PRE:
@@ -252,7 +313,7 @@ ast_node_t* shyd_to_ast(parser_t* par)
       case OP_ADDR:
         if (stack_empty(node_stack))
         {
-          crumb_error(&node->tok->loc, "Missing argument for unary operation!");
+          crumb_error(node->tok->loc, "Missing argument for unary operation!");
           exit(EXIT_FAILURE);
         }
         
@@ -297,7 +358,7 @@ ast_node_t* shyd_to_ast(parser_t* par)
       case OP_COMMA:
         if (stack_empty(node_stack))
         {
-          crumb_error(&node->tok->loc, "Missing argument for binary operation!");
+          crumb_error(node->tok->loc, "Missing argument for binary operation!");
           exit(EXIT_FAILURE);
         }
 
@@ -305,7 +366,7 @@ ast_node_t* shyd_to_ast(parser_t* par)
         
         if (stack_empty(node_stack))
         {
-          crumb_error(&node->tok->loc, "Missing argument for binary operation!");
+          crumb_error(node->tok->loc, "Missing argument for binary operation!");
           exit(EXIT_FAILURE);
         }
 
@@ -313,7 +374,7 @@ ast_node_t* shyd_to_ast(parser_t* par)
         break;
 
       case OP_CALL: break; // TODO
-      default: assert(false);
+      default: unreachable();
       }
 
       stack_push(node_stack, node);

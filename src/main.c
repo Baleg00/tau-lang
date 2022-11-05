@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include <assert.h>
 
+#include "util.h"
 #include "log.h"
 #include "crumb.h"
 #include "cli.h"

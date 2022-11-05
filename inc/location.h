@@ -2,28 +2,15 @@
 #define TAU_LOCATION_H
 
 #include <stddef.h>
-#include <stdint.h>
 
-/// Struct containing location information within a source file. 
 typedef struct location_s
 {
-  /// Path to the source file.
-  const char* filepath;
-
-  /// Pointer to the source string.
-  const char* src;
-
-  /// Pointer to the location in the source string.
-  const char* cur;
-
-  /// Location row (line) number in source string.
-  size_t row;
-
-  /// Location column number in source string.
-  size_t col;
-
-  /// Character length of the word.
-  size_t len;
+  const char *path;
+  char *src, *cur;
+  size_t row, col, len;
 } location_t;
+
+location_t* location_init(void);
+void location_free(location_t* loc);
 
 #endif

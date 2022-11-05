@@ -4,40 +4,27 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include <assert.h>
 
+#include "util.h"
+#include "file.h"
 #include "log.h"
 #include "crumb.h"
 
-lexer_t* lexer_init(const char* filepath)
+lexer_t* lexer_init(const char* path)
 {
   lexer_t* lex = (lexer_t*)malloc(sizeof(lexer_t));
   assert(lex != NULL);
 
-  lex->filepath = filepath;
-  lex->row = 0;
-  lex->col = 0;
+  lex->loc = location_init();
 
-  FILE* file = fopen(filepath, "r");
-  
-  if (file == NULL)
-  {
-    log_fatal("lexer", "Cannot open file: %s", filepath);
-    exit(EXIT_FAILURE);
-  }
+  lex->loc->path = path;
+  lex->loc->row = 0;
+  lex->loc->col = 0;
+  lex->loc->len = 0;
 
-  fseek(file, 0, SEEK_END);
-  size_t len = (size_t)ftell(file);
-  fseek(file, 0, SEEK_SET);
+  file_read_to_string(path, NULL, &lex->loc->src);
 
-  lex->src = (char*)calloc(len + 1, sizeof(char));
-  assert(lex->src != NULL);
-
-  fread(lex->src, sizeof(char), len, file);
-
-  fclose(file);
-
-  lex->cur = lex->src;
+  lex->loc->cur = lex->loc->src;
 
   lex->toks = list_init();
 
@@ -46,22 +33,23 @@ lexer_t* lexer_init(const char* filepath)
 
 void lexer_free(lexer_t* lex)
 {
-  for (list_elem_t* elem = list_front_elem(lex->toks); elem != NULL; elem = list_elem_next(elem))
-    token_free((token_t*)list_elem_data(elem));
-
+  list_for_each(lex->toks, token_free);
   list_free(lex->toks);
   free(lex);
 }
 
+list_t* lexer_tokens(lexer_t* lex)
+{
+  return lex->toks;
+}
+
 token_t* lexer_token_init(lexer_t* lex, token_kind_t kind)
 {
-  token_t* tok = token_init(kind);
+  token_t* tok = token_init();
+  tok->kind = kind;
 
-  tok->loc.filepath = lex->filepath;
-  tok->loc.src = lex->src;
-  tok->loc.cur = lex->cur;
-  tok->loc.row = lex->row;
-  tok->loc.col = lex->col;
+  tok->loc = location_init();
+  *tok->loc = *lex->loc;
 
   return tok;
 }
@@ -73,68 +61,68 @@ void lexer_token_push(lexer_t* lex, token_t* tok)
 
 int lexer_is_space(lexer_t* lex)
 {
-  return isspace(*lex->cur);
+  return isspace(*lex->loc->cur);
 }
 
 int lexer_is_word_begin(lexer_t* lex)
 {
-  return isalpha(*lex->cur) || *lex->cur == '_';
+  return isalpha(*lex->loc->cur) || *lex->loc->cur == '_';
 }
 
 int lexer_is_word(lexer_t* lex)
 {
-  return isalnum(*lex->cur) || *lex->cur == '_';
+  return isalnum(*lex->loc->cur) || *lex->loc->cur == '_';
 }
 
 int lexer_is_decimal(lexer_t* lex)
 {
-  return isdigit(*lex->cur);
+  return isdigit(*lex->loc->cur);
 }
 
 int lexer_is_hexadecimal(lexer_t* lex)
 {
-  return isxdigit(*lex->cur);
+  return isxdigit(*lex->loc->cur);
 }
 
 int lexer_is_octal(lexer_t* lex)
 {
-  return '0' <= *lex->cur && '7' >= *lex->cur;
+  return '0' <= *lex->loc->cur && '7' >= *lex->loc->cur;
 }
 
 int lexer_is_binary(lexer_t* lex)
 {
-  return *lex->cur == '0' || *lex->cur == '1';
+  return *lex->loc->cur == '0' || *lex->loc->cur == '1';
 }
 
 int lexer_is_punctuation(lexer_t* lex)
 {
-  return ispunct(*lex->cur);
+  return ispunct(*lex->loc->cur);
 }
 
 char lexer_current(lexer_t* lex)
 {
-  return *lex->cur;
+  return *lex->loc->cur;
 }
 
 char lexer_next(lexer_t* lex)
 {
-  if (*lex->cur == '\0')
+  if (*lex->loc->cur == '\0')
     return '\0';
   
-  if (*lex->cur == '\n')
+  if (*lex->loc->cur == '\n')
     {
-      ++lex->row;
-      lex->col = 0;
+      ++lex->loc->row;
+      lex->loc->col = 0;
     }
     else
-      ++lex->col;
+      ++lex->loc->col;
 
-  return *(lex->cur++);
+  return *(lex->loc->cur++);
 }
 
 char lexer_peek(lexer_t* lex)
 {
-  return *lex->cur == '\0' ? '\0' : *(lex->cur + 1);
+  return *lex->loc->cur == '\0' ? '\0' : *(lex->loc->cur + 1);
 }
 
 bool lexer_consume(lexer_t* lex, char ch)
@@ -150,12 +138,12 @@ bool lexer_consume(lexer_t* lex, char ch)
 
 size_t lexer_skip(lexer_t* lex, int(*pred)(lexer_t*))
 {
-  const char* begin = lex->cur;
+  const char* begin = lex->loc->cur;
 
-  while (*lex->cur != '\0' && pred(lex))
+  while (*lex->loc->cur != '\0' && pred(lex))
     lexer_next(lex);
 
-  return (size_t)(lex->cur - begin);
+  return (size_t)(lex->loc->cur - begin);
 }
 
 void lexer_skip_n(lexer_t* lex, size_t n)
@@ -166,68 +154,84 @@ void lexer_skip_n(lexer_t* lex, size_t n)
 
 void lexer_read_word(lexer_t* lex)
 {
+  static struct {
+    const char* key;
+    token_kind_t value;
+  } lookup[] = {
+    { "is",       TOK_KW_IS },
+    { "as",       TOK_KW_AS },
+    { "sizeof",   TOK_KW_SIZEOF },
+    { "alignof",  TOK_KW_ALIGNOF },
+    { "typeof",   TOK_KW_TYPEOF },
+    { "in",       TOK_KW_IN },
+    { "var",      TOK_KW_VAR },
+    { "fun",      TOK_KW_FUN },
+    { "gen",      TOK_KW_GEN },
+    { "struct",   TOK_KW_STRUCT },
+    { "union",    TOK_KW_UNION },
+    { "enum",     TOK_KW_ENUM },
+    { "mod",      TOK_KW_MOD },
+    { "use",      TOK_KW_USE },
+    { "from",     TOK_KW_FROM },
+    { "if",       TOK_KW_IF },
+    { "then",     TOK_KW_THEN },
+    { "else",     TOK_KW_ELSE },
+    { "elif",     TOK_KW_ELIF },
+    { "for",      TOK_KW_FOR },
+    { "while",    TOK_KW_WHILE },
+    { "when",     TOK_KW_WHEN },
+    { "do",       TOK_KW_DO },
+    { "break",    TOK_KW_BREAK },
+    { "continue", TOK_KW_CONTINUE },
+    { "return",   TOK_KW_RETURN },
+    { "yield",    TOK_KW_YIELD },
+    { "pub",      TOK_KW_PUB },
+    { "mut",      TOK_KW_MUT },
+    { "const",    TOK_KW_CONST },
+    { "static",   TOK_KW_STATIC },
+    { "i8",       TOK_KW_I8 },
+    { "i16",      TOK_KW_I16 },
+    { "i32",      TOK_KW_I32 },
+    { "i64",      TOK_KW_I64 },
+    { "isize",    TOK_KW_ISIZE },
+    { "u8",       TOK_KW_U8 },
+    { "u16",      TOK_KW_U16 },
+    { "u32",      TOK_KW_U32 },
+    { "u64",      TOK_KW_U64 },
+    { "usize",    TOK_KW_USIZE },
+    { "f32",      TOK_KW_F32 },
+    { "f64",      TOK_KW_F64 },
+    { "bool",     TOK_KW_BOOL },
+    { "unit",     TOK_KW_UNIT },
+    { "true",     TOK_LIT_BOOL_TRUE },
+    { "false",    TOK_LIT_BOOL_FALSE },
+    { "null",     TOK_LIT_NULL },
+  };
+
   token_t* tok = lexer_token_init(lex, TOK_UNKNOWN);
 
-  char* begin = lex->cur;
+  char* begin = lex->loc->cur;
+  
   size_t len = lexer_skip(lex, lexer_is_word);
-  tok->loc.len = len;
+  tok->loc->len = len;
+  
+  char* buf = (char*)malloc((len + 1) * sizeof(char));
+  assert(buf != NULL);
 
-       if (len == 2 && strncmp(begin, "is"      , len) == 0) tok->kind = TOK_KW_IS;
-  else if (len == 2 && strncmp(begin, "as"      , len) == 0) tok->kind = TOK_KW_AS;
-  else if (len == 6 && strncmp(begin, "sizeof"  , len) == 0) tok->kind = TOK_KW_SIZEOF;
-  else if (len == 7 && strncmp(begin, "alignof" , len) == 0) tok->kind = TOK_KW_ALIGNOF;
-  else if (len == 6 && strncmp(begin, "typeof"  , len) == 0) tok->kind = TOK_KW_TYPEOF;
-  else if (len == 2 && strncmp(begin, "in"      , len) == 0) tok->kind = TOK_KW_IN;
-  else if (len == 3 && strncmp(begin, "var"     , len) == 0) tok->kind = TOK_KW_VAR;
-  else if (len == 3 && strncmp(begin, "fun"     , len) == 0) tok->kind = TOK_KW_FUN;
-  else if (len == 3 && strncmp(begin, "gen"     , len) == 0) tok->kind = TOK_KW_GEN;
-  else if (len == 6 && strncmp(begin, "struct"  , len) == 0) tok->kind = TOK_KW_STRUCT;
-  else if (len == 5 && strncmp(begin, "union"   , len) == 0) tok->kind = TOK_KW_UNION;
-  else if (len == 4 && strncmp(begin, "enum"    , len) == 0) tok->kind = TOK_KW_ENUM;
-  else if (len == 3 && strncmp(begin, "mod"     , len) == 0) tok->kind = TOK_KW_MOD;
-  else if (len == 3 && strncmp(begin, "use"     , len) == 0) tok->kind = TOK_KW_USE;
-  else if (len == 4 && strncmp(begin, "from"    , len) == 0) tok->kind = TOK_KW_FROM;
-  else if (len == 2 && strncmp(begin, "if"      , len) == 0) tok->kind = TOK_KW_IF;
-  else if (len == 4 && strncmp(begin, "then"    , len) == 0) tok->kind = TOK_KW_THEN;
-  else if (len == 4 && strncmp(begin, "else"    , len) == 0) tok->kind = TOK_KW_ELSE;
-  else if (len == 4 && strncmp(begin, "elif"    , len) == 0) tok->kind = TOK_KW_ELIF;
-  else if (len == 3 && strncmp(begin, "for"     , len) == 0) tok->kind = TOK_KW_FOR;
-  else if (len == 5 && strncmp(begin, "while"   , len) == 0) tok->kind = TOK_KW_WHILE;
-  else if (len == 4 && strncmp(begin, "when"    , len) == 0) tok->kind = TOK_KW_WHEN;
-  else if (len == 2 && strncmp(begin, "do"      , len) == 0) tok->kind = TOK_KW_DO;
-  else if (len == 5 && strncmp(begin, "break"   , len) == 0) tok->kind = TOK_KW_BREAK;
-  else if (len == 8 && strncmp(begin, "continue", len) == 0) tok->kind = TOK_KW_CONTINUE;
-  else if (len == 6 && strncmp(begin, "return"  , len) == 0) tok->kind = TOK_KW_RETURN;
-  else if (len == 5 && strncmp(begin, "yield"   , len) == 0) tok->kind = TOK_KW_YIELD;
-  else if (len == 3 && strncmp(begin, "pub"     , len) == 0) tok->kind = TOK_KW_PUB;
-  else if (len == 3 && strncmp(begin, "mut"     , len) == 0) tok->kind = TOK_KW_MUT;
-  else if (len == 5 && strncmp(begin, "const"   , len) == 0) tok->kind = TOK_KW_CONST;
-  else if (len == 6 && strncmp(begin, "static"  , len) == 0) tok->kind = TOK_KW_STATIC;
-  else if (len == 2 && strncmp(begin, "i8"      , len) == 0) tok->kind = TOK_KW_I8;
-  else if (len == 3 && strncmp(begin, "i16"     , len) == 0) tok->kind = TOK_KW_I16;
-  else if (len == 3 && strncmp(begin, "i32"     , len) == 0) tok->kind = TOK_KW_I32;
-  else if (len == 3 && strncmp(begin, "i64"     , len) == 0) tok->kind = TOK_KW_I64;
-  else if (len == 4 && strncmp(begin, "isize"   , len) == 0) tok->kind = TOK_KW_ISIZE;
-  else if (len == 2 && strncmp(begin, "u8"      , len) == 0) tok->kind = TOK_KW_U8;
-  else if (len == 3 && strncmp(begin, "u16"     , len) == 0) tok->kind = TOK_KW_U16;
-  else if (len == 3 && strncmp(begin, "u32"     , len) == 0) tok->kind = TOK_KW_U32;
-  else if (len == 3 && strncmp(begin, "u64"     , len) == 0) tok->kind = TOK_KW_U64;
-  else if (len == 5 && strncmp(begin, "usize"   , len) == 0) tok->kind = TOK_KW_USIZE;
-  else if (len == 3 && strncmp(begin, "f32"     , len) == 0) tok->kind = TOK_KW_F32;
-  else if (len == 3 && strncmp(begin, "f64"     , len) == 0) tok->kind = TOK_KW_F64;
-  else if (len == 4 && strncmp(begin, "bool"    , len) == 0) tok->kind = TOK_KW_BOOL;
-  else if (len == 4 && strncmp(begin, "unit"    , len) == 0) tok->kind = TOK_KW_UNIT;
-  else if (len == 4 && strncmp(begin, "true"    , len) == 0) tok->kind = TOK_LIT_BOOL_TRUE;
-  else if (len == 5 && strncmp(begin, "false"   , len) == 0) tok->kind = TOK_LIT_BOOL_FALSE;
-  else if (len == 4 && strncmp(begin, "null"    , len) == 0) tok->kind = TOK_LIT_NULL;
-  else
+  memcpy(buf, begin, len * sizeof(char));
+  buf[len] = '\0';
+
+  for (size_t i = 0; i < sizeof(lookup) / sizeof(lookup[0]); ++i)
+    if (strcmp(lookup[i].key, buf) == 0)
+    {
+      tok->kind = lookup[i].value;
+      break;
+    }
+
+  if (tok->kind == TOK_UNKNOWN)
   {
     tok->kind = TOK_ID;
-    tok->id.len = len;
-    tok->id.value = malloc((len + 1) * sizeof(char));
-    assert(tok->id.value != NULL);
-    memcpy(tok->id.value, lex->cur - len, len * sizeof(char));
-    tok->id.value[len] = '\0';
+    tok->id.value = buf;
   }
 
   lexer_token_push(lex, tok);
@@ -238,15 +242,15 @@ void lexer_read_octal_integer(lexer_t* lex)
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT_OCT);
 
   size_t len = lexer_skip(lex, lexer_is_octal);
-  tok->loc.len = len;
+  tok->loc->len = len;
 
   if (len == 0 || lexer_is_word(lex))
   {
-    crumb_error(&tok->loc, "Ill-formed octal integer!");
+    crumb_error(tok->loc, "Ill-formed octal integer!");
     exit(EXIT_FAILURE);
   }
 
-  tok->lit_int.value = strtoull(lex->cur - len, NULL, 8);
+  tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 8);
 
   lexer_token_push(lex, tok);
 }
@@ -256,15 +260,15 @@ void lexer_read_binary_integer(lexer_t* lex)
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT_BIN);
 
   size_t len = lexer_skip(lex, lexer_is_binary);
-  tok->loc.len = len;
+  tok->loc->len = len;
 
   if (len == 0 || lexer_is_word(lex))
   {
-    crumb_error(&tok->loc, "Ill-formed binary integer!");
+    crumb_error(tok->loc, "Ill-formed binary integer!");
     exit(EXIT_FAILURE);
   }
 
-  tok->lit_int.value = strtoull(lex->cur - len, NULL, 2);
+  tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 2);
 
   lexer_token_push(lex, tok);
 }
@@ -279,8 +283,8 @@ void lexer_read_decimal_number(lexer_t* lex)
   {
     if (!isdigit(lexer_peek(lex)))
     {
-      tok->lit_int.value = strtoull(lex->cur - len, NULL, 10);
-      tok->loc.len = len;
+      tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 10);
+      tok->loc->len = len;
       lexer_token_push(lex, tok);
 
       lexer_read_punctuation(lex);
@@ -308,12 +312,12 @@ void lexer_read_decimal_number(lexer_t* lex)
       len += lexer_skip(lex, lexer_is_decimal);
     }
 
-    tok->lit_flt.value = strtold(lex->cur - len, NULL);
-    tok->loc.len = len;
+    tok->lit_flt.value = strtold(lex->loc->cur - len, NULL);
+    tok->loc->len = len;
 
     if (lexer_is_word(lex))
     {
-      crumb_error(&tok->loc, "Ill-formed decimal float!");
+      crumb_error(tok->loc, "Ill-formed decimal float!");
       exit(EXIT_FAILURE);
     }
 
@@ -321,12 +325,12 @@ void lexer_read_decimal_number(lexer_t* lex)
   }
   else
   {
-    tok->lit_int.value = strtoull(lex->cur - len, NULL, 10);
-    tok->loc.len = len;
+    tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 10);
+    tok->loc->len = len;
 
     if (lexer_is_word(lex))
     {
-      crumb_error(&tok->loc, "Ill-formed decimal integer!");
+      crumb_error(tok->loc, "Ill-formed decimal integer!");
       exit(EXIT_FAILURE);
     }
 
@@ -344,8 +348,8 @@ void lexer_read_hexadecimal_number(lexer_t* lex)
   {
     if (!isxdigit(lexer_peek(lex)))
     {
-      tok->lit_int.value = strtoull(lex->cur - len, NULL, 16);
-      tok->loc.len = len;
+      tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 16);
+      tok->loc->len = len;
       lexer_token_push(lex, tok);
 
       lexer_read_punctuation(lex);
@@ -373,12 +377,12 @@ void lexer_read_hexadecimal_number(lexer_t* lex)
       len += lexer_skip(lex, lexer_is_hexadecimal);
     }
 
-    tok->lit_flt.value = strtold(lex->cur - len, NULL);
-    tok->loc.len = len;
+    tok->lit_flt.value = strtold(lex->loc->cur - len, NULL);
+    tok->loc->len = len;
 
     if (lexer_is_word(lex))
     {
-      crumb_error(&tok->loc, "Ill-formed hexadecimal float!");
+      crumb_error(tok->loc, "Ill-formed hexadecimal float!");
       exit(EXIT_FAILURE);
     }
 
@@ -386,12 +390,12 @@ void lexer_read_hexadecimal_number(lexer_t* lex)
   }
   else
   {
-    tok->lit_int.value = strtoull(lex->cur - len, NULL, 16);
-    tok->loc.len = len;
+    tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 16);
+    tok->loc->len = len;
 
     if (lexer_is_word(lex))
     {
-      crumb_error(&tok->loc, "Ill-formed hexadecimal integer!");
+      crumb_error(tok->loc, "Ill-formed hexadecimal integer!");
       exit(EXIT_FAILURE);
     }
 
@@ -461,7 +465,7 @@ void lexer_read_string(lexer_t* lex)
         break;
 
       default:
-        crumb_error(&tok->loc, "Illegal escape sequence in string!");
+        crumb_error(tok->loc, "Illegal escape sequence in string!");
         exit(EXIT_FAILURE);
       }
     }
@@ -469,18 +473,19 @@ void lexer_read_string(lexer_t* lex)
 
   if (ch != '"')
   {
-    crumb_error(&tok->loc, "Missing string closing quotation mark!");
+    crumb_error(tok->loc, "Missing string closing quotation mark!");
     exit(EXIT_FAILURE);
   }
 
-  tok->lit_str.value = malloc((len + 1) * sizeof(char));
-  assert(tok->lit_str.value != NULL);
+  tok->loc->len = len;
 
-  memcpy(tok->lit_str.value, lex->cur - len - 2, len * sizeof(char));
-  tok->lit_str.value[len] = '\0';
-  tok->lit_str.len = len;
+  char* buf = (char*)malloc((len + 1) * sizeof(char));
+  assert(buf != NULL);
 
-  tok->loc.len = len;
+  memcpy(buf, lex->loc->cur - len - 2, len * sizeof(char));
+  buf[len] = '\0';
+
+  tok->lit_str.value = buf;
 
   lexer_token_push(lex, tok);
 }
@@ -495,7 +500,7 @@ void lexer_read_character(lexer_t* lex)
 
   if (lexer_current(lex) == '\'')
   {
-    crumb_error(&tok->loc, "Empty character!");
+    crumb_error(tok->loc, "Empty character!");
     exit(EXIT_FAILURE);
   }
 
@@ -522,7 +527,7 @@ void lexer_read_character(lexer_t* lex)
 
       if (!isxdigit(lexer_next(lex)))
       {
-        crumb_error(&tok->loc, "Illegal character in hexadecimal byte escape sequence!");
+        crumb_error(tok->loc, "Illegal character in hexadecimal byte escape sequence!");
         exit(EXIT_FAILURE);
       }
 
@@ -535,153 +540,158 @@ void lexer_read_character(lexer_t* lex)
       break;
 
     default:
-      crumb_error(&tok->loc, "Illegal escape sequence!");
+      crumb_error(tok->loc, "Illegal escape sequence!");
       exit(EXIT_FAILURE);
     }
   }
   else
     ++len;
 
-  tok->loc.len = len;
+  tok->loc->len = len;
 
   if (lexer_next(lex) != '\'')
   {
-    crumb_error(&tok->loc, "Missing character closing apostrophe!");
+    crumb_error(tok->loc, "Missing character closing apostrophe!");
     exit(EXIT_FAILURE);
   }
 
-  tok->lit_char.value = malloc((len + 1) * sizeof(char));  
-  assert(tok->lit_char.value != NULL);
+  char* buf = (char*)malloc((len + 1) * sizeof(char));  
+  assert(buf != NULL);
 
-  memcpy(tok->lit_char.value, lex->cur - len - 2, len * sizeof(char));
-  tok->lit_char.value[len] = '\0';
-  tok->lit_char.len = len;
+  memcpy(buf, lex->loc->cur - len - 2, len * sizeof(char));
+  buf[len] = '\0';
+
+  tok->lit_char.value = buf;
 
   lexer_token_push(lex, tok);
 }
 
 void lexer_read_punctuation(lexer_t* lex)
 {
+  size_t lookup[] = { 1, 2, 2, 1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1, 2, 1, 1, 2, 3, 2, 1, 2, 3, 2, 1, 2, 1, 2, 3, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1 };
+
   token_t* tok = lexer_token_init(lex, TOK_UNKNOWN);
+  token_kind_t kind = TOK_UNKNOWN;
 
   if (lexer_consume(lex, '+'))
     if (lexer_consume(lex, '+'))
-      tok->kind = TOK_PUNCT_PLUS_PLUS;
+      kind = TOK_PUNCT_PLUS_PLUS;
     else if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_PLUS_EQUAL;
+      kind = TOK_PUNCT_PLUS_EQUAL;
     else
-      tok->kind = TOK_PUNCT_PLUS;
+      kind = TOK_PUNCT_PLUS;
   else if (lexer_consume(lex, '-'))
     if (lexer_consume(lex, '-'))
-      tok->kind = TOK_PUNCT_MINUS_MINUS;
+      kind = TOK_PUNCT_MINUS_MINUS;
     else if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_MINUS_EQUAL;
+      kind = TOK_PUNCT_MINUS_EQUAL;
     else
-      tok->kind = TOK_PUNCT_MINUS;
+      kind = TOK_PUNCT_MINUS;
   else if (lexer_consume(lex, '*'))
     if (lexer_consume(lex, '.'))
-      tok->kind = TOK_PUNCT_ASTERISK_DOT;
+      kind = TOK_PUNCT_ASTERISK_DOT;
     else if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_ASTERISK_EQUAL;
+      kind = TOK_PUNCT_ASTERISK_EQUAL;
     else
-      tok->kind = TOK_PUNCT_ASTERISK;
+      kind = TOK_PUNCT_ASTERISK;
   else if (lexer_consume(lex, '/'))
     if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_SLASH_EQUAL;
+      kind = TOK_PUNCT_SLASH_EQUAL;
     else
-      tok->kind = TOK_PUNCT_SLASH;
+      kind = TOK_PUNCT_SLASH;
   else if (lexer_consume(lex, '%'))
     if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_PERCENT_EQUAL;
+      kind = TOK_PUNCT_PERCENT_EQUAL;
     else
-      tok->kind = TOK_PUNCT_PERCENT;
+      kind = TOK_PUNCT_PERCENT;
   else if (lexer_consume(lex, '&'))
     if (lexer_consume(lex, '&'))
-      tok->kind = TOK_PUNCT_AMPERSAND_AMPERSAND;
+      kind = TOK_PUNCT_AMPERSAND_AMPERSAND;
     else if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_AMPERSAND_EQUAL;
+      kind = TOK_PUNCT_AMPERSAND_EQUAL;
     else
-      tok->kind = TOK_PUNCT_AMPERSAND;
+      kind = TOK_PUNCT_AMPERSAND;
   else if (lexer_consume(lex, '|'))
     if (lexer_consume(lex, '|'))
-      tok->kind = TOK_PUNCT_BAR_BAR;
+      kind = TOK_PUNCT_BAR_BAR;
     else if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_BAR_EQUAL;
+      kind = TOK_PUNCT_BAR_EQUAL;
     else
-      tok->kind = TOK_PUNCT_BAR;
+      kind = TOK_PUNCT_BAR;
   else if (lexer_consume(lex, '^'))
     if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_HAT_EQUAL;
+      kind = TOK_PUNCT_HAT_EQUAL;
     else
-      tok->kind = TOK_PUNCT_HAT;
+      kind = TOK_PUNCT_HAT;
   else if (lexer_consume(lex, '~'))
-    tok->kind = TOK_PUNCT_TILDE;
+    kind = TOK_PUNCT_TILDE;
   else if (lexer_consume(lex, '<'))
     if (lexer_consume(lex, '<'))
       if (lexer_consume(lex, '='))
-        tok->kind = TOK_PUNCT_LESS_LESS_EQUAL;
+        kind = TOK_PUNCT_LESS_LESS_EQUAL;
       else
-        tok->kind = TOK_PUNCT_LESS_LESS;
+        kind = TOK_PUNCT_LESS_LESS;
     else if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_LESS_EQUAL;
+      kind = TOK_PUNCT_LESS_EQUAL;
     else
-      tok->kind = TOK_PUNCT_LESS;
+      kind = TOK_PUNCT_LESS;
   else if (lexer_consume(lex, '>'))
     if (lexer_consume(lex, '>'))
       if (lexer_consume(lex, '='))
-        tok->kind = TOK_PUNCT_GREATER_GREATER_EQUAL;
+        kind = TOK_PUNCT_GREATER_GREATER_EQUAL;
       else
-        tok->kind = TOK_PUNCT_GREATER_GREATER;
+        kind = TOK_PUNCT_GREATER_GREATER;
     else if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_GREATER_EQUAL;
+      kind = TOK_PUNCT_GREATER_EQUAL;
     else
-      tok->kind = TOK_PUNCT_GREATER;
+      kind = TOK_PUNCT_GREATER;
   else if (lexer_consume(lex, '!'))
     if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_BANG_EQUAL;
+      kind = TOK_PUNCT_BANG_EQUAL;
     else
-      tok->kind = TOK_PUNCT_BANG;
+      kind = TOK_PUNCT_BANG;
   else if (lexer_consume(lex, '.'))
     if (lexer_consume(lex, '.'))
       if (lexer_consume(lex, '.'))
-        tok->kind = TOK_PUNCT_DOT_DOT_DOT;
+        kind = TOK_PUNCT_DOT_DOT_DOT;
       else
-        tok->kind = TOK_PUNCT_DOT_DOT;
+        kind = TOK_PUNCT_DOT_DOT;
     else
-      tok->kind = TOK_PUNCT_DOT;
+      kind = TOK_PUNCT_DOT;
   else if (lexer_consume(lex, '?'))
     if (lexer_consume(lex, '.'))
-      tok->kind = TOK_PUNCT_QUESTION_DOT;
+      kind = TOK_PUNCT_QUESTION_DOT;
     else
-      tok->kind = TOK_PUNCT_QUESTION;
+      kind = TOK_PUNCT_QUESTION;
   else if (lexer_consume(lex, '='))
     if (lexer_consume(lex, '='))
-      tok->kind = TOK_PUNCT_EQUAL_EQUAL;
+      kind = TOK_PUNCT_EQUAL_EQUAL;
     else
-      tok->kind = TOK_PUNCT_EQUAL;
+      kind = TOK_PUNCT_EQUAL;
   else if (lexer_consume(lex, ','))
-    tok->kind = TOK_PUNCT_COMMA;
+    kind = TOK_PUNCT_COMMA;
   else if (lexer_consume(lex, ':'))
-    tok->kind = TOK_PUNCT_COLON;
+    kind = TOK_PUNCT_COLON;
   else if (lexer_consume(lex, '('))
-    tok->kind = TOK_PUNCT_PAREN_LEFT;
+    kind = TOK_PUNCT_PAREN_LEFT;
   else if (lexer_consume(lex, ')'))
-    tok->kind = TOK_PUNCT_PAREN_RIGHT;
+    kind = TOK_PUNCT_PAREN_RIGHT;
   else if (lexer_consume(lex, '['))
-    tok->kind = TOK_PUNCT_BRACKET_LEFT;
+    kind = TOK_PUNCT_BRACKET_LEFT;
   else if (lexer_consume(lex, ']'))
-    tok->kind = TOK_PUNCT_BRACKET_RIGHT;
+    kind = TOK_PUNCT_BRACKET_RIGHT;
   else if (lexer_consume(lex, '{'))
-    tok->kind = TOK_PUNCT_BRACE_LEFT;
+    kind = TOK_PUNCT_BRACE_LEFT;
   else if (lexer_consume(lex, '}'))
-    tok->kind = TOK_PUNCT_BRACE_RIGHT;
+    kind = TOK_PUNCT_BRACE_RIGHT;
   else
   {
-    crumb_error(&tok->loc, "Unknown punctuation!");
+    crumb_error(tok->loc, "Unknown punctuation!");
     exit(EXIT_FAILURE);
   }
 
-  tok->loc.len = 1;
+  tok->kind = kind;
+  tok->loc->len = lookup[kind - TOK_PUNCT_PLUS];
 
   lexer_token_push(lex, tok);
 }
@@ -705,7 +715,7 @@ void lexer_read_next(lexer_t* lex)
   else
   {
     token_t* tok = lexer_token_init(lex, TOK_UNKNOWN);
-    crumb_error(&tok->loc, "Unexpected character!");
+    crumb_error(tok->loc, "Unexpected character!");
     exit(EXIT_FAILURE);
   }
 }

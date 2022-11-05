@@ -1,7 +1,8 @@
 #include "list.h"
 
 #include <stdlib.h>
-#include <assert.h>
+
+#include "util.h"
 
 list_elem_t* list_elem_init(void* data)
 {

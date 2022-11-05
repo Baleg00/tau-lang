@@ -1,7 +1,8 @@
 #include "ast.h"
 
 #include <stdlib.h>
-#include <assert.h>
+
+#include "util.h"
 
 ast_node_t* ast_node_init(ast_kind_t kind)
 {
@@ -186,61 +187,64 @@ const char* ast_kind_to_string(ast_kind_t kind)
 {
   switch (kind)
   {
-  case AST_UNKNOWN: return "AST_UNKNOWN";
-  case AST_ID: return "AST_ID";
-  case AST_TYPE_MUT: return "AST_TYPE_MUT";
-  case AST_TYPE_CONST: return "AST_TYPE_CONST";
-  case AST_TYPE_STATIC: return "AST_TYPE_STATIC";
-  case AST_TYPE_PTR: return "AST_TYPE_PTR";
-  case AST_TYPE_ARRAY: return "AST_TYPE_ARRAY";
-  case AST_TYPE_REF: return "AST_TYPE_REF";
-  case AST_TYPE_NULLABLE: return "AST_TYPE_NULLABLE";
-  case AST_TYPE_FUN: return "AST_TYPE_FUN";
-  case AST_TYPE_GEN: return "AST_TYPE_GEN";
-  case AST_TYPE_BUILTIN_I8: return "AST_TYPE_BUILTIN_I8";
-  case AST_TYPE_BUILTIN_I16: return "AST_TYPE_BUILTIN_I16";
-  case AST_TYPE_BUILTIN_I32: return "AST_TYPE_BUILTIN_I32";
-  case AST_TYPE_BUILTIN_I64: return "AST_TYPE_BUILTIN_I64";
+  case AST_UNKNOWN:            return "AST_UNKNOWN";
+  case AST_ID:                 return "AST_ID";
+  case AST_TYPE_MUT:           return "AST_TYPE_MUT";
+  case AST_TYPE_CONST:         return "AST_TYPE_CONST";
+  case AST_TYPE_STATIC:        return "AST_TYPE_STATIC";
+  case AST_TYPE_PTR:           return "AST_TYPE_PTR";
+  case AST_TYPE_ARRAY:         return "AST_TYPE_ARRAY";
+  case AST_TYPE_REF:           return "AST_TYPE_REF";
+  case AST_TYPE_NULLABLE:      return "AST_TYPE_NULLABLE";
+  case AST_TYPE_FUN:           return "AST_TYPE_FUN";
+  case AST_TYPE_GEN:           return "AST_TYPE_GEN";
+  case AST_TYPE_BUILTIN_I8:    return "AST_TYPE_BUILTIN_I8";
+  case AST_TYPE_BUILTIN_I16:   return "AST_TYPE_BUILTIN_I16";
+  case AST_TYPE_BUILTIN_I32:   return "AST_TYPE_BUILTIN_I32";
+  case AST_TYPE_BUILTIN_I64:   return "AST_TYPE_BUILTIN_I64";
   case AST_TYPE_BUILTIN_ISIZE: return "AST_TYPE_BUILTIN_ISIZE";
-  case AST_TYPE_BUILTIN_U8: return "AST_TYPE_BUILTIN_U8";
-  case AST_TYPE_BUILTIN_U16: return "AST_TYPE_BUILTIN_U16";
-  case AST_TYPE_BUILTIN_U32: return "AST_TYPE_BUILTIN_U32";
-  case AST_TYPE_BUILTIN_U64: return "AST_TYPE_BUILTIN_U64";
+  case AST_TYPE_BUILTIN_U8:    return "AST_TYPE_BUILTIN_U8";
+  case AST_TYPE_BUILTIN_U16:   return "AST_TYPE_BUILTIN_U16";
+  case AST_TYPE_BUILTIN_U32:   return "AST_TYPE_BUILTIN_U32";
+  case AST_TYPE_BUILTIN_U64:   return "AST_TYPE_BUILTIN_U64";
   case AST_TYPE_BUILTIN_USIZE: return "AST_TYPE_BUILTIN_USIZE";
-  case AST_TYPE_BUILTIN_F32: return "AST_TYPE_BUILTIN_F32";
-  case AST_TYPE_BUILTIN_F64: return "AST_TYPE_BUILTIN_F64";
-  case AST_TYPE_BUILTIN_BOOL: return "AST_TYPE_BUILTIN_BOOL";
-  case AST_TYPE_BUILTIN_UNIT: return "AST_TYPE_BUILTIN_UNIT";
-  case AST_EXPR_LIT_INT: return "AST_EXPR_LIT_INT";
-  case AST_EXPR_LIT_FLT: return "AST_EXPR_LIT_FLT";
-  case AST_EXPR_LIT_STR: return "AST_EXPR_LIT_STR";
-  case AST_EXPR_LIT_CHAR: return "AST_EXPR_LIT_CHAR";
-  case AST_EXPR_LIT_BOOL: return "AST_EXPR_LIT_BOOL";
-  case AST_EXPR_LIT_NULL: return "AST_EXPR_LIT_NULL";
-  case AST_EXPR_OP: return "AST_EXPR_OP";
-  case AST_EXPR_LAMBDA_FUN: return "AST_EXPR_LAMBDA_FUN";
-  case AST_EXPR_LAMBDA_GEN: return "AST_EXPR_LAMBDA_GEN";
-  case AST_STMT_IF: return "AST_STMT_IF";
-  case AST_STMT_FOR: return "AST_STMT_FOR";
-  case AST_STMT_WHILE: return "AST_STMT_WHILE";
-  case AST_STMT_WHEN: return "AST_STMT_WHEN";
-  case AST_STMT_WHEN_CASE: return "AST_STMT_WHEN_CASE";
-  case AST_STMT_RETURN: return "AST_STMT_RETURN";
-  case AST_STMT_YIELD: return "AST_STMT_YIELD";
-  case AST_STMT_BLOCK: return "AST_STMT_BLOCK";
-  case AST_STMT_EXPR: return "AST_STMT_EXPR";
-  case AST_DECL_VAR: return "AST_DECL_VAR";
-  case AST_DECL_FUN: return "AST_DECL_FUN";
-  case AST_DECL_GEN: return "AST_DECL_GEN";
-  case AST_DECL_STRUCT: return "AST_DECL_STRUCT";
-  case AST_DECL_UNION: return "AST_DECL_UNION";
-  case AST_DECL_ENUM: return "AST_DECL_ENUM";
-  case AST_DECL_MOD: return "AST_DECL_MOD";
-  case AST_DECL_MEMBER: return "AST_DECL_MEMBER";
-  case AST_ARG: return "AST_ARG";
-  case AST_PROG: return "AST_PROG";
-  default: return "";
-  }  
+  case AST_TYPE_BUILTIN_F32:   return "AST_TYPE_BUILTIN_F32";
+  case AST_TYPE_BUILTIN_F64:   return "AST_TYPE_BUILTIN_F64";
+  case AST_TYPE_BUILTIN_BOOL:  return "AST_TYPE_BUILTIN_BOOL";
+  case AST_TYPE_BUILTIN_UNIT:  return "AST_TYPE_BUILTIN_UNIT";
+  case AST_EXPR_LIT_INT:       return "AST_EXPR_LIT_INT";
+  case AST_EXPR_LIT_FLT:       return "AST_EXPR_LIT_FLT";
+  case AST_EXPR_LIT_STR:       return "AST_EXPR_LIT_STR";
+  case AST_EXPR_LIT_CHAR:      return "AST_EXPR_LIT_CHAR";
+  case AST_EXPR_LIT_BOOL:      return "AST_EXPR_LIT_BOOL";
+  case AST_EXPR_LIT_NULL:      return "AST_EXPR_LIT_NULL";
+  case AST_EXPR_OP:            return "AST_EXPR_OP";
+  case AST_EXPR_LAMBDA_FUN:    return "AST_EXPR_LAMBDA_FUN";
+  case AST_EXPR_LAMBDA_GEN:    return "AST_EXPR_LAMBDA_GEN";
+  case AST_STMT_IF:            return "AST_STMT_IF";
+  case AST_STMT_FOR:           return "AST_STMT_FOR";
+  case AST_STMT_WHILE:         return "AST_STMT_WHILE";
+  case AST_STMT_WHEN:          return "AST_STMT_WHEN";
+  case AST_STMT_WHEN_CASE:     return "AST_STMT_WHEN_CASE";
+  case AST_STMT_RETURN:        return "AST_STMT_RETURN";
+  case AST_STMT_YIELD:         return "AST_STMT_YIELD";
+  case AST_STMT_BLOCK:         return "AST_STMT_BLOCK";
+  case AST_STMT_EXPR:          return "AST_STMT_EXPR";
+  case AST_DECL_VAR:           return "AST_DECL_VAR";
+  case AST_DECL_FUN:           return "AST_DECL_FUN";
+  case AST_DECL_GEN:           return "AST_DECL_GEN";
+  case AST_DECL_STRUCT:        return "AST_DECL_STRUCT";
+  case AST_DECL_UNION:         return "AST_DECL_UNION";
+  case AST_DECL_ENUM:          return "AST_DECL_ENUM";
+  case AST_DECL_MOD:           return "AST_DECL_MOD";
+  case AST_DECL_MEMBER:        return "AST_DECL_MEMBER";
+  case AST_ARG:                return "AST_ARG";
+  case AST_PROG:               return "AST_PROG";
+  }
+
+  unreachable();
+
+  return NULL;
 }
 
 void ast_list_json_dump(FILE* stream, list_t* list)
@@ -489,7 +493,7 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     ast_list_json_dump(stream, root->prog.decls);
     break;
   default:
-    assert(false);
+    unreachable();
   }
 
   fputc('}', stream);

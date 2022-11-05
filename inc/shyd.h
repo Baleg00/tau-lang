@@ -19,6 +19,7 @@ typedef struct shyd_elem_s
 {
   shyd_kind_t kind;
   token_t* tok;
+  ast_node_t* node;
   op_kind_t op;
 } shyd_elem_t;
 

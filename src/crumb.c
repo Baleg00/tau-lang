@@ -7,9 +7,9 @@
 
 static FILE* crumb_global_file = NULL;
 
-void crumb_log(crumb_kind_t kind, const location_t* loc, const char* fmt, ...)
+void crumb_log(crumb_kind_t kind, location_t* loc, const char* fmt, ...)
 {
-  fprintf(crumb_global_file, "[" ESC_FG_BRIGHT_BLACK "%s:%zu:%zu" ESC_RESET "]\n", loc->filepath, loc->row + 1, loc->col + 1);
+  fprintf(crumb_global_file, "[" ESC_FG_BRIGHT_BLACK "%s:%zu:%zu" ESC_RESET "]\n", loc->path, loc->row + 1, loc->col + 1);
 
   const char *line_begin = loc->cur, *line_end = loc->cur;
 

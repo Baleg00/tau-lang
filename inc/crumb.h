@@ -12,7 +12,7 @@ typedef enum crumb_kind_e
   CRUMB_ERROR
 } crumb_kind_t;
 
-void crumb_log(crumb_kind_t kind, const location_t* loc, const char* fmt, ...);
+void crumb_log(crumb_kind_t kind, location_t* loc, const char* fmt, ...);
 
 void crumb_set_file(FILE* file);
 FILE* crumb_get_file(void);
