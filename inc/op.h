@@ -1,7 +1,9 @@
 #ifndef TAU_OP_H
 #define TAU_OP_H
 
-typedef enum op_kind_e
+#include "forward_decls.h"
+
+enum op_kind_e
 {
   OP_IS, // "is" operation type check
   OP_AS, // "as" operation type cast
@@ -61,7 +63,7 @@ typedef enum op_kind_e
   OP_RANGE, // ".." operation generate range
   OP_COMMA, // "," operation comma
   OP_CALL, // "()" operation function call
-} op_kind_t;
+};
 
 const char* op_kind_to_string(op_kind_t kind);
 int op_precedence(op_kind_t kind);

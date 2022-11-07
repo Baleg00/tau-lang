@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 #include "util.h"
+#include "list.h"
+#include "location.h"
 
 token_t* token_init(void)
 {

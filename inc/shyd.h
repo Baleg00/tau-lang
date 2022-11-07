@@ -3,9 +3,7 @@
 
 #include <stdbool.h>
 
-#include "parser.h"
-#include "stack.h"
-#include "queue.h"
+#include "forward_decls.h"
 
 typedef enum shyd_kind_e
 {

@@ -2,9 +2,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "util.h"
+#include "queue.h"
 
 cli_t* cli_init(cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count)
 {

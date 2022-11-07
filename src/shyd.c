@@ -2,6 +2,10 @@
 
 #include "util.h"
 #include "crumb.h"
+#include "op.h"
+#include "parser.h"
+#include "stack.h"
+#include "queue.h"
 
 shyd_elem_t* shyd_elem_init(parser_t* par, shyd_kind_t kind)
 {

@@ -1,9 +1,9 @@
 #ifndef TAU_QUEUE_H
 #define TAU_QUEUE_H
 
-#include "list.h"
+#include <stdbool.h>
 
-typedef list_t queue_t;
+#include "forward_decls.h"
 
 queue_t* queue_init(void);
 void queue_free(queue_t* que);

@@ -1,9 +1,9 @@
 #ifndef TAU_STACK_H
 #define TAU_STACK_H
 
-#include "list.h"
+#include <stdbool.h>
 
-typedef list_t stack_t;
+#include "forward_decls.h"
 
 stack_t* stack_init(void);
 void stack_free(stack_t* stack);

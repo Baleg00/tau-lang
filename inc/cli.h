@@ -2,23 +2,17 @@
 #define TAU_CLI_H
 
 #include <stddef.h>
-#include <stdbool.h>
 
-#include "queue.h"
+#include "forward_decls.h"
 
-typedef enum cli_type_e
+enum cli_type_e
 {
   CLI_TYPE_INTEGER,
   CLI_TYPE_FLOAT,
   CLI_TYPE_BOOLEAN,
   CLI_TYPE_STRING,
   CLI_TYPE_SINK,
-} cli_type_t;
-
-typedef struct cli_s cli_t;
-typedef struct cli_opt_s cli_opt_t;
-
-typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, void*);
+};
 
 struct cli_opt_s
 {

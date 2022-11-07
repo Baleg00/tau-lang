@@ -1,5 +1,7 @@
 #include "stack.h"
 
+#include "list.h"
+
 stack_t* stack_init(void)
 {
   return (stack_t*)list_init();

@@ -5,11 +5,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "token.h"
-#include "op.h"
-#include "list.h"
+#include "forward_decls.h"
 
-typedef enum ast_kind_e
+enum ast_kind_e
 {
   AST_UNKNOWN = 0, // unknown node
 
@@ -73,9 +71,9 @@ typedef enum ast_kind_e
   AST_ARG, // function/generator argument
 
   AST_PROG, // program
-} ast_kind_t;
+};
 
-typedef struct ast_node_s
+struct ast_node_s
 {
   ast_kind_t kind;
   
@@ -83,7 +81,7 @@ typedef struct ast_node_s
 
   union {
     struct {
-      struct ast_node_s* base_type;
+      ast_node_t* base_type;
     } type_mut,
       type_const,
       type_static,
@@ -92,12 +90,12 @@ typedef struct ast_node_s
       type_nullable;
 
     struct {
-      struct ast_node_s *size, *base_type;
+      ast_node_t *size, *base_type;
     } type_array;
 
     struct {
       list_t* args;
-      struct ast_node_s *ret_type;
+      ast_node_t *ret_type;
     } type_fun,
       type_gen;
 
@@ -108,33 +106,33 @@ typedef struct ast_node_s
 
     struct {
       list_t* args;
-      struct ast_node_s *ret_type, *stmt;
+      ast_node_t *ret_type, *stmt;
     } expr_lambda_fun,
       expr_lambda_gen;
 
     struct {
-      struct ast_node_s *cond, *stmt, *stmt_else;
+      ast_node_t *cond, *stmt, *stmt_else;
     } stmt_if;
 
     struct {
-      struct ast_node_s *var, *range, *stmt;
+      ast_node_t *var, *range, *stmt;
     } stmt_for;
 
     struct {
-      struct ast_node_s *cond, *stmt;
+      ast_node_t *cond, *stmt;
     } stmt_while;
 
     struct {
-      struct ast_node_s *expr;
+      ast_node_t *expr;
       list_t* cases;
     } stmt_when;
 
     struct {
-      struct ast_node_s *cond, *stmt;
+      ast_node_t *cond, *stmt;
     } stmt_when_case;
 
     struct {
-      struct ast_node_s* expr;
+      ast_node_t* expr;
     } stmt_return,
       stmt_yield,
       stmt_expr;
@@ -144,17 +142,17 @@ typedef struct ast_node_s
     } stmt_block;
 
     struct {
-      struct ast_node_s *id, *type, *init;
+      ast_node_t *id, *type, *init;
     } decl_var;
 
     struct {
       list_t* args;
-      struct ast_node_s *id, *ret_type, *stmt;
+      ast_node_t *id, *ret_type, *stmt;
     } decl_fun,
       decl_gen;
 
     struct {
-      struct ast_node_s *id;
+      ast_node_t *id;
       list_t* members;
     } decl_struct,
       decl_union,
@@ -162,19 +160,19 @@ typedef struct ast_node_s
       decl_mod;
 
     struct {
-      struct ast_node_s *decl;
+      ast_node_t *decl;
       bool is_pub;
     } decl_member;
 
     struct {
-      struct ast_node_s *id, *type;
+      ast_node_t *id, *type;
     } arg;
 
     struct {
       list_t* decls;
     } prog;
   };
-} ast_node_t;
+};
 
 ast_node_t* ast_node_init(ast_kind_t kind);
 void ast_node_free(ast_node_t* node);
