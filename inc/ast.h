@@ -15,7 +15,6 @@ enum ast_kind_e
 
   AST_TYPE_MUT, // mutable type
   AST_TYPE_CONST, // compile time type
-  AST_TYPE_STATIC, // static storage type
   AST_TYPE_PTR, // pointer type
   AST_TYPE_ARRAY, // array type
   AST_TYPE_REF, // reference type
@@ -44,14 +43,10 @@ enum ast_kind_e
   AST_EXPR_LIT_BOOL, // expression literal boolean
   AST_EXPR_LIT_NULL, // expression literal null
   AST_EXPR_OP, // expression operation
-  AST_EXPR_LAMBDA_FUN, // expression lambda function
-  AST_EXPR_LAMBDA_GEN, // expression lambda generator
   
   AST_STMT_IF, // statement if
   AST_STMT_FOR, // statement for
   AST_STMT_WHILE, // statement while
-  AST_STMT_WHEN, // statement when
-  AST_STMT_WHEN_CASE, // statement when case
   AST_STMT_BREAK, // statement break
   AST_STMT_CONTINUE, // statement continue
   AST_STMT_RETURN, // statement return
@@ -68,7 +63,7 @@ enum ast_kind_e
   AST_DECL_MOD, // declaration module
   AST_DECL_MEMBER, // declaration member
 
-  AST_ARG, // function/generator argument
+  AST_PARAM, // function/generator parameter
 
   AST_PROG, // program
 };
@@ -84,7 +79,6 @@ struct ast_node_s
       ast_node_t* base_type;
     } type_mut,
       type_const,
-      type_static,
       type_ptr,
       type_ref,
       type_nullable;
@@ -94,21 +88,15 @@ struct ast_node_s
     } type_array;
 
     struct {
-      list_t* args;
+      list_t* params;
       ast_node_t *ret_type;
     } type_fun,
       type_gen;
 
     struct {
       op_kind_t kind;
-      list_t* args;
+      list_t* params;
     } expr_op;
-
-    struct {
-      list_t* args;
-      ast_node_t *ret_type, *stmt;
-    } expr_lambda_fun,
-      expr_lambda_gen;
 
     struct {
       ast_node_t *cond, *stmt, *stmt_else;
@@ -121,15 +109,6 @@ struct ast_node_s
     struct {
       ast_node_t *cond, *stmt;
     } stmt_while;
-
-    struct {
-      ast_node_t *expr;
-      list_t* cases;
-    } stmt_when;
-
-    struct {
-      ast_node_t *cond, *stmt;
-    } stmt_when_case;
 
     struct {
       ast_node_t* expr;
@@ -146,7 +125,7 @@ struct ast_node_s
     } decl_var;
 
     struct {
-      list_t* args;
+      list_t* params;
       ast_node_t *id, *ret_type, *stmt;
     } decl_fun,
       decl_gen;
@@ -161,12 +140,11 @@ struct ast_node_s
 
     struct {
       ast_node_t *decl;
-      bool is_pub;
     } decl_member;
 
     struct {
       ast_node_t *id, *type;
-    } arg;
+    } param;
 
     struct {
       list_t* decls;

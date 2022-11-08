@@ -3,7 +3,10 @@
 #include "util.h"
 #include "crumb.h"
 #include "op.h"
+#include "token.h"
+#include "ast.h"
 #include "parser.h"
+#include "list.h"
 #include "stack.h"
 #include "queue.h"
 
@@ -264,21 +267,20 @@ ast_node_t* shyd_to_ast(parser_t* par)
         kind = AST_EXPR_LIT_INT;
         break;
       case TOK_LIT_FLT_DEC:
-      case TOK_LIT_FLT_HEX:
-        kind = AST_EXPR_LIT_INT;
+        kind = AST_EXPR_LIT_FLT;
         break;
       case TOK_LIT_STR:
-        kind = AST_EXPR_LIT_INT;
+        kind = AST_EXPR_LIT_STR;
         break;
       case TOK_LIT_CHAR:
-        kind = AST_EXPR_LIT_INT;
+        kind = AST_EXPR_LIT_CHAR;
         break;
       case TOK_LIT_BOOL_TRUE:
       case TOK_LIT_BOOL_FALSE:
-        kind = AST_EXPR_LIT_INT;
+        kind = AST_EXPR_LIT_BOOL;
         break;
       case TOK_LIT_NULL:
-        kind = AST_EXPR_LIT_INT;
+        kind = AST_EXPR_LIT_NULL;
         break;
       default:
         crumb_error(elem->tok->loc, "Unexpected token! Expected term!");
@@ -295,7 +297,7 @@ ast_node_t* shyd_to_ast(parser_t* par)
       ast_node_t* node = ast_node_init(AST_EXPR_OP);
       node->tok = elem->tok;
       node->expr_op.kind = elem->op;
-      node->expr_op.args = list_init();
+      node->expr_op.params = list_init();
 
       switch (elem->op)
       {
@@ -303,7 +305,7 @@ ast_node_t* shyd_to_ast(parser_t* par)
       case OP_AS:
       case OP_SIZEOF:
       case OP_ALIGNOF:
-        list_push_back(node->expr_op.args, elem->node);
+        list_push_back(node->expr_op.params, elem->node);
       case OP_TYPEOF:
       case OP_ARIT_INC_PRE:
       case OP_ARIT_INC_POST:
@@ -321,7 +323,7 @@ ast_node_t* shyd_to_ast(parser_t* par)
           exit(EXIT_FAILURE);
         }
         
-        list_push_front(node->expr_op.args, stack_pop(node_stack));
+        list_push_front(node->expr_op.params, stack_pop(node_stack));
         break;
       
       case OP_IN:
@@ -366,7 +368,7 @@ ast_node_t* shyd_to_ast(parser_t* par)
           exit(EXIT_FAILURE);
         }
 
-        list_push_front(node->expr_op.args, stack_pop(node_stack));
+        list_push_front(node->expr_op.params, stack_pop(node_stack));
         
         if (stack_empty(node_stack))
         {
@@ -374,7 +376,7 @@ ast_node_t* shyd_to_ast(parser_t* par)
           exit(EXIT_FAILURE);
         }
 
-        list_push_front(node->expr_op.args, stack_pop(node_stack));
+        list_push_front(node->expr_op.params, stack_pop(node_stack));
         break;
 
       case OP_CALL: break; // TODO

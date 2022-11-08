@@ -8,6 +8,8 @@
 #include "crumb.h"
 #include "cli.h"
 
+#include "token.h"
+#include "ast.h"
 #include "lexer.h"
 #include "parser.h"
 

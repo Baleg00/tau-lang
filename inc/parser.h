@@ -3,15 +3,13 @@
 
 #include <stdbool.h>
 
-#include "ast.h"
-#include "token.h"
-#include "list.h"
+#include "forward_decls.h"
 
-typedef struct parser_s
+struct parser_s
 {
   ast_node_t* root;
   list_t* toks;
-} parser_t;
+};
 
 parser_t* parser_init(list_t* toks);
 void parser_free(parser_t* par);
@@ -29,30 +27,24 @@ list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, ast_nod
 
 ast_node_t* parser_parse_id(parser_t* par);
 
-ast_node_t* parser_parse_arg(parser_t* par);
+ast_node_t* parser_parse_param(parser_t* par);
 
 ast_node_t* parser_parse_type_mut(parser_t* par);
 ast_node_t* parser_parse_type_const(parser_t* par);
-ast_node_t* parser_parse_type_static(parser_t* par);
 ast_node_t* parser_parse_type_ptr(parser_t* par);
 ast_node_t* parser_parse_type_array(parser_t* par);
 ast_node_t* parser_parse_type_ref(parser_t* par);
 ast_node_t* parser_parse_type_nullable(parser_t* par);
 ast_node_t* parser_parse_type_fun(parser_t* par);
 ast_node_t* parser_parse_type_gen(parser_t* par);
-ast_node_t* parser_parse_type_id(parser_t* par);
 ast_node_t* parser_parse_type(parser_t* par);
 
-ast_node_t* parser_parse_expr_lambda_fun(parser_t* par);
-ast_node_t* parser_parse_expr_lambda_gen(parser_t* par);
 ast_node_t* parser_parse_expr(parser_t* par);
 
 ast_node_t* parser_parse_stmt_if(parser_t* par);
 ast_node_t* parser_parse_stmt_for_var(parser_t* par);
 ast_node_t* parser_parse_stmt_for(parser_t* par);
 ast_node_t* parser_parse_stmt_while(parser_t* par);
-ast_node_t* parser_parse_stmt_when(parser_t* par);
-ast_node_t* parser_parse_stmt_when_case(parser_t* par);
 ast_node_t* parser_parse_stmt_break(parser_t* par);
 ast_node_t* parser_parse_stmt_continue(parser_t* par);
 ast_node_t* parser_parse_stmt_return(parser_t* par);

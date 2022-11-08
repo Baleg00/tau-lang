@@ -18,7 +18,6 @@ enum token_kind_e
   TOK_LIT_INT_OCT, // literal integer octal
   TOK_LIT_INT_BIN, // literal integer binary
   TOK_LIT_FLT_DEC, // literal float decimal
-  TOK_LIT_FLT_HEX, // literal float hexadecimal
   TOK_LIT_STR, // literal string
   TOK_LIT_CHAR, // literal character
   TOK_LIT_BOOL_TRUE, // literal boolean true
@@ -31,7 +30,6 @@ enum token_kind_e
   TOK_KW_ALIGNOF, // keyword "alignof"
   TOK_KW_TYPEOF, // keyword "typeof"
   TOK_KW_IN, // keyword "in"
-  TOK_KW_VAR, // keyword "var"
   TOK_KW_FUN, // keyword "fun"
   TOK_KW_GEN, // keyword "gen"
   TOK_KW_STRUCT, // keyword "struct"
@@ -39,23 +37,18 @@ enum token_kind_e
   TOK_KW_ENUM, // keyword "enum"
   TOK_KW_MOD, // keyword "mod"
   TOK_KW_USE, // keyword "use"
-  TOK_KW_FROM, // keyword "from"
   TOK_KW_IF, // keyword "if"
   TOK_KW_THEN, // keyword "then"
   TOK_KW_ELSE, // keyword "else"
-  TOK_KW_ELIF, // keyword "elif"
   TOK_KW_FOR, // keyword "for"
   TOK_KW_WHILE, // keyword "while"
-  TOK_KW_WHEN, // keyword "when"
   TOK_KW_DO, // keyword "do"
   TOK_KW_BREAK, // keyword "break"
   TOK_KW_CONTINUE, // keyword "continue"
   TOK_KW_RETURN, // keyword "return"
   TOK_KW_YIELD, // keyword "yield"
-  TOK_KW_PUB, // keyword "pub"
   TOK_KW_MUT, // keyword "mut"
   TOK_KW_CONST, // keyword "const"
-  TOK_KW_STATIC, // keyword "static"
   TOK_KW_I8, // keyword "i8"
   TOK_KW_I16, // keyword "i16"
   TOK_KW_I32, // keyword "i32"
@@ -105,7 +98,6 @@ enum token_kind_e
   TOK_PUNCT_BANG_EQUAL, // punctuation "!="
   TOK_PUNCT_DOT, // punctuation "."
   TOK_PUNCT_DOT_DOT, // punctuation ".."
-  TOK_PUNCT_DOT_DOT_DOT, // punctuation "..."
   TOK_PUNCT_QUESTION, // punctuation "?"
   TOK_PUNCT_QUESTION_DOT, // punctuation "?."
   TOK_PUNCT_EQUAL, // punctuation "="

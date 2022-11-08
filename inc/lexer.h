@@ -2,15 +2,15 @@
 #define TAU_LEXER_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
-#include "list.h"
-#include "token.h"
+#include "forward_decls.h"
 
-typedef struct lexer_s
+struct lexer_s
 {
   location_t* loc;
   list_t* toks;
-} lexer_t;
+};
 
 lexer_t* lexer_init(const char* path);
 void lexer_free(lexer_t* lex);
@@ -40,7 +40,7 @@ void lexer_read_word(lexer_t* lex);
 void lexer_read_octal_integer(lexer_t* lex);
 void lexer_read_binary_integer(lexer_t* lex);
 void lexer_read_decimal_number(lexer_t* lex);
-void lexer_read_hexadecimal_number(lexer_t* lex);
+void lexer_read_hexadecimal_integer(lexer_t* lex);
 void lexer_read_number(lexer_t* lex);
 void lexer_read_string(lexer_t* lex);
 void lexer_read_character(lexer_t* lex);

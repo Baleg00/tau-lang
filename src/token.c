@@ -42,7 +42,6 @@ void token_list_json_dump(FILE* stream, list_t* list)
         fprintf(stream, "%llu", tok->lit_int.value);
         break;
       case TOK_LIT_FLT_DEC:
-      case TOK_LIT_FLT_HEX:
         fprintf(stream, "%lf", tok->lit_flt.value);
         break;
       case TOK_ID:
@@ -82,7 +81,6 @@ const char* token_kind_to_string(token_kind_t kind)
     case TOK_LIT_INT_OCT:                 return "TOK_LIT_INT_OCT";
     case TOK_LIT_INT_BIN:                 return "TOK_LIT_INT_BIN";
     case TOK_LIT_FLT_DEC:                 return "TOK_LIT_FLT_DEC";
-    case TOK_LIT_FLT_HEX:                 return "TOK_LIT_FLT_HEX";
     case TOK_LIT_STR:                     return "TOK_LIT_STR";
     case TOK_LIT_CHAR:                    return "TOK_LIT_CHAR";
     case TOK_LIT_BOOL_TRUE:               return "TOK_LIT_BOOL_TRUE";
@@ -94,7 +92,6 @@ const char* token_kind_to_string(token_kind_t kind)
     case TOK_KW_ALIGNOF:                  return "TOK_KW_ALIGNOF";
     case TOK_KW_TYPEOF:                   return "TOK_KW_TYPEOF";
     case TOK_KW_IN:                       return "TOK_KW_IN";
-    case TOK_KW_VAR:                      return "TOK_KW_VAR";
     case TOK_KW_FUN:                      return "TOK_KW_FUN";
     case TOK_KW_GEN:                      return "TOK_KW_GEN";
     case TOK_KW_STRUCT:                   return "TOK_KW_STRUCT";
@@ -102,23 +99,18 @@ const char* token_kind_to_string(token_kind_t kind)
     case TOK_KW_ENUM:                     return "TOK_KW_ENUM";
     case TOK_KW_MOD:                      return "TOK_KW_MOD";
     case TOK_KW_USE:                      return "TOK_KW_USE";
-    case TOK_KW_FROM:                     return "TOK_KW_FROM";
     case TOK_KW_IF:                       return "TOK_KW_IF";
     case TOK_KW_THEN:                     return "TOK_KW_THEN";
     case TOK_KW_ELSE:                     return "TOK_KW_ELSE";
-    case TOK_KW_ELIF:                     return "TOK_KW_ELIF";
     case TOK_KW_FOR:                      return "TOK_KW_FOR";
     case TOK_KW_WHILE:                    return "TOK_KW_WHILE";
-    case TOK_KW_WHEN:                     return "TOK_KW_WHEN";
     case TOK_KW_DO:                       return "TOK_KW_DO";
     case TOK_KW_BREAK:                    return "TOK_KW_BREAK";
     case TOK_KW_CONTINUE:                 return "TOK_KW_CONTINUE";
     case TOK_KW_RETURN:                   return "TOK_KW_RETURN";
     case TOK_KW_YIELD:                    return "TOK_KW_YIELD";
-    case TOK_KW_PUB:                      return "TOK_KW_PUB";
     case TOK_KW_MUT:                      return "TOK_KW_MUT";
     case TOK_KW_CONST:                    return "TOK_KW_CONST";
-    case TOK_KW_STATIC:                   return "TOK_KW_STATIC";
     case TOK_KW_I8:                       return "TOK_KW_I8";
     case TOK_KW_I16:                      return "TOK_KW_I16";
     case TOK_KW_I32:                      return "TOK_KW_I32";
@@ -167,7 +159,6 @@ const char* token_kind_to_string(token_kind_t kind)
     case TOK_PUNCT_BANG_EQUAL:            return "TOK_PUNCT_BANG_EQUAL";
     case TOK_PUNCT_DOT:                   return "TOK_PUNCT_DOT";
     case TOK_PUNCT_DOT_DOT:               return "TOK_PUNCT_DOT_DOT";
-    case TOK_PUNCT_DOT_DOT_DOT:           return "TOK_PUNCT_DOT_DOT_DOT";
     case TOK_PUNCT_QUESTION:              return "TOK_PUNCT_QUESTION";
     case TOK_PUNCT_QUESTION_DOT:          return "TOK_PUNCT_QUESTION_DOT";
     case TOK_PUNCT_EQUAL:                 return "TOK_PUNCT_EQUAL";
@@ -199,12 +190,12 @@ bool token_is_literal_integer(token_t* tok)
 
 bool token_is_literal_float(token_t* tok)
 {
-  return TOK_LIT_FLT_DEC == tok->kind || TOK_LIT_FLT_HEX == tok->kind;
+  return TOK_LIT_FLT_DEC == tok->kind;
 }
 
 bool token_is_keyword(token_t* tok)
 {
-  return TOK_KW_IS <= tok->kind && TOK_KW_STATIC >= tok->kind;
+  return TOK_KW_IS <= tok->kind && TOK_KW_UNIT >= tok->kind;
 }
 
 bool token_is_punctuation(token_t* tok)
