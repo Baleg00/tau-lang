@@ -247,7 +247,7 @@ ast_node_t* parser_parse_type(parser_t* par)
 
 ast_node_t* parser_parse_expr(parser_t* par)
 {
-  return shyd_to_ast(par);
+  return shyd_ast(par);
 }
 
 ast_node_t* parser_parse_stmt_if(parser_t* par)

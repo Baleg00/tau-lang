@@ -5,6 +5,8 @@
 
 enum op_kind_e
 {
+  OP_UNKNOWN, // unknown operation
+
   OP_IS, // "is" operation type check
   OP_AS, // "as" operation type cast
   OP_SIZEOF, // "sizeof" operation size of expression type
