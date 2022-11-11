@@ -23,7 +23,6 @@ typedef struct type_s type_t;
 typedef enum ast_kind_e ast_kind_t;
 typedef struct ast_node_s ast_node_t;
 
-typedef struct symbol_kind_e symbol_kind_t;
 typedef struct symbol_s symbol_t;
 
 typedef struct symtable_s symtable_t;
@@ -31,5 +30,7 @@ typedef struct symtable_s symtable_t;
 typedef struct lexer_s lexer_t;
 
 typedef struct parser_s parser_t;
+
+typedef struct analyzer_s analyzer_t;
 
 #endif

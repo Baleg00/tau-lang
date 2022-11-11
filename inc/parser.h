@@ -29,6 +29,10 @@ ast_node_t* parser_parse_id(parser_t* par);
 
 ast_node_t* parser_parse_param(parser_t* par);
 
+ast_node_t* parser_parse_loop_var(parser_t* par);
+
+ast_node_t* parser_parse_enumerator(parser_t* par);
+
 ast_node_t* parser_parse_type_mut(parser_t* par);
 ast_node_t* parser_parse_type_const(parser_t* par);
 ast_node_t* parser_parse_type_ptr(parser_t* par);
@@ -42,7 +46,6 @@ ast_node_t* parser_parse_type(parser_t* par);
 ast_node_t* parser_parse_expr(parser_t* par);
 
 ast_node_t* parser_parse_stmt_if(parser_t* par);
-ast_node_t* parser_parse_stmt_for_var(parser_t* par);
 ast_node_t* parser_parse_stmt_for(parser_t* par);
 ast_node_t* parser_parse_stmt_while(parser_t* par);
 ast_node_t* parser_parse_stmt_break(parser_t* par);

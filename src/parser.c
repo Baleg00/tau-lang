@@ -134,6 +134,22 @@ ast_node_t* parser_parse_param(parser_t* par)
   return node;
 }
 
+ast_node_t* parser_parse_loop_var(parser_t* par)
+{
+  ast_node_t* node = parser_node_init(par, AST_LOOP_VAR);
+  node->loop_var.id = parser_parse_id(par);
+  parser_expect(par, TOK_PUNCT_COLON);
+  node->loop_var.type = parser_parse_type(par);
+  return node;
+}
+
+ast_node_t* parser_parse_enumerator(parser_t* par)
+{
+  ast_node_t* node = parser_node_init(par, AST_ENUMERATOR);
+  node->enumerator.id = parser_parse_id(par);
+  return node;
+}
+
 ast_node_t* parser_parse_type_mut(parser_t* par)
 {
   ast_node_t* node = parser_node_init(par, AST_TYPE_MUT);
@@ -261,20 +277,11 @@ ast_node_t* parser_parse_stmt_if(parser_t* par)
   return node;
 }
 
-ast_node_t* parser_parse_stmt_for_var(parser_t* par)
-{
-  ast_node_t* node = parser_node_init(par, AST_DECL_VAR);
-  node->decl_var.id = parser_parse_id(par);
-  node->decl_var.type = parser_consume(par, TOK_PUNCT_COLON) ? parser_parse_type(par) : NULL;
-  node->decl_var.init = NULL;
-  return node;
-}
-
 ast_node_t* parser_parse_stmt_for(parser_t* par)
 {
   ast_node_t* node = parser_node_init(par, AST_STMT_FOR);
   parser_expect(par, TOK_KW_FOR);
-  node->stmt_for.var = parser_parse_stmt_for_var(par);
+  node->stmt_for.var = parser_parse_loop_var(par);
   parser_expect(par, TOK_KW_IN);
   node->stmt_for.range = parser_parse_expr(par);
   parser_expect(par, TOK_KW_DO);
@@ -426,7 +433,7 @@ ast_node_t* parser_parse_decl_enum(parser_t* par)
   parser_expect(par, TOK_KW_ENUM);
   node->decl_enum.id = parser_parse_id(par);
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
-  node->decl_enum.members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_id);
+  node->decl_enum.members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_enumerator);
   return node;
 }
 

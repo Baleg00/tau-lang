@@ -154,6 +154,13 @@ void ast_node_free(ast_node_t* node)
     ast_node_free(node->param.id);
     ast_node_free(node->param.type);
     break;
+  case AST_LOOP_VAR:
+    ast_node_free(node->loop_var.id);
+    ast_node_free(node->loop_var.type);
+    break;
+  case AST_ENUMERATOR:
+    ast_node_free(node->enumerator.id);
+    break;
   case AST_PROG:
     list_for_each(node->prog.decls, ast_node_free);
     list_free(node->prog.decls);
@@ -215,10 +222,11 @@ const char* ast_kind_to_string(ast_kind_t kind)
   case AST_DECL_MOD:           return "AST_DECL_MOD";
   case AST_DECL_MEMBER:        return "AST_DECL_MEMBER";
   case AST_PARAM:              return "AST_PARAM";
+  case AST_LOOP_VAR:           return "AST_LOOP_VAR";
+  case AST_ENUMERATOR:         return "AST_ENUMERATOR";
   case AST_PROG:               return "AST_PROG";
+  default: unreachable();
   }
-
-  unreachable();
 
   return NULL;
 }
@@ -430,6 +438,16 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     ast_json_dump(stream, root->param.id);
     fprintf(stream, ",\"type\":");
     ast_json_dump(stream, root->param.type);
+    break;
+  case AST_LOOP_VAR:
+    fprintf(stream, ",\"id\":");
+    ast_json_dump(stream, root->loop_var.id);
+    fprintf(stream, ",\"type\":");
+    ast_json_dump(stream, root->loop_var.type);
+    break;
+  case AST_ENUMERATOR:
+    fprintf(stream, ",\"id\":");
+    ast_json_dump(stream, root->enumerator.id);
     break;
   case AST_PROG:
     fprintf(stream, ",\"decls\":");

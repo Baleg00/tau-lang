@@ -12,6 +12,7 @@
 #include "ast.h"
 #include "lexer.h"
 #include "parser.h"
+#include "analzyer.h"
 
 #define MAX_INPUT_FILES 32
 
@@ -137,6 +138,10 @@ int main(int argc, char *argv[])
       free(ast_path);
     }
 
+    analyzer_t* analyzer = analyzer_init();
+    analyzer_analyze(analyzer, par->root);
+
+    analyzer_free(analyzer);
     parser_free(par);
     lexer_free(lex);
   }

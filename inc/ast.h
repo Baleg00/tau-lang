@@ -65,6 +65,10 @@ enum ast_kind_e
 
   AST_PARAM, // function/generator parameter
 
+  AST_LOOP_VAR, // loop variable
+
+  AST_ENUMERATOR, // enumerator
+
   AST_PROG, // program
 };
 
@@ -144,7 +148,12 @@ struct ast_node_s
 
     struct {
       ast_node_t *id, *type;
-    } param;
+    } param,
+      loop_var;
+
+    struct {
+      ast_node_t* id;
+    } enumerator;
 
     struct {
       list_t* decls;

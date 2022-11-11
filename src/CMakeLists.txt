@@ -8,6 +8,9 @@ add_executable(${PROJECT_NAME}
   ast.c
   shyd.c
   parser.c
+  symbol.c
+  symtable.c
+  analzyer.c
 
   file.c
   cli.c
