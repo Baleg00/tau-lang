@@ -5,6 +5,7 @@
 #include "util.h"
 #include "list.h"
 #include "location.h"
+#include "memtrace.h"
 
 token_t* token_init(void)
 {
@@ -15,6 +16,19 @@ token_t* token_init(void)
 
 void token_free(token_t* tok)
 {
+  switch (tok->kind)
+  {
+  case TOK_ID:
+    free(tok->id.value);
+    break;
+  case TOK_LIT_STR:
+    free(tok->lit_str.value);
+    break;
+  case TOK_LIT_CHAR:
+    free(tok->lit_char.value);
+    break;
+  }
+
   location_free(tok->loc);
   free(tok);
 }

@@ -11,6 +11,7 @@
 #include "crumb.h"
 #include "list.h"
 #include "token.h"
+#include "memtrace.h"
 
 lexer_t* lexer_init(const char* path)
 {
@@ -37,6 +38,8 @@ void lexer_free(lexer_t* lex)
 {
   list_for_each(lex->toks, token_free);
   list_free(lex->toks);
+  free(lex->loc->src);
+  location_free(lex->loc);
   free(lex);
 }
 

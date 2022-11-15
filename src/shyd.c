@@ -9,6 +9,7 @@
 #include "list.h"
 #include "stack.h"
 #include "queue.h"
+#include "memtrace.h"
 
 shyd_elem_t* shyd_elem_init(parser_t* par, shyd_kind_t kind)
 {

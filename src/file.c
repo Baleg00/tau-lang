@@ -5,6 +5,7 @@
 
 #include "util.h"
 #include "log.h"
+#include "memtrace.h"
 
 void file_read_to_string(const char* path, size_t* len, char** src)
 {

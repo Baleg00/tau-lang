@@ -6,6 +6,7 @@
 #include "token.h"
 #include "op.h"
 #include "list.h"
+#include "memtrace.h"
 
 ast_node_t* ast_node_init(ast_kind_t kind)
 {

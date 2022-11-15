@@ -9,6 +9,7 @@ struct parser_s
 {
   ast_node_t* root;
   list_t* toks;
+  list_elem_t* cur;
 };
 
 parser_t* parser_init(list_t* toks);

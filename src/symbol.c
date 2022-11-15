@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "util.h"
+#include "memtrace.h"
 
 symbol_t* symbol_init(char* id, ast_node_t* node)
 {

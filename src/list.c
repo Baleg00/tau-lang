@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "util.h"
+#include "memtrace.h"
 
 list_elem_t* list_elem_init(void* data)
 {

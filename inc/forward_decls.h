@@ -1,6 +1,7 @@
 #ifndef TAU_FORWARD_DECLS_H
 #define TAU_FORWARD_DECLS_H
 
+typedef struct list_elem_s list_elem_t;
 typedef struct list_s list_t;
 typedef list_t stack_t;
 typedef list_t queue_t;

@@ -12,6 +12,8 @@ add_executable(${PROJECT_NAME}
   symtable.c
   analzyer.c
 
+  memtrace.c
+
   file.c
   cli.c
   log.c

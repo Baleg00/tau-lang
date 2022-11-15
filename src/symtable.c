@@ -7,6 +7,7 @@
 #include "util.h"
 #include "list.h"
 #include "symbol.h"
+#include "memtrace.h"
 
 #define SYMTABLE_INITIAL_CAPACITY 16
 #define SYMTABLE_LOAD_FACTOR 0.75

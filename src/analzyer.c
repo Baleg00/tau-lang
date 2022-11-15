@@ -10,6 +10,7 @@
 #include "ast.h"
 #include "symbol.h"
 #include "symtable.h"
+#include "memtrace.h"
 
 analyzer_t* analyzer_init(void)
 {

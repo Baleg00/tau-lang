@@ -10,6 +10,7 @@
 #include "ast.h"
 #include "token.h"
 #include "list.h"
+#include "memtrace.h"
 
 parser_t* parser_init(list_t* toks)
 {
@@ -17,6 +18,7 @@ parser_t* parser_init(list_t* toks)
   assert(par != NULL);
   par->root = NULL;
   par->toks = toks;
+  par->cur = list_front_elem(toks);
   return par;
 }
 
@@ -28,34 +30,37 @@ void parser_free(parser_t* par)
 
 token_t* parser_current(parser_t* par)
 {
-  return (token_t*)list_front(par->toks);
+  return (token_t*)list_elem_data(par->cur);
 }
 
 token_t* parser_next(parser_t* par)
 {
-  token_t* tok = (token_t*)list_front(par->toks);
+  token_t* tok = parser_current(par);
   assert(tok != NULL);
 
   if (tok->kind != TOK_EOF)
-    return (token_t*)list_pop_front(par->toks);
+  {
+    par->cur = list_elem_next(par->cur);
+    return parser_current(par);
+  }
 
   return tok;
 }
 
 token_t* parser_peek(parser_t* par)
 {
-  token_t* tok = (token_t*)list_front(par->toks);
+  token_t* tok = parser_current(par);
   assert(tok != NULL);
 
   if (tok->kind == TOK_EOF)
     return tok;
 
-  return (token_t*)list_elem_data(list_elem_next(list_front_elem(par->toks)));
+  return (token_t*)list_elem_data(list_elem_next(par->cur));
 }
 
 bool parser_consume(parser_t* par, token_kind_t kind)
 {
-  if (((token_t*)list_front(par->toks))->kind == kind)
+  if (parser_current(par)->kind == kind)
   {
     parser_next(par);
     return true;
@@ -83,7 +88,7 @@ ast_node_t* parser_node_init(parser_t* par, ast_kind_t kind)
   assert(node != NULL);
 
   node->kind = kind;
-  node->tok = (token_t*)list_front(par->toks);
+  node->tok = parser_current(par);
 
   return node;
 }
