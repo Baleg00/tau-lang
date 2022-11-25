@@ -104,6 +104,7 @@ enum token_kind_e
   TOK_PUNCT_EQUAL_EQUAL, // punctuation "=="
   TOK_PUNCT_COMMA, // punctuation ","
   TOK_PUNCT_COLON, // punctuation ":"
+  TOK_PUNCT_SEMICOLON, // punctuation ";"
   TOK_PUNCT_PAREN_LEFT, // punctuation "("
   TOK_PUNCT_PAREN_RIGHT, // punctuation ")"
   TOK_PUNCT_BRACKET_LEFT, // punctuation "["

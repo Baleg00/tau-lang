@@ -565,6 +565,7 @@ void lexer_read_punctuation(lexer_t* lex)
     { TOK_PUNCT_EQUAL_EQUAL,           2 },
     { TOK_PUNCT_COMMA,                 1 },
     { TOK_PUNCT_COLON,                 1 },
+    { TOK_PUNCT_SEMICOLON,             1 },
     { TOK_PUNCT_PAREN_LEFT,            1 },
     { TOK_PUNCT_PAREN_RIGHT,           1 },
     { TOK_PUNCT_BRACKET_LEFT,          1 },
@@ -672,6 +673,8 @@ void lexer_read_punctuation(lexer_t* lex)
     kind = TOK_PUNCT_COMMA;
   else if (lexer_consume(lex, ':'))
     kind = TOK_PUNCT_COLON;
+  else if (lexer_consume(lex, ';'))
+    kind = TOK_PUNCT_SEMICOLON;
   else if (lexer_consume(lex, '('))
     kind = TOK_PUNCT_PAREN_LEFT;
   else if (lexer_consume(lex, ')'))

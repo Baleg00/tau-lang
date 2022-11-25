@@ -107,12 +107,12 @@ int main(int argc, char *argv[])
       strcpy(tokens_path, source_path);
       strcat(tokens_path, ".toks.json");
 
-      log_debug("main", "Dumping tokens: %s", tokens_path);
-
       FILE* tokens_file = fopen(tokens_path, "w");
       assert(tokens_file != NULL);
       token_list_json_dump(tokens_file, lex->toks);
       fclose(tokens_file);
+
+      log_debug("main", "Dumped tokens: %s", tokens_path);
 
       free(tokens_path);
     }
@@ -128,18 +128,22 @@ int main(int argc, char *argv[])
       strcpy(ast_path, source_path);
       strcat(ast_path, ".ast.json");
 
-      log_debug("main", "Dumping AST: %s", ast_path);
-
       FILE* ast_file = fopen(ast_path, "w");
       assert(ast_file != NULL);
       ast_json_dump(ast_file, par->root);
       fclose(ast_file);
 
+      log_debug("main", "Dumped AST: %s", ast_path);
+
       free(ast_path);
     }
 
+    log_debug("main", "Performing semantic analysis...");
+
     analyzer_t* analyzer = analyzer_init();
     analyzer_analyze(analyzer, par->root);
+
+    log_debug("main", "Cleaning up...");
 
     analyzer_free(analyzer);
     parser_free(par);

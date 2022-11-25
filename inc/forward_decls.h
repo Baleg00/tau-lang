@@ -21,6 +21,10 @@ typedef enum op_kind_e op_kind_t;
 typedef enum type_kind_e type_kind_t;
 typedef struct type_s type_t;
 
+typedef enum shyd_kind_e shyd_kind_t;
+typedef struct shyd_elem_s shyd_elem_t;
+typedef struct shyd_s shyd_t;
+
 typedef enum ast_kind_e ast_kind_t;
 typedef struct ast_node_s ast_node_t;
 

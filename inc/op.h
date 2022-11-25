@@ -1,6 +1,8 @@
 #ifndef TAU_OP_H
 #define TAU_OP_H
 
+#include <stdbool.h>
+
 #include "forward_decls.h"
 
 enum op_kind_e
@@ -63,11 +65,15 @@ enum op_kind_e
   OP_IND_MEMBER, // "*." operation indirect member access
   OP_SAFE_IND_MEMBER, // "?." operation safe indirect member access
   OP_RANGE, // ".." operation generate range
-  OP_COMMA, // "," operation comma
+  OP_SEMICOLON, // ";" operation semicolon
   OP_CALL, // "()" operation function call
 };
 
 const char* op_kind_to_string(op_kind_t kind);
+
 int op_precedence(op_kind_t kind);
+
+bool op_is_binary(op_kind_t kind);
+bool op_is_unary(op_kind_t kind);
 
 #endif

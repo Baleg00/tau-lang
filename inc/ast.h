@@ -99,7 +99,21 @@ struct ast_node_s
 
     struct {
       op_kind_t kind;
-      list_t* params;
+
+      union {
+        struct {
+          ast_node_t *lhs, *rhs;
+        } op_binary;
+
+        struct {
+          ast_node_t* arg;
+        } op_unary;
+
+        struct {
+          ast_node_t* callee;
+          list_t* args;
+        } op_call;
+      };
     } expr_op;
 
     struct {

@@ -8,9 +8,8 @@
 #include <string.h>
 
 #include "util.h"
+#include "log.h"
 #include "esc_seq.h"
-
-static const char* MEMTRACE_ALLOC_KIND_STR[] = { "malloc", "calloc", "realloc" };
 
 typedef enum memtrace_alloc_kind_e {
   MEMTRACE_MALLOC,
@@ -56,16 +55,15 @@ void memtrace_atexit(void)
   memtrace_alloc_t* root = memtrace_alloc_root();
 
   if (root->next == NULL)
-    printf("[" ESC_BG_GREEN "MEMTRACE" ESC_RESET "]> No memory leaks detected.\n");
+    log_debug("memtrace", "No leaks detected.");
 
   for (memtrace_alloc_t *alloc = root->next, *next; alloc != NULL; alloc = next)
   {
     next = alloc->next;
 
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Leaked %zu bytes at %p allocated by %s.\n", 
-      alloc->fileinfo.file, alloc->fileinfo.line,
-      alloc->data.size, alloc->data.ptr, MEMTRACE_ALLOC_KIND_STR[alloc->fileinfo.alloc_kind]);
-    __debugbreak();
+    log_error("memtrace", "%s:%d: %zu bytes leaked.", 
+      alloc->fileinfo.file, alloc->fileinfo.line, alloc->data.size);
+    debugbreak();
 
     free(alloc->data.ptr);
     free(alloc);
@@ -76,18 +74,19 @@ void* memtrace_malloc(size_t size, const char* file, int line, const char* func)
 {
   if (size == 0)
   {
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Allocating 0 bytes using malloc is undefined behaviour.\n",
+    log_warn("memtrace", "%s:%d: Undefined behaviour: allocating 0 bytes.",
       file, line);
-    __debugbreak();
+    debugbreak();
   }
 
   void* ptr = malloc(size);
   
   if (ptr == NULL)
   {
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Could not allocate %zu bytes using malloc.\n",
-      file, line, size);
-    __debugbreak();
+    log_error("memtrace", "%s:%d: Allocation failed.",
+      file, line);
+    debugbreak();
+    return NULL;
   }
 
   memtrace_alloc_t* alloc = (memtrace_alloc_t*)malloc(sizeof(memtrace_alloc_t));
@@ -111,18 +110,19 @@ void* memtrace_calloc(size_t count, size_t size, const char* file, int line, con
 {
   if (count * size == 0)
   {
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Allocating 0 bytes using calloc is undefined behaviour.\n",
+    log_warn("memtrace", "%s:%d: Undefined behaviour: allocating 0 bytes.",
       file, line);
-    __debugbreak();
+    debugbreak();
   }
 
   void* ptr = calloc(count, size);
   
   if (ptr == NULL)
   {
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Could not allocate %zu bytes using calloc.\n",
-      file, line, count * size);
-    __debugbreak();
+    log_error("memtrace", "%s:%d: Allocation failed.",
+      file, line);
+    debugbreak();
+    return NULL;
   }
 
   memtrace_alloc_t* alloc = (memtrace_alloc_t*)malloc(sizeof(memtrace_alloc_t));
@@ -149,9 +149,9 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
 
   if (size == 0)
   {
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Reallocating 0 bytes is undefined behaviour.\n",
+    log_warn("memtrace", "%s:%d: Undefined behaviour: reallocating 0 bytes.",
       file, line);
-    __debugbreak();
+    debugbreak();
   }
 
   memtrace_alloc_t* alloc = memtrace_alloc_root();
@@ -163,17 +163,19 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
 
   if (alloc == NULL)
   {
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Reallocating unallocated memory at %p.\n",
+    log_error("memtrace", "%s:%d: Reallocating invalid memory: %p.",
       file, line, ptr);
-    __debugbreak();
+    debugbreak();
+    return NULL;
   }
 
   void* new_ptr = realloc(alloc->data.ptr, size);
 
   if (new_ptr == NULL)
   {
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Could not reallocate memory at %p to %zu bytes.\n",
-      file, line, ptr, size);
+    log_warn("memtrace", "%s:%d: Reallocation failed.",
+      file, line);
+    debugbreak();
     return NULL;
   }
 
@@ -190,10 +192,9 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
 void memtrace_free(void* ptr, const char* file, int line, const char* func)
 {
   if (ptr == NULL)
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Calling free with a null pointer.\n",
-      file, line);
-
-   memtrace_alloc_t *alloc = memtrace_alloc_root(), *prev = alloc;
+    return;
+  
+  memtrace_alloc_t *alloc = memtrace_alloc_root(), *prev = alloc;
   alloc = alloc->next;
 
   for (; alloc != NULL; prev = alloc, alloc = alloc->next)
@@ -202,9 +203,10 @@ void memtrace_free(void* ptr, const char* file, int line, const char* func)
 
   if (alloc == NULL)
   {
-    printf("[" ESC_BG_RED "MEMTRACE" ESC_RESET "]> %s:%d: Trying to free unallocated memory at %p.\n",
+    log_error("memtrace", "%s:%d: Freeing invalid memory: %p.",
       file, line, ptr);
-    __debugbreak();
+    debugbreak();
+    return;
   }
 
   prev->next = alloc->next;

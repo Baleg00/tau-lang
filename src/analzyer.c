@@ -71,75 +71,22 @@ void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, ast_node
 
 void analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
-  list_elem_t* elem = list_front_elem(node->expr_op.params);
-
-  switch (node->expr_op.kind)
+  if (op_is_unary(node->expr_op.kind))
+    analyzer_visit_expr(analyzer, table, (ast_node_t*)node->expr_op.op_unary.arg);
+  else if (op_is_binary(node->expr_op.kind))
   {
-  case OP_IS:
-  case OP_AS:
-    analyzer_visit_expr(analyzer, table, (ast_node_t*)list_elem_data(elem));
-    elem = list_elem_next(elem);
-    analyzer_visit_type(analyzer, table, (ast_node_t*)list_elem_data(elem));
-    break;
-  case OP_SIZEOF:
-  case OP_ALIGNOF:
-    analyzer_visit_type(analyzer, table, (ast_node_t*)list_elem_data(elem));
-    break;
-  case OP_TYPEOF:
-  case OP_ARIT_INC_PRE:
-  case OP_ARIT_INC_POST:
-  case OP_ARIT_DEC_PRE:
-  case OP_ARIT_DEC_POST:
-  case OP_ARIT_POS:
-  case OP_ARIT_NEG:
-  case OP_BIT_NOT:
-  case OP_LOGIC_NOT:
-    analyzer_visit_expr(analyzer, table, (ast_node_t*)list_elem_data(elem));
-    break;
-  case OP_IN:
-  case OP_ARIT_ADD:
-  case OP_ARIT_SUB:
-  case OP_ARIT_MUL:
-  case OP_ARIT_DIV:
-  case OP_ARIT_MOD:
-  case OP_BIT_AND:
-  case OP_BIT_OR:
-  case OP_BIT_XOR:
-  case OP_BIT_LSH:
-  case OP_BIT_RSH:
-  case OP_LOGIC_AND:
-  case OP_LOGIC_OR:
-  case OP_COMP_EQ:
-  case OP_COMP_NE:
-  case OP_COMP_LT:
-  case OP_COMP_LE:
-  case OP_COMP_GT:
-  case OP_COMP_GE:
-  case OP_ASSIGN:
-  case OP_ARIT_ADD_ASSIGN:
-  case OP_ARIT_SUB_ASSIGN:
-  case OP_ARIT_MUL_ASSIGN:
-  case OP_ARIT_DIV_ASSIGN:
-  case OP_ARIT_MOD_ASSIGN:
-  case OP_BIT_AND_ASSIGN:
-  case OP_BIT_OR_ASSIGN:
-  case OP_BIT_XOR_ASSIGN:
-  case OP_BIT_LSH_ASSIGN:
-  case OP_BIT_RSH_ASSIGN:
-  case OP_SUBS:
-  case OP_IND:
-  case OP_ADDR:
-  case OP_MEMBER:
-  case OP_IND_MEMBER:
-  case OP_SAFE_IND_MEMBER:
-  case OP_RANGE:
-  case OP_COMMA:
-    analyzer_visit_expr(analyzer, table, (ast_node_t*)list_elem_data(elem));
-    elem = list_elem_next(elem);
-    analyzer_visit_expr(analyzer, table, (ast_node_t*)list_elem_data(elem));
-    break;
-  default: unreachable();
+    analyzer_visit_expr(analyzer, table, (ast_node_t*)node->expr_op.op_binary.lhs);
+    analyzer_visit_expr(analyzer, table, (ast_node_t*)node->expr_op.op_binary.rhs);
   }
+  else if (node->expr_op.kind == OP_CALL)
+  {
+    analyzer_visit_expr(analyzer, table, (ast_node_t*)node->expr_op.op_call.callee);
+
+    for (list_elem_t* elem = list_front_elem(node->expr_op.op_call.args); elem != NULL; elem = list_elem_next(elem))
+      analyzer_visit_expr(analyzer, table, (ast_node_t*)list_elem_data(elem));
+  }
+  else
+    unreachable();
 }
 
 void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -157,7 +104,9 @@ void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
 
     if (id_sym->node->kind != AST_DECL_VAR &&
         id_sym->node->kind != AST_PARAM &&
-        id_sym->node->kind != AST_ENUMERATOR)
+        id_sym->node->kind != AST_ENUMERATOR &&
+        id_sym->node->kind != AST_DECL_FUN &&
+        id_sym->node->kind != AST_DECL_GEN)
     {
       crumb_error(node->tok->loc, "Symbol is not an expression.");
       exit(EXIT_FAILURE);

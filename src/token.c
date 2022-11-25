@@ -179,6 +179,7 @@ const char* token_kind_to_string(token_kind_t kind)
     case TOK_PUNCT_EQUAL_EQUAL:           return "TOK_PUNCT_EQUAL_EQUAL";
     case TOK_PUNCT_COMMA:                 return "TOK_PUNCT_COMMA";
     case TOK_PUNCT_COLON:                 return "TOK_PUNCT_COLON";
+    case TOK_PUNCT_SEMICOLON:             return "TOK_PUNCT_SEMICOLON";
     case TOK_PUNCT_PAREN_LEFT:            return "TOK_PUNCT_PAREN_LEFT";
     case TOK_PUNCT_PAREN_RIGHT:           return "TOK_PUNCT_PAREN_RIGHT";
     case TOK_PUNCT_BRACKET_LEFT:          return "TOK_PUNCT_BRACKET_LEFT";

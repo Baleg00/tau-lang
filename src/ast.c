@@ -79,8 +79,19 @@ void ast_node_free(ast_node_t* node)
   case AST_EXPR_LIT_NULL:
     break;
   case AST_EXPR_OP:
-    list_for_each(node->expr_op.params, ast_node_free);
-    list_free(node->expr_op.params);
+    if (op_is_unary(node->expr_op.kind))
+      ast_node_free(node->expr_op.op_unary.arg);
+    else if (op_is_binary(node->expr_op.kind))
+    {
+      ast_node_free(node->expr_op.op_binary.lhs);
+      ast_node_free(node->expr_op.op_binary.rhs);
+    }
+    else if (node->expr_op.kind == OP_CALL)
+    {
+      ast_node_free(node->expr_op.op_call.callee);
+      list_for_each(node->expr_op.op_call.args, ast_node_free);
+      list_free(node->expr_op.op_call.args);
+    }
     break;
   case AST_STMT_IF:
     ast_node_free(node->stmt_if.cond);
@@ -333,8 +344,25 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     break;
   case AST_EXPR_OP:
     fprintf(stream, ",\"op\":\"%s\"", op_kind_to_string(root->expr_op.kind));
-    fprintf(stream, ",\"params\":");
-    ast_list_json_dump(stream, root->expr_op.params);
+    if (op_is_unary(root->expr_op.kind))
+    {
+      fprintf(stream, ",\"arg\":");
+      ast_json_dump(stream, root->expr_op.op_unary.arg);
+    }
+    else if (op_is_binary(root->expr_op.kind))
+    {
+      fprintf(stream, ",\"lhs\":");
+      ast_json_dump(stream, root->expr_op.op_binary.lhs);
+      fprintf(stream, ",\"rhs\":");
+      ast_json_dump(stream, root->expr_op.op_binary.rhs);
+    }
+    else if (root->expr_op.kind == OP_CALL)
+    {
+      fprintf(stream, ",\"callee\":");
+      ast_json_dump(stream, root->expr_op.op_call.callee);
+      fprintf(stream, ",\"args\":");
+      ast_list_json_dump(stream, root->expr_op.op_call.args);
+    }
     break;
   case AST_STMT_IF:
     fprintf(stream, ",\"cond\":");
