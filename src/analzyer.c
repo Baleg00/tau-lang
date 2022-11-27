@@ -10,6 +10,7 @@
 #include "ast.h"
 #include "symbol.h"
 #include "symtable.h"
+#include "diagnostics.h"
 #include "memtrace.h"
 
 analyzer_t* analyzer_init(void)
@@ -32,11 +33,7 @@ void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_node_t* n
   symbol_t* collision = symtable_insert(table, param_sym);
 
   if (collision != NULL && collision->node->kind == AST_PARAM)
-  {
-    crumb_error(node->param.id->tok->loc, "Parameter with the same name already defined.");
-    crumb_error(collision->node->param.id->tok->loc, "Previous definition.");
-    exit(EXIT_FAILURE);
-  }
+    report_error_parameter_redefinition(node->param.id->tok->loc);
 
   analyzer_visit_type(analyzer, table, node->param.type);
 }
@@ -50,10 +47,7 @@ void analyzer_visit_loop_var(analyzer_t* analyzer, symtable_t* table, ast_node_t
   assert(collision == NULL);
 
   if (lookup != NULL)
-  {
-    crumb_warn(node->loop_var.id->tok->loc, "Variable shadows another one with the same name.");
-    crumb_warn(lookup->node->tok->loc, "");
-  }
+    report_warning_shadowed_variable(node->loop_var.id->tok->loc);
 }
 
 void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -62,11 +56,7 @@ void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, ast_node
   symbol_t* collision = symtable_insert(table, enumerator_sym);
 
   if (collision != NULL)
-  {
-    crumb_error(node->enumerator.id->tok->loc, "Enumerator defined multiple times.");
-    crumb_error(collision->node->tok->loc, "Previously defined here.");
-    exit(EXIT_FAILURE);
-  }
+    report_error_enumerator_redeclaration(node->enumerator.id->tok->loc);
 }
 
 void analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -97,20 +87,14 @@ void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
     symbol_t* id_sym = symtable_lookup(table, node->tok->id.value);
     
     if (id_sym == NULL)
-    {
-      crumb_error(node->tok->loc, "Undefined symbol.");
-      exit(EXIT_FAILURE);
-    }
+      report_error_undefined_symbol(node->tok->loc);
 
     if (id_sym->node->kind != AST_DECL_VAR &&
         id_sym->node->kind != AST_PARAM &&
         id_sym->node->kind != AST_ENUMERATOR &&
         id_sym->node->kind != AST_DECL_FUN &&
         id_sym->node->kind != AST_DECL_GEN)
-    {
-      crumb_error(node->tok->loc, "Symbol is not an expression.");
-      exit(EXIT_FAILURE);
-    }
+      report_error_symbol_is_not_an_expression(node->tok->loc);
     break;
   case AST_EXPR_LIT_INT:
   case AST_EXPR_LIT_FLT:
@@ -134,18 +118,12 @@ void analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
     symbol_t* id_sym = symtable_lookup(table, node->tok->id.value);
     
     if (id_sym == NULL)
-    {
-      crumb_error(node->tok->loc, "Undefined typename.");
-      exit(EXIT_FAILURE);
-    }
+      report_error_undefined_typename(node->tok->loc);
 
     if (id_sym->node->kind != AST_DECL_STRUCT &&
         id_sym->node->kind != AST_DECL_UNION &&
         id_sym->node->kind != AST_DECL_ENUM)
-    {
-      crumb_error(node->tok->loc, "Symbol is not a typename.");
-      exit(EXIT_FAILURE);
-    }
+      report_error_symbol_is_not_a_typename(node->tok->loc);
     break;
   case AST_TYPE_MUT:
     analyzer_visit_type(analyzer, table, node->type_mut.base_type);
@@ -234,7 +212,8 @@ void analyzer_visit_stmt_continue(analyzer_t* analyzer, symtable_t* table, ast_n
 
 void analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
-  analyzer_visit_expr(analyzer, table, node->stmt_return.expr);
+  if (node->stmt_return.expr != NULL)
+    analyzer_visit_expr(analyzer, table, node->stmt_return.expr);
 }
 
 void analyzer_visit_stmt_yield(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -280,17 +259,10 @@ void analyzer_visit_decl_var(analyzer_t* analyzer, symtable_t* table, ast_node_t
   symbol_t* collision = symtable_insert(table, var_sym);
 
   if (collision != NULL && collision->node->kind == AST_DECL_VAR)
-  {
-    crumb_error(node->decl_var.id->tok->loc, "Variable declared multiple times.");
-    crumb_error(collision->node->decl_var.id->tok->loc, "Previously declared here.");
-    exit(EXIT_FAILURE);
-  }
+    report_error_variable_redeclaration(node->decl_var.id->tok->loc);
 
   if (lookup != NULL && lookup->node->kind == AST_DECL_VAR)
-  {
-    crumb_warn(node->decl_var.id->tok->loc, "Variable shadows another one with the same name.");
-    crumb_warn(lookup->node->decl_var.id->tok->loc, "");
-  }
+    report_warning_shadowed_variable(node->decl_var.id->tok->loc);
 
   analyzer_visit_expr(analyzer, table, node->decl_var.init);
   analyzer_visit_type(analyzer, table, node->decl_var.type);
@@ -301,14 +273,8 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_node_t
   symbol_t* fun_sym = symbol_init(node->decl_fun.id->tok->id.value, node);
   symbol_t* collision = symtable_insert(table, fun_sym);
 
-  if (collision != NULL &&
-    (collision->node->kind == AST_DECL_FUN ||
-    collision->node->kind == AST_DECL_GEN))
-  {
-    crumb_error(node->decl_fun.id->tok->loc, "Symbol declared multiple times.");
-    crumb_error(collision->node->tok->loc, "Previously declared here.");
-    exit(EXIT_FAILURE);
-  }
+  if (collision != NULL)
+    report_error_symbol_redeclaration(node->tok->loc);
 
   symtable_t* fun_table = symtable_init(table);
   fun_sym->scope = fun_table;
@@ -325,14 +291,8 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_node_t
   symbol_t* gen_sym = symbol_init(node->decl_gen.id->tok->id.value, node);
   symbol_t* collision = symtable_insert(table, gen_sym);
 
-  if (collision != NULL && 
-    (collision->node->kind == AST_DECL_FUN || 
-    collision->node->kind == AST_DECL_GEN))
-  {
-    crumb_error(node->decl_gen.id->tok->loc, "Symbol declared multiple times.");
-    crumb_error(collision->node->tok->loc, "Previously declared here.");
-    exit(EXIT_FAILURE);
-  }
+  if (collision != NULL)
+    report_error_symbol_redeclaration(node->tok->loc);
 
   symtable_t* gen_table = symtable_init(table);
   gen_sym->scope = gen_table;
@@ -350,24 +310,11 @@ void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_nod
   symbol_t* lookup = symtable_lookup(table, node->decl_struct.id->tok->id.value);
   symbol_t* collision = symtable_insert(table, struct_sym);
 
-  if (collision != NULL && 
-    (collision->node->kind == AST_DECL_STRUCT || 
-    collision->node->kind == AST_DECL_UNION ||
-    collision->node->kind == AST_DECL_ENUM))
-  {
-    crumb_error(node->decl_struct.id->tok->loc, "Symbol declared multiple times.");
-    crumb_error(collision->node->tok->loc, "Previously declared here.");
-    exit(EXIT_FAILURE);
-  }
+  if (collision != NULL)
+    report_error_symbol_redeclaration(node->tok->loc);
 
-  if (lookup != NULL && 
-    (lookup->node->kind == AST_DECL_STRUCT || 
-    lookup->node->kind == AST_DECL_UNION ||
-    lookup->node->kind == AST_DECL_ENUM))
-  {
-    crumb_warn(node->decl_struct.id->tok->loc, "Symbol shadows another one with the same name.");
-    crumb_warn(lookup->node->tok->loc, "");
-  }
+  if (lookup != NULL)
+    report_warning_shadowed_symbol(node->tok->loc);
 
   symtable_t* struct_table = symtable_init(table);
   struct_sym->scope = struct_table;
@@ -382,24 +329,11 @@ void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_node
   symbol_t* lookup = symtable_lookup(table, node->decl_union.id->tok->id.value);
   symbol_t* collision = symtable_insert(table, union_sym);
 
-  if (collision != NULL && 
-    (collision->node->kind == AST_DECL_STRUCT || 
-    collision->node->kind == AST_DECL_UNION ||
-    collision->node->kind == AST_DECL_ENUM))
-  {
-    crumb_error(node->decl_union.id->tok->loc, "Symbol declared multiple times.");
-    crumb_error(collision->node->tok->loc, "Previously declared here.");
-    exit(EXIT_FAILURE);
-  }
+  if (collision != NULL)
+    report_error_symbol_redeclaration(node->tok->loc);
 
-  if (lookup != NULL && 
-    (lookup->node->kind == AST_DECL_STRUCT || 
-    lookup->node->kind == AST_DECL_UNION ||
-    lookup->node->kind == AST_DECL_ENUM))
-  {
-    crumb_warn(node->decl_union.id->tok->loc, "Symbol shadows another one with the same name.");
-    crumb_warn(lookup->node->tok->loc, "");
-  }
+  if (lookup != NULL)
+    report_warning_shadowed_symbol(node->tok->loc);
 
   symtable_t* union_table = symtable_init(table);
   union_sym->scope = union_table;
@@ -414,24 +348,11 @@ void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_node_
   symbol_t* lookup = symtable_lookup(table, node->decl_enum.id->tok->id.value);
   symbol_t* collision = symtable_insert(table, enum_sym);
 
-  if (collision != NULL && 
-    (collision->node->kind == AST_DECL_STRUCT || 
-    collision->node->kind == AST_DECL_UNION ||
-    collision->node->kind == AST_DECL_ENUM))
-  {
-    crumb_error(node->decl_enum.id->tok->loc, "Symbol declared multiple times.");
-    crumb_error(collision->node->tok->loc, "Previously declared here.");
-    exit(EXIT_FAILURE);
-  }
+  if (collision != NULL)
+    report_error_symbol_redeclaration(node->tok->loc);
 
-  if (lookup != NULL && 
-    (lookup->node->kind == AST_DECL_STRUCT || 
-    lookup->node->kind == AST_DECL_UNION ||
-    lookup->node->kind == AST_DECL_ENUM))
-  {
-    crumb_warn(node->decl_enum.id->tok->loc, "Symbol shadows another one with the same name.");
-    crumb_warn(lookup->node->tok->loc, "");
-  }
+  if (lookup != NULL)
+    report_warning_shadowed_symbol(node->tok->loc);
 
   symtable_t* enum_table = symtable_init(table);
   enum_sym->scope = enum_table;

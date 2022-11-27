@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME}
   cli.c
   log.c
   crumb.c
+  diagnostics.c
 
   list.c
   stack.c

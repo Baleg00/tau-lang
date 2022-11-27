@@ -12,7 +12,7 @@ struct lexer_s
   list_t* toks;
 };
 
-lexer_t* lexer_init(const char* path);
+lexer_t* lexer_init(char* path, char* src);
 void lexer_free(lexer_t* lex);
 
 token_t* lexer_token_init(lexer_t* lex, token_kind_t kind);

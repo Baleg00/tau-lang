@@ -9,11 +9,12 @@
 #include "file.h"
 #include "log.h"
 #include "crumb.h"
+#include "diagnostics.h"
 #include "list.h"
 #include "token.h"
 #include "memtrace.h"
 
-lexer_t* lexer_init(const char* path)
+lexer_t* lexer_init(char* path, char* src)
 {
   lexer_t* lex = (lexer_t*)malloc(sizeof(lexer_t));
   assert(lex != NULL);
@@ -21,11 +22,10 @@ lexer_t* lexer_init(const char* path)
   lex->loc = location_init();
 
   lex->loc->path = path;
+  lex->loc->src = src;
   lex->loc->row = 0;
   lex->loc->col = 0;
   lex->loc->len = 0;
-
-  file_read_to_string(path, NULL, &lex->loc->src);
 
   lex->loc->cur = lex->loc->src;
 
@@ -38,7 +38,6 @@ void lexer_free(lexer_t* lex)
 {
   list_for_each(lex->toks, token_free);
   list_free(lex->toks);
-  free(lex->loc->src);
   location_free(lex->loc);
   free(lex);
 }
@@ -241,14 +240,13 @@ void lexer_read_octal_integer(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT_OCT);
 
-  size_t len = lexer_skip(lex, lexer_is_octal);
+  lexer_skip_n(lex, 2);
+
+  size_t len = 2 + lexer_skip(lex, lexer_is_octal);
   tok->loc->len = len;
 
-  if (len == 0 || lexer_is_word(lex))
-  {
-    crumb_error(tok->loc, "Ill-formed octal integer!");
-    exit(EXIT_FAILURE);
-  }
+  if (len == 2 || lexer_is_word(lex))
+    report_error_ill_formed_integer_literal(tok->loc);
 
   tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 8);
 
@@ -259,14 +257,13 @@ void lexer_read_binary_integer(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT_BIN);
 
-  size_t len = lexer_skip(lex, lexer_is_binary);
+  lexer_skip_n(lex, 2);
+
+  size_t len = 2 + lexer_skip(lex, lexer_is_binary);
   tok->loc->len = len;
 
-  if (len == 0 || lexer_is_word(lex))
-  {
-    crumb_error(tok->loc, "Ill-formed binary integer!");
-    exit(EXIT_FAILURE);
-  }
+  if (len == 2 || lexer_is_word(lex))
+    report_error_ill_formed_integer_literal(tok->loc);
 
   tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 2);
 
@@ -316,10 +313,7 @@ void lexer_read_decimal_number(lexer_t* lex)
     tok->loc->len = len;
 
     if (lexer_is_word(lex))
-    {
-      crumb_error(tok->loc, "Ill-formed decimal float!");
-      exit(EXIT_FAILURE);
-    }
+      report_error_ill_formed_float_literal(tok->loc);
 
     lexer_token_push(lex, tok);
   }
@@ -329,10 +323,7 @@ void lexer_read_decimal_number(lexer_t* lex)
     tok->loc->len = len;
 
     if (lexer_is_word(lex))
-    {
-      crumb_error(tok->loc, "Ill-formed decimal integer!");
-      exit(EXIT_FAILURE);
-    }
+      report_error_ill_formed_integer_literal(tok->loc);
 
     lexer_token_push(lex, tok);
   }
@@ -342,14 +333,13 @@ void lexer_read_hexadecimal_integer(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT_HEX);
 
-  size_t len = lexer_skip(lex, lexer_is_hexadecimal);
+  lexer_skip_n(lex, 2);
+
+  size_t len = 2 + lexer_skip(lex, lexer_is_hexadecimal);
   tok->loc->len = len;
 
-  if (len == 0 || lexer_is_word(lex))
-  {
-    crumb_error(tok->loc, "Ill-formed binary integer!");
-    exit(EXIT_FAILURE);
-  }
+  if (len == 2 || lexer_is_word(lex))
+    report_error_ill_formed_integer_literal(tok->loc);
 
   tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 16);
 
@@ -363,19 +353,16 @@ void lexer_read_number(lexer_t* lex)
     {
     case 'x':
     case 'X':
-      lexer_skip_n(lex, 2);
       lexer_read_hexadecimal_integer(lex);
       return;
 
     case 'o':
     case 'O':
-      lexer_skip_n(lex, 2);
       lexer_read_octal_integer(lex);
       return;
 
     case 'b':
     case 'B':
-      lexer_skip_n(lex, 2);
       lexer_read_binary_integer(lex);
       return;
     }
@@ -410,24 +397,29 @@ void lexer_read_string(lexer_t* lex)
       case 't': // horizontal tab
       case '\'': // single quote
       case '"': // double quote
+        ++len;
         break;
       
       case 'x':
       case 'X': // arbitrary hexadecimal bytes
+        ++len;
+
+        if (!isxdigit(lexer_next(lex)))
+          report_error_escape_no_hex_digits(tok->loc);
+
         len += lexer_skip(lex, lexer_is_hexadecimal);
         break;
 
       default:
-        crumb_error(tok->loc, "Illegal escape sequence in string!");
-        exit(EXIT_FAILURE);
+        report_error_unknown_escape_sequence(tok->loc);
       }
     }
   }
 
   if (ch != '"')
   {
-    crumb_error(tok->loc, "Missing string closing quotation mark!");
-    exit(EXIT_FAILURE);
+    tok->loc->len = 1;
+    report_error_missing_terminating_character(tok->loc, '"');
   }
 
   tok->loc->len = len;
@@ -453,8 +445,8 @@ void lexer_read_character(lexer_t* lex)
 
   if (lexer_current(lex) == '\'')
   {
-    crumb_error(tok->loc, "Empty character!");
-    exit(EXIT_FAILURE);
+    tok->loc->len = 2;
+    report_error_empty_character_literal(tok->loc);
   }
 
   if (lexer_next(lex) == '\\')
@@ -479,34 +471,25 @@ void lexer_read_character(lexer_t* lex)
       ++len;
 
       if (!isxdigit(lexer_next(lex)))
-      {
-        crumb_error(tok->loc, "Illegal character in hexadecimal byte escape sequence!");
-        exit(EXIT_FAILURE);
-      }
+        report_error_escape_no_hex_digits(tok->loc);
 
-      ++len;
-      if (isxdigit(lexer_current(lex)))
-      {
-        lexer_next(lex);
-        ++len;
-      }
+      len += lexer_skip(lex, lexer_is_hexadecimal);
       break;
 
     default:
-      crumb_error(tok->loc, "Illegal escape sequence!");
-      exit(EXIT_FAILURE);
+      report_error_unknown_escape_sequence(tok->loc);
     }
   }
   else
     ++len;
 
-  tok->loc->len = len;
-
   if (lexer_next(lex) != '\'')
   {
-    crumb_error(tok->loc, "Missing character closing apostrophe!");
-    exit(EXIT_FAILURE);
+    tok->loc->len = 1;
+    report_error_missing_terminating_character(tok->loc, '\'');
   }
+
+  tok->loc->len = len;
 
   char* buf = (char*)malloc((len + 1) * sizeof(char));  
   assert(buf != NULL);
@@ -688,10 +671,7 @@ void lexer_read_punctuation(lexer_t* lex)
   else if (lexer_consume(lex, '}'))
     kind = TOK_PUNCT_BRACE_RIGHT;
   else
-  {
-    crumb_error(tok->loc, "Unknown punctuation!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_unexpected_character(tok->loc);
 
   tok->kind = kind;
   tok->loc->len = 0;
@@ -723,11 +703,7 @@ void lexer_read_next(lexer_t* lex)
   else if (lexer_current(lex) == '\0')
     lexer_token_push(lex, lexer_token_init(lex, TOK_EOF));
   else
-  {
-    token_t* tok = lexer_token_init(lex, TOK_UNKNOWN);
-    crumb_error(tok->loc, "Unexpected character!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_unexpected_character(lex->loc);
 }
 
 void lexer_lex(lexer_t* lex)

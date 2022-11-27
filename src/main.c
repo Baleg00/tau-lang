@@ -8,11 +8,14 @@
 #include "crumb.h"
 #include "cli.h"
 
+#include "file.h"
 #include "token.h"
 #include "ast.h"
 #include "lexer.h"
 #include "parser.h"
 #include "analzyer.h"
+
+#include "memtrace.h"
 
 #define MAX_INPUT_FILES 32
 
@@ -93,18 +96,22 @@ int main(int argc, char *argv[])
 
   for (size_t i = 0; i < compiler_state.input_files.count; ++i)
   {
-    const char* source_path = compiler_state.input_files.paths[i];
+    char* path = compiler_state.input_files.paths[i];
 
-    log_debug("main", "Processing source file: %s", source_path);
+    log_debug("main", "Processing source file: %s", path);
+
+    char* src;
+    file_read_to_string(path, NULL, &src);
+
     log_debug("main", "Performing lexical analysis...");
 
-    lexer_t* lex = lexer_init(source_path);
+    lexer_t* lex = lexer_init(path, src);
     lexer_lex(lex);
 
     if (compiler_state.flags.emit_tokens)
     {
-      char* tokens_path = malloc(strlen(source_path) + 11);
-      strcpy(tokens_path, source_path);
+      char* tokens_path = malloc(strlen(path) + 11);
+      strcpy(tokens_path, path);
       strcat(tokens_path, ".toks.json");
 
       FILE* tokens_file = fopen(tokens_path, "w");
@@ -124,8 +131,8 @@ int main(int argc, char *argv[])
 
     if (compiler_state.flags.emit_ast)
     {
-      char* ast_path = malloc(strlen(source_path) + 10);
-      strcpy(ast_path, source_path);
+      char* ast_path = malloc(strlen(path) + 10);
+      strcpy(ast_path, path);
       strcat(ast_path, ".ast.json");
 
       FILE* ast_file = fopen(ast_path, "w");
@@ -148,6 +155,7 @@ int main(int argc, char *argv[])
     analyzer_free(analyzer);
     parser_free(par);
     lexer_free(lex);
+    free(src);
   }
 
   return EXIT_SUCCESS;

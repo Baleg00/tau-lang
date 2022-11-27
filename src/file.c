@@ -5,17 +5,15 @@
 
 #include "util.h"
 #include "log.h"
+#include "diagnostics.h"
 #include "memtrace.h"
 
-void file_read_to_string(const char* path, size_t* len, char** src)
+void file_read_to_string(char* path, size_t* len, char** src)
 {
   FILE* file = fopen(path, "r");
   
   if (file == NULL)
-  {
-    log_fatal("file", "Cannot open file: %s", path);
-    exit(EXIT_FAILURE);
-  }
+    report_error_failed_to_open_file(path);
 
   fseek(file, 0, SEEK_END);
   size_t flen = (size_t)ftell(file);
