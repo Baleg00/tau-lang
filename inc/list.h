@@ -16,7 +16,7 @@ struct list_elem_s
 
 struct list_s
 {
-  list_elem_t *root, *tail;
+  list_elem_t *head, *tail;
   size_t len;
 };
 

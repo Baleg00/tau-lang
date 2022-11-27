@@ -46,7 +46,7 @@ list_t* list_init(void)
   list_t* list = (list_t*)malloc(sizeof(list_t));
   assert(list != NULL);
   list->len = 0;
-  list->root = NULL;
+  list->head = NULL;
   list->tail = NULL;
   return list;
 }
@@ -86,7 +86,7 @@ void* list_back(list_t* list)
 
 list_elem_t* list_front_elem(list_t* list)
 {
-  return list_empty(list) ? NULL : list->root;
+  return list_empty(list) ? NULL : list->head;
 }
 
 list_elem_t* list_back_elem(list_t* list)
@@ -99,15 +99,15 @@ list_elem_t* list_push_front(list_t* list, void* data)
   list_elem_t* new_elem = list_elem_init(data);
 
   new_elem->owner = list;
-  new_elem->next = list->root;
+  new_elem->next = list->head;
   new_elem->prev = NULL;
 
   if (list->tail == NULL)
     list->tail = new_elem;
   else
-    list->root->prev = new_elem;
+    list->head->prev = new_elem;
 
-  list->root = new_elem;
+  list->head = new_elem;
 
   ++list->len;
 
@@ -122,8 +122,8 @@ list_elem_t* list_push_back(list_t* list, void* data)
   new_elem->prev = list->tail;
   new_elem->next = NULL;
 
-  if (list->root == NULL)
-    list->root = new_elem;
+  if (list->head == NULL)
+    list->head = new_elem;
   else
     list->tail->next = new_elem;
 
@@ -138,14 +138,14 @@ void* list_pop_front(list_t* list)
 {
   assert(!list_empty(list));
 
-  list_elem_t* elem = list->root;
+  list_elem_t* elem = list->head;
   
-  if (list->root == list->tail)
-    list->root = list->tail = NULL;
+  if (list->head == list->tail)
+    list->head = list->tail = NULL;
   else
   {
-    list->root= list->root->next;
-    list->root->prev = NULL;
+    list->head= list->head->next;
+    list->head->prev = NULL;
   }
 
   --list->len;
@@ -163,8 +163,8 @@ void* list_pop_back(list_t* list)
 
   list_elem_t* elem = list->tail;
   
-  if (list->root == list->tail)
-    list->root = list->tail = NULL;
+  if (list->head == list->tail)
+    list->head = list->tail = NULL;
   else
   {
     list->tail = list->tail->prev;
@@ -184,7 +184,7 @@ list_elem_t* list_insert_before(list_elem_t* elem, void* data)
 {
   list_elem_t* new_elem = list_elem_init(data);
 
-  if (elem->owner->root == elem)
+  if (elem->owner->head == elem)
     return list_push_front(elem->owner, new_elem);
 
   new_elem->owner = elem->owner;
@@ -218,14 +218,15 @@ list_elem_t* list_insert_after(list_elem_t* elem, void* data)
 
 void* list_remove(list_elem_t* elem)
 {
-  if (elem->owner->root == elem)
+  if (elem->owner->head == elem)
     return list_pop_front(elem->owner);
 
   if (elem->owner->tail == elem)
     return list_pop_back(elem->owner);
 
-  elem->owner = NULL;
+  --elem->owner->len;
   elem->prev->next = elem->next;
+  elem->next->prev = elem->prev;
 
   void* data = elem->data;
 

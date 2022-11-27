@@ -37,7 +37,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
 {
   fputc('[', stream);
 
-  for (list_elem_t* elem = list->root; elem != NULL; elem = elem->next)
+  for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
   {
     token_t* tok = (token_t*)list_elem_data(elem);
 
@@ -77,7 +77,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
 
     fputc('}', stream);
 
-    if (elem->next != NULL)
+    if (list_elem_next(elem) != NULL)
       fputc(',', stream);
   }
 
