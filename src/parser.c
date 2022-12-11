@@ -31,7 +31,7 @@ void parser_free(parser_t* par)
 
 token_t* parser_current(parser_t* par)
 {
-  return (token_t*)list_elem_data(par->cur);
+  return (token_t*)list_elem_get(par->cur);
 }
 
 token_t* parser_next(parser_t* par)
@@ -56,7 +56,7 @@ token_t* parser_peek(parser_t* par)
   if (tok->kind == TOK_EOF)
     return tok;
 
-  return (token_t*)list_elem_data(list_elem_next(par->cur));
+  return (token_t*)list_elem_get(list_elem_next(par->cur));
 }
 
 bool parser_consume(parser_t* par, token_kind_t kind)
@@ -110,13 +110,8 @@ list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, ast_nod
 {
   list_t* list = list_init();
 
-  for (;;)
-  {
+  while (!parser_consume(par, termin))
     list_push_back(list, parse_func(par));
-
-    if (parser_consume(par, termin))
-      break;
-  }
 
   return list;
 }
@@ -386,7 +381,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   parser_expect(par, TOK_KW_FUN);
   node->decl_fun.id = parser_parse_id(par);
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
-  node->decl_fun.params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_param);
+  node->decl_fun.params = parser_current(par)->kind != TOK_PUNCT_PAREN_RIGHT ? parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_param) : list_init();
   parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
   parser_expect(par, TOK_PUNCT_COLON);
   node->decl_fun.ret_type = parser_parse_type(par);

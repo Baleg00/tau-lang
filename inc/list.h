@@ -26,7 +26,8 @@ list_elem_t* list_elem_copy(list_elem_t* elem);
 
 list_elem_t* list_elem_prev(list_elem_t* elem);
 list_elem_t* list_elem_next(list_elem_t* elem);
-void* list_elem_data(list_elem_t* elem);
+void* list_elem_get(list_elem_t* elem);
+void list_elem_set(list_elem_t* elem, void* data);
 
 list_t* list_init(void);
 void list_free(list_t* list);

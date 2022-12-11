@@ -39,7 +39,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
 
   for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
   {
-    token_t* tok = (token_t*)list_elem_data(elem);
+    token_t* tok = (token_t*)list_elem_get(elem);
 
     fprintf(stream, "{\"kind\":\"%s\"", token_kind_to_string(tok->kind));
 

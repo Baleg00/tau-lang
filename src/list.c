@@ -36,9 +36,14 @@ list_elem_t* list_elem_next(list_elem_t* elem)
   return elem->next;
 }
 
-void* list_elem_data(list_elem_t* elem)
+void* list_elem_get(list_elem_t* elem)
 {
   return elem->data;
+}
+
+void list_elem_set(list_elem_t* elem, void* data)
+{
+  elem->data = data;
 }
 
 list_t* list_init(void)
@@ -67,7 +72,7 @@ list_t* list_copy(list_t* list)
   list_t* new_list = list_init();
 
   for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
-    list_push_back(new_list, list_elem_data(elem));
+    list_push_back(new_list, list_elem_get(elem));
 
   return new_list;
 }
@@ -75,13 +80,13 @@ list_t* list_copy(list_t* list)
 void* list_front(list_t* list)
 {
   assert(!list_empty(list));
-  return list_elem_data(list_front_elem(list));
+  return list_elem_get(list_front_elem(list));
 }
 
 void* list_back(list_t* list)
 {
   assert(!list_empty(list));
-  return list_elem_data(list_back_elem(list));
+  return list_elem_get(list_back_elem(list));
 }
 
 list_elem_t* list_front_elem(list_t* list)
@@ -260,5 +265,5 @@ size_t list_size(list_t* list)
 void list_for_each(list_t* list, void(*func)(void*))
 {
     for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
-      func(list_elem_data(elem));
+      func(list_elem_get(elem));
 }

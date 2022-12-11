@@ -248,7 +248,7 @@ void ast_list_json_dump(FILE* stream, list_t* list)
   fputc('[', stream);
   for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
   {
-    ast_json_dump(stream, (ast_node_t*)list_elem_data(elem));
+    ast_json_dump(stream, (ast_node_t*)list_elem_get(elem));
     if (list_elem_next(elem) != NULL)
       fputc(',', stream);
   }

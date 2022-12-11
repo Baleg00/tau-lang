@@ -20,7 +20,7 @@ void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, ast_node
 void analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
 void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
 
-void analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
+ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
 
 void analyzer_visit_stmt_if(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
 void analyzer_visit_stmt_for(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);

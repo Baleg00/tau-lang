@@ -35,7 +35,7 @@ void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_node_t* n
   if (collision != NULL && collision->node->kind == AST_PARAM)
     report_error_parameter_redefinition(node->param.id->tok->loc);
 
-  analyzer_visit_type(analyzer, table, node->param.type);
+  node->param.type = analyzer_visit_type(analyzer, table, node->param.type);
 }
 
 void analyzer_visit_loop_var(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -73,7 +73,7 @@ void analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_node_t*
     analyzer_visit_expr(analyzer, table, (ast_node_t*)node->expr_op.op_call.callee);
 
     for (list_elem_t* elem = list_front_elem(node->expr_op.op_call.args); elem != NULL; elem = list_elem_next(elem))
-      analyzer_visit_expr(analyzer, table, (ast_node_t*)list_elem_data(elem));
+      analyzer_visit_expr(analyzer, table, (ast_node_t*)list_elem_get(elem));
   }
   else
     unreachable();
@@ -91,6 +91,7 @@ void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
 
     if (id_sym->node->kind != AST_DECL_VAR &&
         id_sym->node->kind != AST_PARAM &&
+        id_sym->node->kind != AST_LOOP_VAR &&
         id_sym->node->kind != AST_ENUMERATOR &&
         id_sym->node->kind != AST_DECL_FUN &&
         id_sym->node->kind != AST_DECL_GEN)
@@ -110,7 +111,7 @@ void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
   }
 }
 
-void analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
+ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
   switch (node->kind)
   {
@@ -124,36 +125,39 @@ void analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
         id_sym->node->kind != AST_DECL_UNION &&
         id_sym->node->kind != AST_DECL_ENUM)
       report_error_symbol_is_not_a_typename(node->tok->loc);
-    break;
+
+    ast_node_free(node);
+
+    return id_sym->node;
   case AST_TYPE_MUT:
-    analyzer_visit_type(analyzer, table, node->type_mut.base_type);
+    node->type_mut.base_type = analyzer_visit_type(analyzer, table, node->type_mut.base_type);
     break;
   case AST_TYPE_CONST:
-    analyzer_visit_type(analyzer, table, node->type_const.base_type);
+    node->type_const.base_type = analyzer_visit_type(analyzer, table, node->type_const.base_type);
     break;
   case AST_TYPE_PTR:
-    analyzer_visit_type(analyzer, table, node->type_ptr.base_type);
+    node->type_ptr.base_type = analyzer_visit_type(analyzer, table, node->type_ptr.base_type);
     break;
   case AST_TYPE_ARRAY:
-    analyzer_visit_type(analyzer, table, node->type_array.base_type);
+    node->type_array.base_type = analyzer_visit_type(analyzer, table, node->type_array.base_type);
     if (node->type_array.size != NULL)
       analyzer_visit_expr(analyzer, table, node->type_array.size);
     break;
   case AST_TYPE_REF:
-    analyzer_visit_type(analyzer, table, node->type_ref.base_type);
+    node->type_ref.base_type = analyzer_visit_type(analyzer, table, node->type_ref.base_type);
     break;
   case AST_TYPE_NULLABLE:
-    analyzer_visit_type(analyzer, table, node->type_nullable.base_type);
+    node->type_nullable.base_type = analyzer_visit_type(analyzer, table, node->type_nullable.base_type);
     break;
   case AST_TYPE_FUN:
-    analyzer_visit_type(analyzer, table, node->type_fun.ret_type);
+    node->type_fun.ret_type = analyzer_visit_type(analyzer, table, node->type_fun.ret_type);
     for (list_elem_t* elem = list_front_elem(node->type_fun.params); elem != NULL; elem = list_elem_next(elem))
-      analyzer_visit_type(analyzer, table, (ast_node_t*)list_elem_data(elem));
+      list_elem_set(elem, analyzer_visit_type(analyzer, table, (ast_node_t*)list_elem_get(elem)));
     break;
   case AST_TYPE_GEN:
-    analyzer_visit_type(analyzer, table, node->type_gen.ret_type);
+    node->type_gen.ret_type = analyzer_visit_type(analyzer, table, node->type_gen.ret_type);
     for (list_elem_t* elem = list_front_elem(node->type_gen.params); elem != NULL; elem = list_elem_next(elem))
-      analyzer_visit_type(analyzer, table, (ast_node_t*)list_elem_data(elem));
+      list_elem_set(elem, analyzer_visit_type(analyzer, table, (ast_node_t*)list_elem_get(elem)));
     break;
   case AST_TYPE_BUILTIN_I8:
   case AST_TYPE_BUILTIN_I16:
@@ -172,6 +176,8 @@ void analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
     break;
   default: unreachable();
   }
+
+  return node;
 }
 
 void analyzer_visit_stmt_if(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -226,7 +232,7 @@ void analyzer_visit_stmt_block(analyzer_t* analyzer, symtable_t* table, ast_node
   symtable_t* block_table = symtable_init(table);
 
   for (list_elem_t* elem = list_front_elem(node->stmt_block.stmts); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_stmt(analyzer, block_table, (ast_node_t*)list_elem_data(elem));
+    analyzer_visit_stmt(analyzer, block_table, (ast_node_t*)list_elem_get(elem));
 }
 
 void analyzer_visit_stmt_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -265,7 +271,7 @@ void analyzer_visit_decl_var(analyzer_t* analyzer, symtable_t* table, ast_node_t
     report_warning_shadowed_variable(node->decl_var.id->tok->loc);
 
   analyzer_visit_expr(analyzer, table, node->decl_var.init);
-  analyzer_visit_type(analyzer, table, node->decl_var.type);
+  node->decl_var.type = analyzer_visit_type(analyzer, table, node->decl_var.type);
 }
 
 void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -280,9 +286,9 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_node_t
   fun_sym->scope = fun_table;
 
   for (list_elem_t* elem = list_front_elem(node->decl_fun.params); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_param(analyzer, fun_table, (ast_node_t*)list_elem_data(elem));
+    analyzer_visit_param(analyzer, fun_table, (ast_node_t*)list_elem_get(elem));
 
-  analyzer_visit_type(analyzer, table, node->decl_fun.ret_type);
+  node->decl_fun.ret_type = analyzer_visit_type(analyzer, table, node->decl_fun.ret_type);
   analyzer_visit_stmt(analyzer, fun_table, node->decl_fun.stmt);
 }
 
@@ -298,9 +304,9 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_node_t
   gen_sym->scope = gen_table;
 
   for (list_elem_t* elem = list_front_elem(node->decl_gen.params); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_param(analyzer, gen_table, (ast_node_t*)list_elem_data(elem));
+    analyzer_visit_param(analyzer, gen_table, (ast_node_t*)list_elem_get(elem));
 
-  analyzer_visit_type(analyzer, table, node->decl_gen.ret_type);
+  node->decl_gen.ret_type = analyzer_visit_type(analyzer, table, node->decl_gen.ret_type);
   analyzer_visit_stmt(analyzer, gen_table, node->decl_gen.stmt);
 }
 
@@ -320,7 +326,7 @@ void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_nod
   struct_sym->scope = struct_table;
 
   for (list_elem_t* elem = list_front_elem(node->decl_struct.members); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_decl_member(analyzer, struct_table, (ast_node_t*)list_elem_data(elem));
+    analyzer_visit_decl_member(analyzer, struct_table, (ast_node_t*)list_elem_get(elem));
 }
 
 void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -339,7 +345,7 @@ void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_node
   union_sym->scope = union_table;
 
   for (list_elem_t* elem = list_front_elem(node->decl_union.members); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_decl_member(analyzer, union_table, (ast_node_t*)list_elem_data(elem));
+    analyzer_visit_decl_member(analyzer, union_table, (ast_node_t*)list_elem_get(elem));
 }
 
 void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -358,7 +364,7 @@ void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_node_
   enum_sym->scope = enum_table;
 
   for (list_elem_t* elem = list_front_elem(node->decl_enum.members); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_enumerator(analyzer, enum_table, (ast_node_t*)list_elem_data(elem));
+    analyzer_visit_enumerator(analyzer, enum_table, (ast_node_t*)list_elem_get(elem));
 }
 
 void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -380,7 +386,7 @@ void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* table, ast_node_t
   }
 
   for (list_elem_t* elem = list_front_elem(node->decl_mod.members); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_decl_member(analyzer, mod_table, (ast_node_t*)list_elem_data(elem));
+    analyzer_visit_decl_member(analyzer, mod_table, (ast_node_t*)list_elem_get(elem));
 }
 
 void analyzer_visit_decl_member(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -408,7 +414,7 @@ void analyzer_visit_prog(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
   symtable_t* prog_table = symtable_init(table);
 
   for (list_elem_t* elem = list_front_elem(node->prog.decls); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_decl(analyzer, prog_table, (ast_node_t*)list_elem_data(elem));
+    analyzer_visit_decl(analyzer, prog_table, (ast_node_t*)list_elem_get(elem));
 }
 
 symtable_t* analyzer_analyze(analyzer_t* analyzer, ast_node_t* root)
