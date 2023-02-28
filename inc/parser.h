@@ -3,14 +3,18 @@
 
 #include <stdbool.h>
 
-#include "forward_decls.h"
+#include "list.h"
+#include "token.h"
+#include "ast.h"
 
-struct parser_s
+typedef struct parser_s
 {
   ast_node_t* root;
   list_t* toks;
   list_elem_t* cur;
-};
+} parser_t;
+
+typedef ast_node_t*(*parse_func_t)(parser_t*);
 
 parser_t* parser_init(list_t* toks);
 void parser_free(parser_t* par);
@@ -23,8 +27,8 @@ token_t* parser_peek(parser_t* par);
 bool parser_consume(parser_t* par, token_kind_t kind);
 token_t* parser_expect(parser_t* par, token_kind_t kind);
 
-list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, ast_node_t*(*parse_func)(parser_t*));
-list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, ast_node_t*(*parse_func)(parser_t*));
+list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func);
+list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func);
 
 ast_node_t* parser_parse_id(parser_t* par);
 

@@ -4,9 +4,14 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "forward_decls.h"
+#include "queue.h"
+#include "stack.h"
+#include "token.h"
+#include "ast.h"
+#include "parser.h"
+#include "op.h"
 
-enum shyd_kind_e
+typedef enum shyd_kind_e
 {
   SHYD_UNKNOWN,
   SHYD_TERM,
@@ -14,17 +19,17 @@ enum shyd_kind_e
   SHYD_OP,
   SHYD_PAREN_OPEN,
   SHYD_BRACKET_OPEN,
-};
+} shyd_kind_t;
 
-struct shyd_elem_s
+typedef struct shyd_elem_s
 {
   shyd_kind_t kind;
   token_t* tok;
   ast_node_t* node;
   op_kind_t op;
-};
+} shyd_elem_t;
 
-struct shyd_s
+typedef struct shyd_s
 {
   parser_t* par;
 
@@ -32,7 +37,7 @@ struct shyd_s
   stack_t* op_stack;
 
   bool prev_term;
-};
+} shyd_t;
 
 shyd_t* shyd_init(parser_t* par);
 void shyd_free(shyd_t* shyd);

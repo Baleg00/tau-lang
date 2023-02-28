@@ -3,14 +3,12 @@
 
 #include <stddef.h>
 
-#include "forward_decls.h"
-
-struct location_s
+typedef struct location_s
 {
   const char *path;
   char *src, *cur;
   size_t row, col, len;
-};
+} location_t;
 
 location_t* location_init(void);
 void location_free(location_t* loc);

@@ -8,7 +8,6 @@
 #include "token.h"
 #include "op.h"
 #include "ast.h"
-#include "symbol.h"
 #include "symtable.h"
 #include "diagnostics.h"
 #include "memtrace.h"

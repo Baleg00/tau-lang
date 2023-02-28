@@ -3,7 +3,9 @@
 
 #include <stdbool.h>
 
-#include "forward_decls.h"
+#include "list.h"
+
+typedef list_t stack_t;
 
 stack_t* stack_init(void);
 void stack_free(stack_t* stack);

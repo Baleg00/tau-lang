@@ -4,13 +4,15 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "forward_decls.h"
+#include "list.h"
+#include "location.h"
+#include "token.h"
 
-struct lexer_s
+typedef struct lexer_s
 {
   location_t* loc;
   list_t* toks;
-};
+} lexer_t;
 
 lexer_t* lexer_init(char* path, char* src);
 void lexer_free(lexer_t* lex);

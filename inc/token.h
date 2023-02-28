@@ -5,9 +5,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "forward_decls.h"
+#include "list.h"
+#include "location.h"
 
-enum token_kind_e
+typedef enum token_kind_e
 {
   TOK_UNKNOWN = 0, // unknown token
 
@@ -113,9 +114,9 @@ enum token_kind_e
   TOK_PUNCT_BRACE_RIGHT, // punctuation "}"
 
   TOK_EOF = -1 // end of file
-};
+} token_kind_t;
 
-struct token_s
+typedef struct token_s
 {
   token_kind_t kind;
   location_t* loc;
@@ -134,7 +135,7 @@ struct token_s
       char* value;
     } lit_str, lit_char, id;
   };
-};
+} token_t;
 
 token_t* token_init(void);
 void token_free(token_t* tok);

@@ -5,9 +5,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "forward_decls.h"
+#include "list.h"
+#include "token.h"
+#include "op.h"
 
-enum ast_kind_e
+typedef enum ast_kind_e
 {
   AST_UNKNOWN = 0, // unknown node
 
@@ -70,7 +72,9 @@ enum ast_kind_e
   AST_ENUMERATOR, // enumerator
 
   AST_PROG, // program
-};
+} ast_kind_t;
+
+typedef struct ast_node_s ast_node_t;
 
 struct ast_node_s
 {

@@ -6,7 +6,6 @@
 
 #include "util.h"
 #include "list.h"
-#include "symbol.h"
 #include "memtrace.h"
 
 #define SYMTABLE_INITIAL_CAPACITY 16
@@ -23,6 +22,21 @@ static inline uint64_t fnv1a_hash(const uint8_t* data, size_t size)
   }
 
   return hash;
+}
+
+symbol_t* symbol_init(char* id, ast_node_t* node)
+{
+  symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
+  assert(sym != NULL);
+  sym->scope = NULL;
+  sym->id = id;
+  sym->node = node;
+  return sym;
+}
+
+void symbol_free(symbol_t* sym)
+{
+  free(sym);
 }
 
 symtable_t* symtable_init(symtable_t* parent)

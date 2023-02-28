@@ -1,12 +1,13 @@
 #ifndef TAU_ANALYZER_H
 #define TAU_ANALYZER_H
 
-#include "forward_decls.h"
+#include "ast.h"
+#include "symtable.h"
 
-struct analyzer_s
+typedef struct analyzer_s
 {
   symtable_t* root;
-};
+} analyzer_t;
 
 analyzer_t* analyzer_init(void);
 void analyzer_free(analyzer_t* analyzer);

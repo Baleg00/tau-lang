@@ -3,7 +3,13 @@
 
 #include <stddef.h>
 
-#include "forward_decls.h"
+#include "queue.h"
+
+typedef enum cli_type_e cli_type_t;
+typedef struct cli_opt_s cli_opt_t;
+typedef struct cli_s cli_t;
+
+typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, void*);
 
 enum cli_type_e
 {

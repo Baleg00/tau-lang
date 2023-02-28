@@ -3,9 +3,7 @@
 
 #include <stdbool.h>
 
-#include "forward_decls.h"
-
-enum op_kind_e
+typedef enum op_kind_e
 {
   OP_UNKNOWN, // unknown operation
 
@@ -67,7 +65,7 @@ enum op_kind_e
   OP_RANGE, // ".." operation generate range
   OP_SEMICOLON, // ";" operation semicolon
   OP_CALL, // "()" operation function call
-};
+} op_kind_t;
 
 const char* op_kind_to_string(op_kind_t kind);
 

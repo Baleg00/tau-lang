@@ -1,7 +1,5 @@
 #include "queue.h"
 
-#include "list.h"
-
 queue_t* queue_init(void)
 {
   return (queue_t*)list_init();

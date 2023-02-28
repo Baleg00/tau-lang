@@ -3,7 +3,9 @@
 
 #include <stdbool.h>
 
-#include "forward_decls.h"
+#include "list.h"
+
+typedef list_t queue_t;
 
 queue_t* queue_init(void);
 void queue_free(queue_t* que);

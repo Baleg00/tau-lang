@@ -3,7 +3,19 @@
 
 #include <stddef.h>
 
-#include "forward_decls.h"
+#include "list.h"
+#include "ast.h"
+
+typedef struct symtable_s symtable_t;
+typedef struct symbol_s symbol_t;
+
+struct symbol_s
+{
+  symtable_t* scope;
+  char* id;
+  ast_node_t* node;
+  symbol_t* next;
+};
 
 struct symtable_s
 {
@@ -13,6 +25,9 @@ struct symtable_s
   size_t size, capacity;
   symbol_t** buckets;
 };
+
+symbol_t* symbol_init(char* id, ast_node_t* node);
+void symbol_free(symbol_t* sym);
 
 symtable_t* symtable_init(symtable_t* parent);
 void symtable_free(symtable_t* table);

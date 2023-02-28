@@ -91,7 +91,7 @@ ast_node_t* parser_node_init(parser_t* par, ast_kind_t kind)
   return node;
 }
 
-list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, ast_node_t*(*parse_func)(parser_t*))
+list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func)
 {
   list_t* list = list_init();
 
@@ -106,7 +106,7 @@ list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, ast_node_
   return list;
 }
 
-list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, ast_node_t*(*parse_func)(parser_t*))
+list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func)
 {
   list_t* list = list_init();
 
