@@ -347,7 +347,7 @@ void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
     exit(EXIT_FAILURE);
   }
 
-  node->expr_op.op_binary.lhs = (ast_node_t*)stack_pop(node_stack);
+  node->expr_op.op_binary.rhs = (ast_node_t*)stack_pop(node_stack);
 
   if (stack_empty(node_stack))
   {
@@ -355,7 +355,7 @@ void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
     exit(EXIT_FAILURE);
   }
 
-  node->expr_op.op_binary.rhs = (ast_node_t*)stack_pop(node_stack);
+  node->expr_op.op_binary.lhs = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, node);
 }

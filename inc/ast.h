@@ -23,6 +23,7 @@ typedef enum ast_kind_e
   AST_TYPE_NULLABLE, // nullable type
   AST_TYPE_FUN, // function type
   AST_TYPE_GEN, // generator type
+  AST_TYPE_TYPE, // type type
   AST_TYPE_BUILTIN_I8, // built-in type i8
   AST_TYPE_BUILTIN_I16, // built-in type i16
   AST_TYPE_BUILTIN_I32, // built-in type i32
@@ -66,6 +67,8 @@ typedef enum ast_kind_e
   AST_DECL_MEMBER, // declaration member
 
   AST_PARAM, // function/generator parameter
+  AST_VARIADIC_PARAM, // variadic parameter
+  AST_GENERIC_PARAM, // generic parameter
 
   AST_LOOP_VAR, // loop variable
 
@@ -147,16 +150,22 @@ struct ast_node_s
     } decl_var;
 
     struct {
+      list_t* generic_params;
       list_t* params;
       ast_node_t *id, *ret_type, *stmt;
     } decl_fun,
       decl_gen;
 
     struct {
+      list_t* generic_params;
       ast_node_t *id;
       list_t* members;
-    } decl_struct,
-      decl_union,
+    } decl_struct;
+
+    struct {
+      ast_node_t *id;
+      list_t* members;
+    } decl_union,
       decl_enum,
       decl_mod;
 
@@ -165,10 +174,15 @@ struct ast_node_s
     } decl_member;
 
     struct {
-      ast_node_t *id, *type;
-    } param,
-      loop_var;
+      ast_node_t *id, *type, *init;
+    } param;
 
+    struct {
+      ast_node_t *id, *type;
+    } generic_param,
+      variadic_param,
+      loop_var;
+    
     struct {
       ast_node_t* id;
     } enumerator;

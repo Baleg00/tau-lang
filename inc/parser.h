@@ -33,6 +33,8 @@ list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_f
 ast_node_t* parser_parse_id(parser_t* par);
 
 ast_node_t* parser_parse_param(parser_t* par);
+ast_node_t* parser_parse_variadic_param(parser_t* par);
+ast_node_t* parser_parse_generic_param(parser_t* par);
 
 ast_node_t* parser_parse_loop_var(parser_t* par);
 

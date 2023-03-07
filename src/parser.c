@@ -129,6 +129,27 @@ ast_node_t* parser_parse_param(parser_t* par)
   node->param.id = parser_parse_id(par);
   parser_expect(par, TOK_PUNCT_COLON);
   node->param.type = parser_parse_type(par);
+  node->param.init = parser_consume(par, TOK_PUNCT_EQUAL) ? parser_parse_expr(par) : NULL;
+  return node;
+}
+
+ast_node_t* parser_parse_variadic_param(parser_t* par)
+{
+  ast_node_t* node = parser_node_init(par, AST_VARIADIC_PARAM);
+  node->variadic_param.id = parser_parse_id(par);
+  parser_expect(par, TOK_PUNCT_COLON);
+  node->variadic_param.type = parser_node_init(par, AST_TYPE_ARRAY);
+  node->variadic_param.type->type_array.size = NULL;
+  node->variadic_param.type->type_array.base_type = parser_parse_type(par);
+  return node;
+}
+
+ast_node_t* parser_parse_generic_param(parser_t* par)
+{
+  ast_node_t* node = parser_node_init(par, AST_GENERIC_PARAM);
+  node->generic_param.id = parser_parse_id(par);
+  parser_expect(par, TOK_PUNCT_COLON);
+  node->generic_param.type = parser_consume(par, TOK_KW_TYPE) ? parser_node_init(par, AST_TYPE_TYPE) : parser_parse_type(par);
   return node;
 }
 
@@ -370,8 +391,7 @@ ast_node_t* parser_parse_decl_var(parser_t* par)
   node->decl_var.id = parser_parse_id(par);
   parser_expect(par, TOK_PUNCT_COLON);
   node->decl_var.type = parser_parse_type(par);
-  parser_expect(par, TOK_PUNCT_EQUAL);
-  node->decl_var.init = parser_parse_expr(par);
+  node->decl_var.init = parser_consume(par, TOK_PUNCT_EQUAL) ? parser_parse_expr(par) : NULL;
   return node;
 }
 
@@ -379,13 +399,53 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 {
   ast_node_t* node = parser_node_init(par, AST_DECL_FUN);
   parser_expect(par, TOK_KW_FUN);
+  
+  node->decl_fun.generic_params = NULL;
+  if (parser_consume(par, TOK_PUNCT_LESS))
+  {
+    node->decl_fun.generic_params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+    token_t* tok = parser_expect(par, TOK_PUNCT_GREATER);
+    if (list_size(node->decl_fun.generic_params) == 0)
+      report_error_empty_generic_parameter_list(tok->loc);
+  }
+
   node->decl_fun.id = parser_parse_id(par);
+  
+  node->decl_fun.params = NULL;
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
-  node->decl_fun.params = parser_current(par)->kind != TOK_PUNCT_PAREN_RIGHT ? parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_param) : list_init();
-  parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
+
+  if (!parser_consume(par, TOK_PUNCT_PAREN_RIGHT))
+  {
+    node->decl_fun.params = list_init();
+
+    for (bool seen_default = false;;)
+    {
+      if (parser_consume(par, TOK_PUNCT_DOT_DOT_DOT))
+      {
+        list_push_back(node->decl_fun.params, parser_parse_variadic_param(par));
+        break;
+      }
+
+      ast_node_t* param = parser_parse_param(par);
+      seen_default |= param->param.init != NULL;
+
+      if (seen_default && param->param.init == NULL)
+        report_error_missing_default_parameter(param->tok->loc);
+
+      list_push_back(node->decl_fun.params, param);
+
+      if (!parser_consume(par, TOK_PUNCT_COMMA))
+        break;
+    }
+
+    parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
+  }
+  
   parser_expect(par, TOK_PUNCT_COLON);
   node->decl_fun.ret_type = parser_parse_type(par);
+  
   node->decl_fun.stmt = parser_parse_stmt(par);
+  
   return node;
 }
 
@@ -393,13 +453,53 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
 {
   ast_node_t* node = parser_node_init(par, AST_DECL_GEN);
   parser_expect(par, TOK_KW_GEN);
+
+  node->decl_gen.generic_params = NULL;
+  if (parser_consume(par, TOK_PUNCT_LESS))
+  {
+    node->decl_gen.generic_params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+    token_t* tok = parser_expect(par, TOK_PUNCT_GREATER);
+    if (list_size(node->decl_gen.generic_params) == 0)
+      report_error_empty_generic_parameter_list(tok->loc);
+  }
+
   node->decl_gen.id = parser_parse_id(par);
+
+  node->decl_gen.params = NULL;
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
-  node->decl_gen.params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_param);
-  parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
+  
+  if (!parser_consume(par, TOK_PUNCT_PAREN_RIGHT))
+  {
+    node->decl_gen.params = list_init();
+
+    for (bool seen_default = false;;)
+    {
+      if (parser_consume(par, TOK_PUNCT_DOT_DOT_DOT))
+      {
+        list_push_back(node->decl_gen.params, parser_parse_variadic_param(par));
+        break;
+      }
+
+      ast_node_t* param = parser_parse_param(par);
+      seen_default |= param->param.init != NULL;
+
+      if (seen_default && param->param.init == NULL)
+        report_error_missing_default_parameter(param->tok->loc);
+
+      list_push_back(node->decl_gen.params, param);
+
+      if (!parser_consume(par, TOK_PUNCT_COMMA))
+        break;
+    }
+
+    parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
+  }
+
   parser_expect(par, TOK_PUNCT_COLON);
   node->decl_gen.ret_type = parser_parse_type(par);
+  
   node->decl_gen.stmt = parser_parse_stmt(par);
+  
   return node;
 }
 
@@ -407,9 +507,21 @@ ast_node_t* parser_parse_decl_struct(parser_t* par)
 {
   ast_node_t* node = parser_node_init(par, AST_DECL_STRUCT);
   parser_expect(par, TOK_KW_STRUCT);
+  
+  node->decl_struct.generic_params = NULL;
+  if (parser_consume(par, TOK_PUNCT_LESS))
+  {
+    node->decl_struct.generic_params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+    token_t* tok = parser_expect(par, TOK_PUNCT_GREATER);
+    if (list_size(node->decl_struct.generic_params) == 0)
+      report_error_empty_generic_parameter_list(tok->loc);
+  }
+  
   node->decl_struct.id = parser_parse_id(par);
+
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
   node->decl_struct.members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_member);
+  
   return node;
 }
 

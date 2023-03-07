@@ -187,6 +187,7 @@ void lexer_read_word(lexer_t* lex)
     { "yield",    TOK_KW_YIELD },
     { "mut",      TOK_KW_MUT },
     { "const",    TOK_KW_CONST },
+    { "type",     TOK_KW_TYPE },
     { "i8",       TOK_KW_I8 },
     { "i16",      TOK_KW_I16 },
     { "i32",      TOK_KW_I32 },
@@ -542,7 +543,8 @@ void lexer_read_punctuation(lexer_t* lex)
     { TOK_PUNCT_BANG_EQUAL,            2 },
     { TOK_PUNCT_DOT,                   1 },
     { TOK_PUNCT_DOT_DOT,               2 },
-    { TOK_PUNCT_QUESTION,              2 },
+    { TOK_PUNCT_DOT_DOT_DOT,           3 },
+    { TOK_PUNCT_QUESTION,              1 },
     { TOK_PUNCT_QUESTION_DOT,          2 },
     { TOK_PUNCT_EQUAL,                 1 },
     { TOK_PUNCT_EQUAL_EQUAL,           2 },
@@ -639,7 +641,10 @@ void lexer_read_punctuation(lexer_t* lex)
       kind = TOK_PUNCT_BANG;
   else if (lexer_consume(lex, '.'))
     if (lexer_consume(lex, '.'))
-      kind = TOK_PUNCT_DOT_DOT;
+      if (lexer_consume(lex, '.'))
+        kind = TOK_PUNCT_DOT_DOT_DOT;
+      else
+        kind = TOK_PUNCT_DOT_DOT;
     else
       kind = TOK_PUNCT_DOT;
   else if (lexer_consume(lex, '?'))

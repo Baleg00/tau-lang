@@ -20,6 +20,9 @@ void report_error_unexpected_token(location_t* loc);
 
 void report_error_failed_to_open_file(char* path);
 
+void report_error_empty_generic_parameter_list(location_t* loc);
+void report_error_missing_default_parameter(location_t* loc);
+
 void report_error_parameter_redefinition(location_t* loc);
 void report_error_variable_redeclaration(location_t* loc);
 void report_error_enumerator_redeclaration(location_t* loc);

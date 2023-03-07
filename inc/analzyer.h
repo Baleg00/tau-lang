@@ -13,6 +13,8 @@ analyzer_t* analyzer_init(void);
 void analyzer_free(analyzer_t* analyzer);
 
 void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
+void analyzer_visit_variadic_param(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
+void analyzer_visit_generic_param(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
 
 void analyzer_visit_loop_var(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
 

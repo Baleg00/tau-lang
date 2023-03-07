@@ -14,7 +14,7 @@ decl = mod_decl
 
 mod_decl = "mod" , id , '{' , { decl } , '}' ;
 
-struct_decl = "struct" , id , '{' , { member } , '}' ;
+struct_decl = "struct" , [ generic_param_list ] , id , '{' , { member } , '}' ;
 
 union_decl = "union" , id , '{' , { member } , '}' ;
 
@@ -24,13 +24,25 @@ enum_decl = "enum" , id , '{' , { enumerator } , '}' ;
 
 enumerator = id ;
 
-fun_decl = "fun" , id , '(' , [ param , { ',' , param } ] , ')' , ':' , type , stmt ;
+fun_decl = "fun" , [ generic_param_list ] , id , '(' , [ param_list ] , [ default_param_list | variadic_param ] , ')' , ':' , type , stmt ;
 
-gen_decl = "gen" , id , '(' , [ param , { ',' , param } ] , ')' , ':' , type , stmt ;
+gen_decl = "gen" , [ generic_param_list ] , id , '(' , [ param_list ] , [ default_param_list | variadic_param ] , ')' , ':' , type , stmt ;
+
+generic_param_list = '<' , generic_param , { ',' , generic_param } , '>' ;
+
+generic_param = id , ':' , ( type | "type" ) ;
+
+param_list = param , { ',' , param } ;
 
 param = id , ':' , type ;
 
-var_decl = id , ':' , type , '=' , expr ;
+default_param_list = default_param , { ',' , default_param } ;
+
+default_param = id , ':' , type , '=' , expr ;
+
+variadic_param = id , ':' , type , "..." ;
+
+var_decl = id , ':' , type , [ '=' , expr ] ;
 
 type = primitive_type
   | id
@@ -42,7 +54,9 @@ type = primitive_type
   | "mut" , type
   | "const" , type
   | "fun" , '(' , [ type , { ',' , type } ] , ')' , ':' , type
-  | "gen" , '(' , [ type , { ',' , type } ] , ')' , ':' , type ;
+  | "gen" , '(' , [ type , { ',' , type } ] , ')' , ':' , type
+  | type , '.' , id
+  | type , '<' , ( type | expr ) , { ',' , ( type | expr ) } , '>' ;
 
 primitive_type = "unit"
   | "bool"
@@ -157,7 +171,8 @@ postfix_op = "is" , type
   | "++"
   | "--"
   | '[' , expr , ']'
-  | '(' , [ expr , { ',' , expr } ] , ')' ;
+  | '(' , [ expr , { ',' , expr } ] , ')'
+  | '<' , ( expr | type ) , { ',' , ( expr | type ) }  , '>' ;
 
 group_expr = '(' , expr , ')' ;
 

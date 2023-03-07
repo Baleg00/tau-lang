@@ -125,6 +125,7 @@ const char* token_kind_to_string(token_kind_t kind)
     case TOK_KW_YIELD:                    return "TOK_KW_YIELD";
     case TOK_KW_MUT:                      return "TOK_KW_MUT";
     case TOK_KW_CONST:                    return "TOK_KW_CONST";
+    case TOK_KW_TYPE:                     return "TOK_KW_TYPE";
     case TOK_KW_I8:                       return "TOK_KW_I8";
     case TOK_KW_I16:                      return "TOK_KW_I16";
     case TOK_KW_I32:                      return "TOK_KW_I32";
@@ -173,6 +174,7 @@ const char* token_kind_to_string(token_kind_t kind)
     case TOK_PUNCT_BANG_EQUAL:            return "TOK_PUNCT_BANG_EQUAL";
     case TOK_PUNCT_DOT:                   return "TOK_PUNCT_DOT";
     case TOK_PUNCT_DOT_DOT:               return "TOK_PUNCT_DOT_DOT";
+    case TOK_PUNCT_DOT_DOT_DOT:           return "TOK_PUNCT_DOT_DOT_DOT";
     case TOK_PUNCT_QUESTION:              return "TOK_PUNCT_QUESTION";
     case TOK_PUNCT_QUESTION_DOT:          return "TOK_PUNCT_QUESTION_DOT";
     case TOK_PUNCT_EQUAL:                 return "TOK_PUNCT_EQUAL";

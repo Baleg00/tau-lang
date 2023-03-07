@@ -56,6 +56,7 @@ void ast_node_free(ast_node_t* node)
     list_free(node->type_gen.params);
     ast_node_free(node->type_gen.ret_type);
     break;
+  case AST_TYPE_TYPE:
   case AST_TYPE_BUILTIN_I8:
   case AST_TYPE_BUILTIN_I16:
   case AST_TYPE_BUILTIN_I32:
@@ -126,20 +127,41 @@ void ast_node_free(ast_node_t* node)
     ast_node_free(node->decl_var.init);
     break;
   case AST_DECL_FUN:
+    if (node->decl_fun.generic_params != NULL)
+    {
+      list_for_each(node->decl_fun.generic_params, ast_node_free);
+      list_free(node->decl_fun.generic_params);
+    }
     ast_node_free(node->decl_fun.id);
-    list_for_each(node->decl_fun.params, ast_node_free);
-    list_free(node->decl_fun.params);
+    if (node->decl_fun.params != NULL)
+    {
+      list_for_each(node->decl_fun.params, ast_node_free);
+      list_free(node->decl_fun.params);
+    }
     ast_node_free(node->decl_fun.ret_type);
     ast_node_free(node->decl_fun.stmt);
     break;
   case AST_DECL_GEN:
+    if (node->decl_gen.generic_params != NULL)
+    {
+      list_for_each(node->decl_gen.generic_params, ast_node_free);
+      list_free(node->decl_gen.generic_params);
+    }
     ast_node_free(node->decl_gen.id);
-    list_for_each(node->decl_gen.params, ast_node_free);
-    list_free(node->decl_gen.params);
+    if (node->decl_gen.params != NULL)
+    {
+      list_for_each(node->decl_gen.params, ast_node_free);
+      list_free(node->decl_gen.params);
+    }
     ast_node_free(node->decl_gen.ret_type);
     ast_node_free(node->decl_gen.stmt);
     break;
   case AST_DECL_STRUCT:
+    if (node->decl_struct.generic_params != NULL)
+    {
+      list_for_each(node->decl_struct.generic_params, ast_node_free);
+      list_free(node->decl_struct.generic_params);
+    }
     ast_node_free(node->decl_struct.id);
     list_for_each(node->decl_struct.members, ast_node_free);
     list_free(node->decl_struct.members);
@@ -165,6 +187,15 @@ void ast_node_free(ast_node_t* node)
   case AST_PARAM:
     ast_node_free(node->param.id);
     ast_node_free(node->param.type);
+    ast_node_free(node->param.init);
+    break;
+  case AST_VARIADIC_PARAM:
+    ast_node_free(node->variadic_param.id);
+    ast_node_free(node->variadic_param.type);
+    break;
+  case AST_GENERIC_PARAM:
+    ast_node_free(node->generic_param.id);
+    ast_node_free(node->generic_param.type);
     break;
   case AST_LOOP_VAR:
     ast_node_free(node->loop_var.id);
@@ -195,6 +226,7 @@ const char* ast_kind_to_string(ast_kind_t kind)
   case AST_TYPE_NULLABLE:      return "AST_TYPE_NULLABLE";
   case AST_TYPE_FUN:           return "AST_TYPE_FUN";
   case AST_TYPE_GEN:           return "AST_TYPE_GEN";
+  case AST_TYPE_TYPE:          return "AST_TYPE_TYPE";
   case AST_TYPE_BUILTIN_I8:    return "AST_TYPE_BUILTIN_I8";
   case AST_TYPE_BUILTIN_I16:   return "AST_TYPE_BUILTIN_I16";
   case AST_TYPE_BUILTIN_I32:   return "AST_TYPE_BUILTIN_I32";
@@ -234,6 +266,8 @@ const char* ast_kind_to_string(ast_kind_t kind)
   case AST_DECL_MOD:           return "AST_DECL_MOD";
   case AST_DECL_MEMBER:        return "AST_DECL_MEMBER";
   case AST_PARAM:              return "AST_PARAM";
+  case AST_VARIADIC_PARAM:     return "AST_VARIADIC_PARAM";
+  case AST_GENERIC_PARAM:      return "AST_GENERIC_PARAM";
   case AST_LOOP_VAR:           return "AST_LOOP_VAR";
   case AST_ENUMERATOR:         return "AST_ENUMERATOR";
   case AST_PROG:               return "AST_PROG";
@@ -245,6 +279,12 @@ const char* ast_kind_to_string(ast_kind_t kind)
 
 void ast_list_json_dump(FILE* stream, list_t* list)
 {
+  if (list == NULL)
+  {
+    fprintf(stream, "null");
+    return;
+  }
+
   fputc('[', stream);
   for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
   {
@@ -310,6 +350,7 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     fprintf(stream, ",\"ret_type\":");
     ast_json_dump(stream, root->type_gen.ret_type);
     break;
+  case AST_TYPE_TYPE:
   case AST_TYPE_BUILTIN_I8:
   case AST_TYPE_BUILTIN_I16:
   case AST_TYPE_BUILTIN_I32:
@@ -417,6 +458,8 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   case AST_DECL_FUN:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, root->decl_fun.id);
+    fprintf(stream, ",\"generic_params\":");
+    ast_list_json_dump(stream, root->decl_fun.generic_params);
     fprintf(stream, ",\"params\":");
     ast_list_json_dump(stream, root->decl_fun.params);
     fprintf(stream, ",\"ret_type\":");
@@ -427,6 +470,8 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   case AST_DECL_GEN:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, root->decl_gen.id);
+    fprintf(stream, ",\"generic_params\":");
+    ast_list_json_dump(stream, root->decl_gen.generic_params);
     fprintf(stream, ",\"params\":");
     ast_list_json_dump(stream, root->decl_gen.params);
     fprintf(stream, ",\"ret_type\":");
@@ -437,6 +482,8 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   case AST_DECL_STRUCT:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, root->decl_struct.id);
+    fprintf(stream, ",\"generic_params\":");
+    ast_list_json_dump(stream, root->decl_struct.generic_params);
     fprintf(stream, ",\"members\":");
     ast_list_json_dump(stream, root->decl_struct.members);
     break;
@@ -467,6 +514,20 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     ast_json_dump(stream, root->param.id);
     fprintf(stream, ",\"type\":");
     ast_json_dump(stream, root->param.type);
+    fprintf(stream, ",\"init\":");
+    ast_json_dump(stream, root->param.init);
+    break;
+  case AST_VARIADIC_PARAM:
+    fprintf(stream, ",\"id\":");
+    ast_json_dump(stream, root->variadic_param.id);
+    fprintf(stream, ",\"type\":");
+    ast_json_dump(stream, root->variadic_param.type);
+    break;
+  case AST_GENERIC_PARAM:
+    fprintf(stream, ",\"id\":");
+    ast_json_dump(stream, root->generic_param.id);
+    fprintf(stream, ",\"type\":");
+    ast_json_dump(stream, root->generic_param.type);
     break;
   case AST_LOOP_VAR:
     fprintf(stream, ",\"id\":");

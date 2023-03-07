@@ -28,13 +28,55 @@ void analyzer_free(analyzer_t* analyzer)
 
 void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
+  if (node->kind == AST_VARIADIC_PARAM)
+  {
+    analyzer_visit_variadic_param(analyzer, table, node);
+    return;
+  }
+
   symbol_t* param_sym = symbol_init(node->param.id->tok->id.value, node);
   symbol_t* collision = symtable_insert(table, param_sym);
 
-  if (collision != NULL && collision->node->kind == AST_PARAM)
-    report_error_parameter_redefinition(node->param.id->tok->loc);
+  if (collision != NULL)
+    switch (collision->node->kind)
+    {
+    case AST_PARAM:           report_error_parameter_redefinition(node->param.id->tok->loc);
+    case AST_GENERIC_PARAM:   report_error_parameter_redefinition(node->generic_param.id->tok->loc);
+    case AST_VARIADIC_PARAM:  report_error_parameter_redefinition(node->variadic_param.id->tok->loc);
+    }
 
   node->param.type = analyzer_visit_type(analyzer, table, node->param.type);
+
+  if (node->param.init != NULL)
+    analyzer_visit_expr(analyzer, table, node->param.init);
+}
+
+void analyzer_visit_variadic_param(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
+{
+  symbol_t* param_sym = symbol_init(node->generic_param.id->tok->id.value, node);
+  symbol_t* collision = symtable_insert(table, param_sym);
+
+  if (collision != NULL)
+    switch (collision->node->kind)
+    {
+    case AST_PARAM:           report_error_parameter_redefinition(node->param.id->tok->loc);
+    case AST_GENERIC_PARAM:   report_error_parameter_redefinition(node->generic_param.id->tok->loc);
+    case AST_VARIADIC_PARAM:  report_error_parameter_redefinition(node->variadic_param.id->tok->loc);
+    }
+
+  node->variadic_param.type = analyzer_visit_type(analyzer, table, node->variadic_param.type);
+}
+
+void analyzer_visit_generic_param(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
+{
+  symbol_t* param_sym = symbol_init(node->generic_param.id->tok->id.value, node);
+  symbol_t* collision = symtable_insert(table, param_sym);
+
+  if (collision != NULL && collision->node->kind == AST_PARAM)
+    report_error_parameter_redefinition(node->generic_param.id->tok->loc);
+
+  if (node->generic_param.type->kind != AST_TYPE_TYPE)
+    node->generic_param.type = analyzer_visit_type(analyzer, table, node->param.type);
 }
 
 void analyzer_visit_loop_var(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -90,6 +132,8 @@ void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
 
     if (id_sym->node->kind != AST_DECL_VAR &&
         id_sym->node->kind != AST_PARAM &&
+        id_sym->node->kind != AST_VARIADIC_PARAM &&
+        id_sym->node->kind != AST_GENERIC_PARAM &&
         id_sym->node->kind != AST_LOOP_VAR &&
         id_sym->node->kind != AST_ENUMERATOR &&
         id_sym->node->kind != AST_DECL_FUN &&
@@ -122,7 +166,12 @@ ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_nod
 
     if (id_sym->node->kind != AST_DECL_STRUCT &&
         id_sym->node->kind != AST_DECL_UNION &&
-        id_sym->node->kind != AST_DECL_ENUM)
+        id_sym->node->kind != AST_DECL_ENUM &&
+        id_sym->node->kind != AST_GENERIC_PARAM)
+      report_error_symbol_is_not_a_typename(node->tok->loc);
+
+    if (id_sym->node->kind == AST_GENERIC_PARAM &&
+        id_sym->node->generic_param.type->kind != AST_TYPE_TYPE)
       report_error_symbol_is_not_a_typename(node->tok->loc);
 
     ast_node_free(node);
@@ -173,7 +222,8 @@ ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_nod
   case AST_TYPE_BUILTIN_BOOL:
   case AST_TYPE_BUILTIN_UNIT:
     break;
-  default: unreachable();
+  default:
+    unreachable();
   }
 
   return node;
@@ -269,7 +319,9 @@ void analyzer_visit_decl_var(analyzer_t* analyzer, symtable_t* table, ast_node_t
   if (lookup != NULL && lookup->node->kind == AST_DECL_VAR)
     report_warning_shadowed_variable(node->decl_var.id->tok->loc);
 
-  analyzer_visit_expr(analyzer, table, node->decl_var.init);
+  if (node->decl_var.init != NULL)
+    analyzer_visit_expr(analyzer, table, node->decl_var.init);
+    
   node->decl_var.type = analyzer_visit_type(analyzer, table, node->decl_var.type);
 }
 
@@ -284,10 +336,15 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_node_t
   symtable_t* fun_table = symtable_init(table);
   fun_sym->scope = fun_table;
 
-  for (list_elem_t* elem = list_front_elem(node->decl_fun.params); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_param(analyzer, fun_table, (ast_node_t*)list_elem_get(elem));
+  if (node->decl_fun.generic_params != NULL)
+    for (list_elem_t* elem = list_front_elem(node->decl_fun.generic_params); elem != NULL; elem = list_elem_next(elem))
+      analyzer_visit_generic_param(analyzer, fun_table, (ast_node_t*)list_elem_get(elem));
 
-  node->decl_fun.ret_type = analyzer_visit_type(analyzer, table, node->decl_fun.ret_type);
+  if (node->decl_fun.params != NULL)
+    for (list_elem_t* elem = list_front_elem(node->decl_fun.params); elem != NULL; elem = list_elem_next(elem))
+      analyzer_visit_param(analyzer, fun_table, (ast_node_t*)list_elem_get(elem));
+
+  node->decl_fun.ret_type = analyzer_visit_type(analyzer, fun_table, node->decl_fun.ret_type);
   analyzer_visit_stmt(analyzer, fun_table, node->decl_fun.stmt);
 }
 
@@ -302,10 +359,15 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_node_t
   symtable_t* gen_table = symtable_init(table);
   gen_sym->scope = gen_table;
 
-  for (list_elem_t* elem = list_front_elem(node->decl_gen.params); elem != NULL; elem = list_elem_next(elem))
-    analyzer_visit_param(analyzer, gen_table, (ast_node_t*)list_elem_get(elem));
+  if (node->decl_gen.generic_params != NULL)
+    for (list_elem_t* elem = list_front_elem(node->decl_gen.generic_params); elem != NULL; elem = list_elem_next(elem))
+      analyzer_visit_generic_param(analyzer, gen_table, (ast_node_t*)list_elem_get(elem));
 
-  node->decl_gen.ret_type = analyzer_visit_type(analyzer, table, node->decl_gen.ret_type);
+  if (node->decl_gen.params != NULL)
+    for (list_elem_t* elem = list_front_elem(node->decl_gen.params); elem != NULL; elem = list_elem_next(elem))
+      analyzer_visit_param(analyzer, gen_table, (ast_node_t*)list_elem_get(elem));
+
+  node->decl_gen.ret_type = analyzer_visit_type(analyzer, gen_table, node->decl_gen.ret_type);
   analyzer_visit_stmt(analyzer, gen_table, node->decl_gen.stmt);
 }
 
@@ -323,6 +385,10 @@ void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_nod
 
   symtable_t* struct_table = symtable_init(table);
   struct_sym->scope = struct_table;
+
+  if (node->decl_struct.generic_params != NULL)
+    for (list_elem_t* elem = list_front_elem(node->decl_struct.generic_params); elem != NULL; elem = list_elem_next(elem))
+      analyzer_visit_generic_param(analyzer, struct_table, (ast_node_t*)list_elem_get(elem));
 
   for (list_elem_t* elem = list_front_elem(node->decl_struct.members); elem != NULL; elem = list_elem_next(elem))
     analyzer_visit_decl_member(analyzer, struct_table, (ast_node_t*)list_elem_get(elem));
