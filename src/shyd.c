@@ -252,7 +252,7 @@ bool shyd_parse_operator(shyd_t* shyd)
   case TOK_PUNCT_BANG_EQUAL:            op = OP_COMP_NE; break;
   case TOK_PUNCT_DOT:                   op = OP_MEMBER; break;
   case TOK_PUNCT_DOT_DOT:               op = OP_RANGE; break;
-  case TOK_PUNCT_QUESTION_DOT:          op = OP_SAFE_IND_MEMBER; break;
+  case TOK_PUNCT_QUESTION_DOT:          op = OP_NULL_SAFE_MEMBER; break;
   case TOK_PUNCT_EQUAL:                 op = OP_ASSIGN; break;
   case TOK_PUNCT_EQUAL_EQUAL:           op = OP_COMP_EQ; break;
   case TOK_PUNCT_SEMICOLON:             op = OP_SEMICOLON; break;

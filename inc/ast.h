@@ -24,6 +24,7 @@ typedef enum ast_kind_e
   AST_TYPE_FUN, // function type
   AST_TYPE_GEN, // generator type
   AST_TYPE_TYPE, // type type
+  AST_TYPE_SELF, // self type
   AST_TYPE_BUILTIN_I8, // built-in type i8
   AST_TYPE_BUILTIN_I16, // built-in type i16
   AST_TYPE_BUILTIN_I32, // built-in type i32

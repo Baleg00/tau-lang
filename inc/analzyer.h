@@ -3,6 +3,7 @@
 
 #include "ast.h"
 #include "symtable.h"
+#include "types.h"
 
 typedef struct analyzer_s
 {
@@ -20,8 +21,8 @@ void analyzer_visit_loop_var(analyzer_t* analyzer, symtable_t* table, ast_node_t
 
 void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
 
-void analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
-void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
+type_t* analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
+type_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
 
 ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
 

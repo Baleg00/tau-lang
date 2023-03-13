@@ -140,6 +140,7 @@ const char* token_kind_to_string(token_kind_t kind)
     case TOK_KW_F64:                      return "TOK_KW_F64";
     case TOK_KW_BOOL:                     return "TOK_KW_BOOL";
     case TOK_KW_UNIT:                     return "TOK_KW_UNIT";
+    case TOK_KW_SELF:                     return "TOK_KW_SELF";
     case TOK_PUNCT_PLUS:                  return "TOK_PUNCT_PLUS";
     case TOK_PUNCT_PLUS_PLUS:             return "TOK_PUNCT_PLUS_PLUS";
     case TOK_PUNCT_PLUS_EQUAL:            return "TOK_PUNCT_PLUS_EQUAL";

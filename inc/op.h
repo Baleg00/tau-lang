@@ -61,7 +61,7 @@ typedef enum op_kind_e
   OP_ADDR, // "&" operation address of
   OP_MEMBER, // "." operation member access
   OP_IND_MEMBER, // "*." operation indirect member access
-  OP_SAFE_IND_MEMBER, // "?." operation safe indirect member access
+  OP_NULL_SAFE_MEMBER, // "?." operation null-safe member access
   OP_RANGE, // ".." operation generate range
   OP_SEMICOLON, // ";" operation semicolon
   OP_CALL, // "()" operation function call

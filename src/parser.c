@@ -257,6 +257,7 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_PUNCT_QUESTION:     return parser_parse_type_nullable(par);
   case TOK_KW_FUN:             return parser_parse_type_fun(par);
   case TOK_KW_GEN:             return parser_parse_type_gen(par);
+  case TOK_KW_SELF:            node = parser_node_init(par, AST_TYPE_SELF         ); parser_expect(par, TOK_KW_SELF ); return node;
   case TOK_KW_I8:              node = parser_node_init(par, AST_TYPE_BUILTIN_I8   ); parser_expect(par, TOK_KW_I8   ); return node;
   case TOK_KW_I16:             node = parser_node_init(par, AST_TYPE_BUILTIN_I16  ); parser_expect(par, TOK_KW_I16  ); return node;
   case TOK_KW_I32:             node = parser_node_init(par, AST_TYPE_BUILTIN_I32  ); parser_expect(par, TOK_KW_I32  ); return node;

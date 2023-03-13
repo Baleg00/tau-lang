@@ -100,28 +100,133 @@ void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, ast_node
     report_error_enumerator_redeclaration(node->enumerator.id->tok->loc);
 }
 
-void analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
+type_t* analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
   if (op_is_unary(node->expr_op.kind))
-    analyzer_visit_expr(analyzer, table, (ast_node_t*)node->expr_op.op_unary.arg);
+  {
+    type_t* arg_type = analyzer_visit_expr(analyzer, table, node->expr_op.op_unary.arg);
+
+    switch (node->expr_op.kind)
+    {
+    case OP_SIZEOF:
+      return type_builtin(TYPE_USIZE);
+    case OP_ALIGNOF:
+      return type_builtin(TYPE_USIZE);
+    case OP_TYPEOF:
+      return type_builtin(TYPE_TYPE);
+    case OP_ARIT_INC_PRE:
+    case OP_ARIT_INC_POST:
+    case OP_ARIT_DEC_PRE:
+    case OP_ARIT_DEC_POST:
+    case OP_BIT_NOT:
+      if (!type_is_arithmetic(arg_type->kind) && arg_type->kind != TYPE_PTR)
+        report_error_expected_arithmetic_type(node->tok->loc);
+      
+      return arg_type;
+    case OP_LOGIC_NOT:
+      if (arg_type->kind != TYPE_BOOL)
+        report_error_expected_bool_type(node->tok->loc);
+
+      return arg_type;
+    case OP_IND:
+      if (arg_type->kind != TYPE_PTR)
+        report_error_expected_ptr_type(node->tok->loc);
+
+      return arg_type->type_ptr.base_type;
+    case OP_ADDR:
+      type_t* ptr_type = type_init(TYPE_PTR);
+      ptr_type->type_ptr.base_type = arg_type;
+      return ptr_type;
+    default:
+      unreachable();
+    }
+  }
   else if (op_is_binary(node->expr_op.kind))
   {
-    analyzer_visit_expr(analyzer, table, (ast_node_t*)node->expr_op.op_binary.lhs);
-    analyzer_visit_expr(analyzer, table, (ast_node_t*)node->expr_op.op_binary.rhs);
+    type_t* type_lhs = analyzer_visit_expr(analyzer, table, node->expr_op.op_binary.lhs);
+    type_t* type_rhs = analyzer_visit_expr(analyzer, table, node->expr_op.op_binary.rhs);
+
+    switch (node->expr_op.kind)
+    {
+    case OP_IS:
+    case OP_AS:
+    case OP_IN:
+      return type_builtin(TYPE_BOOL);
+    case OP_ARIT_ADD:
+    case OP_ARIT_SUB:
+    case OP_ARIT_MUL:
+    case OP_ARIT_DIV:
+    case OP_ARIT_MOD:
+    case OP_BIT_AND:
+    case OP_BIT_OR:
+    case OP_BIT_XOR:
+      if (type_is_signed(type_lhs->kind) != type_is_signed(type_rhs->kind))
+        report_error_mixed_signedness(node->tok->loc);
+
+      return type_wider(type_lhs, type_rhs);
+    case OP_BIT_LSH:
+    case OP_BIT_RSH:
+      if (!type_is_integer(type_lhs->kind))
+        report_error_expected_integer_type(node->expr_op.op_binary.lhs);
+
+      if (!type_is_integer(type_rhs->kind))
+        report_error_expected_integer_type(node->expr_op.op_binary.rhs);
+
+      return type_lhs;
+    case OP_LOGIC_AND:
+    case OP_LOGIC_OR:
+      if (type_lhs->kind != TYPE_BOOL)
+        report_error_expected_bool_type(node->expr_op.op_binary.lhs);
+
+      if (type_rhs->kind != TYPE_BOOL)
+        report_error_expected_bool_type(node->expr_op.op_binary.rhs);
+
+      return type_builtin(TYPE_BOOL);
+    case OP_COMP_EQ:
+    case OP_COMP_NE:
+    case OP_COMP_LT:
+    case OP_COMP_LE:
+    case OP_COMP_GT:
+    case OP_COMP_GE:
+      return type_builtin(TYPE_BOOL);
+    case OP_ASSIGN:
+    case OP_ARIT_ADD_ASSIGN:
+    case OP_ARIT_SUB_ASSIGN:
+    case OP_ARIT_MUL_ASSIGN:
+    case OP_ARIT_DIV_ASSIGN:
+    case OP_ARIT_MOD_ASSIGN:
+    case OP_BIT_AND_ASSIGN:
+    case OP_BIT_OR_ASSIGN:
+    case OP_BIT_XOR_ASSIGN:
+    case OP_BIT_LSH_ASSIGN:
+    case OP_BIT_RSH_ASSIGN:
+    case OP_SUBS:
+    case OP_MEMBER:
+    case OP_IND_MEMBER:
+    case OP_NULL_SAFE_MEMBER:
+    case OP_RANGE:
+    case OP_SEMICOLON:
+    default:
+      unreachable();
+    }
   }
   else if (node->expr_op.kind == OP_CALL)
   {
-    analyzer_visit_expr(analyzer, table, (ast_node_t*)node->expr_op.op_call.callee);
+    analyzer_visit_expr(analyzer, table, node->expr_op.op_call.callee);
 
     for (list_elem_t* elem = list_front_elem(node->expr_op.op_call.args); elem != NULL; elem = list_elem_next(elem))
       analyzer_visit_expr(analyzer, table, (ast_node_t*)list_elem_get(elem));
   }
   else
     unreachable();
+
+  return NULL;
 }
 
-void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
+type_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
+  type_t* type = NULL;
+
   switch (node->kind)
   {
   case AST_ID:
@@ -139,19 +244,28 @@ void analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
         id_sym->node->kind != AST_DECL_FUN &&
         id_sym->node->kind != AST_DECL_GEN)
       report_error_symbol_is_not_an_expression(node->tok->loc);
-    break;
+    
+    return type_of(id_sym->node);
   case AST_EXPR_LIT_INT:
+    return type_builtin(TYPE_I32);
   case AST_EXPR_LIT_FLT:
+    return type_builtin(TYPE_F32);
   case AST_EXPR_LIT_STR:
+    return type_builtin(TYPE_STR);
   case AST_EXPR_LIT_CHAR:
+    return type_builtin(TYPE_U8);
   case AST_EXPR_LIT_BOOL:
+    return type_builtin(TYPE_BOOL);
   case AST_EXPR_LIT_NULL:
+    return type_builtin(TYPE_NULL);
     break;
   case AST_EXPR_OP:
-    analyzer_visit_expr_op(analyzer, table, node);
-    break;
-  default: unreachable();
+    return analyzer_visit_expr_op(analyzer, table, node);
+  default:
+    unreachable();
   }
+
+  return type;
 }
 
 ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)

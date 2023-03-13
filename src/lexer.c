@@ -188,6 +188,7 @@ void lexer_read_word(lexer_t* lex)
     { "mut",      TOK_KW_MUT },
     { "const",    TOK_KW_CONST },
     { "type",     TOK_KW_TYPE },
+    { "Self",     TOK_KW_SELF },
     { "i8",       TOK_KW_I8 },
     { "i16",      TOK_KW_I16 },
     { "i32",      TOK_KW_I32 },

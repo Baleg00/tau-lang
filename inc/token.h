@@ -51,6 +51,7 @@ typedef enum token_kind_e
   TOK_KW_MUT, // keyword "mut"
   TOK_KW_CONST, // keyword "const"
   TOK_KW_TYPE, // keyword "type"
+  TOK_KW_SELF, // keyword "Self"
   TOK_KW_I8, // keyword "i8"
   TOK_KW_I16, // keyword "i16"
   TOK_KW_I32, // keyword "i32"

@@ -150,3 +150,38 @@ void report_warning_shadowed_symbol(location_t* loc)
 {
   crumb_warn(loc, "Symbol shadows another.");
 }
+
+void report_error_expected_arithmetic_type(location_t* loc)
+{
+  crumb_error(loc, "Expected arithmetic type.");
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
+void report_error_expected_bool_type(location_t* loc)
+{
+  crumb_error(loc, "Expected bool type.");
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
+void report_error_expected_ptr_type(location_t* loc)
+{
+  crumb_error(loc, "Expected pointer type.");
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
+void report_error_mixed_signedness(location_t* loc)
+{
+  crumb_error(loc, "Mixed signedness.");
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
+void report_error_expected_integer_type(location_t* loc)
+{
+  crumb_error(loc, "Expected integer type.");
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
