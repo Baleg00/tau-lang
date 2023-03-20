@@ -20,6 +20,9 @@ struct list_s
   size_t len;
 };
 
+#define LIST_FOR_EACH(VAR, LIST)\
+  for (list_elem_t* (VAR) = list_front_elem((LIST)); (VAR) != NULL; (VAR) = list_elem_next((VAR)))
+
 list_elem_t* list_elem_init(void* data);
 void list_elem_free(list_elem_t* elem);
 list_elem_t* list_elem_copy(list_elem_t* elem);

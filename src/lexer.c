@@ -424,7 +424,7 @@ void lexer_read_string(lexer_t* lex)
     report_error_missing_terminating_character(tok->loc, '"');
   }
 
-  tok->loc->len = len;
+  tok->loc->len = len + 2;
 
   char* buf = (char*)malloc((len + 1) * sizeof(char));
   assert(buf != NULL);

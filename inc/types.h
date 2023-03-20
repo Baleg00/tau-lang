@@ -2,6 +2,7 @@
 #define TAU_TYPES_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "list.h"
 #include "ast.h"
@@ -33,10 +34,20 @@ typedef enum type_kind_e
   TYPE_UNIT,
   TYPE_NULL,
   TYPE_STR,
-  TYPE_DECL
+  TYPE_STRUCT,
+  TYPE_UNION,
+  TYPE_ENUM,
+  TYPE_MOD,
 } type_kind_t;
 
 typedef struct type_s type_t;
+typedef struct type_member_s type_member_t;
+
+struct type_member_s
+{
+  char* id;
+  type_t* type;
+};
 
 struct type_s
 {
@@ -54,15 +65,23 @@ struct type_s
 
     struct {
       list_t* param_types;
-      type_t *ret_type;
+      type_t* ret_type;
     } type_fun,
       type_gen;
 
     struct {
       ast_node_t* node;
-    } type_decl;
+      char* id;
+      list_t* members;
+    } type_struct,
+      type_union,
+      type_enum,
+      type_mod;
   };
 };
+
+type_member_t* type_member_init(char* id, type_t* type);
+void type_member_free(type_member_t* member);
 
 type_t* type_init(type_kind_t kind);
 void type_free(type_t* type);
@@ -73,9 +92,11 @@ bool type_is_same(type_t* lhs, type_t* rhs);
 bool type_is_integer(type_kind_t kind);
 bool type_is_arithmetic(type_kind_t kind);
 bool type_is_signed(type_kind_t kind);
+bool type_is_owner(type_kind_t kind);
 type_t* type_wider(type_t* a, type_t* b);
 
-type_t* type_ast_type_to_type(ast_node_t* node);
 type_t* type_of(ast_node_t* node);
+
+void type_print(FILE* stream, type_t* type);
 
 #endif

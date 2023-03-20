@@ -219,6 +219,8 @@ bool op_is_unary(op_kind_t kind)
   case OP_ARIT_INC_POST:
   case OP_ARIT_DEC_PRE:
   case OP_ARIT_DEC_POST:
+  case OP_ARIT_POS:
+  case OP_ARIT_NEG:
   case OP_LOGIC_NOT:
   case OP_BIT_NOT:
   case OP_IND:

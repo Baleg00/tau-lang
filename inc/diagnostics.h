@@ -2,6 +2,7 @@
 #define TAU_DIAGNOSTICS_H
 
 #include "location.h"
+#include "types.h"
 
 void report_error_unexpected_character(location_t* loc);
 
@@ -40,7 +41,19 @@ void report_warning_shadowed_symbol(location_t* loc);
 void report_error_expected_arithmetic_type(location_t* loc);
 void report_error_expected_bool_type(location_t* loc);
 void report_error_expected_ptr_type(location_t* loc);
+void report_error_expected_nullable_type(location_t* loc);
 void report_error_mixed_signedness(location_t* loc);
 void report_error_expected_integer_type(location_t* loc);
+void report_error_incompatible_return_type(location_t* loc);
+void report_error_too_many_arguments(location_t* loc);
+void report_error_too_few_arguments(location_t* loc);
+void report_error_expected_callable(location_t* loc);
+void report_error_incompatible_param_type(location_t* loc);
+void report_error_expected_subscriptable(location_t* loc);
+void report_error_expected_owner(location_t* loc);
+void report_error_expected_member(location_t* loc);
+void report_error_no_member_with_name(location_t* loc);
+void report_error_expected_ptr_to_owner(location_t* loc);
+void report_error_type_mismatch(location_t* loc, type_t* expected, type_t* actual);
 
 #endif
