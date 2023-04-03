@@ -48,8 +48,8 @@ const char* log_level_to_string(log_level_t lvl)
   {
   case LOG_LEVEL_TRACE: return "TRACE";
   case LOG_LEVEL_DEBUG: return "DEBUG";
-  case LOG_LEVEL_INFO: return "INFO";
-  case LOG_LEVEL_WARN: return "WARN";
+  case LOG_LEVEL_INFO:  return "INFO";
+  case LOG_LEVEL_WARN:  return "WARN";
   case LOG_LEVEL_ERROR: return "ERROR";
   case LOG_LEVEL_FATAL: return "FATAL";
   default: return "";
@@ -62,8 +62,8 @@ const char* log_level_to_color(log_level_t lvl)
   {
   case LOG_LEVEL_TRACE: return ESC_FG_BRIGHT_BLACK;
   case LOG_LEVEL_DEBUG: return ESC_FG_CYAN;
-  case LOG_LEVEL_INFO: return ESC_FG_WHITE;
-  case LOG_LEVEL_WARN: return ESC_FG_YELLOW;
+  case LOG_LEVEL_INFO:  return ESC_FG_WHITE;
+  case LOG_LEVEL_WARN:  return ESC_FG_YELLOW;
   case LOG_LEVEL_ERROR: return ESC_FG_RED;
   case LOG_LEVEL_FATAL: return ESC_BG_RED;
   default: return "";

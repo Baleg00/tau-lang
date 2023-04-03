@@ -11,36 +11,44 @@
 #include "log.h"
 #include "esc_seq.h"
 
+/** Indicates the function with which the memory was allocated. */
 typedef enum memtrace_alloc_kind_e {
   MEMTRACE_MALLOC,
   MEMTRACE_CALLOC,
   MEMTRACE_REALLOC,
 } memtrace_alloc_kind_t;
 
-typedef struct memtrace_fileinfo_s {
-  memtrace_alloc_kind_t alloc_kind;
-  const char *file, *func;
-  int line;
-} memtrace_fileinfo_t;
+/** Allocation metadata. */
+typedef struct memtrace_meta_s {
+  memtrace_alloc_kind_t alloc_kind; // Allcation kind.
+  const char* file; // Path to source file.
+  const char* func; // Name of containing function.
+  int line; // Line number in source file.
+} memtrace_meta_t;
 
+/** Allocation data. */
 typedef struct memtrace_data_s {
-  void* ptr;
-  size_t size;  
+  void* ptr; // Pointer to memory.
+  size_t size; // Size of allocation in bytes.
 } memtrace_data_t;
 
+/** Allocation object. */
 typedef struct memtrace_alloc_s {
   memtrace_data_t data;
-  memtrace_fileinfo_t fileinfo;
+  memtrace_meta_t meta;
 
-  struct memtrace_alloc_s *next;
+  struct memtrace_alloc_s *next; // Pointer to next allocation.
 } memtrace_alloc_t;
 
+/** Function to be called at program exit. */
 void memtrace_atexit(void);
 
+/** Returns the root allocation object. */
 memtrace_alloc_t* memtrace_alloc_root(void)
 {
   static memtrace_alloc_t* root = NULL;
 
+  // Initialize root
   if (root == NULL)
   {
     root = (memtrace_alloc_t*)calloc(1, sizeof(memtrace_alloc_t));
@@ -61,8 +69,7 @@ void memtrace_atexit(void)
   {
     next = alloc->next;
 
-    log_error("memtrace", "%s:%d: %zu bytes leaked.", 
-      alloc->fileinfo.file, alloc->fileinfo.line, alloc->data.size);
+    log_error("memtrace", "%zu bytes leaked.", alloc->data.size);
     debugbreak();
 
     free(alloc->data.ptr);
@@ -74,8 +81,7 @@ void* memtrace_malloc(size_t size, const char* file, int line, const char* func)
 {
   if (size == 0)
   {
-    log_warn("memtrace", "%s:%d: Undefined behaviour: allocating 0 bytes.",
-      file, line);
+    log_warn("memtrace", "Allocating 0 bytes.");
     debugbreak();
   }
 
@@ -83,8 +89,7 @@ void* memtrace_malloc(size_t size, const char* file, int line, const char* func)
   
   if (ptr == NULL)
   {
-    log_error("memtrace", "%s:%d: Allocation failed.",
-      file, line);
+    log_error("memtrace", "Allocation failed.");
     debugbreak();
     return NULL;
   }
@@ -93,10 +98,10 @@ void* memtrace_malloc(size_t size, const char* file, int line, const char* func)
   assert(alloc != NULL);
   alloc->data.ptr = ptr;
   alloc->data.size = size;
-  alloc->fileinfo.alloc_kind = MEMTRACE_MALLOC;
-  alloc->fileinfo.file = file;
-  alloc->fileinfo.line = line;
-  alloc->fileinfo.func = func;
+  alloc->meta.alloc_kind = MEMTRACE_MALLOC;
+  alloc->meta.file = file;
+  alloc->meta.line = line;
+  alloc->meta.func = func;
 
   memtrace_alloc_t* root = memtrace_alloc_root();
 
@@ -110,8 +115,7 @@ void* memtrace_calloc(size_t count, size_t size, const char* file, int line, con
 {
   if (count * size == 0)
   {
-    log_warn("memtrace", "%s:%d: Undefined behaviour: allocating 0 bytes.",
-      file, line);
+    log_warn("memtrace", "Allocating 0 bytes.", file, line);
     debugbreak();
   }
 
@@ -119,8 +123,7 @@ void* memtrace_calloc(size_t count, size_t size, const char* file, int line, con
   
   if (ptr == NULL)
   {
-    log_error("memtrace", "%s:%d: Allocation failed.",
-      file, line);
+    log_error("memtrace", "Allocation failed.");
     debugbreak();
     return NULL;
   }
@@ -129,10 +132,10 @@ void* memtrace_calloc(size_t count, size_t size, const char* file, int line, con
   assert(alloc != NULL);
   alloc->data.ptr = ptr;
   alloc->data.size = size;
-  alloc->fileinfo.alloc_kind = MEMTRACE_CALLOC;
-  alloc->fileinfo.file = file;
-  alloc->fileinfo.line = line;
-  alloc->fileinfo.func = func;
+  alloc->meta.alloc_kind = MEMTRACE_CALLOC;
+  alloc->meta.file = file;
+  alloc->meta.line = line;
+  alloc->meta.func = func;
 
   memtrace_alloc_t* root = memtrace_alloc_root();
 
@@ -149,8 +152,7 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
 
   if (size == 0)
   {
-    log_warn("memtrace", "%s:%d: Undefined behaviour: reallocating 0 bytes.",
-      file, line);
+    log_warn("memtrace", "Reallocating 0 bytes.");
     debugbreak();
   }
 
@@ -163,8 +165,7 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
 
   if (alloc == NULL)
   {
-    log_error("memtrace", "%s:%d: Reallocating invalid memory: %p.",
-      file, line, ptr);
+    log_error("memtrace", "Reallocating invalid memory: %p.", ptr);
     debugbreak();
     return NULL;
   }
@@ -173,18 +174,17 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
 
   if (new_ptr == NULL)
   {
-    log_warn("memtrace", "%s:%d: Reallocation failed.",
-      file, line);
+    log_warn("memtrace", "Reallocation failed.");
     debugbreak();
     return NULL;
   }
 
   alloc->data.ptr = new_ptr;
   alloc->data.size = size;
-  alloc->fileinfo.alloc_kind = MEMTRACE_REALLOC;
-  alloc->fileinfo.file = file;
-  alloc->fileinfo.line = line;
-  alloc->fileinfo.func = func;
+  alloc->meta.alloc_kind = MEMTRACE_REALLOC;
+  alloc->meta.file = file;
+  alloc->meta.line = line;
+  alloc->meta.func = func;
 
   return alloc->data.ptr;
 }
@@ -203,8 +203,7 @@ void memtrace_free(void* ptr, const char* file, int line, const char* func)
 
   if (alloc == NULL)
   {
-    log_error("memtrace", "%s:%d: Freeing invalid memory: %p.",
-      file, line, ptr);
+    log_error("memtrace", "Deallocating invalid memory: %p.", ptr);
     debugbreak();
     return;
   }

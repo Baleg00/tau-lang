@@ -6,11 +6,14 @@
 
 void report_error_unexpected_character(location_t* loc);
 
+void report_error_identifier_too_long(location_t* loc);
+
 void report_error_missing_terminating_character(location_t* loc, char ch);
 
 void report_error_empty_character_literal(location_t* loc);
 
 void report_error_escape_no_hex_digits(location_t* loc);
+void report_error_escape_too_many_hex_digits(location_t* loc);
 
 void report_error_unknown_escape_sequence(location_t* loc);
 
@@ -19,7 +22,7 @@ void report_error_ill_formed_float_literal(location_t* loc);
 
 void report_error_unexpected_token(location_t* loc);
 
-void report_error_failed_to_open_file(char* path);
+void report_error_failed_to_open_file(const char* path);
 
 void report_error_empty_generic_parameter_list(location_t* loc);
 void report_error_missing_default_parameter(location_t* loc);

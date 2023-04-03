@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     
     cli_opt_flag((char*[]){ "--dump-tokens" }, 1, "Dump tokens into json file.", &compiler_state.flags.emit_tokens),
     cli_opt_flag((char*[]){ "--dump-ast" }, 1, "Dump AST into json file.", &compiler_state.flags.emit_ast),
-    cli_opt_integer((char*[]){ "--log-level" }, 1, 'N', 1, &compiler_state.params.log_level, NULL, NULL, "Set log level.", NULL, NULL),
+    cli_opt_int((char*[]){ "--log-level" }, 1, 'N', 1, &compiler_state.params.log_level, NULL, NULL, "Set log level.", NULL, NULL),
 
     cli_opt_sink(MAX_INPUT_FILES, compiler_state.input_files.paths, &compiler_state.input_files.count, NULL, NULL)
   };
@@ -92,16 +92,25 @@ int main(int argc, char *argv[])
   log_debug("main", "Source files: (%d)", compiler_state.input_files.count);
 
   for (size_t i = 0; i < compiler_state.input_files.count; ++i)
-    log_debug("main", "    %s", compiler_state.input_files.paths[i]);
+  {
+    char file_name_buf[255];
+    file_name(compiler_state.input_files.paths[i], file_name_buf, sizeof(file_name_buf));
+    log_debug("main", "    %s", file_name_buf);
+  }
 
   for (size_t i = 0; i < compiler_state.input_files.count; ++i)
   {
     char* path = compiler_state.input_files.paths[i];
 
-    log_debug("main", "Processing source file: %s", path);
+    char file_name_buf[255];
+    file_name(path, file_name_buf, sizeof(file_name_buf));
 
-    char* src;
-    file_read_to_string(path, NULL, &src);
+    log_debug("main", "Processing source file: %s", file_name_buf);
+
+    size_t src_len = file_read(path, NULL, 0);
+    char* src = (char*)malloc((src_len + 1) * sizeof(char));
+
+    file_read(path, src, src_len + 1);
 
     log_debug("main", "Performing lexical analysis...");
 

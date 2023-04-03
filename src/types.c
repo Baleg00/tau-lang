@@ -189,10 +189,10 @@ bool type_is_same(type_t* lhs, type_t* rhs)
     if (list_size(lhs->type_fun.param_types) == 0)
       return true;
 
-    for (list_elem_t *lit = list_front_elem(lhs->type_fun.param_types), *rit = list_front_elem(rhs->type_fun.param_types);
+    for (list_node_t *lit = list_front_node(lhs->type_fun.param_types), *rit = list_front_node(rhs->type_fun.param_types);
          lit != NULL && rit != NULL;
-         lit = list_elem_next(lit), rit = list_elem_next(rit))
-      if (!type_is_same((type_t*)list_elem_get(lit), (type_t*)list_elem_get(rit)))
+         lit = list_node_next(lit), rit = list_node_next(rit))
+      if (!type_is_same((type_t*)list_node_get(lit), (type_t*)list_node_get(rit)))
         return false;
 
     return type_is_same(lhs->type_fun.ret_type, rhs->type_fun.ret_type);
@@ -209,10 +209,10 @@ bool type_is_same(type_t* lhs, type_t* rhs)
     if (list_size(lhs->type_gen.param_types) == 0)
       return true;
 
-    for (list_elem_t *lit = list_front_elem(lhs->type_gen.param_types), *rit = list_front_elem(rhs->type_gen.param_types);
+    for (list_node_t *lit = list_front_node(lhs->type_gen.param_types), *rit = list_front_node(rhs->type_gen.param_types);
          lit != NULL && rit != NULL;
-         lit = list_elem_next(lit), rit = list_elem_next(rit))
-      if (!type_is_same((type_t*)list_elem_get(lit), (type_t*)list_elem_get(rit)))
+         lit = list_node_next(lit), rit = list_node_next(rit))
+      if (!type_is_same((type_t*)list_node_get(lit), (type_t*)list_node_get(rit)))
         return false;
 
     return type_is_same(lhs->type_gen.ret_type, rhs->type_gen.ret_type);
@@ -373,7 +373,7 @@ type_t* type_of(ast_node_t* node)
     type = type_init(TYPE_REF);
     type->type_ref.base_type = type_of(node->type_ref.base_type);
     return type;
-  case AST_TYPE_NULLABLE:
+  case AST_TYPE_OPTIONAL:
     type = type_init(TYPE_NULLABLE);
     type->type_nullable.base_type = type_of(node->type_nullable.base_type);
     return type;
@@ -385,8 +385,8 @@ type_t* type_of(ast_node_t* node)
     {
       type->type_fun.param_types = list_init();
       
-      for (list_elem_t* it = list_front_elem(node->type_fun.params); it != NULL; it = list_elem_next(it))
-        list_push_back(type->type_fun.param_types, type_of((ast_node_t*)list_elem_get(it)));
+      for (list_node_t* it = list_front_node(node->type_fun.params); it != NULL; it = list_node_next(it))
+        list_push_back(type->type_fun.param_types, type_of((ast_node_t*)list_node_get(it)));
     }
 
     type->type_fun.ret_type = type_of(node->type_fun.ret_type);
@@ -399,8 +399,8 @@ type_t* type_of(ast_node_t* node)
     {
       type->type_gen.param_types = list_init();
 
-      for (list_elem_t* it = list_front_elem(node->type_gen.params); it != NULL; it = list_elem_next(it))
-        list_push_back(type->type_gen.param_types, type_of((ast_node_t*)list_elem_get(it)));
+      for (list_node_t* it = list_front_node(node->type_gen.params); it != NULL; it = list_node_next(it))
+        list_push_back(type->type_gen.param_types, type_of((ast_node_t*)list_node_get(it)));
     }
 
     type->type_gen.ret_type = type_of(node->type_gen.ret_type);
@@ -445,9 +445,9 @@ type_t* type_of(ast_node_t* node)
     {
       type->type_fun.param_types = list_init();
       
-      for (list_elem_t* it = list_front_elem(node->decl_fun.params); it != NULL; it = list_elem_next(it))
+      for (list_node_t* it = list_front_node(node->decl_fun.params); it != NULL; it = list_node_next(it))
       {
-        ast_node_t* param = (ast_node_t*)list_elem_get(it);
+        ast_node_t* param = (ast_node_t*)list_node_get(it);
         list_push_back(type->type_fun.param_types, type_of(param->param.type));
       }
     }
@@ -462,9 +462,9 @@ type_t* type_of(ast_node_t* node)
     {
       type->type_gen.param_types = list_init();
       
-      for (list_elem_t* it = list_front_elem(node->decl_gen.params); it != NULL; it = list_elem_next(it))
+      for (list_node_t* it = list_front_node(node->decl_gen.params); it != NULL; it = list_node_next(it))
       {
-        ast_node_t* param = (ast_node_t*)list_elem_get(it);
+        ast_node_t* param = (ast_node_t*)list_node_get(it);
         list_push_back(type->type_gen.param_types, type_of(param->param.type));
       }
     }
@@ -474,18 +474,18 @@ type_t* type_of(ast_node_t* node)
   case AST_DECL_STRUCT:
     type = type_init(TYPE_STRUCT);
     type->type_struct.node = node;
-    type->type_struct.id = node->decl_struct.id->tok->id.value;
+    type->type_struct.id = ((token_id_t*)node->decl_struct.id->tok)->value;
     type->type_struct.members = NULL;
     
     if (node->decl_struct.members != NULL)
     {
       type->type_struct.members = list_init();
 
-      LIST_FOR_EACH(elem, node->decl_struct.members)
+      LIST_FOR_LOOP(item, node->decl_struct.members)
       {
-        ast_node_t* member_node = (ast_node_t*)list_elem_get(elem);
-        char* id = member_node->decl_member.decl->decl_var.id->tok->id.value;
-        type_member_t* member_type = type_member_init(id, type_of(member_node->decl_member.decl));
+        ast_node_t* member_node = (ast_node_t*)list_node_get(item);
+        token_id_t* tok_id = (token_id_t*)member_node->decl_member.decl->decl_var.id->tok;
+        type_member_t* member_type = type_member_init(tok_id->value, type_of(member_node->decl_member.decl));
         list_push_back(type->type_struct.members, member_type);
       }
     }
@@ -494,18 +494,18 @@ type_t* type_of(ast_node_t* node)
   case AST_DECL_UNION:
     type = type_init(TYPE_UNION);
     type->type_union.node = node;
-    type->type_union.id = node->decl_union.id->tok->id.value;
+    type->type_union.id = ((token_id_t*)node->decl_union.id->tok)->value;
     type->type_union.members = NULL;
 
     if (node->decl_union.members != NULL)
     {
       type->type_union.members = list_init();
 
-      LIST_FOR_EACH(elem, node->decl_union.members)
+      LIST_FOR_LOOP(item, node->decl_union.members)
       {
-        ast_node_t* member_node = (ast_node_t*)list_elem_get(elem);
-        char* id = member_node->decl_member.decl->decl_var.id->tok->id.value;
-        type_member_t* member_type = type_member_init(id, type_of(member_node->decl_member.decl));
+        ast_node_t* member_node = (ast_node_t*)list_node_get(item);
+        token_id_t* tok_id = (token_id_t*)member_node->decl_member.decl->decl_var.id->tok;
+        type_member_t* member_type = type_member_init(tok_id->value, type_of(member_node->decl_member.decl));
         list_push_back(type->type_union.members, member_type);
       }
     }
@@ -514,18 +514,18 @@ type_t* type_of(ast_node_t* node)
   case AST_DECL_ENUM:
     type = type_init(TYPE_ENUM);
     type->type_enum.node = node;
-    type->type_enum.id = node->decl_enum.id->tok->id.value;
+    type->type_enum.id = ((token_id_t*)node->decl_enum.id->tok)->value;
     type->type_enum.members = NULL;
     
     if (node->decl_enum.members != NULL)
     {
       type->type_enum.members = list_init();
 
-      LIST_FOR_EACH(elem, node->decl_enum.members)
+      LIST_FOR_LOOP(item, node->decl_enum.members)
       {
-        ast_node_t* member_node = (ast_node_t*)list_elem_get(elem);
-        char* id = member_node->decl_member.decl->enumerator.id->tok->id.value;
-        type_member_t* member_type = type_member_init(id, type);
+        ast_node_t* member_node = (ast_node_t*)list_node_get(item);
+        token_id_t* tok_id = (token_id_t*)member_node->decl_member.decl->enumerator.id->tok;
+        type_member_t* member_type = type_member_init(tok_id->value, type);
         list_push_back(type->type_enum.members, member_type);
       }
     }
@@ -534,32 +534,33 @@ type_t* type_of(ast_node_t* node)
   case AST_DECL_MOD:
     type = type_init(TYPE_MOD);
     type->type_mod.node = node;
-    type->type_mod.id = node->decl_mod.id->tok->id.value;
+    type->type_mod.id = ((token_id_t*)node->decl_mod.id->tok)->value;
     type->type_mod.members = NULL;
 
     if (node->decl_mod.members != NULL)
     {
       type->type_mod.members = list_init();
 
-      LIST_FOR_EACH(elem, node->decl_mod.members)
+      LIST_FOR_LOOP(item, node->decl_mod.members)
       {
-        ast_node_t* member_node = (ast_node_t*)list_elem_get(elem);
-        char* id = NULL;
+        ast_node_t* member_node = (ast_node_t*)list_node_get(item);
+        ast_node_t* decl = member_node->decl_member.decl;
+        token_id_t* tok_id = NULL;
 
-        switch (member_node->decl_member.decl->kind)
+        switch (decl->kind)
         {
-        case AST_DECL_VAR:    id = member_node->decl_member.decl->decl_var.id->tok->id.value; break;
-        case AST_DECL_FUN:    id = member_node->decl_member.decl->decl_fun.id->tok->id.value; break;
-        case AST_DECL_GEN:    id = member_node->decl_member.decl->decl_gen.id->tok->id.value; break;
-        case AST_DECL_STRUCT: id = member_node->decl_member.decl->decl_struct.id->tok->id.value; break;
-        case AST_DECL_UNION:  id = member_node->decl_member.decl->decl_union.id->tok->id.value; break;
-        case AST_DECL_ENUM:   id = member_node->decl_member.decl->decl_enum.id->tok->id.value; break;
-        case AST_DECL_MOD:    id = member_node->decl_member.decl->decl_mod.id->tok->id.value; break;
+        case AST_DECL_VAR:    tok_id = (token_id_t*)decl->decl_var.id->tok; break;
+        case AST_DECL_FUN:    tok_id = (token_id_t*)decl->decl_fun.id->tok; break;
+        case AST_DECL_GEN:    tok_id = (token_id_t*)decl->decl_gen.id->tok; break;
+        case AST_DECL_STRUCT: tok_id = (token_id_t*)decl->decl_struct.id->tok; break;
+        case AST_DECL_UNION:  tok_id = (token_id_t*)decl->decl_union.id->tok; break;
+        case AST_DECL_ENUM:   tok_id = (token_id_t*)decl->decl_enum.id->tok; break;
+        case AST_DECL_MOD:    tok_id = (token_id_t*)decl->decl_mod.id->tok; break;
         default:
           unreachable();
         }
 
-        type_member_t* member_type = type_member_init(id, type_of(member_node->decl_member.decl));
+        type_member_t* member_type = type_member_init(tok_id->value, type_of(decl));
         list_push_back(type->type_mod.members, member_type);
       }
     }
@@ -611,11 +612,11 @@ void type_print(FILE* stream, type_t* type)
   case TYPE_FUN:
     fprintf(stream, "fun(");
     if (type->type_fun.param_types != NULL)
-      LIST_FOR_EACH(elem, type->type_fun.param_types)
+      LIST_FOR_LOOP(elem, type->type_fun.param_types)
       {
-        type_print(stream, (type_t*)list_elem_get(elem));
+        type_print(stream, (type_t*)list_node_get(elem));
 
-        if (list_elem_next(elem) != NULL)
+        if (list_node_next(elem) != NULL)
           fprintf(stream, ", ");
       }
     fprintf(stream, "): ");
@@ -624,11 +625,11 @@ void type_print(FILE* stream, type_t* type)
   case TYPE_GEN:
     fprintf(stream, "gen(");
     if (type->type_gen.param_types != NULL)
-      LIST_FOR_EACH(elem, type->type_gen.param_types)
+      LIST_FOR_LOOP(elem, type->type_gen.param_types)
       {
-        type_print(stream, (type_t*)list_elem_get(elem));
+        type_print(stream, (type_t*)list_node_get(elem));
 
-        if (list_elem_next(elem) != NULL)
+        if (list_node_next(elem) != NULL)
           fprintf(stream, ", ");
       }
     fprintf(stream, "): ");

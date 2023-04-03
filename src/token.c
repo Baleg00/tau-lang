@@ -7,10 +7,62 @@
 #include "location.h"
 #include "memtrace.h"
 
-token_t* token_init(void)
+token_t* token_init(token_kind_t kind, location_t* loc)
 {
   token_t* tok = (token_t*)malloc(sizeof(token_t));
   assert(tok != NULL);
+  tok->kind = kind;
+  tok->loc = loc;
+  return tok;
+}
+
+token_id_t* token_id_init(location_t* loc, char* value)
+{
+  token_id_t* tok = (token_id_t*)malloc(sizeof(token_id_t));
+  assert(tok != NULL);
+  tok->kind = TOK_ID;
+  tok->loc = loc;
+  tok->value = value;
+  return tok;
+}
+
+token_lit_int_t* token_lit_int_init(location_t* loc, uint64_t value)
+{
+  token_lit_int_t* tok = (token_lit_int_t*)malloc(sizeof(token_lit_int_t));
+  assert(tok != NULL);
+  tok->kind = TOK_LIT_INT;
+  tok->loc = loc;
+  tok->value = value;
+  return tok;
+}
+
+token_lit_flt_t* token_lit_flt_init(location_t* loc, long double value)
+{
+  token_lit_flt_t* tok = (token_lit_flt_t*)malloc(sizeof(token_lit_flt_t));
+  assert(tok != NULL);
+  tok->kind = TOK_LIT_FLT;
+  tok->loc = loc;
+  tok->value = value;
+  return tok;
+}
+
+token_lit_str_t* token_lit_str_init(location_t* loc, char* value)
+{
+  token_lit_str_t* tok = (token_lit_str_t*)malloc(sizeof(token_lit_str_t));
+  assert(tok != NULL);
+  tok->kind = TOK_LIT_STR;
+  tok->loc = loc;
+  tok->value = value;
+  return tok;
+}
+
+token_lit_char_t* token_lit_char_init(location_t* loc, char value)
+{
+  token_lit_char_t* tok = (token_lit_char_t*)malloc(sizeof(token_lit_char_t));
+  assert(tok != NULL);
+  tok->kind = TOK_LIT_CHAR;
+  tok->loc = loc;
+  tok->value = value;
   return tok;
 }
 
@@ -18,15 +70,8 @@ void token_free(token_t* tok)
 {
   switch (tok->kind)
   {
-  case TOK_ID:
-    free(tok->id.value);
-    break;
-  case TOK_LIT_STR:
-    free(tok->lit_str.value);
-    break;
-  case TOK_LIT_CHAR:
-    free(tok->lit_char.value);
-    break;
+  case TOK_ID:       free(((token_id_t*)      tok)->value); break;
+  case TOK_LIT_STR:  free(((token_lit_str_t*) tok)->value); break;
   }
 
   location_free(tok->loc);
@@ -37,9 +82,9 @@ void token_list_json_dump(FILE* stream, list_t* list)
 {
   fputc('[', stream);
 
-  for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
+  for (list_node_t* elem = list_front_node(list); elem != NULL; elem = list_node_next(elem))
   {
-    token_t* tok = (token_t*)list_elem_get(elem);
+    token_t* tok = (token_t*)list_node_get(elem);
 
     fprintf(stream, "{\"kind\":\"%s\"", token_kind_to_string(tok->kind));
 
@@ -49,25 +94,23 @@ void token_list_json_dump(FILE* stream, list_t* list)
 
       switch (tok->kind)
       {
-      case TOK_LIT_INT_DEC:
-      case TOK_LIT_INT_HEX:
-      case TOK_LIT_INT_OCT:
-      case TOK_LIT_INT_BIN:
-        fprintf(stream, "%llu", tok->lit_int.value);
-        break;
-      case TOK_LIT_FLT_DEC:
-        fprintf(stream, "%lf", tok->lit_flt.value);
-        break;
       case TOK_ID:
+        fprintf(stream, "\"%s\"", ((token_id_t*)tok)->value);
+        break;
+      case TOK_LIT_INT:
+        fprintf(stream, "%llu", ((token_lit_int_t*)tok)->value);
+        break;
+      case TOK_LIT_FLT:
+        fprintf(stream, "%lf", ((token_lit_flt_t*)tok)->value);
+        break;
       case TOK_LIT_STR:
+        fprintf(stream, "\"%s\"", ((token_lit_str_t*)tok)->value);
+        break;
       case TOK_LIT_CHAR:
-        fprintf(stream, "\"%s\"", tok->lit_str.value);
+        fprintf(stream, "\"%.*s\"", tok->loc->len - 2, tok->loc->cur + 1);
         break;
-      case TOK_LIT_BOOL_TRUE:
-        fprintf(stream, "true");
-        break;
-      case TOK_LIT_BOOL_FALSE:
-        fprintf(stream, "false");
+      case TOK_LIT_BOOL:
+        fprintf(stream, "%s", ((token_lit_bool_t*)tok)->value ? "true" : "false");
         break;
       case TOK_LIT_NULL:
         fprintf(stream, "null");
@@ -77,7 +120,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
 
     fputc('}', stream);
 
-    if (list_elem_next(elem) != NULL)
+    if (list_node_next(elem) != NULL)
       fputc(',', stream);
   }
 
@@ -90,15 +133,11 @@ const char* token_kind_to_string(token_kind_t kind)
   {
     case TOK_UNKNOWN:                     return "TOK_UNKNOWN";
     case TOK_ID:                          return "TOK_ID";
-    case TOK_LIT_INT_DEC:                 return "TOK_LIT_INT_DEC";
-    case TOK_LIT_INT_HEX:                 return "TOK_LIT_INT_HEX";
-    case TOK_LIT_INT_OCT:                 return "TOK_LIT_INT_OCT";
-    case TOK_LIT_INT_BIN:                 return "TOK_LIT_INT_BIN";
-    case TOK_LIT_FLT_DEC:                 return "TOK_LIT_FLT_DEC";
+    case TOK_LIT_INT:                     return "TOK_LIT_INT";
+    case TOK_LIT_FLT:                     return "TOK_LIT_FLT";
     case TOK_LIT_STR:                     return "TOK_LIT_STR";
     case TOK_LIT_CHAR:                    return "TOK_LIT_CHAR";
-    case TOK_LIT_BOOL_TRUE:               return "TOK_LIT_BOOL_TRUE";
-    case TOK_LIT_BOOL_FALSE:              return "TOK_LIT_BOOL_FALSE";
+    case TOK_LIT_BOOL:                    return "TOK_LIT_BOOL";
     case TOK_LIT_NULL:                    return "TOK_LIT_NULL";
     case TOK_KW_IS:                       return "TOK_KW_IS";
     case TOK_KW_AS:                       return "TOK_KW_AS";
@@ -198,25 +237,25 @@ const char* token_kind_to_string(token_kind_t kind)
 
 bool token_is_literal(token_t* tok)
 {
-  return TOK_LIT_INT_DEC <= tok->kind && TOK_LIT_NULL >= tok->kind;
+  return tok->kind & TOK_FLAG_LIT;
 }
 
 bool token_is_literal_integer(token_t* tok)
 {
-  return TOK_LIT_INT_DEC <= tok->kind && TOK_LIT_INT_BIN >= tok->kind;
+  return tok->kind == TOK_LIT_INT;
 }
 
 bool token_is_literal_float(token_t* tok)
 {
-  return TOK_LIT_FLT_DEC == tok->kind;
+  return tok->kind == TOK_LIT_FLT;
 }
 
 bool token_is_keyword(token_t* tok)
 {
-  return TOK_KW_IS <= tok->kind && TOK_KW_UNIT >= tok->kind;
+  return tok->kind & TOK_FLAG_KW;
 }
 
 bool token_is_punctuation(token_t* tok)
 {
-  return TOK_PUNCT_PLUS <= tok->kind && TOK_PUNCT_BRACE_RIGHT >= tok->kind;
+  return tok->kind & TOK_FLAG_PUNCT;
 }

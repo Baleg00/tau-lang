@@ -46,7 +46,7 @@ void shyd_elem_free(shyd_elem_t* elem)
 
 bool shyd_flush_until_kind(shyd_t* shyd, shyd_kind_t kind)
 {
-  while (!stack_empty(shyd->op_stack) && ((shyd_elem_t*)stack_peek(shyd->op_stack))->kind != kind)
+  while (!stack_empty(shyd->op_stack) && ((shyd_elem_t*)stack_top(shyd->op_stack))->kind != kind)
     queue_offer(shyd->out_queue, stack_pop(shyd->op_stack));
 
   if (stack_empty(shyd->op_stack))
@@ -61,7 +61,7 @@ void shyd_flush_for_op(shyd_t* shyd, op_kind_t op)
 {
   while (!stack_empty(shyd->op_stack))
   {
-    shyd_elem_t* elem = (shyd_elem_t*)stack_peek(shyd->op_stack);
+    shyd_elem_t* elem = (shyd_elem_t*)stack_top(shyd->op_stack);
 
     if (elem->kind == SHYD_PAREN_OPEN || 
       elem->kind == SHYD_BRACKET_OPEN || 
@@ -382,13 +382,10 @@ void shyd_ast_term(shyd_elem_t* elem, stack_t* node_stack)
   case TOK_ID:
     kind = AST_ID;
     break;
-  case TOK_LIT_INT_DEC:
-  case TOK_LIT_INT_HEX:
-  case TOK_LIT_INT_OCT:
-  case TOK_LIT_INT_BIN:
+  case TOK_LIT_INT:
     kind = AST_EXPR_LIT_INT;
     break;
-  case TOK_LIT_FLT_DEC:
+  case TOK_LIT_FLT:
     kind = AST_EXPR_LIT_FLT;
     break;
   case TOK_LIT_STR:
@@ -397,8 +394,7 @@ void shyd_ast_term(shyd_elem_t* elem, stack_t* node_stack)
   case TOK_LIT_CHAR:
     kind = AST_EXPR_LIT_CHAR;
     break;
-  case TOK_LIT_BOOL_TRUE:
-  case TOK_LIT_BOOL_FALSE:
+  case TOK_LIT_BOOL:
     kind = AST_EXPR_LIT_BOOL;
     break;
   case TOK_LIT_NULL:

@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME}
 
   memtrace.c
 
+  str.c
   file.c
   cli.c
   log.c

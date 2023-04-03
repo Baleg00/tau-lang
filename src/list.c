@@ -5,45 +5,45 @@
 #include "util.h"
 #include "memtrace.h"
 
-list_elem_t* list_elem_init(void* data)
+list_node_t* list_node_init(void* data)
 {
-  list_elem_t* elem = (list_elem_t*)malloc(sizeof(list_elem_t));
-  assert(elem != NULL);
-  elem->data = data;
-  elem->owner = NULL;
-  elem->prev = NULL;
-  elem->next = NULL;
-  return elem;
+  list_node_t* node = (list_node_t*)malloc(sizeof(list_node_t));
+  assert(node != NULL);
+  node->data = data;
+  node->owner = NULL;
+  node->prev = NULL;
+  node->next = NULL;
+  return node;
 }
 
-void list_elem_free(list_elem_t* elem)
+void list_node_free(list_node_t* node)
 {
-  free(elem);
+  free(node);
 }
 
-list_elem_t* list_elem_copy(list_elem_t* elem)
+list_node_t* list_node_copy(list_node_t* node)
 {
-  return list_elem_init(elem->data);
+  return list_node_init(node->data);
 }
 
-list_elem_t* list_elem_prev(list_elem_t* elem)
+list_node_t* list_node_prev(list_node_t* node)
 {
-  return elem->prev;
+  return node->prev;
 }
 
-list_elem_t* list_elem_next(list_elem_t* elem)
+list_node_t* list_node_next(list_node_t* node)
 {
-  return elem->next;
+  return node->next;
 }
 
-void* list_elem_get(list_elem_t* elem)
+void* list_node_get(list_node_t* node)
 {
-  return elem->data;
+  return node->data;
 }
 
-void list_elem_set(list_elem_t* elem, void* data)
+void list_node_set(list_node_t* node, void* data)
 {
-  elem->data = data;
+  node->data = data;
 }
 
 list_t* list_init(void)
@@ -58,10 +58,10 @@ list_t* list_init(void)
 
 void list_free(list_t* list)
 {
-  for (list_elem_t *elem = list_front_elem(list), *next; elem != NULL; elem = next)
+  for (list_node_t *node = list_front_node(list), *next; node != NULL; node = next)
   {
-    next = list_elem_next(elem);
-    list_elem_free(elem);
+    next = list_node_next(node);
+    list_node_free(node);
   }
 
   free(list);
@@ -71,8 +71,8 @@ list_t* list_copy(list_t* list)
 {
   list_t* new_list = list_init();
 
-  for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
-    list_push_back(new_list, list_elem_get(elem));
+  LIST_FOR_LOOP(node, list)
+    list_push_back(new_list, list_node_get(node));
 
   return new_list;
 }
@@ -80,70 +80,70 @@ list_t* list_copy(list_t* list)
 void* list_front(list_t* list)
 {
   assert(!list_empty(list));
-  return list_elem_get(list_front_elem(list));
+  return list_node_get(list_front_node(list));
 }
 
 void* list_back(list_t* list)
 {
   assert(!list_empty(list));
-  return list_elem_get(list_back_elem(list));
+  return list_node_get(list_back_node(list));
 }
 
-list_elem_t* list_front_elem(list_t* list)
+list_node_t* list_front_node(list_t* list)
 {
   return list_empty(list) ? NULL : list->head;
 }
 
-list_elem_t* list_back_elem(list_t* list)
+list_node_t* list_back_node(list_t* list)
 {
   return list_empty(list) ? NULL : list->tail;
 }
 
-list_elem_t* list_push_front(list_t* list, void* data)
+list_node_t* list_push_front(list_t* list, void* data)
 {
-  list_elem_t* new_elem = list_elem_init(data);
+  list_node_t* new_node = list_node_init(data);
 
-  new_elem->owner = list;
-  new_elem->next = list->head;
-  new_elem->prev = NULL;
+  new_node->owner = list;
+  new_node->next = list->head;
+  new_node->prev = NULL;
 
   if (list->tail == NULL)
-    list->tail = new_elem;
+    list->tail = new_node;
   else
-    list->head->prev = new_elem;
+    list->head->prev = new_node;
 
-  list->head = new_elem;
+  list->head = new_node;
 
   ++list->len;
 
-  return new_elem;
+  return new_node;
 }
 
-list_elem_t* list_push_back(list_t* list, void* data)
+list_node_t* list_push_back(list_t* list, void* data)
 {
-  list_elem_t* new_elem = list_elem_init(data);
+  list_node_t* new_node = list_node_init(data);
 
-  new_elem->owner = list;
-  new_elem->prev = list->tail;
-  new_elem->next = NULL;
+  new_node->owner = list;
+  new_node->prev = list->tail;
+  new_node->next = NULL;
 
   if (list->head == NULL)
-    list->head = new_elem;
+    list->head = new_node;
   else
-    list->tail->next = new_elem;
+    list->tail->next = new_node;
 
-  list->tail = new_elem;
+  list->tail = new_node;
 
   ++list->len;
 
-  return new_elem;
+  return new_node;
 }
 
 void* list_pop_front(list_t* list)
 {
   assert(!list_empty(list));
 
-  list_elem_t* elem = list->head;
+  list_node_t* node = list->head;
   
   if (list->head == list->tail)
     list->head = list->tail = NULL;
@@ -155,9 +155,9 @@ void* list_pop_front(list_t* list)
 
   --list->len;
 
-  void* data = elem->data;
+  void* data = node->data;
 
-  list_elem_free(elem);
+  list_node_free(node);
 
   return data;
 }
@@ -166,7 +166,7 @@ void* list_pop_back(list_t* list)
 {
   assert(!list_empty(list));
 
-  list_elem_t* elem = list->tail;
+  list_node_t* node = list->tail;
   
   if (list->head == list->tail)
     list->head = list->tail = NULL;
@@ -178,78 +178,78 @@ void* list_pop_back(list_t* list)
 
   --list->len;
 
-  void* data = elem->data;
+  void* data = node->data;
 
-  list_elem_free(elem);
+  list_node_free(node);
 
   return data;
 }
 
-list_elem_t* list_insert_before(list_elem_t* elem, void* data)
+list_node_t* list_insert_before(list_node_t* node, void* data)
 {
-  list_elem_t* new_elem = list_elem_init(data);
+  list_node_t* new_node = list_node_init(data);
 
-  if (elem->owner->head == elem)
-    return list_push_front(elem->owner, new_elem);
+  if (node->owner->head == node)
+    return list_push_front(node->owner, new_node);
 
-  new_elem->owner = elem->owner;
-  new_elem->prev = elem->prev;
-  new_elem->next = elem;
+  new_node->owner = node->owner;
+  new_node->prev = node->prev;
+  new_node->next = node;
 
-  elem->prev = new_elem;
+  node->prev = new_node;
 
-  ++elem->owner->len;
+  ++node->owner->len;
   
-  return new_elem;
+  return new_node;
 }
 
-list_elem_t* list_insert_after(list_elem_t* elem, void* data)
+list_node_t* list_insert_after(list_node_t* node, void* data)
 {
-  list_elem_t* new_elem = list_elem_init(data);
+  list_node_t* new_node = list_node_init(data);
 
-  if (elem->owner->tail == elem)
-    return list_push_back(elem->owner, new_elem);
+  if (node->owner->tail == node)
+    return list_push_back(node->owner, new_node);
 
-  new_elem->owner = elem->owner;
-  new_elem->prev = elem;
-  new_elem->next = elem->next;
+  new_node->owner = node->owner;
+  new_node->prev = node;
+  new_node->next = node->next;
 
-  elem->next = new_elem;
+  node->next = new_node;
 
-  ++elem->owner->len;
+  ++node->owner->len;
 
-  return new_elem;
+  return new_node;
 }
 
-void* list_remove(list_elem_t* elem)
+void* list_remove(list_node_t* node)
 {
-  if (elem->owner->head == elem)
-    return list_pop_front(elem->owner);
+  if (node->owner->head == node)
+    return list_pop_front(node->owner);
 
-  if (elem->owner->tail == elem)
-    return list_pop_back(elem->owner);
+  if (node->owner->tail == node)
+    return list_pop_back(node->owner);
 
-  --elem->owner->len;
-  elem->prev->next = elem->next;
-  elem->next->prev = elem->prev;
+  --node->owner->len;
+  node->prev->next = node->next;
+  node->next->prev = node->prev;
 
-  void* data = elem->data;
+  void* data = node->data;
 
-  list_elem_free(elem);
+  list_node_free(node);
 
   return data;
 }
 
-void* list_remove_before(list_elem_t* elem)
+void* list_remove_before(list_node_t* node)
 {
-  assert(list_elem_prev(elem) != NULL);
-  return list_remove(elem->prev);
+  assert(list_node_prev(node) != NULL);
+  return list_remove(node->prev);
 }
 
-void* list_remove_after(list_elem_t* elem)
+void* list_remove_after(list_node_t* node)
 {
-  assert(list_elem_next(elem) != NULL);
-  return list_remove(elem->next);
+  assert(list_node_next(node) != NULL);
+  return list_remove(node->next);
 }
 
 bool list_empty(list_t* list)
@@ -262,8 +262,8 @@ size_t list_size(list_t* list)
   return list->len;
 }
 
-void list_for_each(list_t* list, void(*func)(void*))
+void list_for_each(list_t* list, list_for_each_func_t func)
 {
-    for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
-      func(list_elem_get(elem));
+  LIST_FOR_LOOP(node, list)
+    func(list_node_get(node));
 }

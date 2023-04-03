@@ -1,3 +1,9 @@
+/**
+ * \file
+ * 
+ * Abstract syntax tree (AST).
+*/
+
 #ifndef TAU_AST_H
 #define TAU_AST_H
 
@@ -9,73 +15,88 @@
 #include "token.h"
 #include "op.h"
 
+/** Indicates the category of a node. */
+typedef enum ast_flag_e
+{
+  AST_FLAG_UNKNOWN    = 0x0000000, // Unknown
+  AST_FLAG_ID         = 0x0010000, // Identifier
+  AST_FLAG_TYPE       = 0x0020000, // Type
+  AST_FLAG_EXPR       = 0x0040000, // Expression
+  AST_FLAG_STMT       = 0x0080000, // Statement
+  AST_FLAG_DECL       = 0x0100000, // Declaration
+  AST_FLAG_PARAM      = 0x0200000, // Parameter
+  AST_FLAG_LOOP_VAR   = 0x0400000, // Loop variable
+  AST_FLAG_ENUMERATOR = 0x0800000, // Enumerator
+  AST_FLAG_PROG       = 0x1000000, // Program
+} ast_flag_t;
+
 typedef enum ast_kind_e
 {
-  AST_UNKNOWN = 0, // unknown node
+  AST_UNKNOWN = AST_FLAG_UNKNOWN, // Unknown node
 
-  AST_ID, // identifier
+  AST_ID = AST_FLAG_ID, // Identifier
 
-  AST_TYPE_MUT, // mutable type
-  AST_TYPE_CONST, // compile time type
-  AST_TYPE_PTR, // pointer type
-  AST_TYPE_ARRAY, // array type
-  AST_TYPE_REF, // reference type
-  AST_TYPE_NULLABLE, // nullable type
-  AST_TYPE_FUN, // function type
-  AST_TYPE_GEN, // generator type
-  AST_TYPE_TYPE, // type type
-  AST_TYPE_SELF, // self type
-  AST_TYPE_BUILTIN_I8, // built-in type i8
-  AST_TYPE_BUILTIN_I16, // built-in type i16
-  AST_TYPE_BUILTIN_I32, // built-in type i32
-  AST_TYPE_BUILTIN_I64, // built-in type i64
-  AST_TYPE_BUILTIN_ISIZE, // built-in type isize
-  AST_TYPE_BUILTIN_U8, // built-in type u8
-  AST_TYPE_BUILTIN_U16, // built-in type u16
-  AST_TYPE_BUILTIN_U32, // built-in type u32
-  AST_TYPE_BUILTIN_U64, // built-in type u64
-  AST_TYPE_BUILTIN_USIZE, // built-in type usize
-  AST_TYPE_BUILTIN_F32, // built-in type f32
-  AST_TYPE_BUILTIN_F64, // built-in type f64
-  AST_TYPE_BUILTIN_BOOL, // built-in type bool
-  AST_TYPE_BUILTIN_UNIT, // built-in type unit
+  AST_TYPE_MUT = AST_FLAG_TYPE, // Mutable type
+  AST_TYPE_CONST, // Compile-time type
+  AST_TYPE_PTR, // Pointer type
+  AST_TYPE_ARRAY, // Array type
+  AST_TYPE_REF, // Reference type
+  AST_TYPE_OPTIONAL, // Optional type
+  AST_TYPE_FUN, // Function type
+  AST_TYPE_GEN, // Generator type
+  AST_TYPE_TYPE, // Type type
+  AST_TYPE_SELF, // Self type
+  AST_TYPE_BUILTIN_I8, // Built-in type i8
+  AST_TYPE_BUILTIN_I16, // Built-in type i16
+  AST_TYPE_BUILTIN_I32, // Built-in type i32
+  AST_TYPE_BUILTIN_I64, // Built-in type i64
+  AST_TYPE_BUILTIN_ISIZE, // Built-in type isize
+  AST_TYPE_BUILTIN_U8, // Built-in type u8
+  AST_TYPE_BUILTIN_U16, // Built-in type u16
+  AST_TYPE_BUILTIN_U32, // Built-in type u32
+  AST_TYPE_BUILTIN_U64, // Built-in type u64
+  AST_TYPE_BUILTIN_USIZE, // Built-in type usize
+  AST_TYPE_BUILTIN_F32, // Built-in type f32
+  AST_TYPE_BUILTIN_F64, // Built-in type f64
+  AST_TYPE_BUILTIN_BOOL, // Built-in type bool
+  AST_TYPE_BUILTIN_UNIT, // Built-in type unit
 
-  AST_EXPR_LIT_INT, // expression literal integer
-  AST_EXPR_LIT_FLT, // expression literal float
-  AST_EXPR_LIT_STR, // expression literal string
-  AST_EXPR_LIT_CHAR, // expression literal character
-  AST_EXPR_LIT_BOOL, // expression literal boolean
-  AST_EXPR_LIT_NULL, // expression literal null
-  AST_EXPR_OP, // expression operation
+  AST_EXPR_LIT_INT = AST_FLAG_EXPR, // Literal integer expression
+  AST_EXPR_LIT_FLT, // Literal float expression
+  AST_EXPR_LIT_STR, // Literal string expression
+  AST_EXPR_LIT_CHAR, // Literal character expression
+  AST_EXPR_LIT_BOOL, // Literal boolean expression
+  AST_EXPR_LIT_NULL, // Literal null expression
+  AST_EXPR_OP, // Operation expression
   
-  AST_STMT_IF, // statement if
-  AST_STMT_FOR, // statement for
-  AST_STMT_WHILE, // statement while
-  AST_STMT_BREAK, // statement break
-  AST_STMT_CONTINUE, // statement continue
-  AST_STMT_RETURN, // statement return
-  AST_STMT_YIELD, // statement yield
-  AST_STMT_BLOCK, // statement block
-  AST_STMT_EXPR, // statement expression
+  AST_STMT_IF = AST_FLAG_STMT, // If-statement
+  AST_STMT_FOR, // For-statement
+  AST_STMT_WHILE, // While-statement
+  AST_STMT_BREAK, // Break-statement
+  AST_STMT_CONTINUE, // Continue-statement
+  AST_STMT_RETURN, // Return-statement
+  AST_STMT_YIELD, // Yield-statement
+  AST_STMT_BLOCK, // Block-statement
+  AST_STMT_EXPR, // Expression-statement
   
-  AST_DECL_VAR, // declaration variable
-  AST_DECL_FUN, // declaration function
-  AST_DECL_GEN, // declaration generator
-  AST_DECL_STRUCT, // declaration struct
-  AST_DECL_UNION, // declaration union
-  AST_DECL_ENUM, // declaration enum
-  AST_DECL_MOD, // declaration module
-  AST_DECL_MEMBER, // declaration member
+  AST_DECL_VAR = AST_FLAG_DECL, // Variable declaration
+  AST_DECL_FUN, // Function declaration
+  AST_DECL_GEN, // Generator declaration
+  AST_DECL_STRUCT, // Struct declaration
+  AST_DECL_UNION, // Union declaration
+  AST_DECL_ENUM, // Enum declaration
+  AST_DECL_MOD, // Module declaration
+  AST_DECL_MEMBER, // Member declaration
 
-  AST_PARAM, // function/generator parameter
-  AST_VARIADIC_PARAM, // variadic parameter
-  AST_GENERIC_PARAM, // generic parameter
+  AST_PARAM = AST_FLAG_PARAM, // Function or generator parameter
+  AST_VARIADIC_PARAM, // Variadic parameter
+  AST_GENERIC_PARAM, // Generic parameter
 
-  AST_LOOP_VAR, // loop variable
+  AST_LOOP_VAR = AST_FLAG_LOOP_VAR, // Loop variable
 
-  AST_ENUMERATOR, // enumerator
+  AST_ENUMERATOR = AST_FLAG_ENUMERATOR, // Enumerator
 
-  AST_PROG, // program
+  AST_PROG = AST_FLAG_PROG, // Program
 } ast_kind_t;
 
 typedef struct ast_node_s ast_node_t;

@@ -39,7 +39,8 @@ void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_node_t* n
 
   node->param.type = analyzer_visit_type(analyzer, table, node->param.type);
 
-  symbol_t* param_sym = symbol_init(node->param.id->tok->id.value, node, type_of(node));
+  token_id_t* tok_id = (token_id_t*)node->param.id->tok;
+  symbol_t* param_sym = symbol_init(tok_id->value, node, type_of(node));
   symbol_t* collision = symtable_insert(table, param_sym);
 
   if (collision != NULL)
@@ -58,7 +59,8 @@ void analyzer_visit_variadic_param(analyzer_t* analyzer, symtable_t* table, ast_
 {
   node->variadic_param.type = analyzer_visit_type(analyzer, table, node->variadic_param.type);
 
-  symbol_t* param_sym = symbol_init(node->generic_param.id->tok->id.value, node, type_of(node));
+  token_id_t* tok_id = (token_id_t*)node->generic_param.id->tok;
+  symbol_t* param_sym = symbol_init(tok_id->value, node, type_of(node));
   symbol_t* collision = symtable_insert(table, param_sym);
 
   if (collision != NULL)
@@ -75,7 +77,8 @@ void analyzer_visit_generic_param(analyzer_t* analyzer, symtable_t* table, ast_n
   if (node->generic_param.type->kind != AST_TYPE_TYPE)
     node->generic_param.type = analyzer_visit_type(analyzer, table, node->param.type);
 
-  symbol_t* param_sym = symbol_init(node->generic_param.id->tok->id.value, node, type_of(node));
+  token_id_t* tok_id = (token_id_t*)node->generic_param.id->tok;
+  symbol_t* param_sym = symbol_init(tok_id->value, node, type_of(node));
   symbol_t* collision = symtable_insert(table, param_sym);
 
   if (collision != NULL && collision->node->kind == AST_PARAM)
@@ -86,8 +89,9 @@ void analyzer_visit_loop_var(analyzer_t* analyzer, symtable_t* table, ast_node_t
 {
   node->loop_var.type = analyzer_visit_type(analyzer, table, node->loop_var.type);
 
-  symbol_t* var_sym = symbol_init(node->loop_var.id->tok->id.value, node, type_of(node));
-  symbol_t* lookup = symtable_lookup(table, node->loop_var.id->tok->id.value);
+  token_id_t* tok_id = (token_id_t*)node->loop_var.id->tok;
+  symbol_t* var_sym = symbol_init(tok_id->value, node, type_of(node));
+  symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, var_sym);
 
   assert(collision == NULL);
@@ -98,11 +102,12 @@ void analyzer_visit_loop_var(analyzer_t* analyzer, symtable_t* table, ast_node_t
 
 void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, symbol_t* enum_sym, ast_node_t* node)
 {
-  symbol_t* enumerator_sym = symbol_init(node->enumerator.id->tok->id.value, node, enum_sym->type);
+  token_id_t* tok_id = (token_id_t*)node->enumerator.id->tok;
+  symbol_t* enumerator_sym = symbol_init(tok_id->value, node, enum_sym->type);
   symbol_t* collision = symtable_insert(table, enumerator_sym);
 
   if (collision != NULL)
-    report_error_enumerator_redeclaration(node->enumerator.id->tok->loc);
+    report_error_enumerator_redeclaration(tok_id->loc);
 }
 
 type_t* analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -275,15 +280,15 @@ type_t* analyzer_visit_expr_op_call(analyzer_t* analyzer, symtable_t* table, ast
   else
     report_error_expected_callable(node->tok->loc);
 
-  for (list_elem_t *param_elem      = list_front_elem(node->expr_op.op_call.args),
-                    *param_type_elem = list_front_elem(callee_param_types);
+  for (list_node_t *param_elem      = list_front_node(node->expr_op.op_call.args),
+                    *param_type_elem = list_front_node(callee_param_types);
         param_elem != NULL && param_type_elem != NULL;
-        param_elem      = list_elem_next(param_elem),
-        param_type_elem = list_elem_next(param_type_elem))
+        param_elem      = list_node_next(param_elem),
+        param_type_elem = list_node_next(param_type_elem))
   {
-    ast_node_t* param = (ast_node_t*)list_elem_get(param_elem);
+    ast_node_t* param = (ast_node_t*)list_node_get(param_elem);
     type_t* type = analyzer_visit_expr(analyzer, table, param);
-    type_t* param_type = (type_t*)list_elem_get(param_type_elem);
+    type_t* param_type = (type_t*)list_node_get(param_type_elem);
 
     if (!type_is_same(type, param_type))
       report_error_incompatible_param_type(param->tok->loc);
@@ -326,55 +331,57 @@ type_t* analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, a
   default:
     unreachable();
   }
+
+  token_id_t* tok_rhs = (token_id_t*)node->expr_op.op_binary.rhs->tok;
   
   switch (type_owner->kind)
   {
   case TYPE_STRUCT:
-    LIST_FOR_EACH(elem, type_owner->type_struct.members)
+    LIST_FOR_LOOP(elem, type_owner->type_struct.members)
     {
-      type_member_t* member_type = (type_member_t*)list_elem_get(elem);
+      type_member_t* member_type = (type_member_t*)list_node_get(elem);
       
-      if (strcmp(member_type->id, node->expr_op.op_binary.rhs->tok->id.value) == 0)
+      if (strcmp(member_type->id, tok_rhs->value) == 0)
         return member_type->type;
     }
 
-    report_error_no_member_with_name(node->expr_op.op_binary.rhs->tok->loc);
+    report_error_no_member_with_name(tok_rhs->loc);
     break;
   case TYPE_UNION:
-    LIST_FOR_EACH(elem, type_owner->type_union.members)
+    LIST_FOR_LOOP(elem, type_owner->type_union.members)
     {
-      type_member_t* member_type = (type_member_t*)list_elem_get(elem);
+      type_member_t* member_type = (type_member_t*)list_node_get(elem);
       
-      if (strcmp(member_type->id, node->expr_op.op_binary.rhs->tok->id.value) == 0)
+      if (strcmp(member_type->id, tok_rhs->value) == 0)
         return member_type->type;
     }
 
-    report_error_no_member_with_name(node->expr_op.op_binary.rhs->tok->loc);
+    report_error_no_member_with_name(tok_rhs->loc);
     break;
   case TYPE_ENUM:
-    LIST_FOR_EACH(elem, type_owner->type_enum.members)
+    LIST_FOR_LOOP(elem, type_owner->type_enum.members)
     {
-      type_member_t* member_type = (type_member_t*)list_elem_get(elem);
+      type_member_t* member_type = (type_member_t*)list_node_get(elem);
       
-      if (strcmp(member_type->id, node->expr_op.op_binary.rhs->tok->id.value) == 0)
+      if (strcmp(member_type->id, tok_rhs->value) == 0)
         return type_owner;
     }
 
-    report_error_no_member_with_name(node->expr_op.op_binary.rhs->tok->loc);
+    report_error_no_member_with_name(tok_rhs->loc);
     break;
   case TYPE_MOD:
-    LIST_FOR_EACH(elem, type_owner->type_mod.members)
+    LIST_FOR_LOOP(elem, type_owner->type_mod.members)
     {
-      type_member_t* member_type = (type_member_t*)list_elem_get(elem);
+      type_member_t* member_type = (type_member_t*)list_node_get(elem);
       
-      if (strcmp(member_type->id, node->expr_op.op_binary.rhs->tok->id.value) == 0)
+      if (strcmp(member_type->id, tok_rhs->value) == 0)
         return member_type->type;
     }
 
-    report_error_no_member_with_name(node->expr_op.op_binary.rhs->tok->loc);
+    report_error_no_member_with_name(tok_rhs->loc);
     break;
   default:
-    report_error_expected_owner(node->expr_op.op_binary.lhs->tok->loc);
+    report_error_expected_owner(tok_rhs->loc);
   }
 
   return NULL;
@@ -408,10 +415,11 @@ type_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t*
   switch (node->kind)
   {
   case AST_ID:
-    symbol_t* id_sym = symtable_lookup(table, node->tok->id.value);
+    token_id_t* tok_id = (token_id_t*)node->tok;
+    symbol_t* id_sym = symtable_lookup(table, tok_id->value);
     
     if (id_sym == NULL)
-      report_error_undefined_symbol(node->tok->loc);
+      report_error_undefined_symbol(tok_id->loc);
 
     switch (id_sym->node->kind)
     {
@@ -428,7 +436,7 @@ type_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t*
     case AST_LOOP_VAR:
       break;
     default:
-      report_error_symbol_is_not_an_expression(node->tok->loc);
+      report_error_symbol_is_not_an_expression(tok_id->loc);
     }
     
     return type_of(id_sym->node);
@@ -459,20 +467,21 @@ ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_nod
   switch (node->kind)
   {
   case AST_ID:
-    symbol_t* id_sym = symtable_lookup(table, node->tok->id.value);
+    token_id_t* tok_id = (token_id_t*)node->tok;
+    symbol_t* id_sym = symtable_lookup(table, tok_id->value);
     
     if (id_sym == NULL)
-      report_error_undefined_typename(node->tok->loc);
+      report_error_undefined_typename(tok_id->loc);
 
     if (id_sym->node->kind != AST_DECL_STRUCT &&
         id_sym->node->kind != AST_DECL_UNION &&
         id_sym->node->kind != AST_DECL_ENUM &&
         id_sym->node->kind != AST_GENERIC_PARAM)
-      report_error_symbol_is_not_a_typename(node->tok->loc);
+      report_error_symbol_is_not_a_typename(tok_id->loc);
 
     if (id_sym->node->kind == AST_GENERIC_PARAM &&
         id_sym->node->generic_param.type->kind != AST_TYPE_TYPE)
-      report_error_symbol_is_not_a_typename(node->tok->loc);
+      report_error_symbol_is_not_a_typename(tok_id->loc);
 
     ast_node_free(node);
 
@@ -494,18 +503,18 @@ ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_nod
   case AST_TYPE_REF:
     node->type_ref.base_type = analyzer_visit_type(analyzer, table, node->type_ref.base_type);
     break;
-  case AST_TYPE_NULLABLE:
+  case AST_TYPE_OPTIONAL:
     node->type_nullable.base_type = analyzer_visit_type(analyzer, table, node->type_nullable.base_type);
     break;
   case AST_TYPE_FUN:
     node->type_fun.ret_type = analyzer_visit_type(analyzer, table, node->type_fun.ret_type);
-    LIST_FOR_EACH(elem, node->type_fun.params)
-      list_elem_set(elem, analyzer_visit_type(analyzer, table, (ast_node_t*)list_elem_get(elem)));
+    LIST_FOR_LOOP(elem, node->type_fun.params)
+      list_node_set(elem, analyzer_visit_type(analyzer, table, (ast_node_t*)list_node_get(elem)));
     break;
   case AST_TYPE_GEN:
     node->type_gen.ret_type = analyzer_visit_type(analyzer, table, node->type_gen.ret_type);
-    LIST_FOR_EACH(elem, node->type_gen.params)
-      list_elem_set(elem, analyzer_visit_type(analyzer, table, (ast_node_t*)list_elem_get(elem)));
+    LIST_FOR_LOOP(elem, node->type_gen.params)
+      list_node_set(elem, analyzer_visit_type(analyzer, table, (ast_node_t*)list_node_get(elem)));
     break;
   case AST_TYPE_BUILTIN_I8:
   case AST_TYPE_BUILTIN_I16:
@@ -572,7 +581,7 @@ type_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* table, ast_
   if (node->stmt_return.expr != NULL)
     type = analyzer_visit_expr(analyzer, table, node->stmt_return.expr);
 
-  type_t* expected_type = stack_peek(analyzer->ret_types);
+  type_t* expected_type = stack_top(analyzer->ret_types);
 
   if (!type_is_same(type, expected_type))
     report_error_incompatible_return_type(node->tok->loc);
@@ -583,7 +592,7 @@ type_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* table, ast_
 type_t* analyzer_visit_stmt_yield(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
   type_t* type = analyzer_visit_expr(analyzer, table, node->stmt_yield.expr);
-  type_t* expected_type = stack_peek(analyzer->ret_types);
+  type_t* expected_type = stack_top(analyzer->ret_types);
   
   if (!type_is_same(type, expected_type))
     report_error_incompatible_return_type(node->tok->loc);
@@ -595,8 +604,8 @@ void analyzer_visit_stmt_block(analyzer_t* analyzer, symtable_t* table, ast_node
 {
   symtable_t* block_table = symtable_init(table);
 
-  LIST_FOR_EACH(elem, node->stmt_block.stmts)
-    analyzer_visit_stmt(analyzer, block_table, (ast_node_t*)list_elem_get(elem));
+  LIST_FOR_LOOP(elem, node->stmt_block.stmts)
+    analyzer_visit_stmt(analyzer, block_table, (ast_node_t*)list_node_get(elem));
 }
 
 type_t* analyzer_visit_stmt_expr(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -626,15 +635,16 @@ void analyzer_visit_decl_var(analyzer_t* analyzer, symtable_t* table, ast_node_t
 {
   node->decl_var.type = analyzer_visit_type(analyzer, table, node->decl_var.type);
 
-  symbol_t* var_sym = symbol_init(node->decl_var.id->tok->id.value, node, type_of(node->decl_var.type));
-  symbol_t* lookup = symtable_lookup(table, node->decl_var.id->tok->id.value);
+  token_id_t* tok_id = (token_id_t*)node->decl_var.id->tok;
+  symbol_t* var_sym = symbol_init(tok_id->value, node, type_of(node->decl_var.type));
+  symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, var_sym);
 
   if (collision != NULL && collision->node->kind == AST_DECL_VAR)
-    report_error_variable_redeclaration(node->decl_var.id->tok->loc);
+    report_error_variable_redeclaration(tok_id->loc);
 
   if (lookup != NULL && lookup->node->kind == AST_DECL_VAR)
-    report_warning_shadowed_variable(node->decl_var.id->tok->loc);
+    report_warning_shadowed_variable(tok_id->loc);
 
   if (node->decl_var.init != NULL)
   {
@@ -650,16 +660,17 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_node_t
   symtable_t* fun_table = symtable_init(table);
 
   if (node->decl_fun.generic_params != NULL)
-    LIST_FOR_EACH(elem, node->decl_fun.generic_params)
-      analyzer_visit_generic_param(analyzer, fun_table, (ast_node_t*)list_elem_get(elem));
+    LIST_FOR_LOOP(elem, node->decl_fun.generic_params)
+      analyzer_visit_generic_param(analyzer, fun_table, (ast_node_t*)list_node_get(elem));
 
   if (node->decl_fun.params != NULL)
-    LIST_FOR_EACH(elem, node->decl_fun.params)
-      analyzer_visit_param(analyzer, fun_table, (ast_node_t*)list_elem_get(elem));
+    LIST_FOR_LOOP(elem, node->decl_fun.params)
+      analyzer_visit_param(analyzer, fun_table, (ast_node_t*)list_node_get(elem));
 
   node->decl_fun.ret_type = analyzer_visit_type(analyzer, fun_table, node->decl_fun.ret_type);
 
-  symbol_t* fun_sym = symbol_init(node->decl_fun.id->tok->id.value, node, type_of(node));
+  token_id_t* tok_id = (token_id_t*)node->decl_fun.id->tok;
+  symbol_t* fun_sym = symbol_init(tok_id->value, node, type_of(node));
   fun_sym->scope = fun_table;
 
   symbol_t* collision = symtable_insert(table, fun_sym);
@@ -677,16 +688,17 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_node_t
   symtable_t* gen_table = symtable_init(table);
 
   if (node->decl_gen.generic_params != NULL)
-    LIST_FOR_EACH(elem, node->decl_gen.generic_params)
-      analyzer_visit_generic_param(analyzer, gen_table, (ast_node_t*)list_elem_get(elem));
+    LIST_FOR_LOOP(elem, node->decl_gen.generic_params)
+      analyzer_visit_generic_param(analyzer, gen_table, (ast_node_t*)list_node_get(elem));
 
   if (node->decl_gen.params != NULL)
-    LIST_FOR_EACH(elem, node->decl_gen.params)
-      analyzer_visit_param(analyzer, gen_table, (ast_node_t*)list_elem_get(elem));
+    LIST_FOR_LOOP(elem, node->decl_gen.params)
+      analyzer_visit_param(analyzer, gen_table, (ast_node_t*)list_node_get(elem));
 
   node->decl_gen.ret_type = analyzer_visit_type(analyzer, gen_table, node->decl_gen.ret_type);
 
-  symbol_t* gen_sym = symbol_init(node->decl_gen.id->tok->id.value, node, type_of(node));
+  token_id_t* tok_id = (token_id_t*)node->decl_gen.id->tok;
+  symbol_t* gen_sym = symbol_init(tok_id->value, node, type_of(node));
   gen_sym->scope = gen_table;
 
   symbol_t* collision = symtable_insert(table, gen_sym);
@@ -706,8 +718,9 @@ void analyzer_visit_decl_struct_member(analyzer_t* analyzer, symtable_t* table, 
 
 void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
-  symbol_t* struct_sym = symbol_init(node->decl_struct.id->tok->id.value, node, type_of(node));
-  symbol_t* lookup = symtable_lookup(table, node->decl_struct.id->tok->id.value);
+  token_id_t* tok_id = (token_id_t*)node->decl_struct.id->tok;
+  symbol_t* struct_sym = symbol_init(tok_id->value, node, type_of(node));
+  symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, struct_sym);
 
   if (collision != NULL)
@@ -720,11 +733,11 @@ void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_nod
   struct_sym->scope = struct_table;
 
   if (node->decl_struct.generic_params != NULL)
-    LIST_FOR_EACH(elem, node->decl_struct.generic_params)
-      analyzer_visit_generic_param(analyzer, struct_table, (ast_node_t*)list_elem_get(elem));
+    LIST_FOR_LOOP(elem, node->decl_struct.generic_params)
+      analyzer_visit_generic_param(analyzer, struct_table, (ast_node_t*)list_node_get(elem));
 
-  LIST_FOR_EACH(elem, node->decl_struct.members)
-    analyzer_visit_decl_struct_member(analyzer, struct_table, (ast_node_t*)list_elem_get(elem));
+  LIST_FOR_LOOP(elem, node->decl_struct.members)
+    analyzer_visit_decl_struct_member(analyzer, struct_table, (ast_node_t*)list_node_get(elem));
 }
 
 void analyzer_visit_decl_union_member(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -734,8 +747,9 @@ void analyzer_visit_decl_union_member(analyzer_t* analyzer, symtable_t* table, a
 
 void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
-  symbol_t* union_sym = symbol_init(node->decl_union.id->tok->id.value, node, type_of(node));
-  symbol_t* lookup = symtable_lookup(table, node->decl_union.id->tok->id.value);
+  token_id_t* tok_id = (token_id_t*)node->decl_union.id->tok;
+  symbol_t* union_sym = symbol_init(tok_id->value, node, type_of(node));
+  symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, union_sym);
 
   if (collision != NULL)
@@ -747,14 +761,15 @@ void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_node
   symtable_t* union_table = symtable_init(table);
   union_sym->scope = union_table;
 
-  LIST_FOR_EACH(elem, node->decl_union.members)
-    analyzer_visit_decl_union_member(analyzer, union_table, (ast_node_t*)list_elem_get(elem));
+  LIST_FOR_LOOP(elem, node->decl_union.members)
+    analyzer_visit_decl_union_member(analyzer, union_table, (ast_node_t*)list_node_get(elem));
 }
 
 void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
-  symbol_t* enum_sym = symbol_init(node->decl_enum.id->tok->id.value, node, type_of(node));
-  symbol_t* lookup = symtable_lookup(table, node->decl_enum.id->tok->id.value);
+  token_id_t* tok_id = (token_id_t*)node->decl_enum.id->tok;
+  symbol_t* enum_sym = symbol_init(tok_id->value, node, type_of(node));
+  symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, enum_sym);
 
   if (collision != NULL)
@@ -766,8 +781,8 @@ void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_node_
   symtable_t* enum_table = symtable_init(table);
   enum_sym->scope = enum_table;
 
-  LIST_FOR_EACH(elem, node->decl_enum.members)
-    analyzer_visit_enumerator(analyzer, enum_table, enum_sym, (ast_node_t*)list_elem_get(elem));
+  LIST_FOR_LOOP(elem, node->decl_enum.members)
+    analyzer_visit_enumerator(analyzer, enum_table, enum_sym, (ast_node_t*)list_node_get(elem));
 }
 
 void analyzer_visit_decl_mod_member(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -777,7 +792,8 @@ void analyzer_visit_decl_mod_member(analyzer_t* analyzer, symtable_t* table, ast
 
 void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
 {
-  symbol_t* mod_sym = symbol_init(node->decl_enum.id->tok->id.value, node, type_of(node));
+  token_id_t* tok_id = (token_id_t*)node->decl_mod.id->tok;
+  symbol_t* mod_sym = symbol_init(tok_id->value, node, type_of(node));
   symbol_t* collision = symtable_insert(table, mod_sym);
 
   symtable_t* mod_table = NULL;
@@ -793,8 +809,8 @@ void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* table, ast_node_t
     mod_sym->scope = mod_table;
   }
 
-  LIST_FOR_EACH(elem, node->decl_mod.members)
-    analyzer_visit_decl_mod_member(analyzer, mod_table, (ast_node_t*)list_elem_get(elem));
+  LIST_FOR_LOOP(elem, node->decl_mod.members)
+    analyzer_visit_decl_mod_member(analyzer, mod_table, (ast_node_t*)list_node_get(elem));
 }
 
 void analyzer_visit_decl(analyzer_t* analyzer, symtable_t* table, ast_node_t* node)
@@ -816,8 +832,8 @@ void analyzer_visit_prog(analyzer_t* analyzer, symtable_t* table, ast_node_t* no
 {
   symtable_t* prog_table = symtable_init(table);
 
-  LIST_FOR_EACH(elem, node->prog.decls)
-    analyzer_visit_decl(analyzer, prog_table, (ast_node_t*)list_elem_get(elem));
+  LIST_FOR_LOOP(elem, node->prog.decls)
+    analyzer_visit_decl(analyzer, prog_table, (ast_node_t*)list_node_get(elem));
 }
 
 symtable_t* analyzer_analyze(analyzer_t* analyzer, ast_node_t* root)

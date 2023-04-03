@@ -19,7 +19,7 @@ parser_t* parser_init(list_t* toks)
   assert(par != NULL);
   par->root = NULL;
   par->toks = toks;
-  par->cur = list_front_elem(toks);
+  par->cur = list_front_node(toks);
   return par;
 }
 
@@ -31,7 +31,7 @@ void parser_free(parser_t* par)
 
 token_t* parser_current(parser_t* par)
 {
-  return (token_t*)list_elem_get(par->cur);
+  return (token_t*)list_node_get(par->cur);
 }
 
 token_t* parser_next(parser_t* par)
@@ -40,10 +40,7 @@ token_t* parser_next(parser_t* par)
   assert(tok != NULL);
 
   if (tok->kind != TOK_EOF)
-  {
-    par->cur = list_elem_next(par->cur);
-    return parser_current(par);
-  }
+    par->cur = list_node_next(par->cur);
 
   return tok;
 }
@@ -56,7 +53,7 @@ token_t* parser_peek(parser_t* par)
   if (tok->kind == TOK_EOF)
     return tok;
 
-  return (token_t*)list_elem_get(list_elem_next(par->cur));
+  return (token_t*)list_node_get(list_node_next(par->cur));
 }
 
 bool parser_consume(parser_t* par, token_kind_t kind)
@@ -211,9 +208,9 @@ ast_node_t* parser_parse_type_ref(parser_t* par)
   return node;
 }
 
-ast_node_t* parser_parse_type_nullable(parser_t* par)
+ast_node_t* parser_parse_type_optional(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_TYPE_NULLABLE);
+  ast_node_t* node = parser_node_init(par, AST_TYPE_OPTIONAL);
   parser_expect(par, TOK_PUNCT_QUESTION);
   node->type_nullable.base_type = parser_parse_type(par);
   return node;
@@ -254,7 +251,7 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_PUNCT_ASTERISK:     return parser_parse_type_ptr(par);
   case TOK_PUNCT_BRACKET_LEFT: return parser_parse_type_array(par);
   case TOK_PUNCT_AMPERSAND:    return parser_parse_type_ref(par);
-  case TOK_PUNCT_QUESTION:     return parser_parse_type_nullable(par);
+  case TOK_PUNCT_QUESTION:     return parser_parse_type_optional(par);
   case TOK_KW_FUN:             return parser_parse_type_fun(par);
   case TOK_KW_GEN:             return parser_parse_type_gen(par);
   case TOK_KW_SELF:            node = parser_node_init(par, AST_TYPE_SELF         ); parser_expect(par, TOK_KW_SELF ); return node;
@@ -401,6 +398,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   ast_node_t* node = parser_node_init(par, AST_DECL_FUN);
   parser_expect(par, TOK_KW_FUN);
   
+  // Parse generic parameters if present.
   node->decl_fun.generic_params = NULL;
   if (parser_consume(par, TOK_PUNCT_LESS))
   {
@@ -412,6 +410,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
   node->decl_fun.id = parser_parse_id(par);
   
+  // Parse parameters.
   node->decl_fun.params = NULL;
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
 
@@ -421,15 +420,28 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
     for (bool seen_default = false;;)
     {
+      // Parse variadic parameter.
+      // If a variadic parameter is present it must be the last one in the
+      // parameter list.
       if (parser_consume(par, TOK_PUNCT_DOT_DOT_DOT))
       {
-        list_push_back(node->decl_fun.params, parser_parse_variadic_param(par));
+        ast_node_t* variadic_param = parser_parse_variadic_param(par);
+
+        // Default parameters must be followed only by default parameters.
+        if (seen_default)
+          report_error_missing_default_parameter(variadic_param->tok->loc);
+
+        list_push_back(node->decl_fun.params, variadic_param);
         break;
       }
 
+      // Parse non-variadic parameter.
       ast_node_t* param = parser_parse_param(par);
+
+      // Set flag variable if we have seen a default parameter.
       seen_default |= param->param.init != NULL;
 
+      // Default parameters must be followed only by default parameters.
       if (seen_default && param->param.init == NULL)
         report_error_missing_default_parameter(param->tok->loc);
 
@@ -455,6 +467,7 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
   ast_node_t* node = parser_node_init(par, AST_DECL_GEN);
   parser_expect(par, TOK_KW_GEN);
 
+  // Parse generic parameters if present.
   node->decl_gen.generic_params = NULL;
   if (parser_consume(par, TOK_PUNCT_LESS))
   {
@@ -466,6 +479,7 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
 
   node->decl_gen.id = parser_parse_id(par);
 
+  // Parse parameters.
   node->decl_gen.params = NULL;
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
   
@@ -475,15 +489,28 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
 
     for (bool seen_default = false;;)
     {
+      // Parse variadic parameter.
+      // If a variadic parameter is present it must be the last one in the
+      // parameter list.
       if (parser_consume(par, TOK_PUNCT_DOT_DOT_DOT))
       {
-        list_push_back(node->decl_gen.params, parser_parse_variadic_param(par));
+        ast_node_t* variadic_param = parser_parse_variadic_param(par);
+
+        // Default parameters must be followed only by default parameters.
+        if (seen_default)
+          report_error_missing_default_parameter(variadic_param->tok->loc);
+
+        list_push_back(node->decl_gen.params, variadic_param);
         break;
       }
 
+      // Parse non-variadic parameter.
       ast_node_t* param = parser_parse_param(par);
+
+      // Set flag variable if we have seen a default parameter.
       seen_default |= param->param.init != NULL;
 
+      // Default parameters must be followed only by default parameters.
       if (seen_default && param->param.init == NULL)
         report_error_missing_default_parameter(param->tok->loc);
 
@@ -509,6 +536,7 @@ ast_node_t* parser_parse_decl_struct(parser_t* par)
   ast_node_t* node = parser_node_init(par, AST_DECL_STRUCT);
   parser_expect(par, TOK_KW_STRUCT);
   
+  // Parse generic parameters if present.
   node->decl_struct.generic_params = NULL;
   if (parser_consume(par, TOK_PUNCT_LESS))
   {

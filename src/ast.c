@@ -43,7 +43,7 @@ void ast_node_free(ast_node_t* node)
   case AST_TYPE_REF:
     ast_node_free(node->type_ref.base_type);
     break;
-  case AST_TYPE_NULLABLE:
+  case AST_TYPE_OPTIONAL:
     ast_node_free(node->type_nullable.base_type);
     break;
   case AST_TYPE_FUN:
@@ -223,7 +223,7 @@ const char* ast_kind_to_string(ast_kind_t kind)
   case AST_TYPE_PTR:           return "AST_TYPE_PTR";
   case AST_TYPE_ARRAY:         return "AST_TYPE_ARRAY";
   case AST_TYPE_REF:           return "AST_TYPE_REF";
-  case AST_TYPE_NULLABLE:      return "AST_TYPE_NULLABLE";
+  case AST_TYPE_OPTIONAL:      return "AST_TYPE_OPTIONAL";
   case AST_TYPE_FUN:           return "AST_TYPE_FUN";
   case AST_TYPE_GEN:           return "AST_TYPE_GEN";
   case AST_TYPE_TYPE:          return "AST_TYPE_TYPE";
@@ -286,10 +286,10 @@ void ast_list_json_dump(FILE* stream, list_t* list)
   }
 
   fputc('[', stream);
-  for (list_elem_t* elem = list_front_elem(list); elem != NULL; elem = list_elem_next(elem))
+  for (list_node_t* elem = list_front_node(list); elem != NULL; elem = list_node_next(elem))
   {
-    ast_json_dump(stream, (ast_node_t*)list_elem_get(elem));
-    if (list_elem_next(elem) != NULL)
+    ast_json_dump(stream, (ast_node_t*)list_node_get(elem));
+    if (list_node_next(elem) != NULL)
       fputc(',', stream);
   }
   fputc(']', stream);
@@ -310,7 +310,7 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   case AST_UNKNOWN:
     break;
   case AST_ID:
-    fprintf(stream, ",\"id\":\"%s\"", root->tok->id.value);
+    fprintf(stream, ",\"id\":\"%s\"", ((token_id_t*)root->tok)->value);
     break;
   case AST_TYPE_MUT:
     fprintf(stream, ",\"base_type\":");
@@ -334,7 +334,7 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     fprintf(stream, ",\"base_type\":");
     ast_json_dump(stream, root->type_ref.base_type);
     break;
-  case AST_TYPE_NULLABLE:
+  case AST_TYPE_OPTIONAL:
     fprintf(stream, ",\"base_type\":");
     ast_json_dump(stream, root->type_nullable.base_type);
     break;
@@ -367,19 +367,19 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   case AST_TYPE_BUILTIN_UNIT:
     break;
   case AST_EXPR_LIT_INT:
-    fprintf(stream, ",\"value\":%llu", root->tok->lit_int.value);
+    fprintf(stream, ",\"value\":%llu", ((token_lit_int_t*)root->tok)->value);
     break;
   case AST_EXPR_LIT_FLT:
-    fprintf(stream, ",\"value\":%Lf", root->tok->lit_flt.value);
+    fprintf(stream, ",\"value\":%Lf", ((token_lit_flt_t*)root->tok)->value);
     break;
   case AST_EXPR_LIT_STR:
-    fprintf(stream, ",\"value\":\"%s\"", root->tok->lit_str.value);
+    fprintf(stream, ",\"value\":\"%s\"", ((token_lit_str_t*)root->tok)->value);
     break;
   case AST_EXPR_LIT_CHAR:
-    fprintf(stream, ",\"value\":\"%s\"", root->tok->lit_char.value);
+    fprintf(stream, ",\"value\":\"%.*s\"", root->tok->loc->len, root->tok->loc->cur);
     break;
   case AST_EXPR_LIT_BOOL:
-    fprintf(stream, ",\"value\":%s", root->tok->kind == TOK_LIT_BOOL_TRUE ? "true" : "false");
+    fprintf(stream, ",\"value\":%s", ((token_lit_bool_t*)root->tok)->value ? "true" : "false");
     break;
   case AST_EXPR_LIT_NULL:
     break;

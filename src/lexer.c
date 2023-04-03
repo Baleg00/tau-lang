@@ -14,23 +14,14 @@
 #include "token.h"
 #include "memtrace.h"
 
+#define IDENTIFIER_MAX_LEN 255
+
 lexer_t* lexer_init(char* path, char* src)
 {
   lexer_t* lex = (lexer_t*)malloc(sizeof(lexer_t));
   assert(lex != NULL);
-
-  lex->loc = location_init();
-
-  lex->loc->path = path;
-  lex->loc->src = src;
-  lex->loc->row = 0;
-  lex->loc->col = 0;
-  lex->loc->len = 0;
-
-  lex->loc->cur = lex->loc->src;
-
+  lex->loc = location_init(path, src, src, 0, 0, 0);
   lex->toks = list_init();
-
   return lex;
 }
 
@@ -49,12 +40,8 @@ list_t* lexer_tokens(lexer_t* lex)
 
 token_t* lexer_token_init(lexer_t* lex, token_kind_t kind)
 {
-  token_t* tok = token_init();
-  tok->kind = kind;
-
-  tok->loc = location_init();
-  *tok->loc = *lex->loc;
-
+  location_t* loc = location_copy(lex->loc);
+  token_t* tok = token_init(kind, loc);
   return tok;
 }
 
@@ -114,12 +101,12 @@ char lexer_next(lexer_t* lex)
     return '\0';
   
   if (*lex->loc->cur == '\n')
-    {
-      ++lex->loc->row;
-      lex->loc->col = 0;
-    }
-    else
-      ++lex->loc->col;
+  {
+    ++lex->loc->row;
+    lex->loc->col = 0;
+  }
+  else
+    ++lex->loc->col;
 
   return *(lex->loc->cur++);
 }
@@ -203,78 +190,87 @@ void lexer_read_word(lexer_t* lex)
     { "f64",      TOK_KW_F64 },
     { "bool",     TOK_KW_BOOL },
     { "unit",     TOK_KW_UNIT },
-    { "true",     TOK_LIT_BOOL_TRUE },
-    { "false",    TOK_LIT_BOOL_FALSE },
+    { "true",     TOK_LIT_BOOL },
+    { "false",    TOK_LIT_BOOL },
     { "null",     TOK_LIT_NULL },
   };
 
-  token_t* tok = lexer_token_init(lex, TOK_UNKNOWN);
+  location_t* loc = location_copy(lex->loc);
 
-  char* begin = lex->loc->cur;
-  
   size_t len = lexer_skip(lex, lexer_is_word);
-  tok->loc->len = len;
-  
-  char* buf = (char*)malloc((len + 1) * sizeof(char));
-  assert(buf != NULL);
+  loc->len = len;
 
-  memcpy(buf, begin, len * sizeof(char));
+  if (len > IDENTIFIER_MAX_LEN)
+    report_error_identifier_too_long(loc);
+
+  char* begin = loc->cur;
+
+  char buf[IDENTIFIER_MAX_LEN + 1];
+  strncpy(buf, begin, len);
   buf[len] = '\0';
+
+  token_kind_t kind = TOK_ID;
 
   for (size_t i = 0; i < sizeof(lookup) / sizeof(lookup[0]); ++i)
     if (strcmp(lookup[i].keyword, buf) == 0)
     {
-      tok->kind = lookup[i].kind;
-      free(buf);
+      kind = lookup[i].kind;
       break;
     }
 
-  if (tok->kind == TOK_UNKNOWN)
+  token_t* tok = NULL;
+
+  if (kind == TOK_ID)
   {
-    tok->kind = TOK_ID;
-    tok->id.value = buf;
+    char* value = (char*)malloc((len + 1) * sizeof(char));
+    assert(value != NULL);
+    strcpy(value, buf);
+    
+    tok = (token_t*)token_id_init(loc, value);
   }
+  else
+    tok = token_init(kind, loc);
 
   lexer_token_push(lex, tok);
 }
 
 void lexer_read_octal_integer(lexer_t* lex)
 {
-  token_t* tok = lexer_token_init(lex, TOK_LIT_INT_OCT);
+  location_t* loc = location_copy(lex->loc);
 
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_octal);
-  tok->loc->len = len;
+  loc->len = len;
 
   if (len == 2 || lexer_is_word(lex))
-    report_error_ill_formed_integer_literal(tok->loc);
+    report_error_ill_formed_integer_literal(loc);
 
-  tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 8);
-
-  lexer_token_push(lex, tok);
+  uint64_t value = strtoull(lex->loc->cur - len, NULL, 8);
+  token_lit_int_t* tok = token_lit_int_init(loc, value);
+  lexer_token_push(lex, (token_t*)tok);
 }
 
 void lexer_read_binary_integer(lexer_t* lex)
 {
-  token_t* tok = lexer_token_init(lex, TOK_LIT_INT_BIN);
-
+  location_t* loc = location_copy(lex->loc);
+  
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_binary);
-  tok->loc->len = len;
+  loc->len = len;
 
   if (len == 2 || lexer_is_word(lex))
-    report_error_ill_formed_integer_literal(tok->loc);
+    report_error_ill_formed_integer_literal(loc);
 
-  tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 2);
-
-  lexer_token_push(lex, tok);
+  uint64_t value = strtoull(lex->loc->cur - len, NULL, 2);
+  token_lit_int_t* tok = token_lit_int_init(loc, value);
+  lexer_token_push(lex, (token_t*)tok);
 }
 
 void lexer_read_decimal_number(lexer_t* lex)
 {
-  token_t* tok = lexer_token_init(lex, TOK_LIT_INT_DEC);
+  location_t* loc = location_copy(lex->loc);
   
   size_t len = lexer_skip(lex, lexer_is_decimal);
 
@@ -282,15 +278,14 @@ void lexer_read_decimal_number(lexer_t* lex)
   {
     if (!isdigit(lexer_peek(lex)))
     {
-      tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 10);
-      tok->loc->len = len;
-      lexer_token_push(lex, tok);
+      loc->len = len;
+      uint64_t value = strtoull(lex->loc->cur - len, NULL, 10);
+      token_lit_int_t* tok = token_lit_int_init(loc, value);
+      lexer_token_push(lex, (token_t*)tok);
 
       lexer_read_punctuation(lex);
       return;
     }
-    
-    tok->kind = TOK_LIT_FLT_DEC;
 
     lexer_next(lex);
     ++len;
@@ -311,41 +306,43 @@ void lexer_read_decimal_number(lexer_t* lex)
       len += lexer_skip(lex, lexer_is_decimal);
     }
 
-    tok->lit_flt.value = strtold(lex->loc->cur - len, NULL);
-    tok->loc->len = len;
+    loc->len = len;
 
     if (lexer_is_word(lex))
-      report_error_ill_formed_float_literal(tok->loc);
-
-    lexer_token_push(lex, tok);
+      report_error_ill_formed_float_literal(loc);
+    
+    long double value = strtold(lex->loc->cur - len, NULL);
+    token_lit_flt_t* tok = token_lit_flt_init(loc, value);
+    lexer_token_push(lex, (token_t*)tok);
   }
   else
   {
-    tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 10);
-    tok->loc->len = len;
+    loc->len = len;
 
     if (lexer_is_word(lex))
-      report_error_ill_formed_integer_literal(tok->loc);
+      report_error_ill_formed_integer_literal(loc);
 
-    lexer_token_push(lex, tok);
+    uint64_t value = strtoull(lex->loc->cur - len, NULL, 10);
+    token_lit_int_t* tok = token_lit_int_init(loc, value);
+    lexer_token_push(lex, (token_t*)tok);
   }
 }
 
 void lexer_read_hexadecimal_integer(lexer_t* lex)
 {
-  token_t* tok = lexer_token_init(lex, TOK_LIT_INT_HEX);
+  location_t* loc = location_copy(lex->loc);
 
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_hexadecimal);
-  tok->loc->len = len;
+  loc->len = len;
 
   if (len == 2 || lexer_is_word(lex))
-    report_error_ill_formed_integer_literal(tok->loc);
+    report_error_ill_formed_integer_literal(loc);
 
-  tok->lit_int.value = strtoull(lex->loc->cur - len, NULL, 16);
-
-  lexer_token_push(lex, tok);
+  uint64_t value = strtoull(lex->loc->cur - len, NULL, 16);
+  token_lit_int_t* tok = token_lit_int_init(loc, value);
+  lexer_token_push(lex, (token_t*)tok);
 }
 
 void lexer_read_number(lexer_t* lex)
@@ -374,7 +371,7 @@ void lexer_read_number(lexer_t* lex)
 
 void lexer_read_string(lexer_t* lex)
 {
-  token_t* tok = lexer_token_init(lex, TOK_LIT_STR);
+  location_t* loc = location_copy(lex->loc);
 
   char ch = lexer_next(lex);
 
@@ -407,48 +404,61 @@ void lexer_read_string(lexer_t* lex)
         ++len;
 
         if (!isxdigit(lexer_next(lex)))
-          report_error_escape_no_hex_digits(tok->loc);
+          report_error_escape_no_hex_digits(loc);
 
         len += lexer_skip(lex, lexer_is_hexadecimal);
         break;
 
       default:
-        report_error_unknown_escape_sequence(tok->loc);
+        report_error_unknown_escape_sequence(loc);
       }
     }
   }
 
   if (ch != '"')
   {
-    tok->loc->len = 1;
-    report_error_missing_terminating_character(tok->loc, '"');
+    loc->len = 1;
+    report_error_missing_terminating_character(loc, '"');
   }
 
-  tok->loc->len = len + 2;
+  loc->len = len + 2;
 
   char* buf = (char*)malloc((len + 1) * sizeof(char));
   assert(buf != NULL);
 
-  memcpy(buf, lex->loc->cur - len - 2, len * sizeof(char));
+  strncpy(buf, lex->loc->cur - len - 1, len);
   buf[len] = '\0';
 
-  tok->lit_str.value = buf;
-
-  lexer_token_push(lex, tok);
+  token_lit_str_t* tok = token_lit_str_init(loc, buf);
+  lexer_token_push(lex, (token_t*)tok);
 }
 
 void lexer_read_character(lexer_t* lex)
 {
-  token_t* tok = lexer_token_init(lex, TOK_LIT_CHAR);
-  
+  static const struct {
+    const char* const key;
+    char value;
+  } lookup[] = {
+    { "\\\\", '\\' },
+    { "\\b",  '\b' },
+    { "\\f",  '\f' },
+    { "\\n",  '\n' },
+    { "\\r",  '\r' },
+    { "\\t",  '\t' },
+    { "\\\'", '\'' },
+    { "\\\"", '"'  }
+  };
+
+  location_t* loc = location_copy(lex->loc);
+
   lexer_next(lex);
 
   size_t len = 0;
 
   if (lexer_current(lex) == '\'')
   {
-    tok->loc->len = 2;
-    report_error_empty_character_literal(tok->loc);
+    loc->len = 2;
+    report_error_empty_character_literal(loc);
   }
 
   if (lexer_next(lex) == '\\')
@@ -472,14 +482,17 @@ void lexer_read_character(lexer_t* lex)
     case 'X': // arbitrary hexadecimal byte
       ++len;
 
-      if (!isxdigit(lexer_next(lex)))
-        report_error_escape_no_hex_digits(tok->loc);
+      if (!isxdigit(lexer_current(lex)))
+        report_error_escape_no_hex_digits(loc);
 
       len += lexer_skip(lex, lexer_is_hexadecimal);
+
+      if (len > 4)
+        report_error_escape_too_many_hex_digits(loc);
       break;
 
     default:
-      report_error_unknown_escape_sequence(tok->loc);
+      report_error_unknown_escape_sequence(loc);
     }
   }
   else
@@ -487,21 +500,30 @@ void lexer_read_character(lexer_t* lex)
 
   if (lexer_next(lex) != '\'')
   {
-    tok->loc->len = 1;
-    report_error_missing_terminating_character(tok->loc, '\'');
+    loc->len = 1;
+    report_error_missing_terminating_character(loc, '\'');
   }
 
-  tok->loc->len = len;
+  loc->len = len + 2;
+  char* begin = loc->cur + 1;
+  char value = '\0';
 
-  char* buf = (char*)malloc((len + 1) * sizeof(char));  
-  assert(buf != NULL);
+  if (len == 1)
+    value = *begin;
+  else if (len == 2)
+  {
+    for (size_t i = 0; i < sizeof(lookup) / sizeof(lookup[0]); ++i)
+      if (strncmp(lookup[i].key, begin, len) == 0)
+      {
+        value = lookup[i].value;
+        break;
+      }
+  }
+  else
+    value = (char)strtol(begin + 2, NULL, 16);
 
-  memcpy(buf, lex->loc->cur - len - 2, len * sizeof(char));
-  buf[len] = '\0';
-
-  tok->lit_char.value = buf;
-
-  lexer_token_push(lex, tok);
+  token_lit_char_t* tok = token_lit_char_init(loc, value);
+  lexer_token_push(lex, (token_t*)tok);
 }
 
 void lexer_read_punctuation(lexer_t* lex)
