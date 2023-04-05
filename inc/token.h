@@ -82,54 +82,54 @@ typedef enum token_kind_e
   TOK_KW_BOOL, // Keyword `bool`
   TOK_KW_UNIT, // Keyword `unit`
 
-  TOK_PUNCT_PLUS = TOK_FLAG_PUNCT, // Punctuation `+
-  TOK_PUNCT_PLUS_PLUS, // Punctuation `++
-  TOK_PUNCT_PLUS_EQUAL, // Punctuation `+=
-  TOK_PUNCT_MINUS, // Punctuation `-
-  TOK_PUNCT_MINUS_MINUS, // Punctuation `--
-  TOK_PUNCT_MINUS_EQUAL, // Punctuation `-=
-  TOK_PUNCT_ASTERISK, // Punctuation `*
-  TOK_PUNCT_ASTERISK_EQUAL, // Punctuation `*=
-  TOK_PUNCT_ASTERISK_DOT, // Punctuation `*.
-  TOK_PUNCT_SLASH, // Punctuation `/
-  TOK_PUNCT_SLASH_EQUAL, // Punctuation `/=
-  TOK_PUNCT_PERCENT, // Punctuation `%
-  TOK_PUNCT_PERCENT_EQUAL, // Punctuation `%=
-  TOK_PUNCT_AMPERSAND, // Punctuation `&
-  TOK_PUNCT_AMPERSAND_AMPERSAND, // Punctuation `&&
-  TOK_PUNCT_AMPERSAND_EQUAL, // Punctuation `&=
-  TOK_PUNCT_BAR, // Punctuation `|
-  TOK_PUNCT_BAR_BAR, // Punctuation `||
-  TOK_PUNCT_BAR_EQUAL, // Punctuation `|=
-  TOK_PUNCT_HAT, // Punctuation `^
-  TOK_PUNCT_HAT_EQUAL, // Punctuation `^=
-  TOK_PUNCT_TILDE, // Punctuation `~
-  TOK_PUNCT_LESS, // Punctuation `<
-  TOK_PUNCT_LESS_LESS, // Punctuation `<<
-  TOK_PUNCT_LESS_LESS_EQUAL, // Punctuation `<<=
-  TOK_PUNCT_LESS_EQUAL, // Punctuation `<=
-  TOK_PUNCT_GREATER, // Punctuation `>
-  TOK_PUNCT_GREATER_GREATER, // Punctuation `>>
-  TOK_PUNCT_GREATER_GREATER_EQUAL, // Punctuation `>>=
-  TOK_PUNCT_GREATER_EQUAL, // Punctuation `>=
-  TOK_PUNCT_BANG, // Punctuation `!
-  TOK_PUNCT_BANG_EQUAL, // Punctuation `!=
-  TOK_PUNCT_DOT, // Punctuation `.
-  TOK_PUNCT_DOT_DOT, // Punctuation `..
-  TOK_PUNCT_DOT_DOT_DOT, // Punctuation `...
-  TOK_PUNCT_QUESTION, // Punctuation `?
-  TOK_PUNCT_QUESTION_DOT, // Punctuation `?.
-  TOK_PUNCT_EQUAL, // Punctuation `=
-  TOK_PUNCT_EQUAL_EQUAL, // Punctuation `==
-  TOK_PUNCT_COMMA, // Punctuation `,
-  TOK_PUNCT_COLON, // Punctuation `:
-  TOK_PUNCT_SEMICOLON, // Punctuation `;
-  TOK_PUNCT_PAREN_LEFT, // Punctuation `(
-  TOK_PUNCT_PAREN_RIGHT, // Punctuation `)
-  TOK_PUNCT_BRACKET_LEFT, // Punctuation `[
-  TOK_PUNCT_BRACKET_RIGHT, // Punctuation `]
-  TOK_PUNCT_BRACE_LEFT, // Punctuation `{
-  TOK_PUNCT_BRACE_RIGHT, // Punctuation `}
+  TOK_PUNCT_PLUS = TOK_FLAG_PUNCT, // Punctuation `+`
+  TOK_PUNCT_PLUS_PLUS, // Punctuation `++`
+  TOK_PUNCT_PLUS_EQUAL, // Punctuation `+=`
+  TOK_PUNCT_MINUS, // Punctuation `-`
+  TOK_PUNCT_MINUS_MINUS, // Punctuation `--`
+  TOK_PUNCT_MINUS_EQUAL, // Punctuation `-=`
+  TOK_PUNCT_ASTERISK, // Punctuation `*`
+  TOK_PUNCT_ASTERISK_EQUAL, // Punctuation `*=`
+  TOK_PUNCT_ASTERISK_DOT, // Punctuation `*.`
+  TOK_PUNCT_SLASH, // Punctuation `/`
+  TOK_PUNCT_SLASH_EQUAL, // Punctuation `/=`
+  TOK_PUNCT_PERCENT, // Punctuation `%`
+  TOK_PUNCT_PERCENT_EQUAL, // Punctuation `%=`
+  TOK_PUNCT_AMPERSAND, // Punctuation `&`
+  TOK_PUNCT_AMPERSAND_AMPERSAND, // Punctuation `&&`
+  TOK_PUNCT_AMPERSAND_EQUAL, // Punctuation `&=`
+  TOK_PUNCT_BAR, // Punctuation `|`
+  TOK_PUNCT_BAR_BAR, // Punctuation `||`
+  TOK_PUNCT_BAR_EQUAL, // Punctuation `|=`
+  TOK_PUNCT_HAT, // Punctuation `^`
+  TOK_PUNCT_HAT_EQUAL, // Punctuation `^=`
+  TOK_PUNCT_TILDE, // Punctuation `~`
+  TOK_PUNCT_LESS, // Punctuation `<`
+  TOK_PUNCT_LESS_LESS, // Punctuation `<<`
+  TOK_PUNCT_LESS_LESS_EQUAL, // Punctuation `<<=`
+  TOK_PUNCT_LESS_EQUAL, // Punctuation `<=`
+  TOK_PUNCT_GREATER, // Punctuation `>`
+  TOK_PUNCT_GREATER_GREATER, // Punctuation `>>`
+  TOK_PUNCT_GREATER_GREATER_EQUAL, // Punctuation `>>=`
+  TOK_PUNCT_GREATER_EQUAL, // Punctuation `>=`
+  TOK_PUNCT_BANG, // Punctuation `!`
+  TOK_PUNCT_BANG_EQUAL, // Punctuation `!=`
+  TOK_PUNCT_DOT, // Punctuation `.`
+  TOK_PUNCT_DOT_DOT, // Punctuation `..`
+  TOK_PUNCT_DOT_DOT_DOT, // Punctuation `...`
+  TOK_PUNCT_QUESTION, // Punctuation `?`
+  TOK_PUNCT_QUESTION_DOT, // Punctuation `?.`
+  TOK_PUNCT_EQUAL, // Punctuation `=`
+  TOK_PUNCT_EQUAL_EQUAL, // Punctuation `==`
+  TOK_PUNCT_COMMA, // Punctuation `,`
+  TOK_PUNCT_COLON, // Punctuation `:`
+  TOK_PUNCT_SEMICOLON, // Punctuation `;`
+  TOK_PUNCT_PAREN_LEFT, // Punctuation `(`
+  TOK_PUNCT_PAREN_RIGHT, // Punctuation `)`
+  TOK_PUNCT_BRACKET_LEFT, // Punctuation `[`
+  TOK_PUNCT_BRACKET_RIGHT, // Punctuation `]`
+  TOK_PUNCT_BRACE_LEFT, // Punctuation `{`
+  TOK_PUNCT_BRACE_RIGHT, // Punctuation `}`
 
   TOK_EOF = TOK_FLAG_EOF // End of file
 } token_kind_t;
@@ -189,6 +189,8 @@ typedef struct token_lit_bool_s
   TOKEN_HEADER;
   bool value;
 } token_lit_bool_t;
+
+#undef TOKEN_HEADER
 
 /**
  * \brief Initializes a new token.

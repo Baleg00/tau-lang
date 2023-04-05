@@ -77,17 +77,6 @@ token_t* parser_expect(parser_t* par, token_kind_t kind)
   return parser_next(par);
 }
 
-ast_node_t* parser_node_init(parser_t* par, ast_kind_t kind)
-{
-  ast_node_t* node = malloc(sizeof(ast_node_t));
-  assert(node != NULL);
-
-  node->kind = kind;
-  node->tok = parser_current(par);
-
-  return node;
-}
-
 list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func)
 {
   list_t* list = list_init();
@@ -115,129 +104,113 @@ list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_f
 
 ast_node_t* parser_parse_id(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_ID);
+  ast_id_t* id = ast_id_init(parser_current(par));
   parser_expect(par, TOK_ID);
-  return node;
-}
-
-ast_node_t* parser_parse_param(parser_t* par)
-{
-  ast_node_t* node = parser_node_init(par, AST_PARAM);
-  node->param.id = parser_parse_id(par);
-  parser_expect(par, TOK_PUNCT_COLON);
-  node->param.type = parser_parse_type(par);
-  node->param.init = parser_consume(par, TOK_PUNCT_EQUAL) ? parser_parse_expr(par) : NULL;
-  return node;
-}
-
-ast_node_t* parser_parse_variadic_param(parser_t* par)
-{
-  ast_node_t* node = parser_node_init(par, AST_VARIADIC_PARAM);
-  node->variadic_param.id = parser_parse_id(par);
-  parser_expect(par, TOK_PUNCT_COLON);
-  node->variadic_param.type = parser_node_init(par, AST_TYPE_ARRAY);
-  node->variadic_param.type->type_array.size = NULL;
-  node->variadic_param.type->type_array.base_type = parser_parse_type(par);
-  return node;
-}
-
-ast_node_t* parser_parse_generic_param(parser_t* par)
-{
-  ast_node_t* node = parser_node_init(par, AST_GENERIC_PARAM);
-  node->generic_param.id = parser_parse_id(par);
-  parser_expect(par, TOK_PUNCT_COLON);
-  node->generic_param.type = parser_consume(par, TOK_KW_TYPE) ? parser_node_init(par, AST_TYPE_TYPE) : parser_parse_type(par);
-  return node;
-}
-
-ast_node_t* parser_parse_loop_var(parser_t* par)
-{
-  ast_node_t* node = parser_node_init(par, AST_LOOP_VAR);
-  node->loop_var.id = parser_parse_id(par);
-  parser_expect(par, TOK_PUNCT_COLON);
-  node->loop_var.type = parser_parse_type(par);
-  return node;
-}
-
-ast_node_t* parser_parse_enumerator(parser_t* par)
-{
-  ast_node_t* node = parser_node_init(par, AST_ENUMERATOR);
-  node->enumerator.id = parser_parse_id(par);
-  return node;
+  return (ast_node_t*)id;
 }
 
 ast_node_t* parser_parse_type_mut(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_TYPE_MUT);
+  ast_type_mut_t* node = ast_type_mut_init(parser_current(par));
+
   parser_expect(par, TOK_KW_MUT);
-  node->type_mut.base_type = parser_parse_type(par);
-  return node;
+  
+  node->base_type = parser_parse_type(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_const(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_TYPE_CONST);
+  ast_type_const_t* node = ast_type_const_init(parser_current(par));
+
   parser_expect(par, TOK_KW_CONST);
-  node->type_const.base_type = parser_parse_type(par);
-  return node;
+  
+  node->base_type = parser_parse_type(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_ptr(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_TYPE_PTR);
+  ast_type_ptr_t* node = ast_type_ptr_init(parser_current(par));
+
   parser_expect(par, TOK_PUNCT_ASTERISK);
-  node->type_ptr.base_type = parser_parse_type(par);
-  return node;
+  
+  node->base_type = parser_parse_type(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_array(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_TYPE_ARRAY);
+  ast_type_array_t* node = ast_type_array_init(parser_current(par));
+
   parser_expect(par, TOK_PUNCT_BRACKET_LEFT);
-  node->type_array.size = parser_current(par)->kind == TOK_PUNCT_BRACKET_RIGHT ? NULL : parser_parse_expr(par);
+  
+  node->size = parser_current(par)->kind == TOK_PUNCT_BRACKET_RIGHT ? NULL : parser_parse_expr(par);
+  
   parser_expect(par, TOK_PUNCT_BRACKET_RIGHT);
-  node->type_array.base_type = parser_parse_type(par);
-  return node;
+
+  node->base_type = parser_parse_type(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_ref(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_TYPE_REF);
+  ast_type_ref_t* node = ast_type_ref_init(parser_current(par));
+
   parser_expect(par, TOK_PUNCT_AMPERSAND);
-  node->type_ref.base_type = parser_parse_type(par);
-  return node;
+  
+  node->base_type = parser_parse_type(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_optional(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_TYPE_OPTIONAL);
+  ast_type_opt_t* node = ast_type_opt_init(parser_current(par));
+
   parser_expect(par, TOK_PUNCT_QUESTION);
-  node->type_nullable.base_type = parser_parse_type(par);
-  return node;
+  
+  node->base_type = parser_parse_type(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_fun(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_TYPE_FUN);
+  ast_type_fun_t* node = ast_type_fun_init(parser_current(par));
+
   parser_expect(par, TOK_KW_FUN);
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
-  node->type_fun.params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_type);
+  
+  node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_type);
+
   parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
   parser_expect(par, TOK_PUNCT_COLON);
-  node->type_fun.ret_type = parser_parse_type(par);
-  return node;
+  
+  node->return_type = parser_parse_type(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_gen(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_TYPE_GEN);
+  ast_type_gen_t* node = ast_type_gen_init(parser_current(par));
+
   parser_expect(par, TOK_KW_GEN);
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
-  node->type_gen.params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_type);
+  
+  node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_type);
+
   parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
   parser_expect(par, TOK_PUNCT_COLON);
-  node->type_gen.ret_type = parser_parse_type(par);
-  return node;
+  
+  node->yield_type = parser_parse_type(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type(parser_t* par)
@@ -254,22 +227,22 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_PUNCT_QUESTION:     return parser_parse_type_optional(par);
   case TOK_KW_FUN:             return parser_parse_type_fun(par);
   case TOK_KW_GEN:             return parser_parse_type_gen(par);
-  case TOK_KW_SELF:            node = parser_node_init(par, AST_TYPE_SELF         ); parser_expect(par, TOK_KW_SELF ); return node;
-  case TOK_KW_I8:              node = parser_node_init(par, AST_TYPE_BUILTIN_I8   ); parser_expect(par, TOK_KW_I8   ); return node;
-  case TOK_KW_I16:             node = parser_node_init(par, AST_TYPE_BUILTIN_I16  ); parser_expect(par, TOK_KW_I16  ); return node;
-  case TOK_KW_I32:             node = parser_node_init(par, AST_TYPE_BUILTIN_I32  ); parser_expect(par, TOK_KW_I32  ); return node;
-  case TOK_KW_I64:             node = parser_node_init(par, AST_TYPE_BUILTIN_I64  ); parser_expect(par, TOK_KW_I64  ); return node;
-  case TOK_KW_ISIZE:           node = parser_node_init(par, AST_TYPE_BUILTIN_ISIZE); parser_expect(par, TOK_KW_ISIZE); return node;
-  case TOK_KW_U8:              node = parser_node_init(par, AST_TYPE_BUILTIN_U8   ); parser_expect(par, TOK_KW_U8   ); return node;
-  case TOK_KW_U16:             node = parser_node_init(par, AST_TYPE_BUILTIN_U16  ); parser_expect(par, TOK_KW_U16  ); return node;
-  case TOK_KW_U32:             node = parser_node_init(par, AST_TYPE_BUILTIN_U32  ); parser_expect(par, TOK_KW_U32  ); return node;
-  case TOK_KW_U64:             node = parser_node_init(par, AST_TYPE_BUILTIN_U64  ); parser_expect(par, TOK_KW_U64  ); return node;
-  case TOK_KW_USIZE:           node = parser_node_init(par, AST_TYPE_BUILTIN_USIZE); parser_expect(par, TOK_KW_USIZE); return node;  
-  case TOK_KW_F32:             node = parser_node_init(par, AST_TYPE_BUILTIN_F32  ); parser_expect(par, TOK_KW_F32  ); return node;
-  case TOK_KW_F64:             node = parser_node_init(par, AST_TYPE_BUILTIN_F64  ); parser_expect(par, TOK_KW_F64  ); return node;
-  case TOK_KW_BOOL:            node = parser_node_init(par, AST_TYPE_BUILTIN_BOOL ); parser_expect(par, TOK_KW_BOOL ); return node;
-  case TOK_KW_UNIT:            node = parser_node_init(par, AST_TYPE_BUILTIN_UNIT ); parser_expect(par, TOK_KW_UNIT ); return node;
-  case TOK_ID:                 node = parser_node_init(par, AST_ID                ); parser_expect(par, TOK_ID      ); return node;
+  case TOK_KW_SELF:            node = (ast_node_t*)ast_type_self_init( parser_expect(par, TOK_KW_SELF )); return node;
+  case TOK_KW_I8:              node = (ast_node_t*)ast_type_i8_init(   parser_expect(par, TOK_KW_I8   )); return node;
+  case TOK_KW_I16:             node = (ast_node_t*)ast_type_i16_init(  parser_expect(par, TOK_KW_I16  )); return node;
+  case TOK_KW_I32:             node = (ast_node_t*)ast_type_i32_init(  parser_expect(par, TOK_KW_I32  )); return node;
+  case TOK_KW_I64:             node = (ast_node_t*)ast_type_i64_init(  parser_expect(par, TOK_KW_I64  )); return node;
+  case TOK_KW_ISIZE:           node = (ast_node_t*)ast_type_isize_init(parser_expect(par, TOK_KW_ISIZE)); return node;
+  case TOK_KW_U8:              node = (ast_node_t*)ast_type_u8_init(   parser_expect(par, TOK_KW_U8   )); return node;
+  case TOK_KW_U16:             node = (ast_node_t*)ast_type_u16_init(  parser_expect(par, TOK_KW_U16  )); return node;
+  case TOK_KW_U32:             node = (ast_node_t*)ast_type_u32_init(  parser_expect(par, TOK_KW_U32  )); return node;
+  case TOK_KW_U64:             node = (ast_node_t*)ast_type_u64_init(  parser_expect(par, TOK_KW_U64  )); return node;
+  case TOK_KW_USIZE:           node = (ast_node_t*)ast_type_usize_init(parser_expect(par, TOK_KW_USIZE)); return node;  
+  case TOK_KW_F32:             node = (ast_node_t*)ast_type_f32_init(  parser_expect(par, TOK_KW_F32  )); return node;
+  case TOK_KW_F64:             node = (ast_node_t*)ast_type_f64_init(  parser_expect(par, TOK_KW_F64  )); return node;
+  case TOK_KW_BOOL:            node = (ast_node_t*)ast_type_bool_init( parser_expect(par, TOK_KW_BOOL )); return node;
+  case TOK_KW_UNIT:            node = (ast_node_t*)ast_type_unit_init( parser_expect(par, TOK_KW_UNIT )); return node;
+  case TOK_ID:                 node = (ast_node_t*)ast_id_init(        parser_expect(par, TOK_ID      )); return node;
   default:                     report_error_unexpected_token(parser_current(par)->loc);
   }
 
@@ -283,80 +256,108 @@ ast_node_t* parser_parse_expr(parser_t* par)
 
 ast_node_t* parser_parse_stmt_if(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_STMT_IF);
+  ast_stmt_if_t* node = ast_stmt_if_init(parser_current(par));
+
   parser_expect(par, TOK_KW_IF);
-  node->stmt_if.cond = parser_parse_expr(par);
+  
+  node->cond = parser_parse_expr(par);
+
   parser_expect(par, TOK_KW_THEN);
-  node->stmt_if.stmt = parser_parse_stmt(par);
-  node->stmt_if.stmt_else = parser_consume(par, TOK_KW_ELSE) ? parser_parse_stmt(par) : NULL;
-  return node;
+  
+  node->stmt = parser_parse_stmt(par);
+  node->stmt_else = parser_consume(par, TOK_KW_ELSE) ? parser_parse_stmt(par) : NULL;
+
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_for(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_STMT_FOR);
+  ast_stmt_for_t* node = ast_stmt_for_init(parser_current(par));
+
   parser_expect(par, TOK_KW_FOR);
-  node->stmt_for.var = parser_parse_loop_var(par);
+  
+  node->var = parser_parse_decl_loop_var(par);
+  
   parser_expect(par, TOK_KW_IN);
-  node->stmt_for.range = parser_parse_expr(par);
+  
+  node->range = parser_parse_expr(par);
+  
   parser_expect(par, TOK_KW_DO);
-  node->stmt_for.stmt = parser_parse_stmt(par);
-  return node;
+  
+  node->stmt = parser_parse_stmt(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_while(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_STMT_WHILE);
+  ast_stmt_while_t* node = ast_stmt_while_init(parser_current(par));
+
   parser_expect(par, TOK_KW_WHILE);
-  node->stmt_while.cond = parser_parse_expr(par);
+  
+  node->cond = parser_parse_expr(par);
+  
   parser_expect(par, TOK_KW_DO);
-  node->stmt_while.stmt = parser_parse_stmt(par);
-  return node;
+  
+  node->stmt = parser_parse_stmt(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_break(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_STMT_BREAK);
+  ast_stmt_break_t* node = ast_stmt_break_init(parser_current(par));
   parser_expect(par, TOK_KW_BREAK);
-  return node;
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_continue(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_STMT_CONTINUE);
+  ast_stmt_continue_t* node = ast_stmt_continue_init(parser_current(par));
   parser_expect(par, TOK_KW_CONTINUE);
-  return node;
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_return(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_STMT_RETURN);
+  ast_stmt_return_t* node = ast_stmt_return_init(parser_current(par));
+
   parser_expect(par, TOK_KW_RETURN);
-  node->stmt_return.expr = parser_parse_expr(par);
-  return node;
+  
+  node->expr = parser_parse_expr(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_yield(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_STMT_YIELD);
+  ast_stmt_yield_t* node = ast_stmt_yield_init(parser_current(par));
+
   parser_expect(par, TOK_KW_YIELD);
-  node->stmt_yield.expr = parser_parse_expr(par);
-  return node;
+  
+  node->expr = parser_parse_expr(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_block(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_STMT_BLOCK);
+  ast_stmt_block_t* node = ast_stmt_block_init(parser_current(par));
+
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
-  node->stmt_block.stmts = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_stmt);
-  return node;
+  
+  node->stmts = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_stmt);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_expr(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_STMT_EXPR);
-  node->stmt_expr.expr = parser_parse_expr(par);
-  return node;
+  ast_stmt_expr_t* node = ast_stmt_expr_init(parser_current(par));
+
+  node->expr = parser_parse_expr(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt(parser_t* par)
@@ -385,38 +386,60 @@ ast_node_t* parser_parse_stmt(parser_t* par)
 
 ast_node_t* parser_parse_decl_var(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_DECL_VAR);
-  node->decl_var.id = parser_parse_id(par);
+  ast_decl_var_t* node = ast_decl_var_init(parser_current(par));
+
+  node->id = parser_parse_id(par);
+  
   parser_expect(par, TOK_PUNCT_COLON);
-  node->decl_var.type = parser_parse_type(par);
-  node->decl_var.init = parser_consume(par, TOK_PUNCT_EQUAL) ? parser_parse_expr(par) : NULL;
-  return node;
+  
+  node->type = parser_parse_type(par);
+  node->init = parser_consume(par, TOK_PUNCT_EQUAL) ? parser_parse_expr(par) : NULL;
+  
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_decl_loop_var(parser_t* par)
+{
+  ast_decl_loop_var_t* node = ast_decl_loop_var_init(parser_current(par));
+  node->id = parser_parse_id(par);
+
+  parser_expect(par, TOK_PUNCT_COLON);
+  
+  node->type = parser_parse_type(par);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_decl_fun(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_DECL_FUN);
+  ast_decl_generic_t* generic_node = NULL;
+  ast_decl_fun_t* node = ast_decl_fun_init(parser_current(par));
+  
   parser_expect(par, TOK_KW_FUN);
   
-  // Parse generic parameters if present.
-  node->decl_fun.generic_params = NULL;
+  // Parse generic parameters.
   if (parser_consume(par, TOK_PUNCT_LESS))
   {
-    node->decl_fun.generic_params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+    generic_node = ast_decl_generic_init(node->tok);
+    generic_node->decl = (ast_node_t*)node;
+    generic_node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+
     token_t* tok = parser_expect(par, TOK_PUNCT_GREATER);
-    if (list_size(node->decl_fun.generic_params) == 0)
+
+    if (list_size(generic_node->params) == 0)
       report_error_empty_generic_parameter_list(tok->loc);
   }
 
-  node->decl_fun.id = parser_parse_id(par);
+  node->id = parser_parse_id(par);
   
   // Parse parameters.
-  node->decl_fun.params = NULL;
+  node->params = NULL;
+
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
 
   if (!parser_consume(par, TOK_PUNCT_PAREN_RIGHT))
   {
-    node->decl_fun.params = list_init();
+    node->params = list_init();
 
     for (bool seen_default = false;;)
     {
@@ -431,21 +454,21 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
         if (seen_default)
           report_error_missing_default_parameter(variadic_param->tok->loc);
 
-        list_push_back(node->decl_fun.params, variadic_param);
+        list_push_back(node->params, variadic_param);
         break;
       }
 
       // Parse non-variadic parameter.
       ast_node_t* param = parser_parse_param(par);
 
-      // Set flag variable if we have seen a default parameter.
-      seen_default |= param->param.init != NULL;
+      // Set flag variable if parameter is a default parameter.
+      seen_default |= param->kind == AST_PARAM_DEFAULT;
 
       // Default parameters must be followed only by default parameters.
-      if (seen_default && param->param.init == NULL)
+      if (seen_default && param->kind != AST_PARAM_DEFAULT)
         report_error_missing_default_parameter(param->tok->loc);
 
-      list_push_back(node->decl_fun.params, param);
+      list_push_back(node->params, param);
 
       if (!parser_consume(par, TOK_PUNCT_COMMA))
         break;
@@ -455,37 +478,43 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   }
   
   parser_expect(par, TOK_PUNCT_COLON);
-  node->decl_fun.ret_type = parser_parse_type(par);
+
+  node->return_type = parser_parse_type(par);
+  node->stmt = parser_parse_stmt(par);
   
-  node->decl_fun.stmt = parser_parse_stmt(par);
-  
-  return node;
+  return generic_node == NULL ? (ast_node_t*)node : (ast_node_t*)generic_node;
 }
 
 ast_node_t* parser_parse_decl_gen(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_DECL_GEN);
-  parser_expect(par, TOK_KW_GEN);
-
-  // Parse generic parameters if present.
-  node->decl_gen.generic_params = NULL;
+  ast_decl_generic_t* generic_node = NULL;
+  ast_decl_gen_t* node = ast_decl_gen_init(parser_current(par));
+  
+  parser_expect(par, TOK_KW_FUN);
+  
+  // Parse generic parameters.
   if (parser_consume(par, TOK_PUNCT_LESS))
   {
-    node->decl_gen.generic_params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+    generic_node = ast_decl_generic_init(node->tok);
+    generic_node->decl = (ast_node_t*)node;
+    generic_node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+
     token_t* tok = parser_expect(par, TOK_PUNCT_GREATER);
-    if (list_size(node->decl_gen.generic_params) == 0)
+
+    if (list_size(generic_node->params) == 0)
       report_error_empty_generic_parameter_list(tok->loc);
   }
 
-  node->decl_gen.id = parser_parse_id(par);
-
-  // Parse parameters.
-  node->decl_gen.params = NULL;
-  parser_expect(par, TOK_PUNCT_PAREN_LEFT);
+  node->id = parser_parse_id(par);
   
+  // Parse parameters.
+  node->params = NULL;
+
+  parser_expect(par, TOK_PUNCT_PAREN_LEFT);
+
   if (!parser_consume(par, TOK_PUNCT_PAREN_RIGHT))
   {
-    node->decl_gen.params = list_init();
+    node->params = list_init();
 
     for (bool seen_default = false;;)
     {
@@ -500,21 +529,21 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
         if (seen_default)
           report_error_missing_default_parameter(variadic_param->tok->loc);
 
-        list_push_back(node->decl_gen.params, variadic_param);
+        list_push_back(node->params, variadic_param);
         break;
       }
 
       // Parse non-variadic parameter.
       ast_node_t* param = parser_parse_param(par);
 
-      // Set flag variable if we have seen a default parameter.
-      seen_default |= param->param.init != NULL;
+      // Set flag variable if parameter is a default parameter.
+      seen_default |= param->kind == AST_PARAM_DEFAULT;
 
       // Default parameters must be followed only by default parameters.
-      if (seen_default && param->param.init == NULL)
+      if (seen_default && param->kind != AST_PARAM_DEFAULT)
         report_error_missing_default_parameter(param->tok->loc);
 
-      list_push_back(node->decl_gen.params, param);
+      list_push_back(node->params, param);
 
       if (!parser_consume(par, TOK_PUNCT_COMMA))
         break;
@@ -522,66 +551,87 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
 
     parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
   }
-
+  
   parser_expect(par, TOK_PUNCT_COLON);
-  node->decl_gen.ret_type = parser_parse_type(par);
+
+  node->yield_type = parser_parse_type(par);
+  node->stmt = parser_parse_stmt(par);
   
-  node->decl_gen.stmt = parser_parse_stmt(par);
-  
-  return node;
+  return generic_node == NULL ? (ast_node_t*)node : (ast_node_t*)generic_node;
 }
 
 ast_node_t* parser_parse_decl_struct(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_DECL_STRUCT);
+  ast_decl_generic_t* generic_node = NULL;
+  ast_decl_struct_t* node = ast_decl_struct_init(parser_current(par));
+
   parser_expect(par, TOK_KW_STRUCT);
   
-  // Parse generic parameters if present.
-  node->decl_struct.generic_params = NULL;
+  // Parse generic parameters.
   if (parser_consume(par, TOK_PUNCT_LESS))
   {
-    node->decl_struct.generic_params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+    generic_node = ast_decl_generic_init(node->tok);
+    generic_node->decl = (ast_node_t*)node;
+    generic_node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+
     token_t* tok = parser_expect(par, TOK_PUNCT_GREATER);
-    if (list_size(node->decl_struct.generic_params) == 0)
+
+    if (list_size(generic_node->params) == 0)
       report_error_empty_generic_parameter_list(tok->loc);
   }
   
-  node->decl_struct.id = parser_parse_id(par);
+  node->id = parser_parse_id(par);
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
-  node->decl_struct.members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_member);
+
+  node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_var);
   
-  return node;
+  return generic_node == NULL ? (ast_node_t*)node : (ast_node_t*)generic_node;
 }
 
 ast_node_t* parser_parse_decl_union(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_DECL_UNION);
+  ast_decl_union_t* node = ast_decl_union_init(parser_current(par));
+
   parser_expect(par, TOK_KW_UNION);
-  node->decl_union.id = parser_parse_id(par);
+  
+  node->id = parser_parse_id(par);
+
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
-  node->decl_union.members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_member);
-  return node;
+  
+  node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_var);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_decl_enum(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_DECL_ENUM);
+  ast_decl_enum_t* node = ast_decl_enum_init(parser_current(par));
+
   parser_expect(par, TOK_KW_ENUM);
-  node->decl_enum.id = parser_parse_id(par);
+  
+  node->id = parser_parse_id(par);
+
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
-  node->decl_enum.members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_enumerator);
-  return node;
+  
+  node->values = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_enumerator);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_decl_mod(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_DECL_MOD);
+  ast_decl_mod_t* node = ast_decl_mod_init(parser_current(par));
+
   parser_expect(par, TOK_KW_MOD);
-  node->decl_mod.id = parser_parse_id(par);
+  
+  node->id = parser_parse_id(par);
+
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
-  node->decl_mod.members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_member);
-  return node;
+  
+  node->decls = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl);
+  
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_decl(parser_t* par)
@@ -601,15 +651,71 @@ ast_node_t* parser_parse_decl(parser_t* par)
   return NULL;
 }
 
-ast_node_t* parser_parse_decl_member(parser_t* par)
+ast_node_t* parser_parse_param(parser_t* par)
 {
-  ast_node_t* node = parser_node_init(par, AST_DECL_MEMBER);
-  node->decl_member.decl = parser_parse_decl(par);
-  return node;
+  token_t* tok = parser_current(par);
+  ast_node_t* id = parser_parse_id(par);
+  parser_expect(par, TOK_PUNCT_COLON);
+  ast_node_t* type = parser_parse_type(par);
+
+  if (parser_consume(par, TOK_PUNCT_EQUAL))
+  {
+    ast_node_t* init = parser_parse_expr(par);
+
+    ast_param_default_t* node = ast_param_default_init(tok);
+    node->id = id;
+    node->type = type;
+    node->init = init;
+
+    return (ast_node_t*)node;
+  }
+
+  ast_param_t* node = ast_param_init(tok);
+  node->id = id;
+  node->type = type;
+
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_variadic_param(parser_t* par)
+{
+  ast_param_variadic_t* node = ast_param_variadic_init(parser_current(par));
+  node->id = parser_parse_id(par);
+  
+  parser_expect(par, TOK_PUNCT_COLON);
+  
+  ast_type_array_t* type = ast_type_array_init(parser_current(par));
+  type->base_type = parser_parse_type(par);
+  type->size = NULL;
+  node->type = (ast_node_t*)type;
+
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_generic_param(parser_t* par)
+{
+  ast_param_generic_t* node = ast_param_generic_init(parser_current(par));
+  node->id = parser_parse_id(par);
+
+  parser_expect(par, TOK_PUNCT_COLON);
+
+  node->type = parser_consume(par, TOK_KW_TYPE) ? (ast_node_t*)ast_type_type_init(parser_current(par)) : parser_parse_type(par);
+  
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_enumerator(parser_t* par)
+{
+  ast_enumerator_t* node = ast_enumerator_init(parser_current(par));
+  node->id = parser_parse_id(par);
+  return (ast_node_t*)node;
 }
 
 void parser_parse(parser_t* par)
 {
-  par->root = ast_node_init(AST_PROG);
-  par->root->prog.decls = parser_parse_terminated_list(par, TOK_EOF, parser_parse_decl);
+  ast_prog_t* node = ast_prog_init(parser_current(par));
+
+  node->decls = parser_parse_terminated_list(par, TOK_EOF, parser_parse_decl);
+
+  par->root = (ast_node_t*)node;
 }

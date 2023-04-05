@@ -181,17 +181,21 @@ bool shyd_parse_call(shyd_t* shyd)
   if (!shyd->prev_term)
     return false;
 
-  ast_node_t* node = parser_node_init(shyd->par, AST_EXPR_OP);
-  node->expr_op.kind = OP_CALL;
+  ast_expr_op_call_t* node = ast_expr_op_call_init(parser_current(shyd->par));
+  node->op_kind = OP_CALL;
+
   parser_expect(shyd->par, TOK_PUNCT_PAREN_LEFT);
-  node->expr_op.op_call.args = parser_parse_delimited_list(shyd->par, TOK_PUNCT_COMMA, parser_parse_expr);
+  
+  node->params = parser_parse_delimited_list(shyd->par, TOK_PUNCT_COMMA, parser_parse_expr);
+  
   parser_expect(shyd->par, TOK_PUNCT_PAREN_RIGHT);
 
   shyd_flush_for_op(shyd, OP_CALL);
 
   shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
   elem->op = OP_CALL;
-  elem->node = node;
+  elem->node = (ast_node_t*)node;
+
   stack_push(shyd->op_stack, elem);
   
   return true;
@@ -320,9 +324,8 @@ void shyd_postfix(shyd_t* shyd)
 
 void shyd_ast_op_unary(shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_node_t* node = ast_node_init(AST_EXPR_OP);
-  node->tok = elem->tok;
-  node->expr_op.kind = elem->op;
+  ast_expr_op_un_t* node = ast_expr_op_un_init(elem->tok);
+  node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
   {
@@ -330,16 +333,15 @@ void shyd_ast_op_unary(shyd_elem_t* elem, stack_t* node_stack)
     exit(EXIT_FAILURE);
   }
 
-  node->expr_op.op_unary.arg = (ast_node_t*)stack_pop(node_stack);
+  node->param = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, node);
 }
 
 void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_node_t* node = ast_node_init(AST_EXPR_OP);
-  node->tok = elem->tok;
-  node->expr_op.kind = elem->op;
+  ast_expr_op_bin_t* node = ast_expr_op_bin_init(elem->tok);
+  node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
   {
@@ -347,7 +349,7 @@ void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
     exit(EXIT_FAILURE);
   }
 
-  node->expr_op.op_binary.rhs = (ast_node_t*)stack_pop(node_stack);
+  node->rhs = (ast_node_t*)stack_pop(node_stack);
 
   if (stack_empty(node_stack))
   {
@@ -355,7 +357,7 @@ void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
     exit(EXIT_FAILURE);
   }
 
-  node->expr_op.op_binary.lhs = (ast_node_t*)stack_pop(node_stack);
+  node->lhs = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, node);
 }
@@ -368,45 +370,28 @@ void shyd_ast_op_call(shyd_elem_t* elem, stack_t* node_stack)
     exit(EXIT_FAILURE);
   }
 
-  elem->node->expr_op.op_call.callee = (ast_node_t*)stack_pop(node_stack);
+  ((ast_expr_op_call_t*)elem->node)->callee = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, elem->node);
 }
 
 void shyd_ast_term(shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_kind_t kind = AST_UNKNOWN;
+  ast_node_t* node = NULL;
 
   switch (elem->tok->kind)
   {
-  case TOK_ID:
-    kind = AST_ID;
-    break;
-  case TOK_LIT_INT:
-    kind = AST_EXPR_LIT_INT;
-    break;
-  case TOK_LIT_FLT:
-    kind = AST_EXPR_LIT_FLT;
-    break;
-  case TOK_LIT_STR:
-    kind = AST_EXPR_LIT_STR;
-    break;
-  case TOK_LIT_CHAR:
-    kind = AST_EXPR_LIT_CHAR;
-    break;
-  case TOK_LIT_BOOL:
-    kind = AST_EXPR_LIT_BOOL;
-    break;
-  case TOK_LIT_NULL:
-    kind = AST_EXPR_LIT_NULL;
-    break;
+  case TOK_ID:       node = (ast_node_t*)ast_id_init(elem->tok); break;
+  case TOK_LIT_INT:  node = (ast_node_t*)ast_expr_lit_int_init(elem->tok); break;
+  case TOK_LIT_FLT:  node = (ast_node_t*)ast_expr_lit_flt_init(elem->tok); break;
+  case TOK_LIT_STR:  node = (ast_node_t*)ast_expr_lit_str_init(elem->tok); break;
+  case TOK_LIT_CHAR: node = (ast_node_t*)ast_expr_lit_char_init(elem->tok); break;
+  case TOK_LIT_BOOL: node = (ast_node_t*)ast_expr_lit_bool_init(elem->tok); break;
+  case TOK_LIT_NULL: node = (ast_node_t*)ast_expr_lit_null_init(elem->tok); break;
   default:
     crumb_error(elem->tok->loc, "Unexpected token! Expected term!");
     exit(EXIT_FAILURE);
   }
-
-  ast_node_t* node = ast_node_init(kind);
-  node->tok = elem->tok;
 
   stack_push(node_stack, node);
 }

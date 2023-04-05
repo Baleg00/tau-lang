@@ -186,7 +186,7 @@ void report_error_expected_ptr_type(location_t* loc)
   exit(EXIT_FAILURE);
 }
 
-void report_error_expected_nullable_type(location_t* loc)
+void report_error_expected_optional_type(location_t* loc)
 {
   crumb_error(loc, "Expected nullable type.");
   debugbreak();

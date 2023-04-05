@@ -44,7 +44,7 @@ void report_warning_shadowed_symbol(location_t* loc);
 void report_error_expected_arithmetic_type(location_t* loc);
 void report_error_expected_bool_type(location_t* loc);
 void report_error_expected_ptr_type(location_t* loc);
-void report_error_expected_nullable_type(location_t* loc);
+void report_error_expected_optional_type(location_t* loc);
 void report_error_mixed_signedness(location_t* loc);
 void report_error_expected_integer_type(location_t* loc);
 void report_error_incompatible_return_type(location_t* loc);

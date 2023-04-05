@@ -42,15 +42,6 @@ parser_t* parser_init(list_t* toks);
 void parser_free(parser_t* par);
 
 /**
- * \brief Initializes a new AST node with the specified kind.
- * 
- * \param[in] par Parser to be used.
- * \param[in] kind Kind of node to be created.
- * \returns New AST node.
-*/
-ast_node_t* parser_node_init(parser_t* par, ast_kind_t kind);
-
-/**
  * \brief Returns current token to be processed.
  * 
  * \param[in] par Parser to be used.
@@ -130,46 +121,6 @@ list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_f
  * \returns Identifier node.
 */
 ast_node_t* parser_parse_id(parser_t* par);
-
-/**
- * \brief Parses a simple function parameter.
- * 
- * \param[in] par Parser to be used.
- * \returns Parameter node.
-*/
-ast_node_t* parser_parse_param(parser_t* par);
-
-/**
- * \brief Parses a variadic function parameter.
- * 
- * \param[in] par Parser to be used.
- * \returns Variadic parameter node.
-*/
-ast_node_t* parser_parse_variadic_param(parser_t* par);
-
-/**
- * \brief Parses a generic parameter.
- * 
- * \param[in] par Parser to be used.
- * \returns Generic parameter node.
-*/
-ast_node_t* parser_parse_generic_param(parser_t* par);
-
-/**
- * \brief Parses a for-loop iteration variable.
- * 
- * \param[in] par Parser to be used.
- * \returns Loop variable node.
-*/
-ast_node_t* parser_parse_loop_var(parser_t* par);
-
-/**
- * \brief Parses an enumerator in an enum declaration.
- * 
- * \param[in] par Parser to be used.
- * \returns Enumerator node.
-*/
-ast_node_t* parser_parse_enumerator(parser_t* par);
 
 /**
  * \brief Parses a mutable type.
@@ -406,6 +357,14 @@ ast_node_t* parser_parse_stmt(parser_t* par);
 ast_node_t* parser_parse_decl_var(parser_t* par);
 
 /**
+ * \brief Parses a for-loop iteration variable.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Loop variable node.
+*/
+ast_node_t* parser_parse_decl_loop_var(parser_t* par);
+
+/**
  * \brief Parses a function declaration.
  * 
  * \details A function is introduced by the `fun` keyword followed by an
@@ -485,13 +444,38 @@ ast_node_t* parser_parse_decl_mod(parser_t* par);
 */
 ast_node_t* parser_parse_decl(parser_t* par);
 
+
 /**
- * \brief Parses a member declaration.
+ * \brief Parses a simple function parameter.
  * 
  * \param[in] par Parser to be used.
- * \returns Declaration node.
+ * \returns Parameter node.
 */
-ast_node_t* parser_parse_decl_member(parser_t* par);
+ast_node_t* parser_parse_param(parser_t* par);
+
+/**
+ * \brief Parses a variadic function parameter.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Variadic parameter node.
+*/
+ast_node_t* parser_parse_variadic_param(parser_t* par);
+
+/**
+ * \brief Parses a generic parameter.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Generic parameter node.
+*/
+ast_node_t* parser_parse_generic_param(parser_t* par);
+
+/**
+ * \brief Parses an enumerator in an enum declaration.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Enumerator node.
+*/
+ast_node_t* parser_parse_enumerator(parser_t* par);
 
 /**
  * \brief Processes a list of tokens and produces an abstract syntax tree.

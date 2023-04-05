@@ -14,7 +14,7 @@ typedef enum type_kind_e
   TYPE_PTR,
   TYPE_ARRAY,
   TYPE_REF,
-  TYPE_NULLABLE,
+  TYPE_OPT,
   TYPE_FUN,
   TYPE_GEN,
   TYPE_TYPE,
@@ -61,22 +61,36 @@ struct type_s
       type_ptr,
       type_array,
       type_ref,
-      type_nullable;
+      type_opt;
 
     struct {
       list_t* param_types;
-      type_t* ret_type;
-    } type_fun,
-      type_gen;
+      type_t* return_type;
+    } type_fun;
+
+    struct {
+      list_t* param_types;
+      type_t* yield_type;
+    } type_gen;
 
     struct {
       ast_node_t* node;
       char* id;
       list_t* members;
     } type_struct,
-      type_union,
-      type_enum,
-      type_mod;
+      type_union;
+
+    struct {
+      ast_node_t* node;
+      char* id;
+      list_t* values;
+    } type_enum;
+
+    struct {
+      ast_node_t* node;
+      char* id;
+      list_t* decls;
+    } type_mod;
   };
 };
 
