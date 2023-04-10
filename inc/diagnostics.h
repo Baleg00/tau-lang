@@ -41,11 +41,13 @@ void report_error_symbol_is_not_a_typename(location_t* loc);
 void report_warning_shadowed_variable(location_t* loc);
 void report_warning_shadowed_symbol(location_t* loc);
 
+void report_error_expected_reference_type(location_t* loc);
+void report_error_expected_generator_type(location_t* loc);
 void report_error_expected_arithmetic_type(location_t* loc);
 void report_error_expected_bool_type(location_t* loc);
 void report_error_expected_ptr_type(location_t* loc);
 void report_error_expected_optional_type(location_t* loc);
-void report_error_mixed_signedness(location_t* loc);
+void report_warning_mixed_signedness(location_t* loc);
 void report_error_expected_integer_type(location_t* loc);
 void report_error_incompatible_return_type(location_t* loc);
 void report_error_too_many_arguments(location_t* loc);

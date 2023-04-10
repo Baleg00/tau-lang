@@ -1,8 +1,8 @@
 #include "arena.h"
 
-#include "memtrace.h"
 #include "util.h"
 #include "log.h"
+#include "memtrace.h"
 
 #define ARENA_DEFAULT_CAPACITY (8 * (1 << 10))
 
@@ -13,7 +13,7 @@
 
 #else
 
-typedef union arena_max_align_u
+typedef struct arena_max_align_s
 {
   uint8_t x;
 

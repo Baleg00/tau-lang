@@ -12,6 +12,12 @@ typedef struct analyzer_s
   stack_t* ret_types;
 } analyzer_t;
 
+typedef struct analyzer_type_node_pair_s
+{
+  type_t* type;
+  ast_node_t* node;
+} analyzer_type_node_pair_t;
+
 analyzer_t* analyzer_init(void);
 void analyzer_free(analyzer_t* analyzer);
 
@@ -22,7 +28,7 @@ type_t* analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* table, a
 type_t* analyzer_visit_expr_op_call(analyzer_t* analyzer, symtable_t* table, ast_expr_op_call_t* node);
 type_t* analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);
 type_t* analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_expr_op_t* node);
-type_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_expr_t* node);
+analyzer_type_node_pair_t analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_expr_t* node);
 
 ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_type_t* node);
 

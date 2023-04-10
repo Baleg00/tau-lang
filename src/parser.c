@@ -584,6 +584,7 @@ ast_node_t* parser_parse_decl_struct(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
 
+  // TODO: Struct member variables cannot have initializers
   node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_var);
   
   return generic_node == NULL ? (ast_node_t*)node : (ast_node_t*)generic_node;
@@ -599,6 +600,7 @@ ast_node_t* parser_parse_decl_union(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
   
+  // TODO: Union member variables cannot have initializers
   node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_var);
   
   return (ast_node_t*)node;

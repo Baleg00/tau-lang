@@ -7,8 +7,9 @@
 #include "log.h"
 #include "crumb.h"
 #include "cli.h"
-
+#include "timer.h"
 #include "file.h"
+
 #include "token.h"
 #include "ast.h"
 #include "lexer.h"
@@ -24,6 +25,7 @@ static struct {
     bool verbose;
     bool emit_tokens;
     bool emit_ast;
+    bool emit_ast_flat;
   } flags;
 
   struct {
@@ -67,6 +69,7 @@ int main(int argc, char *argv[])
     
     cli_opt_flag((char*[]){ "--dump-tokens" }, 1, "Dump tokens into json file.", &compiler_state.flags.emit_tokens),
     cli_opt_flag((char*[]){ "--dump-ast" }, 1, "Dump AST into json file.", &compiler_state.flags.emit_ast),
+    cli_opt_flag((char*[]){ "--dump-ast-flat" }, 1, "Dump flat AST into json file.", &compiler_state.flags.emit_ast_flat),
     cli_opt_int((char*[]){ "--log-level" }, 1, 'N', 1, &compiler_state.params.log_level, NULL, NULL, "Set log level.", NULL, NULL),
 
     cli_opt_sink(MAX_INPUT_FILES, compiler_state.input_files.paths, &compiler_state.input_files.count, NULL, NULL)
@@ -87,17 +90,6 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  log_debug("main", "Verbose mode: %s", compiler_state.flags.verbose ? "Enabled" : "Disabled");
-  log_debug("main", "Log level: %s", log_level_to_string(compiler_state.params.log_level));
-  log_debug("main", "Source files: (%d)", compiler_state.input_files.count);
-
-  for (size_t i = 0; i < compiler_state.input_files.count; ++i)
-  {
-    char file_name_buf[255];
-    file_name(compiler_state.input_files.paths[i], file_name_buf, sizeof(file_name_buf));
-    log_debug("main", "    %s", file_name_buf);
-  }
-
   for (size_t i = 0; i < compiler_state.input_files.count; ++i)
   {
     char* path = compiler_state.input_files.paths[i];
@@ -105,61 +97,80 @@ int main(int argc, char *argv[])
     char file_name_buf[255];
     file_name(path, file_name_buf, sizeof(file_name_buf));
 
-    log_debug("main", "Processing source file: %s", file_name_buf);
+    log_trace("main", "(%s) File read.", file_name_buf);
 
     size_t src_len = file_read(path, NULL, 0);
     char* src = (char*)malloc((src_len + 1) * sizeof(char));
 
     file_read(path, src, src_len + 1);
 
-    log_debug("main", "Performing lexical analysis...");
+    log_trace("main", "(%s) Lexical analysis.", file_name_buf);
 
     lexer_t* lex = lexer_init(path, src);
-    lexer_lex(lex);
+    time_it(lexer, lexer_lex(lex));
 
     if (compiler_state.flags.emit_tokens)
     {
-      char* tokens_path = malloc(strlen(path) + 11);
-      strcpy(tokens_path, path);
-      strcat(tokens_path, ".toks.json");
+      char toks_path_buf[255];
+      strcpy(toks_path_buf, path);
+      strcat(toks_path_buf, ".toks.json");
 
-      FILE* tokens_file = fopen(tokens_path, "w");
-      assert(tokens_file != NULL);
-      token_list_json_dump(tokens_file, lex->toks);
-      fclose(tokens_file);
+      FILE* toks_file = fopen(toks_path_buf, "w");
+      assert(toks_file != NULL);
+      token_list_json_dump(toks_file, lex->toks);
+      fclose(toks_file);
 
-      log_debug("main", "Dumped tokens: %s", tokens_path);
+      char toks_name_buf[255];
+      file_name(toks_path_buf, toks_name_buf, sizeof(toks_name_buf));
 
-      free(tokens_path);
+      log_trace("main", "(%s) Token dump: %s", file_name_buf, toks_name_buf);
     }
 
-    log_debug("main", "Performing syntax analysis...");
+    log_trace("main", "(%s) Syntax analysis.", file_name_buf);
 
     parser_t* par = parser_init(lex->toks);
-    parser_parse(par);
+    time_it(parser, parser_parse(par));
 
     if (compiler_state.flags.emit_ast)
     {
-      char* ast_path = malloc(strlen(path) + 10);
-      strcpy(ast_path, path);
-      strcat(ast_path, ".ast.json");
+      char ast_path_buf[255];
+      strcpy(ast_path_buf, path);
+      strcat(ast_path_buf, ".ast.json");
 
-      FILE* ast_file = fopen(ast_path, "w");
+      FILE* ast_file = fopen(ast_path_buf, "w");
       assert(ast_file != NULL);
       ast_json_dump(ast_file, par->root);
       fclose(ast_file);
 
-      log_debug("main", "Dumped AST: %s", ast_path);
+      char ast_name_buf[255];
+      file_name(ast_path_buf, ast_name_buf, sizeof(ast_name_buf));
 
-      free(ast_path);
+      log_trace("main", "(%s) AST dump: %s", file_name_buf, ast_name_buf);
     }
 
-    log_debug("main", "Performing semantic analysis...");
+    log_trace("main", "(%s) Semantic analysis.", file_name_buf);
 
     analyzer_t* analyzer = analyzer_init();
-    analyzer_analyze(analyzer, par->root);
+    time_it(analyzer, analyzer_analyze(analyzer, par->root));
 
-    log_debug("main", "Cleaning up...");
+    if (compiler_state.flags.emit_ast_flat)
+    {
+      char ast_path_buf[255];
+      strcpy(ast_path_buf, path);
+      strcat(ast_path_buf, ".ast.flat.json");
+
+      FILE* ast_file = fopen(ast_path_buf, "w");
+      assert(ast_file != NULL);
+      ast_json_dump_flat(ast_file, par->root);
+      fclose(ast_file);
+
+      char ast_name_buf[255];
+      file_name(ast_path_buf, ast_name_buf, sizeof(ast_name_buf));
+
+      log_trace("main", "(%s) AST flat dump: %s", file_name_buf, ast_name_buf);
+    }
+
+    log_trace("main", "(%s) Cleanup.", file_name_buf);
 
     analyzer_free(analyzer);
     parser_free(par);

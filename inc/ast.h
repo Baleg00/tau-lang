@@ -523,6 +523,9 @@ ast_node_t* ast_node_init(ast_kind_t kind, token_t* tok, size_t size);
 
 #define ast_prog_init(TOK)           ((ast_prog_t*)           ast_node_init(AST_PROG,           (TOK), sizeof(ast_prog_t)))
 
+#define ast_id_ptr(NODE) (((ast_id_t*)(NODE))->tok->loc->cur)
+#define ast_id_len(NODE) (((ast_id_t*)(NODE))->tok->loc->len)
+
 /**
  * \brief Destroys an AST node and all of its children.
  * 
@@ -531,12 +534,21 @@ ast_node_t* ast_node_init(ast_kind_t kind, token_t* tok, size_t size);
 void ast_node_free(ast_node_t* node);
 
 /**
- * \brief Writes a JSON dump of an abstract syntax tree into a stream.
+ * \brief Writes a JSON dump of an AST into a stream.
  * 
  * \param[in] stream Stream to be written to.
  * \param[in] root Root of AST to be dumped.
 */
 void ast_json_dump(FILE* stream, ast_node_t* root);
+
+/**
+ * \brief Writes a JSON dump of an AST into a stream such that recursive
+ * references are resolved.
+ * 
+ * \param[in] stream Stream to be written to.
+ * \param[in] root Root of AST to be dumped.
+*/
+void ast_json_dump_flat(FILE* stream, ast_node_t* root);
 
 /**
  * \brief Returns a string representation of a node kind.
