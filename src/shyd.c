@@ -9,6 +9,7 @@
 #include "list.h"
 #include "stack.h"
 #include "queue.h"
+#include "diagnostics.h"
 #include "memtrace.h"
 
 shyd_t* shyd_init(parser_t* par)
@@ -307,16 +308,10 @@ void shyd_postfix(shyd_t* shyd)
     shyd_elem_t* elem = (shyd_elem_t*)stack_pop(shyd->op_stack);
     
     if (elem->kind == SHYD_PAREN_OPEN)
-    {
-      crumb_error(elem->tok->loc, "Missing closing parenthesis!");
-      exit(EXIT_FAILURE);
-    }
+      report_error_missing_closing_parenthesis(elem->tok->loc);
     
     if (elem->kind == SHYD_BRACKET_OPEN)
-    {
-      crumb_error(elem->tok->loc, "Missing closing bracket!");
-      exit(EXIT_FAILURE);
-    }
+      report_error_missing_closing_bracket(elem->tok->loc);
 
     queue_offer(shyd->out_queue, elem);
   }
@@ -328,10 +323,7 @@ void shyd_ast_op_unary(shyd_elem_t* elem, stack_t* node_stack)
   node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
-  {
-    crumb_error(node->tok->loc, "Missing argument for unary operation!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_missing_unary_argument(node->tok->loc);
 
   node->param = (ast_node_t*)stack_pop(node_stack);
 
@@ -344,18 +336,12 @@ void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
   node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
-  {
-    crumb_error(node->tok->loc, "Missing argument for binary operation!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_missing_binary_argument(node->tok->loc);
 
   node->rhs = (ast_node_t*)stack_pop(node_stack);
 
   if (stack_empty(node_stack))
-  {
-    crumb_error(node->tok->loc, "Missing argument for binary operation!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_missing_binary_argument(node->tok->loc);
 
   node->lhs = (ast_node_t*)stack_pop(node_stack);
 
@@ -365,10 +351,7 @@ void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
 void shyd_ast_op_call(shyd_elem_t* elem, stack_t* node_stack)
 {
   if (stack_empty(node_stack))
-  {
-    crumb_error(elem->node->tok->loc, "Missing callee for function call!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_missing_callee(elem->node->tok->loc);
 
   ((ast_expr_op_call_t*)elem->node)->callee = (ast_node_t*)stack_pop(node_stack);
 
@@ -388,9 +371,7 @@ void shyd_ast_term(shyd_elem_t* elem, stack_t* node_stack)
   case TOK_LIT_CHAR: node = (ast_node_t*)ast_expr_lit_char_init(elem->tok); break;
   case TOK_LIT_BOOL: node = (ast_node_t*)ast_expr_lit_bool_init(elem->tok); break;
   case TOK_LIT_NULL: node = (ast_node_t*)ast_expr_lit_null_init(elem->tok); break;
-  default:
-    crumb_error(elem->tok->loc, "Unexpected token! Expected term!");
-    exit(EXIT_FAILURE);
+  default: report_error_unexpected_token(elem->tok->loc);
   }
 
   stack_push(node_stack, node);

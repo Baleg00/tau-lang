@@ -23,6 +23,8 @@
 
 #define min(A, B) ((A) < (B) ? (A) : (B))
 
+#define array_len(ARRAY) (sizeof((ARRAY)) / sizeof(*(ARRAY)))
+
 #ifdef _DEBUG
 /** Causes a breakpoint and prompts the user to run a debugger. */
 # define debugbreak() __debugbreak()

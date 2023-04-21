@@ -309,7 +309,7 @@ void lexer_read_decimal_number(lexer_t* lex)
     loc->len = len;
 
     if (lexer_is_word(lex))
-      report_error_ill_formed_float_literal(loc);
+      report_error_ill_formed_floating_point_literal(loc);
     
     long double value = strtold(lex->loc->cur - len, NULL);
     token_lit_flt_t* tok = token_lit_flt_init(loc, value);
@@ -403,13 +403,19 @@ void lexer_read_string(lexer_t* lex)
       case 'X': // arbitrary hexadecimal bytes
         ++len;
 
-        if (!isxdigit(lexer_next(lex)))
-          report_error_escape_no_hex_digits(loc);
+        if (!isxdigit(lexer_current(lex)))
+        {
+          loc->len = 2;
+          loc->cur = lex->loc->cur - 2;
+          report_error_missing_hex_digits_in_escape_sequence(loc);
+        }
 
         len += lexer_skip(lex, lexer_is_hexadecimal);
         break;
 
       default:
+        loc->len = 2;
+        loc->cur = lex->loc->cur - 2;
         report_error_unknown_escape_sequence(loc);
       }
     }
@@ -418,7 +424,7 @@ void lexer_read_string(lexer_t* lex)
   if (ch != '"')
   {
     loc->len = 1;
-    report_error_missing_terminating_character(loc, '"');
+    report_error_missing_terminating_double_quotes(loc);
   }
 
   loc->len = len + 2;
@@ -483,15 +489,25 @@ void lexer_read_character(lexer_t* lex)
       ++len;
 
       if (!isxdigit(lexer_current(lex)))
-        report_error_escape_no_hex_digits(loc);
+      {
+        loc->len = 2;
+        loc->cur = lex->loc->cur - 2;
+        report_error_missing_hex_digits_in_escape_sequence(loc);
+      }
 
       len += lexer_skip(lex, lexer_is_hexadecimal);
 
       if (len > 4)
-        report_error_escape_too_many_hex_digits(loc);
+      {
+        loc->len = len;
+        loc->cur = lex->loc->cur - len;
+        report_error_too_many_hex_digits_in_escape_sequence(loc);
+      }
       break;
 
     default:
+      loc->len = 2;
+      loc->cur = lex->loc->cur - 2;
       report_error_unknown_escape_sequence(loc);
     }
   }
@@ -501,7 +517,7 @@ void lexer_read_character(lexer_t* lex)
   if (lexer_next(lex) != '\'')
   {
     loc->len = 1;
-    report_error_missing_terminating_character(loc, '\'');
+    report_error_missing_terminating_single_quote(loc);
   }
 
   loc->len = len + 2;
@@ -583,6 +599,8 @@ void lexer_read_punctuation(lexer_t* lex)
   };
 
   token_t* tok = lexer_token_init(lex, TOK_UNKNOWN);
+  tok->loc->len = 1;
+  
   token_kind_t kind = TOK_UNKNOWN;
 
   if (lexer_consume(lex, '+'))

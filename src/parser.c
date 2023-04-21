@@ -102,6 +102,21 @@ list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_f
   return list;
 }
 
+list_t* parser_parse_generic_param_list(parser_t* par)
+{
+  parser_expect(par, TOK_PUNCT_LESS);
+
+  list_t* params = NULL;
+
+  if (!parser_consume(par, TOK_PUNCT_GREATER))
+  {
+    params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+    parser_expect(par, TOK_PUNCT_GREATER);
+  }
+
+  return params;
+}
+
 ast_node_t* parser_parse_id(parser_t* par)
 {
   ast_id_t* id = ast_id_init(parser_current(par));
@@ -213,6 +228,21 @@ ast_node_t* parser_parse_type_gen(parser_t* par)
   return (ast_node_t*)node;
 }
 
+ast_node_t* parser_parse_type_member(parser_t* par)
+{
+  ast_id_t* owner = ast_id_init(parser_expect(par, TOK_ID));
+
+  if (parser_current(par)->kind == TOK_PUNCT_DOT)
+  {
+    ast_type_member_t* type = ast_type_member_init(parser_expect(par, TOK_PUNCT_DOT));
+    type->owner = (ast_node_t*)owner;
+    type->member = parser_parse_type_member(par);
+    return (ast_node_t*)type;
+  }
+
+  return (ast_node_t*)owner;
+}
+
 ast_node_t* parser_parse_type(parser_t* par)
 {
   ast_node_t* node;
@@ -242,7 +272,7 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_KW_F64:             node = (ast_node_t*)ast_type_f64_init(  parser_expect(par, TOK_KW_F64  )); return node;
   case TOK_KW_BOOL:            node = (ast_node_t*)ast_type_bool_init( parser_expect(par, TOK_KW_BOOL )); return node;
   case TOK_KW_UNIT:            node = (ast_node_t*)ast_type_unit_init( parser_expect(par, TOK_KW_UNIT )); return node;
-  case TOK_ID:                 node = (ast_node_t*)ast_id_init(        parser_expect(par, TOK_ID      )); return node;
+  case TOK_ID:                 return parser_parse_type_member(par);                      
   default:                     report_error_unexpected_token(parser_current(par)->loc);
   }
 
@@ -418,16 +448,11 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   parser_expect(par, TOK_KW_FUN);
   
   // Parse generic parameters.
-  if (parser_consume(par, TOK_PUNCT_LESS))
+  if (parser_current(par)->kind == TOK_PUNCT_LESS)
   {
     generic_node = ast_decl_generic_init(node->tok);
     generic_node->decl = (ast_node_t*)node;
-    generic_node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
-
-    token_t* tok = parser_expect(par, TOK_PUNCT_GREATER);
-
-    if (list_size(generic_node->params) == 0)
-      report_error_empty_generic_parameter_list(tok->loc);
+    generic_node->params = parser_parse_generic_param_list(par);
   }
 
   node->id = parser_parse_id(par);
@@ -452,7 +477,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
         // Default parameters must be followed only by default parameters.
         if (seen_default)
-          report_error_missing_default_parameter(variadic_param->tok->loc);
+          report_error_missing_default_parameter(variadic_param->tok->loc, ((ast_param_t*)list_back(node->params))->tok->loc);
 
         list_push_back(node->params, variadic_param);
         break;
@@ -466,7 +491,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
       // Default parameters must be followed only by default parameters.
       if (seen_default && param->kind != AST_PARAM_DEFAULT)
-        report_error_missing_default_parameter(param->tok->loc);
+        report_error_missing_default_parameter(param->tok->loc, ((ast_param_t*)list_back(node->params))->tok->loc);
 
       list_push_back(node->params, param);
 
@@ -493,16 +518,11 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
   parser_expect(par, TOK_KW_FUN);
   
   // Parse generic parameters.
-  if (parser_consume(par, TOK_PUNCT_LESS))
+  if (parser_current(par)->kind == TOK_PUNCT_LESS)
   {
     generic_node = ast_decl_generic_init(node->tok);
     generic_node->decl = (ast_node_t*)node;
-    generic_node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
-
-    token_t* tok = parser_expect(par, TOK_PUNCT_GREATER);
-
-    if (list_size(generic_node->params) == 0)
-      report_error_empty_generic_parameter_list(tok->loc);
+    generic_node->params = parser_parse_generic_param_list(par);
   }
 
   node->id = parser_parse_id(par);
@@ -527,7 +547,7 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
 
         // Default parameters must be followed only by default parameters.
         if (seen_default)
-          report_error_missing_default_parameter(variadic_param->tok->loc);
+          report_error_missing_default_parameter(variadic_param->tok->loc, ((ast_param_t*)list_back(node->params))->tok->loc);
 
         list_push_back(node->params, variadic_param);
         break;
@@ -541,7 +561,7 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
 
       // Default parameters must be followed only by default parameters.
       if (seen_default && param->kind != AST_PARAM_DEFAULT)
-        report_error_missing_default_parameter(param->tok->loc);
+        report_error_missing_default_parameter(param->tok->loc, ((ast_param_t*)list_back(node->params))->tok->loc);
 
       list_push_back(node->params, param);
 
@@ -568,16 +588,11 @@ ast_node_t* parser_parse_decl_struct(parser_t* par)
   parser_expect(par, TOK_KW_STRUCT);
   
   // Parse generic parameters.
-  if (parser_consume(par, TOK_PUNCT_LESS))
+  if (parser_current(par)->kind == TOK_PUNCT_LESS)
   {
     generic_node = ast_decl_generic_init(node->tok);
     generic_node->decl = (ast_node_t*)node;
-    generic_node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
-
-    token_t* tok = parser_expect(par, TOK_PUNCT_GREATER);
-
-    if (list_size(generic_node->params) == 0)
-      report_error_empty_generic_parameter_list(tok->loc);
+    generic_node->params = parser_parse_generic_param_list(par);
   }
   
   node->id = parser_parse_id(par);

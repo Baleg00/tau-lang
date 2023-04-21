@@ -82,9 +82,9 @@ void token_list_json_dump(FILE* stream, list_t* list)
 {
   fputc('[', stream);
 
-  for (list_node_t* elem = list_front_node(list); elem != NULL; elem = list_node_next(elem))
+  LIST_FOR_LOOP(it, list)
   {
-    token_t* tok = (token_t*)list_node_get(elem);
+    token_t* tok = (token_t*)list_node_get(it);
 
     fprintf(stream, "{\"kind\":\"%s\"", token_kind_to_string(tok->kind));
 
@@ -120,7 +120,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
 
     fputc('}', stream);
 
-    if (list_node_next(elem) != NULL)
+    if (list_node_next(it) != NULL)
       fputc(',', stream);
   }
 

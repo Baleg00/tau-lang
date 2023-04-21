@@ -115,6 +115,14 @@ list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_fun
 list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func);
 
 /**
+ * \brief Parses a generic parameter list.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Parameter list.
+*/
+list_t* parser_parse_generic_param_list(parser_t* par);
+
+/**
  * \brief Parses an identifier token.
  * 
  * \param[in] par Parser to be used.
@@ -209,6 +217,17 @@ ast_node_t* parser_parse_type_fun(parser_t* par);
  * \returns Generator type node.
 */
 ast_node_t* parser_parse_type_gen(parser_t* par);
+
+/**
+ * \brief Parses a type that may be defined inside another one.
+ * 
+ * \details Member types are defined inside one or more namespaces and can be
+ * accessed using the member operator (`.`).
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Member type node.
+*/
+ast_node_t* parser_parse_type_member(parser_t* par);
 
 /**
  * \brief Parses a type.

@@ -552,11 +552,11 @@ size_t type_print(FILE* stream, type_t* type)
     count += (size_t)fprintf(stream, "fun(");
 
     if (((type_fun_t*)type)->param_types != NULL)
-      LIST_FOR_LOOP(elem, ((type_fun_t*)type)->param_types)
+      LIST_FOR_LOOP(it, ((type_fun_t*)type)->param_types)
       {
-        count += type_print(stream, (type_t*)list_node_get(elem));
+        count += type_print(stream, (type_t*)list_node_get(it));
 
-        if (list_node_next(elem) != NULL)
+        if (list_node_next(it) != NULL)
           count += (size_t)fprintf(stream, ", ");
       }
 
@@ -567,11 +567,11 @@ size_t type_print(FILE* stream, type_t* type)
     count += (size_t)fprintf(stream, "gen(");
 
     if (((type_gen_t*)type)->param_types != NULL)
-      LIST_FOR_LOOP(elem, ((type_gen_t*)type)->param_types)
+      LIST_FOR_LOOP(it, ((type_gen_t*)type)->param_types)
       {
-        count += type_print(stream, (type_t*)list_node_get(elem));
+        count += type_print(stream, (type_t*)list_node_get(it));
 
-        if (list_node_next(elem) != NULL)
+        if (list_node_next(it) != NULL)
           count += (size_t)fprintf(stream, ", ");
       }
 

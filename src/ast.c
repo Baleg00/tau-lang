@@ -74,6 +74,10 @@ void ast_node_free(ast_node_t* node)
   case AST_TYPE_BOOL:
   case AST_TYPE_UNIT:
     break;
+  case AST_TYPE_MEMBER:
+    ast_node_free(((ast_type_member_t*)node)->owner);
+    ast_node_free(((ast_type_member_t*)node)->member);
+    break;
   case AST_EXPR_LIT_INT:
   case AST_EXPR_LIT_FLT:
   case AST_EXPR_LIT_STR:
@@ -294,6 +298,12 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   case AST_TYPE_F64:
   case AST_TYPE_BOOL:
   case AST_TYPE_UNIT:
+    break;
+  case AST_TYPE_MEMBER:
+    fprintf(stream, ",\"owner\":");
+    ast_json_dump(stream, ((ast_type_member_t*)root)->owner);
+    fprintf(stream, ",\"member\":");
+    ast_json_dump(stream, ((ast_type_member_t*)root)->member);
     break;
   case AST_EXPR_LIT_INT:
     fprintf(stream, ",\"value\":%llu", ((token_lit_int_t*)root->tok)->value);
@@ -596,6 +606,12 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root)
       case AST_TYPE_BOOL:
       case AST_TYPE_UNIT:
         break;
+      case AST_TYPE_MEMBER:
+        fprintf(stream, ",\"owner\":\"%p\"", ((ast_type_member_t*)root)->owner);
+        stack_push(nodes, ((ast_type_member_t*)root)->owner);
+        fprintf(stream, ",\"member\":\"%p\"", ((ast_type_member_t*)root)->member);
+        stack_push(nodes, ((ast_type_member_t*)root)->member);
+        break;
       case AST_EXPR_LIT_INT:
         fprintf(stream, ",\"value\":%llu", ((token_lit_int_t*)root->tok)->value);
         break;
@@ -812,6 +828,7 @@ const char* ast_kind_to_string(ast_kind_t kind)
   case AST_TYPE_F64:       return "AST_TYPE_F64";
   case AST_TYPE_BOOL:      return "AST_TYPE_BOOL";
   case AST_TYPE_UNIT:      return "AST_TYPE_UNIT";
+  case AST_TYPE_MEMBER:    return "AST_TYPE_MEMBER";
   case AST_EXPR_LIT_INT:   return "AST_EXPR_LIT_INT";
   case AST_EXPR_LIT_FLT:   return "AST_EXPR_LIT_FLT";
   case AST_EXPR_LIT_STR:   return "AST_EXPR_LIT_STR";

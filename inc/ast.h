@@ -60,6 +60,7 @@ typedef enum ast_kind_e
   AST_TYPE_F64, // Built-in type f64
   AST_TYPE_BOOL, // Built-in type bool
   AST_TYPE_UNIT, // Built-in type unit
+  AST_TYPE_MEMBER, // Member type
 
   AST_EXPR_LIT_INT = AST_FLAG_EXPR, // Literal integer expression
   AST_EXPR_LIT_FLT, // Literal float expression
@@ -205,6 +206,14 @@ typedef struct ast_type_gen_s
   list_t* params; // List of generator parameters.
   ast_node_t* yield_type; // Yield type.
 } ast_type_gen_t;
+
+/** Node type for member types. */
+typedef struct ast_type_member_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* owner; // Owner node.
+  ast_node_t* member; // Member node.
+} ast_type_member_t;
 
 /** Base type for expression nodes. */
 typedef struct ast_expr_s
@@ -483,6 +492,7 @@ ast_node_t* ast_node_init(ast_kind_t kind, token_t* tok, size_t size);
 #define ast_type_f64_init(TOK)       ((ast_type_t*)           ast_node_init(AST_TYPE_F64,       (TOK), sizeof(ast_type_t)))
 #define ast_type_bool_init(TOK)      ((ast_type_t*)           ast_node_init(AST_TYPE_BOOL,      (TOK), sizeof(ast_type_t)))
 #define ast_type_unit_init(TOK)      ((ast_type_t*)           ast_node_init(AST_TYPE_UNIT,      (TOK), sizeof(ast_type_t)))
+#define ast_type_member_init(TOK)    ((ast_type_member_t*)    ast_node_init(AST_TYPE_MEMBER,    (TOK), sizeof(ast_type_member_t)))
 
 #define ast_expr_lit_int_init(TOK)   ((ast_expr_t*)           ast_node_init(AST_EXPR_LIT_INT,   (TOK), sizeof(ast_expr_t)))
 #define ast_expr_lit_flt_init(TOK)   ((ast_expr_t*)           ast_node_init(AST_EXPR_LIT_FLT,   (TOK), sizeof(ast_expr_t)))

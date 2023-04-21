@@ -30,6 +30,7 @@ type_t* analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, a
 type_t* analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_expr_op_t* node);
 analyzer_type_node_pair_t analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_expr_t* node);
 
+ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* table, ast_type_member_t* node);
 ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_type_t* node);
 
 void analyzer_visit_stmt_if(analyzer_t* analyzer, symtable_t* table, ast_stmt_if_t* node);
