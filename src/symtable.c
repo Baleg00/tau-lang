@@ -24,13 +24,14 @@ static inline uint64_t fnv1a_hash(const uint8_t* data, size_t size)
   return hash;
 }
 
-symbol_t* symbol_init(char* id, ast_node_t* node)
+symbol_t* symbol_init(char* id, ast_node_t* node, type_t* type)
 {
   symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
   assert(sym != NULL);
   sym->scope = NULL;
   sym->id = id;
   sym->node = node;
+  sym->type = type;
   return sym;
 }
 

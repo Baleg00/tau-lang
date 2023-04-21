@@ -9,6 +9,7 @@
 #include "list.h"
 #include "stack.h"
 #include "queue.h"
+#include "diagnostics.h"
 #include "memtrace.h"
 
 shyd_t* shyd_init(parser_t* par)
@@ -46,7 +47,7 @@ void shyd_elem_free(shyd_elem_t* elem)
 
 bool shyd_flush_until_kind(shyd_t* shyd, shyd_kind_t kind)
 {
-  while (!stack_empty(shyd->op_stack) && ((shyd_elem_t*)stack_peek(shyd->op_stack))->kind != kind)
+  while (!stack_empty(shyd->op_stack) && ((shyd_elem_t*)stack_top(shyd->op_stack))->kind != kind)
     queue_offer(shyd->out_queue, stack_pop(shyd->op_stack));
 
   if (stack_empty(shyd->op_stack))
@@ -61,7 +62,7 @@ void shyd_flush_for_op(shyd_t* shyd, op_kind_t op)
 {
   while (!stack_empty(shyd->op_stack))
   {
-    shyd_elem_t* elem = (shyd_elem_t*)stack_peek(shyd->op_stack);
+    shyd_elem_t* elem = (shyd_elem_t*)stack_top(shyd->op_stack);
 
     if (elem->kind == SHYD_PAREN_OPEN || 
       elem->kind == SHYD_BRACKET_OPEN || 
@@ -181,17 +182,21 @@ bool shyd_parse_call(shyd_t* shyd)
   if (!shyd->prev_term)
     return false;
 
-  ast_node_t* node = parser_node_init(shyd->par, AST_EXPR_OP);
-  node->expr_op.kind = OP_CALL;
+  ast_expr_op_call_t* node = ast_expr_op_call_init(parser_current(shyd->par));
+  node->op_kind = OP_CALL;
+
   parser_expect(shyd->par, TOK_PUNCT_PAREN_LEFT);
-  node->expr_op.op_call.args = parser_parse_delimited_list(shyd->par, TOK_PUNCT_COMMA, parser_parse_expr);
+  
+  node->params = parser_parse_delimited_list(shyd->par, TOK_PUNCT_COMMA, parser_parse_expr);
+  
   parser_expect(shyd->par, TOK_PUNCT_PAREN_RIGHT);
 
   shyd_flush_for_op(shyd, OP_CALL);
 
   shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
   elem->op = OP_CALL;
-  elem->node = node;
+  elem->node = (ast_node_t*)node;
+
   stack_push(shyd->op_stack, elem);
   
   return true;
@@ -252,7 +257,7 @@ bool shyd_parse_operator(shyd_t* shyd)
   case TOK_PUNCT_BANG_EQUAL:            op = OP_COMP_NE; break;
   case TOK_PUNCT_DOT:                   op = OP_MEMBER; break;
   case TOK_PUNCT_DOT_DOT:               op = OP_RANGE; break;
-  case TOK_PUNCT_QUESTION_DOT:          op = OP_SAFE_IND_MEMBER; break;
+  case TOK_PUNCT_QUESTION_DOT:          op = OP_NULL_SAFE_MEMBER; break;
   case TOK_PUNCT_EQUAL:                 op = OP_ASSIGN; break;
   case TOK_PUNCT_EQUAL_EQUAL:           op = OP_COMP_EQ; break;
   case TOK_PUNCT_SEMICOLON:             op = OP_SEMICOLON; break;
@@ -303,16 +308,10 @@ void shyd_postfix(shyd_t* shyd)
     shyd_elem_t* elem = (shyd_elem_t*)stack_pop(shyd->op_stack);
     
     if (elem->kind == SHYD_PAREN_OPEN)
-    {
-      crumb_error(elem->tok->loc, "Missing closing parenthesis!");
-      exit(EXIT_FAILURE);
-    }
+      report_error_missing_closing_parenthesis(elem->tok->loc);
     
     if (elem->kind == SHYD_BRACKET_OPEN)
-    {
-      crumb_error(elem->tok->loc, "Missing closing bracket!");
-      exit(EXIT_FAILURE);
-    }
+      report_error_missing_closing_bracket(elem->tok->loc);
 
     queue_offer(shyd->out_queue, elem);
   }
@@ -320,42 +319,31 @@ void shyd_postfix(shyd_t* shyd)
 
 void shyd_ast_op_unary(shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_node_t* node = ast_node_init(AST_EXPR_OP);
-  node->tok = elem->tok;
-  node->expr_op.kind = elem->op;
+  ast_expr_op_un_t* node = ast_expr_op_un_init(elem->tok);
+  node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
-  {
-    crumb_error(node->tok->loc, "Missing argument for unary operation!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_missing_unary_argument(node->tok->loc);
 
-  node->expr_op.op_unary.arg = (ast_node_t*)stack_pop(node_stack);
+  node->param = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, node);
 }
 
 void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_node_t* node = ast_node_init(AST_EXPR_OP);
-  node->tok = elem->tok;
-  node->expr_op.kind = elem->op;
+  ast_expr_op_bin_t* node = ast_expr_op_bin_init(elem->tok);
+  node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
-  {
-    crumb_error(node->tok->loc, "Missing argument for binary operation!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_missing_binary_argument(node->tok->loc);
 
-  node->expr_op.op_binary.rhs = (ast_node_t*)stack_pop(node_stack);
+  node->rhs = (ast_node_t*)stack_pop(node_stack);
 
   if (stack_empty(node_stack))
-  {
-    crumb_error(node->tok->loc, "Missing argument for binary operation!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_missing_binary_argument(node->tok->loc);
 
-  node->expr_op.op_binary.lhs = (ast_node_t*)stack_pop(node_stack);
+  node->lhs = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, node);
 }
@@ -363,54 +351,28 @@ void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
 void shyd_ast_op_call(shyd_elem_t* elem, stack_t* node_stack)
 {
   if (stack_empty(node_stack))
-  {
-    crumb_error(elem->node->tok->loc, "Missing callee for function call!");
-    exit(EXIT_FAILURE);
-  }
+    report_error_missing_callee(elem->node->tok->loc);
 
-  elem->node->expr_op.op_call.callee = (ast_node_t*)stack_pop(node_stack);
+  ((ast_expr_op_call_t*)elem->node)->callee = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, elem->node);
 }
 
 void shyd_ast_term(shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_kind_t kind = AST_UNKNOWN;
+  ast_node_t* node = NULL;
 
   switch (elem->tok->kind)
   {
-  case TOK_ID:
-    kind = AST_ID;
-    break;
-  case TOK_LIT_INT_DEC:
-  case TOK_LIT_INT_HEX:
-  case TOK_LIT_INT_OCT:
-  case TOK_LIT_INT_BIN:
-    kind = AST_EXPR_LIT_INT;
-    break;
-  case TOK_LIT_FLT_DEC:
-    kind = AST_EXPR_LIT_FLT;
-    break;
-  case TOK_LIT_STR:
-    kind = AST_EXPR_LIT_STR;
-    break;
-  case TOK_LIT_CHAR:
-    kind = AST_EXPR_LIT_CHAR;
-    break;
-  case TOK_LIT_BOOL_TRUE:
-  case TOK_LIT_BOOL_FALSE:
-    kind = AST_EXPR_LIT_BOOL;
-    break;
-  case TOK_LIT_NULL:
-    kind = AST_EXPR_LIT_NULL;
-    break;
-  default:
-    crumb_error(elem->tok->loc, "Unexpected token! Expected term!");
-    exit(EXIT_FAILURE);
+  case TOK_ID:       node = (ast_node_t*)ast_id_init(elem->tok); break;
+  case TOK_LIT_INT:  node = (ast_node_t*)ast_expr_lit_int_init(elem->tok); break;
+  case TOK_LIT_FLT:  node = (ast_node_t*)ast_expr_lit_flt_init(elem->tok); break;
+  case TOK_LIT_STR:  node = (ast_node_t*)ast_expr_lit_str_init(elem->tok); break;
+  case TOK_LIT_CHAR: node = (ast_node_t*)ast_expr_lit_char_init(elem->tok); break;
+  case TOK_LIT_BOOL: node = (ast_node_t*)ast_expr_lit_bool_init(elem->tok); break;
+  case TOK_LIT_NULL: node = (ast_node_t*)ast_expr_lit_null_init(elem->tok); break;
+  default: report_error_unexpected_token(elem->tok->loc);
   }
-
-  ast_node_t* node = ast_node_init(kind);
-  node->tok = elem->tok;
 
   stack_push(node_stack, node);
 }
