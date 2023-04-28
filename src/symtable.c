@@ -57,9 +57,11 @@ symtable_t* symtable_init(symtable_t* parent)
   return table;
 }
 
+LIST_FOR_EACH_FUNC_DECL(symtable_free, symtable_t);
+
 void symtable_free(symtable_t* table)
 {
-  list_for_each(table->children, symtable_free);
+  list_for_each(table->children, LIST_FOR_EACH_FUNC_NAME(symtable_free));
   list_free(table->children);
 
   for (size_t i = 0, j = 0; i < table->capacity && j < table->size; ++i)

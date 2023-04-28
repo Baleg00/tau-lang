@@ -84,12 +84,12 @@ void crumb_log(crumb_kind_t kind, size_t count, ...)
 
   for (; count > 0; --count)
   {
-    crumb_item_t* item = &va_arg(args, crumb_item_t);
+    crumb_item_t item = va_arg(args, crumb_item_t);
 
-    switch (item->kind)
+    switch (item.kind)
     {
-    case CRUMB_ITEM_MESSAGE: crumb_log_message(kind, &item->msg); break;
-    case CRUMB_ITEM_SNIPPET: crumb_log_snippet(kind, &item->snip); break;
+    case CRUMB_ITEM_MESSAGE: crumb_log_message(kind, &item.msg); break;
+    case CRUMB_ITEM_SNIPPET: crumb_log_snippet(kind, &item.snip); break;
     default: unreachable();
     }
   }

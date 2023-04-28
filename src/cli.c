@@ -71,7 +71,10 @@ void cli_parse(cli_t* cli, int argc, const char* argv[])
       if (opt->callback != NULL)
         opt->callback(cli, que, opt, opt->user_ptr);
 
-      *((const char**)opt->data)++ = arg;
+      const char** data = (const char**)opt->data;
+      *(data++) = arg;
+      opt->data = data;
+
       --opt->arg_max;
 
       if (opt->data_count != NULL)

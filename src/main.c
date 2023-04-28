@@ -55,7 +55,7 @@ void flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
   *(bool*)user_ptr = true;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
   log_set_file(stdout);
   crumb_set_file(stdout);
@@ -67,17 +67,17 @@ int main(int argc, char *argv[])
     cli_opt_version(TAU_VERSION),
     cli_opt_verbose(&compiler_state.flags.verbose),
     
-    cli_opt_flag((char*[]){ "--dump-tokens" }, 1, "Dump tokens into json file.", &compiler_state.flags.emit_tokens),
-    cli_opt_flag((char*[]){ "--dump-ast" }, 1, "Dump AST into json file.", &compiler_state.flags.emit_ast),
-    cli_opt_flag((char*[]){ "--dump-ast-flat" }, 1, "Dump flat AST into json file.", &compiler_state.flags.emit_ast_flat),
-    cli_opt_int((char*[]){ "--log-level" }, 1, 'N', 1, &compiler_state.params.log_level, NULL, NULL, "Set log level.", NULL, NULL),
+    cli_opt_flag(cli_names("--dump-toks"), 1, "Dump tokens into json file.", &compiler_state.flags.emit_tokens),
+    cli_opt_flag(cli_names("--dump-ast"), 1, "Dump AST into json file.", &compiler_state.flags.emit_ast),
+    cli_opt_flag(cli_names("--dump-ast-flat"), 1, "Dump flat AST into json file.", &compiler_state.flags.emit_ast_flat),
+    cli_opt_int(cli_names("--log-level"), 1, 'N', 1, &compiler_state.params.log_level, NULL, NULL, "Set log level.", NULL, NULL),
 
     cli_opt_sink(MAX_INPUT_FILES, compiler_state.input_files.paths, &compiler_state.input_files.count, NULL, NULL)
   };
 
   const char* usages[] = { "tau [option...] file..." };
 
-  cli_t* cli = cli_init(opts, sizeof(opts) / sizeof(cli_opt_t), usages, sizeof(usages) / sizeof(const char*));
+  cli_t* cli = cli_init(opts, array_len(opts), usages, array_len(usages));
   cli_parse(cli, argc, argv);
   cli_free(cli);
 
@@ -90,12 +90,18 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
+  char cwd_buf[255];
+  file_dir(argv[0], cwd_buf, sizeof(cwd_buf));
+
   for (size_t i = 0; i < compiler_state.input_files.count; ++i)
   {
     char* path = compiler_state.input_files.paths[i];
 
+    char abs_path_buf[255];
+    file_join(abs_path_buf, sizeof(abs_path_buf), 2, cwd_buf, path);
+
     char file_name_buf[255];
-    file_name(path, file_name_buf, sizeof(file_name_buf));
+    file_name(abs_path_buf, file_name_buf, sizeof(file_name_buf));
 
     log_trace("main", "(%s) File read.", file_name_buf);
 

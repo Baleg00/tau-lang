@@ -25,9 +25,11 @@ lexer_t* lexer_init(char* path, char* src)
   return lex;
 }
 
+LIST_FOR_EACH_FUNC_DECL(token_free, token_t);
+
 void lexer_free(lexer_t* lex)
 {
-  list_for_each(lex->toks, token_free);
+  list_for_each(lex->toks, LIST_FOR_EACH_FUNC_NAME(token_free));
   list_free(lex->toks);
   location_free(lex->loc);
   free(lex);

@@ -38,6 +38,17 @@ struct list_s
 #define LIST_FOR_LOOP(VAR, LIST)\
   for (list_node_t* (VAR) = list_front_node((LIST)); (VAR) != NULL; (VAR) = list_node_next((VAR)))
 
+/** Utility macro for creating unique names for list_for_each compatible wrapper functions. */
+#define LIST_FOR_EACH_FUNC_NAME(FUNC)\
+  FUNC##_list_for_each_compatible
+
+/** Utility macro for creating list_for_each compatible wrapper functions. */
+#define LIST_FOR_EACH_FUNC_DECL(FUNC, TYPE)\
+  void LIST_FOR_EACH_FUNC_NAME(FUNC)(void* data)\
+  {\
+    FUNC((TYPE*)data);\
+  }
+
 /**
  * \brief Initializes a new node.
  * 

@@ -203,7 +203,7 @@ void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
  * option takes 0 positional arguments and prints all command-line interface
  * usages and option descriptions if option is present.
 */
-#define cli_opt_help() (cli_opt_t){ CLI_TYPE_BOOLEAN, (char*[]){ "-h", "--help" }, 2, 'N', 0, NULL, NULL, NULL, "Display this message.", cli_help_callback, NULL }
+#define cli_opt_help() (cli_opt_t){ CLI_TYPE_BOOLEAN, (const char*[]){ "-h", "--help" }, 2, 'N', 0, NULL, NULL, NULL, "Display this message.", cli_help_callback, NULL }
 
 /**
  * \brief Shorthand macro for initializing the version option.
@@ -215,7 +215,7 @@ void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
  * \param[in] VER String representation of program version.
  * \returns New option.
 */
-#define cli_opt_version(VER) (cli_opt_t){ CLI_TYPE_BOOLEAN, (char*[]){ "--version" }, 1, 'N', 0, NULL, NULL, NULL, "Display version.", cli_version_callback, VER }
+#define cli_opt_version(VER) (cli_opt_t){ CLI_TYPE_BOOLEAN, (const char*[]){ "--version" }, 1, 'N', 0, NULL, NULL, NULL, "Display version.", cli_version_callback, VER }
 
 /**
  * \brief Shorthand macro for initializing the verbose option.
@@ -227,7 +227,7 @@ void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
  * \param[out] DATA Pointer to flag variable.
  * \returns New option.
 */
-#define cli_opt_verbose(DATA) (cli_opt_t){ CLI_TYPE_BOOLEAN, (char*[]){ "-v", "--verbose" }, 2, 'N', 0, NULL, NULL, NULL, "Enable verbose mode.", cli_verbose_callback, DATA }
+#define cli_opt_verbose(DATA) (cli_opt_t){ CLI_TYPE_BOOLEAN, (const char*[]){ "-v", "--verbose" }, 2, 'N', 0, NULL, NULL, NULL, "Enable verbose mode.", cli_verbose_callback, DATA }
 
 /**
  * \brief Shorthand macro for initializing a sink.
@@ -253,5 +253,8 @@ void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
  * \returns New option.
 */
 #define cli_opt_flag(NAMES, NAME_COUNT, DESC, FLAG) (cli_opt_t){ CLI_TYPE_BOOLEAN, NAMES, NAME_COUNT, 'N', 0, NULL, NULL, NULL, DESC, cli_flag_callback, FLAG }
+
+/** Utility macro for making lists of option names. */
+#define cli_names(...) ((const char*[]){ __VA_ARGS__ })
 
 #endif

@@ -54,6 +54,8 @@ type_t* type_builtin(type_kind_t kind)
   return NULL;
 }
 
+LIST_FOR_EACH_FUNC_DECL(type_free, type_t);
+
 void type_free(type_t* type)
 {
   if (type == NULL)
@@ -82,7 +84,7 @@ void type_free(type_t* type)
   case TYPE_FUN:
     if (((type_fun_t*)type)->param_types != NULL)
     {
-      list_for_each(((type_fun_t*)type)->param_types, type_free);
+      list_for_each(((type_fun_t*)type)->param_types, LIST_FOR_EACH_FUNC_NAME(type_free));
       list_free(((type_fun_t*)type)->param_types);
     }
 
@@ -91,7 +93,7 @@ void type_free(type_t* type)
   case TYPE_GEN:
     if (((type_gen_t*)type)->param_types != NULL)
     {
-      list_for_each(((type_gen_t*)type)->param_types, type_free);
+      list_for_each(((type_gen_t*)type)->param_types, LIST_FOR_EACH_FUNC_NAME(type_free));
       list_free(((type_gen_t*)type)->param_types);
     }
 

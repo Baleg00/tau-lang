@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "util.h"
 #include "log.h"
@@ -31,20 +32,9 @@ size_t file_read(const char* path, char* buf, size_t len)
   return flen;
 }
 
-char file_dirsep(void)
-{
-  static const char* file = __FILE__;
-  static char sep = '\0';
-
-  if (sep == '\0')
-    sep = strchr(file, '\\') != NULL ? '\\' : '/';
-  
-  return sep;
-}
-
 size_t file_name(const char* path, char* buf, size_t len)
 {
-  char* sep = strrchr(path, file_dirsep());
+  char* sep = strrchr(path, FILE_DIRSEP);
 
   if (sep == NULL || sep == path)
     return 0;
@@ -84,7 +74,7 @@ size_t file_ext(const char* path, char* buf, size_t len)
 
 size_t file_dir(const char* path, char* buf, size_t len)
 {
-  char* sep = strrchr(path, file_dirsep());
+  char* sep = strrchr(path, FILE_DIRSEP);
 
   if (sep == NULL)
     return 0;
@@ -105,7 +95,7 @@ size_t file_dir(const char* path, char* buf, size_t len)
 size_t file_stem(const char* path, char* buf, size_t len)
 {
   char* dot = strrchr(path, '.');
-  char* sep = strrchr(path, file_dirsep());
+  char* sep = strrchr(path, FILE_DIRSEP);
 
   if (dot == NULL || dot == path ||
       sep == NULL || sep == path)
@@ -130,4 +120,45 @@ size_t file_stem(const char* path, char* buf, size_t len)
   }
 
   return stem_len;
+}
+
+size_t file_join(char* buf, size_t len, size_t count, ...)
+{
+  if (count == 0)
+    return 0;
+
+  size_t result_len = 0;
+
+  va_list paths;
+  va_start(paths, count);
+  const char* path;
+
+  for (size_t i = 0; i < count && len > 0; ++i)
+  {
+    path = va_arg(paths, char*);
+    size_t path_len = strlen(path);
+
+    result_len += path_len;
+
+    if (i + 1 < count)
+      ++result_len;
+
+    if (buf != NULL)
+    {
+      strncpy(buf, path, min(len, path_len));
+      buf += path_len;
+      len -= min(len, path_len);
+
+      if (i + 1 < count)
+      {
+        *(buf++) = FILE_DIRSEP;
+        --len;
+      }
+    }
+  }
+
+  if (buf != NULL && len > 0)
+    *buf = '\0';
+
+  return result_len;
 }
