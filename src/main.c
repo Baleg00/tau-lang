@@ -15,6 +15,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "analzyer.h"
+#include "bytecode.h"
 
 #include "memtrace.h"
 
@@ -176,8 +177,14 @@ int main(int argc, const char *argv[])
       log_trace("main", "(%s) AST flat dump: %s", file_name_buf, ast_name_buf);
     }
 
+    log_trace("main", "(%s) Bytecode generation.", file_name_buf);
+
+    bytecode_t* bc = bytecode_init();
+    time_it(bytecode, bytecode_visit_prog(bc, (ast_prog_t*)par->root));
+
     log_trace("main", "(%s) Cleanup.", file_name_buf);
 
+    bytecode_free(bc);
     analyzer_free(analyzer);
     parser_free(par);
     lexer_free(lex);

@@ -64,8 +64,6 @@ void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, symbol_t
 
 void analyzer_visit_prog(analyzer_t* analyzer, symtable_t* table, ast_prog_t* node);
 
-void analyzer_visit(analyzer_t* analyzer, symtable_t* table, ast_node_t* node);
-
 symtable_t* analyzer_analyze(analyzer_t* analyzer, ast_node_t* root);
 
 #endif

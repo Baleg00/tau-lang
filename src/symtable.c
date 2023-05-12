@@ -11,19 +11,6 @@
 #define SYMTABLE_INITIAL_CAPACITY 16
 #define SYMTABLE_LOAD_FACTOR 0.75
 
-static inline uint64_t fnv1a_hash(const uint8_t* data, size_t size)
-{
-  uint64_t hash = 0xcbf29ce484222325ULL;
-
-  for (size_t i = 0; i < size; ++i)
-  {
-    hash ^= data[i];
-    hash *= 0x00000100000001B3ULL;
-  }
-
-  return hash;
-}
-
 symbol_t* symbol_init(char* id, ast_node_t* node, type_t* type)
 {
   symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
@@ -80,8 +67,8 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
   if (((double)table->size + 1) / (double)table->capacity >= SYMTABLE_LOAD_FACTOR)
     symtable_expand(table);
 
-  uint64_t hash = fnv1a_hash(new_sym->id, strlen(new_sym->id));
-  size_t idx = hash % table->capacity;
+  hash_t h = hash_sized(new_sym->id, strlen(new_sym->id));
+  size_t idx = h % table->capacity;
 
   if (table->buckets[idx] == NULL)
   {
@@ -105,8 +92,8 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
 
 symbol_t* symtable_lookup(symtable_t* table, char* id)
 {
-  uint64_t hash = fnv1a_hash(id, strlen(id));
-  size_t idx = hash % table->capacity;
+  hash_t h = hash_sized(id, strlen(id));
+  size_t idx = h % table->capacity;
 
   for (symbol_t* sym = table->buckets[idx]; sym != NULL; sym = sym->next)
     if (strcmp(sym->id, id) == 0)

@@ -11,6 +11,7 @@ add_executable(${PROJECT_NAME}
   symtable.c
   analzyer.c
   types.c
+  bytecode.c
 
   memtrace.c
 

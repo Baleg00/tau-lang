@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "list.h"
 #include "token.h"
@@ -607,5 +608,13 @@ bool ast_is_decl(ast_node_t* node);
  * \returns True if node is a parameter, false otherwise.
 */
 bool ast_is_param(ast_node_t* node);
+
+/**
+ * \brief Determines the size of a type in bytes.
+ * 
+ * \param[in] node Type node whose size is to be determined.
+ * \returns Size of type in bytes.
+ */
+size_t ast_size_of(ast_node_t* node);
 
 #endif

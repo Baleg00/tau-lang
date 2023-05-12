@@ -892,3 +892,66 @@ bool ast_is_param(ast_node_t* node)
 {
   return node->kind & AST_FLAG_PARAM;
 }
+
+size_t ast_size_of(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_MUT: return ast_size_of(((ast_type_mut_t*)node)->base_type);
+  case AST_TYPE_CONST: return ast_size_of(((ast_type_const_t*)node)->base_type);
+  case AST_TYPE_PTR: return 8;
+  case AST_TYPE_ARRAY: return 8;
+  case AST_TYPE_REF: return ast_size_of(((ast_type_ref_t*)node)->base_type);
+  case AST_TYPE_OPT: return 1 + ast_size_of(((ast_type_opt_t*)node)->base_type);
+  case AST_TYPE_FUN: return 8;
+  case AST_TYPE_GEN: return 8;
+  case AST_TYPE_I8: return 1;
+  case AST_TYPE_I16: return 2;
+  case AST_TYPE_I32: return 4;
+  case AST_TYPE_I64: return 8;
+  case AST_TYPE_ISIZE: return 8;
+  case AST_TYPE_U8: return 1;
+  case AST_TYPE_U16: return 2;
+  case AST_TYPE_U32: return 4;
+  case AST_TYPE_U64: return 8;
+  case AST_TYPE_USIZE: return 8;
+  case AST_TYPE_F32: return 4;
+  case AST_TYPE_F64: return 8;
+  case AST_TYPE_BOOL: return 1;
+  case AST_TYPE_UNIT: return 0;
+  case AST_DECL_VAR: return ast_size_of(((ast_decl_var_t*)node)->type);
+  case AST_DECL_LOOP_VAR: return ast_size_of(((ast_decl_loop_var_t*)node)->type);
+  case AST_DECL_FUN: return 8;
+  case AST_DECL_GEN: return 8;
+  case AST_DECL_STRUCT:
+  {
+    size_t size = 0;
+
+    LIST_FOR_LOOP(it, ((ast_decl_struct_t*)node)->members)
+      size += ast_size_of((ast_node_t*)list_node_get(it));
+
+    return size;
+  }
+  case AST_DECL_UNION:
+  {
+    size_t size = 0;
+
+    LIST_FOR_LOOP(it, ((ast_decl_union_t*)node)->members)
+    {
+      size_t member_size = ast_size_of((ast_node_t*)list_node_get(it));
+
+      if (member_size > size)
+        size = member_size;
+    }
+
+    return size;
+  }
+  case AST_DECL_ENUM: return 4;
+  case AST_PARAM: return ast_size_of(((ast_param_t*)node)->type);
+  case AST_PARAM_DEFAULT: return ast_size_of(((ast_param_default_t*)node)->type);
+  case AST_PARAM_VARIADIC: return ast_size_of(((ast_param_variadic_t*)node)->type);
+  default: unreachable();
+  }
+
+  return -1;
+}
