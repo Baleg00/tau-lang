@@ -385,6 +385,9 @@ typedef struct ast_type_member_s ast_type_member_t;
 /** Base type for expression nodes. */
 typedef struct ast_expr_s ast_expr_t;
 
+/** Base type for literal expression nodes. */
+typedef struct ast_expr_lit_s ast_expr_lit_t;
+
 /** Base type for operator expression nodes. */
 typedef struct ast_expr_op_s ast_expr_op_t;
 

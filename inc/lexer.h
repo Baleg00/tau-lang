@@ -12,10 +12,6 @@
 
 #include "typedefs.h"
 
-#include "list.h"
-#include "location.h"
-#include "token.h"
-
 struct lexer_s
 {
   location_t* loc; // Current location in source file.

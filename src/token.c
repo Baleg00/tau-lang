@@ -3,8 +3,11 @@
 #include <stdlib.h>
 
 #include "util.h"
+
 #include "list.h"
+
 #include "location.h"
+
 #include "memtrace.h"
 
 token_t* token_init(token_kind_t kind, location_t* loc)

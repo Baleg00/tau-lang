@@ -6,11 +6,15 @@
 #include "util.h"
 #include "log.h"
 #include "crumb.h"
-#include "shyd.h"
-#include "ast.h"
-#include "token.h"
+
 #include "list.h"
+
+#include "token.h"
+#include "ast.h"
+#include "shyd.h"
+
 #include "diagnostics.h"
+
 #include "memtrace.h"
 
 parser_t* parser_init(list_t* toks)

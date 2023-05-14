@@ -18,14 +18,14 @@ typedef struct analyzer_type_node_pair_s
 analyzer_t* analyzer_init(void);
 void analyzer_free(analyzer_t* analyzer);
 
-typedesc_t* analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);
-typedesc_t* analyzer_visit_expr_op_as(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);
-typedesc_t* analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* table, ast_expr_op_un_t* node);
-typedesc_t* analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);
-typedesc_t* analyzer_visit_expr_op_call(analyzer_t* analyzer, symtable_t* table, ast_expr_op_call_t* node);
-typedesc_t* analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);
-typedesc_t* analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_expr_op_t* node);
-analyzer_type_node_pair_t analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_expr_t* node);
+void analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);
+void analyzer_visit_expr_op_as(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);
+void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* table, ast_expr_op_un_t* node);
+void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);
+void analyzer_visit_expr_op_call(analyzer_t* analyzer, symtable_t* table, ast_expr_op_call_t* node);
+void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);
+void analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_expr_op_t* node);
+ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_expr_t* node);
 
 ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* table, ast_type_member_t* node);
 ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_type_t* node);

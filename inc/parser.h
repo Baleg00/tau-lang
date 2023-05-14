@@ -11,10 +11,6 @@
 
 #include "typedefs.h"
 
-#include "list.h"
-#include "token.h"
-#include "ast.h"
-
 struct parser_s
 {
   ast_node_t* root; // Root node of abstract syntax tree.

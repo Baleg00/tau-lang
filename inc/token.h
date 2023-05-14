@@ -14,9 +14,6 @@
 
 #include "typedefs.h"
 
-#include "list.h"
-#include "location.h"
-
 /** Utility macro which expands to fields that all tokens must have. */
 #define TOKEN_HEADER\
   struct\

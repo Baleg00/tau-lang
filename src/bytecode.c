@@ -2,11 +2,14 @@
 
 #include <string.h>
 
-#include "token.h"
-#include "opcode.h"
-#include "ast.h"
-#include "list.h"
 #include "util.h"
+
+#include "list.h"
+
+#include "token.h"
+#include "ast.h"
+#include "opcode.h"
+
 #include "memtrace.h"
 
 #define BYTECODE_INITIAL_CAPACITY ((size_t)(4 * (1 << 10)))
@@ -225,14 +228,14 @@ void bytecode_visit_expr_op(bytecode_t* bc, ast_expr_op_t* node)
     bytecode_visit_expr_op_unary(bc, (ast_expr_op_un_t*)node);
   else if (op_is_binary(node->op_kind))
     bytecode_visit_expr_op_binary(bc, (ast_expr_op_bin_t*)node);
+  else
+    unreachable();
   
   // TODO
   // if (node->op_kind == OP_MEMBER ||
   //     node->op_kind == OP_IND_MEMBER ||
   //     node->op_kind == OP_NULL_SAFE_MEMBER)
-  //   return analyzer_visit_expr_op_member(bc, (ast_expr_op_bin_t*)node);
-  
-  unreachable();
+  //   return analyzer_visit_expr_op_member(bc, (ast_expr_op_bin_t*)node);  
 }
 
 void bytecode_visit_expr(bytecode_t* bc, ast_expr_t* node)

@@ -4,14 +4,19 @@
 #include <string.h>
 
 #include "util.h"
+
 #include "list.h"
 #include "stack.h"
+
+#include "location.h"
 #include "token.h"
-#include "op.h"
 #include "ast.h"
-#include "symtable.h"
 #include "typedesc.h"
+#include "op.h"
+#include "symtable.h"
+
 #include "diagnostics.h"
+
 #include "memtrace.h"
 
 analyzer_t* analyzer_init(void)
@@ -30,279 +35,282 @@ void analyzer_free(analyzer_t* analyzer)
   free(analyzer);
 }
 
-typedesc_t* analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node)
+void analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node)
 {
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->lhs);
-  typedesc_t* type_lhs = pair.type;
-  node->lhs = pair.node;
-
+  node->lhs = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->lhs);
   node->rhs = (ast_node_t*)analyzer_visit_type(analyzer, table, (ast_type_t*)node->rhs);
 
   typedesc_t* type_rhs = typedesc_of(node->rhs);
 
-  return typedesc_builtin(TYPEDESC_BOOL);
+  node->desc = typedesc_builtin(TYPEDESC_BOOL);
 }
 
-typedesc_t* analyzer_visit_expr_op_as(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node)
+void analyzer_visit_expr_op_as(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node)
 {
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->lhs);
-  typedesc_t* type_lhs = pair.type;
-  node->lhs = pair.node;
-
+  node->lhs = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->lhs);;
   node->rhs = (ast_node_t*)analyzer_visit_type(analyzer, table, (ast_type_t*)node->rhs);
 
   typedesc_t* type_rhs = typedesc_of(node->rhs);
   
   // TODO: check convertability
 
-  return type_rhs;
+  node->desc = type_rhs;
 }
 
-typedesc_t* analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* table, ast_expr_op_un_t* node)
+void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* table, ast_expr_op_un_t* node)
 {
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->param);
-  typedesc_t* param_type = pair.type;
-  node->param = pair.node;
+  node->param = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->param);
+  typedesc_t* param_desc = ast_desc_of(node->param);
 
   switch (node->op_kind)
   {
   case OP_SIZEOF:
   case OP_ALIGNOF:
-    return typedesc_builtin(TYPEDESC_USIZE);
+    node->desc = typedesc_builtin(TYPEDESC_USIZE);
+    return;
   case OP_TYPEOF:
-    return typedesc_builtin(TYPEDESC_TYPE);
+    node->desc = typedesc_builtin(TYPEDESC_TYPE);
+    return;
   case OP_ARIT_INC_PRE:
   case OP_ARIT_DEC_PRE:
-    if (param_type->kind != TYPEDESC_REF)
+    if (param_desc->kind != TYPEDESC_REF)
       report_error_expected_reference_type(node->tok->loc);
 
-    if (!typedesc_is_arithmetic(((typedesc_ref_t*)param_type)->base_type) && ((typedesc_ref_t*)param_type)->base_type->kind != TYPEDESC_PTR)
+    if (!typedesc_is_arithmetic(((typedesc_ref_t*)param_desc)->base_type) && ((typedesc_ref_t*)param_desc)->base_type->kind != TYPEDESC_PTR)
       report_error_expected_arithmetic_type(node->tok->loc);
 
-    return param_type;
+    node->desc = param_desc;
+    return;
   case OP_ARIT_INC_POST:
   case OP_ARIT_DEC_POST:
-    if (param_type->kind != TYPEDESC_REF)
+    if (param_desc->kind != TYPEDESC_REF)
       report_error_expected_reference_type(node->tok->loc);
 
-    if (!typedesc_is_arithmetic(((typedesc_ref_t*)param_type)->base_type) && ((typedesc_ref_t*)param_type)->base_type->kind != TYPEDESC_PTR)
+    if (!typedesc_is_arithmetic(((typedesc_ref_t*)param_desc)->base_type) && ((typedesc_ref_t*)param_desc)->base_type->kind != TYPEDESC_PTR)
       report_error_expected_arithmetic_type(node->tok->loc);
 
-    return ((typedesc_ref_t*)param_type)->base_type;
+    node->desc = ((typedesc_ref_t*)param_desc)->base_type;
+    return;
   case OP_ARIT_POS:
   case OP_ARIT_NEG:
   case OP_BIT_NOT:
-    param_type = typedesc_remove_ref(param_type);
+    param_desc = typedesc_remove_ref(param_desc);
 
-    if (!typedesc_is_arithmetic(param_type))
+    if (!typedesc_is_arithmetic(param_desc))
       report_error_expected_arithmetic_type(node->tok->loc);
 
-    return param_type;
+    node->desc = param_desc;
+    return;
   case OP_LOGIC_NOT:
-    param_type = typedesc_remove_ref(param_type);
+    param_desc = typedesc_remove_ref(param_desc);
 
-    if (param_type->kind != TYPEDESC_BOOL)
+    if (param_desc->kind != TYPEDESC_BOOL)
       report_error_expected_bool_type(node->tok->loc);
 
-    return param_type;
+    node->desc = param_desc;
+    return;
   case OP_IND:
-    param_type = typedesc_remove_ref(param_type);
+    param_desc = typedesc_remove_ref(param_desc);
 
-    if (param_type->kind != TYPEDESC_PTR)
+    if (param_desc->kind != TYPEDESC_PTR)
       report_error_expected_ptr_type(node->tok->loc);
     
-    return typedesc_make_ref(((typedesc_ptr_t*)param_type)->base_type);
+    node->desc = typedesc_make_ref(((typedesc_ptr_t*)param_desc)->base_type);
+    return;
   case OP_ADDR:
-    if (param_type->kind != TYPEDESC_REF)
+    if (param_desc->kind != TYPEDESC_REF)
       report_error_expected_reference_type(node->tok->loc);
 
-    return typedesc_make_ptr(((typedesc_ref_t*)param_type)->base_type);
+    node->desc = typedesc_make_ptr(((typedesc_ref_t*)param_desc)->base_type);
+    return;
   default:
     unreachable();
   }
-
-  return NULL;
 }
 
-typedesc_t* analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node)
+void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node)
 {
   if (node->op_kind == OP_IS)
-    return analyzer_visit_expr_op_is(analyzer, table, (ast_expr_op_bin_t*)node);
-  
-  if (node->op_kind == OP_AS)
-    return analyzer_visit_expr_op_as(analyzer, table, (ast_expr_op_bin_t*)node);
-
-  analyzer_type_node_pair_t pair_lhs = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->lhs);
-  typedesc_t* type_lhs = pair_lhs.type;
-  node->lhs = pair_lhs.node;
-
-  analyzer_type_node_pair_t pair_rhs = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->rhs);
-  typedesc_t* type_rhs = pair_rhs.type;
-  node->rhs = pair_rhs.node;
-
-  switch (node->op_kind)
+    analyzer_visit_expr_op_is(analyzer, table, (ast_expr_op_bin_t*)node);
+  else if (node->op_kind == OP_AS)
+    analyzer_visit_expr_op_as(analyzer, table, (ast_expr_op_bin_t*)node);
+  else
   {
-  case OP_IN:
-    type_rhs = typedesc_remove_ref(type_rhs);
+    node->lhs = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->lhs);
+    typedesc_t* lhs_desc = ast_desc_of(node->lhs);
 
-    if (type_rhs->kind != TYPEDESC_GEN)
-      report_error_expected_generator_type(node->rhs->tok->loc);
+    node->rhs = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->rhs);
+    typedesc_t* rhs_desc = ast_desc_of(node->rhs);
 
-    if (typedesc_is_same(type_lhs, ((typedesc_gen_t*)type_rhs)->yield_type))
-      report_error_type_mismatch(node->tok->loc, type_lhs, type_rhs);
+    switch (node->op_kind)
+    {
+    case OP_IN:
+      rhs_desc = typedesc_remove_ref(rhs_desc);
 
-    return typedesc_builtin(TYPEDESC_BOOL);
-  case OP_ARIT_ADD:
-  case OP_ARIT_SUB:
-  case OP_ARIT_MUL:
-  case OP_ARIT_DIV:
-  case OP_ARIT_MOD:
-  case OP_BIT_AND:
-  case OP_BIT_OR:
-  case OP_BIT_XOR:
-    type_lhs = typedesc_remove_ref(type_lhs);
-    type_rhs = typedesc_remove_ref(type_rhs);
+      if (rhs_desc->kind != TYPEDESC_GEN)
+        report_error_expected_generator_type(node->rhs->tok->loc);
 
-    if (!typedesc_is_arithmetic(type_lhs))
-      report_error_expected_arithmetic_type(node->lhs->tok->loc);
+      if (typedesc_is_same(lhs_desc, ((typedesc_gen_t*)rhs_desc)->yield_type))
+        report_error_type_mismatch(node->tok->loc, lhs_desc, rhs_desc);
 
-    if (!typedesc_is_arithmetic(type_rhs))
-      report_error_expected_arithmetic_type(node->rhs->tok->loc);
+      node->desc = typedesc_builtin(TYPEDESC_BOOL);
+      break;
+    case OP_ARIT_ADD:
+    case OP_ARIT_SUB:
+    case OP_ARIT_MUL:
+    case OP_ARIT_DIV:
+    case OP_ARIT_MOD:
+    case OP_BIT_AND:
+    case OP_BIT_OR:
+    case OP_BIT_XOR:
+      lhs_desc = typedesc_remove_ref(lhs_desc);
+      rhs_desc = typedesc_remove_ref(rhs_desc);
 
-    if (typedesc_is_signed(type_lhs) != typedesc_is_signed(type_rhs))
-      report_warning_mixed_signedness(node->tok->loc);
+      if (!typedesc_is_arithmetic(lhs_desc))
+        report_error_expected_arithmetic_type(node->lhs->tok->loc);
 
-    return typedesc_promote(type_lhs, type_rhs);
-  case OP_BIT_LSH:
-  case OP_BIT_RSH:
-    type_lhs = typedesc_remove_ref(type_lhs);
-    type_rhs = typedesc_remove_ref(type_rhs);
+      if (!typedesc_is_arithmetic(rhs_desc))
+        report_error_expected_arithmetic_type(node->rhs->tok->loc);
 
-    if (!typedesc_is_integer(type_lhs))
-      report_error_expected_integer_type(node->lhs->tok->loc);
+      if (typedesc_is_signed(lhs_desc) != typedesc_is_signed(rhs_desc))
+        report_warning_mixed_signedness(node->tok->loc);
 
-    if (!typedesc_is_integer(type_rhs))
-      report_error_expected_integer_type(node->rhs->tok->loc);
+      node->desc = typedesc_promote(lhs_desc, rhs_desc);
+      break;
+    case OP_BIT_LSH:
+    case OP_BIT_RSH:
+      lhs_desc = typedesc_remove_ref(lhs_desc);
+      rhs_desc = typedesc_remove_ref(rhs_desc);
 
-    return type_lhs;
-  case OP_LOGIC_AND:
-  case OP_LOGIC_OR:
-    type_lhs = typedesc_remove_ref(type_lhs);
-    type_rhs = typedesc_remove_ref(type_rhs);
+      if (!typedesc_is_integer(lhs_desc))
+        report_error_expected_integer_type(node->lhs->tok->loc);
 
-    if (type_lhs->kind != TYPEDESC_BOOL)
-      report_error_expected_bool_type(node->lhs->tok->loc);
+      if (!typedesc_is_integer(rhs_desc))
+        report_error_expected_integer_type(node->rhs->tok->loc);
 
-    if (type_rhs->kind != TYPEDESC_BOOL)
-      report_error_expected_bool_type(node->rhs->tok->loc);
+      node->desc = lhs_desc;
+      break;
+    case OP_LOGIC_AND:
+    case OP_LOGIC_OR:
+      lhs_desc = typedesc_remove_ref(lhs_desc);
+      rhs_desc = typedesc_remove_ref(rhs_desc);
 
-    return typedesc_builtin(TYPEDESC_BOOL);
-  case OP_COMP_EQ:
-  case OP_COMP_NE:
-  case OP_COMP_LT:
-  case OP_COMP_LE:
-  case OP_COMP_GT:
-  case OP_COMP_GE:
-    type_lhs = typedesc_remove_ref(type_lhs);
-    type_rhs = typedesc_remove_ref(type_rhs);
+      if (lhs_desc->kind != TYPEDESC_BOOL)
+        report_error_expected_bool_type(node->lhs->tok->loc);
 
-    if (!typedesc_is_arithmetic(type_lhs))
-      report_error_expected_arithmetic_type(node->lhs->tok->loc);
+      if (rhs_desc->kind != TYPEDESC_BOOL)
+        report_error_expected_bool_type(node->rhs->tok->loc);
 
-    if (!typedesc_is_arithmetic(type_rhs))
-      report_error_expected_arithmetic_type(node->rhs->tok->loc);
+      node->desc = typedesc_builtin(TYPEDESC_BOOL);
+      break;
+    case OP_COMP_EQ:
+    case OP_COMP_NE:
+    case OP_COMP_LT:
+    case OP_COMP_LE:
+    case OP_COMP_GT:
+    case OP_COMP_GE:
+      lhs_desc = typedesc_remove_ref(lhs_desc);
+      rhs_desc = typedesc_remove_ref(rhs_desc);
 
-    return typedesc_builtin(TYPEDESC_BOOL);
-  case OP_SUBS:
-    type_lhs = typedesc_remove_ref(type_lhs);
-    type_rhs = typedesc_remove_ref(type_rhs);
+      if (!typedesc_is_arithmetic(lhs_desc))
+        report_error_expected_arithmetic_type(node->lhs->tok->loc);
 
-    if (type_lhs->kind != TYPEDESC_ARRAY)
-      report_error_expected_subscriptable(node->lhs->tok->loc);
+      if (!typedesc_is_arithmetic(rhs_desc))
+        report_error_expected_arithmetic_type(node->rhs->tok->loc);
 
-    if (!typedesc_is_integer(type_rhs))
-      report_error_expected_integer_type(node->rhs->tok->loc);
+      node->desc = typedesc_builtin(TYPEDESC_BOOL);
+      break;
+    case OP_SUBS:
+      lhs_desc = typedesc_remove_ref(lhs_desc);
+      rhs_desc = typedesc_remove_ref(rhs_desc);
 
-    return typedesc_make_ref(((typedesc_array_t*)type_lhs)->base_type);
-  case OP_ASSIGN:
-  case OP_ARIT_ADD_ASSIGN:
-  case OP_ARIT_SUB_ASSIGN:
-  case OP_ARIT_MUL_ASSIGN:
-  case OP_ARIT_DIV_ASSIGN:
-  case OP_ARIT_MOD_ASSIGN:
-  case OP_BIT_AND_ASSIGN:
-  case OP_BIT_OR_ASSIGN:
-  case OP_BIT_XOR_ASSIGN:
-  case OP_BIT_LSH_ASSIGN:
-  case OP_BIT_RSH_ASSIGN:
-    if (type_lhs->kind != TYPEDESC_REF)
-      report_error_expected_reference_type(node->lhs->tok->loc);
+      if (lhs_desc->kind != TYPEDESC_ARRAY)
+        report_error_expected_subscriptable(node->lhs->tok->loc);
 
-    if (!typedesc_is_same(typedesc_remove_ref(type_lhs), typedesc_remove_ref(type_rhs)))
-      report_error_type_mismatch(node->tok->loc, type_lhs, type_rhs);
+      if (!typedesc_is_integer(rhs_desc))
+        report_error_expected_integer_type(node->rhs->tok->loc);
 
-    return type_lhs;
-  case OP_RANGE:
-    type_lhs = typedesc_remove_ref(type_lhs);
-    type_rhs = typedesc_remove_ref(type_rhs);
+      node->desc = typedesc_make_ref(((typedesc_array_t*)lhs_desc)->base_type);
+      break;
+    case OP_ASSIGN:
+    case OP_ARIT_ADD_ASSIGN:
+    case OP_ARIT_SUB_ASSIGN:
+    case OP_ARIT_MUL_ASSIGN:
+    case OP_ARIT_DIV_ASSIGN:
+    case OP_ARIT_MOD_ASSIGN:
+    case OP_BIT_AND_ASSIGN:
+    case OP_BIT_OR_ASSIGN:
+    case OP_BIT_XOR_ASSIGN:
+    case OP_BIT_LSH_ASSIGN:
+    case OP_BIT_RSH_ASSIGN:
+      if (lhs_desc->kind != TYPEDESC_REF)
+        report_error_expected_reference_type(node->lhs->tok->loc);
 
-    if (!typedesc_is_integer(type_lhs))
-      report_error_expected_integer_type(node->lhs->tok->loc);
+      if (!typedesc_is_same(typedesc_remove_ref(lhs_desc), typedesc_remove_ref(rhs_desc)))
+        report_error_type_mismatch(node->tok->loc, lhs_desc, rhs_desc);
 
-    if (!typedesc_is_integer(type_rhs))
-      report_error_expected_integer_type(node->rhs->tok->loc);
+      node->desc = lhs_desc;
+      break;
+    case OP_RANGE:
+      lhs_desc = typedesc_remove_ref(lhs_desc);
+      rhs_desc = typedesc_remove_ref(rhs_desc);
 
-    if (!typedesc_is_same(type_lhs, type_rhs))
-      report_error_type_mismatch(node->tok->loc, type_lhs, type_rhs);
+      if (!typedesc_is_integer(lhs_desc))
+        report_error_expected_integer_type(node->lhs->tok->loc);
 
-    typedesc_gen_t* range_type = typedesc_gen_init();
-    range_type->param_types = NULL;
-    range_type->yield_type = type_lhs;
+      if (!typedesc_is_integer(rhs_desc))
+        report_error_expected_integer_type(node->rhs->tok->loc);
 
-    return (typedesc_t*)range_type;
-  case OP_SEMICOLON: // TODO
-  default:
-    unreachable();
+      if (!typedesc_is_same(lhs_desc, rhs_desc))
+        report_error_type_mismatch(node->tok->loc, lhs_desc, rhs_desc);
+
+      typedesc_gen_t* range_type = typedesc_gen_init();
+      range_type->param_types = NULL;
+      range_type->yield_type = lhs_desc;
+
+      node->desc = (typedesc_t*)range_type;
+      break;
+    case OP_SEMICOLON: // TODO
+    default:
+      unreachable();
+    }
   }
-
-  return NULL;
 }
 
-typedesc_t* analyzer_visit_expr_op_call(analyzer_t* analyzer, symtable_t* table, ast_expr_op_call_t* node)
+void analyzer_visit_expr_op_call(analyzer_t* analyzer, symtable_t* table, ast_expr_op_call_t* node)
 {
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->callee);
-  typedesc_t* callee_type = pair.type;
-  node->callee = pair.node;
+  node->callee = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->callee);;
+  typedesc_t* callee_desc = ast_desc_of(node->callee);
 
   list_t* param_types = NULL;
   typedesc_t* return_type = NULL;
 
-  if (callee_type->kind == TYPEDESC_FUN)
+  if (callee_desc->kind == TYPEDESC_FUN)
   {
-    if (node->params != NULL && ((typedesc_fun_t*)callee_type)->param_types == NULL)
+    if (node->params != NULL && ((typedesc_fun_t*)callee_desc)->param_types == NULL)
       report_error_too_many_arguments(node->tok->loc);
     
-    if (node->params == NULL && ((typedesc_fun_t*)callee_type)->param_types != NULL)
+    if (node->params == NULL && ((typedesc_fun_t*)callee_desc)->param_types != NULL)
       report_error_too_few_arguments(node->tok->loc);
 
-    if (list_size(node->params) > list_size(((typedesc_fun_t*)callee_type)->param_types))
+    if (list_size(node->params) > list_size(((typedesc_fun_t*)callee_desc)->param_types))
       report_error_too_many_arguments(node->tok->loc);
     
-    if (list_size(node->params) < list_size(((typedesc_fun_t*)callee_type)->param_types))
+    if (list_size(node->params) < list_size(((typedesc_fun_t*)callee_desc)->param_types))
       report_error_too_few_arguments(node->tok->loc);
 
-    param_types = ((typedesc_fun_t*)callee_type)->param_types;
-    return_type = ((typedesc_fun_t*)callee_type)->return_type;
+    param_types = ((typedesc_fun_t*)callee_desc)->param_types;
+    return_type = ((typedesc_fun_t*)callee_desc)->return_type;
   }
-  else if (callee_type->kind == TYPEDESC_GEN)
+  else if (callee_desc->kind == TYPEDESC_GEN)
   {
-    if (list_size(node->params) > list_size(((typedesc_gen_t*)callee_type)->param_types))
+    if (list_size(node->params) > list_size(((typedesc_gen_t*)callee_desc)->param_types))
       report_error_too_many_arguments(node->tok->loc);
-    else if (list_size(node->params) < list_size(((typedesc_gen_t*)callee_type)->param_types))
+    else if (list_size(node->params) < list_size(((typedesc_gen_t*)callee_desc)->param_types))
       report_error_too_few_arguments(node->tok->loc);
 
-    param_types = ((typedesc_gen_t*)callee_type)->param_types;
-    return_type = ((typedesc_gen_t*)callee_type)->yield_type;
+    param_types = ((typedesc_gen_t*)callee_desc)->param_types;
+    return_type = ((typedesc_gen_t*)callee_desc)->yield_type;
   }
   else
     report_error_expected_callable(node->tok->loc);
@@ -315,52 +323,49 @@ typedesc_t* analyzer_visit_expr_op_call(analyzer_t* analyzer, symtable_t* table,
           param_type_it = list_node_next(param_type_it))
     {
       ast_node_t* param = (ast_node_t*)list_node_get(param_it);
-
-      analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)param);
-      typedesc_t* param_type = pair.type;
-      list_node_set(param_it, pair.node);
+      param = analyzer_visit_expr(analyzer, table, (ast_expr_t*)param);
+      list_node_set(param_it, param);
 
       typedesc_t* expected_param_type = (typedesc_t*)list_node_get(param_type_it);
 
-      if (!typedesc_is_assignable(expected_param_type, param_type))
+      if (!typedesc_is_assignable(expected_param_type, ast_desc_of(param)))
         report_error_incompatible_param_type(param->tok->loc);
     }
 
-  return return_type;
+  node->desc = return_type;
 }
 
-typedesc_t* analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node)
+void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node)
 {
   if (node->rhs->kind != AST_ID)
     report_error_expected_member(node->rhs->tok->loc);
 
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->lhs);
-  typedesc_t* type_owner = typedesc_remove_ref(pair.type);
-  node->lhs = pair.node;
+  node->lhs = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->lhs);
+  typedesc_t* owner_desc = typedesc_remove_ref(ast_desc_of(node->lhs));
 
   switch (node->op_kind)
   {
   case OP_MEMBER:
-    if (!typedesc_is_owner(type_owner))
+    if (!typedesc_is_owner(owner_desc))
       report_error_expected_owner(node->lhs->tok->loc);
     break;
   case OP_IND_MEMBER:
-    if (type_owner->kind != TYPEDESC_PTR)
+    if (owner_desc->kind != TYPEDESC_PTR)
       report_error_expected_ptr_type(node->lhs->tok->loc);
 
-    if (!typedesc_is_owner(((typedesc_ptr_t*)type_owner)->base_type))
+    if (!typedesc_is_owner(((typedesc_ptr_t*)owner_desc)->base_type))
       report_error_expected_ptr_to_owner(node->lhs->tok->loc);
 
-    type_owner = ((typedesc_ptr_t*)type_owner)->base_type;
+    owner_desc = ((typedesc_ptr_t*)owner_desc)->base_type;
     break;
   case OP_NULL_SAFE_MEMBER:
-    if (type_owner->kind != TYPEDESC_OPT)
+    if (owner_desc->kind != TYPEDESC_OPT)
       report_error_expected_optional_type(node->lhs->tok->loc);
 
-    if (!typedesc_is_owner(((typedesc_opt_t*)type_owner)->base_type))
+    if (!typedesc_is_owner(((typedesc_opt_t*)owner_desc)->base_type))
       report_error_expected_owner(node->lhs->tok->loc);
 
-    type_owner = ((typedesc_opt_t*)type_owner)->base_type;
+    owner_desc = ((typedesc_opt_t*)owner_desc)->base_type;
     break;
   default:
     unreachable();
@@ -368,59 +373,63 @@ typedesc_t* analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* tabl
 
   token_id_t* tok_rhs = (token_id_t*)node->rhs->tok;
   
-  switch (type_owner->kind)
+  switch (owner_desc->kind)
   {
   case TYPEDESC_STRUCT:
-    LIST_FOR_LOOP(it, ((ast_decl_struct_t*)((typedesc_struct_t*)type_owner)->node)->members)
+    LIST_FOR_LOOP(it, ((ast_decl_struct_t*)((typedesc_struct_t*)owner_desc)->node)->members)
     {
       ast_decl_var_t* member = (ast_decl_var_t*)list_node_get(it);
 
       if (strncmp(ast_id_ptr(member->id), tok_rhs->value, ast_id_len(member->id)) == 0)
       {
         node->rhs = (ast_node_t*)member;
-        return typedesc_of((ast_node_t*)member);
+        node->desc = typedesc_of((ast_node_t*)member);
+        return;
       }
     }
 
     report_error_no_member_with_name(tok_rhs->loc);
     break;
   case TYPEDESC_UNION:
-    LIST_FOR_LOOP(it, ((ast_decl_union_t*)((typedesc_union_t*)type_owner)->node)->members)
+    LIST_FOR_LOOP(it, ((ast_decl_union_t*)((typedesc_union_t*)owner_desc)->node)->members)
     {
       ast_decl_var_t* member = (ast_decl_var_t*)list_node_get(it);
 
       if (strncmp(ast_id_ptr(member->id), tok_rhs->value, ast_id_len(member->id)) == 0)
       {
         node->rhs = (ast_node_t*)member;
-        return typedesc_of((ast_node_t*)member);
+        node->desc = typedesc_of((ast_node_t*)member);
+        return;
       }
     }
 
     report_error_no_member_with_name(tok_rhs->loc);
     break;
   case TYPEDESC_ENUM:
-    LIST_FOR_LOOP(it, ((ast_decl_enum_t*)((typedesc_enum_t*)type_owner)->node)->values)
+    LIST_FOR_LOOP(it, ((ast_decl_enum_t*)((typedesc_enum_t*)owner_desc)->node)->values)
     {
       ast_enumerator_t* enumerator = (ast_enumerator_t*)list_node_get(it);
 
       if (strncmp(ast_id_ptr(enumerator->id), tok_rhs->value, ast_id_len(enumerator->id)) == 0)
       {
         node->rhs = (ast_node_t*)enumerator;
-        return type_owner;
+        node->desc = owner_desc;
+        return;
       }
     }
 
     report_error_no_member_with_name(tok_rhs->loc);
     break;
   case TYPEDESC_MOD:
-    LIST_FOR_LOOP(it, ((ast_decl_mod_t*)((typedesc_mod_t*)type_owner)->node)->decls)
+    LIST_FOR_LOOP(it, ((ast_decl_mod_t*)((typedesc_mod_t*)owner_desc)->node)->decls)
     {
       ast_decl_t* decl = (ast_decl_t*)list_node_get(it);
 
       if (strncmp(ast_id_ptr(decl->id), tok_rhs->value, ast_id_len(decl->id)) == 0)
       {
         node->rhs = (ast_node_t*)decl;
-        return typedesc_of((ast_node_t*)decl);
+        node->desc = typedesc_of((ast_node_t*)decl);
+        return;
       }
     }
 
@@ -429,32 +438,25 @@ typedesc_t* analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* tabl
   default:
     report_error_expected_owner(tok_rhs->loc);
   }
-
-  return NULL;
 }
 
-typedesc_t* analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_expr_op_t* node)
+void analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* table, ast_expr_op_t* node)
 {
   if (node->op_kind == OP_CALL)
-    return analyzer_visit_expr_op_call(analyzer, table, (ast_expr_op_call_t*)node);
-  
-  if (node->op_kind == OP_MEMBER ||
-      node->op_kind == OP_IND_MEMBER ||
-      node->op_kind == OP_NULL_SAFE_MEMBER)
-    return analyzer_visit_expr_op_member(analyzer, table, (ast_expr_op_bin_t*)node);
-  
-  if (op_is_unary(node->op_kind))
-    return analyzer_visit_expr_op_unary(analyzer, table, (ast_expr_op_un_t*)node);
-  
-  if (op_is_binary(node->op_kind))
-    return analyzer_visit_expr_op_binary(analyzer, table, (ast_expr_op_bin_t*)node);
-  
-  unreachable();
-
-  return NULL;
+    analyzer_visit_expr_op_call(analyzer, table, (ast_expr_op_call_t*)node);
+  else if (node->op_kind == OP_MEMBER ||
+    node->op_kind == OP_IND_MEMBER ||
+    node->op_kind == OP_NULL_SAFE_MEMBER)
+    analyzer_visit_expr_op_member(analyzer, table, (ast_expr_op_bin_t*)node);
+  else if (op_is_unary(node->op_kind))
+    analyzer_visit_expr_op_unary(analyzer, table, (ast_expr_op_un_t*)node);
+  else if (op_is_binary(node->op_kind))
+    analyzer_visit_expr_op_binary(analyzer, table, (ast_expr_op_bin_t*)node);
+  else
+    unreachable();
 }
 
-analyzer_type_node_pair_t analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_expr_t* node)
+ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_expr_t* node)
 {
   switch (node->kind)
   {
@@ -465,47 +467,45 @@ analyzer_type_node_pair_t analyzer_visit_expr(analyzer_t* analyzer, symtable_t* 
     if (id_sym == NULL)
       report_error_undefined_symbol(tok_id->loc);
 
-    switch (id_sym->node->kind)
-    {
-    case AST_DECL_VAR:
-    case AST_DECL_LOOP_VAR:
-    case AST_DECL_FUN:
-    case AST_DECL_GEN:
-    case AST_DECL_STRUCT:
-    case AST_DECL_UNION:
-    case AST_DECL_ENUM:
-    case AST_DECL_MOD:
-    case AST_PARAM:
-    case AST_PARAM_VARIADIC:
-    case AST_PARAM_GENERIC:
-      break;
-    default:
+    if (!ast_is_decl(id_sym->node) && !ast_is_param(id_sym->node))
       report_error_symbol_is_not_an_expression(tok_id->loc);
-    }
-    
-    return (analyzer_type_node_pair_t){ typedesc_of(id_sym->node), id_sym->node };
+
+    if (ast_is_decl(id_sym->node))
+      ((ast_decl_t*)id_sym->node)->desc = typedesc_of(id_sym->node);
+    else if (ast_is_param(id_sym->node))
+      ((ast_param_t*)id_sym->node)->desc = typedesc_of(id_sym->node);
+    else
+      unreachable();
+
+    return id_sym->node;
   case AST_EXPR_LIT_INT:
-    return (analyzer_type_node_pair_t){ typedesc_builtin(TYPEDESC_I32), (ast_node_t*)node };
+    node->desc = typedesc_builtin(TYPEDESC_I32);
+    break;
   case AST_EXPR_LIT_FLT:
-    return (analyzer_type_node_pair_t){ typedesc_builtin(TYPEDESC_F32), (ast_node_t*)node };
+    node->desc = typedesc_builtin(TYPEDESC_F32);
+    break;
   case AST_EXPR_LIT_STR:
     typedesc_ptr_t* str_type = typedesc_ptr_init();
     str_type->base_type = typedesc_builtin(TYPEDESC_U8);
-    return (analyzer_type_node_pair_t){ (typedesc_t*)str_type, (ast_node_t*)node };
+    node->desc = (typedesc_t*)str_type;
+    break;
   case AST_EXPR_LIT_CHAR:
-    return (analyzer_type_node_pair_t){ typedesc_builtin(TYPEDESC_U8), (ast_node_t*)node };
+    node->desc = typedesc_builtin(TYPEDESC_U8);
+    break;
   case AST_EXPR_LIT_BOOL:
-    return (analyzer_type_node_pair_t){ typedesc_builtin(TYPEDESC_BOOL), (ast_node_t*)node };
+    node->desc = typedesc_builtin(TYPEDESC_BOOL);
+    break;
   case AST_EXPR_LIT_NULL:
-    return (analyzer_type_node_pair_t){ typedesc_builtin(TYPEDESC_NULL), (ast_node_t*)node };
+    node->desc =  typedesc_builtin(TYPEDESC_NULL);
     break;
   case AST_EXPR_OP:
-    return (analyzer_type_node_pair_t){ analyzer_visit_expr_op(analyzer, table, (ast_expr_op_t*)node), (ast_node_t*)node };
+    analyzer_visit_expr_op(analyzer, table, (ast_expr_op_t*)node);
+    break;
   default:
     unreachable();
   }
 
-  return (analyzer_type_node_pair_t){ NULL, NULL };
+  return (ast_node_t*)node;
 }
 
 ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* table, ast_type_member_t* node)
@@ -621,11 +621,10 @@ void analyzer_visit_stmt_if(analyzer_t* analyzer, symtable_t* table, ast_stmt_if
 {
   symtable_t* if_table = symtable_init(table);
 
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, if_table, (ast_expr_t*)node->cond);
-  typedesc_t* cond_type = typedesc_remove_ref(pair.type);
-  node->cond = pair.node;
+  node->cond = analyzer_visit_expr(analyzer, if_table, (ast_expr_t*)node->cond);
+  typedesc_t* cond_desc = typedesc_remove_ref(ast_desc_of(node->cond));
 
-  if (cond_type->kind != TYPEDESC_BOOL)
+  if (cond_desc->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);
 
   analyzer_visit_stmt(analyzer, if_table, (ast_stmt_t*)node->stmt);
@@ -640,11 +639,10 @@ void analyzer_visit_stmt_for(analyzer_t* analyzer, symtable_t* table, ast_stmt_f
 
   analyzer_visit_decl_loop_var(analyzer, for_table, (ast_decl_loop_var_t*)node->var);
   
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, for_table, (ast_expr_t*)node->range);
-  typedesc_t* range_type = typedesc_remove_ref(pair.type);
-  node->range = pair.node;
+  node->range = analyzer_visit_expr(analyzer, for_table, (ast_expr_t*)node->range);
+  typedesc_t* range_desc = typedesc_remove_ref(ast_desc_of(node->range));
 
-  if (range_type->kind != TYPEDESC_GEN)
+  if (range_desc->kind != TYPEDESC_GEN)
     report_error_expected_generator_type(node->range->tok->loc);
 
   analyzer_visit_stmt(analyzer, for_table, (ast_stmt_t*)node->stmt);
@@ -654,11 +652,10 @@ void analyzer_visit_stmt_while(analyzer_t* analyzer, symtable_t* table, ast_stmt
 {
   symtable_t* while_table = symtable_init(table);
 
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, while_table, (ast_expr_t*)node->cond);
-  typedesc_t* cond_type = typedesc_remove_ref(pair.type);
-  node->cond = pair.node;
+  node->cond = analyzer_visit_expr(analyzer, while_table, (ast_expr_t*)node->cond);
+  typedesc_t* cond_desc = typedesc_remove_ref(ast_desc_of(node->cond));
 
-  if (cond_type->kind != TYPEDESC_BOOL)
+  if (cond_desc->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);
 
   analyzer_visit_stmt(analyzer, while_table, (ast_stmt_t*)node->stmt);
@@ -674,35 +671,33 @@ void analyzer_visit_stmt_continue(analyzer_t* analyzer, symtable_t* table, ast_s
 
 typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* table, ast_stmt_return_t* node)
 {
-  typedesc_t* type = typedesc_builtin(TYPEDESC_UNIT);
+  typedesc_t* desc = typedesc_builtin(TYPEDESC_UNIT);
 
   if (node->expr != NULL)
   {
-    analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->expr);
-    type = pair.type;
-    node->expr = pair.node;
+    node->expr = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->expr);
+    desc = ast_desc_of(node->expr);
   }
 
-  typedesc_t* expected_type = stack_top(analyzer->ret_types);
+  typedesc_t* expected = stack_top(analyzer->ret_types);
 
-  if (!typedesc_is_same(type, expected_type))
+  if (!typedesc_is_same(desc, expected))
     report_error_incompatible_return_type(node->tok->loc);
 
-  return type;
+  return desc;
 }
 
 typedesc_t* analyzer_visit_stmt_yield(analyzer_t* analyzer, symtable_t* table, ast_stmt_yield_t* node)
 {
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->expr);
-  typedesc_t* type = pair.type;
-  node->expr = pair.node;
+  node->expr = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->expr);
+  typedesc_t* desc = ast_desc_of(node->expr);
 
-  typedesc_t* expected_type = stack_top(analyzer->ret_types);
+  typedesc_t* expected = stack_top(analyzer->ret_types);
   
-  if (!typedesc_is_same(type, expected_type))
+  if (!typedesc_is_same(desc, expected))
     report_error_incompatible_return_type(node->tok->loc);
 
-  return type;
+  return desc;
 }
 
 void analyzer_visit_stmt_block(analyzer_t* analyzer, symtable_t* table, ast_stmt_block_t* node)
@@ -715,9 +710,8 @@ void analyzer_visit_stmt_block(analyzer_t* analyzer, symtable_t* table, ast_stmt
 
 typedesc_t* analyzer_visit_stmt_expr(analyzer_t* analyzer, symtable_t* table, ast_stmt_expr_t* node)
 {
-  analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->expr);
-  node->expr = pair.node;
-  return pair.type;
+  node->expr = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->expr);
+  return ast_desc_of(node->expr);
 }
 
 void analyzer_visit_stmt(analyzer_t* analyzer, symtable_t* table, ast_stmt_t* node)
@@ -741,9 +735,10 @@ void analyzer_visit_stmt(analyzer_t* analyzer, symtable_t* table, ast_stmt_t* no
 void analyzer_visit_decl_var(analyzer_t* analyzer, symtable_t* table, ast_decl_var_t* node)
 {
   node->type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->type);
+  node->desc = typedesc_of((ast_node_t*)node);
 
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* var_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node->type));
+  symbol_t* var_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, var_sym);
 
@@ -755,21 +750,21 @@ void analyzer_visit_decl_var(analyzer_t* analyzer, symtable_t* table, ast_decl_v
 
   if (node->init != NULL)
   {
-    analyzer_type_node_pair_t pair = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->init);
-    typedesc_t* init_type = pair.type;
-    node->init = pair.node;
+    node->init = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->init);
+    typedesc_t* init_desc = ast_desc_of(node->init);
 
-    if (!typedesc_is_same(init_type, var_sym->type))
-      report_error_type_mismatch(node->tok->loc, var_sym->type, init_type);
+    if (!typedesc_is_same(init_desc, node->desc))
+      report_error_type_mismatch(node->tok->loc, node->desc, init_desc);
   }
 }
 
 void analyzer_visit_decl_loop_var(analyzer_t* analyzer, symtable_t* table, ast_decl_loop_var_t* node)
 {
   node->type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->type);
+  node->desc = typedesc_of((ast_node_t*)node);
 
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* var_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node));
+  symbol_t* var_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, var_sym);
 
@@ -788,9 +783,10 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_decl_f
       analyzer_visit_param(analyzer, fun_table, (ast_param_t*)list_node_get(it));
 
   node->return_type = analyzer_visit_type(analyzer, fun_table, (ast_type_t*)node->return_type);
+  node->desc = typedesc_of((ast_node_t*)node);
 
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* fun_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node));
+  symbol_t* fun_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   fun_sym->scope = fun_table;
 
   symbol_t* collision = symtable_insert(table, fun_sym);
@@ -798,7 +794,7 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_decl_f
   if (collision != NULL)
     report_error_symbol_redeclaration(node->tok->loc);
 
-  stack_push(analyzer->ret_types, ((typedesc_fun_t*)fun_sym->type)->return_type);
+  stack_push(analyzer->ret_types, ((typedesc_fun_t*)node->desc)->return_type);
   analyzer_visit_stmt(analyzer, fun_table, (ast_stmt_t*)node->stmt);
   stack_pop(analyzer->ret_types);
 }
@@ -812,9 +808,10 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_decl_g
       analyzer_visit_param(analyzer, gen_table, (ast_param_t*)list_node_get(it));
 
   node->yield_type = analyzer_visit_type(analyzer, gen_table, (ast_type_t*)node->yield_type);
+  node->desc = typedesc_of((ast_node_t*)node);
 
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* gen_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node));
+  symbol_t* gen_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   gen_sym->scope = gen_table;
 
   symbol_t* collision = symtable_insert(table, gen_sym);
@@ -822,7 +819,7 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_decl_g
   if (collision != NULL)
     report_error_symbol_redeclaration(node->tok->loc);
   
-  stack_push(analyzer->ret_types, ((typedesc_gen_t*)gen_sym->type)->yield_type);
+  stack_push(analyzer->ret_types, ((typedesc_gen_t*)node->desc)->yield_type);
   analyzer_visit_stmt(analyzer, gen_table, (ast_stmt_t*)node->stmt);
   stack_pop(analyzer->ret_types);
 }
@@ -830,7 +827,7 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_decl_g
 void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_decl_struct_t* node)
 {
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* struct_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node));
+  symbol_t* struct_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, struct_sym);
 
@@ -845,12 +842,14 @@ void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_dec
 
   LIST_FOR_LOOP(it, node->members)
     analyzer_visit_decl_var(analyzer, struct_table, (ast_decl_var_t*)list_node_get(it));
+
+  node->desc = typedesc_of((ast_node_t*)node);
 }
 
 void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_decl_union_t* node)
 {
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* union_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node));
+  symbol_t* union_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, union_sym);
 
@@ -865,12 +864,14 @@ void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_decl
 
   LIST_FOR_LOOP(it, node->members)
     analyzer_visit_decl_var(analyzer, union_table, (ast_decl_var_t*)list_node_get(it));
+
+  node->desc = typedesc_of((ast_node_t*)node);
 }
 
 void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_decl_enum_t* node)
 {
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* enum_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node));
+  symbol_t* enum_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   symbol_t* lookup = symtable_lookup(table, tok_id->value);
   symbol_t* collision = symtable_insert(table, enum_sym);
 
@@ -885,12 +886,14 @@ void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_decl_
 
   LIST_FOR_LOOP(it, node->values)
     analyzer_visit_enumerator(analyzer, enum_table, enum_sym, (ast_enumerator_t*)list_node_get(it));
+
+  node->desc = typedesc_of((ast_node_t*)node);
 }
 
 void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* table, ast_decl_mod_t* node)
 {
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* mod_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node));
+  symbol_t* mod_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, mod_sym);
 
   symtable_t* mod_table = NULL;
@@ -908,6 +911,8 @@ void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* table, ast_decl_m
 
   LIST_FOR_LOOP(it, node->decls)
     analyzer_visit_decl(analyzer, mod_table, (ast_decl_t*)list_node_get(it));
+
+  node->desc = typedesc_of((ast_node_t*)node);
 }
 
 void analyzer_visit_decl_generic(analyzer_t* analyzer, symtable_t* table, ast_decl_generic_t* node)
@@ -942,7 +947,7 @@ void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_param_t* 
   node->type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->type);
 
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* param_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node));
+  symbol_t* param_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, param_sym);
 
   if (collision != NULL && ast_is_param(collision->node))
@@ -954,6 +959,8 @@ void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_param_t* 
   case AST_PARAM_VARIADIC: analyzer_visit_param_variadic(analyzer, table, (ast_param_variadic_t*)node); return;
   case AST_PARAM_GENERIC: analyzer_visit_param_generic(analyzer, table, (ast_param_generic_t*)node); return;
   }
+
+  node->desc = typedesc_of((ast_node_t*)node);
 }
 
 void analyzer_visit_param_default(analyzer_t* analyzer, symtable_t* table, ast_param_default_t* node)
@@ -972,21 +979,25 @@ void analyzer_visit_param_generic(analyzer_t* analyzer, symtable_t* table, ast_p
     node->type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->type);
 
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* param_sym = symbol_init(tok_id->value, (ast_node_t*)node, typedesc_of((ast_node_t*)node));
+  symbol_t* param_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, param_sym);
 
   if (collision != NULL && ast_is_param(collision->node))
     report_error_parameter_redefinition(tok_id->loc, collision->node->tok->loc);
+
+  node->desc = typedesc_of((ast_node_t*)node);
 }
 
 void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, symbol_t* enum_sym, ast_enumerator_t* node)
 {
   token_id_t* tok_id = (token_id_t*)node->id->tok;
-  symbol_t* enumerator_sym = symbol_init(tok_id->value, (ast_node_t*)node, enum_sym->type);
+  symbol_t* enumerator_sym = symbol_init(tok_id->value, (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, enumerator_sym);
 
   if (collision != NULL)
     report_error_enumerator_redeclaration(tok_id->loc, collision->node->tok->loc);
+
+  node->desc = ast_desc_of(enum_sym->node);
 }
 
 void analyzer_visit_prog(analyzer_t* analyzer, symtable_t* table, ast_prog_t* node)

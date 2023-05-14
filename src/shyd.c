@@ -7,6 +7,7 @@
 #include "ast.h"
 #include "parser.h"
 #include "list.h"
+#include "queue.h"
 #include "stack.h"
 #include "queue.h"
 #include "diagnostics.h"

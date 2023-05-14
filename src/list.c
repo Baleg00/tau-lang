@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "util.h"
+
 #include "memtrace.h"
 
 list_node_t* list_node_init(void* data)

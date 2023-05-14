@@ -6,12 +6,18 @@
 #include <string.h>
 
 #include "util.h"
-#include "file.h"
 #include "log.h"
 #include "crumb.h"
-#include "diagnostics.h"
+
 #include "list.h"
+
+#include "file.h"
+
+#include "location.h"
 #include "token.h"
+
+#include "diagnostics.h"
+
 #include "memtrace.h"
 
 #define IDENTIFIER_MAX_LEN 255

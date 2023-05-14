@@ -1,8 +1,11 @@
 #include "crumb.h"
 
-#include "file.h"
-#include "esc_seq.h"
 #include "util.h"
+#include "esc_seq.h"
+
+#include "file.h"
+
+#include "location.h"
 
 /** Global crumb file stream. */
 static FILE* crumb_file_g = NULL;

@@ -13,8 +13,6 @@
 
 #include "typedefs.h"
 
-#include "list.h"
-
 /**
  * \brief Initializes a new stack.
  * 

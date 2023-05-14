@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "util.h"
+
 #include "memtrace.h"
 
 location_t* location_init(const char *path, char* src, char* cur, size_t row, size_t col, size_t len)

@@ -1,10 +1,14 @@
 #include "typedesc.h"
 
-#include "token.h"
+#include "util.h"
+
 #include "list.h"
+
+#include "location.h"
+#include "token.h"
 #include "op.h"
 #include "ast.h"
-#include "util.h"
+
 #include "memtrace.h"
 
 typedesc_t* typedesc_init(typedesc_kind_t kind, size_t size)

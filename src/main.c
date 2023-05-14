@@ -82,7 +82,7 @@ int main(int argc, const char *argv[])
 
   const char* usages[] = { "tau [option...] file..." };
 
-  cli_t* cli = cli_init(opts, array_len(opts), usages, array_len(usages));
+  cli_t* cli = cli_init(opts, countof(opts), usages, countof(usages));
   cli_parse(cli, argc, argv);
   cli_free(cli);
 

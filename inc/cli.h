@@ -11,8 +11,6 @@
 
 #include "typedefs.h"
 
-#include "queue.h"
-
 struct cli_opt_s
 {
   cli_type_t type; // Option type

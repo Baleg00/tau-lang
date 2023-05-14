@@ -5,17 +5,12 @@
 
 #include "typedefs.h"
 
-#include "list.h"
-#include "ast.h"
-#include "typedesc.h"
-
 struct symbol_s
 {
   symtable_t* scope;
   
   char* id;
   ast_node_t* node;
-  typedesc_t* type;
 
   symbol_t* next;
 };
@@ -29,7 +24,7 @@ struct symtable_s
   symbol_t** buckets;
 };
 
-symbol_t* symbol_init(char* id, ast_node_t* node, typedesc_t* type);
+symbol_t* symbol_init(char* id, ast_node_t* node);
 void symbol_free(symbol_t* sym);
 
 symtable_t* symtable_init(symtable_t* parent);

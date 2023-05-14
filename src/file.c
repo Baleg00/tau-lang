@@ -7,7 +7,9 @@
 
 #include "util.h"
 #include "log.h"
+
 #include "diagnostics.h"
+
 #include "memtrace.h"
 
 size_t file_read(const char* path, char* buf, size_t len)

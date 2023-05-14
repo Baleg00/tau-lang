@@ -22,6 +22,13 @@
     token_t* tok; /** First token in this node. */\
   }
 
+/** Utility macro which expands to fields that all expression nodes must have. */
+#define AST_EXPR_HEADER\
+  struct\
+  {\
+    typedesc_t* desc; /** Type descriptor. */\
+  }
+
 /** Utility macro which expands to fields that all operator expression nodes must have. */
 #define AST_EXPR_OP_HEADER\
   struct\
@@ -34,6 +41,7 @@
   struct\
   {\
     ast_node_t* id; /** Declaration identifier */\
+    typedesc_t* desc; /** Type descriptor. */\
   }
 
 /** Utility macro which expands to fields that all parameter nodes must have. */
@@ -42,6 +50,7 @@
   {\
     ast_node_t* id; /** Parameter identifier. */\
     ast_node_t* type; /** Parameter type. */\
+    typedesc_t* desc; /** Type descriptor. */\
   }
 
 struct ast_node_s
@@ -120,17 +129,26 @@ struct ast_type_member_s
 struct ast_expr_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
+};
+
+struct ast_expr_lit_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_HEADER;
 };
 
 struct ast_expr_op_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
 };
 
 struct ast_expr_op_bin_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
   ast_node_t* lhs; // Left-hand side parameter.
   ast_node_t* rhs; // Right-hand side parameter.
@@ -139,6 +157,7 @@ struct ast_expr_op_bin_s
 struct ast_expr_op_un_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
   ast_node_t* param; // Operator parameter.
 };
@@ -146,6 +165,7 @@ struct ast_expr_op_un_s
 struct ast_expr_op_call_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
   ast_node_t* callee; // Expression to be called.
   list_t* params; // List of parameters.
@@ -282,6 +302,7 @@ struct ast_decl_mod_s
 
 struct ast_decl_generic_s
 {
+  AST_NODE_HEADER;
   list_t* params; // List of generic parameters.
   ast_node_t* decl; // Declaration.
 };
@@ -315,6 +336,7 @@ struct ast_enumerator_s
 {
   AST_NODE_HEADER;
   ast_node_t* id; // Enumerator identifier.
+  typedesc_t* desc; // Type descriptor.
 };
 
 struct ast_prog_s
@@ -366,12 +388,12 @@ ast_node_t* ast_node_init(ast_kind_t kind, token_t* tok, size_t size);
 #define ast_type_unit_init(TOK)      ((ast_type_t*)           ast_node_init(AST_TYPE_UNIT,      (TOK), sizeof(ast_type_t)))
 #define ast_type_member_init(TOK)    ((ast_type_member_t*)    ast_node_init(AST_TYPE_MEMBER,    (TOK), sizeof(ast_type_member_t)))
 
-#define ast_expr_lit_int_init(TOK)   ((ast_expr_t*)           ast_node_init(AST_EXPR_LIT_INT,   (TOK), sizeof(ast_expr_t)))
-#define ast_expr_lit_flt_init(TOK)   ((ast_expr_t*)           ast_node_init(AST_EXPR_LIT_FLT,   (TOK), sizeof(ast_expr_t)))
-#define ast_expr_lit_str_init(TOK)   ((ast_expr_t*)           ast_node_init(AST_EXPR_LIT_STR,   (TOK), sizeof(ast_expr_t)))
-#define ast_expr_lit_char_init(TOK)  ((ast_expr_t*)           ast_node_init(AST_EXPR_LIT_CHAR,  (TOK), sizeof(ast_expr_t)))
-#define ast_expr_lit_bool_init(TOK)  ((ast_expr_t*)           ast_node_init(AST_EXPR_LIT_BOOL,  (TOK), sizeof(ast_expr_t)))
-#define ast_expr_lit_null_init(TOK)  ((ast_expr_t*)           ast_node_init(AST_EXPR_LIT_NULL,  (TOK), sizeof(ast_expr_t)))
+#define ast_expr_lit_int_init(TOK)   ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_INT,   (TOK), sizeof(ast_expr_lit_t)))
+#define ast_expr_lit_flt_init(TOK)   ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_FLT,   (TOK), sizeof(ast_expr_lit_t)))
+#define ast_expr_lit_str_init(TOK)   ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_STR,   (TOK), sizeof(ast_expr_lit_t)))
+#define ast_expr_lit_char_init(TOK)  ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_CHAR,  (TOK), sizeof(ast_expr_lit_t)))
+#define ast_expr_lit_bool_init(TOK)  ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_BOOL,  (TOK), sizeof(ast_expr_lit_t)))
+#define ast_expr_lit_null_init(TOK)  ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_NULL,  (TOK), sizeof(ast_expr_lit_t)))
 #define ast_expr_op_bin_init(TOK)    ((ast_expr_op_bin_t*)    ast_node_init(AST_EXPR_OP,        (TOK), sizeof(ast_expr_op_bin_t)))
 #define ast_expr_op_un_init(TOK)     ((ast_expr_op_un_t*)     ast_node_init(AST_EXPR_OP,        (TOK), sizeof(ast_expr_op_un_t)))
 #define ast_expr_op_call_init(TOK)   ((ast_expr_op_call_t*)   ast_node_init(AST_EXPR_OP,        (TOK), sizeof(ast_expr_op_call_t)))
@@ -495,5 +517,13 @@ size_t ast_size_of(ast_node_t* node);
  * \returns Alignment of type in bytes.
  */
 size_t ast_align_of(ast_node_t* node);
+
+/**
+ * \brief Queries the type descriptor of a node.
+ *  
+ * \param[in] node Node whose type descriptor is to be queried.
+ * \returns Type descriptor of node.
+ */
+typedesc_t* ast_desc_of(ast_node_t* node);
 
 #endif

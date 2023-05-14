@@ -14,7 +14,8 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 add_compile_definitions(
   _CRT_SECURE_NO_WARNINGS
   TAU_DIRECTORY="${CMAKE_CURRENT_LIST_DIR}"
-  TAU_VERSION="${PROJECT_VERSION}")
+  TAU_VERSION="${PROJECT_VERSION}"
+  TAU_DEBUG)
 
 include_directories(./inc)
 include_directories(./src)

@@ -24,7 +24,11 @@
 
 #define min(A, B) ((A) < (B) ? (A) : (B))
 
-#define array_len(ARRAY) (sizeof((ARRAY)) / sizeof(*(ARRAY)))
+#ifdef countof
+# undef countof
+#endif
+
+#define countof(ARRAY) (sizeof((ARRAY)) / sizeof((ARRAY)[0]))
 
 typedef uint64_t hash_t;
 
@@ -44,7 +48,7 @@ static inline hash_t fnv1a_hash(const uint8_t* data, size_t size)
 #define hash(DATA) (fnv1a_hash((DATA), sizeof(*(DATA))))
 #define hash_sized(DATA, SIZE) (fnv1a_hash((DATA), (SIZE)))
 
-#ifdef _DEBUG
+#ifdef TAU_DEBUG
 /** Causes a breakpoint and prompts the user to run a debugger. */
 # define debugbreak() __debugbreak()
 

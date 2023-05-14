@@ -14,8 +14,6 @@
 
 #include "typedefs.h"
 
-#include "location.h"
-
 struct crumb_item_message_s
 {
   const char* msg; // Message format string.

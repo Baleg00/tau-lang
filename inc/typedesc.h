@@ -13,14 +13,14 @@
 #include "typedefs.h"
 
 /** Utility macro which expands to fields that all types must have. */
-#define TYPE_HEADER\
+#define TYPEDESC_HEADER\
   struct\
   {\
     typedesc_kind_t kind; /** Type kind. */\
   }\
 
 /** Utility macro which expands to fields that all declared types must have. */
-#define TYPE_DECL_HEADER\
+#define TYPEDESC_DECL_HEADER\
   struct\
   {\
     ast_decl_t* node; /** Declaration node. */\
@@ -29,55 +29,55 @@
 /** Base type for all types. */
 struct typedesc_s
 {
-  TYPE_HEADER;
+  TYPEDESC_HEADER;
 };
 
 /** Type for mutable types. */
 struct typedesc_mut_s
 {
-  TYPE_HEADER;
+  TYPEDESC_HEADER;
   typedesc_t* base_type; // Underlying type.
 };
 
 /** Type for compile-time types. */
 struct typedesc_const_s
 {
-  TYPE_HEADER;
+  TYPEDESC_HEADER;
   typedesc_t* base_type; // Underlying type.
 };
 
 /** Type for pointer types. */
 struct typedesc_ptr_s
 {
-  TYPE_HEADER;
+  TYPEDESC_HEADER;
   typedesc_t* base_type; // Underlying type.
 };
 
 /** Type for array types. */
 struct typedesc_array_s
 {
-  TYPE_HEADER;
+  TYPEDESC_HEADER;
   typedesc_t* base_type; // Underlying type.
 };
 
 /** Type for reference types. */
 struct typedesc_ref_s
 {
-  TYPE_HEADER;
+  TYPEDESC_HEADER;
   typedesc_t* base_type; // Underlying type.
 };
 
 /** Type for optional types. */
 struct typedesc_opt_s
 {
-  TYPE_HEADER;
+  TYPEDESC_HEADER;
   typedesc_t* base_type; // Underlying type.
 };
 
 /** Type for function types. */
 struct typedesc_fun_s
 {
-  TYPE_HEADER;
+  TYPEDESC_HEADER;
   list_t* param_types; // Parameter types.
   typedesc_t* return_type; // Return type.
 };
@@ -85,7 +85,7 @@ struct typedesc_fun_s
 /** Type for generator types. */
 struct typedesc_gen_s
 {
-  TYPE_HEADER;
+  TYPEDESC_HEADER;
   list_t* param_types; // List of parameter types.
   typedesc_t* yield_type; // Yield type.
 };
@@ -93,40 +93,40 @@ struct typedesc_gen_s
 /** Base type for all declared types. */
 struct typedesc_decl_s
 {
-  TYPE_HEADER;
-  TYPE_DECL_HEADER;
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
 };
 
 /** Type for struct types. */
 struct typedesc_struct_s
 {
-  TYPE_HEADER;
-  TYPE_DECL_HEADER;
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
 };
 
 /** Type for union types. */
 struct typedesc_union_s
 {
-  TYPE_HEADER;
-  TYPE_DECL_HEADER;
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
 };
 
 /** Type for enum types. */
 struct typedesc_enum_s
 {
-  TYPE_HEADER;
-  TYPE_DECL_HEADER;
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
 };
 
 /** Type for module types. */
 struct typedesc_mod_s
 {
-  TYPE_HEADER;
-  TYPE_DECL_HEADER;
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
 };
 
-#undef TYPE_DECL_HEADER
-#undef TYPE_HEADER
+#undef TYPEDESC_DECL_HEADER
+#undef TYPEDESC_HEADER
 
 /**
  * \brief Initializes a new type.
