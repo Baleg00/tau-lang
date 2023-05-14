@@ -10,8 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/** Represents an arena. */
-typedef struct arena_s arena_t;
+#include "typedefs.h"
 
 struct arena_s
 {

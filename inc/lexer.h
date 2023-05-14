@@ -10,16 +10,17 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "typedefs.h"
+
 #include "list.h"
 #include "location.h"
 #include "token.h"
 
-/** Represents a lexical analyzer. */
-typedef struct lexer_s
+struct lexer_s
 {
   location_t* loc; // Current location in source file.
   list_t* toks; // List of processed tokens.
-} lexer_t;
+};
 
 /**
  * \brief Initializes a new lexer.

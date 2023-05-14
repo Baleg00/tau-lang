@@ -9,8 +9,9 @@
 
 #include <stddef.h>
 
-/** Marks a location in a source file. */
-typedef struct location_s
+#include "typedefs.h"
+
+struct location_s
 {
   const char *path; // Path to source file.
   char* src; // Pointer to beginning of source string.
@@ -18,7 +19,7 @@ typedef struct location_s
   size_t row; // Row number in source file.
   size_t col; // Column number in row.
   size_t len; // Character length of marked location.
-} location_t;
+};
 
 /**
  * \brief Initializes a new location.

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef uint16_t opcode_t;
+#include "typedefs.h"
 
 #define OPCODE_NOP ((opcode_t)0x0000)
 #define OPCODE_ADDC ((opcode_t)0x0001)
@@ -173,5 +173,7 @@ typedef uint16_t opcode_t;
 #define OPCODE_D2L ((opcode_t)0x00A5)
 #define OPCODE_D2F ((opcode_t)0x00A6)
 #define OPCODE_HALT ((opcode_t)0xFFFF)
+
+const char* opcode_to_string(opcode_t opcode);
 
 #endif

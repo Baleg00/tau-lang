@@ -11,10 +11,9 @@
 
 #include <stdbool.h>
 
-#include "list.h"
+#include "typedefs.h"
 
-/** Represents a queue. */
-typedef list_t queue_t;
+#include "list.h"
 
 /**
  * \brief Initializes a new queue.

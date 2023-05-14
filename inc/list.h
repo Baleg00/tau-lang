@@ -10,14 +10,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-/** Represents an node in a linked list. */
-typedef struct list_node_s list_node_t;
-
-/** Represents a linked list. */
-typedef struct list_s list_t;
-
-/** Function pointer type to be used by `list_for_each` function. */
-typedef void(*list_for_each_func_t)(void*);
+#include "typedefs.h"
 
 struct list_node_s
 {

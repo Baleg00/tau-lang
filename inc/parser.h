@@ -9,20 +9,18 @@
 
 #include <stdbool.h>
 
+#include "typedefs.h"
+
 #include "list.h"
 #include "token.h"
 #include "ast.h"
 
-/** Represents a syntax analyzer. */
-typedef struct parser_s
+struct parser_s
 {
   ast_node_t* root; // Root node of abstract syntax tree.
   list_t* toks; // List of tokens to be processed.
   list_node_t* cur; // Current token in list.
-} parser_t;
-
-/** Function pointer type to be used when parsing lists. */
-typedef ast_node_t*(*parse_func_t)(parser_t*);
+};
 
 /**
  * \brief Initializes a new parser.

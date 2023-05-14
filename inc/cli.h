@@ -9,28 +9,9 @@
 
 #include <stddef.h>
 
+#include "typedefs.h"
+
 #include "queue.h"
-
-/**Indicates argument type. */
-typedef enum cli_type_e cli_type_t;
-
-/** Represents a command-line option. */
-typedef struct cli_opt_s cli_opt_t;
-
-/** Represents a command-line interface instance. */
-typedef struct cli_s cli_t;
-
-/** Option callback type. */
-typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, void*);
-
-enum cli_type_e
-{
-  CLI_TYPE_INTEGER, // Integer type
-  CLI_TYPE_FLOAT,   // Floating-point type
-  CLI_TYPE_BOOLEAN, // Boolean type
-  CLI_TYPE_STRING,  // String type
-  CLI_TYPE_SINK,    // Absorbs all following arguments
-};
 
 struct cli_opt_s
 {

@@ -11,7 +11,7 @@
 #define SYMTABLE_INITIAL_CAPACITY 16
 #define SYMTABLE_LOAD_FACTOR 0.75
 
-symbol_t* symbol_init(char* id, ast_node_t* node, type_t* type)
+symbol_t* symbol_init(char* id, ast_node_t* node, typedesc_t* type)
 {
   symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
   assert(sym != NULL);

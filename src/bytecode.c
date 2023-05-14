@@ -2,13 +2,17 @@
 
 #include <string.h>
 
+#include "token.h"
+#include "opcode.h"
+#include "ast.h"
+#include "list.h"
 #include "util.h"
 #include "memtrace.h"
 
 #define BYTECODE_INITIAL_CAPACITY ((size_t)(4 * (1 << 10)))
 #define BYTECODE_EXPAND_AMOUNT    ((size_t)(2 * (1 << 10)))
 
-bytecode_label_t* bytecode_label_init(ast_node_t* node, ptrdiff_t offset)
+bytecode_label_t* bytecode_label_init(ast_node_t* node, int64_t offset)
 {
   bytecode_label_t* label = (bytecode_label_t*)malloc(sizeof(bytecode_label_t));
   assert(label != NULL);
@@ -24,22 +28,6 @@ void bytecode_label_free(bytecode_label_t* label)
   free(label);
 }
 
-bytecode_ref_t* bytecode_ref_init(bytecode_label_t* label, ptrdiff_t offset)
-{
-  bytecode_ref_t* ref = (bytecode_ref_t*)malloc(sizeof(bytecode_ref_t));
-  assert(ref != NULL);
-
-  ref->label = label;
-  ref->offset = offset;
-
-  return ref;
-}
-
-void bytecode_ref_free(bytecode_ref_t* ref)
-{
-  free(ref);
-}
-
 bytecode_t* bytecode_init(void)
 {
   bytecode_t* bc = (bytecode_t*)malloc(sizeof(bytecode_t));
@@ -52,7 +40,6 @@ bytecode_t* bytecode_init(void)
   assert(bc->data != NULL);
 
   bc->labels = list_init();
-  bc->refs = list_init();
 
   bc->sp = 0;
 
@@ -61,7 +48,6 @@ bytecode_t* bytecode_init(void)
 
 LIST_FOR_EACH_FUNC_DECL(bytecode_label_free, bytecode_label_t);
 
-LIST_FOR_EACH_FUNC_DECL(bytecode_ref_free, bytecode_ref_t);
 
 void bytecode_free(bytecode_t* bc)
 {
@@ -69,9 +55,6 @@ void bytecode_free(bytecode_t* bc)
 
   list_for_each(bc->labels, LIST_FOR_EACH_FUNC_NAME(bytecode_label_free));
   list_free(bc->labels);
-
-  list_for_each(bc->refs, LIST_FOR_EACH_FUNC_NAME(bytecode_ref_free));
-  list_free(bc->refs);
 
   free(bc);
 }
@@ -106,23 +89,23 @@ void bytecode_emit_bytes(bytecode_t* bc, void* buf, size_t size)
 
 void bytecode_reg_fun(bytecode_t* bc, ast_decl_fun_t* node)
 {
-  bytecode_label_t* label = bytecode_label_init((ast_node_t*)node, (ptrdiff_t)bc->size);
+  bytecode_label_t* label = bytecode_label_init((ast_node_t*)node, (int64_t)bc->size);
   list_push_back(bc->labels, label);
 }
 
 void bytecode_reg_var(bytecode_t* bc, ast_decl_var_t* node)
 {
-  bytecode_label_t* label = bytecode_label_init((ast_node_t*)node, (ptrdiff_t)bc->sp);
+  bytecode_label_t* label = bytecode_label_init((ast_node_t*)node, (int64_t)bc->sp);
   list_push_back(bc->labels, label);
 }
 
-void bytecode_reg_param(bytecode_t* bc, ast_param_t* node, ptrdiff_t offset)
+void bytecode_reg_param(bytecode_t* bc, ast_param_t* node, int64_t offset)
 {
   bytecode_label_t* label = bytecode_label_init((ast_node_t*)node, offset);
   list_push_back(bc->labels, label);
 }
 
-ptrdiff_t bytecode_label_offset(bytecode_t* bc, ast_node_t* node)
+int64_t bytecode_label_offset(bytecode_t* bc, ast_node_t* node)
 {
   LIST_FOR_LOOP(it, bc->labels)
   {
@@ -142,14 +125,25 @@ void bytecode_visit_expr_op_unary(bytecode_t* bc, ast_expr_op_un_t* node)
   switch (node->op_kind)
   {
   case OP_SIZEOF:
-    bytecode_emit_opcode(bc, OPCODE_PUSH8);
-    size_t sizeof_value = ast_size_of(node->param);
-    bytecode_emit_bytes(bc, &sizeof_value, sizeof(size_t));
-    break;
+    {
+      bytecode_emit_opcode(bc, OPCODE_PUSH8);
+      size_t sizeof_value = ast_size_of(node->param);
+      bytecode_emit_bytes(bc, &sizeof_value, sizeof(size_t));
+      break;
+    }
   case OP_ARIT_POS:
     break;
-  case OP_ALIGNOF: // TODO
-  case OP_ARIT_NEG: // TODO
+  case OP_ALIGNOF:
+    {
+      bytecode_emit_opcode(bc, OPCODE_PUSH8);
+      size_t alignof_value = ast_align_of(node->param);
+      bytecode_emit_bytes(bc, &alignof_value, sizeof(size_t));
+      break;
+    }
+  case OP_ARIT_NEG:
+    {
+      
+    }
   case OP_LOGIC_NOT: // TODO
   case OP_BIT_NOT: // TODO
   case OP_IND: // TODO
@@ -219,26 +213,24 @@ void bytecode_visit_expr_op_call(bytecode_t* bc, ast_expr_op_call_t* node)
     bytecode_visit_expr(bc, (ast_expr_t*)list_node_get(it));
 
   bytecode_emit_opcode(bc, OPCODE_INVOKE);
-  ptrdiff_t fun_addr = bytecode_label_offset(bc, node->callee);
-  bytecode_emit_bytes(bc, &fun_addr, sizeof(ptrdiff_t));
+  int64_t fun_addr = bytecode_label_offset(bc, node->callee);
+  bytecode_emit_bytes(bc, &fun_addr, sizeof(int64_t));
 }
 
 void bytecode_visit_expr_op(bytecode_t* bc, ast_expr_op_t* node)
 {
   if (node->op_kind == OP_CALL)
-    return bytecode_visit_expr_op_call(bc, (ast_expr_op_call_t*)node);
+    bytecode_visit_expr_op_call(bc, (ast_expr_op_call_t*)node);
+  else if (op_is_unary(node->op_kind))
+    bytecode_visit_expr_op_unary(bc, (ast_expr_op_un_t*)node);
+  else if (op_is_binary(node->op_kind))
+    bytecode_visit_expr_op_binary(bc, (ast_expr_op_bin_t*)node);
   
   // TODO
   // if (node->op_kind == OP_MEMBER ||
   //     node->op_kind == OP_IND_MEMBER ||
   //     node->op_kind == OP_NULL_SAFE_MEMBER)
   //   return analyzer_visit_expr_op_member(bc, (ast_expr_op_bin_t*)node);
-  
-  if (op_is_unary(node->op_kind))
-    return bytecode_visit_expr_op_unary(bc, (ast_expr_op_un_t*)node);
-  
-  if (op_is_binary(node->op_kind))
-    return bytecode_visit_expr_op_binary(bc, (ast_expr_op_bin_t*)node);
   
   unreachable();
 }
@@ -282,18 +274,18 @@ void bytecode_visit_expr(bytecode_t* bc, ast_expr_t* node)
     break;
   case AST_DECL_VAR:
     bytecode_emit_opcode(bc, OPCODE_LOAD4BP);
-    ptrdiff_t var_offset = bytecode_label_offset(bc, (ast_node_t*)node);
-    bytecode_emit_bytes(bc, &var_offset, sizeof(ptrdiff_t));
+    int64_t var_offset = bytecode_label_offset(bc, (ast_node_t*)node);
+    bytecode_emit_bytes(bc, &var_offset, sizeof(int64_t));
     break;
   case AST_DECL_FUN:
     bytecode_emit_opcode(bc, OPCODE_INVOKE);
-    ptrdiff_t fun_offset = bytecode_label_offset(bc, (ast_node_t*)node);
-    bytecode_emit_bytes(bc, &fun_offset, sizeof(ptrdiff_t));
+    int64_t fun_offset = bytecode_label_offset(bc, (ast_node_t*)node);
+    bytecode_emit_bytes(bc, &fun_offset, sizeof(int64_t));
     break;
   case AST_PARAM:
     bytecode_emit_opcode(bc, OPCODE_PUSH8);
-    ptrdiff_t param_offset = bytecode_label_offset(bc, (ast_node_t*)node);
-    bytecode_emit_bytes(bc, &param_offset, sizeof(ptrdiff_t));
+    int64_t param_offset = bytecode_label_offset(bc, (ast_node_t*)node);
+    bytecode_emit_bytes(bc, &param_offset, sizeof(int64_t));
     bytecode_emit_opcode(bc, OPCODE_LOAD4BP); // TODO
     break;
   case AST_DECL_GEN: // TODO
@@ -385,7 +377,7 @@ void bytecode_visit_decl_fun(bytecode_t* bc, ast_decl_fun_t* node)
 
   if (node->params != NULL)
   {
-    ptrdiff_t param_offset = 0;
+    int64_t param_offset = 0;
 
     LIST_FOR_LOOP(it, node->params)
       param_offset += ast_size_of((ast_node_t*)list_node_get(it));
@@ -439,4 +431,54 @@ void bytecode_visit_prog(bytecode_t* bc, ast_prog_t* node)
     bytecode_visit_decl(bc, (ast_decl_t*)list_node_get(it));
 
   bytecode_emit_opcode(bc, OPCODE_HALT);
+}
+
+void bytecode_dump(FILE* stream, bytecode_t* bc)
+{
+  uint8_t* ptr = bc->data;
+
+  while (ptr - bc->data < bc->size)
+  {
+    opcode_t opcode;
+    memcpy(&opcode, ptr, sizeof(opcode_t));
+    ptr += sizeof(opcode_t);
+
+    fprintf(stream, opcode_to_string(opcode));
+
+    switch (opcode)
+    {
+    case OPCODE_PUSH:
+      uint8_t u8_value;
+      memcpy(&u8_value, ptr, sizeof(uint8_t));
+      fprintf(stream, " %02hhX", u8_value);
+      ptr += sizeof(uint8_t);
+      break;
+    case OPCODE_PUSH2:
+      uint16_t u16_value;
+      memcpy(&u16_value, ptr, sizeof(uint16_t));
+      fprintf(stream, " %04hX", u16_value);
+      ptr += sizeof(uint16_t);
+      break;
+    case OPCODE_PUSH4:
+      uint32_t u32_value;
+      memcpy(&u32_value, ptr, sizeof(uint32_t));
+      fprintf(stream, " %08X", u32_value);
+      ptr += sizeof(uint32_t);
+      break;
+    case OPCODE_PUSH8:
+      uint64_t u64_value;
+      memcpy(&u64_value, ptr, sizeof(uint64_t));
+      fprintf(stream, " %016llX", u64_value);
+      ptr += sizeof(uint64_t);
+      break;
+    case OPCODE_INVOKE:
+      uint64_t addr_value;
+      memcpy(&addr_value, ptr, sizeof(uint64_t));
+      fprintf(stream, " %016llX", addr_value);
+      ptr += sizeof(uint64_t);
+      break;
+    }
+
+    fputc('\n', stream);
+  }
 }

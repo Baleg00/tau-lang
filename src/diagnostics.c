@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#include "location.h"
+#include "typedesc.h"
 #include "util.h"
 #include "log.h"
 #include "crumb.h"
@@ -309,7 +311,7 @@ void report_error_expected_ptr_to_owner(location_t* loc)
   exit(EXIT_FAILURE);
 }
 
-void report_error_type_mismatch(location_t* loc, type_t* expected, type_t* actual)
+void report_error_type_mismatch(location_t* loc, typedesc_t* expected, typedesc_t* actual)
 {
   crumb_error(1, crumb_snippet(loc, "Type mismatch.", NULL, "", NULL));
   debugbreak();

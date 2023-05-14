@@ -27,6 +27,7 @@ static struct {
     bool emit_tokens;
     bool emit_ast;
     bool emit_ast_flat;
+    bool emit_tasm;
   } flags;
 
   struct {
@@ -44,6 +45,8 @@ void compiler_state_init(void)
   compiler_state.flags.verbose = false;
   compiler_state.flags.emit_tokens = false;
   compiler_state.flags.emit_ast = false;
+  compiler_state.flags.emit_ast_flat = false;
+  compiler_state.flags.emit_tasm = false;
 
   compiler_state.params.log_level = LOG_LEVEL_INFO;
 
@@ -71,6 +74,7 @@ int main(int argc, const char *argv[])
     cli_opt_flag(cli_names("--dump-toks"), 1, "Dump tokens into json file.", &compiler_state.flags.emit_tokens),
     cli_opt_flag(cli_names("--dump-ast"), 1, "Dump AST into json file.", &compiler_state.flags.emit_ast),
     cli_opt_flag(cli_names("--dump-ast-flat"), 1, "Dump flat AST into json file.", &compiler_state.flags.emit_ast_flat),
+    cli_opt_flag(cli_names("--dump-tasm"), 1, "Dump assembly into tasm file.", &compiler_state.flags.emit_tasm),
     cli_opt_int(cli_names("--log-level"), 1, 'N', 1, &compiler_state.params.log_level, NULL, NULL, "Set log level.", NULL, NULL),
 
     cli_opt_sink(MAX_INPUT_FILES, compiler_state.input_files.paths, &compiler_state.input_files.count, NULL, NULL)
@@ -181,6 +185,23 @@ int main(int argc, const char *argv[])
 
     bytecode_t* bc = bytecode_init();
     time_it(bytecode, bytecode_visit_prog(bc, (ast_prog_t*)par->root));
+
+    if (compiler_state.flags.emit_tasm)
+    {
+      char tasm_path_buf[255];
+      strcpy(tasm_path_buf, path);
+      strcat(tasm_path_buf, ".tasm");
+
+      FILE* tasm_file = fopen(tasm_path_buf, "w");
+      assert(tasm_file != NULL);
+      bytecode_dump(tasm_file, bc);
+      fclose(tasm_file);
+
+      char tasm_name_buf[255];
+      file_name(tasm_path_buf, tasm_name_buf, sizeof(tasm_name_buf));
+
+      log_trace("main", "(%s) tasm dump: %s", file_name_buf, tasm_name_buf);
+    }
 
     log_trace("main", "(%s) Cleanup.", file_name_buf);
 

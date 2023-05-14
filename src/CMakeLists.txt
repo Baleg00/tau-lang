@@ -10,7 +10,8 @@ add_executable(${PROJECT_NAME}
   parser.c
   symtable.c
   analzyer.c
-  types.c
+  typedesc.c
+  opcode.c
   bytecode.c
 
   memtrace.c
