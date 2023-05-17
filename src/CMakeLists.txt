@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
   typedesc.c
   opcode.c
   bytecode.c
+  compiler.c
 
   memtrace.c
 

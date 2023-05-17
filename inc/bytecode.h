@@ -14,8 +14,8 @@ typedef struct bytecode_label_s
 
 typedef struct bytecode_s
 {
-  size_t capacity;  
-  size_t size;  
+  size_t capacity;
+  size_t size;
   uint8_t* data;
 
   list_t* labels;

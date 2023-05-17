@@ -56,9 +56,21 @@ size_t arena_capacity(arena_t* arena);
  * 
  * \param[in] arena Arena to be used.
  * \param[in] size Number of bytes to be allocated.
- * \returns Pointer to newly allocated memory or null pointer if allocation size
- * exceeds capacity.
+ * \returns Pointer to newly allocated memory or null pointer if allocation
+ * failed.
 */
-void* arena_alloc(arena_t* arena, size_t size);
+void* arena_malloc(arena_t* arena, size_t size);
+
+/**
+ * \brief Allocates memory for count object of size using an arena and
+ * initializes all bytes to zero.
+ * 
+ * \param[in] arena Arena to be used.
+ * \param[in] count Number of objects to be allocated.
+ * \param[in] size Size of an object in bytes.
+ * \returns Pointer to newly allocated memory or null pointer if allocation 
+ * failed.
+*/
+void* arena_calloc(arena_t* arena, size_t count, size_t size);
 
 #endif

@@ -1,7 +1,10 @@
 #include "arena.h"
 
+#include <string.h>
+
 #include "util.h"
 #include "log.h"
+
 #include "memtrace.h"
 
 #define ARENA_DEFAULT_CAPACITY (8 * (1 << 10))
@@ -83,7 +86,7 @@ size_t arena_capacity(arena_t* arena)
   return (size_t)((uintptr_t)arena->end - (uintptr_t)arena->begin);
 }
 
-void* arena_alloc(arena_t* arena, size_t size)
+void* arena_malloc(arena_t* arena, size_t size)
 {
   size_t aligned_size = arena_round(size);
 
@@ -109,6 +112,18 @@ void* arena_alloc(arena_t* arena, size_t size)
 
   void* ptr = arena->ptr;
   arena->ptr = (void*)((uintptr_t)arena->ptr + aligned_size);
+
+  return ptr;
+}
+
+void* arena_calloc(arena_t* arena, size_t count, size_t size)
+{
+  void* ptr = arena_malloc(arena, count * size);
+
+  if (ptr == NULL)
+    return NULL;
+
+  memset(ptr, 0, count * size);
 
   return ptr;
 }

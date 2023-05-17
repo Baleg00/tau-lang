@@ -6,10 +6,14 @@
 
 #include "list.h"
 
+#include "location.h"
 #include "token.h"
 #include "ast.h"
+#include "op.h"
 #include "opcode.h"
+#include "typedesc.h"
 
+#include "arena.h"
 #include "memtrace.h"
 
 #define BYTECODE_INITIAL_CAPACITY ((size_t)(4 * (1 << 10)))
@@ -28,7 +32,6 @@ bytecode_label_t* bytecode_label_init(ast_node_t* node, int64_t offset)
 
 void bytecode_label_free(bytecode_label_t* label)
 {
-  free(label);
 }
 
 bytecode_t* bytecode_init(void)
@@ -51,15 +54,12 @@ bytecode_t* bytecode_init(void)
 
 LIST_FOR_EACH_FUNC_DECL(bytecode_label_free, bytecode_label_t);
 
-
 void bytecode_free(bytecode_t* bc)
 {
   free(bc->data);
 
   list_for_each(bc->labels, LIST_FOR_EACH_FUNC_NAME(bytecode_label_free));
   list_free(bc->labels);
-
-  free(bc);
 }
 
 void bytecode_expand(bytecode_t* bc)
@@ -130,7 +130,7 @@ void bytecode_visit_expr_op_unary(bytecode_t* bc, ast_expr_op_un_t* node)
   case OP_SIZEOF:
     {
       bytecode_emit_opcode(bc, OPCODE_PUSH8);
-      size_t sizeof_value = ast_size_of(node->param);
+      size_t sizeof_value = ast_desc_of(node->param)->size;
       bytecode_emit_bytes(bc, &sizeof_value, sizeof(size_t));
       break;
     }
@@ -139,7 +139,7 @@ void bytecode_visit_expr_op_unary(bytecode_t* bc, ast_expr_op_un_t* node)
   case OP_ALIGNOF:
     {
       bytecode_emit_opcode(bc, OPCODE_PUSH8);
-      size_t alignof_value = ast_align_of(node->param);
+      size_t alignof_value = ast_desc_of(node->param)->align;
       bytecode_emit_bytes(bc, &alignof_value, sizeof(size_t));
       break;
     }
@@ -244,33 +244,8 @@ void bytecode_visit_expr(bytecode_t* bc, ast_expr_t* node)
   {
   case AST_EXPR_LIT_INT:
     bytecode_emit_opcode(bc, OPCODE_PUSH4);
-    int32_t int_value = (int32_t)((token_lit_int_t*)node->tok)->value;
+    int32_t int_value = (int32_t)strtoll(node->tok->loc->cur, NULL, 10); // TODO
     bytecode_emit_bytes(bc, &int_value, sizeof(int32_t));
-    break;
-  case AST_EXPR_LIT_FLT:
-    bytecode_emit_opcode(bc, OPCODE_PUSH4);
-    float flt_value = (float)((token_lit_flt_t*)node->tok)->value;
-    bytecode_emit_bytes(bc, &flt_value, sizeof(float));
-    break;
-  case AST_EXPR_LIT_STR:
-    bytecode_emit_opcode(bc, OPCODE_PUSH8);
-    char* str_value = ((token_lit_str_t*)node->tok)->value;
-    bytecode_emit_bytes(bc, &str_value, sizeof(char*));
-    break;
-  case AST_EXPR_LIT_CHAR:
-    bytecode_emit_opcode(bc, OPCODE_PUSH);
-    char char_value = ((token_lit_char_t*)node->tok)->value;
-    bytecode_emit_bytes(bc, &char_value, sizeof(char));
-    break;
-  case AST_EXPR_LIT_BOOL:
-    bytecode_emit_opcode(bc, OPCODE_PUSH);
-    bool bool_value = ((token_lit_bool_t*)node->tok)->value;
-    bytecode_emit_bytes(bc, &bool_value, sizeof(bool));
-    break;
-  case AST_EXPR_LIT_NULL:
-    bytecode_emit_opcode(bc, OPCODE_PUSH8);
-    void* null_value = NULL;
-    bytecode_emit_bytes(bc, &null_value, sizeof(void*));
     break;
   case AST_EXPR_OP:
     bytecode_visit_expr_op(bc, (ast_expr_op_t*)node);
@@ -291,7 +266,12 @@ void bytecode_visit_expr(bytecode_t* bc, ast_expr_t* node)
     bytecode_emit_bytes(bc, &param_offset, sizeof(int64_t));
     bytecode_emit_opcode(bc, OPCODE_LOAD4BP); // TODO
     break;
-  case AST_DECL_GEN: // TODO
+  case AST_EXPR_LIT_FLT: // TODO
+  case AST_EXPR_LIT_STR:
+  case AST_EXPR_LIT_CHAR:
+  case AST_EXPR_LIT_BOOL:
+  case AST_EXPR_LIT_NULL:
+  case AST_DECL_GEN:
   case AST_PARAM_DEFAULT:
   case AST_PARAM_VARIADIC:
   default: unreachable();
@@ -368,7 +348,7 @@ void bytecode_visit_stmt(bytecode_t* bc, ast_stmt_t* node)
 void bytecode_visit_decl_var(bytecode_t* bc, ast_decl_var_t* node)
 {
   bytecode_reg_var(bc, node);
-  bc->sp += ast_size_of((ast_node_t*)node);
+  bc->sp += ast_desc_of((ast_node_t*)node)->size;
 
   if (node->init != NULL)
     bytecode_visit_expr(bc, (ast_expr_t*)node->init);
@@ -383,12 +363,12 @@ void bytecode_visit_decl_fun(bytecode_t* bc, ast_decl_fun_t* node)
     int64_t param_offset = 0;
 
     LIST_FOR_LOOP(it, node->params)
-      param_offset += ast_size_of((ast_node_t*)list_node_get(it));
+      param_offset += ast_desc_of((ast_node_t*)list_node_get(it))->size;
 
     LIST_FOR_LOOP(it, node->params)
     {
       bytecode_reg_param(bc, (ast_param_t*)list_node_get(it), param_offset);
-      param_offset -= ast_size_of((ast_node_t*)list_node_get(it));
+      param_offset -= ast_desc_of((ast_node_t*)list_node_get(it))->size;
     }
   }
 

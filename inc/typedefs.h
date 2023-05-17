@@ -54,7 +54,7 @@ typedef struct cli_opt_s cli_opt_t;
 typedef struct cli_s cli_t;
 
 /** Option callback type. */
-typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, void*);
+typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, const char*, void*);
 
 #pragma endregion "Command-line Interface"
 
@@ -683,5 +683,12 @@ typedef struct analyzer_s analyzer_t;
 typedef unsigned short opcode_t;
 
 #pragma endregion "Opcode"
+
+#pragma region "Compiler"
+
+/** Represents a compiler instance. */
+typedef struct compiler_s compiler_t;
+
+#pragma endregion "Compiler"
 
 #endif

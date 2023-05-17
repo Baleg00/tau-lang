@@ -13,12 +13,13 @@
 #define SYMTABLE_INITIAL_CAPACITY 16
 #define SYMTABLE_LOAD_FACTOR 0.75
 
-symbol_t* symbol_init(char* id, ast_node_t* node)
+symbol_t* symbol_init(const char* id, size_t len, ast_node_t* node)
 {
   symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
   assert(sym != NULL);
   sym->scope = NULL;
   sym->id = id;
+  sym->len = len;
   sym->node = node;
   return sym;
 }
@@ -68,7 +69,7 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
   if (((double)table->size + 1) / (double)table->capacity >= SYMTABLE_LOAD_FACTOR)
     symtable_expand(table);
 
-  hash_t h = hash_sized(new_sym->id, strlen(new_sym->id));
+  hash_t h = hash_sized(new_sym->id, new_sym->len);
   size_t idx = h % table->capacity;
 
   if (table->buckets[idx] == NULL)
@@ -82,7 +83,7 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
   symbol_t* last = NULL;
 
   for (symbol_t* sym = table->buckets[idx]; sym != NULL; last = sym, sym = sym->next)
-    if (strcmp(sym->id, new_sym->id) == 0)
+    if (sym->len == new_sym->len && strncmp(sym->id, new_sym->id, sym->len) == 0)
       return sym;
 
   ++table->size;
@@ -91,19 +92,19 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
   return NULL;
 }
 
-symbol_t* symtable_lookup(symtable_t* table, char* id)
+symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len)
 {
-  hash_t h = hash_sized(id, strlen(id));
+  hash_t h = hash_sized(id, len);
   size_t idx = h % table->capacity;
 
   for (symbol_t* sym = table->buckets[idx]; sym != NULL; sym = sym->next)
-    if (strcmp(sym->id, id) == 0)
+    if (sym->len == len && strncmp(sym->id, id, sym->len) == 0)
       return sym;
 
   if (table->parent == NULL)
     return NULL;
 
-  return symtable_lookup(table->parent, id);
+  return symtable_lookup(table->parent, id, len);
 }
 
 void symtable_expand(symtable_t* table)

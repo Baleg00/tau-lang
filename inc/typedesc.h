@@ -9,14 +9,20 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "typedefs.h"
+
+/** Platform specific byte size of a pointer. */
+#define TYPEDESC_PTR_SIZE sizeof(void*)
 
 /** Utility macro which expands to fields that all types must have. */
 #define TYPEDESC_HEADER\
   struct\
   {\
     typedesc_kind_t kind; /** Type kind. */\
+    size_t size; /** Byte size of type. */\
+    size_t align; /** Memory alignment of type. */\
   }\
 
 /** Utility macro which expands to fields that all declared types must have. */
@@ -102,6 +108,7 @@ struct typedesc_struct_s
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
+  list_t* member_types; // List of member types.
 };
 
 /** Type for union types. */
@@ -109,6 +116,7 @@ struct typedesc_union_s
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
+  list_t* member_types; // List of member types.
 };
 
 /** Type for enum types. */
@@ -123,6 +131,7 @@ struct typedesc_mod_s
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
+  list_t* member_types; // List of member types.
 };
 
 #undef TYPEDESC_DECL_HEADER
@@ -148,34 +157,34 @@ typedesc_t* typedesc_init(typedesc_kind_t kind, size_t size);
 */
 typedesc_t* typedesc_builtin(typedesc_kind_t kind);
 
-#define typedesc_mut_init()      ((typedesc_mut_t*)   typedesc_init(TYPEDESC_MUT,    sizeof(typedesc_mut_t)))
-#define typedesc_const_init()    ((typedesc_const_t*) typedesc_init(TYPEDESC_CONST,  sizeof(typedesc_const_t)))
-#define typedesc_ptr_init()      ((typedesc_ptr_t*)   typedesc_init(TYPEDESC_PTR,    sizeof(typedesc_ptr_t)))
-#define typedesc_array_init()    ((typedesc_array_t*) typedesc_init(TYPEDESC_ARRAY,  sizeof(typedesc_array_t)))
-#define typedesc_ref_init()      ((typedesc_ref_t*)   typedesc_init(TYPEDESC_REF,    sizeof(typedesc_ref_t)))
-#define typedesc_opt_init()      ((typedesc_opt_t*)   typedesc_init(TYPEDESC_OPT,    sizeof(typedesc_opt_t)))
-#define typedesc_fun_init()      ((typedesc_fun_t*)   typedesc_init(TYPEDESC_FUN,    sizeof(typedesc_fun_t)))
-#define typedesc_gen_init()      ((typedesc_gen_t*)   typedesc_init(TYPEDESC_GEN,    sizeof(typedesc_gen_t)))
-#define typedesc_type_init()     ((typedesc_t*)       typedesc_init(TYPEDESC_TYPE,   sizeof(typedesc_t)))
-#define typedesc_i8_init()       ((typedesc_t*)       typedesc_init(TYPEDESC_I8,     sizeof(typedesc_t)))
-#define typedesc_i16_init()      ((typedesc_t*)       typedesc_init(TYPEDESC_I16,    sizeof(typedesc_t)))
-#define typedesc_i32_init()      ((typedesc_t*)       typedesc_init(TYPEDESC_I32,    sizeof(typedesc_t)))
-#define typedesc_i64_init()      ((typedesc_t*)       typedesc_init(TYPEDESC_I64,    sizeof(typedesc_t)))
-#define typedesc_isize_init()    ((typedesc_t*)       typedesc_init(TYPEDESC_ISIZE,  sizeof(typedesc_t)))
-#define typedesc_u8_init()       ((typedesc_t*)       typedesc_init(TYPEDESC_U8,     sizeof(typedesc_t)))
-#define typedesc_u16_init()      ((typedesc_t*)       typedesc_init(TYPEDESC_U16,    sizeof(typedesc_t)))
-#define typedesc_u32_init()      ((typedesc_t*)       typedesc_init(TYPEDESC_U32,    sizeof(typedesc_t)))
-#define typedesc_u64_init()      ((typedesc_t*)       typedesc_init(TYPEDESC_U64,    sizeof(typedesc_t)))
-#define typedesc_usize_init()    ((typedesc_t*)       typedesc_init(TYPEDESC_USIZE,  sizeof(typedesc_t)))
-#define typedesc_f32_init()      ((typedesc_t*)       typedesc_init(TYPEDESC_F32,    sizeof(typedesc_t)))
-#define typedesc_f64_init()      ((typedesc_t*)       typedesc_init(TYPEDESC_F64,    sizeof(typedesc_t)))
-#define typedesc_bool_init()     ((typedesc_t*)       typedesc_init(TYPEDESC_BOOL,   sizeof(typedesc_t)))
-#define typedesc_unit_init()     ((typedesc_t*)       typedesc_init(TYPEDESC_UNIT,   sizeof(typedesc_t)))
-#define typedesc_null_init()     ((typedesc_t*)       typedesc_init(TYPEDESC_NULL,   sizeof(typedesc_t)))
-#define typedesc_struct_init()   ((typedesc_struct_t*)typedesc_init(TYPEDESC_STRUCT, sizeof(typedesc_struct_t)))
-#define typedesc_union_init()    ((typedesc_union_t*) typedesc_init(TYPEDESC_UNION,  sizeof(typedesc_union_t)))
-#define typedesc_enum_init()     ((typedesc_enum_t*)  typedesc_init(TYPEDESC_ENUM,   sizeof(typedesc_enum_t)))
-#define typedesc_mod_init()      ((typedesc_mod_t*)   typedesc_init(TYPEDESC_MOD,    sizeof(typedesc_mod_t)))
+#define typedesc_mut_init()      ((typedesc_mut_t*)    typedesc_init(TYPEDESC_MUT,    sizeof(typedesc_mut_t)))
+#define typedesc_const_init()    ((typedesc_const_t*)  typedesc_init(TYPEDESC_CONST,  sizeof(typedesc_const_t)))
+#define typedesc_ptr_init()      ((typedesc_ptr_t*)    typedesc_init(TYPEDESC_PTR,    sizeof(typedesc_ptr_t)))
+#define typedesc_array_init()    ((typedesc_array_t*)  typedesc_init(TYPEDESC_ARRAY,  sizeof(typedesc_array_t)))
+#define typedesc_ref_init()      ((typedesc_ref_t*)    typedesc_init(TYPEDESC_REF,    sizeof(typedesc_ref_t)))
+#define typedesc_opt_init()      ((typedesc_opt_t*)    typedesc_init(TYPEDESC_OPT,    sizeof(typedesc_opt_t)))
+#define typedesc_fun_init()      ((typedesc_fun_t*)    typedesc_init(TYPEDESC_FUN,    sizeof(typedesc_fun_t)))
+#define typedesc_gen_init()      ((typedesc_gen_t*)    typedesc_init(TYPEDESC_GEN,    sizeof(typedesc_gen_t)))
+#define typedesc_type_init()     (typedesc_builtin(TYPEDESC_TYPE))
+#define typedesc_i8_init()       (typedesc_builtin(TYPEDESC_I8))
+#define typedesc_i16_init()      (typedesc_builtin(TYPEDESC_I16))
+#define typedesc_i32_init()      (typedesc_builtin(TYPEDESC_I32))
+#define typedesc_i64_init()      (typedesc_builtin(TYPEDESC_I64))
+#define typedesc_isize_init()    (typedesc_builtin(TYPEDESC_ISIZE))
+#define typedesc_u8_init()       (typedesc_builtin(TYPEDESC_U8))
+#define typedesc_u16_init()      (typedesc_builtin(TYPEDESC_U16))
+#define typedesc_u32_init()      (typedesc_builtin(TYPEDESC_U32))
+#define typedesc_u64_init()      (typedesc_builtin(TYPEDESC_U64))
+#define typedesc_usize_init()    (typedesc_builtin(TYPEDESC_USIZE))
+#define typedesc_f32_init()      (typedesc_builtin(TYPEDESC_F32))
+#define typedesc_f64_init()      (typedesc_builtin(TYPEDESC_F64))
+#define typedesc_bool_init()     (typedesc_builtin(TYPEDESC_BOOL))
+#define typedesc_unit_init()     (typedesc_builtin(TYPEDESC_UNIT))
+#define typedesc_null_init()     (typedesc_builtin(TYPEDESC_NULL))
+#define typedesc_struct_init()   ((typedesc_struct_t*) typedesc_init(TYPEDESC_STRUCT, sizeof(typedesc_struct_t)))
+#define typedesc_union_init()    ((typedesc_union_t*)  typedesc_init(TYPEDESC_UNION,  sizeof(typedesc_union_t)))
+#define typedesc_enum_init()     ((typedesc_enum_t*)   typedesc_init(TYPEDESC_ENUM,   sizeof(typedesc_enum_t)))
+#define typedesc_mod_init()      ((typedesc_mod_t*)    typedesc_init(TYPEDESC_MOD,    sizeof(typedesc_mod_t)))
 
 /**
  * \brief Destroys a type.
@@ -307,14 +316,6 @@ typedesc_t* typedesc_remove_ref(typedesc_t* type);
  * \returns Promoted type.
 */
 typedesc_t* typedesc_promote(typedesc_t* lhs, typedesc_t* rhs);
-
-/**
- * \brief Returns the type of an AST node.
- * 
- * \param[in] node Node whose type is to be created.
- * \returns Type of AST node.
-*/
-typedesc_t* typedesc_of(ast_node_t* node);
 
 /**
  * \brief Prints a human-readable representation of a type into a stream.

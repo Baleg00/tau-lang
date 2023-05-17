@@ -22,6 +22,13 @@
     token_t* tok; /** First token in this node. */\
   }
 
+/** Utility macro which expands to fields that all type nodes must have. */
+#define AST_TYPE_HEADER\
+  struct\
+  {\
+    typedesc_t* desc; /** Type descriptor. */\
+  }
+
 /** Utility macro which expands to fields that all expression nodes must have. */
 #define AST_EXPR_HEADER\
   struct\
@@ -66,41 +73,48 @@ struct ast_id_s
 struct ast_type_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
 };
 
 struct ast_type_mut_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   ast_node_t* base_type; // Underlying type.
 };
 
 struct ast_type_const_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   ast_node_t* base_type; // Underlying type.
 };
 
 struct ast_type_ptr_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   ast_node_t* base_type; // Pointed type.
 };
 
 struct ast_type_ref_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   ast_node_t* base_type; // Referenced type.
 };
 
 struct ast_type_opt_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   ast_node_t* base_type; // Underlying type.
 };
 
 struct ast_type_array_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   ast_node_t* base_type; // Contained type.
   ast_node_t* size; // Size of array or null if not specified.
 };
@@ -108,6 +122,7 @@ struct ast_type_array_s
 struct ast_type_fun_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   list_t* params; // List of function parameters.
   ast_node_t* return_type; // Return type.
 };
@@ -115,6 +130,7 @@ struct ast_type_fun_s
 struct ast_type_gen_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   list_t* params; // List of generator parameters.
   ast_node_t* yield_type; // Yield type.
 };
@@ -122,6 +138,7 @@ struct ast_type_gen_s
 struct ast_type_member_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   ast_node_t* owner; // Owner node.
   ast_node_t* member; // Member node.
 };
@@ -501,22 +518,6 @@ bool ast_is_decl(ast_node_t* node);
  * \returns True if node is a parameter, false otherwise.
 */
 bool ast_is_param(ast_node_t* node);
-
-/**
- * \brief Determines the size of a type in bytes.
- * 
- * \param[in] node Type node whose size is to be determined.
- * \returns Size of type in bytes.
- */
-size_t ast_size_of(ast_node_t* node);
-
-/**
- * \brief Determines the alignment of a type in bytes.
- * 
- * \param[in] node Type node whose alignment is to be determined.
- * \returns Alignment of type in bytes.
- */
-size_t ast_align_of(ast_node_t* node);
 
 /**
  * \brief Queries the type descriptor of a node.

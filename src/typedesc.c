@@ -13,49 +13,53 @@
 
 typedesc_t* typedesc_init(typedesc_kind_t kind, size_t size)
 {
-  typedesc_t* type = (typedesc_t*)malloc(size);
-  assert(type != NULL);
-  type->kind = kind;
-  return type;
+  typedesc_t* desc = (typedesc_t*)calloc(1, size);
+  assert(desc != NULL);
+
+  desc->kind = kind;
+  desc->size = 0;
+  desc->align = 0;
+  
+  return desc;
 }
 
 typedesc_t* typedesc_builtin(typedesc_kind_t kind)
 {
-  static typedesc_t typedesc_type  = { .kind = TYPEDESC_TYPE  };
-  static typedesc_t typedesc_i8    = { .kind = TYPEDESC_I8    };
-  static typedesc_t typedesc_i16   = { .kind = TYPEDESC_I16   };
-  static typedesc_t typedesc_i32   = { .kind = TYPEDESC_I32   };
-  static typedesc_t typedesc_i64   = { .kind = TYPEDESC_I64   };
-  static typedesc_t typedesc_isize = { .kind = TYPEDESC_ISIZE };
-  static typedesc_t typedesc_u8    = { .kind = TYPEDESC_U8    };
-  static typedesc_t typedesc_u16   = { .kind = TYPEDESC_U16   };
-  static typedesc_t typedesc_u32   = { .kind = TYPEDESC_U32   };
-  static typedesc_t typedesc_u64   = { .kind = TYPEDESC_U64   };
-  static typedesc_t typedesc_usize = { .kind = TYPEDESC_USIZE };
-  static typedesc_t typedesc_f32   = { .kind = TYPEDESC_F32   };
-  static typedesc_t typedesc_f64   = { .kind = TYPEDESC_F64   };
-  static typedesc_t typedesc_bool  = { .kind = TYPEDESC_BOOL  };
-  static typedesc_t typedesc_unit  = { .kind = TYPEDESC_UNIT  };
-  static typedesc_t typedesc_null  = { .kind = TYPEDESC_NULL  };
+  static typedesc_t desc_type  = { .kind = TYPEDESC_TYPE,  .size = 0, .align = 0 };
+  static typedesc_t desc_i8    = { .kind = TYPEDESC_I8,    .size = 1, .align = 1 };
+  static typedesc_t desc_i16   = { .kind = TYPEDESC_I16,   .size = 2, .align = 2 };
+  static typedesc_t desc_i32   = { .kind = TYPEDESC_I32,   .size = 4, .align = 4 };
+  static typedesc_t desc_i64   = { .kind = TYPEDESC_I64,   .size = 8, .align = 8 };
+  static typedesc_t desc_isize = { .kind = TYPEDESC_ISIZE, .size = 8, .align = 8 };
+  static typedesc_t desc_u8    = { .kind = TYPEDESC_U8,    .size = 1, .align = 1 };
+  static typedesc_t desc_u16   = { .kind = TYPEDESC_U16,   .size = 2, .align = 2 };
+  static typedesc_t desc_u32   = { .kind = TYPEDESC_U32,   .size = 4, .align = 4 };
+  static typedesc_t desc_u64   = { .kind = TYPEDESC_U64,   .size = 8, .align = 8 };
+  static typedesc_t desc_usize = { .kind = TYPEDESC_USIZE, .size = 8, .align = 8 };
+  static typedesc_t desc_f32   = { .kind = TYPEDESC_F32,   .size = 4, .align = 4 };
+  static typedesc_t desc_f64   = { .kind = TYPEDESC_F64,   .size = 8, .align = 8 };
+  static typedesc_t desc_bool  = { .kind = TYPEDESC_BOOL,  .size = 1, .align = 1 };
+  static typedesc_t desc_unit  = { .kind = TYPEDESC_UNIT,  .size = 0, .align = 0 };
+  static typedesc_t desc_null  = { .kind = TYPEDESC_NULL,  .size = 0, .align = 0 };
 
   switch (kind)
   {
-  case TYPEDESC_TYPE:  return &typedesc_type;
-  case TYPEDESC_I8:    return &typedesc_i8;
-  case TYPEDESC_I16:   return &typedesc_i16;
-  case TYPEDESC_I32:   return &typedesc_i32;
-  case TYPEDESC_I64:   return &typedesc_i64;
-  case TYPEDESC_ISIZE: return &typedesc_isize;
-  case TYPEDESC_U8:    return &typedesc_u8;
-  case TYPEDESC_U16:   return &typedesc_u16;
-  case TYPEDESC_U32:   return &typedesc_u32;
-  case TYPEDESC_U64:   return &typedesc_u64;
-  case TYPEDESC_USIZE: return &typedesc_usize;
-  case TYPEDESC_F32:   return &typedesc_f32;
-  case TYPEDESC_F64:   return &typedesc_f64;
-  case TYPEDESC_BOOL:  return &typedesc_bool;
-  case TYPEDESC_UNIT:  return &typedesc_unit;
-  case TYPEDESC_NULL:  return &typedesc_null;
+  case TYPEDESC_TYPE:  return &desc_type;
+  case TYPEDESC_I8:    return &desc_i8;
+  case TYPEDESC_I16:   return &desc_i16;
+  case TYPEDESC_I32:   return &desc_i32;
+  case TYPEDESC_I64:   return &desc_i64;
+  case TYPEDESC_ISIZE: return &desc_isize;
+  case TYPEDESC_U8:    return &desc_u8;
+  case TYPEDESC_U16:   return &desc_u16;
+  case TYPEDESC_U32:   return &desc_u32;
+  case TYPEDESC_U64:   return &desc_u64;
+  case TYPEDESC_USIZE: return &desc_usize;
+  case TYPEDESC_F32:   return &desc_f32;
+  case TYPEDESC_F64:   return &desc_f64;
+  case TYPEDESC_BOOL:  return &desc_bool;
+  case TYPEDESC_UNIT:  return &desc_unit;
+  case TYPEDESC_NULL:  return &desc_null;
   default: unreachable();
   }
 
@@ -125,9 +129,27 @@ void typedesc_free(typedesc_t* type)
   case TYPEDESC_NULL:
     return;
   case TYPEDESC_STRUCT:
+    if (((typedesc_struct_t*)type)->member_types != NULL)
+    {
+      list_for_each(((typedesc_struct_t*)type)->member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+      list_free(((typedesc_struct_t*)type)->member_types);
+    }
+    break;
   case TYPEDESC_UNION:
+    if (((typedesc_union_t*)type)->member_types != NULL)
+    {
+      list_for_each(((typedesc_union_t*)type)->member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+      list_free(((typedesc_union_t*)type)->member_types);
+    }
+    break;
   case TYPEDESC_ENUM:
+    break;
   case TYPEDESC_MOD:
+    if (((typedesc_mod_t*)type)->member_types != NULL)
+    {
+      list_for_each(((typedesc_mod_t*)type)->member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+      list_free(((typedesc_mod_t*)type)->member_types);
+    }
     break;
   default:
     unreachable();
@@ -306,28 +328,6 @@ typedesc_t* typedesc_remove_ref(typedesc_t* type)
   return type->kind == TYPEDESC_REF ? ((typedesc_ref_t*)type)->base_type : type;
 }
 
-size_t typedesc_size(typedesc_t* type)
-{
-  switch (type->kind)
-  {
-  case TYPEDESC_I8:    return 1;
-  case TYPEDESC_I16:   return 2;
-  case TYPEDESC_I32:   return 4;
-  case TYPEDESC_I64:   return 8;
-  case TYPEDESC_ISIZE: return 8;
-  case TYPEDESC_U8:    return 1;
-  case TYPEDESC_U16:   return 2;
-  case TYPEDESC_U32:   return 4;
-  case TYPEDESC_U64:   return 8;
-  case TYPEDESC_USIZE: return 8;
-  case TYPEDESC_F32:   return 4;
-  case TYPEDESC_F64:   return 8;
-  default: unreachable();
-  }
-
-  return 0;
-}
-
 typedesc_t* typedesc_promote(typedesc_t* lhs, typedesc_t* rhs)
 {
   assert(typedesc_is_arithmetic(lhs) && typedesc_is_arithmetic(rhs));
@@ -339,193 +339,7 @@ typedesc_t* typedesc_promote(typedesc_t* lhs, typedesc_t* rhs)
     if (typedesc_is_signed(lhs) != typedesc_is_signed(rhs))
       return typedesc_promote(typedesc_make_signed(lhs), typedesc_make_signed(rhs));
 
-  return typedesc_size(lhs) > typedesc_size(rhs) ? lhs : rhs;
-}
-
-typedesc_t* typedesc_of_mut(ast_type_mut_t* node)
-{
-  typedesc_mut_t* type = typedesc_mut_init();
-  type->base_type = typedesc_of(node->base_type);
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_const(ast_type_const_t* node)
-{
-  typedesc_const_t* type = typedesc_const_init();
-  type->base_type = typedesc_of(node->base_type);
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_ptr(ast_type_ptr_t* node)
-{
-  typedesc_ptr_t* type = typedesc_ptr_init();
-  type->base_type = typedesc_of(node->base_type);
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_array(ast_type_array_t* node)
-{
-  typedesc_array_t* type = typedesc_array_init();
-  type->base_type = typedesc_of(node->base_type);
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_ref(ast_type_ref_t* node)
-{
-  typedesc_ref_t* type = typedesc_ref_init();
-  type->base_type = typedesc_of(node->base_type);
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_opt(ast_type_opt_t* node)
-{
-  typedesc_opt_t* type = typedesc_opt_init();
-  type->base_type = typedesc_of(node->base_type);
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_fun(ast_type_fun_t* node)
-{
-  typedesc_fun_t* type = typedesc_fun_init();
-  type->param_types = NULL;
-
-  if (node->params != NULL)
-  {
-    type->param_types = list_init();
-    
-    LIST_FOR_LOOP(it, node->params)
-      list_push_back(type->param_types, typedesc_of((ast_node_t*)list_node_get(it)));
-  }
-
-  type->return_type = typedesc_of(node->return_type);
-
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_gen(ast_type_gen_t* node)
-{
-  typedesc_gen_t* type = typedesc_gen_init();
-  type->param_types = NULL;
-
-  if (node->params != NULL)
-  {
-    type->param_types = list_init();
-    
-    LIST_FOR_LOOP(it, node->params)
-      list_push_back(type->param_types, typedesc_of((ast_node_t*)list_node_get(it)));
-  }
-
-  type->yield_type = typedesc_of(node->yield_type);
-
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_decl_fun(ast_decl_fun_t* node)
-{
-  typedesc_fun_t* type = typedesc_fun_init();
-  type->param_types = NULL;
-
-  if (node->params != NULL)
-  {
-    type->param_types = list_init();
-    
-    LIST_FOR_LOOP(it, node->params)
-      list_push_back(type->param_types, typedesc_of((ast_node_t*)list_node_get(it)));
-  }
-
-  type->return_type = typedesc_of(node->return_type);
-
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_decl_gen(ast_decl_gen_t* node)
-{
-  typedesc_gen_t* type = typedesc_gen_init();
-  type->param_types = NULL;
-
-  if (node->params != NULL)
-  {
-    type->param_types = list_init();
-    
-    LIST_FOR_LOOP(it, node->params)
-      list_push_back(type->param_types, typedesc_of((ast_node_t*)list_node_get(it)));
-  }
-
-  type->yield_type = typedesc_of(node->yield_type);
-
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_decl_struct(ast_decl_struct_t* node)
-{
-  typedesc_struct_t* type = typedesc_struct_init();
-  type->node = (ast_decl_t*)node;
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_decl_union(ast_decl_union_t* node)
-{
-  typedesc_union_t* type = typedesc_union_init();
-  type->node = (ast_decl_t*)node;
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_decl_enum(ast_decl_enum_t* node)
-{
-  typedesc_enum_t* type = typedesc_enum_init();
-  type->node = (ast_decl_t*)node;
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of_decl_mod(ast_decl_mod_t* node)
-{
-  typedesc_mod_t* type = typedesc_mod_init();
-  type->node = (ast_decl_t*)node;
-  return (typedesc_t*)type;
-}
-
-typedesc_t* typedesc_of(ast_node_t* node)
-{
-  switch (node->kind)
-  {
-  case AST_TYPE_MUT:       return typedesc_of_mut((ast_type_mut_t*)node);
-  case AST_TYPE_CONST:     return typedesc_of_const((ast_type_const_t*)node);
-  case AST_TYPE_PTR:       return typedesc_of_ptr((ast_type_ptr_t*)node);
-  case AST_TYPE_ARRAY:     return typedesc_of_array((ast_type_array_t*)node);
-  case AST_TYPE_REF:       return typedesc_of_ref((ast_type_ref_t*)node);
-  case AST_TYPE_OPT:       return typedesc_of_opt((ast_type_opt_t*)node);
-  case AST_TYPE_FUN:       return typedesc_of_fun((ast_type_fun_t*)node);
-  case AST_TYPE_GEN:       return typedesc_of_gen((ast_type_gen_t*)node);
-  case AST_TYPE_TYPE:      return typedesc_builtin(TYPEDESC_TYPE);
-  case AST_TYPE_I8:        return typedesc_builtin(TYPEDESC_I8);
-  case AST_TYPE_I16:       return typedesc_builtin(TYPEDESC_I16);
-  case AST_TYPE_I32:       return typedesc_builtin(TYPEDESC_I32);
-  case AST_TYPE_I64:       return typedesc_builtin(TYPEDESC_I64);
-  case AST_TYPE_ISIZE:     return typedesc_builtin(TYPEDESC_ISIZE);
-  case AST_TYPE_U8:        return typedesc_builtin(TYPEDESC_U8);
-  case AST_TYPE_U16:       return typedesc_builtin(TYPEDESC_U16);
-  case AST_TYPE_U32:       return typedesc_builtin(TYPEDESC_U32);
-  case AST_TYPE_U64:       return typedesc_builtin(TYPEDESC_U64);
-  case AST_TYPE_USIZE:     return typedesc_builtin(TYPEDESC_USIZE);
-  case AST_TYPE_F32:       return typedesc_builtin(TYPEDESC_F32);
-  case AST_TYPE_F64:       return typedesc_builtin(TYPEDESC_F64);
-  case AST_TYPE_BOOL:      return typedesc_builtin(TYPEDESC_BOOL);
-  case AST_TYPE_UNIT:      return typedesc_builtin(TYPEDESC_UNIT);
-  case AST_DECL_VAR:       return typedesc_of(((ast_decl_var_t*)node)->type);
-  case AST_DECL_LOOP_VAR:  return typedesc_of(((ast_decl_loop_var_t*)node)->type);
-  case AST_DECL_FUN:       return typedesc_of_decl_fun((ast_decl_fun_t*)node);
-  case AST_DECL_GEN:       return typedesc_of_decl_gen((ast_decl_gen_t*)node);
-  case AST_DECL_STRUCT:    return typedesc_of_decl_struct((ast_decl_struct_t*)node);
-  case AST_DECL_UNION:     return typedesc_of_decl_union((ast_decl_union_t*)node);
-  case AST_DECL_ENUM:      return typedesc_of_decl_enum((ast_decl_enum_t*)node);
-  case AST_DECL_MOD:       return typedesc_of_decl_mod((ast_decl_mod_t*)node);
-  case AST_PARAM:          return typedesc_of(((ast_param_t*)node)->type);
-  case AST_PARAM_VARIADIC: return typedesc_of(((ast_param_variadic_t*)node)->type);
-  case AST_PARAM_GENERIC:  return typedesc_of(((ast_param_generic_t*)node)->type);
-  default: unreachable();
-  }
-
-  return NULL;
+  return lhs->size > rhs->size ? lhs : rhs;
 }
 
 size_t typedesc_print(FILE* stream, typedesc_t* type)

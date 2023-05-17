@@ -1,84 +1,20 @@
 #include "token.h"
 
-#include <stdlib.h>
-
 #include "util.h"
 
 #include "list.h"
 
 #include "location.h"
 
-#include "memtrace.h"
-
-token_t* token_init(token_kind_t kind, location_t* loc)
+void token_init(token_t* tok, token_kind_t kind, location_t* loc)
 {
-  token_t* tok = (token_t*)malloc(sizeof(token_t));
-  assert(tok != NULL);
   tok->kind = kind;
   tok->loc = loc;
-  return tok;
-}
-
-token_id_t* token_id_init(location_t* loc, char* value)
-{
-  token_id_t* tok = (token_id_t*)malloc(sizeof(token_id_t));
-  assert(tok != NULL);
-  tok->kind = TOK_ID;
-  tok->loc = loc;
-  tok->value = value;
-  return tok;
-}
-
-token_lit_int_t* token_lit_int_init(location_t* loc, uint64_t value)
-{
-  token_lit_int_t* tok = (token_lit_int_t*)malloc(sizeof(token_lit_int_t));
-  assert(tok != NULL);
-  tok->kind = TOK_LIT_INT;
-  tok->loc = loc;
-  tok->value = value;
-  return tok;
-}
-
-token_lit_flt_t* token_lit_flt_init(location_t* loc, long double value)
-{
-  token_lit_flt_t* tok = (token_lit_flt_t*)malloc(sizeof(token_lit_flt_t));
-  assert(tok != NULL);
-  tok->kind = TOK_LIT_FLT;
-  tok->loc = loc;
-  tok->value = value;
-  return tok;
-}
-
-token_lit_str_t* token_lit_str_init(location_t* loc, char* value)
-{
-  token_lit_str_t* tok = (token_lit_str_t*)malloc(sizeof(token_lit_str_t));
-  assert(tok != NULL);
-  tok->kind = TOK_LIT_STR;
-  tok->loc = loc;
-  tok->value = value;
-  return tok;
-}
-
-token_lit_char_t* token_lit_char_init(location_t* loc, char value)
-{
-  token_lit_char_t* tok = (token_lit_char_t*)malloc(sizeof(token_lit_char_t));
-  assert(tok != NULL);
-  tok->kind = TOK_LIT_CHAR;
-  tok->loc = loc;
-  tok->value = value;
-  return tok;
 }
 
 void token_free(token_t* tok)
 {
-  switch (tok->kind)
-  {
-  case TOK_ID:       free(((token_id_t*)      tok)->value); break;
-  case TOK_LIT_STR:  free(((token_lit_str_t*) tok)->value); break;
-  }
-
   location_free(tok->loc);
-  free(tok);
 }
 
 void token_list_json_dump(FILE* stream, list_t* list)
@@ -92,34 +28,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
     fprintf(stream, "{\"kind\":\"%s\"", token_kind_to_string(tok->kind));
 
     if (token_is_literal(tok) || tok->kind == TOK_ID)
-    {
-      fprintf(stream, ",\"value\":");
-
-      switch (tok->kind)
-      {
-      case TOK_ID:
-        fprintf(stream, "\"%s\"", ((token_id_t*)tok)->value);
-        break;
-      case TOK_LIT_INT:
-        fprintf(stream, "%llu", ((token_lit_int_t*)tok)->value);
-        break;
-      case TOK_LIT_FLT:
-        fprintf(stream, "%lf", ((token_lit_flt_t*)tok)->value);
-        break;
-      case TOK_LIT_STR:
-        fprintf(stream, "\"%s\"", ((token_lit_str_t*)tok)->value);
-        break;
-      case TOK_LIT_CHAR:
-        fprintf(stream, "\"%.*s\"", tok->loc->len - 2, tok->loc->cur + 1);
-        break;
-      case TOK_LIT_BOOL:
-        fprintf(stream, "%s", ((token_lit_bool_t*)tok)->value ? "true" : "false");
-        break;
-      case TOK_LIT_NULL:
-        fprintf(stream, "null");
-        break;
-      }
-    }
+      fprintf(stream, ",\"value\":\"%.*s\"", tok->loc->len, tok->loc->cur);
 
     fputc('}', stream);
 
