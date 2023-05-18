@@ -66,7 +66,7 @@ typedesc_t* typedesc_builtin(typedesc_kind_t kind)
   return NULL;
 }
 
-LIST_FOR_EACH_FUNC_DECL(typedesc_free, typedesc_t);
+LIST_FOR_EACH_FUNC_DECL(typedesc_free, typedesc_t)
 
 void typedesc_free(typedesc_t* type)
 {
@@ -304,9 +304,8 @@ typedesc_t* typedesc_make_signed(typedesc_t* type)
   case TYPEDESC_U32: return typedesc_builtin(TYPEDESC_I32);
   case TYPEDESC_U64: return typedesc_builtin(TYPEDESC_I64);
   case TYPEDESC_USIZE: return typedesc_builtin(TYPEDESC_ISIZE);
+  default: return type;
   }
-
-  return type;
 }
 
 typedesc_t* typedesc_make_ptr(typedesc_t* type)
@@ -417,13 +416,13 @@ size_t typedesc_print(FILE* stream, typedesc_t* type)
   case TYPEDESC_BOOL:  count += (size_t)fprintf(stream, "bool"); break;
   case TYPEDESC_UNIT:  count += (size_t)fprintf(stream, "unit"); break;
   case TYPEDESC_STRUCT:
-    count += (size_t)fprintf(stream, "%.*s", ast_id_len(((typedesc_struct_t*)type)->node->id), ast_id_ptr(((typedesc_struct_t*)type)->node->id));
+    count += (size_t)fprintf(stream, "%.*s", (int)ast_id_len(((typedesc_struct_t*)type)->node->id), ast_id_ptr(((typedesc_struct_t*)type)->node->id));
     break;
   case TYPEDESC_UNION:
-    count += (size_t)fprintf(stream, "%.*s", ast_id_len(((typedesc_union_t*)type)->node->id), ast_id_ptr(((typedesc_union_t*)type)->node->id));
+    count += (size_t)fprintf(stream, "%.*s", (int)ast_id_len(((typedesc_union_t*)type)->node->id), ast_id_ptr(((typedesc_union_t*)type)->node->id));
     break;
   case TYPEDESC_ENUM:
-    count += (size_t)fprintf(stream, "%.*s", ast_id_len(((typedesc_enum_t*)type)->node->id), ast_id_ptr(((typedesc_enum_t*)type)->node->id));
+    count += (size_t)fprintf(stream, "%.*s", (int)ast_id_len(((typedesc_enum_t*)type)->node->id), ast_id_ptr(((typedesc_enum_t*)type)->node->id));
     break;
   default:
     unreachable();

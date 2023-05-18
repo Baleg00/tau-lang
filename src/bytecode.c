@@ -32,6 +32,7 @@ bytecode_label_t* bytecode_label_init(ast_node_t* node, int64_t offset)
 
 void bytecode_label_free(bytecode_label_t* label)
 {
+  unused(label);
 }
 
 bytecode_t* bytecode_init(void)
@@ -52,7 +53,7 @@ bytecode_t* bytecode_init(void)
   return bc;
 }
 
-LIST_FOR_EACH_FUNC_DECL(bytecode_label_free, bytecode_label_t);
+LIST_FOR_EACH_FUNC_DECL(bytecode_label_free, bytecode_label_t)
 
 void bytecode_free(bytecode_t* bc)
 {
@@ -143,10 +144,7 @@ void bytecode_visit_expr_op_unary(bytecode_t* bc, ast_expr_op_un_t* node)
       bytecode_emit_bytes(bc, &alignof_value, sizeof(size_t));
       break;
     }
-  case OP_ARIT_NEG:
-    {
-      
-    }
+  case OP_ARIT_NEG: // TODO
   case OP_LOGIC_NOT: // TODO
   case OP_BIT_NOT: // TODO
   case OP_IND: // TODO
@@ -267,39 +265,49 @@ void bytecode_visit_expr(bytecode_t* bc, ast_expr_t* node)
     bytecode_emit_opcode(bc, OPCODE_LOAD4BP); // TODO
     break;
   case AST_EXPR_LIT_FLT: // TODO
-  case AST_EXPR_LIT_STR:
-  case AST_EXPR_LIT_CHAR:
-  case AST_EXPR_LIT_BOOL:
-  case AST_EXPR_LIT_NULL:
-  case AST_DECL_GEN:
-  case AST_PARAM_DEFAULT:
-  case AST_PARAM_VARIADIC:
+  case AST_EXPR_LIT_STR: // TODO
+  case AST_EXPR_LIT_CHAR: // TODO
+  case AST_EXPR_LIT_BOOL: // TODO
+  case AST_EXPR_LIT_NULL: // TODO
+  case AST_DECL_GEN: // TODO
+  case AST_PARAM_DEFAULT: // TODO
+  case AST_PARAM_VARIADIC: // TODO
   default: unreachable();
   }
 }
 
 void bytecode_visit_stmt_if(bytecode_t* bc, ast_stmt_if_t* node)
 {
+  unused(bc);
+  unused(node);
   unreachable();
 }
 
 void bytecode_visit_stmt_for(bytecode_t* bc, ast_stmt_for_t* node)
 {
+  unused(bc);
+  unused(node);
   unreachable();
 }
 
 void bytecode_visit_stmt_while(bytecode_t* bc, ast_stmt_while_t* node)
 {
+  unused(bc);
+  unused(node);
   unreachable();
 }
 
 void bytecode_visit_stmt_break(bytecode_t* bc, ast_stmt_break_t* node)
 {
+  unused(bc);
+  unused(node);
   unreachable();
 }
 
 void bytecode_visit_stmt_continue(bytecode_t* bc, ast_stmt_continue_t* node)
 {
+  unused(bc);
+  unused(node);
   unreachable();
 }
 
@@ -313,6 +321,8 @@ void bytecode_visit_stmt_return(bytecode_t* bc, ast_stmt_return_t* node)
 
 void bytecode_visit_stmt_yield(bytecode_t* bc, ast_stmt_yield_t* node)
 {
+  unused(bc);
+  unused(node);
   unreachable();
 }
 
@@ -378,6 +388,8 @@ void bytecode_visit_decl_fun(bytecode_t* bc, ast_decl_fun_t* node)
 
 void bytecode_visit_decl_gen(bytecode_t* bc, ast_decl_gen_t* node)
 {
+  unused(bc);
+  unused(node);
   unreachable();
 }
 
@@ -420,7 +432,7 @@ void bytecode_dump(FILE* stream, bytecode_t* bc)
 {
   uint8_t* ptr = bc->data;
 
-  while (ptr - bc->data < bc->size)
+  while (ptr < bc->data + bc->size)
   {
     opcode_t opcode;
     memcpy(&opcode, ptr, sizeof(opcode_t));
@@ -431,35 +443,47 @@ void bytecode_dump(FILE* stream, bytecode_t* bc)
     switch (opcode)
     {
     case OPCODE_PUSH:
+    {
       uint8_t u8_value;
       memcpy(&u8_value, ptr, sizeof(uint8_t));
       fprintf(stream, " %02hhX", u8_value);
       ptr += sizeof(uint8_t);
       break;
+    }
     case OPCODE_PUSH2:
+    {
       uint16_t u16_value;
       memcpy(&u16_value, ptr, sizeof(uint16_t));
       fprintf(stream, " %04hX", u16_value);
       ptr += sizeof(uint16_t);
       break;
+    }
     case OPCODE_PUSH4:
+    {
       uint32_t u32_value;
       memcpy(&u32_value, ptr, sizeof(uint32_t));
       fprintf(stream, " %08X", u32_value);
       ptr += sizeof(uint32_t);
       break;
+    }
     case OPCODE_PUSH8:
+    {
       uint64_t u64_value;
       memcpy(&u64_value, ptr, sizeof(uint64_t));
       fprintf(stream, " %016llX", u64_value);
       ptr += sizeof(uint64_t);
       break;
+    }
     case OPCODE_INVOKE:
+    {
       uint64_t addr_value;
       memcpy(&addr_value, ptr, sizeof(uint64_t));
       fprintf(stream, " %016llX", addr_value);
       ptr += sizeof(uint64_t);
       break;
+    }
+    default:
+      fallthrough();
     }
 
     fputc('\n', stream);

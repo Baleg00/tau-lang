@@ -413,6 +413,7 @@ ast_node_t* parser_parse_stmt(parser_t* par)
   case TOK_KW_RETURN:        return parser_parse_stmt_return(par);
   case TOK_KW_YIELD:         return parser_parse_stmt_yield(par);
   case TOK_PUNCT_BRACE_LEFT: return parser_parse_stmt_block(par);
+  default: fallthrough();
   }
 
   return parser_parse_stmt_expr(par);

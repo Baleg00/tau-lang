@@ -27,6 +27,10 @@
 
 static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_data)
 {
+  unused(cli);
+  unused(que);
+  unused(opt);
+
   compiler_t* compiler = (compiler_t*)user_data;
 
   list_push_back(compiler->input_files, (void*)arg);
@@ -34,6 +38,8 @@ static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const 
 
 static void compiler_dump_tokens(compiler_t* compiler, const char* input_file_path, const char* input_file_name, list_t* tokens)
 {
+  unused(compiler);
+
   char tokens_file_path[COMPILER_MAX_BUFFER_SIZE];
   strcpy(tokens_file_path, input_file_path);
   strcat(tokens_file_path, ".tokens.json");
@@ -48,6 +54,8 @@ static void compiler_dump_tokens(compiler_t* compiler, const char* input_file_pa
 
 static void compiler_dump_ast(compiler_t* compiler, const char* input_file_path, const char* input_file_name, ast_node_t* root)
 {
+  unused(compiler);
+
   char ast_file_path[COMPILER_MAX_BUFFER_SIZE];
   strcpy(ast_file_path, input_file_path);
   strcat(ast_file_path, ".ast.json");
@@ -62,6 +70,8 @@ static void compiler_dump_ast(compiler_t* compiler, const char* input_file_path,
 
 static void compiler_dump_ast_flat(compiler_t* compiler, const char* input_file_path, const char* input_file_name, ast_node_t* root)
 {
+  unused(compiler);
+
   char ast_file_path[COMPILER_MAX_BUFFER_SIZE];
   strcpy(ast_file_path, input_file_path);
   strcat(ast_file_path, ".ast.flat.json");
@@ -76,6 +86,8 @@ static void compiler_dump_ast_flat(compiler_t* compiler, const char* input_file_
 
 static void compiler_dump_tasm(compiler_t* compiler, const char* input_file_path, const char* input_file_name, bytecode_t* bytecode)
 {
+  unused(compiler);
+  
   char tasm_file_path[COMPILER_MAX_BUFFER_SIZE];
   strcpy(tasm_file_path, input_file_path);
   strcat(tasm_file_path, ".tasm");

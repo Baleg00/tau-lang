@@ -315,6 +315,9 @@ void report_error_expected_ptr_to_owner(location_t* loc)
 
 void report_error_type_mismatch(location_t* loc, typedesc_t* expected, typedesc_t* actual)
 {
+  unused(expected);
+  unused(actual);
+
   crumb_error(1, crumb_snippet(loc, "Type mismatch.", NULL, "", NULL));
   debugbreak();
   exit(EXIT_FAILURE);

@@ -33,7 +33,7 @@ void lexer_init(lexer_t* lex, const char* path, char* src)
   lex->toks = list_init();
 }
 
-LIST_FOR_EACH_FUNC_DECL(token_free, token_t);
+LIST_FOR_EACH_FUNC_DECL(token_free, token_t)
 
 void lexer_free(lexer_t* lex)
 {

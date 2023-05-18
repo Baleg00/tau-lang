@@ -1,5 +1,7 @@
 #include "location.h"
 
+#include "util.h"
+
 void location_init(location_t* loc, const char *path, char* src, char* cur, size_t row, size_t col, size_t len)
 {
   loc->path = path;
@@ -12,4 +14,5 @@ void location_init(location_t* loc, const char *path, char* src, char* cur, size
 
 void location_free(location_t* loc)
 {
+  unused(loc);
 }

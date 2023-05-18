@@ -87,6 +87,8 @@ bool shyd_parse_typed_expr(shyd_t* shyd)
   case TOK_KW_ALIGNOF:
     if (shyd->prev_term)
       return false;
+  default:
+    fallthrough();
   }
 
   shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
@@ -97,6 +99,7 @@ bool shyd_parse_typed_expr(shyd_t* shyd)
   case TOK_KW_AS:      elem->op = OP_AS; break;
   case TOK_KW_SIZEOF:  elem->op = OP_SIZEOF; break;
   case TOK_KW_ALIGNOF: elem->op = OP_ALIGNOF; break;
+  default: fallthrough();
   }
 
   stack_push(shyd->op_stack, elem);
@@ -290,6 +293,7 @@ bool shyd_postfix_step(shyd_t* shyd)
   case TOK_PUNCT_PAREN_RIGHT: return shyd_parse_paren_close(shyd);
   case TOK_PUNCT_BRACKET_LEFT: return shyd_parse_bracket_open(shyd);
   case TOK_PUNCT_BRACKET_RIGHT: return shyd_parse_bracket_close(shyd);
+  default: fallthrough();
   }
 
   if (parser_current(shyd->par)->kind == TOK_ID || token_is_literal(parser_current(shyd->par)))
@@ -415,7 +419,7 @@ ast_node_t* shyd_ast(parser_t* par)
 
   ast_node_t* root = stack_empty(node_stack) ? NULL : (ast_node_t*)stack_pop(node_stack);
 
-  assert(("Dangling nodes on stack!", stack_empty(node_stack)));
+  assert(stack_empty(node_stack));
 
   stack_free(node_stack);
 

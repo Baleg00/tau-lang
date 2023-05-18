@@ -22,6 +22,7 @@ void cli_init(cli_t* cli, cli_opt_t* opts, size_t opt_count, const char* usages[
 
 void cli_free(cli_t* cli)
 {
+  unused(cli);
 }
 
 void cli_parse(cli_t* cli, int argc, const char* argv[])
@@ -259,6 +260,11 @@ void cli_parse_any(cli_opt_t* opt, queue_t* que)
 
 void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
+  unused(que);
+  unused(opt);
+  unused(arg);
+  unused(user_ptr);
+
   printf("Usage:\n");
 
   for (size_t i = 0; i < cli->usage_count; ++i)
@@ -287,15 +293,30 @@ void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg
 
 void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
+  unused(cli);
+  unused(que);
+  unused(opt);
+  unused(arg);
+
   printf("Version: %s\n", (const char*)user_ptr);
 }
 
 void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
+  unused(cli);
+  unused(que);
+  unused(opt);
+  unused(arg);
+
   *(bool*)user_ptr = true;
 }
 
 void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
+  unused(cli);
+  unused(que);
+  unused(opt);
+  unused(arg);
+
   *(bool*)user_ptr = true;
 }

@@ -1,14 +1,8 @@
 #ifndef TAU_TYPEDEFS_H
 #define TAU_TYPEDEFS_H
 
-#pragma region "Arena"
-
 /** Represents a memory arena. */
 typedef struct arena_s arena_t;
-
-#pragma endregion "Arena"
-
-#pragma region "List"
 
 /** Represents an node in a linked list. */
 typedef struct list_node_s list_node_t;
@@ -19,23 +13,11 @@ typedef struct list_s list_t;
 /** Function pointer type to be used by `list_for_each` function. */
 typedef void(*list_for_each_func_t)(void*);
 
-#pragma endregion "List"
-
-#pragma region "Stack"
-
 /** Represents a stack. */
 typedef list_t stack_t;
 
-#pragma endregion "Stack"
-
-#pragma region "Queue"
-
 /** Represents a queue. */
 typedef list_t queue_t;
-
-#pragma endregion "Queue"
-
-#pragma region "Command-line Interface"
 
 /**Indicates argument type. */
 typedef enum cli_type_e
@@ -56,10 +38,6 @@ typedef struct cli_s cli_t;
 /** Option callback type. */
 typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, const char*, void*);
 
-#pragma endregion "Command-line Interface"
-
-#pragma region "Log"
-
 /** Log level indicating the kind and severity of a message. */
 typedef enum log_level_e
 {
@@ -70,10 +48,6 @@ typedef enum log_level_e
   LOG_LEVEL_ERROR, // Severe issue or failure.
   LOG_LEVEL_FATAL, // Critical failure and program termination.
 } log_level_t;
-
-#pragma endregion "Log"
-
-#pragma region "Crumb"
 
 /** Indicates the crumb log kind. */
 typedef enum crumb_kind_e
@@ -98,17 +72,8 @@ typedef struct crumb_item_snippet_s crumb_item_snippet_t;
 /** Type large enough to hold any item kind. */
 typedef struct crumb_item_s crumb_item_t;
 
-
-#pragma endregion "Crumb"
-
-#pragma region "Location"
-
 /** Marks a location in a source file. */
 typedef struct location_s location_t;
-
-#pragma endregion "Location"
-
-#pragma region "Token"
 
 /** Indicates the category of a token. */
 typedef enum token_flag_e
@@ -250,16 +215,8 @@ typedef struct token_lit_char_s token_lit_char_t;
 /** Token type for boolean literals. */
 typedef struct token_lit_bool_s token_lit_bool_t;
 
-#pragma endregion "Token"
-
-#pragma region "Lexer"
-
 /** Represents a lexical analyzer. */
 typedef struct lexer_s lexer_t;
-
-#pragma endregion "Lexer"
-
-#pragma region "Abstract Syntax Tree"
 
 /** Indicates the category of a node. */
 typedef enum ast_flag_e
@@ -478,10 +435,6 @@ typedef struct ast_enumerator_s ast_enumerator_t;
 /** Node type for a program. */
 typedef struct ast_prog_s ast_prog_t;
 
-#pragma endregion "Abstract Syntax Tree"
-
-#pragma region "Type Descriptor"
-
 /** Indicates the category of a type descriptor. */
 typedef enum typedesc_flag_e
 {
@@ -570,19 +523,11 @@ typedef struct typedesc_enum_s typedesc_enum_t;
 /** Type for module type descriptors. */
 typedef struct typedesc_mod_s typedesc_mod_t;
 
-#pragma endregion "Type Descriptor"
-
-#pragma region "Parser"
-
 /** Represents a syntax analyzer. */
 typedef struct parser_s parser_t;
 
 /** Function pointer type to be used when parsing lists. */
 typedef ast_node_t*(*parse_func_t)(parser_t*);
-
-#pragma endregion "Parser"
-
-#pragma region "Symbol Table"
 
 /**
  * \brief Represents a symbol.
@@ -598,10 +543,6 @@ typedef struct symbol_s symbol_t;
  * \details A symbol table is a hierarchical collection of symbols
  */
 typedef struct symtable_s symtable_t;
-
-#pragma endregion "Symbol Table"
-
-#pragma region "Operator"
 
 /** Indicates the kind of an operator. */
 typedef enum op_kind_e
@@ -668,27 +609,13 @@ typedef enum op_kind_e
   OP_CALL, // "()" function call
 } op_kind_t;
 
-#pragma endregion "Operator"
-
-#pragma region "Analyzer"
-
 /** Represents an analyzer. */
 typedef struct analyzer_s analyzer_t;
-
-#pragma endregion "Analyzer"
-
-#pragma region "Opcode"
 
 /** Represents an operation code. */
 typedef unsigned short opcode_t;
 
-#pragma endregion "Opcode"
-
-#pragma region "Compiler"
-
 /** Represents a compiler instance. */
 typedef struct compiler_s compiler_t;
-
-#pragma endregion "Compiler"
 
 #endif
