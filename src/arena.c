@@ -9,30 +9,14 @@
 
 #define ARENA_DEFAULT_CAPACITY (8 * (1 << 10))
 
-#ifdef __alignof_is_defined
-
-#include <stdalign.h>
-#define ARENA_MAX_ALIGN (alignof(max_align_t))
-
-#else
-
-typedef struct arena_max_align_s
+typedef union arena_max_align_u
 {
-  uint8_t x;
-
-  union
-  {
-    uintmax_t a;
-    double b;
-    long double c;
-    void* d;
-    void(*e)(void);
-  } y;
+  uintmax_t a;
+  uintptr_t b;
+  long double c;
 } arena_max_align_t;
 
-#define ARENA_MAX_ALIGN (offsetof(arena_max_align_t, y))
-
-#endif
+#define ARENA_MAX_ALIGN (alignof(arena_max_align_t))
 
 /**
  * \brief Aligns a pointer to `ARENA_MAX_ALIGN`.
@@ -106,7 +90,7 @@ void* arena_malloc(arena_t* arena, size_t size)
 
   if (arena == NULL)
   {
-    arena = arena_init_capacity(arena_capacity(arena));
+    arena = arena_init_capacity(arena_capacity(last));
     last->next = arena;
   }
 

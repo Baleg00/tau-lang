@@ -11,6 +11,7 @@
 #include "stack.h"
 #include "queue.h"
 #include "diagnostics.h"
+#include "arena.h"
 #include "memtrace.h"
 
 shyd_t* shyd_init(parser_t* par)
@@ -186,7 +187,10 @@ bool shyd_parse_call(shyd_t* shyd)
   if (!shyd->prev_term)
     return false;
 
-  ast_expr_op_call_t* node = ast_expr_op_call_init(parser_current(shyd->par));
+  ast_expr_op_call_t* node = (ast_expr_op_call_t*)arena_malloc(shyd->par->arena, sizeof(ast_expr_op_call_t));
+  assert(node != NULL);
+  node->kind = AST_EXPR_OP;
+  node->tok = parser_current(shyd->par);
   node->op_kind = OP_CALL;
 
   parser_expect(shyd->par, TOK_PUNCT_PAREN_LEFT);
@@ -322,9 +326,13 @@ void shyd_postfix(shyd_t* shyd)
   }
 }
 
-void shyd_ast_op_unary(shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_expr_op_un_t* node = ast_expr_op_un_init(elem->tok);
+  ast_expr_op_un_t* node = (ast_expr_op_un_t*)arena_malloc(shyd->par->arena, sizeof(ast_expr_op_un_t));
+  assert(node != NULL);
+  node->kind = AST_EXPR_OP;
+  node->tok = parser_current(shyd->par);
+  
   node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
@@ -335,9 +343,13 @@ void shyd_ast_op_unary(shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, node);
 }
 
-void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_expr_op_bin_t* node = ast_expr_op_bin_init(elem->tok);
+  ast_expr_op_bin_t* node = (ast_expr_op_bin_t*)arena_malloc(shyd->par->arena, sizeof(ast_expr_op_bin_t));
+  assert(node != NULL);
+  node->kind = AST_EXPR_OP;
+  node->tok = parser_current(shyd->par);
+
   node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
@@ -353,8 +365,10 @@ void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, node);
 }
 
-void shyd_ast_op_call(shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op_call(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
+  unused(shyd);
+
   if (stack_empty(node_stack))
     report_error_missing_callee(elem->node->tok->loc);
 
@@ -363,33 +377,63 @@ void shyd_ast_op_call(shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, elem->node);
 }
 
-void shyd_ast_term(shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
   ast_node_t* node = NULL;
 
   switch (elem->tok->kind)
   {
-  case TOK_ID:       node = (ast_node_t*)ast_id_init(elem->tok); break;
-  case TOK_LIT_INT:  node = (ast_node_t*)ast_expr_lit_int_init(elem->tok); break;
-  case TOK_LIT_FLT:  node = (ast_node_t*)ast_expr_lit_flt_init(elem->tok); break;
-  case TOK_LIT_STR:  node = (ast_node_t*)ast_expr_lit_str_init(elem->tok); break;
-  case TOK_LIT_CHAR: node = (ast_node_t*)ast_expr_lit_char_init(elem->tok); break;
-  case TOK_LIT_BOOL: node = (ast_node_t*)ast_expr_lit_bool_init(elem->tok); break;
-  case TOK_LIT_NULL: node = (ast_node_t*)ast_expr_lit_null_init(elem->tok); break;
+  case TOK_ID:
+    node = (ast_node_t*)arena_malloc(shyd->par->arena, sizeof(ast_id_t));
+    assert(node != NULL);
+    node->kind = AST_ID;
+    break;
+  case TOK_LIT_INT:
+    node = (ast_node_t*)arena_malloc(shyd->par->arena, sizeof(ast_expr_lit_t));
+    assert(node != NULL);
+    node->kind = AST_EXPR_LIT_INT;
+    break;
+  case TOK_LIT_FLT:
+    node = (ast_node_t*)arena_malloc(shyd->par->arena, sizeof(ast_expr_lit_t));
+    assert(node != NULL);
+    node->kind = AST_EXPR_LIT_FLT;
+    break;
+  case TOK_LIT_STR:
+    node = (ast_node_t*)arena_malloc(shyd->par->arena, sizeof(ast_expr_lit_t));
+    assert(node != NULL);
+    node->kind = AST_EXPR_LIT_STR;
+    break;
+  case TOK_LIT_CHAR:
+    node = (ast_node_t*)arena_malloc(shyd->par->arena, sizeof(ast_expr_lit_t));
+    assert(node != NULL);
+    node->kind = AST_EXPR_LIT_CHAR;
+    break;
+  case TOK_LIT_BOOL:
+    node = (ast_node_t*)arena_malloc(shyd->par->arena, sizeof(ast_expr_lit_t));
+    assert(node != NULL);
+    node->kind = AST_EXPR_LIT_BOOL;
+    break;
+  case TOK_LIT_NULL:
+    node = (ast_node_t*)arena_malloc(shyd->par->arena, sizeof(ast_expr_lit_t));
+    assert(node != NULL);
+    node->kind = AST_EXPR_LIT_NULL;
+    break;
   default: report_error_unexpected_token(elem->tok->loc);
   }
+
+  node->tok = elem->tok;
 
   stack_push(node_stack, node);
 }
 
-void shyd_ast_op(shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
   if (op_is_unary(elem->op))
-    shyd_ast_op_unary(elem, node_stack);
+    shyd_ast_op_unary(shyd, elem, node_stack);
   else if (op_is_binary(elem->op))
-    shyd_ast_op_binary(elem, node_stack);
+    shyd_ast_op_binary(shyd, elem, node_stack);
   else if (elem->op == OP_CALL)
-    shyd_ast_op_call(elem, node_stack);
+    shyd_ast_op_call(shyd, elem, node_stack);
   else
     unreachable();
 }
@@ -408,9 +452,9 @@ ast_node_t* shyd_ast(parser_t* par)
 
     switch (elem->kind)
     {
-    case SHYD_TERM: shyd_ast_term(elem, node_stack); break;
+    case SHYD_TERM: shyd_ast_term(shyd, elem, node_stack); break;
     case SHYD_TYPE: stack_push(node_stack, elem->node); break;
-    case SHYD_OP:   shyd_ast_op(elem, node_stack); break;
+    case SHYD_OP:   shyd_ast_op(shyd, elem, node_stack); break;
     default: unreachable();
     }
 

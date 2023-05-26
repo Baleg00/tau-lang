@@ -59,6 +59,9 @@ list_t* list_init(void)
 
 void list_free(list_t* list)
 {
+  if (list == NULL)
+    return;
+
   for (list_node_t *node = list_front_node(list), *next; node != NULL; node = next)
   {
     next = list_node_next(node);

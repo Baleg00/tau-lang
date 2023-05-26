@@ -21,27 +21,21 @@
 
 #define LEXER_MAX_BUFFER_SIZE 256
 
-void lexer_init(lexer_t* lex, const char* path, char* src)
+void lexer_init(lexer_t* lex, arena_t* arena, const char* path, char* src)
 {
-  lex->arena = arena_init();
+  lex->arena = arena;
 
   lex->loc = (location_t*)arena_malloc(lex->arena, sizeof(location_t));
   assert(lex->loc != NULL);
 
   location_init(lex->loc, path, src, src, 0, 0, 0);
 
-  lex->toks = list_init();
+  lex->toks = NULL;
 }
-
-LIST_FOR_EACH_FUNC_DECL(token_free, token_t)
 
 void lexer_free(lexer_t* lex)
 {
-  list_for_each(lex->toks, LIST_FOR_EACH_FUNC_NAME(token_free));
-  list_free(lex->toks);
   location_free(lex->loc);
-  
-  arena_free(lex->arena);
 }
 
 location_t* lexer_location_copy(lexer_t* lex)
@@ -714,8 +708,10 @@ void lexer_read_next(lexer_t* lex)
     report_error_unexpected_character(lex->loc);
 }
 
-void lexer_lex(lexer_t* lex)
+void lexer_lex(lexer_t* lex, list_t* toks)
 {
+  lex->toks = toks;
+
   while (list_empty(lex->toks) || ((token_t*)list_back(lex->toks))->kind != TOK_EOF)
     lexer_read_next(lex);
 }

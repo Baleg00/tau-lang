@@ -25,6 +25,8 @@
 
 #define COMPILER_MAX_BUFFER_SIZE 256
 
+LIST_FOR_EACH_FUNC_DECL(token_free, token_t)
+
 static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_data)
 {
   unused(cli);
@@ -176,33 +178,45 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     log_trace("main", "(%s) Lexical analysis.", input_file_name);
 
+    arena_t* lexer_arena = arena_init();
+
     lexer_t lexer;
-    lexer_init(&lexer, input_file_path, src);
-    time_it(lexer, lexer_lex(&lexer));
+    lexer_init(&lexer, lexer_arena, input_file_path, src);
+
+    list_t* toks = list_init();
+
+    time_it(lexer, lexer_lex(&lexer, toks));
 
     if (compiler->flags.dump_tokens)
-      compiler_dump_tokens(compiler, input_file_path, input_file_name, lexer.toks);
+      compiler_dump_tokens(compiler, input_file_path, input_file_name, toks);
 
     log_trace("main", "(%s) Syntax analysis.", input_file_name);
 
-    parser_t* parser = parser_init(lexer.toks);
-    time_it(parser, parser_parse(parser));
+    arena_t* parser_arena = arena_init();
+
+    parser_t parser;
+    parser_init(&parser, parser_arena);
+
+    ast_prog_t root;
+
+    time_it(parser, parser_parse(&parser, toks, &root));
 
     if (compiler->flags.dump_ast)
-      compiler_dump_ast(compiler, input_file_path, input_file_name, parser->root);
+      compiler_dump_ast(compiler, input_file_path, input_file_name, (ast_node_t*)&root);
 
     log_trace("main", "(%s) Semantic analysis.", input_file_name);
 
-    analyzer_t* analyzer = analyzer_init();
-    time_it(analyzer, analyzer_analyze(analyzer, parser->root));
+    analyzer_t analyzer;
+    analyzer_init(&analyzer);
+    time_it(analyzer, analyzer_analyze(&analyzer, (ast_node_t*)&root));
 
     if (compiler->flags.dump_ast_flat)
-      compiler_dump_ast_flat(compiler, input_file_path, input_file_name, parser->root);
+      compiler_dump_ast_flat(compiler, input_file_path, input_file_name, (ast_node_t*)&root);
 
     log_trace("main", "(%s) Bytecode generation.", input_file_name);
 
     bytecode_t* bytecode = bytecode_init();
-    time_it(bytecode, bytecode_visit_prog(bytecode, (ast_prog_t*)parser->root));
+    time_it(bytecode, bytecode_visit_prog(bytecode, &root));
 
     if (compiler->flags.dump_tasm)
       compiler_dump_tasm(compiler, input_file_path, input_file_name, bytecode);
@@ -210,9 +224,18 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     log_trace("main", "(%s) Cleanup.", input_file_name);
 
     bytecode_free(bytecode);
-    analyzer_free(analyzer);
-    parser_free(parser);
+
+    analyzer_free(&analyzer);
+    
+    ast_node_free((ast_node_t*)&root);
+    parser_free(&parser);
+    arena_free(parser_arena);
+
+    list_for_each(toks, LIST_FOR_EACH_FUNC_NAME(token_free));
+    list_free(toks);
     lexer_free(&lexer);
+    arena_free(lexer_arena);
+    
     free(src);
   }
 

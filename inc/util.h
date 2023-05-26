@@ -30,6 +30,18 @@
 
 #define countof(ARRAY) (sizeof((ARRAY)) / sizeof((ARRAY)[0]))
 
+#ifdef offsetof
+# undef offsetof
+#endif
+
+#define offsetof(TYPE, MEMBER) ((size_t)(&((TYPE*)NULL)->MEMBER))
+
+#ifdef alignof
+# undef alignof
+#endif
+
+#define alignof(TYPE) (offsetof(struct { char c; TYPE t; }, t))
+
 #ifdef unused
 # undef unused
 #endif
@@ -70,15 +82,17 @@ static inline hash_t fnv1a_hash(const uint8_t* data, size_t size)
     log_fatal("unreachable", "%s:%d", __FILE__, __LINE__);\
     debugbreak();\
     exit(EXIT_FAILURE);\
-  } while (0);
+  } while (0)
 
 /** Causes program termination if the condition is false. */
 # define assert(COND)\
-  if (!(COND)) {\
-    log_fatal("assert", "%s:%d Assertion failed: %s", __FILE__, __LINE__, #COND);\
-    debugbreak();\
-    exit(EXIT_FAILURE);\
-  }
+  do {\
+    if (!(COND)) {\
+      log_fatal("assert", "%s:%d Assertion failed: %s", __FILE__, __LINE__, #COND);\
+      debugbreak();\
+      exit(EXIT_FAILURE);\
+    }\
+  } while (0)
 #else
 /** Causes a breakpoint and prompts the user to run a debugger. */
 # define debugbreak() ((void)0)

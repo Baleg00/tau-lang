@@ -55,11 +55,11 @@ bool shyd_parse_operator(shyd_t* shyd);
 bool shyd_postfix_step(shyd_t* shyd);
 void shyd_postfix(shyd_t* shyd);
 
-void shyd_ast_term(shyd_elem_t* elem, stack_t* node_stack);
-void shyd_ast_op_unary(shyd_elem_t* elem, stack_t* node_stack);
-void shyd_ast_op_binary(shyd_elem_t* elem, stack_t* node_stack);
-void shyd_ast_op_call(shyd_elem_t* elem, stack_t* node_stack);
-void shyd_ast_op(shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_op_call(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_op(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack);
 
 ast_node_t* shyd_ast(parser_t* par);
 

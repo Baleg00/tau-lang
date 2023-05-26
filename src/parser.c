@@ -15,22 +15,16 @@
 
 #include "diagnostics.h"
 
-#include "memtrace.h"
+#include "arena.h"
 
-parser_t* parser_init(list_t* toks)
+void parser_init(parser_t* par, arena_t* arena)
 {
-  parser_t* par = (parser_t*)malloc(sizeof(parser_t));
-  assert(par != NULL);
-  par->root = NULL;
-  par->toks = toks;
-  par->cur = list_front_node(toks);
-  return par;
+  par->arena = arena;
 }
 
 void parser_free(parser_t* par)
 {
-  ast_node_free(par->root);
-  free(par);
+  unused(par);
 }
 
 token_t* parser_current(parser_t* par)
@@ -123,14 +117,21 @@ list_t* parser_parse_generic_param_list(parser_t* par)
 
 ast_node_t* parser_parse_id(parser_t* par)
 {
-  ast_id_t* id = ast_id_init(parser_current(par));
+  ast_id_t* node = (ast_id_t*)arena_malloc(par->arena, sizeof(ast_id_t));
+  assert(node != NULL);
+  node->kind = AST_ID;
+  node->tok = parser_current(par);
+
   parser_expect(par, TOK_ID);
-  return (ast_node_t*)id;
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_mut(parser_t* par)
 {
-  ast_type_mut_t* node = ast_type_mut_init(parser_current(par));
+  ast_type_mut_t* node = (ast_type_mut_t*)arena_malloc(par->arena, sizeof(ast_type_mut_t));
+  assert(node != NULL);
+  node->kind = AST_TYPE_MUT;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_MUT);
   
@@ -141,7 +142,10 @@ ast_node_t* parser_parse_type_mut(parser_t* par)
 
 ast_node_t* parser_parse_type_const(parser_t* par)
 {
-  ast_type_const_t* node = ast_type_const_init(parser_current(par));
+  ast_type_const_t* node = (ast_type_const_t*)arena_malloc(par->arena, sizeof(ast_type_const_t));
+  assert(node != NULL);
+  node->kind = AST_TYPE_CONST;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_CONST);
   
@@ -152,7 +156,10 @@ ast_node_t* parser_parse_type_const(parser_t* par)
 
 ast_node_t* parser_parse_type_ptr(parser_t* par)
 {
-  ast_type_ptr_t* node = ast_type_ptr_init(parser_current(par));
+  ast_type_ptr_t* node = (ast_type_ptr_t*)arena_malloc(par->arena, sizeof(ast_type_ptr_t));
+  assert(node != NULL);
+  node->kind = AST_TYPE_PTR;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_PUNCT_ASTERISK);
   
@@ -163,7 +170,10 @@ ast_node_t* parser_parse_type_ptr(parser_t* par)
 
 ast_node_t* parser_parse_type_array(parser_t* par)
 {
-  ast_type_array_t* node = ast_type_array_init(parser_current(par));
+  ast_type_array_t* node = (ast_type_array_t*)arena_malloc(par->arena, sizeof(ast_type_array_t));
+  assert(node != NULL);
+  node->kind = AST_TYPE_ARRAY;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_PUNCT_BRACKET_LEFT);
   
@@ -178,7 +188,10 @@ ast_node_t* parser_parse_type_array(parser_t* par)
 
 ast_node_t* parser_parse_type_ref(parser_t* par)
 {
-  ast_type_ref_t* node = ast_type_ref_init(parser_current(par));
+  ast_type_ref_t* node = (ast_type_ref_t*)arena_malloc(par->arena, sizeof(ast_type_ref_t));
+  assert(node != NULL);
+  node->kind = AST_TYPE_REF;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_PUNCT_AMPERSAND);
   
@@ -189,7 +202,10 @@ ast_node_t* parser_parse_type_ref(parser_t* par)
 
 ast_node_t* parser_parse_type_optional(parser_t* par)
 {
-  ast_type_opt_t* node = ast_type_opt_init(parser_current(par));
+  ast_type_opt_t* node = (ast_type_opt_t*)arena_malloc(par->arena, sizeof(ast_type_opt_t));
+  assert(node != NULL);
+  node->kind = AST_TYPE_OPT;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_PUNCT_QUESTION);
   
@@ -200,7 +216,10 @@ ast_node_t* parser_parse_type_optional(parser_t* par)
 
 ast_node_t* parser_parse_type_fun(parser_t* par)
 {
-  ast_type_fun_t* node = ast_type_fun_init(parser_current(par));
+  ast_type_fun_t* node = (ast_type_fun_t*)arena_malloc(par->arena, sizeof(ast_type_fun_t));
+  assert(node != NULL);
+  node->kind = AST_TYPE_FUN;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_FUN);
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
@@ -217,7 +236,10 @@ ast_node_t* parser_parse_type_fun(parser_t* par)
 
 ast_node_t* parser_parse_type_gen(parser_t* par)
 {
-  ast_type_gen_t* node = ast_type_gen_init(parser_current(par));
+  ast_type_gen_t* node = (ast_type_gen_t*)arena_malloc(par->arena, sizeof(ast_type_gen_t));
+  assert(node != NULL);
+  node->kind = AST_TYPE_GEN;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_GEN);
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
@@ -234,11 +256,18 @@ ast_node_t* parser_parse_type_gen(parser_t* par)
 
 ast_node_t* parser_parse_type_member(parser_t* par)
 {
-  ast_id_t* owner = ast_id_init(parser_expect(par, TOK_ID));
+  ast_id_t* owner = (ast_id_t*)arena_malloc(par->arena, sizeof(ast_id_t));
+  assert(owner != NULL);
+  owner->kind = AST_ID;
+  owner->tok = parser_current(par);
 
   if (parser_current(par)->kind == TOK_PUNCT_DOT)
   {
-    ast_type_member_t* type = ast_type_member_init(parser_expect(par, TOK_PUNCT_DOT));
+    ast_type_member_t* type = (ast_type_member_t*)arena_malloc(par->arena, sizeof(ast_type_member_t));
+    assert(type != NULL);
+    type->kind = AST_ID;
+    type->tok = parser_current(par);
+
     type->owner = (ast_node_t*)owner;
     type->member = parser_parse_type_member(par);
     return (ast_node_t*)type;
@@ -253,31 +282,116 @@ ast_node_t* parser_parse_type(parser_t* par)
 
   switch (parser_current(par)->kind)
   {
-  case TOK_KW_MUT:             return parser_parse_type_mut(par);
-  case TOK_KW_CONST:           return parser_parse_type_const(par);
-  case TOK_PUNCT_ASTERISK:     return parser_parse_type_ptr(par);
-  case TOK_PUNCT_BRACKET_LEFT: return parser_parse_type_array(par);
-  case TOK_PUNCT_AMPERSAND:    return parser_parse_type_ref(par);
-  case TOK_PUNCT_QUESTION:     return parser_parse_type_optional(par);
-  case TOK_KW_FUN:             return parser_parse_type_fun(par);
-  case TOK_KW_GEN:             return parser_parse_type_gen(par);
-  case TOK_KW_SELF:            node = (ast_node_t*)ast_type_self_init( parser_expect(par, TOK_KW_SELF )); return node;
-  case TOK_KW_I8:              node = (ast_node_t*)ast_type_i8_init(   parser_expect(par, TOK_KW_I8   )); return node;
-  case TOK_KW_I16:             node = (ast_node_t*)ast_type_i16_init(  parser_expect(par, TOK_KW_I16  )); return node;
-  case TOK_KW_I32:             node = (ast_node_t*)ast_type_i32_init(  parser_expect(par, TOK_KW_I32  )); return node;
-  case TOK_KW_I64:             node = (ast_node_t*)ast_type_i64_init(  parser_expect(par, TOK_KW_I64  )); return node;
-  case TOK_KW_ISIZE:           node = (ast_node_t*)ast_type_isize_init(parser_expect(par, TOK_KW_ISIZE)); return node;
-  case TOK_KW_U8:              node = (ast_node_t*)ast_type_u8_init(   parser_expect(par, TOK_KW_U8   )); return node;
-  case TOK_KW_U16:             node = (ast_node_t*)ast_type_u16_init(  parser_expect(par, TOK_KW_U16  )); return node;
-  case TOK_KW_U32:             node = (ast_node_t*)ast_type_u32_init(  parser_expect(par, TOK_KW_U32  )); return node;
-  case TOK_KW_U64:             node = (ast_node_t*)ast_type_u64_init(  parser_expect(par, TOK_KW_U64  )); return node;
-  case TOK_KW_USIZE:           node = (ast_node_t*)ast_type_usize_init(parser_expect(par, TOK_KW_USIZE)); return node;  
-  case TOK_KW_F32:             node = (ast_node_t*)ast_type_f32_init(  parser_expect(par, TOK_KW_F32  )); return node;
-  case TOK_KW_F64:             node = (ast_node_t*)ast_type_f64_init(  parser_expect(par, TOK_KW_F64  )); return node;
-  case TOK_KW_BOOL:            node = (ast_node_t*)ast_type_bool_init( parser_expect(par, TOK_KW_BOOL )); return node;
-  case TOK_KW_UNIT:            node = (ast_node_t*)ast_type_unit_init( parser_expect(par, TOK_KW_UNIT )); return node;
-  case TOK_ID:                 return parser_parse_type_member(par);                      
-  default:                     report_error_unexpected_token(parser_current(par)->loc);
+  case TOK_KW_MUT:
+    return parser_parse_type_mut(par);
+  case TOK_KW_CONST:
+    return parser_parse_type_const(par);
+  case TOK_PUNCT_ASTERISK:
+    return parser_parse_type_ptr(par);
+  case TOK_PUNCT_BRACKET_LEFT:
+    return parser_parse_type_array(par);
+  case TOK_PUNCT_AMPERSAND:
+    return parser_parse_type_ref(par);
+  case TOK_PUNCT_QUESTION:
+    return parser_parse_type_optional(par);
+  case TOK_KW_FUN:
+    return parser_parse_type_fun(par);
+  case TOK_KW_GEN:
+    return parser_parse_type_gen(par);
+  case TOK_KW_SELF:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_SELF;
+    node->tok = parser_expect(par, TOK_KW_SELF);
+    return node;
+  case TOK_KW_I8:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_I8;
+    node->tok = parser_expect(par, TOK_KW_I8);
+    return node;
+  case TOK_KW_I16:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_I16;
+    node->tok = parser_expect(par, TOK_KW_I16);
+    return node;
+  case TOK_KW_I32:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_I32;
+    node->tok = parser_expect(par, TOK_KW_I32);
+    return node;
+  case TOK_KW_I64:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_I64;
+    node->tok = parser_expect(par, TOK_KW_I64);
+    return node;
+  case TOK_KW_ISIZE:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_ISIZE;
+    node->tok = parser_expect(par, TOK_KW_ISIZE);
+    return node;
+  case TOK_KW_U8:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_U8;
+    node->tok = parser_expect(par, TOK_KW_U8);
+    return node;
+  case TOK_KW_U16:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_U16;
+    node->tok = parser_expect(par, TOK_KW_U16);
+    return node;
+  case TOK_KW_U32:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_U32;
+    node->tok = parser_expect(par, TOK_KW_U32);
+    return node;
+  case TOK_KW_U64:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_U64;
+    node->tok = parser_expect(par, TOK_KW_U64);
+    return node;
+  case TOK_KW_USIZE:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_USIZE;
+    node->tok = parser_expect(par, TOK_KW_USIZE);
+    return node;  
+  case TOK_KW_F32:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_F32;
+    node->tok = parser_expect(par, TOK_KW_F32);
+    return node;
+  case TOK_KW_F64:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_F64;
+    node->tok = parser_expect(par, TOK_KW_F64);
+    return node;
+  case TOK_KW_BOOL:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_BOOL;
+    node->tok = parser_expect(par, TOK_KW_BOOL);
+    return node;
+  case TOK_KW_UNIT:
+    node = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node != NULL);
+    node->kind = AST_TYPE_UNIT;
+    node->tok = parser_expect(par, TOK_KW_UNIT);
+    return node;
+  case TOK_ID:
+    return parser_parse_type_member(par);                      
+  default:
+    report_error_unexpected_token(parser_current(par)->loc);
   }
 
   return NULL;
@@ -290,7 +404,10 @@ ast_node_t* parser_parse_expr(parser_t* par)
 
 ast_node_t* parser_parse_stmt_if(parser_t* par)
 {
-  ast_stmt_if_t* node = ast_stmt_if_init(parser_current(par));
+  ast_stmt_if_t* node = (ast_stmt_if_t*)arena_malloc(par->arena, sizeof(ast_stmt_if_t));
+  assert(node != NULL);
+  node->kind = AST_STMT_IF;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_IF);
   
@@ -306,7 +423,10 @@ ast_node_t* parser_parse_stmt_if(parser_t* par)
 
 ast_node_t* parser_parse_stmt_for(parser_t* par)
 {
-  ast_stmt_for_t* node = ast_stmt_for_init(parser_current(par));
+  ast_stmt_for_t* node = (ast_stmt_for_t*)arena_malloc(par->arena, sizeof(ast_stmt_for_t));
+  assert(node != NULL);
+  node->kind = AST_STMT_FOR;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_FOR);
   
@@ -325,7 +445,10 @@ ast_node_t* parser_parse_stmt_for(parser_t* par)
 
 ast_node_t* parser_parse_stmt_while(parser_t* par)
 {
-  ast_stmt_while_t* node = ast_stmt_while_init(parser_current(par));
+  ast_stmt_while_t* node = (ast_stmt_while_t*)arena_malloc(par->arena, sizeof(ast_stmt_while_t));
+  assert(node != NULL);
+  node->kind = AST_STMT_WHILE;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_WHILE);
   
@@ -340,21 +463,32 @@ ast_node_t* parser_parse_stmt_while(parser_t* par)
 
 ast_node_t* parser_parse_stmt_break(parser_t* par)
 {
-  ast_stmt_break_t* node = ast_stmt_break_init(parser_current(par));
+  ast_stmt_break_t* node = (ast_stmt_break_t*)arena_malloc(par->arena, sizeof(ast_stmt_break_t));
+  assert(node != NULL);
+  node->kind = AST_STMT_BREAK;
+  node->tok = parser_current(par);
+
   parser_expect(par, TOK_KW_BREAK);
   return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_continue(parser_t* par)
 {
-  ast_stmt_continue_t* node = ast_stmt_continue_init(parser_current(par));
+  ast_stmt_continue_t* node = (ast_stmt_continue_t*)arena_malloc(par->arena, sizeof(ast_stmt_continue_t));
+  assert(node != NULL);
+  node->kind = AST_STMT_CONTINUE;
+  node->tok = parser_current(par);
+
   parser_expect(par, TOK_KW_CONTINUE);
   return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_stmt_return(parser_t* par)
 {
-  ast_stmt_return_t* node = ast_stmt_return_init(parser_current(par));
+  ast_stmt_return_t* node = (ast_stmt_return_t*)arena_malloc(par->arena, sizeof(ast_stmt_return_t));
+  assert(node != NULL);
+  node->kind = AST_STMT_RETURN;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_RETURN);
   
@@ -365,7 +499,10 @@ ast_node_t* parser_parse_stmt_return(parser_t* par)
 
 ast_node_t* parser_parse_stmt_yield(parser_t* par)
 {
-  ast_stmt_yield_t* node = ast_stmt_yield_init(parser_current(par));
+  ast_stmt_yield_t* node = (ast_stmt_yield_t*)arena_malloc(par->arena, sizeof(ast_stmt_yield_t));
+  assert(node != NULL);
+  node->kind = AST_STMT_YIELD;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_YIELD);
   
@@ -376,7 +513,10 @@ ast_node_t* parser_parse_stmt_yield(parser_t* par)
 
 ast_node_t* parser_parse_stmt_block(parser_t* par)
 {
-  ast_stmt_block_t* node = ast_stmt_block_init(parser_current(par));
+  ast_stmt_block_t* node = (ast_stmt_block_t*)arena_malloc(par->arena, sizeof(ast_stmt_block_t));
+  assert(node != NULL);
+  node->kind = AST_STMT_BLOCK;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
   
@@ -387,7 +527,10 @@ ast_node_t* parser_parse_stmt_block(parser_t* par)
 
 ast_node_t* parser_parse_stmt_expr(parser_t* par)
 {
-  ast_stmt_expr_t* node = ast_stmt_expr_init(parser_current(par));
+  ast_stmt_expr_t* node = (ast_stmt_expr_t*)arena_malloc(par->arena, sizeof(ast_stmt_expr_t));
+  assert(node != NULL);
+  node->kind = AST_STMT_EXPR;
+  node->tok = parser_current(par);
 
   node->expr = parser_parse_expr(par);
   
@@ -421,7 +564,10 @@ ast_node_t* parser_parse_stmt(parser_t* par)
 
 ast_node_t* parser_parse_decl_var(parser_t* par)
 {
-  ast_decl_var_t* node = ast_decl_var_init(parser_current(par));
+  ast_decl_var_t* node = (ast_decl_var_t*)arena_malloc(par->arena, sizeof(ast_decl_var_t));
+  assert(node != NULL);
+  node->kind = AST_DECL_VAR;
+  node->tok = parser_current(par);
 
   node->id = parser_parse_id(par);
   
@@ -435,7 +581,11 @@ ast_node_t* parser_parse_decl_var(parser_t* par)
 
 ast_node_t* parser_parse_decl_loop_var(parser_t* par)
 {
-  ast_decl_loop_var_t* node = ast_decl_loop_var_init(parser_current(par));
+  ast_decl_loop_var_t* node = (ast_decl_loop_var_t*)arena_malloc(par->arena, sizeof(ast_decl_loop_var_t));
+  assert(node != NULL);
+  node->kind = AST_DECL_LOOP_VAR;
+  node->tok = parser_current(par);
+
   node->id = parser_parse_id(par);
 
   parser_expect(par, TOK_PUNCT_COLON);
@@ -448,14 +598,22 @@ ast_node_t* parser_parse_decl_loop_var(parser_t* par)
 ast_node_t* parser_parse_decl_fun(parser_t* par)
 {
   ast_decl_generic_t* generic_node = NULL;
-  ast_decl_fun_t* node = ast_decl_fun_init(parser_current(par));
-  
+
+  ast_decl_fun_t* node = (ast_decl_fun_t*)arena_malloc(par->arena, sizeof(ast_decl_fun_t));
+  assert(node != NULL);
+  node->kind = AST_DECL_FUN;
+  node->tok = parser_current(par);
+
   parser_expect(par, TOK_KW_FUN);
   
   // Parse generic parameters.
   if (parser_current(par)->kind == TOK_PUNCT_LESS)
   {
-    generic_node = ast_decl_generic_init(node->tok);
+    generic_node = (ast_decl_generic_t*)arena_malloc(par->arena, sizeof(ast_decl_generic_t));
+    assert(generic_node != NULL);
+    generic_node->kind = AST_DECL_GENERIC;
+    generic_node->tok = node->tok;
+
     generic_node->decl = (ast_node_t*)node;
     generic_node->params = parser_parse_generic_param_list(par);
   }
@@ -492,7 +650,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
       ast_node_t* param = parser_parse_param(par);
 
       // Set flag variable if parameter is a default parameter.
-      seen_default |= param->kind == AST_PARAM_DEFAULT;
+      seen_default = seen_default || param->kind == AST_PARAM_DEFAULT;
 
       // Default parameters must be followed only by default parameters.
       if (seen_default && param->kind != AST_PARAM_DEFAULT)
@@ -518,14 +676,22 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 ast_node_t* parser_parse_decl_gen(parser_t* par)
 {
   ast_decl_generic_t* generic_node = NULL;
-  ast_decl_gen_t* node = ast_decl_gen_init(parser_current(par));
   
+  ast_decl_gen_t* node = (ast_decl_gen_t*)arena_malloc(par->arena, sizeof(ast_decl_gen_t));
+  assert(node != NULL);
+  node->kind = AST_DECL_GEN;
+  node->tok = parser_current(par);
+
   parser_expect(par, TOK_KW_FUN);
   
   // Parse generic parameters.
   if (parser_current(par)->kind == TOK_PUNCT_LESS)
   {
-    generic_node = ast_decl_generic_init(node->tok);
+    generic_node = (ast_decl_generic_t*)arena_malloc(par->arena, sizeof(ast_decl_generic_t));
+    assert(generic_node != NULL);
+    generic_node->kind = AST_DECL_GENERIC;
+    generic_node->tok = node->tok;
+
     generic_node->decl = (ast_node_t*)node;
     generic_node->params = parser_parse_generic_param_list(par);
   }
@@ -588,14 +754,22 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
 ast_node_t* parser_parse_decl_struct(parser_t* par)
 {
   ast_decl_generic_t* generic_node = NULL;
-  ast_decl_struct_t* node = ast_decl_struct_init(parser_current(par));
+
+  ast_decl_struct_t* node = (ast_decl_struct_t*)arena_malloc(par->arena, sizeof(ast_decl_struct_t));
+  assert(node != NULL);
+  node->kind = AST_DECL_STRUCT;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_STRUCT);
   
   // Parse generic parameters.
   if (parser_current(par)->kind == TOK_PUNCT_LESS)
   {
-    generic_node = ast_decl_generic_init(node->tok);
+    generic_node = (ast_decl_generic_t*)arena_malloc(par->arena, sizeof(ast_decl_generic_t));
+    assert(generic_node != NULL);
+    generic_node->kind = AST_DECL_GENERIC;
+    generic_node->tok = node->tok;
+
     generic_node->decl = (ast_node_t*)node;
     generic_node->params = parser_parse_generic_param_list(par);
   }
@@ -612,7 +786,10 @@ ast_node_t* parser_parse_decl_struct(parser_t* par)
 
 ast_node_t* parser_parse_decl_union(parser_t* par)
 {
-  ast_decl_union_t* node = ast_decl_union_init(parser_current(par));
+  ast_decl_union_t* node = (ast_decl_union_t*)arena_malloc(par->arena, sizeof(ast_decl_union_t));
+  assert(node != NULL);
+  node->kind = AST_DECL_UNION;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_UNION);
   
@@ -628,7 +805,10 @@ ast_node_t* parser_parse_decl_union(parser_t* par)
 
 ast_node_t* parser_parse_decl_enum(parser_t* par)
 {
-  ast_decl_enum_t* node = ast_decl_enum_init(parser_current(par));
+  ast_decl_enum_t* node = (ast_decl_enum_t*)arena_malloc(par->arena, sizeof(ast_decl_enum_t));
+  assert(node != NULL);
+  node->kind = AST_DECL_ENUM;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_ENUM);
   
@@ -643,7 +823,10 @@ ast_node_t* parser_parse_decl_enum(parser_t* par)
 
 ast_node_t* parser_parse_decl_mod(parser_t* par)
 {
-  ast_decl_mod_t* node = ast_decl_mod_init(parser_current(par));
+  ast_decl_mod_t* node = (ast_decl_mod_t*)arena_malloc(par->arena, sizeof(ast_decl_mod_t));
+  assert(node != NULL);
+  node->kind = AST_DECL_MOD;
+  node->tok = parser_current(par);
 
   parser_expect(par, TOK_KW_MOD);
   
@@ -684,7 +867,11 @@ ast_node_t* parser_parse_param(parser_t* par)
   {
     ast_node_t* init = parser_parse_expr(par);
 
-    ast_param_default_t* node = ast_param_default_init(tok);
+    ast_param_default_t* node = (ast_param_default_t*)arena_malloc(par->arena, sizeof(ast_param_default_t));
+    assert(node != NULL);
+    node->kind = AST_PARAM_DEFAULT;
+    node->tok = tok;
+
     node->id = id;
     node->type = type;
     node->init = init;
@@ -692,7 +879,11 @@ ast_node_t* parser_parse_param(parser_t* par)
     return (ast_node_t*)node;
   }
 
-  ast_param_t* node = ast_param_init(tok);
+  ast_param_t* node = (ast_param_t*)arena_malloc(par->arena, sizeof(ast_param_t));
+  assert(node != NULL);
+  node->kind = AST_PARAM;
+  node->tok = tok;
+  
   node->id = id;
   node->type = type;
 
@@ -701,12 +892,20 @@ ast_node_t* parser_parse_param(parser_t* par)
 
 ast_node_t* parser_parse_variadic_param(parser_t* par)
 {
-  ast_param_variadic_t* node = ast_param_variadic_init(parser_current(par));
+  ast_param_variadic_t* node = (ast_param_variadic_t*)arena_malloc(par->arena, sizeof(ast_param_variadic_t));
+  assert(node != NULL);
+  node->kind = AST_PARAM_VARIADIC;
+  node->tok = parser_current(par);
+
   node->id = parser_parse_id(par);
   
   parser_expect(par, TOK_PUNCT_COLON);
   
-  ast_type_array_t* type = ast_type_array_init(parser_current(par));
+  ast_type_array_t* type = (ast_type_array_t*)arena_malloc(par->arena, sizeof(ast_type_array_t));
+  assert(type != NULL);
+  type->kind = AST_TYPE_ARRAY;
+  type->tok = parser_current(par);
+
   type->base_type = parser_parse_type(par);
   type->size = NULL;
   node->type = (ast_node_t*)type;
@@ -716,28 +915,45 @@ ast_node_t* parser_parse_variadic_param(parser_t* par)
 
 ast_node_t* parser_parse_generic_param(parser_t* par)
 {
-  ast_param_generic_t* node = ast_param_generic_init(parser_current(par));
+  ast_param_generic_t* node = (ast_param_generic_t*)arena_malloc(par->arena, sizeof(ast_param_generic_t));
+  assert(node != NULL);
+  node->kind = AST_PARAM_GENERIC;
+  node->tok = parser_current(par);
+
   node->id = parser_parse_id(par);
 
   parser_expect(par, TOK_PUNCT_COLON);
 
-  node->type = parser_consume(par, TOK_KW_TYPE) ? (ast_node_t*)ast_type_type_init(parser_current(par)) : parser_parse_type(par);
+  if (parser_consume(par, TOK_KW_TYPE))
+  {
+    node->type = (ast_node_t*)arena_malloc(par->arena, sizeof(ast_type_t));
+    assert(node->type != NULL);
+    node->type->kind = AST_TYPE_TYPE;
+    node->type->tok = parser_current(par);
+  }
+  else
+    node->type = parser_parse_type(par);
   
   return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_enumerator(parser_t* par)
 {
-  ast_enumerator_t* node = ast_enumerator_init(parser_current(par));
+  ast_enumerator_t* node = (ast_enumerator_t*)arena_malloc(par->arena, sizeof(ast_enumerator_t));
+  assert(node != NULL);
+  node->kind = AST_ENUMERATOR;
+  node->tok = parser_current(par);
+
   node->id = parser_parse_id(par);
   return (ast_node_t*)node;
 }
 
-void parser_parse(parser_t* par)
+void parser_parse(parser_t* par, list_t* toks, ast_prog_t* root)
 {
-  ast_prog_t* node = ast_prog_init(parser_current(par));
-
-  node->decls = parser_parse_terminated_list(par, TOK_EOF, parser_parse_decl);
-
-  par->root = (ast_node_t*)node;
+  par->toks = toks;
+  par->cur = list_front_node(toks);
+  
+  root->kind = AST_PROG;
+  root->tok = parser_current(par);
+  root->decls = parser_parse_terminated_list(par, TOK_EOF, parser_parse_decl);
 }

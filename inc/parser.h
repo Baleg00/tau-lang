@@ -13,23 +13,24 @@
 
 struct parser_s
 {
-  ast_node_t* root; // Root node of abstract syntax tree.
+  arena_t* arena;
+
   list_t* toks; // List of tokens to be processed.
   list_node_t* cur; // Current token in list.
 };
 
 /**
- * \brief Initializes a new parser.
+ * \brief Initializes a parser instance.
  * 
- * \param[in] toks List of tokens to be processed.
- * \returns New parser.
+ * \param[out] par Parser instance to be initialzed.
+ * \param[in] arena Arena allocator to be used.
 */
-parser_t* parser_init(list_t* toks);
+void parser_init(parser_t* par, arena_t* arena);
 
 /**
  * \brief Destroys a parser.
  * 
- * \details The abstract syntax tree is destroyed but the tokens are not.
+ * \details It is the caller's responsibility to properly free the AST.
  * 
  * \param[in] par Parser to be destroyed.
 */
@@ -494,7 +495,9 @@ ast_node_t* parser_parse_enumerator(parser_t* par);
  * \brief Processes a list of tokens and produces an abstract syntax tree.
  * 
  * \param[in] par Parser to be used.
+ * \param[in] toks List of tokens to be parsed.
+ * \param[out] root Root node to be used.
 */
-void parser_parse(parser_t* par);
+void parser_parse(parser_t* par, list_t* toks, ast_prog_t* root);
 
 #endif

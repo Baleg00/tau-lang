@@ -24,11 +24,12 @@ struct lexer_s
  * \brief Initializes a lexer instance.
  * 
  * \param[out] lex Lexer instance to be initialized.
+ * \param[in] arena Arena allocator to be used.
  * \param[in] path Path to source file to be processed.
  * \param[in] src Pointer to source string to be processed.
  * \returns New lexer.
 */
-void lexer_init(lexer_t* lex, const char* path, char* src);
+void lexer_init(lexer_t* lex, arena_t* arena, const char* path, char* src);
 
 /**
  * \brief Destroys a lexer.
@@ -271,8 +272,11 @@ void lexer_read_next(lexer_t* lex);
 /**
  * \brief Processes source while there are tokens to read.
  * 
+ * \details It is the caller's responsibility to properly free the tokens.
+ * 
  * \param[in] lex Lexer to be used.
+ * \param[out] toks List to output tokens into.
 */
-void lexer_lex(lexer_t* lex);
+void lexer_lex(lexer_t* lex, list_t* toks);
 
 #endif

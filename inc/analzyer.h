@@ -9,13 +9,7 @@ struct analyzer_s
   stack_t* ret_types;
 };
 
-typedef struct analyzer_type_node_pair_s
-{
-  typedesc_t* type;
-  ast_node_t* node;
-} analyzer_type_node_pair_t;
-
-analyzer_t* analyzer_init(void);
+void analyzer_init(analyzer_t* analyzer);
 void analyzer_free(analyzer_t* analyzer);
 
 void analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);

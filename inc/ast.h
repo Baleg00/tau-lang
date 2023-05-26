@@ -368,81 +368,13 @@ struct ast_prog_s
 #undef AST_NODE_HEADER
 
 /**
- * \brief Initializes a new AST node.
+ * \brief Initializes an AST node instance.
  * 
+ * \param[out] node Node instance to be initialized.
  * \param[in] kind Node kind.
  * \param[in] tok First token of node.
- * \param[in] size Size of node in bytes.
- * \returns New node.
 */
-ast_node_t* ast_node_init(ast_kind_t kind, token_t* tok, size_t size);
-
-#define ast_id_init(TOK)             ((ast_id_t*)             ast_node_init(AST_ID,             (TOK), sizeof(ast_id_t)))
-
-#define ast_type_mut_init(TOK)       ((ast_type_mut_t*)       ast_node_init(AST_TYPE_MUT,       (TOK), sizeof(ast_type_mut_t)))
-#define ast_type_const_init(TOK)     ((ast_type_const_t*)     ast_node_init(AST_TYPE_CONST,     (TOK), sizeof(ast_type_const_t)))
-#define ast_type_ptr_init(TOK)       ((ast_type_ptr_t*)       ast_node_init(AST_TYPE_PTR,       (TOK), sizeof(ast_type_ptr_t)))
-#define ast_type_array_init(TOK)     ((ast_type_array_t*)     ast_node_init(AST_TYPE_ARRAY,     (TOK), sizeof(ast_type_array_t)))
-#define ast_type_ref_init(TOK)       ((ast_type_ref_t*)       ast_node_init(AST_TYPE_REF,       (TOK), sizeof(ast_type_ref_t)))
-#define ast_type_opt_init(TOK)       ((ast_type_opt_t*)       ast_node_init(AST_TYPE_OPT,       (TOK), sizeof(ast_type_opt_t)))
-#define ast_type_fun_init(TOK)       ((ast_type_fun_t*)       ast_node_init(AST_TYPE_FUN,       (TOK), sizeof(ast_type_fun_t)))
-#define ast_type_gen_init(TOK)       ((ast_type_gen_t*)       ast_node_init(AST_TYPE_GEN,       (TOK), sizeof(ast_type_gen_t)))
-#define ast_type_type_init(TOK)      ((ast_type_t*)           ast_node_init(AST_TYPE_TYPE,      (TOK), sizeof(ast_type_t)))
-#define ast_type_self_init(TOK)      ((ast_type_t*)           ast_node_init(AST_TYPE_SELF,      (TOK), sizeof(ast_type_t)))
-#define ast_type_i8_init(TOK)        ((ast_type_t*)           ast_node_init(AST_TYPE_I8,        (TOK), sizeof(ast_type_t)))
-#define ast_type_i16_init(TOK)       ((ast_type_t*)           ast_node_init(AST_TYPE_I16,       (TOK), sizeof(ast_type_t)))
-#define ast_type_i32_init(TOK)       ((ast_type_t*)           ast_node_init(AST_TYPE_I32,       (TOK), sizeof(ast_type_t)))
-#define ast_type_i64_init(TOK)       ((ast_type_t*)           ast_node_init(AST_TYPE_I64,       (TOK), sizeof(ast_type_t)))
-#define ast_type_isize_init(TOK)     ((ast_type_t*)           ast_node_init(AST_TYPE_ISIZE,     (TOK), sizeof(ast_type_t)))
-#define ast_type_u8_init(TOK)        ((ast_type_t*)           ast_node_init(AST_TYPE_U8,        (TOK), sizeof(ast_type_t)))
-#define ast_type_u16_init(TOK)       ((ast_type_t*)           ast_node_init(AST_TYPE_U16,       (TOK), sizeof(ast_type_t)))
-#define ast_type_u32_init(TOK)       ((ast_type_t*)           ast_node_init(AST_TYPE_U32,       (TOK), sizeof(ast_type_t)))
-#define ast_type_u64_init(TOK)       ((ast_type_t*)           ast_node_init(AST_TYPE_U64,       (TOK), sizeof(ast_type_t)))
-#define ast_type_usize_init(TOK)     ((ast_type_t*)           ast_node_init(AST_TYPE_USIZE,     (TOK), sizeof(ast_type_t)))
-#define ast_type_f32_init(TOK)       ((ast_type_t*)           ast_node_init(AST_TYPE_F32,       (TOK), sizeof(ast_type_t)))
-#define ast_type_f64_init(TOK)       ((ast_type_t*)           ast_node_init(AST_TYPE_F64,       (TOK), sizeof(ast_type_t)))
-#define ast_type_bool_init(TOK)      ((ast_type_t*)           ast_node_init(AST_TYPE_BOOL,      (TOK), sizeof(ast_type_t)))
-#define ast_type_unit_init(TOK)      ((ast_type_t*)           ast_node_init(AST_TYPE_UNIT,      (TOK), sizeof(ast_type_t)))
-#define ast_type_member_init(TOK)    ((ast_type_member_t*)    ast_node_init(AST_TYPE_MEMBER,    (TOK), sizeof(ast_type_member_t)))
-
-#define ast_expr_lit_int_init(TOK)   ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_INT,   (TOK), sizeof(ast_expr_lit_t)))
-#define ast_expr_lit_flt_init(TOK)   ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_FLT,   (TOK), sizeof(ast_expr_lit_t)))
-#define ast_expr_lit_str_init(TOK)   ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_STR,   (TOK), sizeof(ast_expr_lit_t)))
-#define ast_expr_lit_char_init(TOK)  ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_CHAR,  (TOK), sizeof(ast_expr_lit_t)))
-#define ast_expr_lit_bool_init(TOK)  ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_BOOL,  (TOK), sizeof(ast_expr_lit_t)))
-#define ast_expr_lit_null_init(TOK)  ((ast_expr_lit_t*)       ast_node_init(AST_EXPR_LIT_NULL,  (TOK), sizeof(ast_expr_lit_t)))
-#define ast_expr_op_bin_init(TOK)    ((ast_expr_op_bin_t*)    ast_node_init(AST_EXPR_OP,        (TOK), sizeof(ast_expr_op_bin_t)))
-#define ast_expr_op_un_init(TOK)     ((ast_expr_op_un_t*)     ast_node_init(AST_EXPR_OP,        (TOK), sizeof(ast_expr_op_un_t)))
-#define ast_expr_op_call_init(TOK)   ((ast_expr_op_call_t*)   ast_node_init(AST_EXPR_OP,        (TOK), sizeof(ast_expr_op_call_t)))
-
-#define ast_stmt_if_init(TOK)        ((ast_stmt_if_t*)        ast_node_init(AST_STMT_IF,        (TOK), sizeof(ast_stmt_if_t)))
-#define ast_stmt_for_init(TOK)       ((ast_stmt_for_t*)       ast_node_init(AST_STMT_FOR,       (TOK), sizeof(ast_stmt_for_t)))
-#define ast_stmt_while_init(TOK)     ((ast_stmt_while_t*)     ast_node_init(AST_STMT_WHILE,     (TOK), sizeof(ast_stmt_while_t)))
-#define ast_stmt_break_init(TOK)     ((ast_stmt_break_t*)     ast_node_init(AST_STMT_BREAK,     (TOK), sizeof(ast_stmt_break_t)))
-#define ast_stmt_continue_init(TOK)  ((ast_stmt_continue_t*)  ast_node_init(AST_STMT_CONTINUE,  (TOK), sizeof(ast_stmt_continue_t)))
-#define ast_stmt_return_init(TOK)    ((ast_stmt_return_t*)    ast_node_init(AST_STMT_RETURN,    (TOK), sizeof(ast_stmt_return_t)))
-#define ast_stmt_yield_init(TOK)     ((ast_stmt_yield_t*)     ast_node_init(AST_STMT_YIELD,     (TOK), sizeof(ast_stmt_yield_t)))
-#define ast_stmt_block_init(TOK)     ((ast_stmt_block_t*)     ast_node_init(AST_STMT_BLOCK,     (TOK), sizeof(ast_stmt_block_t)))
-#define ast_stmt_expr_init(TOK)      ((ast_stmt_expr_t*)      ast_node_init(AST_STMT_EXPR,      (TOK), sizeof(ast_stmt_expr_t)))
-
-#define ast_decl_var_init(TOK)       ((ast_decl_var_t*)       ast_node_init(AST_DECL_VAR,       (TOK), sizeof(ast_decl_var_t)))
-#define ast_decl_loop_var_init(TOK)  ((ast_decl_loop_var_t*)  ast_node_init(AST_DECL_LOOP_VAR,  (TOK), sizeof(ast_decl_loop_var_t)))
-#define ast_decl_fun_init(TOK)       ((ast_decl_fun_t*)       ast_node_init(AST_DECL_FUN,       (TOK), sizeof(ast_decl_fun_t)))
-#define ast_decl_gen_init(TOK)       ((ast_decl_gen_t*)       ast_node_init(AST_DECL_GEN,       (TOK), sizeof(ast_decl_gen_t)))
-#define ast_decl_struct_init(TOK)    ((ast_decl_struct_t*)    ast_node_init(AST_DECL_STRUCT,    (TOK), sizeof(ast_decl_struct_t)))
-#define ast_decl_union_init(TOK)     ((ast_decl_union_t*)     ast_node_init(AST_DECL_UNION,     (TOK), sizeof(ast_decl_union_t)))
-#define ast_decl_enum_init(TOK)      ((ast_decl_enum_t*)      ast_node_init(AST_DECL_ENUM,      (TOK), sizeof(ast_decl_enum_t)))
-#define ast_decl_mod_init(TOK)       ((ast_decl_mod_t*)       ast_node_init(AST_DECL_MOD,       (TOK), sizeof(ast_decl_mod_t)))
-#define ast_decl_generic_init(TOK)   ((ast_decl_generic_t*)   ast_node_init(AST_DECL_GENERIC,   (TOK), sizeof(ast_decl_generic_t)))
-
-#define ast_param_init(TOK)          ((ast_param_t*)          ast_node_init(AST_PARAM,          (TOK), sizeof(ast_param_t)))
-#define ast_param_default_init(TOK)  ((ast_param_default_t*)  ast_node_init(AST_PARAM_DEFAULT,  (TOK), sizeof(ast_param_default_t)))
-#define ast_param_variadic_init(TOK) ((ast_param_variadic_t*) ast_node_init(AST_PARAM_VARIADIC, (TOK), sizeof(ast_param_variadic_t)))
-#define ast_param_generic_init(TOK)  ((ast_param_generic_t*)  ast_node_init(AST_PARAM_GENERIC,  (TOK), sizeof(ast_param_generic_t)))
-
-#define ast_enumerator_init(TOK)     ((ast_enumerator_t*)     ast_node_init(AST_ENUMERATOR,     (TOK), sizeof(ast_enumerator_t)))
-
-#define ast_prog_init(TOK)           ((ast_prog_t*)           ast_node_init(AST_PROG,           (TOK), sizeof(ast_prog_t)))
+void ast_node_init(ast_node_t* node, ast_kind_t kind, token_t* tok);
 
 #define ast_id_ptr(NODE) (((ast_id_t*)(NODE))->tok->loc->cur)
 #define ast_id_len(NODE) (((ast_id_t*)(NODE))->tok->loc->len)

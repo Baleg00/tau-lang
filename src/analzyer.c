@@ -17,22 +17,16 @@
 
 #include "diagnostics.h"
 
-#include "memtrace.h"
-
-analyzer_t* analyzer_init(void)
+void analyzer_init(analyzer_t* analyzer)
 {
-  analyzer_t* analyzer = (analyzer_t*)malloc(sizeof(analyzer_t));
-  assert(analyzer != NULL);
   analyzer->root = symtable_init(NULL);
   analyzer->ret_types = stack_init();
-  return analyzer;
 }
 
 void analyzer_free(analyzer_t* analyzer)
 {
   symtable_free(analyzer->root);
   stack_free(analyzer->ret_types);
-  free(analyzer);
 }
 
 void analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node)
