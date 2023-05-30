@@ -20,6 +20,510 @@ void ast_node_init(ast_node_t* node, ast_kind_t kind, token_t* tok)
 
 LIST_FOR_EACH_FUNC_DECL(ast_node_free, ast_node_t)
 
+static void ast_type_mut_free(ast_type_mut_t* node)
+{
+  ast_node_t* base_type = node->base_type;
+  typedesc_t* desc = node->desc;
+
+  node->base_type = NULL;
+  node->desc = NULL;
+  
+  ast_node_free(base_type);
+  typedesc_free(desc);
+}
+
+static void ast_type_const_free(ast_type_const_t* node)
+{
+  ast_node_t* base_type = node->base_type;
+  typedesc_t* desc = node->desc;
+
+  node->base_type = NULL;
+  node->desc = NULL;
+  
+  ast_node_free(base_type);
+  typedesc_free(desc);
+}
+
+static void ast_type_ptr_free(ast_type_ptr_t* node)
+{
+  ast_node_t* base_type = node->base_type;
+  typedesc_t* desc = node->desc;
+
+  node->base_type = NULL;
+  node->desc = NULL;
+  
+  ast_node_free(base_type);
+  typedesc_free(desc);
+}
+
+static void ast_type_array_free(ast_type_array_t* node)
+{
+  ast_node_t* base_type = node->base_type;
+  ast_node_t* size = node->size;
+  typedesc_t* desc = node->desc;
+
+  node->base_type = NULL;
+  node->size = NULL;
+  node->desc = NULL;
+  
+  ast_node_free(base_type);
+  ast_node_free(size);
+  typedesc_free(desc);
+}
+
+static void ast_type_ref_free(ast_type_ref_t* node)
+{
+  ast_node_t* base_type = node->base_type;
+  typedesc_t* desc = node->desc;
+
+  node->base_type = NULL;
+  node->desc = NULL;
+  
+  ast_node_free(base_type);
+  typedesc_free(desc);
+}
+
+static void ast_type_opt_free(ast_type_opt_t* node)
+{
+  ast_node_t* base_type = node->base_type;
+  typedesc_t* desc = node->desc;
+
+  node->base_type = NULL;
+  node->desc = NULL;
+  
+  ast_node_free(base_type);
+  typedesc_free(desc);
+}
+
+static void ast_type_fun_free(ast_type_fun_t* node)
+{
+  ast_node_t* return_type = node->return_type;
+  list_t* params = node->params;
+  typedesc_t* desc = node->desc;
+
+  node->return_type = NULL;
+  node->params = NULL;
+  node->desc = NULL;
+
+  ast_node_free(return_type);
+  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(params);
+  typedesc_free(desc);
+}
+
+static void ast_type_gen_free(ast_type_gen_t* node)
+{
+  ast_node_t* yield_type = node->yield_type;
+  list_t* params = node->params;
+  typedesc_t* desc = node->desc;
+
+  node->yield_type = NULL;
+  node->params = NULL;
+  node->desc = NULL;
+
+  ast_node_free(yield_type);
+  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(params);
+  typedesc_free(desc);
+}
+
+static void ast_type_member_free(ast_type_member_t* node)
+{
+  ast_node_t* owner = node->owner;
+  ast_node_t* member = node->member;
+  typedesc_t* desc = node->desc;
+
+  node->owner = NULL;
+  node->member = NULL;
+  node->desc = NULL;
+
+  ast_node_free(owner);
+  ast_node_free(member);
+  typedesc_free(desc);
+}
+
+static void ast_expr_lit_free(ast_expr_lit_t* node)
+{
+  typedesc_t* desc = node->desc;
+
+  node->desc = NULL;
+
+  typedesc_free(desc);
+}
+
+static void ast_expr_op_un_free(ast_expr_op_un_t* node)
+{
+  ast_node_t* param = node->param;
+  typedesc_t* desc = node->desc;
+
+  node->param = NULL;
+  node->desc = NULL;
+
+  ast_node_free(param);
+  typedesc_free(desc);
+}
+
+static void ast_expr_op_bin_free(ast_expr_op_bin_t* node)
+{
+  ast_node_t* lhs = node->lhs;
+  ast_node_t* rhs = node->rhs;
+  typedesc_t* desc = node->desc;
+
+  node->lhs = NULL;
+  node->rhs = NULL;
+  node->desc = NULL;
+
+  ast_node_free(lhs);
+  ast_node_free(rhs);
+  typedesc_free(desc);
+}
+
+static void ast_expr_op_call_free(ast_expr_op_call_t* node)
+{
+  ast_node_t* callee = node->callee;
+  list_t* params = node->params;
+  typedesc_t* desc = node->desc;
+
+  node->callee = NULL;
+  node->params = NULL;
+  node->desc = NULL;
+
+  ast_node_free(callee);
+  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(params);
+  typedesc_free(desc);
+}
+
+static void ast_expr_op_free(ast_expr_op_t* node)
+{
+  if (op_is_unary(node->op_kind))
+    ast_expr_op_un_free((ast_expr_op_un_t*)node);
+  else if (op_is_binary(node->op_kind))
+    ast_expr_op_bin_free((ast_expr_op_bin_t*)node);
+  else if (node->op_kind == OP_CALL)
+    ast_expr_op_call_free((ast_expr_op_call_t*)node);
+  else
+    unreachable();
+}
+
+static void ast_stmt_if_free(ast_stmt_if_t* node)
+{
+  ast_node_t* cond = node->cond;
+  ast_node_t* stmt = node->stmt;
+  ast_node_t* stmt_else = node->stmt_else;
+
+  node->cond = NULL;
+  node->stmt = NULL;
+  node->stmt_else = NULL;
+
+  ast_node_free(cond);
+  ast_node_free(stmt);
+  ast_node_free(stmt_else);
+}
+
+static void ast_stmt_for_free(ast_stmt_for_t* node)
+{
+  ast_node_t* var = node->var;
+  ast_node_t* range = node->range;
+  ast_node_t* stmt = node->stmt;
+
+  node->var = NULL;
+  node->range = NULL;
+  node->stmt = NULL;
+
+  ast_node_free(var);
+  ast_node_free(range);
+  ast_node_free(stmt);
+}
+
+static void ast_stmt_while_free(ast_stmt_while_t* node)
+{
+  ast_node_t* cond = node->cond;
+  ast_node_t* stmt = node->stmt;
+
+  node->cond = NULL;
+  node->stmt = NULL;
+
+  ast_node_free(cond);
+  ast_node_free(stmt);
+}
+
+static void ast_stmt_return_free(ast_stmt_return_t* node)
+{
+  ast_node_t* expr = node->expr;
+
+  node->expr = NULL;
+
+  ast_node_free(expr);
+}
+
+static void ast_stmt_yield_free(ast_stmt_yield_t* node)
+{
+  ast_node_t* expr = node->expr;
+
+  node->expr = NULL;
+
+  ast_node_free(expr);
+}
+
+static void ast_stmt_block_free(ast_stmt_block_t* node)
+{
+  list_t* stmts = node->stmts;
+
+  node->stmts = NULL;
+
+  list_for_each(stmts, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(stmts);
+}
+
+static void ast_stmt_expr_free(ast_stmt_expr_t* node)
+{
+  ast_node_t* expr = node->expr;
+
+  node->expr = NULL;
+
+  ast_node_free(expr);
+}
+
+static void ast_decl_var_free(ast_decl_var_t* node)
+{
+  ast_node_t* id = node->id;
+  ast_node_t* type = node->type;
+  ast_node_t* init = node->init;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->type = NULL;
+  node->init = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  ast_node_free(type);
+  ast_node_free(init);
+  typedesc_free(desc);
+}
+
+static void ast_decl_loop_var_free(ast_decl_loop_var_t* node)
+{
+  ast_node_t* id = node->id;
+  ast_node_t* type = node->type;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->type = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  ast_node_free(type);
+  typedesc_free(desc);
+}
+
+static void ast_decl_fun_free(ast_decl_fun_t* node)
+{
+  ast_node_t* id = node->id;
+  list_t* params = node->params;
+  ast_node_t* return_type = node->return_type;
+  ast_node_t* stmt = node->stmt;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->params = NULL;
+  node->return_type = NULL;
+  node->stmt = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(params);
+  ast_node_free(return_type);
+  ast_node_free(stmt);
+  typedesc_free(desc);
+}
+
+static void ast_decl_gen_free(ast_decl_gen_t* node)
+{
+  ast_node_t* id = node->id;
+  list_t* params = node->params;
+  ast_node_t* yield_type = node->yield_type;
+  ast_node_t* stmt = node->stmt;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->params = NULL;
+  node->yield_type = NULL;
+  node->stmt = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(params);
+  ast_node_free(yield_type);
+  ast_node_free(stmt);
+  typedesc_free(desc);
+}
+
+static void ast_decl_struct_free(ast_decl_struct_t* node)
+{
+  ast_node_t* id = node->id;
+  list_t* members = node->members;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->members = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  list_for_each(members, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(members);
+  typedesc_free(desc);
+}
+
+static void ast_decl_union_free(ast_decl_union_t* node)
+{
+  ast_node_t* id = node->id;
+  list_t* members = node->members;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->members = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  list_for_each(members, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(members);
+  typedesc_free(desc);
+}
+
+static void ast_decl_enum_free(ast_decl_enum_t* node)
+{
+  ast_node_t* id = node->id;
+  list_t* values = node->values;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->values = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  list_for_each(values, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(values);
+  typedesc_free(desc);
+}
+
+static void ast_decl_mod_free(ast_decl_mod_t* node)
+{
+  ast_node_t* id = node->id;
+  list_t* decls = node->decls;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->decls = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  list_for_each(decls, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(decls);
+  typedesc_free(desc);
+}
+
+static void ast_decl_generic_free(ast_decl_generic_t* node)
+{
+  ast_node_t* decl = node->decl;
+  list_t* params = node->params;
+
+  node->decl = NULL;
+  node->params = NULL;
+
+  ast_node_free(decl);
+  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(params);
+}
+
+static void ast_param_free(ast_param_t* node)
+{
+  ast_node_t* id = node->id;
+  ast_node_t* type = node->type;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->type = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  ast_node_free(type);
+  typedesc_free(desc);
+}
+
+static void ast_param_default_free(ast_param_default_t* node)
+{
+  ast_node_t* id = node->id;
+  ast_node_t* type = node->type;
+  ast_node_t* init = node->init;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->type = NULL;
+  node->init = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  ast_node_free(type);
+  ast_node_free(init);
+  typedesc_free(desc);
+}
+
+static void ast_param_variadic_free(ast_param_variadic_t* node)
+{
+  ast_node_t* id = node->id;
+  ast_node_t* type = node->type;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->type = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  ast_node_free(type);
+  typedesc_free(desc);
+}
+
+static void ast_param_generic_free(ast_param_generic_t* node)
+{
+  ast_node_t* id = node->id;
+  ast_node_t* type = node->type;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->type = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  ast_node_free(type);
+  typedesc_free(desc);
+}
+
+static void ast_enumerator_free(ast_enumerator_t* node)
+{
+  ast_node_t* id = node->id;
+  typedesc_t* desc = node->desc;
+
+  node->id = NULL;
+  node->desc = NULL;
+
+  ast_node_free(id);
+  typedesc_free(desc);
+}
+
+static void ast_prog_free(ast_prog_t* node)
+{
+  list_t* decls = node->decls;
+
+  node->decls = NULL;
+
+  list_for_each(decls, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_free(decls);
+}
+
 void ast_node_free(ast_node_t* node)
 {
   if (node == NULL)
@@ -27,66 +531,16 @@ void ast_node_free(ast_node_t* node)
 
   switch (node->kind)
   {
-  case AST_UNKNOWN:
-    break;
-  case AST_ID:
-    break;
-  case AST_TYPE_MUT:
-    ast_node_free(((ast_type_mut_t*)node)->base_type);
-    ((ast_type_mut_t*)node)->base_type = NULL;
-    typedesc_free(((ast_type_mut_t*)node)->desc);
-    ((ast_type_mut_t*)node)->desc = NULL;
-    break;
-  case AST_TYPE_CONST:
-    ast_node_free(((ast_type_const_t*)node)->base_type);
-    ((ast_type_const_t*)node)->base_type = NULL;
-    typedesc_free(((ast_type_const_t*)node)->desc);
-    ((ast_type_const_t*)node)->desc = NULL;
-    break;
-  case AST_TYPE_PTR:
-    ast_node_free(((ast_type_ptr_t*)node)->base_type);
-    ((ast_type_ptr_t*)node)->base_type = NULL;
-    typedesc_free(((ast_type_ptr_t*)node)->desc);
-    ((ast_type_ptr_t*)node)->desc = NULL;
-    break;
-  case AST_TYPE_ARRAY:
-    ast_node_free(((ast_type_array_t*)node)->base_type);
-    ((ast_type_array_t*)node)->base_type = NULL;
-    ast_node_free(((ast_type_array_t*)node)->size);
-    ((ast_type_array_t*)node)->size = NULL;
-    typedesc_free(((ast_type_array_t*)node)->desc);
-    ((ast_type_array_t*)node)->desc = NULL;
-    break;
-  case AST_TYPE_REF:
-    ast_node_free(((ast_type_ref_t*)node)->base_type);
-    ((ast_type_ref_t*)node)->base_type = NULL;
-    typedesc_free(((ast_type_ref_t*)node)->desc);
-    ((ast_type_ref_t*)node)->desc = NULL;
-    break;
-  case AST_TYPE_OPT:
-    ast_node_free(((ast_type_opt_t*)node)->base_type);
-    ((ast_type_opt_t*)node)->base_type = NULL;
-    typedesc_free(((ast_type_opt_t*)node)->desc);
-    ((ast_type_opt_t*)node)->desc = NULL;
-    break;
-  case AST_TYPE_FUN:
-    list_for_each(((ast_type_fun_t*)node)->params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-    list_free(((ast_type_fun_t*)node)->params);
-    ((ast_type_fun_t*)node)->params = NULL;
-    ast_node_free(((ast_type_fun_t*)node)->return_type);
-    ((ast_type_fun_t*)node)->return_type = NULL;
-    typedesc_free(((ast_type_fun_t*)node)->desc);
-    ((ast_type_fun_t*)node)->desc = NULL;
-    break;
-  case AST_TYPE_GEN:
-    list_for_each(((ast_type_gen_t*)node)->params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-    list_free(((ast_type_gen_t*)node)->params);
-    ((ast_type_gen_t*)node)->params = NULL;
-    ast_node_free(((ast_type_gen_t*)node)->yield_type);
-    ((ast_type_gen_t*)node)->yield_type = NULL;
-    typedesc_free(((ast_type_gen_t*)node)->desc);
-    ((ast_type_gen_t*)node)->desc = NULL;
-    break;
+  case AST_UNKNOWN: break;
+  case AST_ID: break;
+  case AST_TYPE_MUT: ast_type_mut_free((ast_type_mut_t*)node); break;
+  case AST_TYPE_CONST: ast_type_const_free((ast_type_const_t*)node); break;
+  case AST_TYPE_PTR: ast_type_ptr_free((ast_type_ptr_t*)node); break;
+  case AST_TYPE_ARRAY: ast_type_array_free((ast_type_array_t*)node); break;
+  case AST_TYPE_REF: ast_type_ref_free((ast_type_ref_t*)node); break;
+  case AST_TYPE_OPT: ast_type_opt_free((ast_type_opt_t*)node); break;
+  case AST_TYPE_FUN: ast_type_fun_free((ast_type_fun_t*)node); break;
+  case AST_TYPE_GEN: ast_type_gen_free((ast_type_gen_t*)node); break;
   case AST_TYPE_TYPE:
   case AST_TYPE_SELF:
   case AST_TYPE_I8:
@@ -102,228 +556,38 @@ void ast_node_free(ast_node_t* node)
   case AST_TYPE_F32:
   case AST_TYPE_F64:
   case AST_TYPE_BOOL:
-  case AST_TYPE_UNIT:
-    break;
-  case AST_TYPE_MEMBER:
-    ast_node_free(((ast_type_member_t*)node)->owner);
-    ((ast_type_member_t*)node)->owner = NULL;
-    ast_node_free(((ast_type_member_t*)node)->member);
-    ((ast_type_member_t*)node)->member = NULL;
-    typedesc_free(((ast_type_member_t*)node)->desc);
-    ((ast_type_member_t*)node)->desc = NULL;
-    break;
+  case AST_TYPE_UNIT: break;
+  case AST_TYPE_MEMBER: ast_type_member_free((ast_type_member_t*)node); break;
   case AST_EXPR_LIT_INT:
   case AST_EXPR_LIT_FLT:
   case AST_EXPR_LIT_STR:
   case AST_EXPR_LIT_CHAR:
   case AST_EXPR_LIT_BOOL:
-  case AST_EXPR_LIT_NULL:
-    typedesc_free(((ast_expr_lit_t*)node)->desc);
-    ((ast_expr_lit_t*)node)->desc = NULL;
-    break;
-  case AST_EXPR_OP:
-    if (op_is_unary(((ast_expr_op_t*)node)->op_kind))
-    {
-      ast_node_free(((ast_expr_op_un_t*)node)->param);
-      ((ast_expr_op_un_t*)node)->param = NULL;
-    }
-    else if (op_is_binary(((ast_expr_op_t*)node)->op_kind))
-    {
-      ast_node_free(((ast_expr_op_bin_t*)node)->lhs);
-      ((ast_expr_op_bin_t*)node)->lhs = NULL;
-      ast_node_free(((ast_expr_op_bin_t*)node)->rhs);
-      ((ast_expr_op_bin_t*)node)->rhs = NULL;
-    }
-    else if (((ast_expr_op_t*)node)->op_kind == OP_CALL)
-    {
-      ast_node_free(((ast_expr_op_call_t*)node)->callee);
-      ((ast_expr_op_call_t*)node)->callee = NULL;
-      list_for_each(((ast_expr_op_call_t*)node)->params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-      list_free(((ast_expr_op_call_t*)node)->params);
-      ((ast_expr_op_call_t*)node)->params = NULL;
-    }
-    typedesc_free(((ast_expr_op_t*)node)->desc);
-    ((ast_expr_op_t*)node)->desc = NULL;
-    break;
-  case AST_STMT_IF:
-    ast_node_free(((ast_stmt_if_t*)node)->cond);
-    ((ast_stmt_if_t*)node)->cond = NULL;
-    ast_node_free(((ast_stmt_if_t*)node)->stmt);
-    ((ast_stmt_if_t*)node)->stmt = NULL;
-    ast_node_free(((ast_stmt_if_t*)node)->stmt_else);
-    ((ast_stmt_if_t*)node)->stmt_else = NULL;
-    break;
-  case AST_STMT_FOR:
-    ast_node_free(((ast_stmt_for_t*)node)->var);
-    ((ast_stmt_for_t*)node)->var = NULL;
-    ast_node_free(((ast_stmt_for_t*)node)->range);
-    ((ast_stmt_for_t*)node)->range = NULL;
-    ast_node_free(((ast_stmt_for_t*)node)->stmt);
-    ((ast_stmt_for_t*)node)->stmt = NULL;
-    break;
-  case AST_STMT_WHILE:
-    ast_node_free(((ast_stmt_while_t*)node)->cond);
-    ((ast_stmt_while_t*)node)->cond = NULL;
-    ast_node_free(((ast_stmt_while_t*)node)->stmt);
-    ((ast_stmt_while_t*)node)->stmt = NULL;
-    break;
-  case AST_STMT_RETURN:
-    ast_node_free(((ast_stmt_return_t*)node)->expr);
-    ((ast_stmt_return_t*)node)->expr = NULL;
-    break;
-  case AST_STMT_YIELD:
-    ast_node_free(((ast_stmt_yield_t*)node)->expr);
-    ((ast_stmt_yield_t*)node)->expr = NULL;
-    break;
-  case AST_STMT_BLOCK:
-    list_for_each(((ast_stmt_block_t*)node)->stmts, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-    list_free(((ast_stmt_block_t*)node)->stmts);
-    ((ast_stmt_block_t*)node)->stmts = NULL;
-    break;
-  case AST_STMT_EXPR:
-    ast_node_free(((ast_stmt_expr_t*)node)->expr);
-    ((ast_stmt_expr_t*)node)->expr = NULL;
-    break;
-  case AST_DECL_VAR:
-    ast_node_free(((ast_decl_var_t*)node)->id);
-    ((ast_decl_var_t*)node)->id = NULL;
-    ast_node_free(((ast_decl_var_t*)node)->type);
-    ((ast_decl_var_t*)node)->type = NULL;
-    ast_node_free(((ast_decl_var_t*)node)->init);
-    ((ast_decl_var_t*)node)->init = NULL;
-    typedesc_free(((ast_decl_var_t*)node)->desc);
-    ((ast_decl_var_t*)node)->desc = NULL;
-    break;
-  case AST_DECL_LOOP_VAR:
-    ast_node_free(((ast_decl_loop_var_t*)node)->id);
-    ((ast_decl_loop_var_t*)node)->id = NULL;
-    ast_node_free(((ast_decl_loop_var_t*)node)->type);
-    ((ast_decl_loop_var_t*)node)->type = NULL;
-    typedesc_free(((ast_decl_loop_var_t*)node)->desc);
-    ((ast_decl_loop_var_t*)node)->desc = NULL;
-    break;
-  case AST_DECL_FUN:
-    ast_node_free(((ast_decl_fun_t*)node)->id);
-    ((ast_decl_fun_t*)node)->id = NULL;
-    if (((ast_decl_fun_t*)node)->params != NULL)
-    {
-      list_for_each(((ast_decl_fun_t*)node)->params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-      list_free(((ast_decl_fun_t*)node)->params);
-      ((ast_decl_fun_t*)node)->params = NULL;
-    }
-    ast_node_free(((ast_decl_fun_t*)node)->return_type);
-    ((ast_decl_fun_t*)node)->return_type = NULL;
-    ast_node_free(((ast_decl_fun_t*)node)->stmt);
-    ((ast_decl_fun_t*)node)->stmt = NULL;
-    typedesc_free(((ast_decl_fun_t*)node)->desc);
-    ((ast_decl_fun_t*)node)->desc = NULL;
-    break;
-  case AST_DECL_GEN:
-    ast_node_free(((ast_decl_gen_t*)node)->id);
-    ((ast_decl_gen_t*)node)->id = NULL;
-    if (((ast_decl_gen_t*)node)->params != NULL)
-    {
-      list_for_each(((ast_decl_gen_t*)node)->params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-      list_free(((ast_decl_gen_t*)node)->params);
-      ((ast_decl_gen_t*)node)->params = NULL;
-    }
-    ast_node_free(((ast_decl_gen_t*)node)->yield_type);
-    ((ast_decl_gen_t*)node)->yield_type = NULL;
-    ast_node_free(((ast_decl_gen_t*)node)->stmt);
-    ((ast_decl_gen_t*)node)->stmt = NULL;
-    typedesc_free(((ast_decl_gen_t*)node)->desc);
-    ((ast_decl_gen_t*)node)->desc = NULL;
-    break;
-  case AST_DECL_STRUCT:
-    ast_node_free(((ast_decl_struct_t*)node)->id);
-    ((ast_decl_struct_t*)node)->id = NULL;
-    list_for_each(((ast_decl_struct_t*)node)->members, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-    list_free(((ast_decl_struct_t*)node)->members);
-    ((ast_decl_struct_t*)node)->members = NULL;
-    typedesc_free(((ast_decl_struct_t*)node)->desc);
-    ((ast_decl_struct_t*)node)->desc = NULL;
-    break;
-  case AST_DECL_UNION:
-    ast_node_free(((ast_decl_union_t*)node)->id);
-    ((ast_decl_union_t*)node)->id = NULL;
-    list_for_each(((ast_decl_union_t*)node)->members, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-    list_free(((ast_decl_union_t*)node)->members);
-    ((ast_decl_union_t*)node)->members = NULL;
-    typedesc_free(((ast_decl_union_t*)node)->desc);
-    ((ast_decl_union_t*)node)->desc = NULL;
-    break;
-  case AST_DECL_ENUM:
-    ast_node_free(((ast_decl_enum_t*)node)->id);
-    ((ast_decl_enum_t*)node)->id = NULL;
-    list_for_each(((ast_decl_enum_t*)node)->values, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-    list_free(((ast_decl_enum_t*)node)->values);
-    ((ast_decl_enum_t*)node)->values = NULL;
-    typedesc_free(((ast_decl_enum_t*)node)->desc);
-    ((ast_decl_enum_t*)node)->desc = NULL;
-    break;
-  case AST_DECL_MOD:
-    ast_node_free(((ast_decl_mod_t*)node)->id);
-    ((ast_decl_mod_t*)node)->id = NULL;
-    list_for_each(((ast_decl_mod_t*)node)->decls, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-    list_free(((ast_decl_mod_t*)node)->decls);
-    ((ast_decl_mod_t*)node)->decls = NULL;
-    typedesc_free(((ast_decl_mod_t*)node)->desc);
-    ((ast_decl_mod_t*)node)->desc = NULL;
-    break;
-  case AST_DECL_GENERIC:
-    list_for_each(((ast_decl_generic_t*)node)->params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-    list_free(((ast_decl_generic_t*)node)->params);
-    ((ast_decl_generic_t*)node)->params = NULL;
-    ast_node_free(((ast_decl_generic_t*)node)->decl);
-    ((ast_decl_generic_t*)node)->decl = NULL;
-    break;
-  case AST_PARAM:
-    ast_node_free(((ast_param_t*)node)->id);
-    ((ast_param_t*)node)->id = NULL;
-    ast_node_free(((ast_param_t*)node)->type);
-    ((ast_param_t*)node)->type = NULL;
-    typedesc_free(((ast_param_t*)node)->desc);
-    ((ast_param_t*)node)->desc = NULL;
-    break;
-  case AST_PARAM_DEFAULT:
-    ast_node_free(((ast_param_default_t*)node)->id);
-    ((ast_param_default_t*)node)->id = NULL;
-    ast_node_free(((ast_param_default_t*)node)->type);
-    ((ast_param_default_t*)node)->type = NULL;
-    ast_node_free(((ast_param_default_t*)node)->init);
-    ((ast_param_default_t*)node)->init = NULL;
-    typedesc_free(((ast_param_default_t*)node)->desc);
-    ((ast_param_default_t*)node)->desc = NULL;
-    break;
-  case AST_PARAM_VARIADIC:
-    ast_node_free(((ast_param_variadic_t*)node)->id);
-    ((ast_param_variadic_t*)node)->id = NULL;
-    ast_node_free(((ast_param_variadic_t*)node)->type);
-    ((ast_param_variadic_t*)node)->type = NULL;
-    typedesc_free(((ast_param_variadic_t*)node)->desc);
-    ((ast_param_variadic_t*)node)->desc = NULL;
-    break;
-  case AST_PARAM_GENERIC:
-    ast_node_free(((ast_param_generic_t*)node)->id);
-    ((ast_param_generic_t*)node)->id = NULL;
-    ast_node_free(((ast_param_generic_t*)node)->type);
-    ((ast_param_generic_t*)node)->type = NULL;
-    typedesc_free(((ast_param_generic_t*)node)->desc);
-    ((ast_param_generic_t*)node)->desc = NULL;
-    break;
-  case AST_ENUMERATOR:
-    ast_node_free(((ast_enumerator_t*)node)->id);
-    ((ast_enumerator_t*)node)->id = NULL;
-    typedesc_free(((ast_enumerator_t*)node)->desc);
-    ((ast_enumerator_t*)node)->desc = NULL;
-    break;
-  case AST_PROG:
-    list_for_each(((ast_prog_t*)node)->decls, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
-    list_free(((ast_prog_t*)node)->decls);
-    ((ast_prog_t*)node)->decls = NULL;
-    break;
-  default:
-    unreachable();
+  case AST_EXPR_LIT_NULL: ast_expr_lit_free((ast_expr_lit_t*)node); break;
+  case AST_EXPR_OP: ast_expr_op_free((ast_expr_op_t*)node); break;
+  case AST_STMT_IF: ast_stmt_if_free((ast_stmt_if_t*)node); break;
+  case AST_STMT_FOR: ast_stmt_for_free((ast_stmt_for_t*)node); break;
+  case AST_STMT_WHILE: ast_stmt_while_free((ast_stmt_while_t*)node); break;
+  case AST_STMT_RETURN: ast_stmt_return_free((ast_stmt_return_t*)node); break;
+  case AST_STMT_YIELD: ast_stmt_yield_free((ast_stmt_yield_t*)node); break;
+  case AST_STMT_BLOCK: ast_stmt_block_free((ast_stmt_block_t*)node); break;
+  case AST_STMT_EXPR: ast_stmt_expr_free((ast_stmt_expr_t*)node); break;
+  case AST_DECL_VAR: ast_decl_var_free((ast_decl_var_t*)node); break;
+  case AST_DECL_LOOP_VAR: ast_decl_loop_var_free((ast_decl_loop_var_t*)node); break;
+  case AST_DECL_FUN: ast_decl_fun_free((ast_decl_fun_t*)node); break;
+  case AST_DECL_GEN: ast_decl_gen_free((ast_decl_gen_t*)node); break;
+  case AST_DECL_STRUCT: ast_decl_struct_free((ast_decl_struct_t*)node); break;
+  case AST_DECL_UNION: ast_decl_union_free((ast_decl_union_t*)node); break;
+  case AST_DECL_ENUM: ast_decl_enum_free((ast_decl_enum_t*)node); break;
+  case AST_DECL_MOD: ast_decl_mod_free((ast_decl_mod_t*)node); break;
+  case AST_DECL_GENERIC: ast_decl_generic_free((ast_decl_generic_t*)node); break;
+  case AST_PARAM: ast_param_free((ast_param_t*)node); break;
+  case AST_PARAM_DEFAULT: ast_param_default_free((ast_param_default_t*)node); break;
+  case AST_PARAM_VARIADIC: ast_param_variadic_free((ast_param_variadic_t*)node); break;
+  case AST_PARAM_GENERIC: ast_param_generic_free((ast_param_generic_t*)node); break;
+  case AST_ENUMERATOR: ast_enumerator_free((ast_enumerator_t*)node); break;
+  case AST_PROG: ast_prog_free((ast_prog_t*)node); break;
+  default: unreachable();
   }
 }
 

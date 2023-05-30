@@ -29,7 +29,7 @@ struct list_s
 
 /** Utility macro iterating over a list. */
 #define LIST_FOR_LOOP(VAR, LIST)\
-  for (list_node_t* (VAR) = list_front_node((LIST)); (VAR) != NULL; (VAR) = list_node_next((VAR)))
+  for (list_node_t* (VAR) = (LIST) == NULL ? NULL : list_front_node((LIST)); (VAR) != NULL; (VAR) = list_node_next((VAR)))
 
 /** Utility macro for creating unique names for list_for_each compatible wrapper functions. */
 #define LIST_FOR_EACH_FUNC_NAME(FUNC)\

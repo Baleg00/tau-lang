@@ -374,14 +374,13 @@ size_t typedesc_print(FILE* stream, typedesc_t* type)
   case TYPEDESC_FUN:
     count += (size_t)fprintf(stream, "fun(");
 
-    if (((typedesc_fun_t*)type)->param_types != NULL)
-      LIST_FOR_LOOP(it, ((typedesc_fun_t*)type)->param_types)
-      {
-        count += typedesc_print(stream, (typedesc_t*)list_node_get(it));
+    LIST_FOR_LOOP(it, ((typedesc_fun_t*)type)->param_types)
+    {
+      count += typedesc_print(stream, (typedesc_t*)list_node_get(it));
 
-        if (list_node_next(it) != NULL)
-          count += (size_t)fprintf(stream, ", ");
-      }
+      if (list_node_next(it) != NULL)
+        count += (size_t)fprintf(stream, ", ");
+    }
 
     count += (size_t)fprintf(stream, "): ");
     count += typedesc_print(stream, ((typedesc_fun_t*)type)->return_type);
@@ -389,14 +388,13 @@ size_t typedesc_print(FILE* stream, typedesc_t* type)
   case TYPEDESC_GEN:
     count += (size_t)fprintf(stream, "gen(");
 
-    if (((typedesc_gen_t*)type)->param_types != NULL)
-      LIST_FOR_LOOP(it, ((typedesc_gen_t*)type)->param_types)
-      {
-        count += typedesc_print(stream, (typedesc_t*)list_node_get(it));
+    LIST_FOR_LOOP(it, ((typedesc_gen_t*)type)->param_types)
+    {
+      count += typedesc_print(stream, (typedesc_t*)list_node_get(it));
 
-        if (list_node_next(it) != NULL)
-          count += (size_t)fprintf(stream, ", ");
-      }
+      if (list_node_next(it) != NULL)
+        count += (size_t)fprintf(stream, ", ");
+    }
 
     count += (size_t)fprintf(stream, "): ");
     count += typedesc_print(stream, ((typedesc_gen_t*)type)->yield_type);

@@ -195,10 +195,15 @@ bool shyd_parse_call(shyd_t* shyd)
 
   parser_expect(shyd->par, TOK_PUNCT_PAREN_LEFT);
   
-  node->params = parser_parse_delimited_list(shyd->par, TOK_PUNCT_COMMA, parser_parse_expr);
-  
-  parser_expect(shyd->par, TOK_PUNCT_PAREN_RIGHT);
+  node->params = NULL;
 
+  if (!parser_consume(shyd->par, TOK_PUNCT_PAREN_RIGHT))
+  {
+    node->params = parser_parse_delimited_list(shyd->par, TOK_PUNCT_COMMA, parser_parse_expr);
+
+    parser_expect(shyd->par, TOK_PUNCT_PAREN_RIGHT);
+  }
+  
   shyd_flush_for_op(shyd, OP_CALL);
 
   shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);

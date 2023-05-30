@@ -279,20 +279,30 @@ void analyzer_visit_expr_op_call(analyzer_t* analyzer, symtable_t* table, ast_ex
 
   if (callee_desc->kind == TYPEDESC_FUN)
   {
-    if (node->params != NULL && ((typedesc_fun_t*)callee_desc)->param_types == NULL)
-      report_error_too_many_arguments(node->tok->loc);
-    
-    if (node->params == NULL && ((typedesc_fun_t*)callee_desc)->param_types != NULL)
-      report_error_too_few_arguments(node->tok->loc);
-
-    if (list_size(node->params) > list_size(((typedesc_fun_t*)callee_desc)->param_types))
-      report_error_too_many_arguments(node->tok->loc);
-    
-    if (list_size(node->params) < list_size(((typedesc_fun_t*)callee_desc)->param_types))
-      report_error_too_few_arguments(node->tok->loc);
-
     param_types = ((typedesc_fun_t*)callee_desc)->param_types;
     return_type = ((typedesc_fun_t*)callee_desc)->return_type;
+
+    if (node->params == NULL)
+    {
+      if (param_types != NULL && list_size(param_types) != 0)
+        report_error_too_few_arguments(node->tok->loc);
+    }
+    else
+    {
+      if (param_types == NULL)
+      {
+        if (list_size(node->params) != 0)
+          report_error_too_many_arguments(node->tok->loc);
+      }
+      else
+      {
+        if (list_size(node->params) < list_size(param_types))
+          report_error_too_few_arguments(node->tok->loc);
+
+        if (list_size(node->params) > list_size(param_types))
+          report_error_too_many_arguments(node->tok->loc);
+      }
+    }
   }
   else if (callee_desc->kind == TYPEDESC_GEN)
   {
@@ -1018,9 +1028,8 @@ void analyzer_visit_decl_generic(analyzer_t* analyzer, symtable_t* table, ast_de
 {
   symtable_t* generic_table = symtable_init(table);
 
-  if (node->params != NULL)
-    LIST_FOR_LOOP(it, node->params)
-      analyzer_visit_param_generic(analyzer, generic_table, (ast_param_generic_t*)list_node_get(it));
+  LIST_FOR_LOOP(it, node->params)
+    analyzer_visit_param_generic(analyzer, generic_table, (ast_param_generic_t*)list_node_get(it));
 
   analyzer_visit_decl(analyzer, generic_table, (ast_decl_t*)node->decl);
 }
