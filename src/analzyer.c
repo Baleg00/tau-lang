@@ -17,8 +17,11 @@
 
 #include "diagnostics.h"
 
-void analyzer_init(analyzer_t* analyzer)
+#include "arena.h"
+
+void analyzer_init(arena_t* arena, analyzer_t* analyzer)
 {
+  analyzer->arena = arena;
   analyzer->root = symtable_init(NULL);
   analyzer->ret_types = stack_init();
 }
@@ -107,13 +110,13 @@ void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* table, ast_e
     if (param_desc->kind != TYPEDESC_PTR)
       report_error_expected_ptr_type(node->tok->loc);
     
-    node->desc = typedesc_make_ref(((typedesc_ptr_t*)param_desc)->base_type);
+    node->desc = typedesc_make_ref(analyzer->arena, ((typedesc_ptr_t*)param_desc)->base_type);
     return;
   case OP_ADDR:
     if (param_desc->kind != TYPEDESC_REF)
       report_error_expected_reference_type(node->tok->loc);
 
-    node->desc = typedesc_make_ptr(((typedesc_ref_t*)param_desc)->base_type);
+    node->desc = typedesc_make_ptr(analyzer->arena, ((typedesc_ref_t*)param_desc)->base_type);
     return;
   default:
     unreachable();
@@ -222,7 +225,7 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* table, ast_
       if (!typedesc_is_integer(rhs_desc))
         report_error_expected_integer_type(node->rhs->tok->loc);
 
-      node->desc = typedesc_make_ref(((typedesc_array_t*)lhs_desc)->base_type);
+      node->desc = typedesc_make_ref(analyzer->arena, ((typedesc_array_t*)lhs_desc)->base_type);
       break;
     case OP_ASSIGN:
     case OP_ARIT_ADD_ASSIGN:
@@ -256,7 +259,10 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* table, ast_
       if (!typedesc_is_same(lhs_desc, rhs_desc))
         report_error_type_mismatch(node->tok->loc, lhs_desc, rhs_desc);
 
-      typedesc_gen_t* range_type = typedesc_gen_init();
+      typedesc_gen_t* range_type = (typedesc_gen_t*)arena_malloc(analyzer->arena, sizeof(typedesc_gen_t));
+      assert(range_type != NULL);
+      typedesc_init((typedesc_t*)range_type, TYPEDESC_GEN, 0, 0);
+
       range_type->param_types = NULL;
       range_type->yield_type = lhs_desc;
 
@@ -483,8 +489,12 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_exp
     break;
   case AST_EXPR_LIT_STR:
   {
-    typedesc_ptr_t* str_type = typedesc_ptr_init();
+    typedesc_ptr_t* str_type = (typedesc_ptr_t*)arena_malloc(analyzer->arena, sizeof(typedesc_ptr_t));
+    assert(str_type != NULL);
+    typedesc_init((typedesc_t*)str_type, TYPEDESC_PTR, TYPEDESC_PTR_SIZE, TYPEDESC_PTR_ALIGN);
+
     str_type->base_type = typedesc_builtin(TYPEDESC_U8);
+    
     node->desc = (typedesc_t*)str_type;
     break;
   }
@@ -812,9 +822,11 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_decl_f
 {
   symtable_t* fun_table = symtable_init(table);
 
-  typedesc_fun_t* fun_desc = typedesc_fun_init();
-  fun_desc->size = TYPEDESC_PTR_SIZE;
-  fun_desc->align = TYPEDESC_PTR_SIZE;
+  typedesc_fun_t* fun_desc = (typedesc_fun_t*)arena_malloc(analyzer->arena, sizeof(typedesc_fun_t));
+  assert(fun_desc != NULL);
+  typedesc_init((typedesc_t*)fun_desc, TYPEDESC_FUN, TYPEDESC_PTR_SIZE, TYPEDESC_PTR_ALIGN);
+
+  fun_desc->param_types = NULL;
 
   if (node->params != NULL)
   {
@@ -851,9 +863,11 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_decl_g
 {
   symtable_t* gen_table = symtable_init(table);
 
-  typedesc_gen_t* gen_desc = typedesc_gen_init();
-  gen_desc->size = TYPEDESC_PTR_SIZE;
-  gen_desc->align = TYPEDESC_PTR_SIZE;
+  typedesc_gen_t* gen_desc = (typedesc_gen_t*)arena_malloc(analyzer->arena, sizeof(typedesc_gen_t));
+  assert(gen_desc != NULL);
+  typedesc_init((typedesc_t*)gen_desc, TYPEDESC_GEN, TYPEDESC_PTR_SIZE, TYPEDESC_PTR_ALIGN);
+
+  gen_desc->param_types = NULL;
 
   if (node->params != NULL)
   {
@@ -902,10 +916,11 @@ void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_dec
   symtable_t* struct_table = symtable_init(table);
   struct_sym->scope = struct_table;
 
-  typedesc_struct_t* struct_desc = typedesc_struct_init();
+  typedesc_struct_t* struct_desc = (typedesc_struct_t*)arena_malloc(analyzer->arena, sizeof(typedesc_struct_t));
+  assert(struct_desc != NULL);
+  typedesc_init((typedesc_t*)struct_desc, TYPEDESC_STRUCT, 0, 1);
+
   struct_desc->node = (ast_decl_t*)node;
-  struct_desc->size = 0;
-  struct_desc->align = 1;
   struct_desc->member_types = list_init();
 
   LIST_FOR_LOOP(it, node->members)
@@ -942,10 +957,11 @@ void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_decl
   symtable_t* union_table = symtable_init(table);
   union_sym->scope = union_table;
 
-  typedesc_union_t* union_desc = typedesc_union_init();
+  typedesc_union_t* union_desc = (typedesc_union_t*)arena_malloc(analyzer->arena, sizeof(typedesc_union_t));
+  assert(union_desc != NULL);
+  typedesc_init((typedesc_t*)union_desc, TYPEDESC_UNION, 0, 1);
+
   union_desc->node = (ast_decl_t*)node;
-  union_desc->size = 0;
-  union_desc->align = 1;
   union_desc->member_types = list_init();
 
   LIST_FOR_LOOP(it, node->members)
@@ -980,10 +996,11 @@ void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_decl_
   symtable_t* enum_table = symtable_init(table);
   enum_sym->scope = enum_table;
 
-  typedesc_enum_t* enum_desc = typedesc_enum_init();
+  typedesc_enum_t* enum_desc = (typedesc_enum_t*)arena_malloc(analyzer->arena, sizeof(typedesc_enum_t));
+  assert(enum_desc != NULL);
+  typedesc_init((typedesc_t*)enum_desc, TYPEDESC_ENUM, typedesc_builtin(TYPEDESC_I32)->size, typedesc_builtin(TYPEDESC_I32)->align);
+
   enum_desc->node = (ast_decl_t*)node;
-  enum_desc->size = typedesc_builtin(TYPEDESC_I32)->size;
-  enum_desc->align = typedesc_builtin(TYPEDESC_I32)->align;
 
   LIST_FOR_LOOP(it, node->values)
     analyzer_visit_enumerator(analyzer, enum_table, enum_sym, (ast_enumerator_t*)list_node_get(it));
@@ -1010,7 +1027,10 @@ void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* table, ast_decl_m
     mod_sym->scope = mod_table;
   }
 
-  typedesc_mod_t* mod_desc = typedesc_mod_init();
+  typedesc_mod_t* mod_desc = (typedesc_mod_t*)arena_malloc(analyzer->arena, sizeof(typedesc_mod_t));
+  assert(mod_desc != NULL);
+  typedesc_init((typedesc_t*)mod_desc, TYPEDESC_MOD, 0, 0);
+  
   mod_desc->node = (ast_decl_t*)node;
   mod_desc->member_types = list_init();
 

@@ -16,6 +16,9 @@
 /** Platform specific byte size of a pointer. */
 #define TYPEDESC_PTR_SIZE sizeof(void*)
 
+/** Platform specific alignment of a pointer. */
+#define TYPEDESC_PTR_ALIGN sizeof(void*)
+
 /** Utility macro which expands to fields that all types must have. */
 #define TYPEDESC_HEADER\
   struct\
@@ -138,13 +141,14 @@ struct typedesc_mod_s
 #undef TYPEDESC_HEADER
 
 /**
- * \brief Initializes a new type.
+ * \brief Initializes a type instance.
  * 
+ * \param[out] desc Type instance to be initialized.
  * \param[in] kind Type kind.
- * \param[in] size Size of type in bytes.
- * \returns New type.
+ * \param[in] size Type size in bytes.
+ * \param[in] align Type memory alignment.
 */
-typedesc_t* typedesc_init(typedesc_kind_t kind, size_t size);
+void typedesc_init(typedesc_t* type, typedesc_kind_t kind, size_t size, size_t align);
 
 /**
  * \brief Returns a built-in type.
@@ -156,35 +160,6 @@ typedesc_t* typedesc_init(typedesc_kind_t kind, size_t size);
  * \returns Built-in type.
 */
 typedesc_t* typedesc_builtin(typedesc_kind_t kind);
-
-#define typedesc_mut_init()      ((typedesc_mut_t*)    typedesc_init(TYPEDESC_MUT,    sizeof(typedesc_mut_t)))
-#define typedesc_const_init()    ((typedesc_const_t*)  typedesc_init(TYPEDESC_CONST,  sizeof(typedesc_const_t)))
-#define typedesc_ptr_init()      ((typedesc_ptr_t*)    typedesc_init(TYPEDESC_PTR,    sizeof(typedesc_ptr_t)))
-#define typedesc_array_init()    ((typedesc_array_t*)  typedesc_init(TYPEDESC_ARRAY,  sizeof(typedesc_array_t)))
-#define typedesc_ref_init()      ((typedesc_ref_t*)    typedesc_init(TYPEDESC_REF,    sizeof(typedesc_ref_t)))
-#define typedesc_opt_init()      ((typedesc_opt_t*)    typedesc_init(TYPEDESC_OPT,    sizeof(typedesc_opt_t)))
-#define typedesc_fun_init()      ((typedesc_fun_t*)    typedesc_init(TYPEDESC_FUN,    sizeof(typedesc_fun_t)))
-#define typedesc_gen_init()      ((typedesc_gen_t*)    typedesc_init(TYPEDESC_GEN,    sizeof(typedesc_gen_t)))
-#define typedesc_type_init()     (typedesc_builtin(TYPEDESC_TYPE))
-#define typedesc_i8_init()       (typedesc_builtin(TYPEDESC_I8))
-#define typedesc_i16_init()      (typedesc_builtin(TYPEDESC_I16))
-#define typedesc_i32_init()      (typedesc_builtin(TYPEDESC_I32))
-#define typedesc_i64_init()      (typedesc_builtin(TYPEDESC_I64))
-#define typedesc_isize_init()    (typedesc_builtin(TYPEDESC_ISIZE))
-#define typedesc_u8_init()       (typedesc_builtin(TYPEDESC_U8))
-#define typedesc_u16_init()      (typedesc_builtin(TYPEDESC_U16))
-#define typedesc_u32_init()      (typedesc_builtin(TYPEDESC_U32))
-#define typedesc_u64_init()      (typedesc_builtin(TYPEDESC_U64))
-#define typedesc_usize_init()    (typedesc_builtin(TYPEDESC_USIZE))
-#define typedesc_f32_init()      (typedesc_builtin(TYPEDESC_F32))
-#define typedesc_f64_init()      (typedesc_builtin(TYPEDESC_F64))
-#define typedesc_bool_init()     (typedesc_builtin(TYPEDESC_BOOL))
-#define typedesc_unit_init()     (typedesc_builtin(TYPEDESC_UNIT))
-#define typedesc_null_init()     (typedesc_builtin(TYPEDESC_NULL))
-#define typedesc_struct_init()   ((typedesc_struct_t*) typedesc_init(TYPEDESC_STRUCT, sizeof(typedesc_struct_t)))
-#define typedesc_union_init()    ((typedesc_union_t*)  typedesc_init(TYPEDESC_UNION,  sizeof(typedesc_union_t)))
-#define typedesc_enum_init()     ((typedesc_enum_t*)   typedesc_init(TYPEDESC_ENUM,   sizeof(typedesc_enum_t)))
-#define typedesc_mod_init()      ((typedesc_mod_t*)    typedesc_init(TYPEDESC_MOD,    sizeof(typedesc_mod_t)))
 
 /**
  * \brief Destroys a type.
@@ -286,18 +261,20 @@ typedesc_t* typedesc_make_signed(typedesc_t* type);
 /**
  * \brief Adds a pointer to a type.
  * 
+ * \param[in] arena Arena allocator to be used.
  * \param[in] type Type to be pointed to.
  * \returns Pointer type.
 */
-typedesc_t* typedesc_make_ptr(typedesc_t* type);
+typedesc_t* typedesc_make_ptr(arena_t* arena, typedesc_t* type);
 
 /**
  * \brief Adds a reference to a type.
  * 
+ * \param[in] arena Arena allocator to be used.
  * \param[in] type Type to be referenced.
  * \returns Reference type.
 */
-typedesc_t* typedesc_make_ref(typedesc_t* type);
+typedesc_t* typedesc_make_ref(arena_t* arena, typedesc_t* type);
 
 /**
  * \brief Removes a reference from a type.

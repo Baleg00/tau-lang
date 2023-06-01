@@ -207,7 +207,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     log_trace("main", "(%s) Semantic analysis.", input_file_name);
 
     analyzer_t analyzer;
-    analyzer_init(&analyzer);
+    analyzer_init(parser_arena, &analyzer);
     time_it(analyzer, analyzer_analyze(&analyzer, (ast_node_t*)&root));
 
     if (compiler->flags.dump_ast_flat)

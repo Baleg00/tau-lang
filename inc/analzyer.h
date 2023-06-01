@@ -5,11 +5,13 @@
 
 struct analyzer_s
 {
+  arena_t* arena;
+
   symtable_t* root;
   stack_t* ret_types;
 };
 
-void analyzer_init(analyzer_t* analyzer);
+void analyzer_init(arena_t* arena, analyzer_t* analyzer);
 void analyzer_free(analyzer_t* analyzer);
 
 void analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* table, ast_expr_op_bin_t* node);

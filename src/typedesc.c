@@ -9,18 +9,13 @@
 #include "op.h"
 #include "ast.h"
 
-#include "memtrace.h"
+#include "arena.h"
 
-typedesc_t* typedesc_init(typedesc_kind_t kind, size_t size)
+void typedesc_init(typedesc_t* desc, typedesc_kind_t kind, size_t size, size_t align)
 {
-  typedesc_t* desc = (typedesc_t*)calloc(1, size);
-  assert(desc != NULL);
-
   desc->kind = kind;
-  desc->size = 0;
-  desc->align = 0;
-  
-  return desc;
+  desc->size = size;
+  desc->align = align;
 }
 
 typedesc_t* typedesc_builtin(typedesc_kind_t kind)
@@ -68,6 +63,116 @@ typedesc_t* typedesc_builtin(typedesc_kind_t kind)
 
 LIST_FOR_EACH_FUNC_DECL(typedesc_free, typedesc_t)
 
+static void typedesc_free_mut(typedesc_mut_t* type)
+{
+  typedesc_t* base_type = type->base_type;
+
+  type->base_type = NULL;
+
+  typedesc_free(base_type);
+}
+
+static void typedesc_free_const(typedesc_const_t* type)
+{
+  typedesc_t* base_type = type->base_type;
+
+  type->base_type = NULL;
+
+  typedesc_free(base_type);
+}
+
+static void typedesc_free_ptr(typedesc_ptr_t* type)
+{
+  typedesc_t* base_type = type->base_type;
+
+  type->base_type = NULL;
+
+  typedesc_free(base_type);
+}
+
+static void typedesc_free_array(typedesc_array_t* type)
+{
+  typedesc_t* base_type = type->base_type;
+
+  type->base_type = NULL;
+
+  typedesc_free(base_type);
+}
+
+static void typedesc_free_ref(typedesc_ref_t* type)
+{
+  typedesc_t* base_type = type->base_type;
+
+  type->base_type = NULL;
+
+  typedesc_free(base_type);
+}
+
+static void typedesc_free_opt(typedesc_opt_t* type)
+{
+  typedesc_t* base_type = type->base_type;
+
+  type->base_type = NULL;
+
+  typedesc_free(base_type);
+}
+
+static void typedesc_free_fun(typedesc_fun_t* type)
+{
+  list_t* param_types = type->param_types;
+  typedesc_t* return_type = type->return_type;
+
+  type->param_types = NULL;
+  type->return_type = NULL;
+
+  list_for_each(param_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_free(param_types);
+  typedesc_free(return_type);
+}
+
+static void typedesc_free_gen(typedesc_gen_t* type)
+{
+  list_t* param_types = type->param_types;
+  typedesc_t* yield_type = type->yield_type;
+
+  type->param_types = NULL;
+  type->yield_type = NULL;
+
+  list_for_each(param_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_free(param_types);
+  typedesc_free(yield_type);
+}
+
+static void typedesc_free_struct(typedesc_struct_t* type)
+{
+  list_t* member_types = type->member_types;
+
+  type->member_types = NULL;
+
+  list_for_each(member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_free(member_types);
+}
+
+static void typedesc_free_union(typedesc_union_t* type)
+{
+  list_t* member_types = type->member_types;
+
+  type->member_types = NULL;
+
+  list_for_each(member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_free(member_types);
+}
+
+static void typedesc_free_mod(typedesc_mod_t* type)
+{
+  list_t* member_types = type->member_types;
+
+  type->member_types = NULL;
+
+  list_for_each(member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_free(member_types);
+}
+
 void typedesc_free(typedesc_t* type)
 {
   if (type == NULL)
@@ -75,42 +180,14 @@ void typedesc_free(typedesc_t* type)
 
   switch (type->kind)
   {
-  case TYPEDESC_MUT:
-    typedesc_free(((typedesc_mut_t*)type)->base_type);
-    break;
-  case TYPEDESC_CONST:
-    typedesc_free(((typedesc_const_t*)type)->base_type);
-    break;
-  case TYPEDESC_PTR:
-    typedesc_free(((typedesc_ptr_t*)type)->base_type);
-    break;
-  case TYPEDESC_ARRAY:
-    typedesc_free(((typedesc_array_t*)type)->base_type);
-    break;
-  case TYPEDESC_REF:
-    typedesc_free(((typedesc_ref_t*)type)->base_type);
-    break;
-  case TYPEDESC_OPT:
-    typedesc_free(((typedesc_opt_t*)type)->base_type);
-    break;
-  case TYPEDESC_FUN:
-    if (((typedesc_fun_t*)type)->param_types != NULL)
-    {
-      list_for_each(((typedesc_fun_t*)type)->param_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
-      list_free(((typedesc_fun_t*)type)->param_types);
-    }
-
-    typedesc_free(((typedesc_fun_t*)type)->return_type);
-    break;
-  case TYPEDESC_GEN:
-    if (((typedesc_gen_t*)type)->param_types != NULL)
-    {
-      list_for_each(((typedesc_gen_t*)type)->param_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
-      list_free(((typedesc_gen_t*)type)->param_types);
-    }
-
-    typedesc_free(((typedesc_gen_t*)type)->yield_type);
-    break;
+  case TYPEDESC_MUT: typedesc_free_mut((typedesc_mut_t*)type); break;
+  case TYPEDESC_CONST: typedesc_free_const((typedesc_const_t*)type); break;
+  case TYPEDESC_PTR: typedesc_free_ptr((typedesc_ptr_t*)type); break;
+  case TYPEDESC_ARRAY: typedesc_free_array((typedesc_array_t*)type); break;
+  case TYPEDESC_REF: typedesc_free_ref((typedesc_ref_t*)type); break;
+  case TYPEDESC_OPT: typedesc_free_opt((typedesc_opt_t*)type); break;
+  case TYPEDESC_FUN: typedesc_free_fun((typedesc_fun_t*)type); break;
+  case TYPEDESC_GEN: typedesc_free_gen((typedesc_gen_t*)type); break;
   case TYPEDESC_TYPE:
   case TYPEDESC_I8:
   case TYPEDESC_I16:
@@ -126,36 +203,13 @@ void typedesc_free(typedesc_t* type)
   case TYPEDESC_F64:
   case TYPEDESC_BOOL:
   case TYPEDESC_UNIT:
-  case TYPEDESC_NULL:
-    return;
-  case TYPEDESC_STRUCT:
-    if (((typedesc_struct_t*)type)->member_types != NULL)
-    {
-      list_for_each(((typedesc_struct_t*)type)->member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
-      list_free(((typedesc_struct_t*)type)->member_types);
-    }
-    break;
-  case TYPEDESC_UNION:
-    if (((typedesc_union_t*)type)->member_types != NULL)
-    {
-      list_for_each(((typedesc_union_t*)type)->member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
-      list_free(((typedesc_union_t*)type)->member_types);
-    }
-    break;
-  case TYPEDESC_ENUM:
-    break;
-  case TYPEDESC_MOD:
-    if (((typedesc_mod_t*)type)->member_types != NULL)
-    {
-      list_for_each(((typedesc_mod_t*)type)->member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
-      list_free(((typedesc_mod_t*)type)->member_types);
-    }
-    break;
-  default:
-    unreachable();
+  case TYPEDESC_NULL: break;
+  case TYPEDESC_STRUCT: typedesc_free_struct((typedesc_struct_t*)type); break;
+  case TYPEDESC_UNION: typedesc_free_union((typedesc_union_t*)type); break;
+  case TYPEDESC_ENUM: break;
+  case TYPEDESC_MOD: typedesc_free_mod((typedesc_mod_t*)type); break;
+  default: unreachable();
   }
-
-  free(type);
 }
 
 bool typedesc_is_same_fun(typedesc_fun_t* lhs, typedesc_fun_t* rhs)
@@ -308,17 +362,25 @@ typedesc_t* typedesc_make_signed(typedesc_t* type)
   }
 }
 
-typedesc_t* typedesc_make_ptr(typedesc_t* type)
+typedesc_t* typedesc_make_ptr(arena_t* arena, typedesc_t* type)
 {
-  typedesc_ptr_t* ptr_type = typedesc_ptr_init();
+  typedesc_ptr_t* ptr_type = (typedesc_ptr_t*)arena_malloc(arena, sizeof(typedesc_ptr_t));
+  assert(ptr_type != NULL);
+  typedesc_init((typedesc_t*)ptr_type, TYPEDESC_PTR, TYPEDESC_PTR_SIZE, TYPEDESC_PTR_ALIGN);
+  
   ptr_type->base_type = type;
+  
   return (typedesc_t*)ptr_type;
 }
 
-typedesc_t* typedesc_make_ref(typedesc_t* type)
+typedesc_t* typedesc_make_ref(arena_t* arena, typedesc_t* type)
 {
-  typedesc_ref_t* ref_type = typedesc_ref_init();
+  typedesc_ref_t* ref_type = (typedesc_ref_t*)arena_malloc(arena, sizeof(typedesc_ref_t));
+  assert(ref_type != NULL);
+  typedesc_init((typedesc_t*)ref_type, TYPEDESC_REF, type->size, type->align);
+
   ref_type->base_type = type;
+  
   return (typedesc_t*)ref_type;
 }
 
