@@ -191,15 +191,16 @@ void* list_pop_back(list_t* list)
 
 list_node_t* list_insert_before(list_node_t* node, void* data)
 {
-  list_node_t* new_node = list_node_init(data);
-
   if (node->owner->head == node)
-    return list_push_front(node->owner, new_node);
+    return list_push_front(node->owner, data);
+
+  list_node_t* new_node = list_node_init(data);
 
   new_node->owner = node->owner;
   new_node->prev = node->prev;
   new_node->next = node;
 
+  node->prev->next = new_node;
   node->prev = new_node;
 
   ++node->owner->len;
@@ -209,15 +210,16 @@ list_node_t* list_insert_before(list_node_t* node, void* data)
 
 list_node_t* list_insert_after(list_node_t* node, void* data)
 {
-  list_node_t* new_node = list_node_init(data);
-
   if (node->owner->tail == node)
-    return list_push_back(node->owner, new_node);
+    return list_push_back(node->owner, data);
+
+  list_node_t* new_node = list_node_init(data);
 
   new_node->owner = node->owner;
   new_node->prev = node;
   new_node->next = node->next;
 
+  node->next->prev = new_node;
   node->next = new_node;
 
   ++node->owner->len;
