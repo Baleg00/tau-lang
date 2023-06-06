@@ -7,7 +7,9 @@
 
 #include "util.h"
 #include "log.h"
+
 #include "diagnostics.h"
+
 #include "memtrace.h"
 
 size_t file_read(const char* path, char* buf, size_t len)
@@ -36,8 +38,8 @@ size_t file_name(const char* path, char* buf, size_t len)
 {
   char* sep = strrchr(path, FILE_DIRSEP);
 
-  if (sep == NULL || sep == path)
-    return 0;
+  if (sep == NULL)
+    sep = (char*)path - 1;
 
   size_t name_len = strlen(sep + 1);
 

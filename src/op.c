@@ -203,9 +203,9 @@ bool op_is_binary(op_kind_t kind)
   case OP_RANGE:
   case OP_SEMICOLON:
     return true;
+  default:
+    return false;
   }
-
-  return false;
 }
 
 bool op_is_unary(op_kind_t kind)
@@ -226,7 +226,7 @@ bool op_is_unary(op_kind_t kind)
   case OP_IND:
   case OP_ADDR:
     return true;
+  default:
+    return false;
   }
-
-  return false;
 }

@@ -4,7 +4,9 @@
 #include <time.h>
 #include <string.h>
 
+#include "util.h"
 #include "esc_seq.h"
+#include "file.h"
 
 static log_level_t log_global_level = LOG_LEVEL_TRACE;
 static FILE* log_global_file = NULL;
@@ -12,11 +14,11 @@ static bool log_global_verbose = false;
 
 void log_log(log_level_t lvl, const char* file, int line, const char* func, const char* name, const char* fmt, ...)
 {
+  unused(func);
+
   if (lvl < log_global_level || log_global_file == NULL)
     return;
 
-  file = (const char*)strrchr(file, '\\') + 1;
-  
   if (log_global_verbose)
   {
     time_t tm = time(NULL);

@@ -11,10 +11,7 @@
 
 #include <stdbool.h>
 
-#include "list.h"
-
-/** Represents a stack. */
-typedef list_t stack_t;
+#include "typedefs.h"
 
 /**
  * \brief Initializes a new stack.

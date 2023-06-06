@@ -6,23 +6,23 @@
 #include <string.h>
 
 #include "util.h"
-#include "queue.h"
-#include "memtrace.h"
 
-cli_t* cli_init(cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count)
+#include "queue.h"
+
+#include "arena.h"
+
+void cli_init(cli_t* cli, cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count)
 {
-  cli_t* cli = (cli_t*)malloc(sizeof(cli_t));
-  assert(cli != NULL);
   cli->opts = opts;
   cli->opt_count = opt_count;
+
   cli->usages = usages;
   cli->usage_count = usage_count;
-  return cli;
 }
 
 void cli_free(cli_t* cli)
 {
-  free(cli);
+  unused(cli);
 }
 
 void cli_parse(cli_t* cli, int argc, const char* argv[])
@@ -31,7 +31,7 @@ void cli_parse(cli_t* cli, int argc, const char* argv[])
 
   // Push arguments to queue
   for (int i = 1; i < argc; ++i)
-    queue_offer(que, (char*)argv[i]);
+    queue_offer(que, (void*)argv[i]);
 
   // Process while there are arguments in the queue
   while (!queue_empty(que))
@@ -54,7 +54,7 @@ void cli_parse(cli_t* cli, int argc, const char* argv[])
       }
 
       if (opt->callback != NULL)
-        opt->callback(cli, que, opt, opt->user_ptr);
+        opt->callback(cli, que, opt, arg, opt->user_ptr);
     }
     // Is option a sink? Sink option should be the last one if present
     else if (cli->opts[cli->opt_count - 1].type == CLI_TYPE_SINK)
@@ -69,11 +69,14 @@ void cli_parse(cli_t* cli, int argc, const char* argv[])
       }
 
       if (opt->callback != NULL)
-        opt->callback(cli, que, opt, opt->user_ptr);
+        opt->callback(cli, que, opt, arg, opt->user_ptr);
 
-      const char** data = (const char**)opt->data;
-      *(data++) = arg;
-      opt->data = data;
+      if (opt->data != NULL)
+      {
+        const char** data = (const char**)opt->data;
+        *(data++) = arg;
+        opt->data = data;
+      }
 
       --opt->arg_max;
 
@@ -255,8 +258,13 @@ void cli_parse_any(cli_opt_t* opt, queue_t* que)
   }
 }
 
-void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
+void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
+  unused(que);
+  unused(opt);
+  unused(arg);
+  unused(user_ptr);
+
   printf("Usage:\n");
 
   for (size_t i = 0; i < cli->usage_count; ++i)
@@ -283,17 +291,32 @@ void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
   }
 }
 
-void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
+void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
+  unused(cli);
+  unused(que);
+  unused(opt);
+  unused(arg);
+
   printf("Version: %s\n", (const char*)user_ptr);
 }
 
-void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
+void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
+  unused(cli);
+  unused(que);
+  unused(opt);
+  unused(arg);
+
   *(bool*)user_ptr = true;
 }
 
-void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
+void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
+  unused(cli);
+  unused(que);
+  unused(opt);
+  unused(arg);
+
   *(bool*)user_ptr = true;
 }

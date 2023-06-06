@@ -1,4 +1,4 @@
-add_executable(${PROJECT_NAME} 
+add_executable(tauc
   main.c
   
   location.c
@@ -10,7 +10,10 @@ add_executable(${PROJECT_NAME}
   parser.c
   symtable.c
   analzyer.c
-  types.c
+  typedesc.c
+  opcode.c
+  bytecode.c
+  compiler.c
 
   memtrace.c
 
@@ -27,6 +30,9 @@ add_executable(${PROJECT_NAME}
   stack.c
   queue.c)
   
+set_target_properties(tauc
+  PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
+
 add_compile_options(
   $<$<C_COMPILER_ID:MSVC>:/Wall /WX>
   $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>)

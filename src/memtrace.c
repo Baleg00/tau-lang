@@ -191,6 +191,10 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
 
 void memtrace_free(void* ptr, const char* file, int line, const char* func)
 {
+  unused(file);
+  unused(line);
+  unused(func);
+
   if (ptr == NULL)
     return;
   

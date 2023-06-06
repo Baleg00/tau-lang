@@ -9,28 +9,7 @@
 
 #include <stddef.h>
 
-#include "queue.h"
-
-/**Indicates argument type. */
-typedef enum cli_type_e cli_type_t;
-
-/** Represents a command-line option. */
-typedef struct cli_opt_s cli_opt_t;
-
-/** Represents a command-line interface instance. */
-typedef struct cli_s cli_t;
-
-/** Option callback type. */
-typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, void*);
-
-enum cli_type_e
-{
-  CLI_TYPE_INTEGER, // Integer type
-  CLI_TYPE_FLOAT,   // Floating-point type
-  CLI_TYPE_BOOLEAN, // Boolean type
-  CLI_TYPE_STRING,  // String type
-  CLI_TYPE_SINK,    // Absorbs all following arguments
-};
+#include "typedefs.h"
 
 struct cli_opt_s
 {
@@ -72,13 +51,13 @@ struct cli_s
 /**
  * \brief Initializes a command-line interface instance with the specified parameters.
  * 
+ * \param[out] cli Command-line interface instance to be initialized.
  * \param[in] opts Array of command-line options.
  * \param[in] opt_count Number of command-line options.
  * \param[in] usages Array of command usage descriptions.
  * \param[in] usage_count Number of command usage descriptions.
- * \returns Pointer to new command-line interface instance.
 */
-cli_t* cli_init(cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count);
+void cli_init(cli_t* cli, cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count);
 
 /** Destroys a command-line interface instance. */
 void cli_free(cli_t* cli);
@@ -141,9 +120,10 @@ void cli_parse_any(cli_opt_t* opt, queue_t* que);
  * \param[in] cli Command-line interface instance.
  * \param[in] que Queue of arguments. (ignored)
  * \param[in] opt Matched option. (ignored)
+ * \param[in] arg Matched argument string. (ignored)
  * \param[in] user_ptr Pointer to user provided data. (ignored)
 */
-void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
+void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr);
 
 /**
  * \brief Built-in callback funciton to be used for the "--version" option.
@@ -154,9 +134,10 @@ void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr)
  * \param[in] cli Command-line interface instance. (ignored)
  * \param[in] que Queue of arguments. (ignored)
  * \param[in] opt Matched option. (ignored)
+ * \param[in] arg Matched argument string. (ignored)
  * \param[in] user_ptr Pointer to version string.
 */
-void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
+void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr);
 
 /**
  * \brief Built-in callback funciton to be used for the "--verbose" option.
@@ -167,9 +148,10 @@ void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_p
  * \param[in] cli Command-line interface instance. (ignored)
  * \param[in] que Queue of arguments. (ignored)
  * \param[in] opt Matched option. (ignored)
+ * \param[in] arg Matched argument string. (ignored)
  * \param[out] user_ptr Pointer to flag variable.
 */
-void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
+void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr);
 
 /**
  * \brief Built-in callback funciton to be used for flags.
@@ -180,9 +162,10 @@ void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_p
  * \param[in] cli Command-line interface instance. (ignored)
  * \param[in] que Queue of arguments. (ignored)
  * \param[in] opt Matched option. (ignored)
+ * \param[in] arg Matched argument string. (ignored)
  * \param[out] user_ptr Pointer to flag variable.
 */
-void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, void* user_ptr);
+void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr);
 
 /** Shorthand macro for initalizing an integer option. */
 #define cli_opt_int(...)  (cli_opt_t){ CLI_TYPE_INTEGER, __VA_ARGS__ }

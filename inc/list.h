@@ -10,14 +10,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-/** Represents an node in a linked list. */
-typedef struct list_node_s list_node_t;
-
-/** Represents a linked list. */
-typedef struct list_s list_t;
-
-/** Function pointer type to be used by `list_for_each` function. */
-typedef void(*list_for_each_func_t)(void*);
+#include "typedefs.h"
 
 struct list_node_s
 {
@@ -36,7 +29,7 @@ struct list_s
 
 /** Utility macro iterating over a list. */
 #define LIST_FOR_LOOP(VAR, LIST)\
-  for (list_node_t* (VAR) = list_front_node((LIST)); (VAR) != NULL; (VAR) = list_node_next((VAR)))
+  for (list_node_t* (VAR) = (LIST) == NULL ? NULL : list_front_node((LIST)); (VAR) != NULL; (VAR) = list_node_next((VAR)))
 
 /** Utility macro for creating unique names for list_for_each compatible wrapper functions. */
 #define LIST_FOR_EACH_FUNC_NAME(FUNC)\

@@ -6,6 +6,10 @@
 #include "util.h"
 #include "log.h"
 #include "crumb.h"
+
+#include "location.h"
+#include "typedesc.h"
+
 #include "memtrace.h"
 
 void report_error_unexpected_character(location_t* loc)
@@ -99,7 +103,7 @@ void report_error_missing_default_parameter(location_t* param_loc, location_t* f
     crumb_message("A default parameter must only be followed by default parameters.", NULL),
     crumb_snippet(first_param_loc, "", NULL, "First default parameter appears here.", NULL)
   };
-  crumb_error(array_len(items), items[0], items[1], items[2]);
+  crumb_error(countof(items), items[0], items[1], items[2]);
   debugbreak();
   exit(EXIT_FAILURE);
 }
@@ -110,7 +114,7 @@ void report_error_parameter_redefinition(location_t* param_loc, location_t* rede
     crumb_snippet(param_loc, "Parameter redefinition.", NULL, "A parameter with this name already exists.", NULL),
     crumb_snippet(redefined_loc, "", NULL, "First parameter with this name appears here.", NULL)
   };
-  crumb_error(array_len(items), items[0], items[1]);
+  crumb_error(countof(items), items[0], items[1]);
   debugbreak();
   exit(EXIT_FAILURE);
 }
@@ -121,7 +125,7 @@ void report_error_variable_redeclaration(location_t* var_loc, location_t* redecl
     crumb_snippet(var_loc, "Variable redeclaration.", NULL, "A variable with this name already exists.", NULL),
     crumb_snippet(redeclared_loc, "", NULL, "First variable with this name appears here.", NULL)
   };
-  crumb_error(array_len(items), items[0], items[1]);
+  crumb_error(countof(items), items[0], items[1]);
   debugbreak();
   exit(EXIT_FAILURE);
 }
@@ -132,7 +136,7 @@ void report_error_enumerator_redeclaration(location_t* enum_loc, location_t* red
     crumb_snippet(enum_loc, "Enumerator redeclaration.", NULL, "An enumerator with this name already exists.", NULL),
     crumb_snippet(redeclared_loc, "", NULL, "First enumerator with this name appears here.", NULL)
   };
-  crumb_error(array_len(items), items[0], items[1]);
+  crumb_error(countof(items), items[0], items[1]);
   debugbreak();
   exit(EXIT_FAILURE);
 }
@@ -309,8 +313,11 @@ void report_error_expected_ptr_to_owner(location_t* loc)
   exit(EXIT_FAILURE);
 }
 
-void report_error_type_mismatch(location_t* loc, type_t* expected, type_t* actual)
+void report_error_type_mismatch(location_t* loc, typedesc_t* expected, typedesc_t* actual)
 {
+  unused(expected);
+  unused(actual);
+
   crumb_error(1, crumb_snippet(loc, "Type mismatch.", NULL, "", NULL));
   debugbreak();
   exit(EXIT_FAILURE);

@@ -1,8 +1,7 @@
 #ifndef TAU_DIAGNOSTICS_H
 #define TAU_DIAGNOSTICS_H
 
-#include "location.h"
-#include "types.h"
+#include "typedefs.h"
 
 void report_error_unexpected_character(location_t* loc);
 void report_error_identifier_too_long(location_t* loc);
@@ -45,7 +44,7 @@ void report_error_expected_owner(location_t* loc);
 void report_error_expected_member(location_t* loc);
 void report_error_no_member_with_name(location_t* loc);
 void report_error_expected_ptr_to_owner(location_t* loc);
-void report_error_type_mismatch(location_t* loc, type_t* expected, type_t* actual);
+void report_error_type_mismatch(location_t* loc, typedesc_t* expected, typedesc_t* actual);
 void report_error_missing_closing_parenthesis(location_t* loc);
 void report_error_missing_closing_bracket(location_t* loc);
 void report_error_missing_unary_argument(location_t* loc);

@@ -6,32 +6,21 @@
 
 #include "util.h"
 #include "list.h"
+#include "ast.h"
+#include "typedesc.h"
 #include "memtrace.h"
 
 #define SYMTABLE_INITIAL_CAPACITY 16
 #define SYMTABLE_LOAD_FACTOR 0.75
 
-static inline uint64_t fnv1a_hash(const uint8_t* data, size_t size)
-{
-  uint64_t hash = 0xcbf29ce484222325ULL;
-
-  for (size_t i = 0; i < size; ++i)
-  {
-    hash ^= data[i];
-    hash *= 0x00000100000001B3ULL;
-  }
-
-  return hash;
-}
-
-symbol_t* symbol_init(char* id, ast_node_t* node, type_t* type)
+symbol_t* symbol_init(const char* id, size_t len, ast_node_t* node)
 {
   symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
   assert(sym != NULL);
   sym->scope = NULL;
   sym->id = id;
+  sym->len = len;
   sym->node = node;
-  sym->type = type;
   return sym;
 }
 
@@ -57,7 +46,7 @@ symtable_t* symtable_init(symtable_t* parent)
   return table;
 }
 
-LIST_FOR_EACH_FUNC_DECL(symtable_free, symtable_t);
+LIST_FOR_EACH_FUNC_DECL(symtable_free, symtable_t)
 
 void symtable_free(symtable_t* table)
 {
@@ -80,8 +69,8 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
   if (((double)table->size + 1) / (double)table->capacity >= SYMTABLE_LOAD_FACTOR)
     symtable_expand(table);
 
-  uint64_t hash = fnv1a_hash(new_sym->id, strlen(new_sym->id));
-  size_t idx = hash % table->capacity;
+  hash_t h = hash_sized(new_sym->id, new_sym->len);
+  size_t idx = h % table->capacity;
 
   if (table->buckets[idx] == NULL)
   {
@@ -94,7 +83,7 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
   symbol_t* last = NULL;
 
   for (symbol_t* sym = table->buckets[idx]; sym != NULL; last = sym, sym = sym->next)
-    if (strcmp(sym->id, new_sym->id) == 0)
+    if (sym->len == new_sym->len && strncmp(sym->id, new_sym->id, sym->len) == 0)
       return sym;
 
   ++table->size;
@@ -103,19 +92,19 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
   return NULL;
 }
 
-symbol_t* symtable_lookup(symtable_t* table, char* id)
+symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len)
 {
-  uint64_t hash = fnv1a_hash(id, strlen(id));
-  size_t idx = hash % table->capacity;
+  hash_t h = hash_sized(id, len);
+  size_t idx = h % table->capacity;
 
   for (symbol_t* sym = table->buckets[idx]; sym != NULL; sym = sym->next)
-    if (strcmp(sym->id, id) == 0)
+    if (sym->len == len && strncmp(sym->id, id, sym->len) == 0)
       return sym;
 
   if (table->parent == NULL)
     return NULL;
 
-  return symtable_lookup(table->parent, id);
+  return symtable_lookup(table->parent, id, len);
 }
 
 void symtable_expand(symtable_t* table)

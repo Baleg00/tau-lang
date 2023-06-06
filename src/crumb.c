@@ -1,14 +1,19 @@
 #include "crumb.h"
 
-#include "file.h"
-#include "esc_seq.h"
 #include "util.h"
+#include "esc_seq.h"
+
+#include "file.h"
+
+#include "location.h"
 
 /** Global crumb file stream. */
 static FILE* crumb_file_g = NULL;
 
 void crumb_log_message(crumb_kind_t kind, crumb_item_message_t* item)
 {
+  unused(kind);
+
   fprintf(crumb_file_g, "\n    ");
   vfprintf(crumb_file_g, item->msg, item->msg_args);
   fputc('\n', crumb_file_g);
@@ -47,15 +52,15 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
     fprintf(crumb_file_g, "    %s%zu" ESC_RESET " | %.*s%s%.*s" ESC_RESET "%.*s\n",
       crumb_kind_to_color(kind), // Row number color
       loc->row + 1, // Row number
-      loc->cur - line_begin, line_begin, // From line begin to referenced part
+      (int)(loc->cur - line_begin), line_begin, // From line begin to referenced part
       crumb_kind_to_color(kind), // Highlight color
-      loc->len, loc->cur, // Referenced part
-      line_end - loc->cur - loc->len, loc->cur + loc->len); // Rest of line
+      (int)loc->len, loc->cur, // Referenced part
+      (int)(line_end - loc->cur - loc->len), loc->cur + loc->len); // Rest of line
 
     { // Print underline
       int offset = snprintf(NULL, 0, "    %zu | %.*s", 
         loc->row + 1, 
-        loc->cur - line_begin, line_begin);
+        (int)(loc->cur - line_begin), line_begin);
 
       for (int i = 0; i < offset; ++i)
         fputc(' ', crumb_file_g);
