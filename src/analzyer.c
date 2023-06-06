@@ -546,110 +546,184 @@ ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* table, 
   return NULL;
 }
 
+static ast_node_t* analyzer_visit_type_id(analyzer_t* analyzer, symtable_t* table, ast_id_t* node)
+{
+  token_t* id_tok = node->tok;
+  symbol_t* id_sym = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
+  
+  if (id_sym == NULL)
+    report_error_undefined_typename(id_tok->loc);
+
+  if (id_sym->node->kind != AST_DECL_STRUCT &&
+      id_sym->node->kind != AST_DECL_UNION &&
+      id_sym->node->kind != AST_DECL_ENUM &&
+      id_sym->node->kind != AST_PARAM_GENERIC)
+    report_error_symbol_is_not_a_typename(id_tok->loc);
+
+  if (id_sym->node->kind == AST_PARAM_GENERIC &&
+      ((ast_param_generic_t*)id_sym->node)->type->kind != AST_TYPE_TYPE)
+    report_error_symbol_is_not_a_typename(id_tok->loc);
+
+  ast_node_free((ast_node_t*)node);
+
+  return id_sym->node;
+}
+
+static void analyzer_visit_type_mut(analyzer_t* analyzer, symtable_t* table, ast_type_mut_t* node)
+{
+  node->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->base_type);
+
+  typedesc_mut_t* desc = (typedesc_mut_t*)arena_malloc(analyzer->arena, sizeof(typedesc_mut_t));
+  assert(desc != NULL);
+
+  desc->base_type = ast_desc_of(node->base_type);
+  typedesc_init((typedesc_t*)desc, TYPEDESC_MUT, desc->base_type->size, desc->base_type->align);
+}
+
+static void analyzer_visit_type_const(analyzer_t* analyzer, symtable_t* table, ast_type_const_t* node)
+{
+  node->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->base_type);
+
+  typedesc_const_t* desc = (typedesc_const_t*)arena_malloc(analyzer->arena, sizeof(typedesc_const_t));
+  assert(desc != NULL);
+
+  desc->base_type = ast_desc_of(node->base_type);
+  typedesc_init((typedesc_t*)desc, TYPEDESC_CONST, desc->base_type->size, desc->base_type->align);
+}
+
+static void analyzer_visit_type_ptr(analyzer_t* analyzer, symtable_t* table, ast_type_ptr_t* node)
+{
+  node->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->base_type);
+  
+  typedesc_ptr_t* desc = (typedesc_ptr_t*)arena_malloc(analyzer->arena, sizeof(typedesc_ptr_t));
+  assert(desc != NULL);
+
+  typedesc_init((typedesc_t*)desc, TYPEDESC_PTR, TYPEDESC_PTR_SIZE, TYPEDESC_PTR_ALIGN);
+  desc->base_type = ast_desc_of((ast_node_t*)node->base_type);
+
+  node->desc = (typedesc_t*)desc;
+}
+
+static void analyzer_visit_type_array(analyzer_t* analyzer, symtable_t* table, ast_type_array_t* node)
+{
+  node->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->base_type);
+  
+  typedesc_array_t* desc = (typedesc_array_t*)arena_malloc(analyzer->arena, sizeof(typedesc_array_t));
+  assert(desc != NULL);
+
+  // TODO: array size should be a multiple of the size of its base type
+  typedesc_init((typedesc_t*)desc, TYPEDESC_ARRAY, TYPEDESC_PTR_SIZE, TYPEDESC_PTR_ALIGN);
+  desc->base_type = ast_desc_of((ast_node_t*)node->base_type);
+
+  if (node->size != NULL)
+    analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->size);
+
+  node->desc = (typedesc_t*)desc;
+}
+
+static void analyzer_visit_type_ref(analyzer_t* analyzer, symtable_t* table, ast_type_ref_t* node)
+{
+  node->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->base_type);
+
+  typedesc_ref_t* desc = (typedesc_ref_t*)arena_malloc(analyzer->arena, sizeof(typedesc_ref_t));
+  assert(desc != NULL);
+
+  desc->base_type = ast_desc_of(node->base_type);
+  typedesc_init((typedesc_t*)desc, TYPEDESC_REF, desc->base_type->size, desc->base_type->align);
+}
+
+static void analyzer_visit_type_opt(analyzer_t* analyzer, symtable_t* table, ast_type_opt_t* node)
+{
+  node->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->base_type);
+
+  typedesc_opt_t* desc = (typedesc_opt_t*)arena_malloc(analyzer->arena, sizeof(typedesc_opt_t));
+  assert(desc != NULL);
+
+  desc->base_type = ast_desc_of(node->base_type);
+  typedesc_init((typedesc_t*)desc, TYPEDESC_OPT, desc->base_type->size, desc->base_type->align);
+}
+
+static void analyzer_visit_type_fun(analyzer_t* analyzer, symtable_t* table, ast_type_fun_t* node)
+{
+  node->return_type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->return_type);
+
+  LIST_FOR_LOOP(it, node->params)
+    list_node_set(it, analyzer_visit_type(analyzer, table, (ast_type_t*)list_node_get(it)));
+
+  typedesc_fun_t* desc = (typedesc_fun_t*)arena_malloc(analyzer->arena, sizeof(typedesc_fun_t));
+  assert(desc != NULL);
+
+  typedesc_init((typedesc_t*)desc, TYPEDESC_FUN, TYPEDESC_PTR_SIZE, TYPEDESC_PTR_ALIGN);
+  desc->return_type = ast_desc_of(node->return_type);
+  desc->param_types = NULL;
+
+  if (node->params != NULL)
+  {
+    desc->param_types = list_init();
+
+    LIST_FOR_LOOP(it, node->params)
+    {
+      ast_param_t* param = (ast_param_t*)list_node_get(it);
+      list_push_back(desc->param_types, param->desc);
+    }
+  }
+}
+
+static void analyzer_visit_type_gen(analyzer_t* analyzer, symtable_t* table, ast_type_gen_t* node)
+{
+  node->yield_type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->yield_type);
+
+  LIST_FOR_LOOP(it, node->params)
+    list_node_set(it, analyzer_visit_type(analyzer, table, (ast_type_t*)list_node_get(it)));
+
+  typedesc_gen_t* desc = (typedesc_gen_t*)arena_malloc(analyzer->arena, sizeof(typedesc_gen_t));
+  assert(desc != NULL);
+
+  typedesc_init((typedesc_t*)desc, TYPEDESC_GEN, TYPEDESC_PTR_SIZE, TYPEDESC_PTR_ALIGN);
+  desc->yield_type = ast_desc_of(node->yield_type);
+  desc->param_types = NULL;
+
+  if (node->params != NULL)
+  {
+    desc->param_types = list_init();
+
+    LIST_FOR_LOOP(it, node->params)
+    {
+      ast_param_t* param = (ast_param_t*)list_node_get(it);
+      list_push_back(desc->param_types, param->desc);
+    }
+  }
+}
+
 ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* table, ast_type_t* node)
 {
   switch (node->kind)
   {
-  case AST_ID:
-  {
-    token_t* id_tok = node->tok;
-    symbol_t* id_sym = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
-    
-    if (id_sym == NULL)
-      report_error_undefined_typename(id_tok->loc);
-
-    if (id_sym->node->kind != AST_DECL_STRUCT &&
-        id_sym->node->kind != AST_DECL_UNION &&
-        id_sym->node->kind != AST_DECL_ENUM &&
-        id_sym->node->kind != AST_PARAM_GENERIC)
-      report_error_symbol_is_not_a_typename(id_tok->loc);
-
-    if (id_sym->node->kind == AST_PARAM_GENERIC &&
-        ((ast_param_generic_t*)id_sym->node)->type->kind != AST_TYPE_TYPE)
-      report_error_symbol_is_not_a_typename(id_tok->loc);
-
-    ast_node_free((ast_node_t*)node);
-
-    return id_sym->node;
-  }
-  case AST_TYPE_MUT:
-    ((ast_type_mut_t*)node)->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)((ast_type_mut_t*)node)->base_type);
-    ((ast_type_mut_t*)node)->desc = ast_desc_of(((ast_type_mut_t*)node)->base_type);
-    break;
-  case AST_TYPE_CONST:
-    ((ast_type_const_t*)node)->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)((ast_type_const_t*)node)->base_type);
-    ((ast_type_const_t*)node)->desc = ast_desc_of(((ast_type_const_t*)node)->base_type);
-    break;
-  case AST_TYPE_PTR:
-    ((ast_type_ptr_t*)node)->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)((ast_type_ptr_t*)node)->base_type);
-    break;
-  case AST_TYPE_ARRAY:
-    ((ast_type_array_t*)node)->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)((ast_type_array_t*)node)->base_type);
-    if (((ast_type_array_t*)node)->size != NULL)
-      analyzer_visit_expr(analyzer, table, (ast_expr_t*)((ast_type_array_t*)node)->size);
-    break;
-  case AST_TYPE_REF:
-    ((ast_type_ref_t*)node)->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)((ast_type_ref_t*)node)->base_type);
-    break;
-  case AST_TYPE_OPT:
-    ((ast_type_opt_t*)node)->base_type = analyzer_visit_type(analyzer, table, (ast_type_t*)((ast_type_opt_t*)node)->base_type);
-    break;
-  case AST_TYPE_FUN:
-    ((ast_type_fun_t*)node)->return_type = analyzer_visit_type(analyzer, table, (ast_type_t*)((ast_type_fun_t*)node)->return_type);
-    LIST_FOR_LOOP(it, ((ast_type_fun_t*)node)->params)
-      list_node_set(it, analyzer_visit_type(analyzer, table, (ast_type_t*)list_node_get(it)));
-    break;
-  case AST_TYPE_GEN:
-    ((ast_type_gen_t*)node)->yield_type = analyzer_visit_type(analyzer, table, (ast_type_t*)((ast_type_gen_t*)node)->yield_type);
-    LIST_FOR_LOOP(it, ((ast_type_gen_t*)node)->params)
-      list_node_set(it, analyzer_visit_type(analyzer, table, (ast_type_t*)list_node_get(it)));
-    break;
-  case AST_TYPE_I8:
-    node->desc = typedesc_builtin(TYPEDESC_I8);
-    break;
-  case AST_TYPE_I16:
-    node->desc = typedesc_builtin(TYPEDESC_I16);
-    break;
-  case AST_TYPE_I32:
-    node->desc = typedesc_builtin(TYPEDESC_I32);
-    break;
-  case AST_TYPE_I64:
-    node->desc = typedesc_builtin(TYPEDESC_I64);
-    break;
-  case AST_TYPE_ISIZE:
-    node->desc = typedesc_builtin(TYPEDESC_ISIZE);
-    break;
-  case AST_TYPE_U8:
-    node->desc = typedesc_builtin(TYPEDESC_U8);
-    break;
-  case AST_TYPE_U16:
-    node->desc = typedesc_builtin(TYPEDESC_U16);
-    break;
-  case AST_TYPE_U32:
-    node->desc = typedesc_builtin(TYPEDESC_U32);
-    break;
-  case AST_TYPE_U64:
-    node->desc = typedesc_builtin(TYPEDESC_U64);
-    break;
-  case AST_TYPE_USIZE:
-    node->desc = typedesc_builtin(TYPEDESC_USIZE);
-    break;
-  case AST_TYPE_F32:
-    node->desc = typedesc_builtin(TYPEDESC_F32);
-    break;
-  case AST_TYPE_F64:
-    node->desc = typedesc_builtin(TYPEDESC_F64);
-    break;
-  case AST_TYPE_BOOL:
-    node->desc = typedesc_builtin(TYPEDESC_BOOL);
-    break;
-  case AST_TYPE_UNIT:
-    node->desc = typedesc_builtin(TYPEDESC_UNIT);
-    break;
-  case AST_TYPE_MEMBER:
-    return analyzer_visit_type_member(analyzer, table, (ast_type_member_t*)node);
-  default:
-    unreachable();
+  case AST_ID: return analyzer_visit_type_id(analyzer, table, (ast_id_t*)node);
+  case AST_TYPE_MUT: analyzer_visit_type_mut(analyzer, table, (ast_type_mut_t*)node); break;
+  case AST_TYPE_CONST: analyzer_visit_type_const(analyzer, table, (ast_type_const_t*)node); break;
+  case AST_TYPE_PTR: analyzer_visit_type_ptr(analyzer, table, (ast_type_ptr_t*)node); break;
+  case AST_TYPE_ARRAY: analyzer_visit_type_array(analyzer, table, (ast_type_array_t*)node); break;
+  case AST_TYPE_REF: analyzer_visit_type_ref(analyzer, table, (ast_type_ref_t*)node); break;
+  case AST_TYPE_OPT: analyzer_visit_type_opt(analyzer, table, (ast_type_opt_t*)node); break;
+  case AST_TYPE_FUN: analyzer_visit_type_fun(analyzer, table, (ast_type_fun_t*)node); break;
+  case AST_TYPE_GEN: analyzer_visit_type_gen(analyzer, table, (ast_type_gen_t*)node); break;
+  case AST_TYPE_I8: node->desc = typedesc_builtin(TYPEDESC_I8); break;
+  case AST_TYPE_I16: node->desc = typedesc_builtin(TYPEDESC_I16); break;
+  case AST_TYPE_I32: node->desc = typedesc_builtin(TYPEDESC_I32); break;
+  case AST_TYPE_I64: node->desc = typedesc_builtin(TYPEDESC_I64); break;
+  case AST_TYPE_ISIZE: node->desc = typedesc_builtin(TYPEDESC_ISIZE); break;
+  case AST_TYPE_U8: node->desc = typedesc_builtin(TYPEDESC_U8); break;
+  case AST_TYPE_U16: node->desc = typedesc_builtin(TYPEDESC_U16); break;
+  case AST_TYPE_U32: node->desc = typedesc_builtin(TYPEDESC_U32); break;
+  case AST_TYPE_U64: node->desc = typedesc_builtin(TYPEDESC_U64); break;
+  case AST_TYPE_USIZE: node->desc = typedesc_builtin(TYPEDESC_USIZE); break;
+  case AST_TYPE_F32: node->desc = typedesc_builtin(TYPEDESC_F32); break;
+  case AST_TYPE_F64: node->desc = typedesc_builtin(TYPEDESC_F64); break;
+  case AST_TYPE_BOOL: node->desc = typedesc_builtin(TYPEDESC_BOOL); break;
+  case AST_TYPE_UNIT: node->desc = typedesc_builtin(TYPEDESC_UNIT); break;
+  case AST_TYPE_MEMBER: return analyzer_visit_type_member(analyzer, table, (ast_type_member_t*)node);
+  default: unreachable();
   }
 
   return (ast_node_t*)node;
