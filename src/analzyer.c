@@ -548,6 +548,8 @@ ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* table, 
 
 static ast_node_t* analyzer_visit_type_id(analyzer_t* analyzer, symtable_t* table, ast_id_t* node)
 {
+  unused(analyzer);
+
   token_t* id_tok = node->tok;
   symbol_t* id_sym = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
   

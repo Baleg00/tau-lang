@@ -9,7 +9,7 @@ void iter_increment(void* data)
 
 test()
 
-  list_t* list;
+  list_t* list = NULL;
 
   describe("list")
     describe("list_init")
@@ -17,16 +17,16 @@ test()
         list = list_init();
       end()
 
+      after_each()
+        list_free(list);
+      end()
+
       it("should not return NULL")
         assert_not_null(list);
-
-        list_free(list);
       end()
 
       it("should return an empty list")
         assert_equal(list_size(list), 0);
-
-        list_free(list);
       end()
     end()
       
@@ -34,11 +34,13 @@ test()
       before_each()
         list = list_init();
       end()
+      
+      after_each()
+        list_free(list);
+      end()
 
       it("should return 0 for empty list")
         assert_equal(list_size(list), 0);
-
-        list_free(list);
       end()
 
       it("should not return 0 for non-empty list")
@@ -57,8 +59,6 @@ test()
         assert_equal(list_size(list), 1);
         list_pop_back(list);
         assert_equal(list_size(list), 0);
-
-        list_free(list);
       end()
     end()
 
@@ -67,17 +67,19 @@ test()
         list = list_init();
       end()
 
+      after_each()
+        list_free(list);
+      end()
+
       it("should insert node after tail")
         int data1 = 1, data2 = 2, data3 = 3;
         
         list_push_back(list, &data1);
-        assert_equal(*(int*)list_back(list), data1);
+        assert_ptr_equal(list_back(list), &data1);
         list_push_back(list, &data2);
-        assert_equal(*(int*)list_back(list), data2);
+        assert_ptr_equal(list_back(list), &data2);
         list_push_back(list, &data3);
-        assert_equal(*(int*)list_back(list), data3);
-
-        list_free(list);
+        assert_ptr_equal(list_back(list), &data3);
       end()
 
       it("should increase list size")
@@ -89,14 +91,16 @@ test()
         assert_equal(list_size(list), 2);
         list_push_back(list, &data3);
         assert_equal(list_size(list), 3);
-
-        list_free(list);
       end()
     end()
 
     describe("list_pop_back")
       before_each()
         list = list_init();
+      end()
+
+      after_each()
+        list_free(list);
       end()
 
       it("should remove tail")
@@ -106,11 +110,9 @@ test()
         list_push_back(list, &data2);
         list_push_back(list, &data3);
 
-        assert_equal(*(int*)list_pop_back(list), data3);
-        assert_equal(*(int*)list_pop_back(list), data2);
-        assert_equal(*(int*)list_pop_back(list), data1);
-
-        list_free(list);
+        assert_ptr_equal(list_pop_back(list), &data3);
+        assert_ptr_equal(list_pop_back(list), &data2);
+        assert_ptr_equal(list_pop_back(list), &data1);
       end()
 
       it("should decrease list size")
@@ -126,8 +128,6 @@ test()
         assert_equal(list_size(list), 1);
         list_pop_back(list);
         assert_equal(list_size(list), 0);
-
-        list_free(list);
       end()
     end()
 
@@ -136,17 +136,19 @@ test()
         list = list_init();
       end()
 
+      after_each()
+        list_free(list);
+      end()
+
       it("should insert node before head")
         int data1 = 1, data2 = 2, data3 = 3;
         
         list_push_front(list, &data1);
-        assert_equal(*(int*)list_front(list), data1);
+        assert_ptr_equal(list_front(list), &data1);
         list_push_front(list, &data2);
-        assert_equal(*(int*)list_front(list), data2);
+        assert_ptr_equal(list_front(list), &data2);
         list_push_front(list, &data3);
-        assert_equal(*(int*)list_front(list), data3);
-
-        list_free(list);
+        assert_ptr_equal(list_front(list), &data3);
       end()
 
       it("should increase list size")
@@ -158,14 +160,16 @@ test()
         assert_equal(list_size(list), 2);
         list_push_front(list, &data3);
         assert_equal(list_size(list), 3);
-
-        list_free(list);
       end()
     end()
 
     describe("list_pop_front")
       before_each()
         list = list_init();
+      end()
+
+      after_each()
+        list_free(list);
       end()
 
       it("should remove head")
@@ -175,11 +179,9 @@ test()
         list_push_front(list, &data2);
         list_push_front(list, &data3);
 
-        assert_equal(*(int*)list_pop_front(list), data3);
-        assert_equal(*(int*)list_pop_front(list), data2);
-        assert_equal(*(int*)list_pop_front(list), data1);
-
-        list_free(list);
+        assert_ptr_equal(list_pop_front(list), &data3);
+        assert_ptr_equal(list_pop_front(list), &data2);
+        assert_ptr_equal(list_pop_front(list), &data1);
       end()
 
       it("should decrease list size")
@@ -195,14 +197,16 @@ test()
         assert_equal(list_size(list), 1);
         list_pop_front(list);
         assert_equal(list_size(list), 0);
-
-        list_free(list);
       end()
     end()
 
     describe("list_insert_before")
       before_each()
         list = list_init();
+      end()
+
+      after_each()
+        list_free(list);
       end()
 
       it("should insert node before head")
@@ -215,12 +219,10 @@ test()
         int data4 = 4;
 
         list_node_t* new_head = list_insert_before(node1, &data4);
-        assert_equal(*(int*)list_front(list), data4);
+        assert_ptr_equal(list_front(list), &data4);
 
-        assert_equal(list_node_next(new_head), node1);
-        assert_equal(list_node_prev(node1), new_head);
-
-        list_free(list);
+        assert_ptr_equal(list_node_next(new_head), node1);
+        assert_ptr_equal(list_node_prev(node1), new_head);
       end()
       
       it("should insert between nodes")
@@ -234,13 +236,11 @@ test()
 
         list_node_t* new_node = list_insert_before(node2, &data4);
         
-        assert_equal(list_node_next(node1), new_node);
-        assert_equal(list_node_prev(node2), new_node);
+        assert_ptr_equal(list_node_next(node1), new_node);
+        assert_ptr_equal(list_node_prev(node2), new_node);
 
-        assert_equal(list_node_next(new_node), node2);
-        assert_equal(list_node_prev(new_node), node1);
-
-        list_free(list);
+        assert_ptr_equal(list_node_next(new_node), node2);
+        assert_ptr_equal(list_node_prev(new_node), node1);
       end()
 
       it("should increase list size")
@@ -256,14 +256,16 @@ test()
         list_insert_before(list_front_node(list), &data5);
 
         assert_equal(list_size(list), 5);
-
-        list_free(list);
       end()
     end()
 
     describe("list_insert_after")
       before_each()
         list = list_init();
+      end()
+
+      after_each()
+        list_free(list);
       end()
 
       it("should insert node after tail")
@@ -276,12 +278,10 @@ test()
         int data4 = 4;
 
         list_node_t* new_tail = list_insert_after(node3, &data4);
-        assert_equal(*(int*)list_back(list), data4);
+        assert_ptr_equal(list_back(list), &data4);
 
-        assert_equal(list_node_next(node3), new_tail);
-        assert_equal(list_node_prev(new_tail), node3);
-
-        list_free(list);
+        assert_ptr_equal(list_node_next(node3), new_tail);
+        assert_ptr_equal(list_node_prev(new_tail), node3);
       end()
       
       it("should insert between nodes")
@@ -295,13 +295,11 @@ test()
 
         list_node_t* new_node = list_insert_after(node1, &data4);
         
-        assert_equal(list_node_next(node1), new_node);
-        assert_equal(list_node_prev(node2), new_node);
+        assert_ptr_equal(list_node_next(node1), new_node);
+        assert_ptr_equal(list_node_prev(node2), new_node);
 
-        assert_equal(list_node_next(new_node), node2);
-        assert_equal(list_node_prev(new_node), node1);
-
-        list_free(list);
+        assert_ptr_equal(list_node_next(new_node), node2);
+        assert_ptr_equal(list_node_prev(new_node), node1);
       end()
 
       it("should increase list size")
@@ -317,14 +315,16 @@ test()
         list_insert_after(list_back_node(list), &data5);
 
         assert_equal(list_size(list), 5);
-
-        list_free(list);
       end()
     end()
 
     describe("list_remove")
       before_each()
         list = list_init();
+      end()
+
+      after_each()
+        list_free(list);
       end()
 
       it("should remove head")
@@ -334,11 +334,9 @@ test()
         list_push_back(list, &data2);
         list_push_back(list, &data3);
 
-        assert_equal(*(int*)list_remove(node1), data1);
-        assert_equal(*(int*)list_front(list), data2);
+        assert_ptr_equal(list_remove(node1), &data1);
+        assert_ptr_equal(list_front(list), &data2);
         assert_null(list_node_prev(list_front_node(list)));
-
-        list_free(list);
       end()
       
       it("should remove tail")
@@ -348,11 +346,9 @@ test()
         list_push_back(list, &data2);
         list_node_t* node3 = list_push_back(list, &data3);
 
-        assert_equal(*(int*)list_remove(node3), data3);
-        assert_equal(*(int*)list_back(list), data2);
+        assert_ptr_equal(list_remove(node3), &data3);
+        assert_ptr_equal(list_back(list), &data2);
         assert_null(list_node_next(list_back_node(list)));
-
-        list_free(list);
       end()
       
       it("should remove intermediate node")
@@ -362,11 +358,9 @@ test()
         list_node_t* node2 = list_push_back(list, &data2);
         list_node_t* node3 = list_push_back(list, &data3);
 
-        assert_equal(*(int*)list_remove(node2), data2);
+        assert_ptr_equal(list_remove(node2), &data2);
         assert_equal(list_node_next(node1), node3);
         assert_equal(list_node_prev(node3), node1);
-
-        list_free(list);
       end()
 
       it("should decrease list size")
@@ -383,14 +377,16 @@ test()
         list_remove(list_back_node(list));
 
         assert_equal(list_size(list), 2);
-
-        list_free(list);
       end()
     end()
 
     describe("list_remove_before")
       before_each()
         list = list_init();
+      end()
+
+      after_each()
+        list_free(list);
       end()
       
       it("should remove head")
@@ -400,11 +396,9 @@ test()
         list_node_t* node2 = list_push_back(list, &data2);
         list_push_back(list, &data3);
 
-        assert_equal(*(int*)list_remove_before(node2), data1);
-        assert_equal(*(int*)list_front(list), data2);
+        assert_ptr_equal(list_remove_before(node2), &data1);
+        assert_ptr_equal(list_front(list), &data2);
         assert_null(list_node_prev(node2));
-
-        list_free(list);
       end()
 
       it("should remove intermediate node")
@@ -414,11 +408,9 @@ test()
         list_push_back(list, &data2);
         list_node_t* node3 = list_push_back(list, &data3);
 
-        assert_equal(*(int*)list_remove_before(node3), data2);
-        assert_equal(list_node_next(node1), node3);
-        assert_equal(list_node_prev(node3), node1);
-
-        list_free(list);
+        assert_ptr_equal(list_remove_before(node3), &data2);
+        assert_ptr_equal(list_node_next(node1), node3);
+        assert_ptr_equal(list_node_prev(node3), node1);
       end()
 
       it("should decrease list size")
@@ -434,14 +426,16 @@ test()
         list_remove_before(node4);
 
         assert_equal(list_size(list), 3);
-
-        list_free(list);
       end()
     end()
 
     describe("list_remove_after")
       before_each()
         list = list_init();
+      end()
+
+      after_each()
+        list_free(list);
       end()
       
       it("should remove tail")
@@ -451,11 +445,9 @@ test()
         list_node_t* node2 = list_push_back(list, &data2);
         list_push_back(list, &data3);
 
-        assert_equal(*(int*)list_remove_after(node2), data3);
-        assert_equal(*(int*)list_back(list), data2);
+        assert_ptr_equal(list_remove_after(node2), &data3);
+        assert_ptr_equal(list_back(list), &data2);
         assert_null(list_node_next(node2));
-
-        list_free(list);
       end()
 
       it("should remove intermediate node")
@@ -465,11 +457,9 @@ test()
         list_push_back(list, &data2);
         list_node_t* node3 = list_push_back(list, &data3);
 
-        assert_equal(*(int*)list_remove_after(node1), data2);
-        assert_equal(list_node_next(node1), node3);
-        assert_equal(list_node_prev(node3), node1);
-
-        list_free(list);
+        assert_ptr_equal(list_remove_after(node1), &data2);
+        assert_ptr_equal(list_node_next(node1), node3);
+        assert_ptr_equal(list_node_prev(node3), node1);
       end()
 
       it("should decrease list size")
@@ -485,44 +475,40 @@ test()
         list_remove_before(node4);
 
         assert_equal(list_size(list), 3);
-
-        list_free(list);
       end()
     end()
 
     describe("list_for_each")
-      before_each()
-        list = list_init();
-      end()
-      
       it("should iterate through list")
+        list = list_init();
+      
         int data1 = 1, data2 = 2, data3 = 3;
         
-        list_node_t* node1 = list_push_back(list, &data1);
-        list_node_t* node2 = list_push_back(list, &data2);
-        list_node_t* node3 = list_push_back(list, &data3);
+        list_push_back(list, &data1);
+        list_push_back(list, &data2);
+        list_push_back(list, &data3);
 
         list_for_each(list, iter_increment);
 
-        assert_equal(*(int*)list_node_get(node1), 2);
-        assert_equal(*(int*)list_node_get(node2), 3);
-        assert_equal(*(int*)list_node_get(node3), 4);
+        assert_equal(data1, 2);
+        assert_equal(data2, 3);
+        assert_equal(data3, 4);
 
         list_free(list);
       end()
       
       it("should work with empty list")
+        list = list_init();
+
         list_for_each(list, iter_increment);
 
         assert_true(list_empty(list));
-
+        
         list_free(list);
       end()
       
       it("should work with NULL")
-        list_free(list);
-
-        list_t* list = NULL;
+        list = NULL;
 
         list_for_each(list, iter_increment);
       end()

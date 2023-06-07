@@ -1,31 +1,16 @@
-add_executable(list_test
-  list_test.c
-
-  ../src/list.c
-  ../src/log.c
-  ../src/memtrace.c
+set(TAU_TEST_SOURCES
+  ${TAU_TEST_DIR}/list_test.c
+  ${TAU_TEST_DIR}/stack_test.c
+  ${TAU_TEST_DIR}/queue_test.c
+  ${TAU_TEST_DIR}/arena_test.c
+  ${TAU_TEST_DIR}/lexer_test.c
 )
 
-add_test(NAME list_test COMMAND list_test)
+foreach(TEST_SOURCE IN ITEMS ${TAU_TEST_SOURCES})
+  get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
 
-add_executable(stack_test
-  stack_test.c
-
-  ../src/stack.c
-  ../src/list.c
-  ../src/log.c
-  ../src/memtrace.c
-)
-
-add_test(NAME stack_test COMMAND stack_test)
-
-add_executable(queue_test
-  queue_test.c
-
-  ../src/queue.c
-  ../src/list.c
-  ../src/log.c
-  ../src/memtrace.c
-)
-
-add_test(NAME queue_test COMMAND queue_test)
+  add_executable(${TEST_NAME} ${TEST_SOURCE})
+  target_link_libraries(${TEST_NAME} PUBLIC ${TAU_LIBRARY_NAME})
+  
+  add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+endforeach()

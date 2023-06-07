@@ -17,7 +17,6 @@ struct lexer_s
   arena_t* arena;
 
   location_t* loc; // Current location in source file.
-  list_t* toks; // List of processed tokens.
 };
 
 /**
@@ -60,21 +59,13 @@ location_t* lexer_location_copy(lexer_t* lex);
 token_t* lexer_token_init(lexer_t* lex, token_kind_t kind);
 
 /**
- * \brief Add token to lexer's token list.
- * 
- * \param[in] lex Lexer to be used.
- * \param[in] tok Token to be added to list.
-*/
-void lexer_token_push(lexer_t* lex, token_t* tok);
-
-/**
  * \brief Checks if the current character is a whitespace.
  * 
  * \param[in] lex Lexer to be used.
  * \returns Non-zero value if the current character is a whitespace, zero
  * otherwise.
 */
-int lexer_is_space(lexer_t* lex);
+bool lexer_is_space(lexer_t* lex);
 
 /**
  * \brief Checks if the current character could be the beginning of a word.
@@ -83,7 +74,7 @@ int lexer_is_space(lexer_t* lex);
  * \returns Non-zero value if the current character could be the beginning of a
  * word, zero otherwise.
 */
-int lexer_is_word_begin(lexer_t* lex);
+bool lexer_is_word_begin(lexer_t* lex);
 
 /**
  * \brief Checks if the current character could appear in a word.
@@ -92,7 +83,7 @@ int lexer_is_word_begin(lexer_t* lex);
  * \returns Non-zero value if the current character could appear in a word,
  * zero otherwise.
 */
-int lexer_is_word(lexer_t* lex);
+bool lexer_is_word(lexer_t* lex);
 
 /**
  * \brief Checks if the current character is a decimal digit.
@@ -101,7 +92,7 @@ int lexer_is_word(lexer_t* lex);
  * \returns Non-zero value if the current character is a decimal digit, zero
  * otherwise.
 */
-int lexer_is_decimal(lexer_t* lex);
+bool lexer_is_decimal(lexer_t* lex);
 
 /**
  * \brief Checks if the current character is a hexadecimal digit.
@@ -110,7 +101,7 @@ int lexer_is_decimal(lexer_t* lex);
  * \returns Non-zero value if the current character is a hexadecimal digit, zero
  * otherwise.
 */
-int lexer_is_hexadecimal(lexer_t* lex);
+bool lexer_is_hexadecimal(lexer_t* lex);
 
 /**
  * \brief Checks if the current character is an octal digit.
@@ -119,7 +110,7 @@ int lexer_is_hexadecimal(lexer_t* lex);
  * \returns Non-zero value if the current character is an octal digit, zero
  * otherwise.
 */
-int lexer_is_octal(lexer_t* lex);
+bool lexer_is_octal(lexer_t* lex);
 
 /**
  * \brief Checks if the current character is a binary digit.
@@ -128,7 +119,7 @@ int lexer_is_octal(lexer_t* lex);
  * \returns Non-zero value if the current character is a binary digit, zero
  * otherwise.
 */
-int lexer_is_binary(lexer_t* lex);
+bool lexer_is_binary(lexer_t* lex);
 
 /**
  * \brief Checks if the current character is a punctuation.
@@ -137,7 +128,7 @@ int lexer_is_binary(lexer_t* lex);
  * \returns Non-zero value if the current character is a punctuation, zero
  * otherwise.
 */
-int lexer_is_punctuation(lexer_t* lex);
+bool lexer_is_punctuation(lexer_t* lex);
 
 /**
  * \brief Returns the character at the current location of the lexer.
@@ -185,7 +176,7 @@ bool lexer_consume(lexer_t* lex, char ch);
  * \param[in] pred Predicate to be used.
  * \returns Number of characters skipped.
 */
-size_t lexer_skip(lexer_t* lex, int(*pred)(lexer_t*));
+size_t lexer_skip(lexer_t* lex, bool(*pred)(lexer_t*));
 
 /**
  * \brief Skips the specified number of characters.
@@ -203,35 +194,35 @@ void lexer_skip_n(lexer_t* lex, size_t n);
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_word(lexer_t* lex);
+token_t* lexer_read_word(lexer_t* lex);
 
 /**
  * \brief Read an octal integer token and add it to the token list.
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_octal_integer(lexer_t* lex);
+token_t* lexer_read_octal_integer(lexer_t* lex);
 
 /**
  * \brief Read a binary integer token and add it to the token list.
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_binary_integer(lexer_t* lex);
+token_t* lexer_read_binary_integer(lexer_t* lex);
 
 /**
  * \brief Read a decimal integer token and add it to the token list.
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_decimal_number(lexer_t* lex);
+token_t* lexer_read_decimal_number(lexer_t* lex);
 
 /**
  * \brief Read a hexadecimal integer token and add it to the token list.
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_hexadecimal_integer(lexer_t* lex);
+token_t* lexer_read_hexadecimal_integer(lexer_t* lex);
 
 /**
  * \brief Read a number token which can either be a binary, octal, decimal or
@@ -239,35 +230,35 @@ void lexer_read_hexadecimal_integer(lexer_t* lex);
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_number(lexer_t* lex);
+token_t* lexer_read_number(lexer_t* lex);
 
 /**
  * \brief Read a string token and add it to the token list.
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_string(lexer_t* lex);
+token_t* lexer_read_string(lexer_t* lex);
 
 /**
  * \brief Read a character token and add it to the token list.
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_character(lexer_t* lex);
+token_t* lexer_read_character(lexer_t* lex);
 
 /**
  * \brief Read a punctuation token and add it to the token list.
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_punctuation(lexer_t* lex);
+token_t* lexer_read_punctuation(lexer_t* lex);
 
 /**
  * \brief Read a token and add it to the token list.
  * 
  * \param[in] lex Lexer to be used.
 */
-void lexer_read_next(lexer_t* lex);
+token_t* lexer_read_next(lexer_t* lex);
 
 /**
  * \brief Processes source while there are tokens to read.

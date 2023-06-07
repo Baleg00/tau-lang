@@ -1,38 +1,10 @@
-add_executable(tauc
-  main.c
-  
-  location.c
-  token.c
-  lexer.c
-  op.c
-  ast.c
-  shyd.c
-  parser.c
-  symtable.c
-  analzyer.c
-  typedesc.c
-  opcode.c
-  bytecode.c
-  compiler.c
+if(MSVC)
+  add_compile_options(/Wall /WX)
+else()
+  add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+endif()
 
-  memtrace.c
+add_library(${TAU_LIBRARY_NAME} STATIC ${TAU_SOURCES})
 
-  timer.c
-  arena.c
-  str.c
-  file.c
-  cli.c
-  log.c
-  crumb.c
-  diagnostics.c
-
-  list.c
-  stack.c
-  queue.c)
-  
-set_target_properties(tauc
-  PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
-
-add_compile_options(
-  $<$<C_COMPILER_ID:MSVC>:/Wall /WX>
-  $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>)
+add_executable(${TAU_EXECUTABLE_NAME} main.c)
+target_link_libraries(${TAU_EXECUTABLE_NAME} PUBLIC ${TAU_LIBRARY_NAME})

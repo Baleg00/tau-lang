@@ -7,8 +7,6 @@
 
 #include "memtrace.h"
 
-#define ARENA_DEFAULT_CAPACITY (8 * (1 << 10))
-
 typedef union arena_max_align_u
 {
   uintmax_t a;

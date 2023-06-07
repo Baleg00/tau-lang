@@ -12,6 +12,8 @@
 
 #include "typedefs.h"
 
+#define ARENA_DEFAULT_CAPACITY (8 * (1 << 10))
+
 struct arena_s
 {
   void* begin; // Begin pointer of chunk.

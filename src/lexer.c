@@ -29,8 +29,6 @@ void lexer_init(lexer_t* lex, arena_t* arena, const char* path, char* src)
   assert(lex->loc != NULL);
 
   location_init(lex->loc, path, src, src, 0, 0, 0);
-
-  lex->toks = NULL;
 }
 
 void lexer_free(lexer_t* lex)
@@ -48,11 +46,6 @@ location_t* lexer_location_copy(lexer_t* lex)
   return loc;
 }
 
-list_t* lexer_tokens(lexer_t* lex)
-{
-  return lex->toks;
-}
-
 token_t* lexer_token_init(lexer_t* lex, token_kind_t kind)
 {
   location_t* loc = lexer_location_copy(lex);
@@ -65,49 +58,44 @@ token_t* lexer_token_init(lexer_t* lex, token_kind_t kind)
   return tok;
 }
 
-void lexer_token_push(lexer_t* lex, token_t* tok)
+bool lexer_is_space(lexer_t* lex)
 {
-  list_push_back(lex->toks, tok);
+  return isspace(*lex->loc->cur) != 0;
 }
 
-int lexer_is_space(lexer_t* lex)
+bool lexer_is_word_begin(lexer_t* lex)
 {
-  return isspace(*lex->loc->cur);
+  return isalpha(*lex->loc->cur) != 0 || *lex->loc->cur == '_';
 }
 
-int lexer_is_word_begin(lexer_t* lex)
+bool lexer_is_word(lexer_t* lex)
 {
-  return isalpha(*lex->loc->cur) || *lex->loc->cur == '_';
+  return isalnum(*lex->loc->cur) != 0 || *lex->loc->cur == '_';
 }
 
-int lexer_is_word(lexer_t* lex)
+bool lexer_is_decimal(lexer_t* lex)
 {
-  return isalnum(*lex->loc->cur) || *lex->loc->cur == '_';
+  return isdigit(*lex->loc->cur) != 0;
 }
 
-int lexer_is_decimal(lexer_t* lex)
+bool lexer_is_hexadecimal(lexer_t* lex)
 {
-  return isdigit(*lex->loc->cur);
+  return isxdigit(*lex->loc->cur) != 0;
 }
 
-int lexer_is_hexadecimal(lexer_t* lex)
-{
-  return isxdigit(*lex->loc->cur);
-}
-
-int lexer_is_octal(lexer_t* lex)
+bool lexer_is_octal(lexer_t* lex)
 {
   return '0' <= *lex->loc->cur && '7' >= *lex->loc->cur;
 }
 
-int lexer_is_binary(lexer_t* lex)
+bool lexer_is_binary(lexer_t* lex)
 {
   return *lex->loc->cur == '0' || *lex->loc->cur == '1';
 }
 
-int lexer_is_punctuation(lexer_t* lex)
+bool lexer_is_punctuation(lexer_t* lex)
 {
-  return ispunct(*lex->loc->cur);
+  return ispunct(*lex->loc->cur) != 0;
 }
 
 char lexer_current(lexer_t* lex)
@@ -147,7 +135,7 @@ bool lexer_consume(lexer_t* lex, char ch)
   return false;
 }
 
-size_t lexer_skip(lexer_t* lex, int(*pred)(lexer_t*))
+size_t lexer_skip(lexer_t* lex, bool(*pred)(lexer_t*))
 {
   const char* begin = lex->loc->cur;
 
@@ -163,7 +151,7 @@ void lexer_skip_n(lexer_t* lex, size_t n)
     lexer_next(lex);
 }
 
-void lexer_read_word(lexer_t* lex)
+token_t* lexer_read_word(lexer_t* lex)
 {
   static const struct {
     const char* const keyword;
@@ -236,10 +224,10 @@ void lexer_read_word(lexer_t* lex)
       break;
     }
 
-  lexer_token_push(lex, tok);
+  return tok;
 }
 
-void lexer_read_octal_integer(lexer_t* lex)
+token_t* lexer_read_octal_integer(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT);
 
@@ -251,10 +239,10 @@ void lexer_read_octal_integer(lexer_t* lex)
   if (len == 2 || lexer_is_word(lex))
     report_error_ill_formed_integer_literal(tok->loc);
 
-  lexer_token_push(lex, tok);
+  return tok;
 }
 
-void lexer_read_binary_integer(lexer_t* lex)
+token_t* lexer_read_binary_integer(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT);
 
@@ -266,10 +254,10 @@ void lexer_read_binary_integer(lexer_t* lex)
   if (len == 2 || lexer_is_word(lex))
     report_error_ill_formed_integer_literal(tok->loc);
 
-  lexer_token_push(lex, tok);
+  return tok;
 }
 
-void lexer_read_decimal_number(lexer_t* lex)
+token_t* lexer_read_decimal_number(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT);
   
@@ -280,10 +268,7 @@ void lexer_read_decimal_number(lexer_t* lex)
     if (!isdigit(lexer_peek(lex)))
     {
       tok->loc->len = len;
-      lexer_token_push(lex, tok);
-
-      lexer_read_punctuation(lex);
-      return;
+      return tok;
     }
 
     lexer_next(lex);
@@ -311,20 +296,18 @@ void lexer_read_decimal_number(lexer_t* lex)
       report_error_ill_formed_floating_point_literal(tok->loc);
     
     tok->kind = TOK_LIT_FLT;
-    lexer_token_push(lex, tok);
+    return tok;
   }
-  else
-  {
-    tok->loc->len = len;
 
-    if (lexer_is_word(lex))
-      report_error_ill_formed_integer_literal(tok->loc);
+  tok->loc->len = len;
 
-    lexer_token_push(lex, tok);
-  }
+  if (lexer_is_word(lex))
+    report_error_ill_formed_integer_literal(tok->loc);
+
+  return tok;
 }
 
-void lexer_read_hexadecimal_integer(lexer_t* lex)
+token_t* lexer_read_hexadecimal_integer(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT);
 
@@ -336,34 +319,29 @@ void lexer_read_hexadecimal_integer(lexer_t* lex)
   if (len == 2 || lexer_is_word(lex))
     report_error_ill_formed_integer_literal(tok->loc);
 
-  lexer_token_push(lex, tok);
+  return tok;
 }
 
-void lexer_read_number(lexer_t* lex)
+token_t* lexer_read_number(lexer_t* lex)
 {
   if (lexer_current(lex) == '0')
     switch (lexer_peek(lex))
     {
     case 'x':
     case 'X':
-      lexer_read_hexadecimal_integer(lex);
-      return;
-
+      return lexer_read_hexadecimal_integer(lex);
     case 'o':
     case 'O':
-      lexer_read_octal_integer(lex);
-      return;
-
+      return lexer_read_octal_integer(lex);
     case 'b':
     case 'B':
-      lexer_read_binary_integer(lex);
-      return;
+      return lexer_read_binary_integer(lex);
     }
 
-  lexer_read_decimal_number(lex);
+  return lexer_read_decimal_number(lex);
 }
 
-void lexer_read_string(lexer_t* lex)
+token_t* lexer_read_string(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_STR);
 
@@ -423,10 +401,10 @@ void lexer_read_string(lexer_t* lex)
 
   tok->loc->len = len + 2;
 
-  lexer_token_push(lex, tok);
+  return tok;
 }
 
-void lexer_read_character(lexer_t* lex)
+token_t* lexer_read_character(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_CHAR);
 
@@ -495,10 +473,10 @@ void lexer_read_character(lexer_t* lex)
 
   tok->loc->len = len + 2;
 
-  lexer_token_push(lex, tok);
+  return tok;
 }
 
-void lexer_read_punctuation(lexer_t* lex)
+token_t* lexer_read_punctuation(lexer_t* lex)
 {
   static const struct {
     const token_kind_t kind;
@@ -685,33 +663,33 @@ void lexer_read_punctuation(lexer_t* lex)
       break;
     }
 
-  lexer_token_push(lex, tok);
+  return tok;
 }
 
-void lexer_read_next(lexer_t* lex)
+token_t* lexer_read_next(lexer_t* lex)
 {
   lexer_skip(lex, lexer_is_space);
 
   if (lexer_is_word_begin(lex))
-    lexer_read_word(lex);
+    return lexer_read_word(lex);
   else if (lexer_is_decimal(lex))
-    lexer_read_number(lex);
+    return lexer_read_number(lex);
   else if (lexer_current(lex) == '"')
-    lexer_read_string(lex);
+    return lexer_read_string(lex);
   else if (lexer_current(lex) == '\'')
-    lexer_read_character(lex);
+    return lexer_read_character(lex);
   else if (lexer_is_punctuation(lex))
-    lexer_read_punctuation(lex);
+    return lexer_read_punctuation(lex);
   else if (lexer_current(lex) == '\0')
-    lexer_token_push(lex, lexer_token_init(lex, TOK_EOF));
-  else
-    report_error_unexpected_character(lex->loc);
+    return lexer_token_init(lex, TOK_EOF);
+  
+  report_error_unexpected_character(lex->loc);
+
+  return NULL;
 }
 
 void lexer_lex(lexer_t* lex, list_t* toks)
 {
-  lex->toks = toks;
-
-  while (list_empty(lex->toks) || ((token_t*)list_back(lex->toks))->kind != TOK_EOF)
-    lexer_read_next(lex);
+  while (list_empty(toks) || ((token_t*)list_back(toks))->kind != TOK_EOF)
+    list_push_back(toks, lexer_read_next(lex));
 }
