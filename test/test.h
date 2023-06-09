@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #include <setjmp.h>
 
 #include "esc_seq.h"
@@ -31,6 +32,9 @@ struct test_context_s
   test_context_t* parent; /** Parent context. */
   size_t depth; /** Context depth. */
 
+  double time_begin; /** Context begin timestamp. */
+  double time_end; /** Context end timestamp. */
+
   volatile int result; /** Context result. (EXIT_SUCCESS or EXIT_FAILURE) */
   
   volatile bool has_before_jmp_buf; /** Indicates that the context has a before block. */
@@ -49,6 +53,19 @@ struct test_context_s
 
   jmp_buf return_jmp_buf; /** Jump buffer to return to. */
 };
+
+#define _timer_begin()\
+  do {\
+    _ctx.time_begin = (double)clock() / (double)CLOCKS_PER_SEC;\
+  } while (0)\
+
+#define _timer_end()\
+  do {\
+    _ctx.time_end = (double)clock() / (double)CLOCKS_PER_SEC;\
+  } while (0)\
+
+#define _timer_elapsed()\
+  ((_ctx.time_end - _ctx.time_begin) * 1000.0)
 
 #define _print_indent(COUNT)\
   do {\
@@ -140,9 +157,10 @@ struct test_context_s
     }\
     case TEST_CONTEXT_IT:\
     {\
+      _timer_end();\
       _do_after_each();\
       _do_after();\
-      printf(ESC_FG_BRIGHT_GREEN " passed\n" ESC_RESET);\
+      printf(ESC_FG_BRIGHT_GREEN " passed" ESC_FG_BRIGHT_BLACK " (%.0lf ms)\n" ESC_RESET, _timer_elapsed());\
       longjmp(_ctx.exit_jmp_buf, 1);\
     }\
     }\
@@ -259,6 +277,7 @@ struct test_context_s
     }\
     _do_before();\
     _do_before_each();\
+    _timer_begin();\
     _print_indent(_ctx.depth);\
     printf(ESC_FG_BRIGHT_BLACK "%s" ESC_RESET, (SHOULD));\
 

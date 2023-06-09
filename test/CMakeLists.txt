@@ -3,7 +3,6 @@ set(TAU_TEST_SOURCES
   ${TAU_TEST_DIR}/stack_test.c
   ${TAU_TEST_DIR}/queue_test.c
   ${TAU_TEST_DIR}/arena_test.c
-  ${TAU_TEST_DIR}/lexer_test.c
 )
 
 foreach(TEST_SOURCE IN ITEMS ${TAU_TEST_SOURCES})

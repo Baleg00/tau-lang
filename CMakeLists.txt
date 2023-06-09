@@ -21,34 +21,6 @@ set(TAU_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TAU_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/inc)
 set(TAU_TEST_DIR ${CMAKE_CURRENT_LIST_DIR}/test)
 
-set(TAU_SOURCES
-  ${TAU_SOURCE_DIR}/analzyer.c
-  ${TAU_SOURCE_DIR}/arena.c
-  ${TAU_SOURCE_DIR}/ast.c
-  ${TAU_SOURCE_DIR}/bytecode.c
-  ${TAU_SOURCE_DIR}/cli.c
-  ${TAU_SOURCE_DIR}/compiler.c
-  ${TAU_SOURCE_DIR}/crumb.c
-  ${TAU_SOURCE_DIR}/diagnostics.c
-  ${TAU_SOURCE_DIR}/file.c
-  ${TAU_SOURCE_DIR}/lexer.c
-  ${TAU_SOURCE_DIR}/list.c
-  ${TAU_SOURCE_DIR}/location.c
-  ${TAU_SOURCE_DIR}/log.c
-  ${TAU_SOURCE_DIR}/memtrace.c
-  ${TAU_SOURCE_DIR}/op.c
-  ${TAU_SOURCE_DIR}/opcode.c
-  ${TAU_SOURCE_DIR}/parser.c
-  ${TAU_SOURCE_DIR}/queue.c
-  ${TAU_SOURCE_DIR}/shyd.c
-  ${TAU_SOURCE_DIR}/stack.c
-  ${TAU_SOURCE_DIR}/str.c
-  ${TAU_SOURCE_DIR}/symtable.c
-  ${TAU_SOURCE_DIR}/timer.c
-  ${TAU_SOURCE_DIR}/token.c
-  ${TAU_SOURCE_DIR}/typedesc.c
-)
-
 SET(TAU_EXECUTABLE_NAME tauc)
 SET(TAU_LIBRARY_NAME tau_lib)
 

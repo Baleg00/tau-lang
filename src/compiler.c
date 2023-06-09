@@ -18,7 +18,6 @@
 #include "ast.h"
 #include "parser.h"
 #include "analzyer.h"
-#include "bytecode.h"
 
 #include "arena.h"
 #include "memtrace.h"
@@ -84,22 +83,6 @@ static void compiler_dump_ast_flat(compiler_t* compiler, const char* input_file_
   fclose(ast_file);
 
   log_trace("main", "(%s) AST flat dump: %s", input_file_name, ast_file_path);
-}
-
-static void compiler_dump_tasm(compiler_t* compiler, const char* input_file_path, const char* input_file_name, bytecode_t* bytecode)
-{
-  unused(compiler);
-  
-  char tasm_file_path[COMPILER_MAX_BUFFER_SIZE];
-  strcpy(tasm_file_path, input_file_path);
-  strcat(tasm_file_path, ".tasm");
-
-  FILE* tasm_file = fopen(tasm_file_path, "w");
-  assert(tasm_file != NULL);
-  bytecode_dump(tasm_file, bytecode);
-  fclose(tasm_file);
-
-  log_trace("main", "(%s) tasm dump: %s", input_file_name, tasm_file_path);
 }
 
 void compiler_init(compiler_t* compiler)
@@ -213,17 +196,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     if (compiler->flags.dump_ast_flat)
       compiler_dump_ast_flat(compiler, input_file_path, input_file_name, (ast_node_t*)&root);
 
-    log_trace("main", "(%s) Bytecode generation.", input_file_name);
-
-    bytecode_t* bytecode = bytecode_init();
-    time_it(bytecode, bytecode_visit_prog(bytecode, &root));
-
-    if (compiler->flags.dump_tasm)
-      compiler_dump_tasm(compiler, input_file_path, input_file_name, bytecode);
-
     log_trace("main", "(%s) Cleanup.", input_file_name);
-
-    bytecode_free(bytecode);
 
     analyzer_free(&analyzer);
     
