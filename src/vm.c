@@ -24,6 +24,8 @@ void vm_init(vm_t* vm, const uint8_t* code, size_t size)
   vm->stack.data = malloc(VM_DEFAULT_STACK_SIZE);
   assert(vm->stack.data != NULL);
   vm->stack.offset = 0;
+
+  vm->regs.SP = (uint64_t)vm->stack.data;
 }
 
 void vm_free(vm_t* vm)
@@ -31,7 +33,7 @@ void vm_free(vm_t* vm)
   free(vm->stack.data);
 }
 
-uint8_t vm_register_8bit_get(vm_t* vm, register_t reg)
+uint8_t vm_register_u8_get(vm_t* vm, register_t reg)
 {
   switch (reg)
   {
@@ -53,7 +55,7 @@ uint8_t vm_register_8bit_get(vm_t* vm, register_t reg)
   return 0;
 }
 
-uint16_t vm_register_16bit_get(vm_t* vm, register_t reg)
+uint16_t vm_register_u16_get(vm_t* vm, register_t reg)
 {
   switch (reg)
   {
@@ -75,7 +77,7 @@ uint16_t vm_register_16bit_get(vm_t* vm, register_t reg)
   return 0;
 }
 
-uint32_t vm_register_32bit_get(vm_t* vm, register_t reg)
+uint32_t vm_register_u32_get(vm_t* vm, register_t reg)
 {
   switch (reg)
   {
@@ -97,7 +99,7 @@ uint32_t vm_register_32bit_get(vm_t* vm, register_t reg)
   return 0;
 }
 
-uint64_t vm_register_64bit_get(vm_t* vm, register_t reg)
+uint64_t vm_register_u64_get(vm_t* vm, register_t reg)
 {
   switch (reg)
   {
@@ -116,21 +118,45 @@ uint64_t vm_register_64bit_get(vm_t* vm, register_t reg)
   return 0;
 }
 
-void vm_register_get(vm_t* vm, register_t reg, void* data)
+float vm_register_f32_get(vm_t* vm, register_t reg)
 {
-  if (register_is_8bit(reg))
-    *((uint8_t*)data) = vm_register_8bit_get(vm, reg);
-  else if (register_is_16bit(reg))
-    *((uint16_t*)data) = vm_register_16bit_get(vm, reg);
-  else if (register_is_32bit(reg))
-    *((uint32_t*)data) = vm_register_32bit_get(vm, reg);
-  else if (register_is_64bit(reg))
-    *((uint64_t*)data) = vm_register_64bit_get(vm, reg);
-  else
-    unreachable();
+  switch (reg)
+  {
+  case REG_AHD: return ((float*)&vm->regs.A)[1];
+  case REG_ALD: return ((float*)&vm->regs.A)[0];
+  case REG_BHD: return ((float*)&vm->regs.B)[1];
+  case REG_BLD: return ((float*)&vm->regs.B)[0];
+  case REG_CHD: return ((float*)&vm->regs.C)[1];
+  case REG_CLD: return ((float*)&vm->regs.C)[0];
+  case REG_DHD: return ((float*)&vm->regs.D)[1];
+  case REG_DLD: return ((float*)&vm->regs.D)[0];
+  case REG_EHD: return ((float*)&vm->regs.E)[1];
+  case REG_ELD: return ((float*)&vm->regs.E)[0];
+  case REG_FHD: return ((float*)&vm->regs.F)[1];
+  case REG_FLD: return ((float*)&vm->regs.F)[0];
+  default: unreachable();
+  }
+
+  return 0.0f;
 }
 
-void vm_register_8bit_set(vm_t* vm, register_t reg, uint8_t value)
+double vm_register_f64_get(vm_t* vm, register_t reg)
+{
+  switch (reg)
+  {
+  case REG_A: return *(double*)&vm->regs.A;
+  case REG_B: return *(double*)&vm->regs.B;
+  case REG_C: return *(double*)&vm->regs.C;
+  case REG_D: return *(double*)&vm->regs.D;
+  case REG_E: return *(double*)&vm->regs.E;
+  case REG_F: return *(double*)&vm->regs.F;
+  default: unreachable();
+  }
+
+  return 0.0;
+}
+
+void vm_register_u8_set(vm_t* vm, register_t reg, uint8_t value)
 {
   switch (reg)
   {
@@ -150,7 +176,7 @@ void vm_register_8bit_set(vm_t* vm, register_t reg, uint8_t value)
   }
 }
 
-void vm_register_16bit_set(vm_t* vm, register_t reg, uint16_t value)
+void vm_register_u16_set(vm_t* vm, register_t reg, uint16_t value)
 {
   switch (reg)
   {
@@ -170,7 +196,7 @@ void vm_register_16bit_set(vm_t* vm, register_t reg, uint16_t value)
   }
 }
 
-void vm_register_32bit_set(vm_t* vm, register_t reg, uint32_t value)
+void vm_register_u32_set(vm_t* vm, register_t reg, uint32_t value)
 {
   switch (reg)
   {
@@ -190,7 +216,7 @@ void vm_register_32bit_set(vm_t* vm, register_t reg, uint32_t value)
   }
 }
 
-void vm_register_64bit_set(vm_t* vm, register_t reg, uint64_t value)
+void vm_register_u64_set(vm_t* vm, register_t reg, uint64_t value)
 {
   switch (reg)
   {
@@ -207,138 +233,280 @@ void vm_register_64bit_set(vm_t* vm, register_t reg, uint64_t value)
   }
 }
 
-void vm_register_set(vm_t* vm, register_t reg, const void* data)
+void vm_register_f32_set(vm_t* vm, register_t reg, float value)
 {
-  if (register_is_8bit(reg))
-    vm_register_8bit_set(vm, reg, *(const uint8_t*)data);
-  else if (register_is_16bit(reg))
-    vm_register_16bit_set(vm, reg, *(const uint16_t*)data);
-  else if (register_is_32bit(reg))
-    vm_register_32bit_set(vm, reg, *(const uint32_t*)data);
-  else if (register_is_64bit(reg))
-    vm_register_64bit_set(vm, reg, *(const uint64_t*)data);
-  else
-    unreachable();
+  switch (reg)
+  {
+  case REG_AHD: ((float*)&vm->regs.A)[1] = value; break;
+  case REG_ALD: ((float*)&vm->regs.A)[0] = value; break;
+  case REG_BHD: ((float*)&vm->regs.B)[1] = value; break;
+  case REG_BLD: ((float*)&vm->regs.B)[0] = value; break;
+  case REG_CHD: ((float*)&vm->regs.C)[1] = value; break;
+  case REG_CLD: ((float*)&vm->regs.C)[0] = value; break;
+  case REG_DHD: ((float*)&vm->regs.D)[1] = value; break;
+  case REG_DLD: ((float*)&vm->regs.D)[0] = value; break;
+  case REG_EHD: ((float*)&vm->regs.E)[1] = value; break;
+  case REG_ELD: ((float*)&vm->regs.E)[0] = value; break;
+  case REG_FHD: ((float*)&vm->regs.F)[1] = value; break;
+  case REG_FLD: ((float*)&vm->regs.F)[0] = value; break;
+  default: unreachable();
+  }
 }
 
-uint8_t vm_code_next_8bit(vm_t* vm)
+void vm_register_f64_set(vm_t* vm, register_t reg, double value)
 {
-  uint8_t value = vm_mem_8bit_get(vm->code.data + vm->regs.IP);
-  vm->regs.IP += 1;
+  switch (reg)
+  {
+  case REG_A: *(double*)&vm->regs.A = value; break;
+  case REG_B: *(double*)&vm->regs.B = value; break;
+  case REG_C: *(double*)&vm->regs.C = value; break;
+  case REG_D: *(double*)&vm->regs.D = value; break;
+  case REG_E: *(double*)&vm->regs.E = value; break;
+  case REG_F: *(double*)&vm->regs.F = value; break;
+  default: unreachable();
+  }
+}
+
+uint8_t vm_code_next_u8(vm_t* vm)
+{
+  uint8_t value = vm_mem_u8_get(vm, vm->code.data + vm->regs.IP);
+  vm->regs.IP += sizeof(uint8_t);
   return value;
 }
 
-uint16_t vm_code_next_16bit(vm_t* vm)
+uint16_t vm_code_next_u16(vm_t* vm)
 {
-  uint16_t value = vm_mem_16bit_get(vm->code.data + vm->regs.IP);
-  vm->regs.IP += 2;
+  uint16_t value = vm_mem_u16_get(vm, vm->code.data + vm->regs.IP);
+  vm->regs.IP += sizeof(uint16_t);
   return value;
 }
 
-uint32_t vm_code_next_32bit(vm_t* vm)
+uint32_t vm_code_next_u32(vm_t* vm)
 {
-  uint32_t value = vm_mem_32bit_get(vm->code.data + vm->regs.IP);
-  vm->regs.IP += 4;
+  uint32_t value = vm_mem_u32_get(vm, vm->code.data + vm->regs.IP);
+  vm->regs.IP += sizeof(uint32_t);
   return value;
 }
 
-uint64_t vm_code_next_64bit(vm_t* vm)
+uint64_t vm_code_next_u64(vm_t* vm)
 {
-  uint64_t value = vm_mem_64bit_get(vm->code.data + vm->regs.IP);
-  vm->regs.IP += 8;
+  uint64_t value = vm_mem_u64_get(vm, vm->code.data + vm->regs.IP);
+  vm->regs.IP += sizeof(uint64_t);
   return value;
 }
 
-uint8_t vm_mem_8bit_get(const void* mem)
+float vm_code_next_f32(vm_t* vm)
 {
+  float value = vm_mem_f32_get(vm, vm->code.data + vm->regs.IP);
+  vm->regs.IP += sizeof(float);
+  return value;
+}
+
+double vm_code_next_f64(vm_t* vm)
+{
+  double value = vm_mem_f64_get(vm, vm->code.data + vm->regs.IP);
+  vm->regs.IP += sizeof(double);
+  return value;
+}
+
+uint8_t vm_mem_u8_get(vm_t* vm, const void* mem)
+{
+  unused(vm);
+
   return *(uint8_t*)mem;
 }
 
-uint16_t vm_mem_16bit_get(const void* mem)
+uint16_t vm_mem_u16_get(vm_t* vm, const void* mem)
 {
-  uint8_t low = ((const uint8_t*)mem)[0];
-  uint8_t high = ((const uint8_t*)mem)[1];
-  return ((uint16_t)high << 8) |
-         ((uint16_t)low);
+  unused(vm);
+
+  uint16_t value;
+  memcpy(&value, mem, sizeof(uint16_t));
+  return value;
 }
 
-uint32_t vm_mem_32bit_get(const void* mem)
+uint32_t vm_mem_u32_get(vm_t* vm, const void* mem)
 {
-  uint8_t byte1 = ((const uint8_t*)mem)[0];
-  uint8_t byte2 = ((const uint8_t*)mem)[1];
-  uint8_t byte3 = ((const uint8_t*)mem)[2];
-  uint8_t byte4 = ((const uint8_t*)mem)[3];
-  return (((uint32_t)byte4) << 24) |
-         (((uint32_t)byte3) << 16) |
-         (((uint32_t)byte2) << 8) |
-         (((uint32_t)byte1));
+  unused(vm);
+
+  uint32_t value;
+  memcpy(&value, mem, sizeof(uint32_t));
+  return value;
 }
 
-uint64_t vm_mem_64bit_get(const void* mem)
+uint64_t vm_mem_u64_get(vm_t* vm, const void* mem)
 {
-  uint8_t byte1 = ((const uint8_t*)mem)[0];
-  uint8_t byte2 = ((const uint8_t*)mem)[1];
-  uint8_t byte3 = ((const uint8_t*)mem)[2];
-  uint8_t byte4 = ((const uint8_t*)mem)[3];
-  uint8_t byte5 = ((const uint8_t*)mem)[4];
-  uint8_t byte6 = ((const uint8_t*)mem)[5];
-  uint8_t byte7 = ((const uint8_t*)mem)[6];
-  uint8_t byte8 = ((const uint8_t*)mem)[7];
-  return (((uint64_t)byte8) << 56) |
-         (((uint64_t)byte7) << 48) |
-         (((uint64_t)byte6) << 40) |
-         (((uint64_t)byte5) << 32) |
-         (((uint64_t)byte4) << 24) |
-         (((uint64_t)byte3) << 16) |
-         (((uint64_t)byte2) << 8) |
-         (((uint64_t)byte1));
+  unused(vm);
+
+  uint64_t value;
+  memcpy(&value, mem, sizeof(uint64_t));
+  return value;
 }
 
-void vm_mem_8bit_set(void* mem, uint8_t value)
+float vm_mem_f32_get(vm_t* vm, const void* mem)
 {
+  unused(vm);
+
+  float value;
+  memcpy(&value, mem, sizeof(float));
+  return value;
+}
+
+double vm_mem_f64_get(vm_t* vm, const void* mem)
+{
+  unused(vm);
+
+  double value;
+  memcpy(&value, mem, sizeof(double));
+  return value;
+}
+
+void vm_mem_u8_set(vm_t* vm, void* mem, uint8_t value)
+{
+  unused(vm);
+
   *(uint8_t*)mem = value;
 }
 
-void vm_mem_16bit_set(void* mem, uint16_t value)
+void vm_mem_u16_set(vm_t* vm, void* mem, uint16_t value)
 {
-  ((uint8_t*)mem)[0] = (uint8_t)(value & 0xFF);
-  ((uint8_t*)mem)[1] = (uint8_t)((value >> 8) & 0xFF);
+  unused(vm);
+
+  memcpy(mem, &value, sizeof(uint16_t));
 }
 
-void vm_mem_32bit_set(void* mem, uint32_t value)
+void vm_mem_u32_set(vm_t* vm, void* mem, uint32_t value)
 {
-  ((uint8_t*)mem)[0] = (uint8_t)(value & 0xFF);
-  ((uint8_t*)mem)[1] = (uint8_t)((value >> 8) & 0xFF);
-  ((uint8_t*)mem)[2] = (uint8_t)((value >> 16) & 0xFF);
-  ((uint8_t*)mem)[3] = (uint8_t)((value >> 24) & 0xFF);
+  unused(vm);
+
+  memcpy(mem, &value, sizeof(uint32_t));
 }
 
-void vm_mem_64bit_set(void* mem, uint64_t value)
+void vm_mem_u64_set(vm_t* vm, void* mem, uint64_t value)
 {
-  ((uint8_t*)mem)[0] = (uint8_t)(value & 0xFF);
-  ((uint8_t*)mem)[1] = (uint8_t)((value >> 8) & 0xFF);
-  ((uint8_t*)mem)[2] = (uint8_t)((value >> 16) & 0xFF);
-  ((uint8_t*)mem)[3] = (uint8_t)((value >> 24) & 0xFF);
-  ((uint8_t*)mem)[4] = (uint8_t)((value >> 32) & 0xFF);
-  ((uint8_t*)mem)[5] = (uint8_t)((value >> 40) & 0xFF);
-  ((uint8_t*)mem)[6] = (uint8_t)((value >> 48) & 0xFF);
-  ((uint8_t*)mem)[7] = (uint8_t)((value >> 56) & 0xFF);
+  unused(vm);
+
+  memcpy(mem, &value, sizeof(uint64_t));
+}
+
+void vm_mem_f32_set(vm_t* vm, void* mem, float value)
+{
+  unused(vm);
+
+  memcpy(mem, &value, sizeof(float));
+}
+
+void vm_mem_f64_set(vm_t* vm, void* mem, double value)
+{
+  unused(vm);
+
+  memcpy(mem, &value, sizeof(double));
+}
+
+void vm_stack_u8_push(vm_t* vm, uint8_t value)
+{
+  assert((uint8_t*)vm->regs.SP + sizeof(uint8_t) < vm->stack.data + vm->stack.size);
+  memcpy((void*)vm->regs.SP, &value, sizeof(uint8_t));
+  vm->regs.SP += sizeof(uint8_t);
+}
+
+void vm_stack_u16_push(vm_t* vm, uint16_t value)
+{
+  assert((uint8_t*)vm->regs.SP + sizeof(uint16_t) < vm->stack.data + vm->stack.size);
+  memcpy((void*)vm->regs.SP, &value, sizeof(uint16_t));
+  vm->regs.SP += sizeof(uint16_t);
+}
+
+void vm_stack_u32_push(vm_t* vm, uint32_t value)
+{
+  assert((uint8_t*)vm->regs.SP + sizeof(uint32_t) < vm->stack.data + vm->stack.size);
+  memcpy((void*)vm->regs.SP, &value, sizeof(uint32_t));
+  vm->regs.SP += sizeof(uint32_t);
+}
+
+void vm_stack_u64_push(vm_t* vm, uint64_t value)
+{
+  assert((uint8_t*)vm->regs.SP + sizeof(uint64_t) < vm->stack.data + vm->stack.size);
+  memcpy((void*)vm->regs.SP, &value, sizeof(uint64_t));
+  vm->regs.SP += sizeof(uint64_t);
+}
+
+void vm_stack_f32_push(vm_t* vm, float value)
+{
+  assert((uint8_t*)vm->regs.SP + sizeof(float) < vm->stack.data + vm->stack.size);
+  memcpy((void*)vm->regs.SP, &value, sizeof(float));
+  vm->regs.SP += sizeof(float);
+}
+
+void vm_stack_f64_push(vm_t* vm, double value)
+{
+  assert((uint8_t*)vm->regs.SP + sizeof(double) < vm->stack.data + vm->stack.size);
+  memcpy((void*)vm->regs.SP, &value, sizeof(double));
+  vm->regs.SP += sizeof(double);
+}
+
+uint8_t vm_stack_u8_pop(vm_t* vm)
+{
+  assert((uint8_t*)vm->regs.SP - sizeof(uint8_t) >= vm->stack.data);
+  vm->regs.SP -= sizeof(uint8_t);
+  uint8_t value;
+  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
+  return value;
+}
+
+uint16_t vm_stack_u16_pop(vm_t* vm)
+{
+  assert((uint8_t*)vm->regs.SP - sizeof(uint16_t) >= vm->stack.data);
+  vm->regs.SP -= sizeof(uint16_t);
+  uint16_t value;
+  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
+  return value;
+}
+
+uint32_t vm_stack_u32_pop(vm_t* vm)
+{
+  assert((uint8_t*)vm->regs.SP - sizeof(uint32_t) >= vm->stack.data);
+  vm->regs.SP -= sizeof(uint32_t);
+  uint32_t value;
+  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
+  return value;
+}
+
+uint64_t vm_stack_u64_pop(vm_t* vm)
+{
+  assert((uint8_t*)vm->regs.SP - sizeof(uint64_t) >= vm->stack.data);
+  vm->regs.SP -= sizeof(uint64_t);
+  uint64_t value;
+  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
+  return value;
+}
+
+float vm_stack_f32_pop(vm_t* vm)
+{
+  assert((uint8_t*)vm->regs.SP - sizeof(float) >= vm->stack.data);
+  vm->regs.SP -= sizeof(float);
+  float value;
+  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
+  return value;
+}
+
+double vm_stack_f64_pop(vm_t* vm)
+{
+  assert((uint8_t*)vm->regs.SP - sizeof(double) >= vm->stack.data);
+  vm->regs.SP -= sizeof(double);
+  double value;
+  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
+  return value;
 }
 
 void vm_fetch(vm_t* vm)
 {
-  uint8_t low = vm->code.data[vm->regs.IP];
-  uint8_t high = vm->code.data[vm->regs.IP + 1];
-
-  vm->inst.raw = (((uint16_t)high) << 8) | ((uint16_t)low);
-  vm->regs.IP += 2;
+  vm->inst.raw = vm_code_next_u16(vm);
 }
 
 void vm_decode(vm_t* vm)
 {
-  vm->inst.opcode = (opcode_t)((vm->inst.raw >> 6) & 0x3FF);
-  vm->inst.param = (opcode_param_t)((vm->inst.raw >> 3) & 0x7);
-  vm->inst.width = (opcode_width_t)((vm->inst.raw >> 1) & 0x3);
+  opcode_decode(vm->inst.raw, &vm->inst.opcode, &vm->inst.param, &vm->inst.width);
 }
 
 static inline void vm_execute_MOV(vm_t* vm)

@@ -54,7 +54,7 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
 */
 void memtrace_free(void* ptr, const char* file, int line, const char* func);
 
-#ifdef _DEBUG
+#ifdef TAU_DEBUG
 # ifndef TAU_MEMTRACE_IMPL
 /**
  * Allocates `SIZE` bytes of memory.

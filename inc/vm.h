@@ -53,34 +53,54 @@ struct vm_s
 void vm_init(vm_t* vm, const uint8_t* code, size_t size);
 void vm_free(vm_t* vm);
 
-uint8_t vm_register_8bit_get(vm_t* vm, register_t reg);
-uint16_t vm_register_16bit_get(vm_t* vm, register_t reg);
-uint32_t vm_register_32bit_get(vm_t* vm, register_t reg);
-uint64_t vm_register_64bit_get(vm_t* vm, register_t reg);
+uint8_t vm_register_u8_get(vm_t* vm, register_t reg);
+uint16_t vm_register_u16_get(vm_t* vm, register_t reg);
+uint32_t vm_register_u32_get(vm_t* vm, register_t reg);
+uint64_t vm_register_u64_get(vm_t* vm, register_t reg);
+float vm_register_f32_get(vm_t* vm, register_t reg);
+double vm_register_f64_get(vm_t* vm, register_t reg);
 
-void vm_register_get(vm_t* vm, register_t reg, void* data);
+void vm_register_u8_set(vm_t* vm, register_t reg, uint8_t value);
+void vm_register_u16_set(vm_t* vm, register_t reg, uint16_t value);
+void vm_register_u32_set(vm_t* vm, register_t reg, uint32_t value);
+void vm_register_u64_set(vm_t* vm, register_t reg, uint64_t value);
+void vm_register_f32_set(vm_t* vm, register_t reg, float value);
+void vm_register_f64_set(vm_t* vm, register_t reg, double value);
 
-void vm_register_8bit_set(vm_t* vm, register_t reg, uint8_t value);
-void vm_register_16bit_set(vm_t* vm, register_t reg, uint16_t value);
-void vm_register_32bit_set(vm_t* vm, register_t reg, uint32_t value);
-void vm_register_64bit_set(vm_t* vm, register_t reg, uint64_t value);
+uint8_t vm_code_next_u8(vm_t* vm);
+uint16_t vm_code_next_u16(vm_t* vm);
+uint32_t vm_code_next_u32(vm_t* vm);
+uint64_t vm_code_next_u64(vm_t* vm);
+float vm_code_next_f32(vm_t* vm);
+double vm_code_next_f64(vm_t* vm);
 
-void vm_register_set(vm_t* vm, register_t reg, const void* data);
+uint8_t vm_mem_u8_get(vm_t* vm, const void* mem);
+uint16_t vm_mem_u16_get(vm_t* vm, const void* mem);
+uint32_t vm_mem_u32_get(vm_t* vm, const void* mem);
+uint64_t vm_mem_u64_get(vm_t* vm, const void* mem);
+float vm_mem_f32_get(vm_t* vm, const void* mem);
+double vm_mem_f64_get(vm_t* vm, const void* mem);
 
-uint8_t vm_code_next_8bit(vm_t* vm);
-uint16_t vm_code_next_16bit(vm_t* vm);
-uint32_t vm_code_next_32bit(vm_t* vm);
-uint64_t vm_code_next_64bit(vm_t* vm);
+void vm_mem_u8_set(vm_t* vm, void* mem, uint8_t value);
+void vm_mem_u16_set(vm_t* vm, void* mem, uint16_t value);
+void vm_mem_u32_set(vm_t* vm, void* mem, uint32_t value);
+void vm_mem_u64_set(vm_t* vm, void* mem, uint64_t value);
+void vm_mem_f32_set(vm_t* vm, void* mem, float value);
+void vm_mem_f64_set(vm_t* vm, void* mem, double value);
 
-uint8_t vm_mem_8bit_get(const void* mem);
-uint16_t vm_mem_16bit_get(const void* mem);
-uint32_t vm_mem_32bit_get(const void* mem);
-uint64_t vm_mem_64bit_get(const void* mem);
+void vm_stack_u8_push(vm_t* vm, uint8_t value);
+void vm_stack_u16_push(vm_t* vm, uint16_t value);
+void vm_stack_u32_push(vm_t* vm, uint32_t value);
+void vm_stack_u64_push(vm_t* vm, uint64_t value);
+void vm_stack_f32_push(vm_t* vm, float value);
+void vm_stack_f64_push(vm_t* vm, double value);
 
-void vm_mem_8bit_set(void* mem, uint8_t value);
-void vm_mem_16bit_set(void* mem, uint16_t value);
-void vm_mem_32bit_set(void* mem, uint32_t value);
-void vm_mem_64bit_set(void* mem, uint64_t value);
+uint8_t vm_stack_u8_pop(vm_t* vm);
+uint16_t vm_stack_u16_pop(vm_t* vm);
+uint32_t vm_stack_u32_pop(vm_t* vm);
+uint64_t vm_stack_u64_pop(vm_t* vm);
+float vm_stack_f32_pop(vm_t* vm);
+double vm_stack_f64_pop(vm_t* vm);
 
 void vm_fetch(vm_t* vm);
 void vm_decode(vm_t* vm);

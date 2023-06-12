@@ -2,6 +2,159 @@
 
 #include "util.h"
 
+uint8_t register_encode(register_t reg)
+{
+  // Value of `reg` needs to be remapped to fit into 4 bits.
+  // When decoding, bit width is used to exactly determine the register.
+  switch (reg)
+  {
+  case REG_A:
+  case REG_ALD:
+  case REG_ALB:
+  case REG_ALW:
+    return 0;
+  case REG_AHD:
+  case REG_AHW:
+  case REG_AHB:
+    return 1;
+  case REG_B:
+  case REG_BLD:
+  case REG_BLB:
+  case REG_BLW:
+    return 2;
+  case REG_BHD:
+  case REG_BHW:
+  case REG_BHB:
+    return 3;
+  case REG_C:
+  case REG_CLD:
+  case REG_CLB:
+  case REG_CLW:
+    return 4;
+  case REG_CHD:
+  case REG_CHW:
+  case REG_CHB:
+    return 5;
+  case REG_D:
+  case REG_DLD:
+  case REG_DLB:
+  case REG_DLW:
+    return 6;
+  case REG_DHD:
+  case REG_DHW:
+  case REG_DHB:
+    return 7;
+  case REG_E:
+  case REG_ELD:
+  case REG_ELB:
+  case REG_ELW:
+    return 8;
+  case REG_EHD:
+  case REG_EHW:
+  case REG_EHB:
+    return 9;
+  case REG_F:
+  case REG_FLD:
+  case REG_FLB:
+  case REG_FLW:
+    return 10;
+  case REG_FHD:
+  case REG_FHW:
+  case REG_FHB:
+    return 11;
+  case REG_SP:
+    return 12;
+  case REG_BP:
+    return 13;
+  case REG_IP:
+    return 14;
+  default:
+    unreachable();
+  }
+
+  return -1;
+}
+
+register_t register_decode(uint8_t data, opcode_width_t width)
+{
+  switch (width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    switch (data)
+    {
+    case 0:  return REG_ALB;
+    case 1:  return REG_AHB;
+    case 2:  return REG_BLB;
+    case 3:  return REG_BHB;
+    case 4:  return REG_CLB;
+    case 5:  return REG_CHB;
+    case 6:  return REG_DLB;
+    case 7:  return REG_DHB;
+    case 8:  return REG_ELB;
+    case 9:  return REG_EHB;
+    case 10: return REG_FLB;
+    case 11: return REG_FHB;
+    default: unreachable();
+    }
+    break;
+  case OPCODE_WIDTH_16BIT:
+    switch (data)
+    {
+    case 0:  return REG_ALW;
+    case 1:  return REG_AHW;
+    case 2:  return REG_BLW;
+    case 3:  return REG_BHW;
+    case 4:  return REG_CLW;
+    case 5:  return REG_CHW;
+    case 6:  return REG_DLW;
+    case 7:  return REG_DHW;
+    case 8:  return REG_ELW;
+    case 9:  return REG_EHW;
+    case 10: return REG_FLW;
+    case 11: return REG_FHW;
+    default: unreachable();
+    }
+    break;
+  case OPCODE_WIDTH_32BIT:
+    switch (data)
+    {
+    case 0:  return REG_ALD;
+    case 1:  return REG_AHD;
+    case 2:  return REG_BLD;
+    case 3:  return REG_BHD;
+    case 4:  return REG_CLD;
+    case 5:  return REG_CHD;
+    case 6:  return REG_DLD;
+    case 7:  return REG_DHD;
+    case 8:  return REG_ELD;
+    case 9:  return REG_EHD;
+    case 10: return REG_FLD;
+    case 11: return REG_FHD;
+    default: unreachable();
+    }
+    break;
+  case OPCODE_WIDTH_64BIT:
+    switch (data)
+    {
+    case 0:  return REG_A;
+    case 2:  return REG_B;
+    case 4:  return REG_C;
+    case 6:  return REG_D;
+    case 8:  return REG_E;
+    case 10: return REG_F;
+    case 12: return REG_SP;
+    case 13: return REG_BP;
+    case 14: return REG_IP;
+    default: unreachable();
+    }
+    break;
+  default:
+    unreachable();
+  }
+
+  return -1;
+}
+
 const char* register_to_string(register_t reg)
 {
   switch (reg)
