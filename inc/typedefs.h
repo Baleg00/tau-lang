@@ -749,6 +749,19 @@ typedef enum opcode_width_e
   OPCODE_WIDTH_64BIT,
 } opcode_width_t;
 
+/** Memory addressing mode. */
+typedef enum addr_mode_e
+{
+  ADDR_MODE_OFFSET,                  // <offset>
+  ADDR_MODE_BASE,                    // <base>
+  ADDR_MODE_BASE_OFFSET,             // <base> + <offset>
+  ADDR_MODE_BASE_INDEX,              // <base> + <index>
+  ADDR_MODE_BASE_INDEX_OFFSET,       // <base> + <index> + <offset>
+  ADDR_MODE_BASE_INDEX_SCALE,        // <base> + <index> * <scale>
+  ADDR_MODE_INDEX_SCALE_OFFSET,      // <index> * <scale> + <offset>
+  ADDR_MODE_BASE_INDEX_SCALE_OFFSET, // <base> + <index> * <scale> + <offset>
+} addr_mode_t;
+
 /** Represents a virtual machine instance. */
 typedef struct vm_s vm_t;
 

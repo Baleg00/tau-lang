@@ -403,6 +403,329 @@ void vm_mem_f64_set(vm_t* vm, void* mem, double value)
   memcpy(mem, &value, sizeof(double));
 }
 
+static inline uint8_t encode_scale(int32_t scale)
+{
+  // Highest bit represents sign. (0 - positive, 1 - negative)
+  // Lowest 3 bits represent power of 2.
+  switch (scale)
+  {
+  case 2:    return            1;
+  case 4:    return            2;
+  case 8:    return            3;
+  case 16:   return            4;
+  case 32:   return            5;
+  case 64:   return            6;
+  case 128:  return            7;
+  case -2:   return (1 << 3) | 1;
+  case -4:   return (1 << 3) | 2;
+  case -8:   return (1 << 3) | 3;
+  case -16:  return (1 << 3) | 4;
+  case -32:  return (1 << 3) | 5;
+  case -64:  return (1 << 3) | 6;
+  case -128: return (1 << 3) | 7;
+  default: unreachable();
+  }
+
+  return 0;
+}
+
+static inline int32_t decode_scale(uint8_t value)
+{
+  switch (value)
+  {
+  case            1: return 2;
+  case            2: return 4;
+  case            3: return 8;
+  case            4: return 16;
+  case            5: return 32;
+  case            6: return 64;
+  case            7: return 128;
+  case (1 << 3) | 1: return -2;
+  case (1 << 3) | 2: return -4;
+  case (1 << 3) | 3: return -8;
+  case (1 << 3) | 4: return -16;
+  case (1 << 3) | 5: return -32;
+  case (1 << 3) | 6: return -64;
+  case (1 << 3) | 7: return -128;
+  default: unreachable();
+  }
+
+  return 0;
+}
+
+static size_t vm_mem_addr_encode_offset(vm_t* vm, void* mem, int64_t offset)
+{
+  unused(vm);
+
+  *(uint8_t*)mem = ((uint8_t)ADDR_MODE_OFFSET & 0xF) << 4;
+  
+  memcpy((uint8_t*)mem + 1, &offset, sizeof(int64_t));
+
+  return sizeof(uint8_t) + sizeof(int64_t);
+}
+
+static size_t vm_mem_addr_encode_base(vm_t* vm, void* mem, register_t base)
+{
+  unused(vm);
+
+  assert(register_bits(base) == 64);
+
+  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE & 0xF) << 4) |
+                   (register_encode(base) & 0xF);
+
+  return sizeof(uint8_t);
+}
+
+static size_t vm_mem_addr_encode_base_offset(vm_t* vm, void* mem, register_t base, int64_t offset)
+{
+  unused(vm);
+
+  assert(register_bits(base) == 64);
+
+  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_OFFSET & 0xF) << 4) |
+                   (register_encode(base) & 0xF);
+
+  memcpy((uint8_t*)mem + 1, &offset, sizeof(int64_t));
+
+  return sizeof(uint8_t) + sizeof(int64_t);
+}
+
+static size_t vm_mem_addr_encode_base_index(vm_t* vm, void* mem, register_t base, register_t index)
+{
+  unused(vm);
+
+  assert(register_bits(base) == 64);
+  assert(register_bits(index) == 64);
+
+  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_INDEX & 0xF) << 4) |
+                   (register_encode(base) & 0xF);
+
+  *((uint8_t*)mem + 1) = (register_encode(index) & 0xF) << 4;
+
+  return 2 * sizeof(uint8_t);
+}
+
+static size_t vm_mem_addr_encode_base_index_offset(vm_t* vm, void* mem, register_t base, register_t index, int64_t offset)
+{
+  unused(vm);
+
+  assert(register_bits(base) == 64);
+  assert(register_bits(index) == 64);
+
+  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_INDEX_OFFSET & 0xF) << 4) |
+                   (register_encode(base) & 0xF);
+
+  *((uint8_t*)mem + 1) = (register_encode(index) & 0xF) << 4;
+
+  memcpy((uint8_t*)mem + 2, &offset, sizeof(int64_t));
+
+  return 2 * sizeof(uint8_t) + sizeof(int64_t);
+}
+
+static size_t vm_mem_addr_encode_base_index_scale(vm_t* vm, void* mem, register_t base, register_t index, int32_t scale)
+{
+  unused(vm);
+
+  assert(register_bits(base) == 64);
+  assert(register_bits(index) == 64);
+
+  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_INDEX_SCALE & 0xF) << 4) |
+                   (register_encode(base) & 0xF);
+
+  *((uint8_t*)mem + 1) = ((register_encode(index) & 0xF) << 4) |
+                         (encode_scale(scale) & 0xF);
+
+  return 2 * sizeof(uint8_t);
+}
+
+static size_t vm_mem_addr_encode_index_scale_offset(vm_t* vm, void* mem, register_t index, int32_t scale, int64_t offset)
+{
+  unused(vm);
+
+  assert(register_bits(index) == 64);
+
+  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_INDEX_SCALE_OFFSET & 0xF) << 4);
+
+  *((uint8_t*)mem + 1) = ((register_encode(index) & 0xF) << 4) |
+                         (encode_scale(scale) & 0xF);
+
+  memcpy((uint8_t*)mem + 2, &offset, sizeof(int64_t));
+
+  return 2 * sizeof(uint8_t) + sizeof(int64_t);
+}
+
+static size_t vm_mem_addr_encode_base_index_scale_offset(vm_t* vm, void* mem, register_t base, register_t index, int32_t scale, int64_t offset)
+{
+  unused(vm);
+
+  assert(register_bits(base) == 64);
+  assert(register_bits(index) == 64);
+
+  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_INDEX_SCALE_OFFSET & 0xF) << 4) |
+                   (register_encode(base) & 0xF);
+
+  *((uint8_t*)mem + 1) = ((register_encode(index) & 0xF) << 4) |
+                         (encode_scale(scale) & 0xF);
+
+  memcpy((uint8_t*)mem + 2, &offset, sizeof(int64_t));
+
+  return 2 * sizeof(uint8_t) + sizeof(int64_t);
+}
+
+size_t vm_mem_addr_encode(vm_t* vm, void* mem, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset)
+{
+  switch (mode)
+  {
+  case ADDR_MODE_OFFSET:                  return vm_mem_addr_encode_offset(                 vm, mem,                     offset); break;
+  case ADDR_MODE_BASE:                    return vm_mem_addr_encode_base(                   vm, mem, base                      ); break;
+  case ADDR_MODE_BASE_OFFSET:             return vm_mem_addr_encode_base_offset(            vm, mem, base,               offset); break;
+  case ADDR_MODE_BASE_INDEX:              return vm_mem_addr_encode_base_index(             vm, mem, base, index               ); break;
+  case ADDR_MODE_BASE_INDEX_OFFSET:       return vm_mem_addr_encode_base_index_offset(      vm, mem, base, index,        offset); break;
+  case ADDR_MODE_BASE_INDEX_SCALE:        return vm_mem_addr_encode_base_index_scale(       vm, mem, base, index, scale        ); break;
+  case ADDR_MODE_INDEX_SCALE_OFFSET:      return vm_mem_addr_encode_index_scale_offset(     vm, mem,       index, scale, offset); break;
+  case ADDR_MODE_BASE_INDEX_SCALE_OFFSET: return vm_mem_addr_encode_base_index_scale_offset(vm, mem, base, index, scale, offset); break;
+  default: unreachable();
+  }
+
+  return 0;
+}
+
+static size_t vm_mem_addr_decode_offset(vm_t* vm, const void* mem, int64_t* offset)
+{
+  unused(vm);
+
+  if (offset != NULL)
+    memcpy(offset, (const uint8_t*)mem + 1, sizeof(int64_t));
+
+  return sizeof(uint8_t) + sizeof(int64_t);
+}
+
+static size_t vm_mem_addr_decode_base(vm_t* vm, const void* mem, register_t* base)
+{
+  unused(vm);
+
+  if (base != NULL)
+    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
+
+  return sizeof(uint8_t);
+}
+
+static size_t vm_mem_addr_decode_base_offset(vm_t* vm, const void* mem, register_t* base, int64_t* offset)
+{
+  unused(vm);
+  
+  if (base != NULL)
+    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
+
+  if (offset != NULL)
+    memcpy(offset, (const uint8_t*)mem + 1, sizeof(int64_t));
+
+  return sizeof(uint8_t) + sizeof(int64_t);
+}
+
+static size_t vm_mem_addr_decode_base_index(vm_t* vm, const void* mem, register_t* base, register_t* index)
+{
+  unused(vm);
+
+  if (base != NULL)
+    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
+
+  if (index != NULL)
+    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
+
+  return 2 * sizeof(uint8_t);
+}
+
+static size_t vm_mem_addr_decode_base_index_offset(vm_t* vm, const void* mem, register_t* base, register_t* index, int64_t* offset)
+{
+  unused(vm);
+
+  if (base != NULL)
+    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
+
+  if (index != NULL)
+    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
+
+  if (offset != NULL)
+    memcpy(offset, (const uint8_t*)mem + 2, sizeof(int64_t));
+
+  return 2 * sizeof(uint8_t) + sizeof(int64_t);
+}
+
+static size_t vm_mem_addr_decode_base_index_scale(vm_t* vm, const void* mem, register_t* base, register_t* index, int32_t* scale)
+{
+  unused(vm);
+
+  if (base != NULL)
+    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
+
+  if (index != NULL)
+    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
+
+  if (scale != NULL)
+    *scale = decode_scale((*((const uint8_t*)mem + 1)) & 0xF);
+
+  return 2 * sizeof(uint8_t);
+}
+
+static size_t vm_mem_addr_decode_index_scale_offset(vm_t* vm, const void* mem, register_t* index, int32_t* scale, int64_t* offset)
+{
+  unused(vm);
+
+  if (index != NULL)
+    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
+
+  if (scale != NULL)
+    *scale = decode_scale((*((const uint8_t*)mem + 1)) & 0xF);
+
+  if (offset != NULL)
+    memcpy(offset, (const uint8_t*)mem + 2, sizeof(int64_t));
+  
+  return 2 * sizeof(uint8_t) + sizeof(int64_t);
+}
+
+static size_t vm_mem_addr_decode_base_index_scale_offset(vm_t* vm, const void* mem, register_t* base, register_t* index, int32_t* scale, int64_t* offset)
+{
+  unused(vm);
+
+  if (base != NULL)
+    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
+
+  if (index != NULL)
+    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
+
+  if (scale != NULL)
+    *scale = decode_scale((*((const uint8_t*)mem + 1)) & 0xF);
+
+  if (offset != NULL)
+    memcpy(offset, (const uint8_t*)mem + 2, sizeof(int64_t));
+  
+  return 2 * sizeof(uint8_t) + sizeof(int64_t);
+}
+
+size_t vm_mem_addr_decode(vm_t* vm, const void* mem, addr_mode_t* mode, register_t* base, register_t* index, int32_t* scale, int64_t* offset)
+{
+  addr_mode_t mode_value = (*(const uint8_t*)mem) >> 4;
+
+  if (mode != NULL)
+    *mode = mode_value;
+
+  switch (mode_value)
+  {
+  case ADDR_MODE_OFFSET:                  return vm_mem_addr_decode_offset(                 vm, mem,                     offset); break;
+  case ADDR_MODE_BASE:                    return vm_mem_addr_decode_base(                   vm, mem, base                      ); break;
+  case ADDR_MODE_BASE_OFFSET:             return vm_mem_addr_decode_base_offset(            vm, mem, base,               offset); break;
+  case ADDR_MODE_BASE_INDEX:              return vm_mem_addr_decode_base_index(             vm, mem, base, index               ); break;
+  case ADDR_MODE_BASE_INDEX_OFFSET:       return vm_mem_addr_decode_base_index_offset(      vm, mem, base, index,        offset); break;
+  case ADDR_MODE_BASE_INDEX_SCALE:        return vm_mem_addr_decode_base_index_scale(       vm, mem, base, index, scale        ); break;
+  case ADDR_MODE_INDEX_SCALE_OFFSET:      return vm_mem_addr_decode_index_scale_offset(     vm, mem,       index, scale, offset); break;
+  case ADDR_MODE_BASE_INDEX_SCALE_OFFSET: return vm_mem_addr_decode_base_index_scale_offset(vm, mem, base, index, scale, offset); break;
+  default: unreachable();
+  }
+
+  return 0;
+}
+
 void vm_stack_u8_push(vm_t* vm, uint8_t value)
 {
   assert((uint8_t*)vm->regs.SP + sizeof(uint8_t) < vm->stack.data + vm->stack.size);

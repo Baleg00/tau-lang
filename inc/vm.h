@@ -88,6 +88,9 @@ void vm_mem_u64_set(vm_t* vm, void* mem, uint64_t value);
 void vm_mem_f32_set(vm_t* vm, void* mem, float value);
 void vm_mem_f64_set(vm_t* vm, void* mem, double value);
 
+size_t vm_mem_addr_encode(vm_t* vm, void* mem, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset);
+size_t vm_mem_addr_decode(vm_t* vm, const void* mem, addr_mode_t* mode, register_t* base, register_t* index, int32_t* scale, int64_t* offset);
+
 void vm_stack_u8_push(vm_t* vm, uint8_t value);
 void vm_stack_u16_push(vm_t* vm, uint16_t value);
 void vm_stack_u32_push(vm_t* vm, uint32_t value);
