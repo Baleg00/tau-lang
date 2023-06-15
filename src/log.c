@@ -8,18 +8,18 @@
 #include "esc_seq.h"
 #include "file.h"
 
-static log_level_t log_global_level = LOG_LEVEL_TRACE;
-static FILE* log_global_file = NULL;
-static bool log_global_verbose = false;
+static log_level_t g_log_level = LOG_LEVEL_TRACE;
+static FILE* g_log_file = NULL;
+static bool g_log_verbose = false;
 
 void log_log(log_level_t lvl, const char* file, int line, const char* func, const char* name, const char* fmt, ...)
 {
   unused(func);
 
-  if (lvl < log_global_level || log_global_file == NULL)
+  if (lvl < g_log_level || g_log_file == NULL)
     return;
 
-  if (log_global_verbose)
+  if (g_log_verbose)
   {
     time_t tm = time(NULL);
     
@@ -27,21 +27,21 @@ void log_log(log_level_t lvl, const char* file, int line, const char* func, cons
     size_t len = strftime(time_buf, sizeof(time_buf), "%H:%M:%S", localtime(&tm));
     time_buf[len] = '\0';
 
-    fprintf(log_global_file, ESC_FG_BRIGHT_BLACK "%s:%d %s " ESC_RESET,
+    fprintf(g_log_file, ESC_FG_BRIGHT_BLACK "%s:%d %s " ESC_RESET,
       file, line, time_buf);
   }
 
-  fprintf(log_global_file, "[%s%s:%s" ESC_RESET "]> ", 
+  fprintf(g_log_file, "[%s%s:%s" ESC_RESET "]> ", 
     log_level_to_color(lvl), log_level_to_string(lvl), name);
 
   va_list args;
   va_start(args, fmt);
 
-  vfprintf(log_global_file, fmt, args);
+  vfprintf(g_log_file, fmt, args);
 
   va_end(args);
 
-  fputc('\n', log_global_file);
+  fputc('\n', g_log_file);
 }
 
 const char* log_level_to_string(log_level_t lvl)
@@ -74,30 +74,30 @@ const char* log_level_to_color(log_level_t lvl)
 
 void log_set_level(log_level_t lvl)
 {
-  log_global_level = lvl;
+  g_log_level = lvl;
 }
 
 log_level_t log_get_level(void)
 {
-  return log_global_level;
+  return g_log_level;
 }
 
 void log_set_file(FILE* file)
 {
-  log_global_file = file;
+  g_log_file = file;
 }
 
 FILE* log_get_file(void)
 {
-  return log_global_file;
+  return g_log_file;
 }
 
 void log_set_verbose(bool value)
 {
-  log_global_verbose = value;
+  g_log_verbose = value;
 }
 
 bool log_get_verbose(void)
 {
-  return log_global_verbose;
+  return g_log_verbose;
 }

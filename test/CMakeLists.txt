@@ -13,6 +13,7 @@ foreach(TEST_SOURCE IN ITEMS ${TAU_TEST_SOURCES})
 
   add_executable(${TEST_NAME} ${TEST_SOURCE})
   target_link_libraries(${TEST_NAME} PUBLIC ${TAU_LIBRARY_NAME})
+  target_compile_definitions(${TEST_NAME} PUBLIC ${COMPILE_DEFINITIONS} TAU_TEST)
   
   add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endforeach()

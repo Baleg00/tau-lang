@@ -24,26 +24,31 @@ void list_node_free(list_node_t* node)
 
 list_node_t* list_node_copy(list_node_t* node)
 {
+  assert(node != NULL);
   return list_node_init(node->data);
 }
 
 list_node_t* list_node_prev(list_node_t* node)
 {
+  assert(node != NULL);
   return node->prev;
 }
 
 list_node_t* list_node_next(list_node_t* node)
 {
+  assert(node != NULL);
   return node->next;
 }
 
 void* list_node_get(list_node_t* node)
 {
+  assert(node != NULL);
   return node->data;
 }
 
 void list_node_set(list_node_t* node, void* data)
 {
+  assert(node != NULL);
   node->data = data;
 }
 
@@ -95,16 +100,20 @@ void* list_back(list_t* list)
 
 list_node_t* list_front_node(list_t* list)
 {
+  assert(list != NULL);
   return list_empty(list) ? NULL : list->head;
 }
 
 list_node_t* list_back_node(list_t* list)
 {
+  assert(list != NULL);
   return list_empty(list) ? NULL : list->tail;
 }
 
 list_node_t* list_push_front(list_t* list, void* data)
 {
+  assert(list != NULL);
+
   list_node_t* new_node = list_node_init(data);
 
   new_node->owner = list;
@@ -125,6 +134,8 @@ list_node_t* list_push_front(list_t* list, void* data)
 
 list_node_t* list_push_back(list_t* list, void* data)
 {
+  assert(list != NULL);
+
   list_node_t* new_node = list_node_init(data);
 
   new_node->owner = list;
@@ -191,6 +202,8 @@ void* list_pop_back(list_t* list)
 
 list_node_t* list_insert_before(list_node_t* node, void* data)
 {
+  assert(node != NULL);
+
   if (node->owner->head == node)
     return list_push_front(node->owner, data);
 
@@ -210,6 +223,8 @@ list_node_t* list_insert_before(list_node_t* node, void* data)
 
 list_node_t* list_insert_after(list_node_t* node, void* data)
 {
+  assert(node != NULL);
+
   if (node->owner->tail == node)
     return list_push_back(node->owner, data);
 
@@ -229,6 +244,8 @@ list_node_t* list_insert_after(list_node_t* node, void* data)
 
 void* list_remove(list_node_t* node)
 {
+  assert(node != NULL);
+
   if (node->owner->head == node)
     return list_pop_front(node->owner);
 
@@ -248,23 +265,27 @@ void* list_remove(list_node_t* node)
 
 void* list_remove_before(list_node_t* node)
 {
+  assert(node != NULL);
   assert(list_node_prev(node) != NULL);
   return list_remove(node->prev);
 }
 
 void* list_remove_after(list_node_t* node)
 {
+  assert(node != NULL);
   assert(list_node_next(node) != NULL);
   return list_remove(node->next);
 }
 
 bool list_empty(list_t* list)
 {
+  assert(list != NULL);
   return list->len == 0;
 }
 
 size_t list_size(list_t* list)
 {
+  assert(list != NULL);
   return list->len;
 }
 

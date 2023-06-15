@@ -19,7 +19,7 @@ typedef list_t stack_t;
 /** Represents a queue. */
 typedef list_t queue_t;
 
-/**Indicates argument type. */
+/** Indicates argument type. */
 typedef enum cli_type_e
 {
   CLI_TYPE_INTEGER, // Integer type

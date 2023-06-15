@@ -11,6 +11,11 @@
 
 #include "esc_seq.h"
 
+#ifndef TAU_TEST
+# error "TAU_TEST must be defined when using test.h"
+#endif
+
+/** Indicates the kind of a test context. */
 typedef enum test_context_kind_e
 {
   TEST_CONTEXT_TEST,
