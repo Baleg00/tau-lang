@@ -613,7 +613,8 @@ typedef enum op_kind_e
 typedef struct analyzer_s analyzer_t;
 
 /** Represents a register in the virtual machine. */
-typedef enum register_e {
+typedef enum register_e
+{
   REG_A,   // 64-bit general purpose register A
   REG_AHD, // 32-bit general purpose register A high double word
   REG_ALD, // 32-bit general purpose register A low double word
@@ -668,13 +669,22 @@ typedef enum register_e {
 } register_t;
 
 /** Represents an operation code for the virtual machine. */
-typedef enum opcode_e {
+typedef enum opcode_e
+{
   OPCODE_NOP,  // NOP
 
   OPCODE_MOV,  // MOV <reg|mem>, <reg|mem|imm>
   OPCODE_PSH,  // PSH <reg|mem|imm>
   OPCODE_POP,  // POP <reg|mem>
   OPCODE_LEA,  // LEA <reg>, <mem>
+
+  OPCODE_ADD, // ADD <reg|mem>, <reg|mem|imm>
+  OPCODE_SUB, // SUB <reg|mem>, <reg|mem|imm>
+  OPCODE_MUL, // MUL <reg|mem>, <reg|mem|imm>
+  OPCODE_DIV, // DIV <reg|mem>, <reg|mem|imm>
+  OPCODE_MOD, // MOD <reg|mem>, <reg|mem|imm>
+  OPCODE_INC, // INC <reg|mem>
+  OPCODE_DEC, // DEC <reg|mem>
 
   OPCODE_IADD, // IADD <reg|mem>, <reg|mem|imm>
   OPCODE_ISUB, // ISUB <reg|mem>, <reg|mem|imm>
@@ -710,8 +720,6 @@ typedef enum opcode_e {
   OPCODE_JLE,  // JLE <label>
   OPCODE_JG,   // JG <label>
   OPCODE_JGE,  // JGE <label>
-  OPCODE_JZ,   // JZ <label>
-  OPCODE_JNZ,  // JNZ <label>
 
   OPCODE_CMP,  // CMP <reg|mem>, <reg|mem|imm>
 

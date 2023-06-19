@@ -111,6 +111,12 @@ const char* opcode_to_string(opcode_t opcode)
   case OPCODE_PSH:  return "PSH";
   case OPCODE_POP:  return "POP";
   case OPCODE_LEA:  return "LEA";
+  case OPCODE_ADD:  return "ADD";
+  case OPCODE_SUB:  return "SUB";
+  case OPCODE_MUL:  return "MUL";
+  case OPCODE_DIV:  return "DIV";
+  case OPCODE_MOD:  return "MOD";
+  case OPCODE_INC:  return "INC";
   case OPCODE_IADD: return "IADD";
   case OPCODE_ISUB: return "ISUB";
   case OPCODE_IMUL: return "IMUL";
@@ -140,8 +146,6 @@ const char* opcode_to_string(opcode_t opcode)
   case OPCODE_JLE:  return "JLE";
   case OPCODE_JG:   return "JG";
   case OPCODE_JGE:  return "JGE";
-  case OPCODE_JZ:   return "JZ";
-  case OPCODE_JNZ:  return "JNZ";
   case OPCODE_CMP:  return "CMP";
   case OPCODE_CLF:  return "CLF";
   case OPCODE_CALL: return "CALL";
@@ -177,11 +181,14 @@ size_t opcode_param_count(opcode_t opcode)
   case OPCODE_JLE:
   case OPCODE_JG:
   case OPCODE_JGE:
-  case OPCODE_JZ:
-  case OPCODE_JNZ:
   case OPCODE_CALL:
     return 1;
   case OPCODE_MOV:
+  case OPCODE_ADD:
+  case OPCODE_SUB:
+  case OPCODE_MUL:
+  case OPCODE_DIV:
+  case OPCODE_MOD:
   case OPCODE_IADD:
   case OPCODE_ISUB:
   case OPCODE_IMUL:

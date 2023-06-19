@@ -9,7 +9,7 @@
 #include "util.h"
 #include "memtrace.h"
 
-#define VM_DEFAULT_STACK_SIZE (4 * (1 << 10))
+#define VM_STACK_DEFAULT_SIZE ((size_t)(8 * (1 << 10)))
 
 void vm_init(vm_t* vm, const uint8_t* code, size_t size)
 {
@@ -20,12 +20,11 @@ void vm_init(vm_t* vm, const uint8_t* code, size_t size)
   vm->code.size = size;
   vm->code.data = code;
 
-  vm->stack.size = VM_DEFAULT_STACK_SIZE;
-  vm->stack.data = malloc(VM_DEFAULT_STACK_SIZE);
+  vm->stack.size = VM_STACK_DEFAULT_SIZE;
+  vm->stack.data = malloc(VM_STACK_DEFAULT_SIZE);
   assert(vm->stack.data != NULL);
-  vm->stack.offset = 0;
 
-  vm->regs.SP = (uint64_t)vm->stack.data;
+  vm->regs.SP = (uint64_t)(vm->stack.data + VM_STACK_DEFAULT_SIZE);
 }
 
 void vm_free(vm_t* vm)
@@ -116,6 +115,26 @@ uint64_t vm_register_u64_get(vm_t* vm, register_t reg)
   }
 
   return 0;
+}
+
+int8_t vm_register_i8_get(vm_t* vm, register_t reg)
+{
+  return (int8_t)vm_register_u8_get(vm, reg);
+}
+
+int16_t vm_register_i16_get(vm_t* vm, register_t reg)
+{
+  return (int16_t)vm_register_u16_get(vm, reg);
+}
+
+int32_t vm_register_i32_get(vm_t* vm, register_t reg)
+{
+  return (int32_t)vm_register_u32_get(vm, reg);
+}
+
+int64_t vm_register_i64_get(vm_t* vm, register_t reg)
+{
+  return (int64_t)vm_register_u64_get(vm, reg);
 }
 
 float vm_register_f32_get(vm_t* vm, register_t reg)
@@ -233,6 +252,26 @@ void vm_register_u64_set(vm_t* vm, register_t reg, uint64_t value)
   }
 }
 
+void vm_register_i8_set(vm_t* vm, register_t reg, int8_t value)
+{
+  vm_register_u8_set(vm, reg, (uint8_t)value);
+}
+
+void vm_register_i16_set(vm_t* vm, register_t reg, int16_t value)
+{
+  vm_register_u16_set(vm, reg, (uint16_t)value);
+}
+
+void vm_register_i32_set(vm_t* vm, register_t reg, int32_t value)
+{
+  vm_register_u32_set(vm, reg, (uint32_t)value);
+}
+
+void vm_register_i64_set(vm_t* vm, register_t reg, int64_t value)
+{
+  vm_register_u64_set(vm, reg, (uint64_t)value);
+}
+
 void vm_register_f32_set(vm_t* vm, register_t reg, float value)
 {
   switch (reg)
@@ -267,140 +306,190 @@ void vm_register_f64_set(vm_t* vm, register_t reg, double value)
   }
 }
 
+#define vm_code_next_impl(TYPE)\
+  do {\
+    TYPE value;\
+    memcpy(&value, (const void*)(vm->code.data + vm->regs.IP), sizeof(TYPE));\
+    vm->regs.IP += sizeof(TYPE);\
+    return value;\
+  } while (0)\
+
 uint8_t vm_code_next_u8(vm_t* vm)
 {
-  uint8_t value = vm_mem_u8_get(vm, vm->code.data + vm->regs.IP);
-  vm->regs.IP += sizeof(uint8_t);
-  return value;
+  vm_code_next_impl(uint8_t);
 }
 
 uint16_t vm_code_next_u16(vm_t* vm)
 {
-  uint16_t value = vm_mem_u16_get(vm, vm->code.data + vm->regs.IP);
-  vm->regs.IP += sizeof(uint16_t);
-  return value;
+  vm_code_next_impl(uint16_t);
 }
 
 uint32_t vm_code_next_u32(vm_t* vm)
 {
-  uint32_t value = vm_mem_u32_get(vm, vm->code.data + vm->regs.IP);
-  vm->regs.IP += sizeof(uint32_t);
-  return value;
+  vm_code_next_impl(uint32_t);
 }
 
 uint64_t vm_code_next_u64(vm_t* vm)
 {
-  uint64_t value = vm_mem_u64_get(vm, vm->code.data + vm->regs.IP);
-  vm->regs.IP += sizeof(uint64_t);
-  return value;
+  vm_code_next_impl(uint64_t);
+}
+
+int8_t vm_code_next_i8(vm_t* vm)
+{
+  vm_code_next_impl(int8_t);
+}
+
+int16_t vm_code_next_i16(vm_t* vm)
+{
+  vm_code_next_impl(int16_t);
+}
+
+int32_t vm_code_next_i32(vm_t* vm)
+{
+  vm_code_next_impl(int32_t);
+}
+
+int64_t vm_code_next_i64(vm_t* vm)
+{
+  vm_code_next_impl(int64_t);
 }
 
 float vm_code_next_f32(vm_t* vm)
 {
-  float value = vm_mem_f32_get(vm, vm->code.data + vm->regs.IP);
-  vm->regs.IP += sizeof(float);
-  return value;
+  vm_code_next_impl(float);
 }
 
 double vm_code_next_f64(vm_t* vm)
 {
-  double value = vm_mem_f64_get(vm, vm->code.data + vm->regs.IP);
-  vm->regs.IP += sizeof(double);
-  return value;
+  vm_code_next_impl(double);
 }
+
+void* vm_code_next_addr(vm_t* vm)
+{
+  addr_mode_t mode;
+  register_t base;
+  register_t index;
+  int32_t scale;
+  int64_t offset;
+
+  size_t size = vm_addr_decode(vm, (const void*)(vm->code.data + vm->regs.IP), &mode, &base, &index, &scale, &offset);
+  vm->regs.IP += size;
+
+  return vm_addr_effective(vm, mode, base, index, scale, offset);
+}
+
+#define vm_mem_get_impl(TYPE)\
+  do {\
+    unused(vm);\
+    TYPE value;\
+    memcpy(&value, mem, sizeof(TYPE));\
+    return value;\
+  } while (0)\
 
 uint8_t vm_mem_u8_get(vm_t* vm, const void* mem)
 {
-  unused(vm);
-
-  return *(uint8_t*)mem;
+  vm_mem_get_impl(uint8_t);
 }
 
 uint16_t vm_mem_u16_get(vm_t* vm, const void* mem)
 {
-  unused(vm);
-
-  uint16_t value;
-  memcpy(&value, mem, sizeof(uint16_t));
-  return value;
+  vm_mem_get_impl(uint16_t);
 }
 
 uint32_t vm_mem_u32_get(vm_t* vm, const void* mem)
 {
-  unused(vm);
-
-  uint32_t value;
-  memcpy(&value, mem, sizeof(uint32_t));
-  return value;
+  vm_mem_get_impl(uint32_t);
 }
 
 uint64_t vm_mem_u64_get(vm_t* vm, const void* mem)
 {
-  unused(vm);
+  vm_mem_get_impl(uint64_t);
+}
 
-  uint64_t value;
-  memcpy(&value, mem, sizeof(uint64_t));
-  return value;
+int8_t vm_mem_i8_get(vm_t* vm, const void* mem)
+{
+  vm_mem_get_impl(int8_t);
+}
+
+int16_t vm_mem_i16_get(vm_t* vm, const void* mem)
+{
+  vm_mem_get_impl(int16_t);
+}
+
+int32_t vm_mem_i32_get(vm_t* vm, const void* mem)
+{
+  vm_mem_get_impl(int32_t);
+}
+
+int64_t vm_mem_i64_get(vm_t* vm, const void* mem)
+{
+  vm_mem_get_impl(int64_t);
 }
 
 float vm_mem_f32_get(vm_t* vm, const void* mem)
 {
-  unused(vm);
-
-  float value;
-  memcpy(&value, mem, sizeof(float));
-  return value;
+  vm_mem_get_impl(float);
 }
 
 double vm_mem_f64_get(vm_t* vm, const void* mem)
 {
-  unused(vm);
-
-  double value;
-  memcpy(&value, mem, sizeof(double));
-  return value;
+  vm_mem_get_impl(double);
 }
+
+#define vm_mem_set_impl(TYPE)\
+  do {\
+    unused(vm);\
+    memcpy(mem, &value, sizeof(TYPE));\
+  } while (0)\
 
 void vm_mem_u8_set(vm_t* vm, void* mem, uint8_t value)
 {
-  unused(vm);
-
-  *(uint8_t*)mem = value;
+  vm_mem_set_impl(uint8_t);
 }
 
 void vm_mem_u16_set(vm_t* vm, void* mem, uint16_t value)
 {
-  unused(vm);
-
-  memcpy(mem, &value, sizeof(uint16_t));
+  vm_mem_set_impl(uint16_t);
 }
 
 void vm_mem_u32_set(vm_t* vm, void* mem, uint32_t value)
 {
-  unused(vm);
-
-  memcpy(mem, &value, sizeof(uint32_t));
+  vm_mem_set_impl(uint32_t);
 }
 
 void vm_mem_u64_set(vm_t* vm, void* mem, uint64_t value)
 {
-  unused(vm);
+  vm_mem_set_impl(uint64_t);
+}
 
-  memcpy(mem, &value, sizeof(uint64_t));
+void vm_mem_i8_set(vm_t* vm, void* mem, int8_t value)
+{
+  vm_mem_set_impl(int8_t);
+}
+
+void vm_mem_i16_set(vm_t* vm, void* mem, int16_t value)
+{
+  vm_mem_set_impl(int16_t);
+}
+
+void vm_mem_i32_set(vm_t* vm, void* mem, int32_t value)
+{
+  vm_mem_set_impl(int32_t);
+}
+
+void vm_mem_i64_set(vm_t* vm, void* mem, int64_t value)
+{
+  vm_mem_set_impl(int64_t);
 }
 
 void vm_mem_f32_set(vm_t* vm, void* mem, float value)
 {
-  unused(vm);
-
-  memcpy(mem, &value, sizeof(float));
+  vm_mem_set_impl(float);
 }
 
 void vm_mem_f64_set(vm_t* vm, void* mem, double value)
 {
-  unused(vm);
-
-  memcpy(mem, &value, sizeof(double));
+  vm_mem_set_impl(double);
 }
 
 static inline uint8_t encode_scale(int32_t scale)
@@ -572,7 +661,7 @@ static size_t vm_mem_addr_encode_base_index_scale_offset(vm_t* vm, void* mem, re
   return 2 * sizeof(uint8_t) + sizeof(int64_t);
 }
 
-size_t vm_mem_addr_encode(vm_t* vm, void* mem, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset)
+size_t vm_addr_encode(vm_t* vm, void* mem, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset)
 {
   switch (mode)
   {
@@ -703,7 +792,7 @@ static size_t vm_mem_addr_decode_base_index_scale_offset(vm_t* vm, const void* m
   return 2 * sizeof(uint8_t) + sizeof(int64_t);
 }
 
-size_t vm_mem_addr_decode(vm_t* vm, const void* mem, addr_mode_t* mode, register_t* base, register_t* index, int32_t* scale, int64_t* offset)
+size_t vm_addr_decode(vm_t* vm, const void* mem, addr_mode_t* mode, register_t* base, register_t* index, int32_t* scale, int64_t* offset)
 {
   addr_mode_t mode_value = (*(const uint8_t*)mem) >> 4;
 
@@ -726,100 +815,138 @@ size_t vm_mem_addr_decode(vm_t* vm, const void* mem, addr_mode_t* mode, register
   return 0;
 }
 
+void* vm_addr_effective(vm_t* vm, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset)
+{
+  switch (mode)
+  {
+  case ADDR_MODE_OFFSET:                  return (void*)(                                                                         offset);
+  case ADDR_MODE_BASE:                    return (void*)(vm_register_u64_get(vm, base)                                                  );
+  case ADDR_MODE_BASE_OFFSET:             return (void*)(vm_register_u64_get(vm, base)                                          + offset);
+  case ADDR_MODE_BASE_INDEX:              return (void*)(vm_register_u64_get(vm, base) + vm_register_u64_get(vm, index)                 );
+  case ADDR_MODE_BASE_INDEX_OFFSET:       return (void*)(vm_register_u64_get(vm, base) + vm_register_u64_get(vm, index)         + offset);
+  case ADDR_MODE_BASE_INDEX_SCALE:        return (void*)(vm_register_u64_get(vm, base) + vm_register_u64_get(vm, index) * scale         );
+  case ADDR_MODE_INDEX_SCALE_OFFSET:      return (void*)(                                vm_register_u64_get(vm, index) * scale + offset);
+  case ADDR_MODE_BASE_INDEX_SCALE_OFFSET: return (void*)(vm_register_u64_get(vm, base) + vm_register_u64_get(vm, index) * scale + offset);
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+#define vm_stack_push_impl(TYPE)\
+  do {\
+    assert((uint8_t*)vm->regs.SP - sizeof(TYPE) >= vm->stack.data);\
+    vm->regs.SP -= sizeof(TYPE);\
+    memcpy((void*)vm->regs.SP, &value, sizeof(TYPE));\
+  } while (0)\
+
 void vm_stack_u8_push(vm_t* vm, uint8_t value)
 {
-  assert((uint8_t*)vm->regs.SP + sizeof(uint8_t) < vm->stack.data + vm->stack.size);
-  memcpy((void*)vm->regs.SP, &value, sizeof(uint8_t));
-  vm->regs.SP += sizeof(uint8_t);
+  vm_stack_push_impl(uint8_t);
 }
 
 void vm_stack_u16_push(vm_t* vm, uint16_t value)
 {
-  assert((uint8_t*)vm->regs.SP + sizeof(uint16_t) < vm->stack.data + vm->stack.size);
-  memcpy((void*)vm->regs.SP, &value, sizeof(uint16_t));
-  vm->regs.SP += sizeof(uint16_t);
+  vm_stack_push_impl(uint16_t);
 }
 
 void vm_stack_u32_push(vm_t* vm, uint32_t value)
 {
-  assert((uint8_t*)vm->regs.SP + sizeof(uint32_t) < vm->stack.data + vm->stack.size);
-  memcpy((void*)vm->regs.SP, &value, sizeof(uint32_t));
-  vm->regs.SP += sizeof(uint32_t);
+  vm_stack_push_impl(uint32_t);
 }
 
 void vm_stack_u64_push(vm_t* vm, uint64_t value)
 {
-  assert((uint8_t*)vm->regs.SP + sizeof(uint64_t) < vm->stack.data + vm->stack.size);
-  memcpy((void*)vm->regs.SP, &value, sizeof(uint64_t));
-  vm->regs.SP += sizeof(uint64_t);
+  vm_stack_push_impl(uint64_t);
+}
+
+void vm_stack_i8_push(vm_t* vm, int8_t value)
+{
+  vm_stack_push_impl(int8_t);
+}
+
+void vm_stack_i16_push(vm_t* vm, int16_t value)
+{
+  vm_stack_push_impl(int16_t);
+}
+
+void vm_stack_i32_push(vm_t* vm, int32_t value)
+{
+  vm_stack_push_impl(int32_t);
+}
+
+void vm_stack_i64_push(vm_t* vm, int64_t value)
+{
+  vm_stack_push_impl(int64_t);
 }
 
 void vm_stack_f32_push(vm_t* vm, float value)
 {
-  assert((uint8_t*)vm->regs.SP + sizeof(float) < vm->stack.data + vm->stack.size);
-  memcpy((void*)vm->regs.SP, &value, sizeof(float));
-  vm->regs.SP += sizeof(float);
+  vm_stack_push_impl(float);
 }
 
 void vm_stack_f64_push(vm_t* vm, double value)
 {
-  assert((uint8_t*)vm->regs.SP + sizeof(double) < vm->stack.data + vm->stack.size);
-  memcpy((void*)vm->regs.SP, &value, sizeof(double));
-  vm->regs.SP += sizeof(double);
+  vm_stack_push_impl(double);
 }
+
+#define vm_stack_pop_impl(TYPE)\
+  do {\
+    assert((uint8_t*)vm->regs.SP + sizeof(TYPE) <= vm->stack.data + VM_STACK_DEFAULT_SIZE);\
+    TYPE value;\
+    memcpy(&value, (void*)vm->regs.SP, sizeof(TYPE));\
+    vm->regs.SP += sizeof(TYPE);\
+    return value;\
+  } while (0)\
 
 uint8_t vm_stack_u8_pop(vm_t* vm)
 {
-  assert((uint8_t*)vm->regs.SP - sizeof(uint8_t) >= vm->stack.data);
-  vm->regs.SP -= sizeof(uint8_t);
-  uint8_t value;
-  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
-  return value;
+  vm_stack_pop_impl(uint8_t);
 }
 
 uint16_t vm_stack_u16_pop(vm_t* vm)
 {
-  assert((uint8_t*)vm->regs.SP - sizeof(uint16_t) >= vm->stack.data);
-  vm->regs.SP -= sizeof(uint16_t);
-  uint16_t value;
-  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
-  return value;
+  vm_stack_pop_impl(uint16_t);
 }
 
 uint32_t vm_stack_u32_pop(vm_t* vm)
 {
-  assert((uint8_t*)vm->regs.SP - sizeof(uint32_t) >= vm->stack.data);
-  vm->regs.SP -= sizeof(uint32_t);
-  uint32_t value;
-  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
-  return value;
+  vm_stack_pop_impl(uint32_t);
 }
 
 uint64_t vm_stack_u64_pop(vm_t* vm)
 {
-  assert((uint8_t*)vm->regs.SP - sizeof(uint64_t) >= vm->stack.data);
-  vm->regs.SP -= sizeof(uint64_t);
-  uint64_t value;
-  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
-  return value;
+  vm_stack_pop_impl(uint64_t);
+}
+
+int8_t vm_stack_i8_pop(vm_t* vm)
+{
+  vm_stack_pop_impl(int8_t);
+}
+
+int16_t vm_stack_i16_pop(vm_t* vm)
+{
+  vm_stack_pop_impl(int16_t);
+}
+
+int32_t vm_stack_i32_pop(vm_t* vm)
+{
+  vm_stack_pop_impl(int32_t);
+}
+
+int64_t vm_stack_i64_pop(vm_t* vm)
+{
+  vm_stack_pop_impl(int64_t);
 }
 
 float vm_stack_f32_pop(vm_t* vm)
 {
-  assert((uint8_t*)vm->regs.SP - sizeof(float) >= vm->stack.data);
-  vm->regs.SP -= sizeof(float);
-  float value;
-  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
-  return value;
+  vm_stack_pop_impl(float);
 }
 
 double vm_stack_f64_pop(vm_t* vm)
 {
-  assert((uint8_t*)vm->regs.SP - sizeof(double) >= vm->stack.data);
-  vm->regs.SP -= sizeof(double);
-  double value;
-  memcpy(&value, (void*)vm->regs.SP, sizeof(value));
-  return value;
+  vm_stack_pop_impl(double);
 }
 
 void vm_fetch(vm_t* vm)
@@ -832,109 +959,2021 @@ void vm_decode(vm_t* vm)
   opcode_decode(vm->inst.raw, &vm->inst.opcode, &vm->inst.param, &vm->inst.width);
 }
 
+static inline void vm_execute_MOV_reg_reg(vm_t* vm)
+{
+  uint8_t encoded_regs = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_8BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_8BIT);
+    vm_register_u8_set(vm, reg_dest, vm_register_u8_get(vm, reg_src));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_16BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_16BIT);
+    vm_register_u16_set(vm, reg_dest, vm_register_u16_get(vm, reg_src));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_32BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_32BIT);
+    vm_register_u32_set(vm, reg_dest, vm_register_u32_get(vm, reg_src));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_64BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_64BIT);
+    vm_register_u64_set(vm, reg_dest, vm_register_u64_get(vm, reg_src));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_MOV_mem_reg(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+    vm_mem_u8_set(vm, mem_dest, vm_register_u8_get(vm, reg_src));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+    vm_mem_u16_set(vm, mem_dest, vm_register_u16_get(vm, reg_src));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+    vm_mem_u32_set(vm, mem_dest, vm_register_u32_get(vm, reg_src));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+    vm_mem_u64_set(vm, mem_dest, vm_register_u64_get(vm, reg_src));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_MOV_reg_mem(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+  void* mem_src = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+    vm_register_u8_set(vm, reg_dest, vm_mem_u8_get(vm, mem_src));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+    vm_register_u16_set(vm, reg_dest, vm_mem_u16_get(vm, mem_src));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+    vm_register_u32_set(vm, reg_dest, vm_mem_u32_get(vm, mem_src));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+    vm_register_u64_set(vm, reg_dest, vm_mem_u64_get(vm, mem_src));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_MOV_mem_mem(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+  void* mem_src = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_mem_u8_set(vm, mem_dest, vm_mem_u8_get(vm, mem_src));
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_mem_u16_set(vm, mem_dest, vm_mem_u16_get(vm, mem_src));
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_mem_u32_set(vm, mem_dest, vm_mem_u32_get(vm, mem_src));
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_mem_u64_set(vm, mem_dest, vm_mem_u64_get(vm, mem_src));
+    break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_MOV_reg_imm(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+    vm_register_u8_set(vm, reg_dest, vm_code_next_u8(vm));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+    vm_register_u16_set(vm, reg_dest, vm_code_next_u16(vm));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+    vm_register_u32_set(vm, reg_dest, vm_code_next_u32(vm));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+    vm_register_u64_set(vm, reg_dest, vm_code_next_u64(vm));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_MOV_mem_imm(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_mem_u8_set(vm, mem_dest, vm_code_next_u8(vm));
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_mem_u16_set(vm, mem_dest, vm_code_next_u16(vm));
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_mem_u32_set(vm, mem_dest, vm_code_next_u32(vm));
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_mem_u64_set(vm, mem_dest, vm_code_next_u64(vm));
+    break;
+  default: unreachable();
+  }
+}
+
 static inline void vm_execute_MOV(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_MOV_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_MOV_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_MOV_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_MOV_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_MOV_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_MOV_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_PSH_reg(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg, OPCODE_WIDTH_8BIT);
+    vm_stack_u8_push(vm, vm_register_u8_get(vm, reg_src));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg, OPCODE_WIDTH_16BIT);
+    vm_stack_u16_push(vm, vm_register_u16_get(vm, reg_src));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg, OPCODE_WIDTH_32BIT);
+    vm_stack_u32_push(vm, vm_register_u32_get(vm, reg_src));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg, OPCODE_WIDTH_64BIT);
+    vm_stack_u64_push(vm, vm_register_u64_get(vm, reg_src));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_PSH_mem(vm_t* vm)
+{
+  void* addr_src = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_stack_u8_push(vm, vm_mem_u8_get(vm, addr_src));
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_stack_u16_push(vm, vm_mem_u16_get(vm, addr_src));
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_stack_u32_push(vm, vm_mem_u32_get(vm, addr_src));
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_stack_u64_push(vm, vm_mem_u64_get(vm, addr_src));
+    break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_PSH_imm(vm_t* vm)
+{
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_stack_u8_push(vm, vm_code_next_u8(vm));
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_stack_u16_push(vm, vm_code_next_u16(vm));
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_stack_u32_push(vm, vm_code_next_u32(vm));
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_stack_u64_push(vm, vm_code_next_u64(vm));
+    break;
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_PSH(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG: vm_execute_PSH_reg(vm); break;
+  case OPCODE_PARAM_MEM: vm_execute_PSH_mem(vm); break;
+  case OPCODE_PARAM_IMM: vm_execute_PSH_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_POP_reg(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg, OPCODE_WIDTH_8BIT);
+    vm_register_u8_set(vm, reg_dest, vm_stack_u8_pop(vm));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg, OPCODE_WIDTH_8BIT);
+    vm_register_u16_set(vm, reg_dest, vm_stack_u16_pop(vm));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg, OPCODE_WIDTH_8BIT);
+    vm_register_u32_set(vm, reg_dest, vm_stack_u32_pop(vm));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg, OPCODE_WIDTH_8BIT);
+    vm_register_u64_set(vm, reg_dest, vm_stack_u64_pop(vm));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_POP_mem(vm_t* vm)
+{
+  void* addr_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_mem_u8_set(vm, addr_dest, vm_stack_u8_pop(vm));
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_mem_u16_set(vm, addr_dest, vm_stack_u16_pop(vm));
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_mem_u32_set(vm, addr_dest, vm_stack_u32_pop(vm));
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_mem_u64_set(vm, addr_dest, vm_stack_u64_pop(vm));
+    break;
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_POP(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG: vm_execute_POP_reg(vm); break;
+  case OPCODE_PARAM_MEM: vm_execute_POP_mem(vm); break;
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_LEA(vm_t* vm)
 {
-  unused(vm);
+  assert(vm->inst.param == OPCODE_PARAM_REG_MEM);
+  assert(vm->inst.width == OPCODE_WIDTH_64BIT);
+
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+  register_t reg_dest = register_decode(encoded_reg, OPCODE_WIDTH_64BIT);
+  void* addr = vm_code_next_addr(vm);
+
+  vm_register_u64_set(vm, reg_dest, (uint64_t)addr);
+}
+
+#define vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(OP)\
+  do {\
+    uint8_t encoded_regs = vm_code_next_u8(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_8BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_8BIT);\
+      vm_register_u8_set(vm, reg_dest, vm_register_u8_get(vm, reg_dest) OP vm_register_u8_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_16BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_16BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_16BIT);\
+      vm_register_u16_set(vm, reg_dest, vm_register_u16_get(vm, reg_dest) OP vm_register_u16_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_32BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_register_u32_set(vm, reg_dest, vm_register_u32_get(vm, reg_dest) OP vm_register_u32_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_64BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_register_u64_set(vm, reg_dest, vm_register_u64_get(vm, reg_dest) OP vm_register_u64_get(vm, reg_src));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(OP)\
+  do {\
+    void* mem_dest = vm_code_next_addr(vm);\
+    uint8_t encoded_reg = vm_code_next_u8(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);\
+      vm_mem_u8_set(vm, mem_dest, vm_mem_u8_get(vm, mem_dest) OP vm_register_u8_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_16BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);\
+      vm_mem_u16_set(vm, mem_dest, vm_mem_u16_get(vm, mem_dest) OP vm_register_u16_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_mem_u32_set(vm, mem_dest, vm_mem_u32_get(vm, mem_dest) OP vm_register_u32_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_mem_u64_set(vm, mem_dest, vm_mem_u64_get(vm, mem_dest) OP vm_register_u64_get(vm, reg_src));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(OP)\
+  do {\
+    uint8_t encoded_reg = vm_code_next_u8(vm);\
+    void* mem_src = vm_code_next_addr(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);\
+      vm_register_u8_set(vm, reg_dest, vm_register_u8_get(vm, reg_dest) OP vm_mem_u8_get(vm, mem_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_16BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);\
+      vm_register_u16_set(vm, reg_dest, vm_register_u16_get(vm, reg_dest) OP vm_mem_u16_get(vm, mem_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_register_u32_set(vm, reg_dest, vm_register_u32_get(vm, reg_dest) OP vm_mem_u32_get(vm, mem_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_register_u64_set(vm, reg_dest, vm_register_u64_get(vm, reg_dest) OP vm_mem_u64_get(vm, mem_src));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(OP)\
+  do {\
+    void* mem_dest = vm_code_next_addr(vm);\
+    void* mem_src = vm_code_next_addr(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+      vm_mem_u8_set(vm, mem_dest, vm_mem_u8_get(vm, mem_dest) OP vm_mem_u8_get(vm, mem_src));\
+      break;\
+    case OPCODE_WIDTH_16BIT:\
+      vm_mem_u16_set(vm, mem_dest, vm_mem_u16_get(vm, mem_dest) OP vm_mem_u16_get(vm, mem_src));\
+      break;\
+    case OPCODE_WIDTH_32BIT:\
+      vm_mem_u32_set(vm, mem_dest, vm_mem_u32_get(vm, mem_dest) OP vm_mem_u32_get(vm, mem_src));\
+      break;\
+    case OPCODE_WIDTH_64BIT:\
+      vm_mem_u64_set(vm, mem_dest, vm_mem_u64_get(vm, mem_dest) OP vm_mem_u64_get(vm, mem_src));\
+      break;\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(OP)\
+  do {\
+    uint8_t encoded_reg = vm_code_next_u8(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);\
+      vm_register_u8_set(vm, reg_dest, vm_register_u8_get(vm, reg_dest) OP vm_code_next_u8(vm));\
+      break;\
+    }\
+    case OPCODE_WIDTH_16BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);\
+      vm_register_u16_set(vm, reg_dest, vm_register_u16_get(vm, reg_dest) OP vm_code_next_u16(vm));\
+      break;\
+    }\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_register_u32_set(vm, reg_dest, vm_register_u32_get(vm, reg_dest) OP vm_code_next_u32(vm));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_register_u64_set(vm, reg_dest, vm_register_u64_get(vm, reg_dest) OP vm_code_next_u64(vm));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(OP)\
+  do {\
+    void* mem_dest = vm_code_next_addr(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+      vm_mem_u8_set(vm, mem_dest, vm_mem_u8_get(vm, mem_dest) OP vm_code_next_u8(vm));\
+      break;\
+    case OPCODE_WIDTH_16BIT:\
+      vm_mem_u16_set(vm, mem_dest, vm_mem_u16_get(vm, mem_dest) OP vm_code_next_u16(vm));\
+      break;\
+    case OPCODE_WIDTH_32BIT:\
+      vm_mem_u32_set(vm, mem_dest, vm_mem_u32_get(vm, mem_dest) OP vm_code_next_u32(vm));\
+      break;\
+    case OPCODE_WIDTH_64BIT:\
+      vm_mem_u64_set(vm, mem_dest, vm_mem_u64_get(vm, mem_dest) OP vm_code_next_u64(vm));\
+      break;\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+static inline void vm_execute_ADD_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(+);
+}
+
+static inline void vm_execute_ADD_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(+);
+}
+
+static inline void vm_execute_ADD_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(+);
+}
+
+static inline void vm_execute_ADD_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(+);
+}
+
+static inline void vm_execute_ADD_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(+);
+}
+
+static inline void vm_execute_ADD_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(+);
+}
+
+static inline void vm_execute_ADD(vm_t* vm)
+{
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_ADD_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_ADD_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_ADD_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_ADD_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_ADD_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_ADD_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_SUB_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(-);
+}
+
+static inline void vm_execute_SUB_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(-);
+}
+
+static inline void vm_execute_SUB_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(-);
+}
+
+static inline void vm_execute_SUB_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(-);
+}
+
+static inline void vm_execute_SUB_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(-);
+}
+
+static inline void vm_execute_SUB_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(-);
+}
+
+static inline void vm_execute_SUB(vm_t* vm)
+{
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_SUB_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_SUB_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_SUB_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_SUB_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_SUB_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_SUB_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_MUL_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(*);
+}
+
+static inline void vm_execute_MUL_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(*);
+}
+
+static inline void vm_execute_MUL_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(*);
+}
+
+static inline void vm_execute_MUL_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(*);
+}
+
+static inline void vm_execute_MUL_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(*);
+}
+
+static inline void vm_execute_MUL_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(*);
+}
+
+static inline void vm_execute_MUL(vm_t* vm)
+{
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_MUL_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_MUL_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_MUL_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_MUL_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_MUL_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_MUL_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_DIV_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(/);
+}
+
+static inline void vm_execute_DIV_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(/);
+}
+
+static inline void vm_execute_DIV_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(/);
+}
+
+static inline void vm_execute_DIV_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(/);
+}
+
+static inline void vm_execute_DIV_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(/);
+}
+
+static inline void vm_execute_DIV_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(/);
+}
+
+static inline void vm_execute_DIV(vm_t* vm)
+{
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_DIV_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_DIV_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_DIV_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_DIV_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_DIV_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_DIV_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_MOD_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(%);
+}
+
+static inline void vm_execute_MOD_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(%);
+}
+
+static inline void vm_execute_MOD_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(%);
+}
+
+static inline void vm_execute_MOD_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(%);
+}
+
+static inline void vm_execute_MOD_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(%);
+}
+
+static inline void vm_execute_MOD_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(%);
+}
+
+static inline void vm_execute_MOD(vm_t* vm)
+{
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_MOD_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_MOD_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_MOD_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_MOD_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_MOD_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_MOD_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_INC_reg(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+    vm_register_u8_set(vm, reg_dest, vm_register_u8_get(vm, reg_dest) + 1);
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+    vm_register_u16_set(vm, reg_dest, vm_register_u16_get(vm, reg_dest) + 1);
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+    vm_register_u32_set(vm, reg_dest, vm_register_u32_get(vm, reg_dest) + 1);
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+    vm_register_u64_set(vm, reg_dest, vm_register_u64_get(vm, reg_dest) + 1);
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_INC_mem(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_mem_u8_set(vm, mem_dest, vm_mem_u8_get(vm, mem_dest) + 1);
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_mem_u16_set(vm, mem_dest, vm_mem_u16_get(vm, mem_dest) + 1);
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_mem_u32_set(vm, mem_dest, vm_mem_u32_get(vm, mem_dest) + 1);
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_mem_u64_set(vm, mem_dest, vm_mem_u64_get(vm, mem_dest) + 1);
+    break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_INC(vm_t* vm)
+{
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG: vm_execute_INC_reg(vm); break;
+  case OPCODE_PARAM_MEM: vm_execute_INC_mem(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_DEC_reg(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+    vm_register_u8_set(vm, reg_dest, vm_register_u8_get(vm, reg_dest) - 1);
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+    vm_register_u16_set(vm, reg_dest, vm_register_u16_get(vm, reg_dest) - 1);
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+    vm_register_u32_set(vm, reg_dest, vm_register_u32_get(vm, reg_dest) - 1);
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+    vm_register_u64_set(vm, reg_dest, vm_register_u64_get(vm, reg_dest) - 1);
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_DEC_mem(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_mem_u8_set(vm, mem_dest, vm_mem_u8_get(vm, mem_dest) - 1);
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_mem_u16_set(vm, mem_dest, vm_mem_u16_get(vm, mem_dest) - 1);
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_mem_u32_set(vm, mem_dest, vm_mem_u32_get(vm, mem_dest) - 1);
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_mem_u64_set(vm, mem_dest, vm_mem_u64_get(vm, mem_dest) - 1);
+    break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_DEC(vm_t* vm)
+{
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG: vm_execute_DEC_reg(vm); break;
+  case OPCODE_PARAM_MEM: vm_execute_DEC_mem(vm); break;
+  default: unreachable();
+  }
+}
+
+#define vm_execute_SIGNED_BIN_OP_reg_reg_impl(OP)\
+  do {\
+    uint8_t encoded_regs = vm_code_next_u8(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_8BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_8BIT);\
+      vm_register_i8_set(vm, reg_dest, vm_register_i8_get(vm, reg_dest) OP vm_register_i8_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_16BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_16BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_16BIT);\
+      vm_register_i16_set(vm, reg_dest, vm_register_i16_get(vm, reg_dest) OP vm_register_i16_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_32BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_register_i32_set(vm, reg_dest, vm_register_i32_get(vm, reg_dest) OP vm_register_i32_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_64BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_register_i64_set(vm, reg_dest, vm_register_i64_get(vm, reg_dest) OP vm_register_i64_get(vm, reg_src));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_SIGNED_BIN_OP_mem_reg_impl(OP)\
+  do {\
+    void* mem_dest = vm_code_next_addr(vm);\
+    uint8_t encoded_reg = vm_code_next_u8(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);\
+      vm_mem_i8_set(vm, mem_dest, vm_mem_i8_get(vm, mem_dest) OP vm_register_i8_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_16BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);\
+      vm_mem_i16_set(vm, mem_dest, vm_mem_i16_get(vm, mem_dest) OP vm_register_i16_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_mem_i32_set(vm, mem_dest, vm_mem_i32_get(vm, mem_dest) OP vm_register_i32_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_mem_i64_set(vm, mem_dest, vm_mem_i64_get(vm, mem_dest) OP vm_register_i64_get(vm, reg_src));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_SIGNED_BIN_OP_reg_mem_impl(OP)\
+  do {\
+    uint8_t encoded_reg = vm_code_next_u8(vm);\
+    void* mem_src = vm_code_next_addr(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);\
+      vm_register_i8_set(vm, reg_dest, vm_register_i8_get(vm, reg_dest) OP vm_mem_i8_get(vm, mem_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_16BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);\
+      vm_register_i16_set(vm, reg_dest, vm_register_i16_get(vm, reg_dest) OP vm_mem_i16_get(vm, mem_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_register_i32_set(vm, reg_dest, vm_register_i32_get(vm, reg_dest) OP vm_mem_i32_get(vm, mem_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_register_i64_set(vm, reg_dest, vm_register_i64_get(vm, reg_dest) OP vm_mem_i64_get(vm, mem_src));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_SIGNED_BIN_OP_mem_mem_impl(OP)\
+  do {\
+    void* mem_dest = vm_code_next_addr(vm);\
+    void* mem_src = vm_code_next_addr(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+      vm_mem_i8_set(vm, mem_dest, vm_mem_i8_get(vm, mem_dest) OP vm_mem_i8_get(vm, mem_src));\
+      break;\
+    case OPCODE_WIDTH_16BIT:\
+      vm_mem_i16_set(vm, mem_dest, vm_mem_i16_get(vm, mem_dest) OP vm_mem_i16_get(vm, mem_src));\
+      break;\
+    case OPCODE_WIDTH_32BIT:\
+      vm_mem_i32_set(vm, mem_dest, vm_mem_i32_get(vm, mem_dest) OP vm_mem_i32_get(vm, mem_src));\
+      break;\
+    case OPCODE_WIDTH_64BIT:\
+      vm_mem_i64_set(vm, mem_dest, vm_mem_i64_get(vm, mem_dest) OP vm_mem_i64_get(vm, mem_src));\
+      break;\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_SIGNED_BIN_OP_reg_imm_impl(OP)\
+  do {\
+    uint8_t encoded_reg = vm_code_next_u8(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);\
+      vm_register_i8_set(vm, reg_dest, vm_register_i8_get(vm, reg_dest) OP vm_code_next_i8(vm));\
+      break;\
+    }\
+    case OPCODE_WIDTH_16BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);\
+      vm_register_i16_set(vm, reg_dest, vm_register_i16_get(vm, reg_dest) OP vm_code_next_i16(vm));\
+      break;\
+    }\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_register_i32_set(vm, reg_dest, vm_register_i32_get(vm, reg_dest) OP vm_code_next_i32(vm));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_register_i64_set(vm, reg_dest, vm_register_i64_get(vm, reg_dest) OP vm_code_next_i64(vm));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_SIGNED_BIN_OP_mem_imm_impl(OP)\
+  do {\
+    void* mem_dest = vm_code_next_addr(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_8BIT:\
+      vm_mem_i8_set(vm, mem_dest, vm_mem_i8_get(vm, mem_dest) OP vm_code_next_i8(vm));\
+      break;\
+    case OPCODE_WIDTH_16BIT:\
+      vm_mem_i16_set(vm, mem_dest, vm_mem_i16_get(vm, mem_dest) OP vm_code_next_i16(vm));\
+      break;\
+    case OPCODE_WIDTH_32BIT:\
+      vm_mem_i32_set(vm, mem_dest, vm_mem_i32_get(vm, mem_dest) OP vm_code_next_i32(vm));\
+      break;\
+    case OPCODE_WIDTH_64BIT:\
+      vm_mem_i64_set(vm, mem_dest, vm_mem_i64_get(vm, mem_dest) OP vm_code_next_i64(vm));\
+      break;\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+static inline void vm_execute_IADD_reg_reg(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_reg_reg_impl(+);
+}
+
+static inline void vm_execute_IADD_mem_reg(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_mem_reg_impl(+);
+}
+
+static inline void vm_execute_IADD_reg_mem(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_reg_mem_impl(+);
+}
+
+static inline void vm_execute_IADD_mem_mem(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_mem_mem_impl(+);
+}
+
+static inline void vm_execute_IADD_reg_imm(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_reg_imm_impl(+);
+}
+
+static inline void vm_execute_IADD_mem_imm(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_mem_imm_impl(+);
 }
 
 static inline void vm_execute_IADD(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_IADD_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_IADD_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_IADD_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_IADD_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_IADD_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_IADD_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ISUB_reg_reg(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_reg_reg_impl(-);
+}
+
+static inline void vm_execute_ISUB_mem_reg(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_mem_reg_impl(-);
+}
+
+static inline void vm_execute_ISUB_reg_mem(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_reg_mem_impl(-);
+}
+
+static inline void vm_execute_ISUB_mem_mem(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_mem_mem_impl(-);
+}
+
+static inline void vm_execute_ISUB_reg_imm(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_reg_imm_impl(-);
+}
+
+static inline void vm_execute_ISUB_mem_imm(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_mem_imm_impl(-);
 }
 
 static inline void vm_execute_ISUB(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_ISUB_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_ISUB_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_ISUB_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_ISUB_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_ISUB_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_ISUB_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_IMUL_reg_reg(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_reg_reg_impl(*);
+}
+
+static inline void vm_execute_IMUL_mem_reg(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_mem_reg_impl(*);
+}
+
+static inline void vm_execute_IMUL_reg_mem(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_reg_mem_impl(*);
+}
+
+static inline void vm_execute_IMUL_mem_mem(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_mem_mem_impl(*);
+}
+
+static inline void vm_execute_IMUL_reg_imm(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_reg_imm_impl(*);
+}
+
+static inline void vm_execute_IMUL_mem_imm(vm_t* vm)
+{
+  vm_execute_SIGNED_BIN_OP_mem_imm_impl(*);
 }
 
 static inline void vm_execute_IMUL(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_IMUL_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_IMUL_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_IMUL_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_IMUL_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_IMUL_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_IMUL_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_IDIV_reg_reg(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_reg_reg_impl(/);
+}
+
+static inline void vm_execute_IDIV_mem_reg(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_mem_reg_impl(/);
+}
+
+static inline void vm_execute_IDIV_reg_mem(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_reg_mem_impl(/);
+}
+
+static inline void vm_execute_IDIV_mem_mem(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_mem_mem_impl(/);
+}
+
+static inline void vm_execute_IDIV_reg_imm(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_reg_imm_impl(/);
+}
+
+static inline void vm_execute_IDIV_mem_imm(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_mem_imm_impl(/);
 }
 
 static inline void vm_execute_IDIV(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_IDIV_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_IDIV_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_IDIV_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_IDIV_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_IDIV_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_IDIV_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_IMOD_reg_reg(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_reg_reg_impl(%);
+}
+
+static inline void vm_execute_IMOD_mem_reg(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_mem_reg_impl(%);
+}
+
+static inline void vm_execute_IMOD_reg_mem(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_reg_mem_impl(%);
+}
+
+static inline void vm_execute_IMOD_mem_mem(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_mem_mem_impl(%);
+}
+
+static inline void vm_execute_IMOD_reg_imm(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_reg_imm_impl(%);
+}
+
+static inline void vm_execute_IMOD_mem_imm(vm_t* vm)
+{
+    vm_execute_SIGNED_BIN_OP_mem_imm_impl(%);
 }
 
 static inline void vm_execute_IMOD(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_IMOD_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_IMOD_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_IMOD_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_IMOD_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_IMOD_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_IMOD_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_INEG_reg(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+    vm_register_i8_set(vm, reg_dest, -vm_register_i8_get(vm, reg_dest));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+    vm_register_i16_set(vm, reg_dest, -vm_register_i16_get(vm, reg_dest));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+    vm_register_i32_set(vm, reg_dest, -vm_register_i32_get(vm, reg_dest));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+    vm_register_i64_set(vm, reg_dest, -vm_register_i64_get(vm, reg_dest));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_INEG_mem(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_mem_i8_set(vm, mem_dest, -vm_mem_i8_get(vm, mem_dest));
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_mem_i16_set(vm, mem_dest, -vm_mem_i16_get(vm, mem_dest));
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_mem_i32_set(vm, mem_dest, -vm_mem_i32_get(vm, mem_dest));
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_mem_i64_set(vm, mem_dest, -vm_mem_i64_get(vm, mem_dest));
+    break;
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_INEG(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG: vm_execute_INEG_reg(vm); break;
+  case OPCODE_PARAM_MEM: vm_execute_INEG_mem(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_IINC_reg(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+    vm_register_i8_set(vm, reg_dest, vm_register_i8_get(vm, reg_dest) + 1);
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+    vm_register_i16_set(vm, reg_dest, vm_register_i16_get(vm, reg_dest) + 1);
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+    vm_register_i32_set(vm, reg_dest, vm_register_i32_get(vm, reg_dest) + 1);
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+    vm_register_i64_set(vm, reg_dest, vm_register_i64_get(vm, reg_dest) + 1);
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_IINC_mem(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_mem_i8_set(vm, mem_dest, vm_mem_i8_get(vm, mem_dest) + 1);
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_mem_i16_set(vm, mem_dest, vm_mem_i16_get(vm, mem_dest) + 1);
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_mem_i32_set(vm, mem_dest, vm_mem_i32_get(vm, mem_dest) + 1);
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_mem_i64_set(vm, mem_dest, vm_mem_i64_get(vm, mem_dest) + 1);
+    break;
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_IINC(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG: vm_execute_IINC_reg(vm); break;
+  case OPCODE_PARAM_MEM: vm_execute_IINC_mem(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_IDEC_reg(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+    vm_register_i8_set(vm, reg_dest, vm_register_i8_get(vm, reg_dest) - 1);
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+    vm_register_i16_set(vm, reg_dest, vm_register_i16_get(vm, reg_dest) - 1);
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+    vm_register_i32_set(vm, reg_dest, vm_register_i32_get(vm, reg_dest) - 1);
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+    vm_register_i64_set(vm, reg_dest, vm_register_i64_get(vm, reg_dest) - 1);
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_IDEC_mem(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+    vm_mem_i8_set(vm, mem_dest, vm_mem_i8_get(vm, mem_dest) - 1);
+    break;
+  case OPCODE_WIDTH_16BIT:
+    vm_mem_i16_set(vm, mem_dest, vm_mem_i16_get(vm, mem_dest) - 1);
+    break;
+  case OPCODE_WIDTH_32BIT:
+    vm_mem_i32_set(vm, mem_dest, vm_mem_i32_get(vm, mem_dest) - 1);
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_mem_i64_set(vm, mem_dest, vm_mem_i64_get(vm, mem_dest) - 1);
+    break;
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_IDEC(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG: vm_execute_IDEC_reg(vm); break;
+  case OPCODE_PARAM_MEM: vm_execute_IDEC_mem(vm); break;
+  default: unreachable();
+  }
+}
+
+#define vm_execute_FLOAT_BIN_OP_reg_reg_impl(OP)\
+  do {\
+    uint8_t encoded_regs = vm_code_next_u8(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_32BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_register_f32_set(vm, reg_dest, vm_register_f32_get(vm, reg_dest) OP vm_register_f32_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_64BIT);\
+      register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_register_f64_set(vm, reg_dest, vm_register_f64_get(vm, reg_dest) OP vm_register_f64_get(vm, reg_src));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_FLOAT_BIN_OP_mem_reg_impl(OP)\
+  do {\
+    void* mem_dest = vm_code_next_addr(vm);\
+    uint8_t encoded_reg = vm_code_next_u8(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_mem_f32_set(vm, mem_dest, vm_mem_f32_get(vm, mem_dest) OP vm_register_f32_get(vm, reg_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_mem_f64_set(vm, mem_dest, vm_mem_f64_get(vm, mem_dest) OP vm_register_f64_get(vm, reg_src));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_FLOAT_BIN_OP_reg_mem_impl(OP)\
+  do {\
+    uint8_t encoded_reg = vm_code_next_u8(vm);\
+    void* mem_src = vm_code_next_addr(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_register_f32_set(vm, reg_dest, vm_register_f32_get(vm, reg_dest) OP vm_mem_f32_get(vm, mem_src));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_register_f64_set(vm, reg_dest, vm_register_f64_get(vm, reg_dest) OP vm_mem_f64_get(vm, mem_src));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_FLOAT_BIN_OP_mem_mem_impl(OP)\
+  do {\
+    void* mem_dest = vm_code_next_addr(vm);\
+    void* mem_src = vm_code_next_addr(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_32BIT:\
+      vm_mem_f32_set(vm, mem_dest, vm_mem_f32_get(vm, mem_dest) OP vm_mem_f32_get(vm, mem_src));\
+      break;\
+    case OPCODE_WIDTH_64BIT:\
+      vm_mem_f64_set(vm, mem_dest, vm_mem_f64_get(vm, mem_dest) OP vm_mem_f64_get(vm, mem_src));\
+      break;\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_FLOAT_BIN_OP_reg_imm_impl(OP)\
+  do {\
+    uint8_t encoded_reg = vm_code_next_u8(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_32BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);\
+      vm_register_f32_set(vm, reg_dest, vm_register_f32_get(vm, reg_dest) OP vm_code_next_f32(vm));\
+      break;\
+    }\
+    case OPCODE_WIDTH_64BIT:\
+    {\
+      register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);\
+      vm_register_f64_set(vm, reg_dest, vm_register_f64_get(vm, reg_dest) OP vm_code_next_f64(vm));\
+      break;\
+    }\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+#define vm_execute_FLOAT_BIN_OP_mem_imm_impl(OP)\
+  do {\
+    void* mem_dest = vm_code_next_addr(vm);\
+    switch (vm->inst.width)\
+    {\
+    case OPCODE_WIDTH_32BIT:\
+      vm_mem_f32_set(vm, mem_dest, vm_mem_f32_get(vm, mem_dest) OP vm_code_next_f32(vm));\
+      break;\
+    case OPCODE_WIDTH_64BIT:\
+      vm_mem_f64_set(vm, mem_dest, vm_mem_f64_get(vm, mem_dest) OP vm_code_next_f64(vm));\
+      break;\
+    default: unreachable();\
+    }\
+  } while (0)\
+
+static inline void vm_execute_FADD_reg_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_reg_impl(+);
+}
+
+static inline void vm_execute_FADD_mem_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_reg_impl(+);
+}
+
+static inline void vm_execute_FADD_reg_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_mem_impl(+);
+}
+
+static inline void vm_execute_FADD_mem_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_mem_impl(+);
+}
+
+static inline void vm_execute_FADD_reg_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_imm_impl(+);
+}
+
+static inline void vm_execute_FADD_mem_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_imm_impl(+);
 }
 
 static inline void vm_execute_FADD(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_FADD_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_FADD_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_FADD_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_FADD_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_FADD_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_FADD_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_FSUB_reg_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_reg_impl(-);
+}
+
+static inline void vm_execute_FSUB_mem_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_reg_impl(-);
+}
+
+static inline void vm_execute_FSUB_reg_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_mem_impl(-);
+}
+
+static inline void vm_execute_FSUB_mem_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_mem_impl(-);
+}
+
+static inline void vm_execute_FSUB_reg_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_imm_impl(-);
+}
+
+static inline void vm_execute_FSUB_mem_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_imm_impl(-);
 }
 
 static inline void vm_execute_FSUB(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_FSUB_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_FSUB_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_FSUB_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_FSUB_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_FSUB_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_FSUB_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_FMUL_reg_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_reg_impl(*);
+}
+
+static inline void vm_execute_FMUL_mem_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_reg_impl(*);
+}
+
+static inline void vm_execute_FMUL_reg_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_mem_impl(*);
+}
+
+static inline void vm_execute_FMUL_mem_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_mem_impl(*);
+}
+
+static inline void vm_execute_FMUL_reg_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_imm_impl(*);
+}
+
+static inline void vm_execute_FMUL_mem_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_imm_impl(*);
 }
 
 static inline void vm_execute_FMUL(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_FMUL_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_FMUL_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_FMUL_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_FMUL_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_FMUL_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_FMUL_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_FDIV_reg_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_reg_impl(/);
+}
+
+static inline void vm_execute_FDIV_mem_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_reg_impl(/);
+}
+
+static inline void vm_execute_FDIV_reg_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_mem_impl(/);
+}
+
+static inline void vm_execute_FDIV_mem_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_mem_impl(/);
+}
+
+static inline void vm_execute_FDIV_reg_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_imm_impl(/);
+}
+
+static inline void vm_execute_FDIV_mem_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_imm_impl(/);
 }
 
 static inline void vm_execute_FDIV(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_FDIV_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_FDIV_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_FDIV_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_FDIV_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_FDIV_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_FDIV_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_FMOD_reg_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_reg_impl(/);
+}
+
+static inline void vm_execute_FMOD_mem_reg(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_reg_impl(/);
+}
+
+static inline void vm_execute_FMOD_reg_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_mem_impl(/);
+}
+
+static inline void vm_execute_FMOD_mem_mem(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_mem_impl(/);
+}
+
+static inline void vm_execute_FMOD_reg_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_reg_imm_impl(/);
+}
+
+static inline void vm_execute_FMOD_mem_imm(vm_t* vm)
+{
+  vm_execute_FLOAT_BIN_OP_mem_imm_impl(/);
 }
 
 static inline void vm_execute_FMOD(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_FMOD_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_FMOD_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_FMOD_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_FMOD_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_FMOD_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_FMOD_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_FNEG_reg(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+    vm_register_f32_set(vm, reg_dest, -vm_register_f32_get(vm, reg_dest));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+    vm_register_f64_set(vm, reg_dest, -vm_register_f64_get(vm, reg_dest));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_FNEG_mem(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_32BIT:
+    vm_mem_f32_set(vm, mem_dest, -vm_mem_f32_get(vm, mem_dest));
+    break;
+  case OPCODE_WIDTH_64BIT:
+    vm_mem_f64_set(vm, mem_dest, -vm_mem_f64_get(vm, mem_dest));
+    break;
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_FNEG(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG: vm_execute_FNEG_reg(vm); break;
+  case OPCODE_PARAM_MEM: vm_execute_FNEG_mem(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_AND_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(&);
+}
+
+static inline void vm_execute_AND_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(&);
+}
+
+static inline void vm_execute_AND_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(&);
+}
+
+static inline void vm_execute_AND_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(&);
+}
+
+static inline void vm_execute_AND_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(&);
+}
+
+static inline void vm_execute_AND_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(&);
 }
 
 static inline void vm_execute_AND(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_AND_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_AND_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_AND_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_AND_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_AND_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_AND_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_OR_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(|);
+}
+
+static inline void vm_execute_OR_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(|);
+}
+
+static inline void vm_execute_OR_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(|);
+}
+
+static inline void vm_execute_OR_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(|);
+}
+
+static inline void vm_execute_OR_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(|);
+}
+
+static inline void vm_execute_OR_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(|);
 }
 
 static inline void vm_execute_OR(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_OR_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_OR_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_OR_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_OR_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_OR_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_OR_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_XOR_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(^);
+}
+
+static inline void vm_execute_XOR_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(^);
+}
+
+static inline void vm_execute_XOR_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(^);
+}
+
+static inline void vm_execute_XOR_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(^);
+}
+
+static inline void vm_execute_XOR_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(^);
+}
+
+static inline void vm_execute_XOR_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(^);
 }
 
 static inline void vm_execute_XOR(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_XOR_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_XOR_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_XOR_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_XOR_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_XOR_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_XOR_mem_imm(vm); break;
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_NOT(vm_t* vm)
@@ -942,69 +2981,947 @@ static inline void vm_execute_NOT(vm_t* vm)
   unused(vm);
 }
 
+static inline void vm_execute_SHL_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(<<);
+}
+
+static inline void vm_execute_SHL_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(<<);
+}
+
+static inline void vm_execute_SHL_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(<<);
+}
+
+static inline void vm_execute_SHL_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(<<);
+}
+
+static inline void vm_execute_SHL_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(<<);
+}
+
+static inline void vm_execute_SHL_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(<<);
+}
+
 static inline void vm_execute_SHL(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_SHL_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_SHL_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_SHL_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_SHL_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_SHL_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_SHL_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_SHR_reg_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(>>);
+}
+
+static inline void vm_execute_SHR_mem_reg(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(>>);
+}
+
+static inline void vm_execute_SHR_reg_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(>>);
+}
+
+static inline void vm_execute_SHR_mem_mem(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(>>);
+}
+
+static inline void vm_execute_SHR_reg_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(>>);
+}
+
+static inline void vm_execute_SHR_mem_imm(vm_t* vm)
+{
+  vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(>>);
 }
 
 static inline void vm_execute_SHR(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_SHR_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_SHR_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_SHR_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_SHR_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_SHR_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_SHR_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROL_reg_reg(vm_t* vm)
+{
+  uint8_t encoded_regs = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_8BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_8BIT);
+    
+    uint8_t shift = vm_register_u8_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+
+    uint8_t value = vm_register_u8_get(vm, reg_dest);
+
+    vm_register_u8_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_16BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_16BIT);
+    
+    uint16_t shift = vm_register_u16_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_register_u16_get(vm, reg_dest);
+
+    vm_register_u16_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_32BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_32BIT);
+    
+    uint32_t shift = vm_register_u32_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_register_u32_get(vm, reg_dest);
+
+    vm_register_u32_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_64BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_64BIT);
+    
+    uint64_t shift = vm_register_u64_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_register_u64_get(vm, reg_dest);
+
+    vm_register_u64_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROL_mem_reg(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+
+    uint8_t shift = vm_register_u8_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+
+    uint8_t value = vm_mem_u8_get(vm, mem_dest);
+
+    vm_mem_u8_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+
+    uint16_t shift = vm_register_u16_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_mem_u16_get(vm, mem_dest);
+
+    vm_mem_u16_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+
+    uint32_t shift = vm_register_u32_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_mem_u32_get(vm, mem_dest);
+
+    vm_mem_u32_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+
+    uint64_t shift = vm_register_u64_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_mem_u64_get(vm, mem_dest);
+
+    vm_mem_u64_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROL_reg_mem(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+  void* mem_src = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+
+    uint8_t shift = vm_mem_u8_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+      
+    uint8_t value = vm_register_u8_get(vm, reg_dest);
+
+    vm_register_u8_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+
+    uint16_t shift = vm_mem_u16_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_register_u16_get(vm, reg_dest);
+
+    vm_register_u16_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+
+    uint32_t shift = vm_mem_u32_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_register_u32_get(vm, reg_dest);
+
+    vm_register_u32_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+
+    uint64_t shift = vm_mem_u64_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_register_u64_get(vm, reg_dest);
+
+    vm_register_u64_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROL_mem_mem(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+  void* mem_src = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    uint8_t shift = vm_mem_u8_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+
+    uint8_t value = vm_mem_u8_get(vm, mem_dest);
+
+    vm_mem_u8_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    uint16_t shift = vm_mem_u16_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_mem_u16_get(vm, mem_dest);
+
+    vm_mem_u16_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    uint32_t shift = vm_mem_u32_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_mem_u32_get(vm, mem_dest);
+
+    vm_mem_u32_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    uint64_t shift = vm_mem_u64_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_mem_u64_get(vm, mem_dest);
+
+    vm_mem_u64_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROL_reg_imm(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+
+    uint8_t shift = vm_code_next_u8(vm);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+
+    uint8_t value = vm_register_u8_get(vm, reg_dest);
+
+    vm_register_u8_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+
+    uint16_t shift = vm_code_next_u16(vm);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_register_u16_get(vm, reg_dest);
+
+    vm_register_u16_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+
+    uint32_t shift = vm_code_next_u32(vm);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_register_u32_get(vm, reg_dest);
+
+    vm_register_u32_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+
+    uint64_t shift = vm_code_next_u64(vm);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_register_u64_get(vm, reg_dest);
+
+    vm_register_u64_set(vm, reg_dest, (value << shift) | (value >> (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROL_mem_imm(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    uint8_t shift = vm_code_next_u8(vm);
+    
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+    
+    uint8_t value = vm_mem_u8_get(vm, mem_dest);
+
+    vm_mem_u8_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    uint16_t shift = vm_code_next_u16(vm);
+    
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+    
+    uint16_t value = vm_mem_u16_get(vm, mem_dest);
+
+    vm_mem_u16_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    uint32_t shift = vm_code_next_u32(vm);
+    
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+    
+    uint32_t value = vm_mem_u32_get(vm, mem_dest);
+
+    vm_mem_u32_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    uint64_t shift = vm_code_next_u64(vm);
+    
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+    
+    uint64_t value = vm_mem_u64_get(vm, mem_dest);
+
+    vm_mem_u64_set(vm, mem_dest, (value << shift) | (value >> (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_ROL(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_ROL_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_ROL_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_ROL_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_ROL_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_ROL_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_ROL_mem_imm(vm); break;
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROR_reg_reg(vm_t* vm)
+{
+  uint8_t encoded_regs = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_8BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_8BIT);
+    
+    uint8_t shift = vm_register_u8_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+
+    uint8_t value = vm_register_u8_get(vm, reg_dest);
+
+    vm_register_u8_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_16BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_16BIT);
+    
+    uint16_t shift = vm_register_u16_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_register_u16_get(vm, reg_dest);
+
+    vm_register_u16_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_32BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_32BIT);
+    
+    uint32_t shift = vm_register_u32_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_register_u32_get(vm, reg_dest);
+
+    vm_register_u32_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, OPCODE_WIDTH_64BIT);
+    register_t reg_src = register_decode(encoded_regs & 0xF, OPCODE_WIDTH_64BIT);
+    
+    uint64_t shift = vm_register_u64_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_register_u64_get(vm, reg_dest);
+
+    vm_register_u64_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROR_mem_reg(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+
+    uint8_t shift = vm_register_u8_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+
+    uint8_t value = vm_mem_u8_get(vm, mem_dest);
+
+    vm_mem_u8_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+
+    uint16_t shift = vm_register_u16_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_mem_u16_get(vm, mem_dest);
+
+    vm_mem_u16_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+
+    uint32_t shift = vm_register_u32_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_mem_u32_get(vm, mem_dest);
+
+    vm_mem_u32_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_src = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+
+    uint64_t shift = vm_register_u64_get(vm, reg_src);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_mem_u64_get(vm, mem_dest);
+
+    vm_mem_u64_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROR_reg_mem(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+  void* mem_src = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+
+    uint8_t shift = vm_mem_u8_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+      
+    uint8_t value = vm_register_u8_get(vm, reg_dest);
+
+    vm_register_u8_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+
+    uint16_t shift = vm_mem_u16_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_register_u16_get(vm, reg_dest);
+
+    vm_register_u16_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+
+    uint32_t shift = vm_mem_u32_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_register_u32_get(vm, reg_dest);
+
+    vm_register_u32_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+
+    uint64_t shift = vm_mem_u64_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_register_u64_get(vm, reg_dest);
+
+    vm_register_u64_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROR_mem_mem(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+  void* mem_src = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    uint8_t shift = vm_mem_u8_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+
+    uint8_t value = vm_mem_u8_get(vm, mem_dest);
+
+    vm_mem_u8_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    uint16_t shift = vm_mem_u16_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_mem_u16_get(vm, mem_dest);
+
+    vm_mem_u16_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    uint32_t shift = vm_mem_u32_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_mem_u32_get(vm, mem_dest);
+
+    vm_mem_u32_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    uint64_t shift = vm_mem_u64_get(vm, mem_src);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_mem_u64_get(vm, mem_dest);
+
+    vm_mem_u64_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROR_reg_imm(vm_t* vm)
+{
+  uint8_t encoded_reg = vm_code_next_u8(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_8BIT);
+
+    uint8_t shift = vm_code_next_u8(vm);
+
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+
+    uint8_t value = vm_register_u8_get(vm, reg_dest);
+
+    vm_register_u8_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_16BIT);
+
+    uint16_t shift = vm_code_next_u16(vm);
+
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+
+    uint16_t value = vm_register_u16_get(vm, reg_dest);
+
+    vm_register_u16_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_32BIT);
+
+    uint32_t shift = vm_code_next_u32(vm);
+
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+
+    uint32_t value = vm_register_u32_get(vm, reg_dest);
+
+    vm_register_u32_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    register_t reg_dest = register_decode(encoded_reg & 0xF, OPCODE_WIDTH_64BIT);
+
+    uint64_t shift = vm_code_next_u64(vm);
+
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+
+    uint64_t value = vm_register_u64_get(vm, reg_dest);
+
+    vm_register_u64_set(vm, reg_dest, (value >> shift) | (value << (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
+}
+
+static inline void vm_execute_ROR_mem_imm(vm_t* vm)
+{
+  void* mem_dest = vm_code_next_addr(vm);
+
+  switch (vm->inst.width)
+  {
+  case OPCODE_WIDTH_8BIT:
+  {
+    uint8_t shift = vm_code_next_u8(vm);
+    
+    if ((shift &= sizeof(uint8_t) * 8 - 1) == 0)
+      break;
+    
+    uint8_t value = vm_mem_u8_get(vm, mem_dest);
+
+    vm_mem_u8_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint8_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_16BIT:
+  {
+    uint16_t shift = vm_code_next_u16(vm);
+    
+    if ((shift &= sizeof(uint16_t) * 8 - 1) == 0)
+      break;
+    
+    uint16_t value = vm_mem_u16_get(vm, mem_dest);
+
+    vm_mem_u16_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint16_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_32BIT:
+  {
+    uint32_t shift = vm_code_next_u32(vm);
+    
+    if ((shift &= sizeof(uint32_t) * 8 - 1) == 0)
+      break;
+    
+    uint32_t value = vm_mem_u32_get(vm, mem_dest);
+
+    vm_mem_u32_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint32_t) * 8 - shift)));
+    break;
+  }
+  case OPCODE_WIDTH_64BIT:
+  {
+    uint64_t shift = vm_code_next_u64(vm);
+    
+    if ((shift &= sizeof(uint64_t) * 8 - 1) == 0)
+      break;
+    
+    uint64_t value = vm_mem_u64_get(vm, mem_dest);
+
+    vm_mem_u64_set(vm, mem_dest, (value >> shift) | (value << (sizeof(uint64_t) * 8 - shift)));
+    break;
+  }
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_ROR(vm_t* vm)
 {
-  unused(vm);
+  switch (vm->inst.param)
+  {
+  case OPCODE_PARAM_REG_REG: vm_execute_ROR_reg_reg(vm); break;
+  case OPCODE_PARAM_MEM_REG: vm_execute_ROR_mem_reg(vm); break;
+  case OPCODE_PARAM_REG_MEM: vm_execute_ROR_reg_mem(vm); break;
+  case OPCODE_PARAM_MEM_MEM: vm_execute_ROR_mem_mem(vm); break;
+  case OPCODE_PARAM_REG_IMM: vm_execute_ROR_reg_imm(vm); break;
+  case OPCODE_PARAM_MEM_IMM: vm_execute_ROR_mem_imm(vm); break;
+  default: unreachable();
+  }
 }
 
 static inline void vm_execute_JMP(vm_t* vm)
 {
-  unused(vm);
+  vm->regs.IP = vm_code_next_u64(vm);
 }
 
 static inline void vm_execute_JE(vm_t* vm)
 {
-  unused(vm);
+  uint64_t addr = vm_code_next_u64(vm);
+
+  if (vm->flags.zero)
+    vm->regs.IP = addr;
 }
 
 static inline void vm_execute_JNE(vm_t* vm)
 {
-  unused(vm);
+  uint64_t addr = vm_code_next_u64(vm);
+
+  if (!vm->flags.zero)
+    vm->regs.IP = addr;
 }
 
 static inline void vm_execute_JL(vm_t* vm)
 {
-  unused(vm);
+  uint64_t addr = vm_code_next_u64(vm);
+
+  if (vm->flags.negative)
+    vm->regs.IP = addr;
 }
 
 static inline void vm_execute_JLE(vm_t* vm)
 {
-  unused(vm);
+  uint64_t addr = vm_code_next_u64(vm);
+
+  if (vm->flags.zero || vm->flags.negative)
+    vm->regs.IP = addr;
 }
 
 static inline void vm_execute_JG(vm_t* vm)
 {
-  unused(vm);
+  uint64_t addr = vm_code_next_u64(vm);
+
+  if (!vm->flags.zero && !vm->flags.negative)
+    vm->regs.IP = addr;
 }
 
 static inline void vm_execute_JGE(vm_t* vm)
 {
-  unused(vm);
-}
+  uint64_t addr = vm_code_next_u64(vm);
 
-static inline void vm_execute_JZ(vm_t* vm)
-{
-  unused(vm);
-}
-
-static inline void vm_execute_JNZ(vm_t* vm)
-{
-  unused(vm);
+  if (vm->flags.zero || !vm->flags.negative)
+    vm->regs.IP = addr;
 }
 
 static inline void vm_execute_CMP(vm_t* vm)
@@ -1036,6 +3953,13 @@ void vm_execute(vm_t* vm)
   case OPCODE_PSH:  vm_execute_PSH(vm); break;
   case OPCODE_POP:  vm_execute_POP(vm); break;
   case OPCODE_LEA:  vm_execute_LEA(vm); break;
+  case OPCODE_ADD:  vm_execute_ADD(vm); break;
+  case OPCODE_SUB:  vm_execute_SUB(vm); break;
+  case OPCODE_MUL:  vm_execute_MUL(vm); break;
+  case OPCODE_DIV:  vm_execute_DIV(vm); break;
+  case OPCODE_MOD:  vm_execute_MOD(vm); break;
+  case OPCODE_INC:  vm_execute_INC(vm); break;
+  case OPCODE_DEC:  vm_execute_DEC(vm); break;
   case OPCODE_IADD: vm_execute_IADD(vm); break;
   case OPCODE_ISUB: vm_execute_ISUB(vm); break;
   case OPCODE_IMUL: vm_execute_IMUL(vm); break;
@@ -1065,8 +3989,6 @@ void vm_execute(vm_t* vm)
   case OPCODE_JLE:  vm_execute_JLE(vm); break;
   case OPCODE_JG:   vm_execute_JG(vm); break;
   case OPCODE_JGE:  vm_execute_JGE(vm); break;
-  case OPCODE_JZ:   vm_execute_JZ(vm); break;
-  case OPCODE_JNZ:  vm_execute_JNZ(vm); break;
   case OPCODE_CMP:  vm_execute_CMP(vm); break;
   case OPCODE_CLF:  vm_execute_CLF(vm); break;
   case OPCODE_CALL: vm_execute_CALL(vm); break;

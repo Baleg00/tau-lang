@@ -1,38 +1,23 @@
 #include "test.h"
 
+#include "opcode.h"
+#include "register.h"
 #include "vm.h"
 
 test()
 
   vm_t vm;
-  
-  const uint8_t code[] = {
-    0x01,
-    0x02, 0x03,
-    0x04, 0x05, 0x06, 0x07,
-    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-    0x00, 0x00, 0x00, 0x40,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
-  };
-
-  const uint8_t mem_readonly[] = {
-    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-    0x00, 0x00, 0x80, 0x40,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x14, 0x40
-  };
-
-  uint8_t mem[8];
-
-  before()
-    vm_init(&vm, code, sizeof(code));
-  end()
-
-  after()
-    vm_free(&vm);
-  end()
 
   describe("vm")
     describe("registers")
+      before()
+        vm_init(&vm, NULL, 0);
+      end()
+
+      after()
+        vm_free(&vm);
+      end()
+
       it("should set and get unsigned 8-bit register values")
         vm_register_u8_set(&vm, REG_ALB, 0xAB);
         assert_equal(vm_register_u8_get(&vm, REG_ALB), 0xAB);
@@ -65,6 +50,23 @@ test()
     end()
 
     describe("code")
+      const uint8_t code[] = {
+        0x01,
+        0x02, 0x03,
+        0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+        0x00, 0x00, 0x00, 0x40,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+      };
+
+      before()
+        vm_init(&vm, code, sizeof(code));
+      end()
+
+      after()
+        vm_free(&vm);
+      end()
+
       it("should retrieve the next unsigned 8-bit value from the code")
         uint8_t value = vm_code_next_u8(&vm);
         assert_equal(value, 0x01);
@@ -97,6 +99,22 @@ test()
     end()
 
     describe("memory")
+      const uint8_t mem_readonly[] = {
+        0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+        0x00, 0x00, 0x80, 0x40,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x14, 0x40
+      };
+
+      uint8_t mem[8];
+
+      before()
+        vm_init(&vm, NULL, 0);
+      end()
+
+      after()
+        vm_free(&vm);
+      end()
+
       it("should get unsigned 8-bit values from memory")
         uint8_t value = vm_mem_u8_get(&vm, &mem_readonly[0]);
         assert_equal(value, 0x11);
@@ -180,17 +198,26 @@ test()
     end()
 
     describe("addressing")
+      uint8_t mem[16];
+
+      before()
+        vm_init(&vm, NULL, 0);
+      end()
+
+      after()
+        vm_free(&vm);
+      end()
+
       it("should encode and decode ADDR_MODE_OFFSET")
         addr_mode_t mode = ADDR_MODE_OFFSET;
         int64_t offset = 123;
 
-        uint8_t mem[16];
-        size_t encoded_size = vm_mem_addr_encode(&vm, mem, mode, 0, 0, 0, offset);
+        size_t encoded_size = vm_addr_encode(&vm, mem, mode, 0, 0, 0, offset);
 
         addr_mode_t decoded_mode;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_mem_addr_decode(&vm, mem, &decoded_mode, NULL, NULL, NULL, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, NULL, NULL, NULL, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -201,13 +228,12 @@ test()
         addr_mode_t mode = ADDR_MODE_BASE;
         register_t base = REG_A;
 
-        uint8_t mem[16];
-        size_t encoded_size = vm_mem_addr_encode(&vm, mem, mode, base, 0, 0, 0);
+        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, 0, 0, 0);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
 
-        size_t decoded_size = vm_mem_addr_decode(&vm, mem, &decoded_mode, &decoded_base, NULL, NULL, NULL);
+        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, NULL, NULL, NULL);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -219,14 +245,13 @@ test()
         register_t base = REG_B;
         int64_t offset = 456;
 
-        uint8_t mem[16];
-        size_t encoded_size = vm_mem_addr_encode(&vm, mem, mode, base, 0, 0, offset);
+        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, 0, 0, offset);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_mem_addr_decode(&vm, mem, &decoded_mode, &decoded_base, NULL, NULL, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, NULL, NULL, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -239,14 +264,13 @@ test()
         register_t base = REG_C;
         register_t index = REG_D;
 
-        uint8_t mem[16];
-        size_t encoded_size = vm_mem_addr_encode(&vm, mem, mode, base, index, 0, 0);
+        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, index, 0, 0);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
         register_t decoded_index;
 
-        size_t decoded_size = vm_mem_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, NULL, NULL);
+        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, NULL, NULL);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -260,15 +284,14 @@ test()
         register_t index = REG_F;
         int64_t offset = 789;
 
-        uint8_t mem[16];
-        size_t encoded_size = vm_mem_addr_encode(&vm, mem, mode, base, index, 0, offset);
+        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, index, 0, offset);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
         register_t decoded_index;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_mem_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, NULL, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, NULL, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -283,15 +306,14 @@ test()
         register_t index = REG_B;
         int32_t scale = 64;
 
-        uint8_t mem[16];
-        size_t encoded_size = vm_mem_addr_encode(&vm, mem, mode, base, index, scale, 0);
+        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, index, scale, 0);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
         register_t decoded_index;
         int32_t decoded_scale;
 
-        size_t decoded_size = vm_mem_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, &decoded_scale, NULL);
+        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, &decoded_scale, NULL);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -306,15 +328,14 @@ test()
         int32_t scale = -128;
         int64_t offset = -123;
 
-        uint8_t mem[16];
-        size_t encoded_size = vm_mem_addr_encode(&vm, mem, mode, 0, index, scale, offset);
+        size_t encoded_size = vm_addr_encode(&vm, mem, mode, 0, index, scale, offset);
 
         addr_mode_t decoded_mode;
         register_t decoded_index;
         int32_t decoded_scale;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_mem_addr_decode(&vm, mem, &decoded_mode, NULL, &decoded_index, &decoded_scale, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, NULL, &decoded_index, &decoded_scale, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -330,8 +351,7 @@ test()
         int32_t scale = 128;
         int64_t offset = -456;
 
-        uint8_t mem[16];
-        size_t encoded_size = vm_mem_addr_encode(&vm, mem, mode, base, index, scale, offset);
+        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, index, scale, offset);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
@@ -339,7 +359,7 @@ test()
         int32_t decoded_scale;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_mem_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, &decoded_scale, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, &decoded_scale, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -351,6 +371,14 @@ test()
     end()
 
     describe("stack")
+      before()
+        vm_init(&vm, NULL, 0);
+      end()
+
+      after()
+        vm_free(&vm);
+      end()
+
       it("should push and pop unsigned 8-bit values to/from the stack")
         vm_stack_u8_push(&vm, 0x11);
         vm_stack_u8_push(&vm, 0x22);
