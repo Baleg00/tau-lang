@@ -3,6 +3,7 @@
 #include "opcode.h"
 #include "register.h"
 #include "vm.h"
+#include "tasm.h"
 
 test()
 
@@ -212,12 +213,12 @@ test()
         addr_mode_t mode = ADDR_MODE_OFFSET;
         int64_t offset = 123;
 
-        size_t encoded_size = vm_addr_encode(&vm, mem, mode, 0, 0, 0, offset);
+        size_t encoded_size = vm_addr_encode(mem, mode, 0, 0, 0, offset);
 
         addr_mode_t decoded_mode;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, NULL, NULL, NULL, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(mem, &decoded_mode, NULL, NULL, NULL, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -228,12 +229,12 @@ test()
         addr_mode_t mode = ADDR_MODE_BASE;
         register_t base = REG_A;
 
-        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, 0, 0, 0);
+        size_t encoded_size = vm_addr_encode(mem, mode, base, 0, 0, 0);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
 
-        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, NULL, NULL, NULL);
+        size_t decoded_size = vm_addr_decode(mem, &decoded_mode, &decoded_base, NULL, NULL, NULL);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -245,13 +246,13 @@ test()
         register_t base = REG_B;
         int64_t offset = 456;
 
-        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, 0, 0, offset);
+        size_t encoded_size = vm_addr_encode(mem, mode, base, 0, 0, offset);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, NULL, NULL, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(mem, &decoded_mode, &decoded_base, NULL, NULL, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -264,13 +265,13 @@ test()
         register_t base = REG_C;
         register_t index = REG_D;
 
-        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, index, 0, 0);
+        size_t encoded_size = vm_addr_encode(mem, mode, base, index, 0, 0);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
         register_t decoded_index;
 
-        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, NULL, NULL);
+        size_t decoded_size = vm_addr_decode(mem, &decoded_mode, &decoded_base, &decoded_index, NULL, NULL);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -284,14 +285,14 @@ test()
         register_t index = REG_F;
         int64_t offset = 789;
 
-        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, index, 0, offset);
+        size_t encoded_size = vm_addr_encode(mem, mode, base, index, 0, offset);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
         register_t decoded_index;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, NULL, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(mem, &decoded_mode, &decoded_base, &decoded_index, NULL, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -306,14 +307,14 @@ test()
         register_t index = REG_B;
         int32_t scale = 64;
 
-        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, index, scale, 0);
+        size_t encoded_size = vm_addr_encode(mem, mode, base, index, scale, 0);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
         register_t decoded_index;
         int32_t decoded_scale;
 
-        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, &decoded_scale, NULL);
+        size_t decoded_size = vm_addr_decode(mem, &decoded_mode, &decoded_base, &decoded_index, &decoded_scale, NULL);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -328,14 +329,14 @@ test()
         int32_t scale = -128;
         int64_t offset = -123;
 
-        size_t encoded_size = vm_addr_encode(&vm, mem, mode, 0, index, scale, offset);
+        size_t encoded_size = vm_addr_encode(mem, mode, 0, index, scale, offset);
 
         addr_mode_t decoded_mode;
         register_t decoded_index;
         int32_t decoded_scale;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, NULL, &decoded_index, &decoded_scale, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(mem, &decoded_mode, NULL, &decoded_index, &decoded_scale, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -351,7 +352,7 @@ test()
         int32_t scale = 128;
         int64_t offset = -456;
 
-        size_t encoded_size = vm_addr_encode(&vm, mem, mode, base, index, scale, offset);
+        size_t encoded_size = vm_addr_encode(mem, mode, base, index, scale, offset);
 
         addr_mode_t decoded_mode;
         register_t decoded_base;
@@ -359,7 +360,7 @@ test()
         int32_t decoded_scale;
         int64_t decoded_offset;
 
-        size_t decoded_size = vm_addr_decode(&vm, mem, &decoded_mode, &decoded_base, &decoded_index, &decoded_scale, &decoded_offset);
+        size_t decoded_size = vm_addr_decode(mem, &decoded_mode, &decoded_base, &decoded_index, &decoded_scale, &decoded_offset);
 
         assert_equal(encoded_size, decoded_size);
         assert_equal(decoded_mode, mode);
@@ -419,6 +420,42 @@ test()
         vm_stack_f64_push(&vm, 4.567);
         assert_equal(vm_stack_f64_pop(&vm), 4.567);
         assert_equal(vm_stack_f64_pop(&vm), 1.234);
+      end()
+    end()
+
+    describe("tasm")
+      it("should add two unsigned integers")
+        uint8_t code[64];
+        uint8_t* ptr = code;
+
+        // PSH dword 1
+        ptr += tasm_write_opcode(ptr, OPCODE_PSH, OPCODE_PARAM_IMM, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_u32(ptr, 1);
+
+        // PSH dword 2
+        ptr += tasm_write_opcode(ptr, OPCODE_PSH, OPCODE_PARAM_IMM, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_u32(ptr, 2);
+
+        // ADD dword ral, [rsp]
+        ptr += tasm_write_opcode(ptr, OPCODE_ADD, OPCODE_PARAM_REG_MEM, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_register(ptr, REG_ALD);
+        ptr += tasm_write_addr(ptr, ADDR_MODE_BASE, REG_SP, 0, 0, 0);
+
+        // ADD dword ral, [rsp + 4]
+        ptr += tasm_write_opcode(ptr, OPCODE_ADD, OPCODE_PARAM_REG_MEM, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_register(ptr, REG_ALD);
+        ptr += tasm_write_addr(ptr, ADDR_MODE_BASE_OFFSET, REG_SP, 0, 0, 4);
+
+        // HLT
+        ptr += tasm_write_opcode(ptr, OPCODE_HLT, OPCODE_PARAM_NONE, OPCODE_WIDTH_NONE);
+
+        vm_init(&vm, code, sizeof(code));
+
+        vm_run(&vm);
+
+        assert_equal(vm_register_i32_get(&vm, REG_ALD), 3);
+
+        vm_free(&vm);
       end()
     end()
   end()

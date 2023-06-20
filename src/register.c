@@ -68,6 +68,8 @@ uint8_t register_encode(register_t reg)
     return 13;
   case REG_IP:
     return 14;
+  case REG_FLAGS:
+    return 15;
   default:
     unreachable();
   }
@@ -94,6 +96,7 @@ register_t register_decode(uint8_t data, opcode_width_t width)
     case 9:  return REG_EHB;
     case 10: return REG_FLB;
     case 11: return REG_FHB;
+    case 15: return REG_FLAGS;
     default: unreachable();
     }
     break;
@@ -159,51 +162,52 @@ const char* register_to_string(register_t reg)
 {
   switch (reg)
   {
-  case REG_A:   return "A";
-  case REG_AHD: return "AHD";
-  case REG_ALD: return "ALD";
-  case REG_AHW: return "AHW";
-  case REG_ALW: return "ALW";
-  case REG_AHB: return "AHB";
-  case REG_ALB: return "ALB";
-  case REG_B:   return "B";
-  case REG_BHD: return "BHD";
-  case REG_BLD: return "BLD";
-  case REG_BHW: return "BHW";
-  case REG_BLW: return "BLW";
-  case REG_BHB: return "BHB";
-  case REG_BLB: return "BLB";
-  case REG_C:   return "C";
-  case REG_CHD: return "CHD";
-  case REG_CLD: return "CLD";
-  case REG_CHW: return "CHW";
-  case REG_CLW: return "CLW";
-  case REG_CHB: return "CHB";
-  case REG_CLB: return "CLB";
-  case REG_D:   return "D";
-  case REG_DHD: return "DHD";
-  case REG_DLD: return "DLD";
-  case REG_DHW: return "DHW";
-  case REG_DLW: return "DLW";
-  case REG_DHB: return "DHB";
-  case REG_DLB: return "DLB";
-  case REG_E:   return "E";
-  case REG_EHD: return "EHD";
-  case REG_ELD: return "ELD";
-  case REG_EHW: return "EHW";
-  case REG_ELW: return "ELW";
-  case REG_EHB: return "EHB";
-  case REG_ELB: return "ELB";
-  case REG_F:   return "F";
-  case REG_FHD: return "FHD";
-  case REG_FLD: return "FLD";
-  case REG_FHW: return "FHW";
-  case REG_FLW: return "FLW";
-  case REG_FHB: return "FHB";
-  case REG_FLB: return "FLB";
-  case REG_SP:  return "SP";
-  case REG_BP:  return "BP";
-  case REG_IP:  return "IP";
+  case REG_A:     return "A";
+  case REG_AHD:   return "AHD";
+  case REG_ALD:   return "ALD";
+  case REG_AHW:   return "AHW";
+  case REG_ALW:   return "ALW";
+  case REG_AHB:   return "AHB";
+  case REG_ALB:   return "ALB";
+  case REG_B:     return "B";
+  case REG_BHD:   return "BHD";
+  case REG_BLD:   return "BLD";
+  case REG_BHW:   return "BHW";
+  case REG_BLW:   return "BLW";
+  case REG_BHB:   return "BHB";
+  case REG_BLB:   return "BLB";
+  case REG_C:     return "C";
+  case REG_CHD:   return "CHD";
+  case REG_CLD:   return "CLD";
+  case REG_CHW:   return "CHW";
+  case REG_CLW:   return "CLW";
+  case REG_CHB:   return "CHB";
+  case REG_CLB:   return "CLB";
+  case REG_D:     return "D";
+  case REG_DHD:   return "DHD";
+  case REG_DLD:   return "DLD";
+  case REG_DHW:   return "DHW";
+  case REG_DLW:   return "DLW";
+  case REG_DHB:   return "DHB";
+  case REG_DLB:   return "DLB";
+  case REG_E:     return "E";
+  case REG_EHD:   return "EHD";
+  case REG_ELD:   return "ELD";
+  case REG_EHW:   return "EHW";
+  case REG_ELW:   return "ELW";
+  case REG_EHB:   return "EHB";
+  case REG_ELB:   return "ELB";
+  case REG_F:     return "F";
+  case REG_FHD:   return "FHD";
+  case REG_FLD:   return "FLD";
+  case REG_FHW:   return "FHW";
+  case REG_FLW:   return "FLW";
+  case REG_FHB:   return "FHB";
+  case REG_FLB:   return "FLB";
+  case REG_SP:    return "SP";
+  case REG_BP:    return "BP";
+  case REG_IP:    return "IP";
+  case REG_FLAGS: return "FLAGS";
   default: unreachable();
   }
 
@@ -245,6 +249,7 @@ bool register_is_8bit(register_t reg)
   case REG_ELB:
   case REG_FHB:
   case REG_FLB:
+  case REG_FLAGS:
     return true;
   default:
     return false;

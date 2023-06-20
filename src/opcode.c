@@ -137,8 +137,6 @@ const char* opcode_to_string(opcode_t opcode)
   case OPCODE_NOT:  return "NOT";
   case OPCODE_SHL:  return "SHL";
   case OPCODE_SHR:  return "SHR";
-  case OPCODE_ROL:  return "ROL";
-  case OPCODE_ROR:  return "ROR";
   case OPCODE_JMP:  return "JMP";
   case OPCODE_JE:   return "JE";
   case OPCODE_JNE:  return "JNE";
@@ -204,8 +202,6 @@ size_t opcode_param_count(opcode_t opcode)
   case OPCODE_XOR:
   case OPCODE_SHL:
   case OPCODE_SHR:
-  case OPCODE_ROL:
-  case OPCODE_ROR:
   case OPCODE_CMP:
     return 2;
   default:

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "typedefs.h"
 
@@ -10,25 +11,28 @@ struct vm_s
 {
   struct
   {
-    uint64_t A; // 64-bit general purpose register A.
-    uint64_t B; // 64-bit general purpose register B.
-    uint64_t C; // 64-bit general purpose register C.
-    uint64_t D; // 64-bit general purpose register D.
-    uint64_t E; // 64-bit general purpose register E.
-    uint64_t F; // 64-bit general purpose register F.
+    uint64_t A;  // 64-bit general purpose register A.
+    uint64_t B;  // 64-bit general purpose register B.
+    uint64_t C;  // 64-bit general purpose register C.
+    uint64_t D;  // 64-bit general purpose register D.
+    uint64_t E;  // 64-bit general purpose register E.
+    uint64_t F;  // 64-bit general purpose register F.
+
     uint64_t SP; // 64-bit stack pointer register.
     uint64_t BP; // 64-bit base pointer register.
     uint64_t IP; // 64-bit instruction pointer register.
+  
+    // 8-bit status flags register.
+    struct
+    {
+      uint8_t zero     : 1; // Indicates that the operation result was zero.
+      uint8_t negative : 1; // Indicates that sign bit is set in the operation result.
+      uint8_t overflow : 1; // Indicates an arithmetic overflow.
+      uint8_t carry    : 1; // Indicates that the operation carried a bit.
+      uint8_t parity   : 1; // Indicates an even or odd number of 1 bits in the operation result.
+      uint8_t reserved : 3; // Reserved bits.
+    } FLAGS;
   } regs;
-
-  struct
-  {
-    uint8_t zero : 1; // Indicates that the operation result was zero.
-    uint8_t negative : 1; // Indicates that sign bit is set in the operation result.
-    uint8_t overflow : 1; // Indicates an arithmetic overflow.
-    uint8_t carry : 1; // Indicates that the operation carried a bit.
-    uint8_t parity : 1; // Indicates an even or odd number of 1 bits in the operation result.
-  } flags;
 
   struct
   {
@@ -111,8 +115,8 @@ void vm_mem_i64_set(vm_t* vm, void* mem, int64_t value);
 void vm_mem_f32_set(vm_t* vm, void* mem, float value);
 void vm_mem_f64_set(vm_t* vm, void* mem, double value);
 
-size_t vm_addr_encode(vm_t* vm, void* mem, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset);
-size_t vm_addr_decode(vm_t* vm, const void* mem, addr_mode_t* mode, register_t* base, register_t* index, int32_t* scale, int64_t* offset);
+size_t vm_addr_encode(void* mem, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset);
+size_t vm_addr_decode(const void* mem, addr_mode_t* mode, register_t* base, register_t* index, int32_t* scale, int64_t* offset);
 void* vm_addr_effective(vm_t* vm, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset);
 
 void vm_stack_u8_push(vm_t* vm, uint8_t value);

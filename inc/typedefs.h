@@ -666,6 +666,8 @@ typedef enum register_e
   REG_SP,  // 64-bit stack pointer register
   REG_BP,  // 64-bit base pointer register
   REG_IP,  // 64-bit instruction pointer register
+
+  REG_FLAGS, // 8-bit status flags register
 } register_t;
 
 /** Represents an operation code for the virtual machine. */
@@ -709,8 +711,6 @@ typedef enum opcode_e
   OPCODE_NOT,  // NOT <reg|mem>
   OPCODE_SHL,  // SHL <reg|mem>, <reg|mem|imm>
   OPCODE_SHR,  // SHL <reg|mem>, <reg|mem|imm>
-  OPCODE_ROL,  // ROL <reg|mem>, <reg|mem|imm>
-  OPCODE_ROR,  // ROR <reg|mem>, <reg|mem|imm>
 
   OPCODE_JMP,  // JMP <label>
 
