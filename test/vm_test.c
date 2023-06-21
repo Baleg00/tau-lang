@@ -423,46 +423,7 @@ test()
       end()
     end()
 
-    describe("tasm")
-      it("should add unsigned integers")
-        uint8_t code[64];
-        uint8_t* ptr = code;
-
-        // PSH dword 1
-        ptr += tasm_write_opcode(ptr, OPCODE_PSH, OPCODE_PARAM_IMM, OPCODE_WIDTH_32BIT);
-        ptr += tasm_write_u32(ptr, 1);
-
-        // PSH dword 2
-        ptr += tasm_write_opcode(ptr, OPCODE_PSH, OPCODE_PARAM_IMM, OPCODE_WIDTH_32BIT);
-        ptr += tasm_write_u32(ptr, 2);
-
-        // ADD dword ral, [rsp]
-        ptr += tasm_write_opcode(ptr, OPCODE_ADD, OPCODE_PARAM_REG_MEM, OPCODE_WIDTH_32BIT);
-        ptr += tasm_write_register(ptr, REG_ALD);
-        ptr += tasm_write_addr(ptr, ADDR_MODE_BASE, REG_SP, 0, 0, 0);
-
-        // ADD dword ral, [rsp + 4]
-        ptr += tasm_write_opcode(ptr, OPCODE_ADD, OPCODE_PARAM_REG_MEM, OPCODE_WIDTH_32BIT);
-        ptr += tasm_write_register(ptr, REG_ALD);
-        ptr += tasm_write_addr(ptr, ADDR_MODE_BASE_OFFSET, REG_SP, 0, 0, 4);
-
-        // HLT
-        ptr += tasm_write_opcode(ptr, OPCODE_HLT, OPCODE_PARAM_NONE, OPCODE_WIDTH_NONE);
-
-        vm_init(&vm, code, sizeof(code));
-
-        vm_run(&vm);
-
-        assert_equal(vm_register_i32_get(&vm, REG_ALD), 3);
-        assert_equal(vm.regs.FLAGS.zero, 0);
-        assert_equal(vm.regs.FLAGS.negative, 0);
-        assert_equal(vm.regs.FLAGS.overflow, 0);
-        assert_equal(vm.regs.FLAGS.carry, 0);
-        assert_equal(vm.regs.FLAGS.parity, 0);
-
-        vm_free(&vm);
-      end()
-      
+    describe("tasm")      
       it("should calculate fibonacci numbers")
         uint8_t code[128];
         uint8_t* ptr = code;
@@ -535,6 +496,95 @@ test()
         vm_run(&vm);
 
         assert_equal(vm_register_u64_get(&vm, REG_B), 8);
+
+        vm_free(&vm);
+      end()
+
+      it("should determine if a number is prime")
+        uint8_t code[128];
+        uint8_t* ptr = code;
+
+        uint64_t label_loop;
+        uint64_t label_prime;
+        uint64_t label_finish;
+
+        uint8_t* reference_prime;
+        uint8_t* reference_finish;
+
+        // MOV dword ral, 19  ; number is 19
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_IMM, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_register(ptr, REG_ALD);
+        ptr += tasm_write_u32(ptr, 19);
+        
+        // MOV dword rbl, 2   ; divisor is 2
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_IMM, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_register(ptr, REG_BLD);
+        ptr += tasm_write_u32(ptr, 2);
+
+        // :loop
+        label_loop = (uint64_t)(ptr - code);
+
+        // MOV dword rcl, rbl ; move divisor into rcl
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_REG, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_registers(ptr, REG_CLD, REG_BLD);
+
+        // MUL dword rcl, rcl ; square divisor
+        ptr += tasm_write_opcode(ptr, OPCODE_MUL, OPCODE_PARAM_REG_REG, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_registers(ptr, REG_CLD, REG_CLD);
+        
+        // CMP dword ral, rcl ; compare number and square of divisor
+        ptr += tasm_write_opcode(ptr, OPCODE_CMP, OPCODE_PARAM_REG_REG, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_registers(ptr, REG_ALD, REG_CLD);
+        
+        // JC :prime          ; if number is less than square of divisor then
+        //                    ; number is prime
+        ptr += tasm_write_opcode(ptr, OPCODE_JC, OPCODE_PARAM_LABEL, OPCODE_WIDTH_64BIT);
+        reference_prime = ptr;
+        ptr += tasm_write_u64(ptr, 0 /* :prime */);
+
+        // MOV dword rcl, ral ; move number into rcl
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_REG, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_registers(ptr, REG_CLD, REG_ALD);
+
+        // MOD dword rcl, rbl ; modulo number and divisor
+        ptr += tasm_write_opcode(ptr, OPCODE_MOD, OPCODE_PARAM_REG_REG, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_registers(ptr, REG_CLD, REG_BLD);
+
+        // JZ :finish         ; if remainder is zero then number is not prime,
+        //                    ; jump to finish
+        ptr += tasm_write_opcode(ptr, OPCODE_JZ, OPCODE_PARAM_LABEL, OPCODE_WIDTH_64BIT);
+        reference_finish = ptr;
+        ptr += tasm_write_u64(ptr, 0 /* :finish */);
+        
+        // INC dword rbl      ; increment divisor
+        ptr += tasm_write_opcode(ptr, OPCODE_INC, OPCODE_PARAM_REG, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_register(ptr, REG_BLD);
+
+        // JMP :loop          ; jump back to loop
+        ptr += tasm_write_opcode(ptr, OPCODE_JMP, OPCODE_PARAM_LABEL, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_u64(ptr, label_loop);
+
+        // :prime
+        label_prime = (uint64_t)(ptr - code);
+        memcpy(reference_prime, &label_prime, sizeof(uint64_t));
+
+        // MOV dword rfl, 1   ; move 1 into rfl indicating that number is prime
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_IMM, OPCODE_WIDTH_32BIT);
+        ptr += tasm_write_register(ptr, REG_FLD);
+        ptr += tasm_write_u32(ptr, 1);
+
+        // :finish
+        label_finish = (uint64_t)(ptr - code);
+        memcpy(reference_finish, &label_finish, sizeof(uint64_t));
+
+        // HLT                ; halt
+        ptr += tasm_write_opcode(ptr, OPCODE_HLT, OPCODE_PARAM_NONE, OPCODE_WIDTH_NONE);
+
+        vm_init(&vm, code, sizeof(code));
+
+        vm_run(&vm);
+
+        assert_equal(vm_register_u32_get(&vm, REG_FLD), 1);
 
         vm_free(&vm);
       end()

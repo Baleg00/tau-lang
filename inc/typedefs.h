@@ -693,10 +693,9 @@ typedef enum opcode_e
   OPCODE_IMUL, // IMUL <reg|mem>, <reg|mem|imm>
   OPCODE_IDIV, // IDIV <reg|mem>, <reg|mem|imm>
   OPCODE_IMOD, // IMOD <reg|mem>, <reg|mem|imm>
-  OPCODE_INEG, // INEG <reg|mem>
-
   OPCODE_IINC, // IINC <reg|mem>
   OPCODE_IDEC, // IDEC <reg|mem>
+  OPCODE_INEG, // INEG <reg|mem>
 
   OPCODE_FADD, // FADD <reg|mem>, <reg|mem|imm>
   OPCODE_FSUB, // FSUB <reg|mem>, <reg|mem|imm>
@@ -720,6 +719,16 @@ typedef enum opcode_e
   OPCODE_JLE,  // JLE <label>
   OPCODE_JG,   // JG <label>
   OPCODE_JGE,  // JGE <label>
+  OPCODE_JZ,   // JZ <label>
+  OPCODE_JNZ,  // JNZ <label>
+  OPCODE_JN,   // JN <label>
+  OPCODE_JNN,  // JNN <label>
+  OPCODE_JO,   // JO <label>
+  OPCODE_JNO,  // JNO <label>
+  OPCODE_JC,   // JC <label>
+  OPCODE_JNC,  // JNC <label>
+  OPCODE_JP,   // JP <label>
+  OPCODE_JNP,  // JNP <label>
 
   OPCODE_CMP,  // CMP <reg|mem>, <reg|mem|imm>
   OPCODE_ICMP,  // CMP <reg|mem>, <reg|mem|imm>

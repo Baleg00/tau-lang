@@ -106,50 +106,60 @@ const char* opcode_to_string(opcode_t opcode)
 {
   switch (opcode)
   {
-  case OPCODE_NOP:  return "NOP";
-  case OPCODE_MOV:  return "MOV";
-  case OPCODE_PSH:  return "PSH";
-  case OPCODE_POP:  return "POP";
-  case OPCODE_LEA:  return "LEA";
-  case OPCODE_ADD:  return "ADD";
-  case OPCODE_SUB:  return "SUB";
-  case OPCODE_MUL:  return "MUL";
-  case OPCODE_DIV:  return "DIV";
-  case OPCODE_MOD:  return "MOD";
-  case OPCODE_INC:  return "INC";
-  case OPCODE_IADD: return "IADD";
-  case OPCODE_ISUB: return "ISUB";
-  case OPCODE_IMUL: return "IMUL";
-  case OPCODE_IDIV: return "IDIV";
-  case OPCODE_IMOD: return "IMOD";
-  case OPCODE_INEG: return "INEG";
-  case OPCODE_IINC: return "IINC";
-  case OPCODE_IDEC: return "IDEC";
-  case OPCODE_FADD: return "FADD";
-  case OPCODE_FSUB: return "FSUB";
-  case OPCODE_FMUL: return "FMUL";
-  case OPCODE_FDIV: return "FDIV";
-  case OPCODE_FMOD: return "FMOD";
-  case OPCODE_FNEG: return "FNEG";
-  case OPCODE_AND:  return "AND";
-  case OPCODE_OR:   return "OR";
-  case OPCODE_XOR:  return "XOR";
-  case OPCODE_NOT:  return "NOT";
-  case OPCODE_SHL:  return "SHL";
-  case OPCODE_SHR:  return "SHR";
-  case OPCODE_JMP:  return "JMP";
-  case OPCODE_JE:   return "JE";
-  case OPCODE_JNE:  return "JNE";
-  case OPCODE_JL:   return "JL";
-  case OPCODE_JLE:  return "JLE";
-  case OPCODE_JG:   return "JG";
-  case OPCODE_JGE:  return "JGE";
-  case OPCODE_CMP:  return "CMP";
-  case OPCODE_ICMP: return "ICMP";
-  case OPCODE_CLF:  return "CLF";
-  case OPCODE_CALL: return "CALL";
-  case OPCODE_RET:  return "RET";
-  case OPCODE_HLT:  return "HLT";
+  case OPCODE_NOP:  return "nop";
+  case OPCODE_MOV:  return "mov";
+  case OPCODE_PSH:  return "psh";
+  case OPCODE_POP:  return "pop";
+  case OPCODE_LEA:  return "lea";
+  case OPCODE_ADD:  return "add";
+  case OPCODE_SUB:  return "sub";
+  case OPCODE_MUL:  return "mul";
+  case OPCODE_DIV:  return "div";
+  case OPCODE_MOD:  return "mod";
+  case OPCODE_INC:  return "inc";
+  case OPCODE_IADD: return "iadd";
+  case OPCODE_ISUB: return "isub";
+  case OPCODE_IMUL: return "imul";
+  case OPCODE_IDIV: return "idiv";
+  case OPCODE_IMOD: return "imod";
+  case OPCODE_INEG: return "ineg";
+  case OPCODE_IINC: return "iinc";
+  case OPCODE_IDEC: return "idec";
+  case OPCODE_FADD: return "fadd";
+  case OPCODE_FSUB: return "fsub";
+  case OPCODE_FMUL: return "fmul";
+  case OPCODE_FDIV: return "fdiv";
+  case OPCODE_FMOD: return "fmod";
+  case OPCODE_FNEG: return "fneg";
+  case OPCODE_AND:  return "and";
+  case OPCODE_OR:   return "or";
+  case OPCODE_XOR:  return "xor";
+  case OPCODE_NOT:  return "not";
+  case OPCODE_SHL:  return "shl";
+  case OPCODE_SHR:  return "shr";
+  case OPCODE_JMP:  return "jmp";
+  case OPCODE_JE:   return "je";
+  case OPCODE_JNE:  return "jne";
+  case OPCODE_JL:   return "jl";
+  case OPCODE_JLE:  return "jle";
+  case OPCODE_JG:   return "jg";
+  case OPCODE_JGE:  return "jge";
+  case OPCODE_JZ:   return "jz";
+  case OPCODE_JNZ:  return "jnz";
+  case OPCODE_JN:   return "jn";
+  case OPCODE_JNN:  return "jnn";
+  case OPCODE_JO:   return "jo";
+  case OPCODE_JNO:  return "jno";
+  case OPCODE_JC:   return "jc";
+  case OPCODE_JNC:  return "jnc";
+  case OPCODE_JP:   return "jp";
+  case OPCODE_JNP:  return "jnp";
+  case OPCODE_CMP:  return "cmp";
+  case OPCODE_ICMP: return "icmp";
+  case OPCODE_CLF:  return "clf";
+  case OPCODE_CALL: return "call";
+  case OPCODE_RET:  return "ret";
+  case OPCODE_HLT:  return "hlt";
   default: unreachable();
   }
 
@@ -182,6 +192,16 @@ size_t opcode_param_count(opcode_t opcode)
   case OPCODE_JLE:
   case OPCODE_JG:
   case OPCODE_JGE:
+  case OPCODE_JZ:
+  case OPCODE_JNZ:
+  case OPCODE_JN:
+  case OPCODE_JNN:
+  case OPCODE_JO:
+  case OPCODE_JNO:
+  case OPCODE_JC:
+  case OPCODE_JNC:
+  case OPCODE_JP:
+  case OPCODE_JNP:
   case OPCODE_CALL:
     return 1;
   case OPCODE_MOV:
