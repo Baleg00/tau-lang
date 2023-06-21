@@ -145,6 +145,7 @@ const char* opcode_to_string(opcode_t opcode)
   case OPCODE_JG:   return "JG";
   case OPCODE_JGE:  return "JGE";
   case OPCODE_CMP:  return "CMP";
+  case OPCODE_ICMP: return "ICMP";
   case OPCODE_CLF:  return "CLF";
   case OPCODE_CALL: return "CALL";
   case OPCODE_RET:  return "RET";
@@ -167,6 +168,8 @@ size_t opcode_param_count(opcode_t opcode)
   case OPCODE_PSH:
   case OPCODE_POP:
   case OPCODE_LEA:
+  case OPCODE_INC:
+  case OPCODE_DEC:
   case OPCODE_INEG:
   case OPCODE_IINC:
   case OPCODE_IDEC:
@@ -203,6 +206,7 @@ size_t opcode_param_count(opcode_t opcode)
   case OPCODE_SHL:
   case OPCODE_SHR:
   case OPCODE_CMP:
+  case OPCODE_ICMP:
     return 2;
   default:
     unreachable();

@@ -722,6 +722,7 @@ typedef enum opcode_e
   OPCODE_JGE,  // JGE <label>
 
   OPCODE_CMP,  // CMP <reg|mem>, <reg|mem|imm>
+  OPCODE_ICMP,  // CMP <reg|mem>, <reg|mem|imm>
 
   OPCODE_CLF,  // CLF
 

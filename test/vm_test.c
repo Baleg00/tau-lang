@@ -424,7 +424,7 @@ test()
     end()
 
     describe("tasm")
-      it("should add two unsigned integers")
+      it("should add unsigned integers")
         uint8_t code[64];
         uint8_t* ptr = code;
 
@@ -454,6 +454,87 @@ test()
         vm_run(&vm);
 
         assert_equal(vm_register_i32_get(&vm, REG_ALD), 3);
+        assert_equal(vm.regs.FLAGS.zero, 0);
+        assert_equal(vm.regs.FLAGS.negative, 0);
+        assert_equal(vm.regs.FLAGS.overflow, 0);
+        assert_equal(vm.regs.FLAGS.carry, 0);
+        assert_equal(vm.regs.FLAGS.parity, 0);
+
+        vm_free(&vm);
+      end()
+      
+      it("should calculate fibonacci numbers")
+        uint8_t code[128];
+        uint8_t* ptr = code;
+
+        uint64_t label_loop;
+        uint64_t label_finish;
+        uint8_t* reference_finish;
+
+        // MOV qword rf, 5
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_IMM, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_register(ptr, REG_F);
+        ptr += tasm_write_u64(ptr, 5);
+
+        // MOV qword ra, 0
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_IMM, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_register(ptr, REG_A);
+        ptr += tasm_write_u64(ptr, 0);
+
+        // MOV qword rb, 1
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_IMM, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_register(ptr, REG_B);
+        ptr += tasm_write_u64(ptr, 1);
+
+        // :loop
+        label_loop = (uint64_t)(ptr - code);
+
+        // CMP qword rf, 0
+        ptr += tasm_write_opcode(ptr, OPCODE_CMP, OPCODE_PARAM_REG_IMM, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_register(ptr, REG_F);
+        ptr += tasm_write_u64(ptr, 0);
+
+        // JZ :finish
+        ptr += tasm_write_opcode(ptr, OPCODE_JE, OPCODE_PARAM_LABEL, OPCODE_WIDTH_64BIT);
+        reference_finish = ptr;
+        ptr += tasm_write_u64(ptr, 0 /* :finish */);
+
+        // DEC qword rf
+        ptr += tasm_write_opcode(ptr, OPCODE_DEC, OPCODE_PARAM_REG, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_register(ptr, REG_F);
+
+        // ADD qword ra, rb
+        ptr += tasm_write_opcode(ptr, OPCODE_ADD, OPCODE_PARAM_REG_REG, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_registers(ptr, REG_A, REG_B);
+
+        // MOV qword rc, ra
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_REG, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_registers(ptr, REG_C, REG_A);
+
+        // MOV qword ra, rb
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_REG, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_registers(ptr, REG_A, REG_B);
+
+        // MOV qword rb, rc
+        ptr += tasm_write_opcode(ptr, OPCODE_MOV, OPCODE_PARAM_REG_REG, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_registers(ptr, REG_B, REG_C);
+
+        // JMP :loop
+        ptr += tasm_write_opcode(ptr, OPCODE_JMP, OPCODE_PARAM_LABEL, OPCODE_WIDTH_64BIT);
+        ptr += tasm_write_u64(ptr, label_loop /* :loop */);
+
+        // :finish
+        label_finish = (uint64_t)(ptr - code);
+        memcpy(reference_finish, &label_finish, sizeof(uint64_t));
+
+        // HLT
+        ptr += tasm_write_opcode(ptr, OPCODE_HLT, OPCODE_PARAM_NONE, OPCODE_WIDTH_NONE);
+
+        vm_init(&vm, code, sizeof(code));
+
+        vm_run(&vm);
+
+        assert_equal(vm_register_u64_get(&vm, REG_B), 8);
 
         vm_free(&vm);
       end()
