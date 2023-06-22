@@ -6,6 +6,7 @@
 
 #include "opcode.h"
 #include "register.h"
+#include "tasm.h"
 
 #include "util.h"
 #include "memtrace.h"
@@ -277,7 +278,7 @@ void vm_register_f64_set(vm_t* vm, register_t reg, double value)
   }
 }
 
-#define vm_code_next_impl(TYPE)\
+#define template_impl_vm_code_next(TYPE)\
   do {\
     TYPE value;\
     memcpy(&value, (const void*)(vm->code.data + vm->regs.IP), sizeof(TYPE));\
@@ -285,16 +286,16 @@ void vm_register_f64_set(vm_t* vm, register_t reg, double value)
     return value;\
   } while (0)\
 
-uint8_t  vm_code_next_u8 (vm_t* vm) { vm_code_next_impl(uint8_t);  }
-uint16_t vm_code_next_u16(vm_t* vm) { vm_code_next_impl(uint16_t); }
-uint32_t vm_code_next_u32(vm_t* vm) { vm_code_next_impl(uint32_t); }
-uint64_t vm_code_next_u64(vm_t* vm) { vm_code_next_impl(uint64_t); }
-int8_t   vm_code_next_i8 (vm_t* vm) { vm_code_next_impl(int8_t);   }
-int16_t  vm_code_next_i16(vm_t* vm) { vm_code_next_impl(int16_t);  }
-int32_t  vm_code_next_i32(vm_t* vm) { vm_code_next_impl(int32_t);  }
-int64_t  vm_code_next_i64(vm_t* vm) { vm_code_next_impl(int64_t);  }
-float    vm_code_next_f32(vm_t* vm) { vm_code_next_impl(float);    }
-double   vm_code_next_f64(vm_t* vm) { vm_code_next_impl(double);   }
+uint8_t  vm_code_next_u8 (vm_t* vm) { template_impl_vm_code_next(uint8_t);  }
+uint16_t vm_code_next_u16(vm_t* vm) { template_impl_vm_code_next(uint16_t); }
+uint32_t vm_code_next_u32(vm_t* vm) { template_impl_vm_code_next(uint32_t); }
+uint64_t vm_code_next_u64(vm_t* vm) { template_impl_vm_code_next(uint64_t); }
+int8_t   vm_code_next_i8 (vm_t* vm) { template_impl_vm_code_next(int8_t);   }
+int16_t  vm_code_next_i16(vm_t* vm) { template_impl_vm_code_next(int16_t);  }
+int32_t  vm_code_next_i32(vm_t* vm) { template_impl_vm_code_next(int32_t);  }
+int64_t  vm_code_next_i64(vm_t* vm) { template_impl_vm_code_next(int64_t);  }
+float    vm_code_next_f32(vm_t* vm) { template_impl_vm_code_next(float);    }
+double   vm_code_next_f64(vm_t* vm) { template_impl_vm_code_next(double);   }
 
 void* vm_code_next_addr(vm_t* vm)
 {
@@ -304,13 +305,13 @@ void* vm_code_next_addr(vm_t* vm)
   int32_t scale;
   int64_t offset;
 
-  size_t size = vm_addr_decode((const void*)(vm->code.data + vm->regs.IP), &mode, &base, &index, &scale, &offset);
+  size_t size = tasm_addr_decode((const void*)(vm->code.data + vm->regs.IP), &mode, &base, &index, &scale, &offset);
   vm->regs.IP += size;
 
   return vm_addr_effective(vm, mode, base, index, scale, offset);
 }
 
-#define vm_mem_get_impl(TYPE)\
+#define template_impl_vm_mem_get(TYPE)\
   do {\
     unused(vm);\
     TYPE value;\
@@ -318,324 +319,33 @@ void* vm_code_next_addr(vm_t* vm)
     return value;\
   } while (0)\
 
-uint8_t  vm_mem_u8_get (vm_t* vm, const void* mem) { vm_mem_get_impl(uint8_t);  }
-uint16_t vm_mem_u16_get(vm_t* vm, const void* mem) { vm_mem_get_impl(uint16_t); }
-uint32_t vm_mem_u32_get(vm_t* vm, const void* mem) { vm_mem_get_impl(uint32_t); }
-uint64_t vm_mem_u64_get(vm_t* vm, const void* mem) { vm_mem_get_impl(uint64_t); }
-int8_t   vm_mem_i8_get (vm_t* vm, const void* mem) { vm_mem_get_impl(int8_t);   }
-int16_t  vm_mem_i16_get(vm_t* vm, const void* mem) { vm_mem_get_impl(int16_t);  }
-int32_t  vm_mem_i32_get(vm_t* vm, const void* mem) { vm_mem_get_impl(int32_t);  }
-int64_t  vm_mem_i64_get(vm_t* vm, const void* mem) { vm_mem_get_impl(int64_t);  }
-float    vm_mem_f32_get(vm_t* vm, const void* mem) { vm_mem_get_impl(float);    }
-double   vm_mem_f64_get(vm_t* vm, const void* mem) { vm_mem_get_impl(double);   }
+uint8_t  vm_mem_u8_get (vm_t* vm, const void* mem) { template_impl_vm_mem_get(uint8_t);  }
+uint16_t vm_mem_u16_get(vm_t* vm, const void* mem) { template_impl_vm_mem_get(uint16_t); }
+uint32_t vm_mem_u32_get(vm_t* vm, const void* mem) { template_impl_vm_mem_get(uint32_t); }
+uint64_t vm_mem_u64_get(vm_t* vm, const void* mem) { template_impl_vm_mem_get(uint64_t); }
+int8_t   vm_mem_i8_get (vm_t* vm, const void* mem) { template_impl_vm_mem_get(int8_t);   }
+int16_t  vm_mem_i16_get(vm_t* vm, const void* mem) { template_impl_vm_mem_get(int16_t);  }
+int32_t  vm_mem_i32_get(vm_t* vm, const void* mem) { template_impl_vm_mem_get(int32_t);  }
+int64_t  vm_mem_i64_get(vm_t* vm, const void* mem) { template_impl_vm_mem_get(int64_t);  }
+float    vm_mem_f32_get(vm_t* vm, const void* mem) { template_impl_vm_mem_get(float);    }
+double   vm_mem_f64_get(vm_t* vm, const void* mem) { template_impl_vm_mem_get(double);   }
 
-#define vm_mem_set_impl(TYPE)\
+#define template_impl_vm_mem_set(TYPE)\
   do {\
     unused(vm);\
     memcpy(mem, &value, sizeof(TYPE));\
   } while (0)\
 
-void vm_mem_u8_set (vm_t* vm, void* mem, uint8_t  value) { vm_mem_set_impl(uint8_t);  }
-void vm_mem_u16_set(vm_t* vm, void* mem, uint16_t value) { vm_mem_set_impl(uint16_t); }
-void vm_mem_u32_set(vm_t* vm, void* mem, uint32_t value) { vm_mem_set_impl(uint32_t); }
-void vm_mem_u64_set(vm_t* vm, void* mem, uint64_t value) { vm_mem_set_impl(uint64_t); }
-void vm_mem_i8_set (vm_t* vm, void* mem, int8_t   value) { vm_mem_set_impl(int8_t);   }
-void vm_mem_i16_set(vm_t* vm, void* mem, int16_t  value) { vm_mem_set_impl(int16_t);  }
-void vm_mem_i32_set(vm_t* vm, void* mem, int32_t  value) { vm_mem_set_impl(int32_t);  }
-void vm_mem_i64_set(vm_t* vm, void* mem, int64_t  value) { vm_mem_set_impl(int64_t);  }
-void vm_mem_f32_set(vm_t* vm, void* mem, float    value) { vm_mem_set_impl(float);    }
-void vm_mem_f64_set(vm_t* vm, void* mem, double   value) { vm_mem_set_impl(double);   }
-
-static inline uint8_t encode_scale(int32_t scale)
-{
-  // Highest bit represents sign. (0 - positive, 1 - negative)
-  // Lowest 3 bits represent power of 2.
-  switch (scale)
-  {
-  case 2:    return            1;
-  case 4:    return            2;
-  case 8:    return            3;
-  case 16:   return            4;
-  case 32:   return            5;
-  case 64:   return            6;
-  case 128:  return            7;
-  case -2:   return (1 << 3) | 1;
-  case -4:   return (1 << 3) | 2;
-  case -8:   return (1 << 3) | 3;
-  case -16:  return (1 << 3) | 4;
-  case -32:  return (1 << 3) | 5;
-  case -64:  return (1 << 3) | 6;
-  case -128: return (1 << 3) | 7;
-  default: unreachable();
-  }
-
-  return 0;
-}
-
-static inline int32_t decode_scale(uint8_t value)
-{
-  switch (value)
-  {
-  case            1: return 2;
-  case            2: return 4;
-  case            3: return 8;
-  case            4: return 16;
-  case            5: return 32;
-  case            6: return 64;
-  case            7: return 128;
-  case (1 << 3) | 1: return -2;
-  case (1 << 3) | 2: return -4;
-  case (1 << 3) | 3: return -8;
-  case (1 << 3) | 4: return -16;
-  case (1 << 3) | 5: return -32;
-  case (1 << 3) | 6: return -64;
-  case (1 << 3) | 7: return -128;
-  default: unreachable();
-  }
-
-  return 0;
-}
-
-static size_t vm_mem_addr_encode_offset(void* mem, int64_t offset)
-{
-  *(uint8_t*)mem = ((uint8_t)ADDR_MODE_OFFSET & 0xF) << 4;
-  
-  memcpy((uint8_t*)mem + 1, &offset, sizeof(int64_t));
-
-  return sizeof(uint8_t) + sizeof(int64_t);
-}
-
-static size_t vm_mem_addr_encode_base(void* mem, register_t base)
-{
-  assert(register_bits(base) == 64);
-
-  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE & 0xF) << 4) |
-                   (register_encode(base) & 0xF);
-
-  return sizeof(uint8_t);
-}
-
-static size_t vm_mem_addr_encode_base_offset(void* mem, register_t base, int64_t offset)
-{
-  assert(register_bits(base) == 64);
-
-  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_OFFSET & 0xF) << 4) |
-                   (register_encode(base) & 0xF);
-
-  memcpy((uint8_t*)mem + 1, &offset, sizeof(int64_t));
-
-  return sizeof(uint8_t) + sizeof(int64_t);
-}
-
-static size_t vm_mem_addr_encode_base_index(void* mem, register_t base, register_t index)
-{
-  assert(register_bits(base) == 64);
-  assert(register_bits(index) == 64);
-
-  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_INDEX & 0xF) << 4) |
-                   (register_encode(base) & 0xF);
-
-  *((uint8_t*)mem + 1) = (register_encode(index) & 0xF) << 4;
-
-  return 2 * sizeof(uint8_t);
-}
-
-static size_t vm_mem_addr_encode_base_index_offset(void* mem, register_t base, register_t index, int64_t offset)
-{
-  assert(register_bits(base) == 64);
-  assert(register_bits(index) == 64);
-
-  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_INDEX_OFFSET & 0xF) << 4) |
-                   (register_encode(base) & 0xF);
-
-  *((uint8_t*)mem + 1) = (register_encode(index) & 0xF) << 4;
-
-  memcpy((uint8_t*)mem + 2, &offset, sizeof(int64_t));
-
-  return 2 * sizeof(uint8_t) + sizeof(int64_t);
-}
-
-static size_t vm_mem_addr_encode_base_index_scale(void* mem, register_t base, register_t index, int32_t scale)
-{
-  assert(register_bits(base) == 64);
-  assert(register_bits(index) == 64);
-
-  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_INDEX_SCALE & 0xF) << 4) |
-                   (register_encode(base) & 0xF);
-
-  *((uint8_t*)mem + 1) = ((register_encode(index) & 0xF) << 4) |
-                         (encode_scale(scale) & 0xF);
-
-  return 2 * sizeof(uint8_t);
-}
-
-static size_t vm_mem_addr_encode_index_scale_offset(void* mem, register_t index, int32_t scale, int64_t offset)
-{
-  assert(register_bits(index) == 64);
-
-  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_INDEX_SCALE_OFFSET & 0xF) << 4);
-
-  *((uint8_t*)mem + 1) = ((register_encode(index) & 0xF) << 4) |
-                         (encode_scale(scale) & 0xF);
-
-  memcpy((uint8_t*)mem + 2, &offset, sizeof(int64_t));
-
-  return 2 * sizeof(uint8_t) + sizeof(int64_t);
-}
-
-static size_t vm_mem_addr_encode_base_index_scale_offset(void* mem, register_t base, register_t index, int32_t scale, int64_t offset)
-{
-  assert(register_bits(base) == 64);
-  assert(register_bits(index) == 64);
-
-  *(uint8_t*)mem = (((uint8_t)ADDR_MODE_BASE_INDEX_SCALE_OFFSET & 0xF) << 4) |
-                   (register_encode(base) & 0xF);
-
-  *((uint8_t*)mem + 1) = ((register_encode(index) & 0xF) << 4) |
-                         (encode_scale(scale) & 0xF);
-
-  memcpy((uint8_t*)mem + 2, &offset, sizeof(int64_t));
-
-  return 2 * sizeof(uint8_t) + sizeof(int64_t);
-}
-
-size_t vm_addr_encode(void* mem, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset)
-{
-  switch (mode)
-  {
-  case ADDR_MODE_OFFSET:                  return vm_mem_addr_encode_offset(                 mem,                     offset); break;
-  case ADDR_MODE_BASE:                    return vm_mem_addr_encode_base(                   mem, base                      ); break;
-  case ADDR_MODE_BASE_OFFSET:             return vm_mem_addr_encode_base_offset(            mem, base,               offset); break;
-  case ADDR_MODE_BASE_INDEX:              return vm_mem_addr_encode_base_index(             mem, base, index               ); break;
-  case ADDR_MODE_BASE_INDEX_OFFSET:       return vm_mem_addr_encode_base_index_offset(      mem, base, index,        offset); break;
-  case ADDR_MODE_BASE_INDEX_SCALE:        return vm_mem_addr_encode_base_index_scale(       mem, base, index, scale        ); break;
-  case ADDR_MODE_INDEX_SCALE_OFFSET:      return vm_mem_addr_encode_index_scale_offset(     mem,       index, scale, offset); break;
-  case ADDR_MODE_BASE_INDEX_SCALE_OFFSET: return vm_mem_addr_encode_base_index_scale_offset(mem, base, index, scale, offset); break;
-  default: unreachable();
-  }
-
-  return 0;
-}
-
-static size_t vm_mem_addr_decode_offset(const void* mem, int64_t* offset)
-{
-  if (offset != NULL)
-    memcpy(offset, (const uint8_t*)mem + 1, sizeof(int64_t));
-
-  return sizeof(uint8_t) + sizeof(int64_t);
-}
-
-static size_t vm_mem_addr_decode_base(const void* mem, register_t* base)
-{
-  if (base != NULL)
-    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
-
-  return sizeof(uint8_t);
-}
-
-static size_t vm_mem_addr_decode_base_offset(const void* mem, register_t* base, int64_t* offset)
-{
-  if (base != NULL)
-    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
-
-  if (offset != NULL)
-    memcpy(offset, (const uint8_t*)mem + 1, sizeof(int64_t));
-
-  return sizeof(uint8_t) + sizeof(int64_t);
-}
-
-static size_t vm_mem_addr_decode_base_index(const void* mem, register_t* base, register_t* index)
-{
-  if (base != NULL)
-    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
-
-  if (index != NULL)
-    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
-
-  return 2 * sizeof(uint8_t);
-}
-
-static size_t vm_mem_addr_decode_base_index_offset(const void* mem, register_t* base, register_t* index, int64_t* offset)
-{
-  if (base != NULL)
-    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
-
-  if (index != NULL)
-    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
-
-  if (offset != NULL)
-    memcpy(offset, (const uint8_t*)mem + 2, sizeof(int64_t));
-
-  return 2 * sizeof(uint8_t) + sizeof(int64_t);
-}
-
-static size_t vm_mem_addr_decode_base_index_scale(const void* mem, register_t* base, register_t* index, int32_t* scale)
-{
-  if (base != NULL)
-    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
-
-  if (index != NULL)
-    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
-
-  if (scale != NULL)
-    *scale = decode_scale((*((const uint8_t*)mem + 1)) & 0xF);
-
-  return 2 * sizeof(uint8_t);
-}
-
-static size_t vm_mem_addr_decode_index_scale_offset(const void* mem, register_t* index, int32_t* scale, int64_t* offset)
-{
-  if (index != NULL)
-    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
-
-  if (scale != NULL)
-    *scale = decode_scale((*((const uint8_t*)mem + 1)) & 0xF);
-
-  if (offset != NULL)
-    memcpy(offset, (const uint8_t*)mem + 2, sizeof(int64_t));
-  
-  return 2 * sizeof(uint8_t) + sizeof(int64_t);
-}
-
-static size_t vm_mem_addr_decode_base_index_scale_offset(const void* mem, register_t* base, register_t* index, int32_t* scale, int64_t* offset)
-{
-  if (base != NULL)
-    *base = register_decode((*(const uint8_t*)mem) & 0xF, OPCODE_WIDTH_64BIT);
-
-  if (index != NULL)
-    *index = register_decode(((*((const uint8_t*)mem + 1)) >> 4) & 0xF, OPCODE_WIDTH_64BIT);
-
-  if (scale != NULL)
-    *scale = decode_scale((*((const uint8_t*)mem + 1)) & 0xF);
-
-  if (offset != NULL)
-    memcpy(offset, (const uint8_t*)mem + 2, sizeof(int64_t));
-  
-  return 2 * sizeof(uint8_t) + sizeof(int64_t);
-}
-
-size_t vm_addr_decode(const void* mem, addr_mode_t* mode, register_t* base, register_t* index, int32_t* scale, int64_t* offset)
-{
-  addr_mode_t mode_value = (*(const uint8_t*)mem) >> 4;
-
-  if (mode != NULL)
-    *mode = mode_value;
-
-  switch (mode_value)
-  {
-  case ADDR_MODE_OFFSET:                  return vm_mem_addr_decode_offset(                 mem,                     offset); break;
-  case ADDR_MODE_BASE:                    return vm_mem_addr_decode_base(                   mem, base                      ); break;
-  case ADDR_MODE_BASE_OFFSET:             return vm_mem_addr_decode_base_offset(            mem, base,               offset); break;
-  case ADDR_MODE_BASE_INDEX:              return vm_mem_addr_decode_base_index(             mem, base, index               ); break;
-  case ADDR_MODE_BASE_INDEX_OFFSET:       return vm_mem_addr_decode_base_index_offset(      mem, base, index,        offset); break;
-  case ADDR_MODE_BASE_INDEX_SCALE:        return vm_mem_addr_decode_base_index_scale(       mem, base, index, scale        ); break;
-  case ADDR_MODE_INDEX_SCALE_OFFSET:      return vm_mem_addr_decode_index_scale_offset(     mem,       index, scale, offset); break;
-  case ADDR_MODE_BASE_INDEX_SCALE_OFFSET: return vm_mem_addr_decode_base_index_scale_offset(mem, base, index, scale, offset); break;
-  default: unreachable();
-  }
-
-  return 0;
-}
+void vm_mem_u8_set (vm_t* vm, void* mem, uint8_t  value) { template_impl_vm_mem_set(uint8_t);  }
+void vm_mem_u16_set(vm_t* vm, void* mem, uint16_t value) { template_impl_vm_mem_set(uint16_t); }
+void vm_mem_u32_set(vm_t* vm, void* mem, uint32_t value) { template_impl_vm_mem_set(uint32_t); }
+void vm_mem_u64_set(vm_t* vm, void* mem, uint64_t value) { template_impl_vm_mem_set(uint64_t); }
+void vm_mem_i8_set (vm_t* vm, void* mem, int8_t   value) { template_impl_vm_mem_set(int8_t);   }
+void vm_mem_i16_set(vm_t* vm, void* mem, int16_t  value) { template_impl_vm_mem_set(int16_t);  }
+void vm_mem_i32_set(vm_t* vm, void* mem, int32_t  value) { template_impl_vm_mem_set(int32_t);  }
+void vm_mem_i64_set(vm_t* vm, void* mem, int64_t  value) { template_impl_vm_mem_set(int64_t);  }
+void vm_mem_f32_set(vm_t* vm, void* mem, float    value) { template_impl_vm_mem_set(float);    }
+void vm_mem_f64_set(vm_t* vm, void* mem, double   value) { template_impl_vm_mem_set(double);   }
 
 void* vm_addr_effective(vm_t* vm, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset)
 {
@@ -655,25 +365,25 @@ void* vm_addr_effective(vm_t* vm, addr_mode_t mode, register_t base, register_t 
   return NULL;
 }
 
-#define vm_stack_push_impl(TYPE)\
+#define template_impl_vm_stack_push(TYPE)\
   do {\
     assert((uint8_t*)vm->regs.SP - sizeof(TYPE) >= vm->stack.data);\
     vm->regs.SP -= sizeof(TYPE);\
     memcpy((void*)vm->regs.SP, &value, sizeof(TYPE));\
   } while (0)\
 
-void vm_stack_u8_push (vm_t* vm, uint8_t  value) { vm_stack_push_impl(uint8_t);  }
-void vm_stack_u16_push(vm_t* vm, uint16_t value) { vm_stack_push_impl(uint16_t); }
-void vm_stack_u32_push(vm_t* vm, uint32_t value) { vm_stack_push_impl(uint32_t); }
-void vm_stack_u64_push(vm_t* vm, uint64_t value) { vm_stack_push_impl(uint64_t); }
-void vm_stack_i8_push (vm_t* vm, int8_t   value) { vm_stack_push_impl(int8_t);   }
-void vm_stack_i16_push(vm_t* vm, int16_t  value) { vm_stack_push_impl(int16_t);  }
-void vm_stack_i32_push(vm_t* vm, int32_t  value) { vm_stack_push_impl(int32_t);  }
-void vm_stack_i64_push(vm_t* vm, int64_t  value) { vm_stack_push_impl(int64_t);  }
-void vm_stack_f32_push(vm_t* vm, float    value) { vm_stack_push_impl(float);    }
-void vm_stack_f64_push(vm_t* vm, double   value) { vm_stack_push_impl(double);   }
+void vm_stack_u8_push (vm_t* vm, uint8_t  value) { template_impl_vm_stack_push(uint8_t);  }
+void vm_stack_u16_push(vm_t* vm, uint16_t value) { template_impl_vm_stack_push(uint16_t); }
+void vm_stack_u32_push(vm_t* vm, uint32_t value) { template_impl_vm_stack_push(uint32_t); }
+void vm_stack_u64_push(vm_t* vm, uint64_t value) { template_impl_vm_stack_push(uint64_t); }
+void vm_stack_i8_push (vm_t* vm, int8_t   value) { template_impl_vm_stack_push(int8_t);   }
+void vm_stack_i16_push(vm_t* vm, int16_t  value) { template_impl_vm_stack_push(int16_t);  }
+void vm_stack_i32_push(vm_t* vm, int32_t  value) { template_impl_vm_stack_push(int32_t);  }
+void vm_stack_i64_push(vm_t* vm, int64_t  value) { template_impl_vm_stack_push(int64_t);  }
+void vm_stack_f32_push(vm_t* vm, float    value) { template_impl_vm_stack_push(float);    }
+void vm_stack_f64_push(vm_t* vm, double   value) { template_impl_vm_stack_push(double);   }
 
-#define vm_stack_pop_impl(TYPE)\
+#define template_impl_vm_stack_pop(TYPE)\
   do {\
     assert((uint8_t*)vm->regs.SP + sizeof(TYPE) <= vm->stack.data + VM_STACK_DEFAULT_SIZE);\
     TYPE value;\
@@ -682,16 +392,16 @@ void vm_stack_f64_push(vm_t* vm, double   value) { vm_stack_push_impl(double);  
     return value;\
   } while (0)\
 
-uint8_t  vm_stack_u8_pop (vm_t* vm) { vm_stack_pop_impl(uint8_t);  }
-uint16_t vm_stack_u16_pop(vm_t* vm) { vm_stack_pop_impl(uint16_t); }
-uint32_t vm_stack_u32_pop(vm_t* vm) { vm_stack_pop_impl(uint32_t); }
-uint64_t vm_stack_u64_pop(vm_t* vm) { vm_stack_pop_impl(uint64_t); }
-int8_t   vm_stack_i8_pop (vm_t* vm) { vm_stack_pop_impl(int8_t);   }
-int16_t  vm_stack_i16_pop(vm_t* vm) { vm_stack_pop_impl(int16_t);  }
-int32_t  vm_stack_i32_pop(vm_t* vm) { vm_stack_pop_impl(int32_t);  }
-int64_t  vm_stack_i64_pop(vm_t* vm) { vm_stack_pop_impl(int64_t);  }
-float    vm_stack_f32_pop(vm_t* vm) { vm_stack_pop_impl(float);    }
-double   vm_stack_f64_pop(vm_t* vm) { vm_stack_pop_impl(double);   }
+uint8_t  vm_stack_u8_pop (vm_t* vm) { template_impl_vm_stack_pop(uint8_t);  }
+uint16_t vm_stack_u16_pop(vm_t* vm) { template_impl_vm_stack_pop(uint16_t); }
+uint32_t vm_stack_u32_pop(vm_t* vm) { template_impl_vm_stack_pop(uint32_t); }
+uint64_t vm_stack_u64_pop(vm_t* vm) { template_impl_vm_stack_pop(uint64_t); }
+int8_t   vm_stack_i8_pop (vm_t* vm) { template_impl_vm_stack_pop(int8_t);   }
+int16_t  vm_stack_i16_pop(vm_t* vm) { template_impl_vm_stack_pop(int16_t);  }
+int32_t  vm_stack_i32_pop(vm_t* vm) { template_impl_vm_stack_pop(int32_t);  }
+int64_t  vm_stack_i64_pop(vm_t* vm) { template_impl_vm_stack_pop(int64_t);  }
+float    vm_stack_f32_pop(vm_t* vm) { template_impl_vm_stack_pop(float);    }
+double   vm_stack_f64_pop(vm_t* vm) { template_impl_vm_stack_pop(double);   }
 
 void vm_fetch(vm_t* vm)
 {
@@ -912,7 +622,7 @@ static inline void vm_execute_LEA(vm_t* vm)
   vm_register_u64_set(vm, reg_dest, (uint64_t)addr);
 }
 
-#define vm_parity_impl(TYPE)\
+#define template_impl_vm_parity(TYPE)\
   do {\
     TYPE parity = 0;\
     while (value)\
@@ -923,131 +633,144 @@ static inline void vm_execute_LEA(vm_t* vm)
     return parity;\
   } while (0)\
 
-static inline uint8_t  vm_parity_u8 (uint8_t  value) { vm_parity_impl(uint8_t ); }
-static inline uint16_t vm_parity_u16(uint16_t value) { vm_parity_impl(uint16_t); }
-static inline uint32_t vm_parity_u32(uint32_t value) { vm_parity_impl(uint32_t); }
-static inline uint64_t vm_parity_u64(uint64_t value) { vm_parity_impl(uint64_t); }
+static inline uint8_t  vm_parity_u8 (uint8_t  value) { template_impl_vm_parity(uint8_t ); }
+static inline uint16_t vm_parity_u16(uint16_t value) { template_impl_vm_parity(uint16_t); }
+static inline uint32_t vm_parity_u32(uint32_t value) { template_impl_vm_parity(uint32_t); }
+static inline uint64_t vm_parity_u64(uint64_t value) { template_impl_vm_parity(uint64_t); }
 
-#define vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(OP)\
+#define template_impl_vm_execute_UNSIGNED_BIN_OP_reg_reg(OP)\
   do {\
     uint8_t encoded_regs = vm_code_next_u8(vm);\
     register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, vm->inst.width);\
     register_t reg_src = register_decode(encoded_regs & 0xF, vm->inst.width);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_register_u8_set (vm, reg_dest, (OP##8 )(vm, vm_register_u8_get (vm, reg_dest), vm_register_u8_get (vm, reg_src))); break;\
-    case OPCODE_WIDTH_16BIT: vm_register_u16_set(vm, reg_dest, (OP##16)(vm, vm_register_u16_get(vm, reg_dest), vm_register_u16_get(vm, reg_src))); break;\
-    case OPCODE_WIDTH_32BIT: vm_register_u32_set(vm, reg_dest, (OP##32)(vm, vm_register_u32_get(vm, reg_dest), vm_register_u32_get(vm, reg_src))); break;\
-    case OPCODE_WIDTH_64BIT: vm_register_u64_set(vm, reg_dest, (OP##64)(vm, vm_register_u64_get(vm, reg_dest), vm_register_u64_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_register_u8_set (vm, reg_dest, (vm_##OP##8 )(vm, vm_register_u8_get (vm, reg_dest), vm_register_u8_get (vm, reg_src))); break;\
+    case OPCODE_WIDTH_16BIT: vm_register_u16_set(vm, reg_dest, (vm_##OP##16)(vm, vm_register_u16_get(vm, reg_dest), vm_register_u16_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_32BIT: vm_register_u32_set(vm, reg_dest, (vm_##OP##32)(vm, vm_register_u32_get(vm, reg_dest), vm_register_u32_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_64BIT: vm_register_u64_set(vm, reg_dest, (vm_##OP##64)(vm, vm_register_u64_get(vm, reg_dest), vm_register_u64_get(vm, reg_src))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(OP)\
+#define template_impl_vm_execute_UNSIGNED_BIN_OP_mem_reg(OP)\
   do {\
     void* mem_dest = vm_code_next_addr(vm);\
     uint8_t encoded_reg = vm_code_next_u8(vm);\
     register_t reg_src = register_decode(encoded_reg & 0xF, vm->inst.width);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_mem_u8_set (vm, mem_dest, (OP##8 )(vm, vm_mem_u8_get (vm, mem_dest), vm_register_u8_get (vm, reg_src))); break;\
-    case OPCODE_WIDTH_16BIT: vm_mem_u16_set(vm, mem_dest, (OP##16)(vm, vm_mem_u16_get(vm, mem_dest), vm_register_u16_get(vm, reg_src))); break;\
-    case OPCODE_WIDTH_32BIT: vm_mem_u32_set(vm, mem_dest, (OP##32)(vm, vm_mem_u32_get(vm, mem_dest), vm_register_u32_get(vm, reg_src))); break;\
-    case OPCODE_WIDTH_64BIT: vm_mem_u64_set(vm, mem_dest, (OP##64)(vm, vm_mem_u64_get(vm, mem_dest), vm_register_u64_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_mem_u8_set (vm, mem_dest, (vm_##OP##8 )(vm, vm_mem_u8_get (vm, mem_dest), vm_register_u8_get (vm, reg_src))); break;\
+    case OPCODE_WIDTH_16BIT: vm_mem_u16_set(vm, mem_dest, (vm_##OP##16)(vm, vm_mem_u16_get(vm, mem_dest), vm_register_u16_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_32BIT: vm_mem_u32_set(vm, mem_dest, (vm_##OP##32)(vm, vm_mem_u32_get(vm, mem_dest), vm_register_u32_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_64BIT: vm_mem_u64_set(vm, mem_dest, (vm_##OP##64)(vm, vm_mem_u64_get(vm, mem_dest), vm_register_u64_get(vm, reg_src))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(OP)\
+#define template_impl_vm_execute_UNSIGNED_BIN_OP_reg_mem(OP)\
   do {\
     uint8_t encoded_reg = vm_code_next_u8(vm);\
     void* mem_src = vm_code_next_addr(vm);\
     register_t reg_dest = register_decode(encoded_reg & 0xF, vm->inst.width);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_register_u8_set (vm, reg_dest, (OP##8 )(vm, vm_register_u8_get (vm, reg_dest), vm_mem_u8_get (vm, mem_src))); break;\
-    case OPCODE_WIDTH_16BIT: vm_register_u16_set(vm, reg_dest, (OP##16)(vm, vm_register_u16_get(vm, reg_dest), vm_mem_u16_get(vm, mem_src))); break;\
-    case OPCODE_WIDTH_32BIT: vm_register_u32_set(vm, reg_dest, (OP##32)(vm, vm_register_u32_get(vm, reg_dest), vm_mem_u32_get(vm, mem_src))); break;\
-    case OPCODE_WIDTH_64BIT: vm_register_u64_set(vm, reg_dest, (OP##64)(vm, vm_register_u64_get(vm, reg_dest), vm_mem_u64_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_register_u8_set (vm, reg_dest, (vm_##OP##8 )(vm, vm_register_u8_get (vm, reg_dest), vm_mem_u8_get (vm, mem_src))); break;\
+    case OPCODE_WIDTH_16BIT: vm_register_u16_set(vm, reg_dest, (vm_##OP##16)(vm, vm_register_u16_get(vm, reg_dest), vm_mem_u16_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_32BIT: vm_register_u32_set(vm, reg_dest, (vm_##OP##32)(vm, vm_register_u32_get(vm, reg_dest), vm_mem_u32_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_64BIT: vm_register_u64_set(vm, reg_dest, (vm_##OP##64)(vm, vm_register_u64_get(vm, reg_dest), vm_mem_u64_get(vm, mem_src))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(OP)\
+#define template_impl_vm_execute_UNSIGNED_BIN_OP_mem_mem(OP)\
   do {\
     void* mem_dest = vm_code_next_addr(vm);\
     void* mem_src = vm_code_next_addr(vm);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_mem_u8_set (vm, mem_dest, (OP##8 )(vm, vm_mem_u8_get (vm, mem_dest), vm_mem_u8_get (vm, mem_src))); break;\
-    case OPCODE_WIDTH_16BIT: vm_mem_u16_set(vm, mem_dest, (OP##16)(vm, vm_mem_u16_get(vm, mem_dest), vm_mem_u16_get(vm, mem_src))); break;\
-    case OPCODE_WIDTH_32BIT: vm_mem_u32_set(vm, mem_dest, (OP##32)(vm, vm_mem_u32_get(vm, mem_dest), vm_mem_u32_get(vm, mem_src))); break;\
-    case OPCODE_WIDTH_64BIT: vm_mem_u64_set(vm, mem_dest, (OP##64)(vm, vm_mem_u64_get(vm, mem_dest), vm_mem_u64_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_mem_u8_set (vm, mem_dest, (vm_##OP##8 )(vm, vm_mem_u8_get (vm, mem_dest), vm_mem_u8_get (vm, mem_src))); break;\
+    case OPCODE_WIDTH_16BIT: vm_mem_u16_set(vm, mem_dest, (vm_##OP##16)(vm, vm_mem_u16_get(vm, mem_dest), vm_mem_u16_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_32BIT: vm_mem_u32_set(vm, mem_dest, (vm_##OP##32)(vm, vm_mem_u32_get(vm, mem_dest), vm_mem_u32_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_64BIT: vm_mem_u64_set(vm, mem_dest, (vm_##OP##64)(vm, vm_mem_u64_get(vm, mem_dest), vm_mem_u64_get(vm, mem_src))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(OP)\
+#define template_impl_vm_execute_UNSIGNED_BIN_OP_reg_imm(OP)\
   do {\
     uint8_t encoded_reg = vm_code_next_u8(vm);\
     register_t reg_dest = register_decode(encoded_reg & 0xF, vm->inst.width);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_register_u8_set (vm, reg_dest, (OP##8 )(vm, vm_register_u8_get (vm, reg_dest), vm_code_next_u8 (vm))); break;\
-    case OPCODE_WIDTH_16BIT: vm_register_u16_set(vm, reg_dest, (OP##16)(vm, vm_register_u16_get(vm, reg_dest), vm_code_next_u16(vm))); break;\
-    case OPCODE_WIDTH_32BIT: vm_register_u32_set(vm, reg_dest, (OP##32)(vm, vm_register_u32_get(vm, reg_dest), vm_code_next_u32(vm))); break;\
-    case OPCODE_WIDTH_64BIT: vm_register_u64_set(vm, reg_dest, (OP##64)(vm, vm_register_u64_get(vm, reg_dest), vm_code_next_u64(vm))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_register_u8_set (vm, reg_dest, (vm_##OP##8 )(vm, vm_register_u8_get (vm, reg_dest), vm_code_next_u8 (vm))); break;\
+    case OPCODE_WIDTH_16BIT: vm_register_u16_set(vm, reg_dest, (vm_##OP##16)(vm, vm_register_u16_get(vm, reg_dest), vm_code_next_u16(vm))); break;\
+    case OPCODE_WIDTH_32BIT: vm_register_u32_set(vm, reg_dest, (vm_##OP##32)(vm, vm_register_u32_get(vm, reg_dest), vm_code_next_u32(vm))); break;\
+    case OPCODE_WIDTH_64BIT: vm_register_u64_set(vm, reg_dest, (vm_##OP##64)(vm, vm_register_u64_get(vm, reg_dest), vm_code_next_u64(vm))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(OP)\
+#define template_impl_vm_execute_UNSIGNED_BIN_OP_mem_imm(OP)\
   do {\
     void* mem_dest = vm_code_next_addr(vm);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_mem_u8_set (vm, mem_dest, (OP##8 )(vm, vm_mem_u8_get (vm, mem_dest), vm_code_next_u8 (vm))); break;\
-    case OPCODE_WIDTH_16BIT: vm_mem_u16_set(vm, mem_dest, (OP##16)(vm, vm_mem_u16_get(vm, mem_dest), vm_code_next_u16(vm))); break;\
-    case OPCODE_WIDTH_32BIT: vm_mem_u32_set(vm, mem_dest, (OP##32)(vm, vm_mem_u32_get(vm, mem_dest), vm_code_next_u32(vm))); break;\
-    case OPCODE_WIDTH_64BIT: vm_mem_u64_set(vm, mem_dest, (OP##64)(vm, vm_mem_u64_get(vm, mem_dest), vm_code_next_u64(vm))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_mem_u8_set (vm, mem_dest, (vm_##OP##8 )(vm, vm_mem_u8_get (vm, mem_dest), vm_code_next_u8 (vm))); break;\
+    case OPCODE_WIDTH_16BIT: vm_mem_u16_set(vm, mem_dest, (vm_##OP##16)(vm, vm_mem_u16_get(vm, mem_dest), vm_code_next_u16(vm))); break;\
+    case OPCODE_WIDTH_32BIT: vm_mem_u32_set(vm, mem_dest, (vm_##OP##32)(vm, vm_mem_u32_get(vm, mem_dest), vm_code_next_u32(vm))); break;\
+    case OPCODE_WIDTH_64BIT: vm_mem_u64_set(vm, mem_dest, (vm_##OP##64)(vm, vm_mem_u64_get(vm, mem_dest), vm_code_next_u64(vm))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_ADD_impl(MAX, PARITY)\
+#define template_decls_vm_execute_BIN_OP(OP, SIGN)\
+  static inline void vm_execute_##OP##_reg_reg(vm_t* vm) { template_impl_vm_execute_##SIGN##_BIN_OP_reg_reg(OP); }\
+  static inline void vm_execute_##OP##_mem_reg(vm_t* vm) { template_impl_vm_execute_##SIGN##_BIN_OP_mem_reg(OP); }\
+  static inline void vm_execute_##OP##_reg_mem(vm_t* vm) { template_impl_vm_execute_##SIGN##_BIN_OP_reg_mem(OP); }\
+  static inline void vm_execute_##OP##_mem_mem(vm_t* vm) { template_impl_vm_execute_##SIGN##_BIN_OP_mem_mem(OP); }\
+  static inline void vm_execute_##OP##_reg_imm(vm_t* vm) { template_impl_vm_execute_##SIGN##_BIN_OP_reg_imm(OP); }\
+  static inline void vm_execute_##OP##_mem_imm(vm_t* vm) { template_impl_vm_execute_##SIGN##_BIN_OP_mem_imm(OP); }\
+  static inline void vm_execute_##OP(vm_t* vm)\
+  {\
+    switch (vm->inst.param)\
+    {\
+    case OPCODE_PARAM_REG_REG: vm_execute_##OP##_reg_reg(vm); break;\
+    case OPCODE_PARAM_MEM_REG: vm_execute_##OP##_mem_reg(vm); break;\
+    case OPCODE_PARAM_REG_MEM: vm_execute_##OP##_reg_mem(vm); break;\
+    case OPCODE_PARAM_MEM_MEM: vm_execute_##OP##_mem_mem(vm); break;\
+    case OPCODE_PARAM_REG_IMM: vm_execute_##OP##_reg_imm(vm); break;\
+    case OPCODE_PARAM_MEM_IMM: vm_execute_##OP##_mem_imm(vm); break;\
+    default: unreachable();\
+    }\
+  }\
+
+#define template_decls_vm_UNSIGNED_BIN_OP(OP)\
+  static inline uint8_t  vm_##OP##8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { template_impl_vm_##OP(0, UINT8_MAX,  vm_parity_u8 ); }\
+  static inline uint16_t vm_##OP##16(vm_t* vm, uint16_t lhs, uint16_t rhs) { template_impl_vm_##OP(0, UINT16_MAX, vm_parity_u16); }\
+  static inline uint32_t vm_##OP##32(vm_t* vm, uint32_t lhs, uint32_t rhs) { template_impl_vm_##OP(0, UINT32_MAX, vm_parity_u32); }\
+  static inline uint64_t vm_##OP##64(vm_t* vm, uint64_t lhs, uint64_t rhs) { template_impl_vm_##OP(0, UINT64_MAX, vm_parity_u64); }\
+
+#define template_decls_vm_SIGNED_BIN_OP(OP)\
+  static inline int8_t  vm_##OP##8 (vm_t* vm, int8_t  lhs, int8_t  rhs) { template_impl_vm_##OP(INT8_MIN,  INT8_MAX,  vm_parity_u8 ); }\
+  static inline int16_t vm_##OP##16(vm_t* vm, int16_t lhs, int16_t rhs) { template_impl_vm_##OP(INT16_MIN, INT16_MAX, vm_parity_u16); }\
+  static inline int32_t vm_##OP##32(vm_t* vm, int32_t lhs, int32_t rhs) { template_impl_vm_##OP(INT32_MIN, INT32_MAX, vm_parity_u32); }\
+  static inline int64_t vm_##OP##64(vm_t* vm, int64_t lhs, int64_t rhs) { template_impl_vm_##OP(INT64_MIN, INT64_MAX, vm_parity_u64); }\
+
+#define template_decls_vm_BIN_OP(OP, SIGN)\
+  template_decls_vm_##SIGN##_BIN_OP(OP)\
+
+#define template_impl_vm_ADD(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.carry = (MAX) - lhs < rhs;\
     vm->regs.FLAGS.parity = (PARITY)(lhs + rhs);\
     return lhs + rhs;\
   } while (0)\
 
-static inline uint8_t  vm_ADD8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_ADD_impl(UINT8_MAX,  vm_parity_u8 ); }
-static inline uint16_t vm_ADD16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_ADD_impl(UINT16_MAX, vm_parity_u16); }
-static inline uint32_t vm_ADD32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_ADD_impl(UINT32_MAX, vm_parity_u32); }
-static inline uint64_t vm_ADD64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_ADD_impl(UINT64_MAX, vm_parity_u64); }
+template_decls_vm_BIN_OP(ADD, UNSIGNED)
+template_decls_vm_execute_BIN_OP(ADD, UNSIGNED)
 
-static inline void vm_execute_ADD_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_ADD); }
-static inline void vm_execute_ADD_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_ADD); }
-static inline void vm_execute_ADD_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_ADD); }
-static inline void vm_execute_ADD_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_ADD); }
-static inline void vm_execute_ADD_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_ADD); }
-static inline void vm_execute_ADD_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_ADD); }
-
-static inline void vm_execute_ADD(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_ADD_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_ADD_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_ADD_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_ADD_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_ADD_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_ADD_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_SUB_impl(PARITY)\
+#define template_impl_vm_SUB(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = lhs == rhs;\
     vm->regs.FLAGS.negative = (lhs - rhs) >> (sizeof(lhs) * 8 - 1);\
@@ -1056,33 +779,10 @@ static inline void vm_execute_ADD(vm_t* vm)
     return lhs - rhs;\
   } while (0)\
 
-static inline uint8_t  vm_SUB8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_SUB_impl(vm_parity_u8 ); }
-static inline uint16_t vm_SUB16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_SUB_impl(vm_parity_u16); }
-static inline uint32_t vm_SUB32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_SUB_impl(vm_parity_u32); }
-static inline uint64_t vm_SUB64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_SUB_impl(vm_parity_u64); }
+template_decls_vm_BIN_OP(SUB, UNSIGNED)
+template_decls_vm_execute_BIN_OP(SUB, UNSIGNED)
 
-static inline void vm_execute_SUB_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_SUB); }
-static inline void vm_execute_SUB_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_SUB); }
-static inline void vm_execute_SUB_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_SUB); }
-static inline void vm_execute_SUB_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_SUB); }
-static inline void vm_execute_SUB_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_SUB); }
-static inline void vm_execute_SUB_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_SUB); }
-
-static inline void vm_execute_SUB(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_SUB_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_SUB_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_SUB_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_SUB_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_SUB_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_SUB_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_MUL_impl(MAX, PARITY)\
+#define template_impl_vm_MUL(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = lhs * rhs == 0;\
     vm->regs.FLAGS.carry = rhs != 0 && lhs > (MAX) / rhs;\
@@ -1090,33 +790,10 @@ static inline void vm_execute_SUB(vm_t* vm)
     return lhs * rhs;\
   } while (0)\
 
-static inline uint8_t  vm_MUL8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_MUL_impl(UINT8_MAX,  vm_parity_u8 ); }
-static inline uint16_t vm_MUL16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_MUL_impl(UINT16_MAX, vm_parity_u16); }
-static inline uint32_t vm_MUL32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_MUL_impl(UINT32_MAX, vm_parity_u32); }
-static inline uint64_t vm_MUL64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_MUL_impl(UINT64_MAX, vm_parity_u64); }
+template_decls_vm_BIN_OP(MUL, UNSIGNED)
+template_decls_vm_execute_BIN_OP(MUL, UNSIGNED)
 
-static inline void vm_execute_MUL_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_MUL); }
-static inline void vm_execute_MUL_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_MUL); }
-static inline void vm_execute_MUL_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_MUL); }
-static inline void vm_execute_MUL_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_MUL); }
-static inline void vm_execute_MUL_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_MUL); }
-static inline void vm_execute_MUL_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_MUL); }
-
-static inline void vm_execute_MUL(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_MUL_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_MUL_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_MUL_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_MUL_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_MUL_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_MUL_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_DIV_impl(PARITY)\
+#define template_impl_vm_DIV(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = lhs == 0;\
     vm->regs.FLAGS.carry = lhs % rhs != 0;\
@@ -1124,33 +801,10 @@ static inline void vm_execute_MUL(vm_t* vm)
     return lhs / rhs;\
   } while (0)\
 
-static inline uint8_t  vm_DIV8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_DIV_impl(vm_parity_u8 ); }
-static inline uint16_t vm_DIV16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_DIV_impl(vm_parity_u16); }
-static inline uint32_t vm_DIV32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_DIV_impl(vm_parity_u32); }
-static inline uint64_t vm_DIV64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_DIV_impl(vm_parity_u64); }
+template_decls_vm_BIN_OP(DIV, UNSIGNED)
+template_decls_vm_execute_BIN_OP(DIV, UNSIGNED)
 
-static inline void vm_execute_DIV_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_DIV); }
-static inline void vm_execute_DIV_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_DIV); }
-static inline void vm_execute_DIV_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_DIV); }
-static inline void vm_execute_DIV_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_DIV); }
-static inline void vm_execute_DIV_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_DIV); }
-static inline void vm_execute_DIV_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_DIV); }
-
-static inline void vm_execute_DIV(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_DIV_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_DIV_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_DIV_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_DIV_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_DIV_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_DIV_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_MOD_impl(PARITY)\
+#define template_impl_vm_MOD(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = lhs % rhs == 0;\
     vm->regs.FLAGS.carry = lhs % rhs != 0;\
@@ -1158,31 +812,8 @@ static inline void vm_execute_DIV(vm_t* vm)
     return lhs % rhs;\
   } while (0)\
 
-static inline uint8_t  vm_MOD8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_MOD_impl(vm_parity_u8 ); }
-static inline uint16_t vm_MOD16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_MOD_impl(vm_parity_u16); }
-static inline uint32_t vm_MOD32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_MOD_impl(vm_parity_u32); }
-static inline uint64_t vm_MOD64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_MOD_impl(vm_parity_u64); }
-
-static inline void vm_execute_MOD_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_MOD); }
-static inline void vm_execute_MOD_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_MOD); }
-static inline void vm_execute_MOD_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_MOD); }
-static inline void vm_execute_MOD_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_MOD); }
-static inline void vm_execute_MOD_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_MOD); }
-static inline void vm_execute_MOD_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_MOD); }
-
-static inline void vm_execute_MOD(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_MOD_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_MOD_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_MOD_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_MOD_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_MOD_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_MOD_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
+template_decls_vm_BIN_OP(MOD, UNSIGNED)
+template_decls_vm_execute_BIN_OP(MOD, UNSIGNED)
 
 static inline void vm_execute_INC_reg(vm_t* vm)
 {
@@ -1262,93 +893,93 @@ static inline void vm_execute_DEC(vm_t* vm)
   }
 }
 
-#define vm_execute_SIGNED_BIN_OP_reg_reg_impl(OP)\
+#define template_impl_vm_execute_SIGNED_BIN_OP_reg_reg(OP)\
   do {\
     uint8_t encoded_regs = vm_code_next_u8(vm);\
     register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, vm->inst.width);\
     register_t reg_src = register_decode(encoded_regs & 0xF, vm->inst.width);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_register_i8_set (vm, reg_dest, (OP##8 )(vm, vm_register_i8_get (vm, reg_dest), vm_register_i8_get (vm, reg_src))); break;\
-    case OPCODE_WIDTH_16BIT: vm_register_i16_set(vm, reg_dest, (OP##16)(vm, vm_register_i16_get(vm, reg_dest), vm_register_i16_get(vm, reg_src))); break;\
-    case OPCODE_WIDTH_32BIT: vm_register_i32_set(vm, reg_dest, (OP##32)(vm, vm_register_i32_get(vm, reg_dest), vm_register_i32_get(vm, reg_src))); break;\
-    case OPCODE_WIDTH_64BIT: vm_register_i64_set(vm, reg_dest, (OP##64)(vm, vm_register_i64_get(vm, reg_dest), vm_register_i64_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_register_i8_set (vm, reg_dest, (vm_##OP##8 )(vm, vm_register_i8_get (vm, reg_dest), vm_register_i8_get (vm, reg_src))); break;\
+    case OPCODE_WIDTH_16BIT: vm_register_i16_set(vm, reg_dest, (vm_##OP##16)(vm, vm_register_i16_get(vm, reg_dest), vm_register_i16_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_32BIT: vm_register_i32_set(vm, reg_dest, (vm_##OP##32)(vm, vm_register_i32_get(vm, reg_dest), vm_register_i32_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_64BIT: vm_register_i64_set(vm, reg_dest, (vm_##OP##64)(vm, vm_register_i64_get(vm, reg_dest), vm_register_i64_get(vm, reg_src))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_SIGNED_BIN_OP_mem_reg_impl(OP)\
+#define template_impl_vm_execute_SIGNED_BIN_OP_mem_reg(OP)\
   do {\
     void* mem_dest = vm_code_next_addr(vm);\
     uint8_t encoded_reg = vm_code_next_u8(vm);\
     register_t reg_src = register_decode(encoded_reg & 0xF, vm->inst.width);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_mem_i8_set (vm, mem_dest, (OP##8 )(vm, vm_mem_i8_get (vm, mem_dest), vm_register_i8_get (vm, reg_src))); break;\
-    case OPCODE_WIDTH_16BIT: vm_mem_i16_set(vm, mem_dest, (OP##16)(vm, vm_mem_i16_get(vm, mem_dest), vm_register_i16_get(vm, reg_src))); break;\
-    case OPCODE_WIDTH_32BIT: vm_mem_i32_set(vm, mem_dest, (OP##32)(vm, vm_mem_i32_get(vm, mem_dest), vm_register_i32_get(vm, reg_src))); break;\
-    case OPCODE_WIDTH_64BIT: vm_mem_i64_set(vm, mem_dest, (OP##64)(vm, vm_mem_i64_get(vm, mem_dest), vm_register_i64_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_mem_i8_set (vm, mem_dest, (vm_##OP##8 )(vm, vm_mem_i8_get (vm, mem_dest), vm_register_i8_get (vm, reg_src))); break;\
+    case OPCODE_WIDTH_16BIT: vm_mem_i16_set(vm, mem_dest, (vm_##OP##16)(vm, vm_mem_i16_get(vm, mem_dest), vm_register_i16_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_32BIT: vm_mem_i32_set(vm, mem_dest, (vm_##OP##32)(vm, vm_mem_i32_get(vm, mem_dest), vm_register_i32_get(vm, reg_src))); break;\
+    case OPCODE_WIDTH_64BIT: vm_mem_i64_set(vm, mem_dest, (vm_##OP##64)(vm, vm_mem_i64_get(vm, mem_dest), vm_register_i64_get(vm, reg_src))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_SIGNED_BIN_OP_reg_mem_impl(OP)\
+#define template_impl_vm_execute_SIGNED_BIN_OP_reg_mem(OP)\
   do {\
     uint8_t encoded_reg = vm_code_next_u8(vm);\
     void* mem_src = vm_code_next_addr(vm);\
     register_t reg_dest = register_decode(encoded_reg & 0xF, vm->inst.width);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_register_i8_set (vm, reg_dest, (OP## 8)(vm, vm_register_i8_get (vm, reg_dest), vm_mem_i8_get (vm, mem_src))); break;\
-    case OPCODE_WIDTH_16BIT: vm_register_i16_set(vm, reg_dest, (OP##16)(vm, vm_register_i16_get(vm, reg_dest), vm_mem_i16_get(vm, mem_src))); break;\
-    case OPCODE_WIDTH_32BIT: vm_register_i32_set(vm, reg_dest, (OP##32)(vm, vm_register_i32_get(vm, reg_dest), vm_mem_i32_get(vm, mem_src))); break;\
-    case OPCODE_WIDTH_64BIT: vm_register_i64_set(vm, reg_dest, (OP##64)(vm, vm_register_i64_get(vm, reg_dest), vm_mem_i64_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_register_i8_set (vm, reg_dest, (vm_##OP## 8)(vm, vm_register_i8_get (vm, reg_dest), vm_mem_i8_get (vm, mem_src))); break;\
+    case OPCODE_WIDTH_16BIT: vm_register_i16_set(vm, reg_dest, (vm_##OP##16)(vm, vm_register_i16_get(vm, reg_dest), vm_mem_i16_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_32BIT: vm_register_i32_set(vm, reg_dest, (vm_##OP##32)(vm, vm_register_i32_get(vm, reg_dest), vm_mem_i32_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_64BIT: vm_register_i64_set(vm, reg_dest, (vm_##OP##64)(vm, vm_register_i64_get(vm, reg_dest), vm_mem_i64_get(vm, mem_src))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_SIGNED_BIN_OP_mem_mem_impl(OP)\
+#define template_impl_vm_execute_SIGNED_BIN_OP_mem_mem(OP)\
   do {\
     void* mem_dest = vm_code_next_addr(vm);\
     void* mem_src = vm_code_next_addr(vm);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_mem_i8_set (vm, mem_dest, (OP##8 )(vm, vm_mem_i8_get (vm, mem_dest), vm_mem_i8_get (vm, mem_src))); break;\
-    case OPCODE_WIDTH_16BIT: vm_mem_i16_set(vm, mem_dest, (OP##16)(vm, vm_mem_i16_get(vm, mem_dest), vm_mem_i16_get(vm, mem_src))); break;\
-    case OPCODE_WIDTH_32BIT: vm_mem_i32_set(vm, mem_dest, (OP##32)(vm, vm_mem_i32_get(vm, mem_dest), vm_mem_i32_get(vm, mem_src))); break;\
-    case OPCODE_WIDTH_64BIT: vm_mem_i64_set(vm, mem_dest, (OP##64)(vm, vm_mem_i64_get(vm, mem_dest), vm_mem_i64_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_mem_i8_set (vm, mem_dest, (vm_##OP##8 )(vm, vm_mem_i8_get (vm, mem_dest), vm_mem_i8_get (vm, mem_src))); break;\
+    case OPCODE_WIDTH_16BIT: vm_mem_i16_set(vm, mem_dest, (vm_##OP##16)(vm, vm_mem_i16_get(vm, mem_dest), vm_mem_i16_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_32BIT: vm_mem_i32_set(vm, mem_dest, (vm_##OP##32)(vm, vm_mem_i32_get(vm, mem_dest), vm_mem_i32_get(vm, mem_src))); break;\
+    case OPCODE_WIDTH_64BIT: vm_mem_i64_set(vm, mem_dest, (vm_##OP##64)(vm, vm_mem_i64_get(vm, mem_dest), vm_mem_i64_get(vm, mem_src))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_SIGNED_BIN_OP_reg_imm_impl(OP)\
+#define template_impl_vm_execute_SIGNED_BIN_OP_reg_imm(OP)\
   do {\
     uint8_t encoded_reg = vm_code_next_u8(vm);\
     register_t reg_dest = register_decode(encoded_reg & 0xF, vm->inst.width);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_register_i8_set (vm, reg_dest, (OP##8 )(vm, vm_register_i8_get (vm, reg_dest), vm_code_next_i8 (vm))); break;\
-    case OPCODE_WIDTH_16BIT: vm_register_i16_set(vm, reg_dest, (OP##16)(vm, vm_register_i16_get(vm, reg_dest), vm_code_next_i16(vm))); break;\
-    case OPCODE_WIDTH_32BIT: vm_register_i32_set(vm, reg_dest, (OP##32)(vm, vm_register_i32_get(vm, reg_dest), vm_code_next_i32(vm))); break;\
-    case OPCODE_WIDTH_64BIT: vm_register_i64_set(vm, reg_dest, (OP##64)(vm, vm_register_i64_get(vm, reg_dest), vm_code_next_i64(vm))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_register_i8_set (vm, reg_dest, (vm_##OP##8 )(vm, vm_register_i8_get (vm, reg_dest), vm_code_next_i8 (vm))); break;\
+    case OPCODE_WIDTH_16BIT: vm_register_i16_set(vm, reg_dest, (vm_##OP##16)(vm, vm_register_i16_get(vm, reg_dest), vm_code_next_i16(vm))); break;\
+    case OPCODE_WIDTH_32BIT: vm_register_i32_set(vm, reg_dest, (vm_##OP##32)(vm, vm_register_i32_get(vm, reg_dest), vm_code_next_i32(vm))); break;\
+    case OPCODE_WIDTH_64BIT: vm_register_i64_set(vm, reg_dest, (vm_##OP##64)(vm, vm_register_i64_get(vm, reg_dest), vm_code_next_i64(vm))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_execute_SIGNED_BIN_OP_mem_imm_impl(OP)\
+#define template_impl_vm_execute_SIGNED_BIN_OP_mem_imm(OP)\
   do {\
     void* mem_dest = vm_code_next_addr(vm);\
     switch (vm->inst.width)\
     {\
-    case OPCODE_WIDTH_8BIT:  vm_mem_i8_set (vm, mem_dest, (OP##8 )(vm, vm_mem_i8_get (vm, mem_dest), vm_code_next_i8 (vm))); break;\
-    case OPCODE_WIDTH_16BIT: vm_mem_i16_set(vm, mem_dest, (OP##16)(vm, vm_mem_i16_get(vm, mem_dest), vm_code_next_i16(vm))); break;\
-    case OPCODE_WIDTH_32BIT: vm_mem_i32_set(vm, mem_dest, (OP##32)(vm, vm_mem_i32_get(vm, mem_dest), vm_code_next_i32(vm))); break;\
-    case OPCODE_WIDTH_64BIT: vm_mem_i64_set(vm, mem_dest, (OP##64)(vm, vm_mem_i64_get(vm, mem_dest), vm_code_next_i64(vm))); break;\
+    case OPCODE_WIDTH_8BIT:  vm_mem_i8_set (vm, mem_dest, (vm_##OP##8 )(vm, vm_mem_i8_get (vm, mem_dest), vm_code_next_i8 (vm))); break;\
+    case OPCODE_WIDTH_16BIT: vm_mem_i16_set(vm, mem_dest, (vm_##OP##16)(vm, vm_mem_i16_get(vm, mem_dest), vm_code_next_i16(vm))); break;\
+    case OPCODE_WIDTH_32BIT: vm_mem_i32_set(vm, mem_dest, (vm_##OP##32)(vm, vm_mem_i32_get(vm, mem_dest), vm_code_next_i32(vm))); break;\
+    case OPCODE_WIDTH_64BIT: vm_mem_i64_set(vm, mem_dest, (vm_##OP##64)(vm, vm_mem_i64_get(vm, mem_dest), vm_code_next_i64(vm))); break;\
     default: unreachable();\
     }\
   } while (0)\
 
-#define vm_IADD_impl(MIN, MAX, PARITY)\
+#define template_impl_vm_IADD(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = lhs + rhs == 0;\
     vm->regs.FLAGS.negative = lhs + rhs < 0;\
@@ -1357,33 +988,10 @@ static inline void vm_execute_DEC(vm_t* vm)
     return lhs + rhs;\
   } while (0)\
 
-static inline int8_t  vm_IADD8 (vm_t* vm, int8_t  lhs, int8_t  rhs) { vm_IADD_impl(INT8_MIN,  INT8_MAX,  vm_parity_u8 ); }
-static inline int16_t vm_IADD16(vm_t* vm, int16_t lhs, int16_t rhs) { vm_IADD_impl(INT16_MIN, INT16_MAX, vm_parity_u16); }
-static inline int32_t vm_IADD32(vm_t* vm, int32_t lhs, int32_t rhs) { vm_IADD_impl(INT32_MIN, INT32_MAX, vm_parity_u32); }
-static inline int64_t vm_IADD64(vm_t* vm, int64_t lhs, int64_t rhs) { vm_IADD_impl(INT64_MIN, INT64_MAX, vm_parity_u64); }
+template_decls_vm_BIN_OP(IADD, SIGNED)
+template_decls_vm_execute_BIN_OP(IADD, SIGNED)
 
-static inline void vm_execute_IADD_reg_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_reg_impl(vm_IADD); }
-static inline void vm_execute_IADD_mem_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_reg_impl(vm_IADD); }
-static inline void vm_execute_IADD_reg_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_mem_impl(vm_IADD); }
-static inline void vm_execute_IADD_mem_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_mem_impl(vm_IADD); }
-static inline void vm_execute_IADD_reg_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_imm_impl(vm_IADD); }
-static inline void vm_execute_IADD_mem_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_imm_impl(vm_IADD); }
-
-static inline void vm_execute_IADD(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_IADD_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_IADD_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_IADD_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_IADD_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_IADD_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_IADD_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_ISUB_impl(MIN, MAX, PARITY)\
+#define template_impl_vm_ISUB(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = lhs - rhs == 0;\
     vm->regs.FLAGS.negative = lhs - rhs < 0;\
@@ -1392,33 +1000,10 @@ static inline void vm_execute_IADD(vm_t* vm)
     return lhs - rhs;\
   } while (0)\
 
-static inline int8_t  vm_ISUB8 (vm_t* vm, int8_t  lhs, int8_t  rhs) { vm_ISUB_impl(INT8_MIN,  INT8_MAX,  vm_parity_u8 ); }
-static inline int16_t vm_ISUB16(vm_t* vm, int16_t lhs, int16_t rhs) { vm_ISUB_impl(INT16_MIN, INT16_MAX, vm_parity_u16); }
-static inline int32_t vm_ISUB32(vm_t* vm, int32_t lhs, int32_t rhs) { vm_ISUB_impl(INT32_MIN, INT32_MAX, vm_parity_u32); }
-static inline int64_t vm_ISUB64(vm_t* vm, int64_t lhs, int64_t rhs) { vm_ISUB_impl(INT64_MIN, INT64_MAX, vm_parity_u64); }
+template_decls_vm_BIN_OP(ISUB, SIGNED)
+template_decls_vm_execute_BIN_OP(ISUB, SIGNED)
 
-static inline void vm_execute_ISUB_reg_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_reg_impl(vm_ISUB); }
-static inline void vm_execute_ISUB_mem_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_reg_impl(vm_ISUB); }
-static inline void vm_execute_ISUB_reg_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_mem_impl(vm_ISUB); }
-static inline void vm_execute_ISUB_mem_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_mem_impl(vm_ISUB); }
-static inline void vm_execute_ISUB_reg_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_imm_impl(vm_ISUB); }
-static inline void vm_execute_ISUB_mem_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_imm_impl(vm_ISUB); }
-
-static inline void vm_execute_ISUB(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_ISUB_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_ISUB_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_ISUB_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_ISUB_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_ISUB_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_ISUB_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_IMUL_impl(MIN, MAX, PARITY)\
+#define template_impl_vm_IMUL(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = lhs * rhs == 0;\
     vm->regs.FLAGS.negative = lhs * rhs < 0;\
@@ -1428,33 +1013,10 @@ static inline void vm_execute_ISUB(vm_t* vm)
     return lhs * rhs;\
   } while (0)\
 
-static inline int8_t  vm_IMUL8 (vm_t* vm, int8_t  lhs, int8_t  rhs) { vm_IMUL_impl(INT8_MIN,  INT8_MAX,  vm_parity_u8 ); }
-static inline int16_t vm_IMUL16(vm_t* vm, int16_t lhs, int16_t rhs) { vm_IMUL_impl(INT16_MIN, INT16_MAX, vm_parity_u16); }
-static inline int32_t vm_IMUL32(vm_t* vm, int32_t lhs, int32_t rhs) { vm_IMUL_impl(INT32_MIN, INT32_MAX, vm_parity_u32); }
-static inline int64_t vm_IMUL64(vm_t* vm, int64_t lhs, int64_t rhs) { vm_IMUL_impl(INT64_MIN, INT64_MAX, vm_parity_u64); }
+template_decls_vm_BIN_OP(IMUL, SIGNED)
+template_decls_vm_execute_BIN_OP(IMUL, SIGNED)
 
-static inline void vm_execute_IMUL_reg_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_reg_impl(vm_IMUL); }
-static inline void vm_execute_IMUL_mem_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_reg_impl(vm_IMUL); }
-static inline void vm_execute_IMUL_reg_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_mem_impl(vm_IMUL); }
-static inline void vm_execute_IMUL_mem_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_mem_impl(vm_IMUL); }
-static inline void vm_execute_IMUL_reg_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_imm_impl(vm_IMUL); }
-static inline void vm_execute_IMUL_mem_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_imm_impl(vm_IMUL); }
-
-static inline void vm_execute_IMUL(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_IMUL_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_IMUL_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_IMUL_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_IMUL_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_IMUL_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_IMUL_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_IDIV_impl(MIN, MAX, PARITY)\
+#define template_impl_vm_IDIV(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = lhs == 0;\
     vm->regs.FLAGS.negative = (lhs < 0) != (rhs < 0);\
@@ -1463,33 +1025,10 @@ static inline void vm_execute_IMUL(vm_t* vm)
     return lhs / rhs;\
   } while (0)\
 
-static inline int8_t  vm_IDIV8 (vm_t* vm, int8_t  lhs, int8_t  rhs) { vm_IDIV_impl(INT8_MIN,  INT8_MAX,  vm_parity_u8 ); }
-static inline int16_t vm_IDIV16(vm_t* vm, int16_t lhs, int16_t rhs) { vm_IDIV_impl(INT16_MIN, INT16_MAX, vm_parity_u16); }
-static inline int32_t vm_IDIV32(vm_t* vm, int32_t lhs, int32_t rhs) { vm_IDIV_impl(INT32_MIN, INT32_MAX, vm_parity_u32); }
-static inline int64_t vm_IDIV64(vm_t* vm, int64_t lhs, int64_t rhs) { vm_IDIV_impl(INT64_MIN, INT64_MAX, vm_parity_u64); }
+template_decls_vm_BIN_OP(IDIV, SIGNED)
+template_decls_vm_execute_BIN_OP(IDIV, SIGNED)
 
-static inline void vm_execute_IDIV_reg_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_reg_impl(vm_IDIV); }
-static inline void vm_execute_IDIV_mem_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_reg_impl(vm_IDIV); }
-static inline void vm_execute_IDIV_reg_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_mem_impl(vm_IDIV); }
-static inline void vm_execute_IDIV_mem_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_mem_impl(vm_IDIV); }
-static inline void vm_execute_IDIV_reg_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_imm_impl(vm_IDIV); }
-static inline void vm_execute_IDIV_mem_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_imm_impl(vm_IDIV); }
-
-static inline void vm_execute_IDIV(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_IDIV_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_IDIV_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_IDIV_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_IDIV_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_IDIV_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_IDIV_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_IMOD_impl(MIN, PARITY)\
+#define template_impl_vm_IMOD(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = lhs % rhs == 0;\
     vm->regs.FLAGS.negative = lhs % rhs < 0;\
@@ -1498,33 +1037,10 @@ static inline void vm_execute_IDIV(vm_t* vm)
     return lhs % rhs;\
   } while (0)\
 
-static inline int8_t  vm_IMOD8 (vm_t* vm, int8_t  lhs, int8_t  rhs) { vm_IMOD_impl(INT8_MIN,  vm_parity_u8 ); }
-static inline int16_t vm_IMOD16(vm_t* vm, int16_t lhs, int16_t rhs) { vm_IMOD_impl(INT16_MIN, vm_parity_u16); }
-static inline int32_t vm_IMOD32(vm_t* vm, int32_t lhs, int32_t rhs) { vm_IMOD_impl(INT32_MIN, vm_parity_u32); }
-static inline int64_t vm_IMOD64(vm_t* vm, int64_t lhs, int64_t rhs) { vm_IMOD_impl(INT64_MIN, vm_parity_u64); }
+template_decls_vm_BIN_OP(IMOD, SIGNED)
+template_decls_vm_execute_BIN_OP(IMOD, SIGNED)
 
-static inline void vm_execute_IMOD_reg_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_reg_impl(vm_IMOD); }
-static inline void vm_execute_IMOD_mem_reg(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_reg_impl(vm_IMOD); }
-static inline void vm_execute_IMOD_reg_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_mem_impl(vm_IMOD); }
-static inline void vm_execute_IMOD_mem_mem(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_mem_impl(vm_IMOD); }
-static inline void vm_execute_IMOD_reg_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_reg_imm_impl(vm_IMOD); }
-static inline void vm_execute_IMOD_mem_imm(vm_t* vm) { vm_execute_SIGNED_BIN_OP_mem_imm_impl(vm_IMOD); }
-
-static inline void vm_execute_IMOD(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_IMOD_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_IMOD_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_IMOD_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_IMOD_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_IMOD_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_IMOD_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_INEG_impl(PARITY)\
+#define template_impl_vm_INEG(PARITY)\
   do {\
     vm->regs.FLAGS.zero = value == 0;\
     vm->regs.FLAGS.negative = value > 0;\
@@ -1532,10 +1048,10 @@ static inline void vm_execute_IMOD(vm_t* vm)
     return -value;\
   } while (0)\
 
-static inline int8_t  vm_INEG8 (vm_t* vm, int8_t  value) { vm_INEG_impl(vm_parity_u8 ); }
-static inline int16_t vm_INEG16(vm_t* vm, int16_t value) { vm_INEG_impl(vm_parity_u16); }
-static inline int32_t vm_INEG32(vm_t* vm, int32_t value) { vm_INEG_impl(vm_parity_u32); }
-static inline int64_t vm_INEG64(vm_t* vm, int64_t value) { vm_INEG_impl(vm_parity_u64); }
+static inline int8_t  vm_INEG8 (vm_t* vm, int8_t  value) { template_impl_vm_INEG(vm_parity_u8 ); }
+static inline int16_t vm_INEG16(vm_t* vm, int16_t value) { template_impl_vm_INEG(vm_parity_u16); }
+static inline int32_t vm_INEG32(vm_t* vm, int32_t value) { template_impl_vm_INEG(vm_parity_u32); }
+static inline int64_t vm_INEG64(vm_t* vm, int64_t value) { template_impl_vm_INEG(vm_parity_u64); }
 
 static inline void vm_execute_INEG_reg(vm_t* vm)
 {
@@ -1654,7 +1170,7 @@ static inline void vm_execute_IDEC(vm_t* vm)
   }
 }
 
-#define vm_execute_FLOAT_BIN_OP_reg_reg_impl(OP)\
+#define template_impl_vm_execute_FLOAT_BIN_OP_reg_reg(OP)\
   do {\
     uint8_t encoded_regs = vm_code_next_u8(vm);\
     register_t reg_dest = register_decode((encoded_regs >> 4) & 0xF, vm->inst.width);\
@@ -1667,7 +1183,7 @@ static inline void vm_execute_IDEC(vm_t* vm)
     }\
   } while (0)\
 
-#define vm_execute_FLOAT_BIN_OP_mem_reg_impl(OP)\
+#define template_impl_vm_execute_FLOAT_BIN_OP_mem_reg(OP)\
   do {\
     void* mem_dest = vm_code_next_addr(vm);\
     uint8_t encoded_reg = vm_code_next_u8(vm);\
@@ -1680,7 +1196,7 @@ static inline void vm_execute_IDEC(vm_t* vm)
     }\
   } while (0)\
 
-#define vm_execute_FLOAT_BIN_OP_reg_mem_impl(OP)\
+#define template_impl_vm_execute_FLOAT_BIN_OP_reg_mem(OP)\
   do {\
     uint8_t encoded_reg = vm_code_next_u8(vm);\
     void* mem_src = vm_code_next_addr(vm);\
@@ -1693,7 +1209,7 @@ static inline void vm_execute_IDEC(vm_t* vm)
     }\
   } while (0)\
 
-#define vm_execute_FLOAT_BIN_OP_mem_mem_impl(OP)\
+#define template_impl_vm_execute_FLOAT_BIN_OP_mem_mem(OP)\
   do {\
     void* mem_dest = vm_code_next_addr(vm);\
     void* mem_src = vm_code_next_addr(vm);\
@@ -1705,7 +1221,7 @@ static inline void vm_execute_IDEC(vm_t* vm)
     }\
   } while (0)\
 
-#define vm_execute_FLOAT_BIN_OP_reg_imm_impl(OP)\
+#define template_impl_vm_execute_FLOAT_BIN_OP_reg_imm(OP)\
   do {\
     uint8_t encoded_reg = vm_code_next_u8(vm);\
     register_t reg_dest = register_decode(encoded_reg & 0xF, vm->inst.width);\
@@ -1717,7 +1233,7 @@ static inline void vm_execute_IDEC(vm_t* vm)
     }\
   } while (0)\
 
-#define vm_execute_FLOAT_BIN_OP_mem_imm_impl(OP)\
+#define template_impl_vm_execute_FLOAT_BIN_OP_mem_imm(OP)\
   do {\
     void* mem_dest = vm_code_next_addr(vm);\
     switch (vm->inst.width)\
@@ -1728,12 +1244,12 @@ static inline void vm_execute_IDEC(vm_t* vm)
     }\
   } while (0)\
 
-static inline void vm_execute_FADD_reg_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_reg_impl(+); }
-static inline void vm_execute_FADD_mem_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_reg_impl(+); }
-static inline void vm_execute_FADD_reg_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_mem_impl(+); }
-static inline void vm_execute_FADD_mem_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_mem_impl(+); }
-static inline void vm_execute_FADD_reg_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_imm_impl(+); }
-static inline void vm_execute_FADD_mem_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_imm_impl(+); }
+static inline void vm_execute_FADD_reg_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_reg(+); }
+static inline void vm_execute_FADD_mem_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_reg(+); }
+static inline void vm_execute_FADD_reg_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_mem(+); }
+static inline void vm_execute_FADD_mem_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_mem(+); }
+static inline void vm_execute_FADD_reg_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_imm(+); }
+static inline void vm_execute_FADD_mem_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_imm(+); }
 
 static inline void vm_execute_FADD(vm_t* vm)
 {
@@ -1749,12 +1265,12 @@ static inline void vm_execute_FADD(vm_t* vm)
   }
 }
 
-static inline void vm_execute_FSUB_reg_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_reg_impl(-); }
-static inline void vm_execute_FSUB_mem_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_reg_impl(-); }
-static inline void vm_execute_FSUB_reg_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_mem_impl(-); }
-static inline void vm_execute_FSUB_mem_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_mem_impl(-); }
-static inline void vm_execute_FSUB_reg_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_imm_impl(-); }
-static inline void vm_execute_FSUB_mem_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_imm_impl(-); }
+static inline void vm_execute_FSUB_reg_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_reg(-); }
+static inline void vm_execute_FSUB_mem_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_reg(-); }
+static inline void vm_execute_FSUB_reg_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_mem(-); }
+static inline void vm_execute_FSUB_mem_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_mem(-); }
+static inline void vm_execute_FSUB_reg_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_imm(-); }
+static inline void vm_execute_FSUB_mem_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_imm(-); }
 
 static inline void vm_execute_FSUB(vm_t* vm)
 {
@@ -1770,12 +1286,12 @@ static inline void vm_execute_FSUB(vm_t* vm)
   }
 }
 
-static inline void vm_execute_FMUL_reg_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_reg_impl(*); }
-static inline void vm_execute_FMUL_mem_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_reg_impl(*); }
-static inline void vm_execute_FMUL_reg_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_mem_impl(*); }
-static inline void vm_execute_FMUL_mem_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_mem_impl(*); }
-static inline void vm_execute_FMUL_reg_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_imm_impl(*); }
-static inline void vm_execute_FMUL_mem_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_imm_impl(*); }
+static inline void vm_execute_FMUL_reg_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_reg(*); }
+static inline void vm_execute_FMUL_mem_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_reg(*); }
+static inline void vm_execute_FMUL_reg_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_mem(*); }
+static inline void vm_execute_FMUL_mem_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_mem(*); }
+static inline void vm_execute_FMUL_reg_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_imm(*); }
+static inline void vm_execute_FMUL_mem_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_imm(*); }
 
 static inline void vm_execute_FMUL(vm_t* vm)
 {
@@ -1791,12 +1307,12 @@ static inline void vm_execute_FMUL(vm_t* vm)
   }
 }
 
-static inline void vm_execute_FDIV_reg_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_reg_impl(/); }
-static inline void vm_execute_FDIV_mem_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_reg_impl(/); }
-static inline void vm_execute_FDIV_reg_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_mem_impl(/); }
-static inline void vm_execute_FDIV_mem_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_mem_impl(/); }
-static inline void vm_execute_FDIV_reg_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_imm_impl(/); }
-static inline void vm_execute_FDIV_mem_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_imm_impl(/); }
+static inline void vm_execute_FDIV_reg_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_reg(/); }
+static inline void vm_execute_FDIV_mem_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_reg(/); }
+static inline void vm_execute_FDIV_reg_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_mem(/); }
+static inline void vm_execute_FDIV_mem_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_mem(/); }
+static inline void vm_execute_FDIV_reg_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_imm(/); }
+static inline void vm_execute_FDIV_mem_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_imm(/); }
 
 static inline void vm_execute_FDIV(vm_t* vm)
 {
@@ -1812,12 +1328,12 @@ static inline void vm_execute_FDIV(vm_t* vm)
   }
 }
 
-static inline void vm_execute_FMOD_reg_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_reg_impl(/); }
-static inline void vm_execute_FMOD_mem_reg(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_reg_impl(/); }
-static inline void vm_execute_FMOD_reg_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_mem_impl(/); }
-static inline void vm_execute_FMOD_mem_mem(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_mem_impl(/); }
-static inline void vm_execute_FMOD_reg_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_reg_imm_impl(/); }
-static inline void vm_execute_FMOD_mem_imm(vm_t* vm) { vm_execute_FLOAT_BIN_OP_mem_imm_impl(/); }
+static inline void vm_execute_FMOD_reg_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_reg(/); }
+static inline void vm_execute_FMOD_mem_reg(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_reg(/); }
+static inline void vm_execute_FMOD_reg_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_mem(/); }
+static inline void vm_execute_FMOD_mem_mem(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_mem(/); }
+static inline void vm_execute_FMOD_reg_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_reg_imm(/); }
+static inline void vm_execute_FMOD_mem_imm(vm_t* vm) { template_impl_vm_execute_FLOAT_BIN_OP_mem_imm(/); }
 
 static inline void vm_execute_FMOD(vm_t* vm)
 {
@@ -1868,7 +1384,7 @@ static inline void vm_execute_FNEG(vm_t* vm)
   }
 }
 
-#define vm_AND_impl(PARITY)\
+#define template_impl_vm_AND(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = (lhs & rhs) == 0;\
     vm->regs.FLAGS.negative = (lhs & rhs) >> (sizeof(lhs) * 8 - 1);\
@@ -1876,33 +1392,10 @@ static inline void vm_execute_FNEG(vm_t* vm)
     return lhs & rhs;\
   } while (0)\
 
-static inline uint8_t  vm_AND8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_AND_impl(vm_parity_u8 ); }
-static inline uint16_t vm_AND16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_AND_impl(vm_parity_u16); }
-static inline uint32_t vm_AND32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_AND_impl(vm_parity_u32); }
-static inline uint64_t vm_AND64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_AND_impl(vm_parity_u64); }
+template_decls_vm_BIN_OP(AND, UNSIGNED)
+template_decls_vm_execute_BIN_OP(AND, UNSIGNED)
 
-static inline void vm_execute_AND_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_AND); }
-static inline void vm_execute_AND_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_AND); }
-static inline void vm_execute_AND_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_AND); }
-static inline void vm_execute_AND_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_AND); }
-static inline void vm_execute_AND_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_AND); }
-static inline void vm_execute_AND_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_AND); }
-
-static inline void vm_execute_AND(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_AND_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_AND_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_AND_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_AND_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_AND_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_AND_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_OR_impl(PARITY)\
+#define template_impl_vm_OR(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = (lhs | rhs) == 0;\
     vm->regs.FLAGS.negative = (lhs | rhs) >> (sizeof(lhs) * 8 - 1);\
@@ -1910,33 +1403,10 @@ static inline void vm_execute_AND(vm_t* vm)
     return lhs | rhs;\
   } while (0)\
 
-static inline uint8_t  vm_OR8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_OR_impl(vm_parity_u8 ); }
-static inline uint16_t vm_OR16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_OR_impl(vm_parity_u16); }
-static inline uint32_t vm_OR32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_OR_impl(vm_parity_u32); }
-static inline uint64_t vm_OR64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_OR_impl(vm_parity_u64); }
+template_decls_vm_BIN_OP(OR, UNSIGNED)
+template_decls_vm_execute_BIN_OP(OR, UNSIGNED)
 
-static inline void vm_execute_OR_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_OR); }
-static inline void vm_execute_OR_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_OR); }
-static inline void vm_execute_OR_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_OR); }
-static inline void vm_execute_OR_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_OR); }
-static inline void vm_execute_OR_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_OR); }
-static inline void vm_execute_OR_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_OR); }
-
-static inline void vm_execute_OR(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_OR_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_OR_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_OR_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_OR_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_OR_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_OR_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_XOR_impl(PARITY)\
+#define template_impl_vm_XOR(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = (lhs ^ rhs) == 0;\
     vm->regs.FLAGS.negative = (lhs ^ rhs) >> (sizeof(lhs) * 8 - 1);\
@@ -1944,43 +1414,20 @@ static inline void vm_execute_OR(vm_t* vm)
     return lhs ^ rhs;\
   } while (0)\
 
-static inline uint8_t  vm_XOR8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_XOR_impl(vm_parity_u8 ); }
-static inline uint16_t vm_XOR16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_XOR_impl(vm_parity_u16); }
-static inline uint32_t vm_XOR32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_XOR_impl(vm_parity_u32); }
-static inline uint64_t vm_XOR64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_XOR_impl(vm_parity_u64); }
+template_decls_vm_BIN_OP(XOR, UNSIGNED)
+template_decls_vm_execute_BIN_OP(XOR, UNSIGNED)
 
-static inline void vm_execute_XOR_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_XOR); }
-static inline void vm_execute_XOR_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_XOR); }
-static inline void vm_execute_XOR_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_XOR); }
-static inline void vm_execute_XOR_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_XOR); }
-static inline void vm_execute_XOR_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_XOR); }
-static inline void vm_execute_XOR_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_XOR); }
-
-static inline void vm_execute_XOR(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_XOR_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_XOR_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_XOR_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_XOR_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_XOR_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_XOR_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_NOT_impl(MAX, PARITY)\
+#define template_impl_vm_NOT(MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = value == (MAX);\
     vm->regs.FLAGS.parity = (PARITY)(~value);\
     return ~value;\
   } while (0)\
 
-static inline uint8_t  vm_NOT8 (vm_t* vm, uint8_t  value) { vm_NOT_impl(UINT8_MAX,  vm_parity_u8 ); }
-static inline uint16_t vm_NOT16(vm_t* vm, uint16_t value) { vm_NOT_impl(UINT16_MAX, vm_parity_u16); }
-static inline uint32_t vm_NOT32(vm_t* vm, uint32_t value) { vm_NOT_impl(UINT32_MAX, vm_parity_u32); }
-static inline uint64_t vm_NOT64(vm_t* vm, uint64_t value) { vm_NOT_impl(UINT64_MAX, vm_parity_u64); }
+static inline uint8_t  vm_NOT8 (vm_t* vm, uint8_t  value) { template_impl_vm_NOT(UINT8_MAX,  vm_parity_u8 ); }
+static inline uint16_t vm_NOT16(vm_t* vm, uint16_t value) { template_impl_vm_NOT(UINT16_MAX, vm_parity_u16); }
+static inline uint32_t vm_NOT32(vm_t* vm, uint32_t value) { template_impl_vm_NOT(UINT32_MAX, vm_parity_u32); }
+static inline uint64_t vm_NOT64(vm_t* vm, uint64_t value) { template_impl_vm_NOT(UINT64_MAX, vm_parity_u64); }
 
 static inline void vm_execute_NOT_reg(vm_t* vm)
 {
@@ -2021,7 +1468,7 @@ static inline void vm_execute_NOT(vm_t* vm)
   }
 }
 
-#define vm_SHL_impl(PARITY)\
+#define template_impl_vm_SHL(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = (lhs << rhs) == 0;\
     vm->regs.FLAGS.negative = (lhs << rhs) >> (sizeof(lhs) * 8 - 1);\
@@ -2030,33 +1477,10 @@ static inline void vm_execute_NOT(vm_t* vm)
     return lhs << rhs;\
   } while (0)\
 
-static inline uint8_t  vm_SHL8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_SHL_impl(vm_parity_u8 ); }
-static inline uint16_t vm_SHL16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_SHL_impl(vm_parity_u16); }
-static inline uint32_t vm_SHL32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_SHL_impl(vm_parity_u32); }
-static inline uint64_t vm_SHL64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_SHL_impl(vm_parity_u64); }
+template_decls_vm_BIN_OP(SHL, UNSIGNED)
+template_decls_vm_execute_BIN_OP(SHL, UNSIGNED)
 
-static inline void vm_execute_SHL_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_SHL); }
-static inline void vm_execute_SHL_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_SHL); }
-static inline void vm_execute_SHL_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_SHL); }
-static inline void vm_execute_SHL_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_SHL); }
-static inline void vm_execute_SHL_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_SHL); }
-static inline void vm_execute_SHL_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_SHL); }
-
-static inline void vm_execute_SHL(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_SHL_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_SHL_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_SHL_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_SHL_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_SHL_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_SHL_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
-
-#define vm_SHR_impl(PARITY)\
+#define template_impl_vm_SHR(MIN, MAX, PARITY)\
   do {\
     vm->regs.FLAGS.zero = (lhs >> rhs) == 0;\
     vm->regs.FLAGS.negative = (lhs >> rhs) >> (sizeof(lhs) * 8 - 1);\
@@ -2064,31 +1488,8 @@ static inline void vm_execute_SHL(vm_t* vm)
     return lhs >> rhs;\
   } while (0)\
 
-static inline uint8_t  vm_SHR8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_SHR_impl(vm_parity_u8 ); }
-static inline uint16_t vm_SHR16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_SHR_impl(vm_parity_u16); }
-static inline uint32_t vm_SHR32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_SHR_impl(vm_parity_u32); }
-static inline uint64_t vm_SHR64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_SHR_impl(vm_parity_u64); }
-
-static inline void vm_execute_SHR_reg_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_reg_impl(vm_SHR); }
-static inline void vm_execute_SHR_mem_reg(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_reg_impl(vm_SHR); }
-static inline void vm_execute_SHR_reg_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_mem_impl(vm_SHR); }
-static inline void vm_execute_SHR_mem_mem(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_mem_impl(vm_SHR); }
-static inline void vm_execute_SHR_reg_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_reg_imm_impl(vm_SHR); }
-static inline void vm_execute_SHR_mem_imm(vm_t* vm) { vm_execute_UNSIGNED_BIN_OP_mem_imm_impl(vm_SHR); }
-
-static inline void vm_execute_SHR(vm_t* vm)
-{
-  switch (vm->inst.param)
-  {
-  case OPCODE_PARAM_REG_REG: vm_execute_SHR_reg_reg(vm); break;
-  case OPCODE_PARAM_MEM_REG: vm_execute_SHR_mem_reg(vm); break;
-  case OPCODE_PARAM_REG_MEM: vm_execute_SHR_reg_mem(vm); break;
-  case OPCODE_PARAM_MEM_MEM: vm_execute_SHR_mem_mem(vm); break;
-  case OPCODE_PARAM_REG_IMM: vm_execute_SHR_reg_imm(vm); break;
-  case OPCODE_PARAM_MEM_IMM: vm_execute_SHR_mem_imm(vm); break;
-  default: unreachable();
-  }
-}
+template_decls_vm_BIN_OP(SHR, UNSIGNED)
+template_decls_vm_execute_BIN_OP(SHR, UNSIGNED)
 
 static inline void vm_execute_JMP(vm_t* vm)
 {
@@ -2223,16 +1624,16 @@ static inline void vm_execute_JNP(vm_t* vm)
     vm->regs.IP = addr;
 }
 
-#define vm_CMP_impl()\
+#define template_impl_vm_CMP()\
   do {\
     vm->regs.FLAGS.zero = lhs == rhs;\
     vm->regs.FLAGS.carry = lhs < rhs;\
   } while (0)\
 
-static inline void vm_CMP8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { vm_CMP_impl(); }
-static inline void vm_CMP16(vm_t* vm, uint16_t lhs, uint16_t rhs) { vm_CMP_impl(); }
-static inline void vm_CMP32(vm_t* vm, uint32_t lhs, uint32_t rhs) { vm_CMP_impl(); }
-static inline void vm_CMP64(vm_t* vm, uint64_t lhs, uint64_t rhs) { vm_CMP_impl(); }
+static inline void vm_CMP8 (vm_t* vm, uint8_t  lhs, uint8_t  rhs) { template_impl_vm_CMP(); }
+static inline void vm_CMP16(vm_t* vm, uint16_t lhs, uint16_t rhs) { template_impl_vm_CMP(); }
+static inline void vm_CMP32(vm_t* vm, uint32_t lhs, uint32_t rhs) { template_impl_vm_CMP(); }
+static inline void vm_CMP64(vm_t* vm, uint64_t lhs, uint64_t rhs) { template_impl_vm_CMP(); }
 
 static inline void vm_execute_CMP_reg_reg(vm_t* vm)
 {
@@ -2340,7 +1741,7 @@ static inline void vm_execute_CMP(vm_t* vm)
   }
 }
 
-#define vm_ICMP_impl(MIN, MAX)\
+#define template_impl_vm_ICMP(MIN, MAX)\
   do {\
     vm->regs.FLAGS.zero = lhs == rhs;\
     vm->regs.FLAGS.negative = lhs - rhs < 0;\
@@ -2348,10 +1749,10 @@ static inline void vm_execute_CMP(vm_t* vm)
     vm->regs.FLAGS.carry = lhs < rhs;\
   } while (0)\
 
-static inline void vm_ICMP8 (vm_t* vm, int8_t  lhs, int8_t  rhs) { vm_ICMP_impl(INT8_MIN,  INT8_MAX ); }
-static inline void vm_ICMP16(vm_t* vm, int16_t lhs, int16_t rhs) { vm_ICMP_impl(INT16_MIN, INT16_MAX); }
-static inline void vm_ICMP32(vm_t* vm, int32_t lhs, int32_t rhs) { vm_ICMP_impl(INT32_MIN, INT32_MAX); }
-static inline void vm_ICMP64(vm_t* vm, int64_t lhs, int64_t rhs) { vm_ICMP_impl(INT64_MIN, INT64_MAX); }
+static inline void vm_ICMP8 (vm_t* vm, int8_t  lhs, int8_t  rhs) { template_impl_vm_ICMP(INT8_MIN,  INT8_MAX ); }
+static inline void vm_ICMP16(vm_t* vm, int16_t lhs, int16_t rhs) { template_impl_vm_ICMP(INT16_MIN, INT16_MAX); }
+static inline void vm_ICMP32(vm_t* vm, int32_t lhs, int32_t rhs) { template_impl_vm_ICMP(INT32_MIN, INT32_MAX); }
+static inline void vm_ICMP64(vm_t* vm, int64_t lhs, int64_t rhs) { template_impl_vm_ICMP(INT64_MIN, INT64_MAX); }
 
 static inline void vm_execute_ICMP_reg_reg(vm_t* vm)
 {

@@ -23,4 +23,7 @@ size_t tasm_write_opcode(void* dest, opcode_t opcode, opcode_param_t param, opco
 
 size_t tasm_write_addr(void* dest, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset);
 
+size_t tasm_addr_encode(void* dest, addr_mode_t mode, register_t base, register_t index, int32_t scale, int64_t offset);
+size_t tasm_addr_decode(const void* src, addr_mode_t* mode, register_t* base, register_t* index, int32_t* scale, int64_t* offset);
+
 #endif
