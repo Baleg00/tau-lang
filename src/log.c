@@ -1,3 +1,10 @@
+/**
+ * \file log.c
+ * 
+ * \copyright Copyright (c) Róna Balázs. All rights reserved.
+ * \license 
+*/
+
 #include "log.h"
 
 #include <stdarg.h>
@@ -9,14 +16,14 @@
 #include "file.h"
 
 static log_level_t g_log_level = LOG_LEVEL_TRACE;
-static FILE* g_log_file = NULL;
+static FILE* g_log_stream = NULL;
 static bool g_log_verbose = false;
 
 void log_log(log_level_t lvl, const char* file, int line, const char* func, const char* name, const char* fmt, ...)
 {
   unused(func);
 
-  if (lvl < g_log_level || g_log_file == NULL)
+  if (lvl < g_log_level || g_log_stream == NULL)
     return;
 
   if (g_log_verbose)
@@ -27,21 +34,21 @@ void log_log(log_level_t lvl, const char* file, int line, const char* func, cons
     size_t len = strftime(time_buf, sizeof(time_buf), "%H:%M:%S", localtime(&tm));
     time_buf[len] = '\0';
 
-    fprintf(g_log_file, ESC_FG_BRIGHT_BLACK "%s:%d %s " ESC_RESET,
+    fprintf(g_log_stream, ESC_FG_BRIGHT_BLACK "%s:%d %s " ESC_RESET,
       file, line, time_buf);
   }
 
-  fprintf(g_log_file, "[%s%s:%s" ESC_RESET "]> ", 
+  fprintf(g_log_stream, "[%s%s:%s" ESC_RESET "]> ", 
     log_level_to_color(lvl), log_level_to_string(lvl), name);
 
   va_list args;
   va_start(args, fmt);
 
-  vfprintf(g_log_file, fmt, args);
+  vfprintf(g_log_stream, fmt, args);
 
   va_end(args);
 
-  fputc('\n', g_log_file);
+  fputc('\n', g_log_stream);
 }
 
 const char* log_level_to_string(log_level_t lvl)
@@ -82,14 +89,14 @@ log_level_t log_get_level(void)
   return g_log_level;
 }
 
-void log_set_file(FILE* file)
+void log_set_stream(FILE* stream)
 {
-  g_log_file = file;
+  g_log_stream = stream;
 }
 
-FILE* log_get_file(void)
+FILE* log_get_stream(void)
 {
-  return g_log_file;
+  return g_log_stream;
 }
 
 void log_set_verbose(bool value)

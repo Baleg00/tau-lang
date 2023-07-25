@@ -5,6 +5,7 @@
 
 #include "arena.h"
 #include "list.h"
+#include "log.h"
 #include "typedefs.h"
 
 struct compiler_s

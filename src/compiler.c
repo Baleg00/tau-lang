@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "util.h"
-#include "log.h"
 #include "crumb.h"
 #include "timer.h"
 #include "file.h"
@@ -84,7 +83,7 @@ static void compiler_dump_ast_flat(compiler_t* compiler, const char* input_file_
 
 void compiler_init(compiler_t* compiler)
 {
-  log_set_file(stdout);
+  log_set_stream(stdout);
   crumb_set_file(stdout);
 
   compiler->arena = arena_init();

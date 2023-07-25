@@ -22,17 +22,6 @@ typedef struct cli_s cli_t;
 /** Option callback type. */
 typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, const char*, void*);
 
-/** Log level indicating the kind and severity of a message. */
-typedef enum log_level_e
-{
-  LOG_LEVEL_TRACE, // Low-level, highly detailed behaviour.
-  LOG_LEVEL_DEBUG, // Diagnostic messages.
-  LOG_LEVEL_INFO,  // Normal behaviour, informative messages.
-  LOG_LEVEL_WARN,  // Abnormal or unexpected behaviour.
-  LOG_LEVEL_ERROR, // Severe issue or failure.
-  LOG_LEVEL_FATAL, // Critical failure and program termination.
-} log_level_t;
-
 /** Indicates the crumb log kind. */
 typedef enum crumb_kind_e
 {
