@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "typedefs.h"
+#include "list.h"
 
 struct token_s
 {

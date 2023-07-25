@@ -10,6 +10,7 @@
 #include <stdbool.h>
 
 #include "typedefs.h"
+#include "list.h"
 
 struct parser_s
 {

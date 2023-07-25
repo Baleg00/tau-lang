@@ -1,66 +1,73 @@
 /**
- * \file
+ * \file stack.h
  * 
- * Stack data structure. 
+ * \brief Stack data structure interface.
  * 
- * Stack is just a wrapper over a doubly-linked list.
-*/
+ * \details A stack is a linear data structure that follows the
+ * Last-In-First-Out (LIFO) principle. It is similar to a stack of items, where
+ * the last item added is the first one to be removed. Elements can only be
+ * inserted or removed from the top of the stack. Common stack operations
+ * include push (adding an item to the top), pop (removing the top item), and
+ * peek (viewing the top item without removing it).
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
 
 #ifndef TAU_STACK_H
 #define TAU_STACK_H
 
 #include <stdbool.h>
 
-#include "typedefs.h"
+/**
+ * \brief Stack data structure.
+ */
+typedef struct stack_s stack_t;
 
 /**
- * \brief Initializes a new stack.
- * 
- * \returns New stack.
-*/
+ * \brief Initializes a new empty stack.
+ *
+ * \returns Pointer to the initialized stack.
+ */
 stack_t* stack_init(void);
 
 /**
- * \brief Destroys a stack.
- * 
- * \param[in] stack Stack to be destroyed.
-*/
+ * \brief Frees the resources associated with a stack.
+ *
+ * \param[in] stack Pointer to the stack to free.
+ */
 void stack_free(stack_t* stack);
 
 /**
- * \brief Pushes a data pointer onto the stack.
- * 
- * \param[in] stack Stack to be pushed onto.
- * \param[in] data Pointer to be pushed onto stack.
-*/
+ * \brief Adds the given data to the top of a stack.
+ *
+ * \param[in,out] stack Pointer to the stack.
+ * \param[in] data Pointer to the data to be added.
+ */
 void stack_push(stack_t* stack, void* data);
 
 /**
- * \brief Pops and returns pointer from the stack.
- * 
- * \details The function fails if the provided stack is empty.
- * 
- * \param[in] stack Stack to be popped from.
- * \returns Pointer popped from the stack.
-*/
+ * \brief Removes and returns the data stored at the top of a stack.
+ *
+ * \param[in,out] stack Pointer to the stack.
+ * \returns Pointer to the data removed from the top of the stack.
+ */
 void* stack_pop(stack_t* stack);
 
 /**
- * \brief Returns top pointer from the stack.
- * 
- * \details The function fails if the provided stack is empty.
- * 
- * \param[in] stack Stack whose top item is to be returned.
- * \returns Top pointer.
-*/
-void* stack_top(stack_t* stack);
+ * \brief Retrieves the data stored at the top of a stack.
+ *
+ * \param[in] stack Pointer to the stack.
+ * \returns Pointer to the data at the top of the stack.
+ */
+void* stack_peek(stack_t* stack);
 
 /**
- * \brief Checks if the stack has no items.
- * 
- * \param[in] stack Stack to be checked.
- * \returns True if stack is empty, false otherwise.
-*/
+ * \brief Checks if a stack is empty.
+ *
+ * \param[in] stack Pointer to the stack.
+ * \returns `true` if the stack is empty, `false` otherwise.
+ */
 bool stack_empty(stack_t* stack);
 
 #endif

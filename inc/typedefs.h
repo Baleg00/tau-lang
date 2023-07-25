@@ -4,20 +4,7 @@
 /** Represents a memory arena. */
 typedef struct arena_s arena_t;
 
-/** Represents an node in a linked list. */
-typedef struct list_node_s list_node_t;
-
-/** Represents a linked list. */
-typedef struct list_s list_t;
-
-/** Function pointer type to be used by `list_for_each` function. */
-typedef void(*list_for_each_func_t)(void*);
-
-/** Represents a stack. */
-typedef list_t stack_t;
-
-/** Represents a queue. */
-typedef list_t queue_t;
+typedef struct queue_s queue_t;
 
 /** Indicates argument type. */
 typedef enum cli_type_e

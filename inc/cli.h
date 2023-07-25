@@ -10,6 +10,7 @@
 #include <stddef.h>
 
 #include "typedefs.h"
+#include "queue.h"
 
 struct cli_opt_s
 {

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "typedefs.h"
+#include "list.h"
 
 struct compiler_s
 {

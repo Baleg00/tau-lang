@@ -5,9 +5,6 @@
 
 #include "util.h"
 
-#include "list.h"
-#include "stack.h"
-
 #include "location.h"
 #include "token.h"
 #include "ast.h"
@@ -799,7 +796,7 @@ typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* table, 
     desc = ast_desc_of(node->expr);
   }
 
-  typedesc_t* expected = stack_top(analyzer->ret_types);
+  typedesc_t* expected = stack_peek(analyzer->ret_types);
 
   if (!typedesc_is_same(desc, expected))
     report_error_incompatible_return_type(node->tok->loc);
@@ -812,7 +809,7 @@ typedesc_t* analyzer_visit_stmt_yield(analyzer_t* analyzer, symtable_t* table, a
   node->expr = analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->expr);
   typedesc_t* desc = ast_desc_of(node->expr);
 
-  typedesc_t* expected = stack_top(analyzer->ret_types);
+  typedesc_t* expected = stack_peek(analyzer->ret_types);
   
   if (!typedesc_is_same(desc, expected))
     report_error_incompatible_return_type(node->tok->loc);

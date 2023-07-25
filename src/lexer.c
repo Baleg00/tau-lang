@@ -8,8 +8,6 @@
 #include "log.h"
 #include "crumb.h"
 
-#include "list.h"
-
 #include "file.h"
 
 #include "location.h"

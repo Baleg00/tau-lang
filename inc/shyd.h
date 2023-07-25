@@ -5,6 +5,8 @@
 #include <stdbool.h>
 
 #include "typedefs.h"
+#include "queue.h"
+#include "stack.h"
 
 typedef enum shyd_kind_e
 {

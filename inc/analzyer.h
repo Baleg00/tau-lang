@@ -2,6 +2,8 @@
 #define TAU_ANALYZER_H
 
 #include "typedefs.h"
+#include "list.h"
+#include "stack.h"
 
 struct analyzer_s
 {

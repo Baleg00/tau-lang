@@ -1,3 +1,10 @@
+/**
+ * \file stack.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "stack.h"
 
 #include "list.h"
@@ -22,7 +29,7 @@ void* stack_pop(stack_t* stack)
   return list_pop_back((list_t*)stack);
 }
 
-void* stack_top(stack_t* stack)
+void* stack_peek(stack_t* stack)
 {
   return list_back((list_t*)stack);
 }

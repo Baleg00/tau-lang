@@ -2,9 +2,6 @@
 
 #include "util.h"
 
-#include "list.h"
-#include "stack.h"
-
 #include "location.h"
 #include "token.h"
 #include "op.h"

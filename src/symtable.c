@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "util.h"
-#include "list.h"
 #include "ast.h"
 #include "typedesc.h"
 #include "memtrace.h"

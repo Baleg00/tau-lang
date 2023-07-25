@@ -8,8 +8,6 @@
 #include "parser.h"
 #include "list.h"
 #include "queue.h"
-#include "stack.h"
-#include "queue.h"
 #include "diagnostics.h"
 #include "arena.h"
 #include "memtrace.h"
@@ -49,7 +47,7 @@ void shyd_elem_free(shyd_elem_t* elem)
 
 bool shyd_flush_until_kind(shyd_t* shyd, shyd_kind_t kind)
 {
-  while (!stack_empty(shyd->op_stack) && ((shyd_elem_t*)stack_top(shyd->op_stack))->kind != kind)
+  while (!stack_empty(shyd->op_stack) && ((shyd_elem_t*)stack_peek(shyd->op_stack))->kind != kind)
     queue_offer(shyd->out_queue, stack_pop(shyd->op_stack));
 
   if (stack_empty(shyd->op_stack))
@@ -64,7 +62,7 @@ void shyd_flush_for_op(shyd_t* shyd, op_kind_t op)
 {
   while (!stack_empty(shyd->op_stack))
   {
-    shyd_elem_t* elem = (shyd_elem_t*)stack_top(shyd->op_stack);
+    shyd_elem_t* elem = (shyd_elem_t*)stack_peek(shyd->op_stack);
 
     if (elem->kind == SHYD_PAREN_OPEN || 
       elem->kind == SHYD_BRACKET_OPEN || 

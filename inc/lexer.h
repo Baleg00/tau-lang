@@ -11,6 +11,7 @@
 #include <stdbool.h>
 
 #include "typedefs.h"
+#include "list.h"
 
 struct lexer_s
 {

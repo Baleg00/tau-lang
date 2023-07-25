@@ -2,8 +2,6 @@
 
 #include "util.h"
 
-#include "list.h"
-
 #include "location.h"
 
 void token_init(token_t* tok, token_kind_t kind, location_t* loc)

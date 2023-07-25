@@ -1,3 +1,10 @@
+/**
+ * \file list.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "list.h"
 
 #include <stdlib.h>
@@ -5,6 +12,21 @@
 #include "util.h"
 
 #include "memtrace.h"
+
+struct list_node_s
+{
+  void* data; // Pointer to the stored data.
+  list_t* owner; // Pointer to the list which the node belongs to.
+  list_node_t* prev; // Pointer to the previous node or NULL.
+  list_node_t* next; // Pointer to the next node or NULL.
+};
+
+struct list_s
+{
+  list_node_t* head; // Pointer to the first node in the list or NULL.
+  list_node_t* tail; // Pointer to the last node in the list or NULL.
+  size_t len; // Number of nodes in the list.
+};
 
 list_node_t* list_node_init(void* data)
 {

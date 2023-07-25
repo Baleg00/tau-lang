@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "typedefs.h"
+#include "list.h"
 
 /** Platform specific byte size of a pointer. */
 #define TYPEDESC_PTR_SIZE sizeof(void*)

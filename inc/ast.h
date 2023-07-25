@@ -13,6 +13,8 @@
 #include <stdint.h>
 
 #include "typedefs.h"
+#include "list.h"
+#include "stack.h"
 
 /** Utility macro which expands to fields that all nodes must have. */
 #define AST_NODE_HEADER\

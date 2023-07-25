@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include "typedefs.h"
+#include "list.h"
 
 struct symbol_s
 {

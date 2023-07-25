@@ -7,8 +7,6 @@
 #include "log.h"
 #include "crumb.h"
 
-#include "list.h"
-
 #include "token.h"
 #include "ast.h"
 #include "shyd.h"

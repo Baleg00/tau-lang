@@ -1,66 +1,75 @@
 /**
- * \file
+ * \file queue.h
  * 
- * Queue data structure.
+ * \brief Stack data structure interface.
  * 
- * Queue is just a wrapper over a doubly-linked list.
-*/
+ * \details A queue is a linear data structure that follows the
+ * First-In-First-Out (FIFO) principle. It is similar to a queue of people
+ * waiting in line, where the first person to join the queue is the first one
+ * to be served. Elements can only be inserted at the back and removed from the
+ * front of the queue. This ensures that the order of insertion is preserved.
+ * Common queue operations include offer (adding an item to the back), poll
+ * (removing the front item), and peek (viewing the front item without removing
+ * it).
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
 
 #ifndef TAU_QUEUE_H
 #define TAU_QUEUE_H
 
 #include <stdbool.h>
 
-#include "typedefs.h"
+/**
+ * \brief Queue data structure.
+ */
+typedef struct queue_s queue_t;
 
 /**
- * \brief Initializes a new queue.
- * 
- * \returns New queue.
-*/
+ * \brief Initializes a new empty queue.
+ *
+ * \returns Pointer to the initialized queue.
+ */
 queue_t* queue_init(void);
 
 /**
- * \brief Destroys a queue.
- * 
- * \param[in] que Queue to be destroyed.
-*/
+ * \brief Frees the resources associated with a queue.
+ *
+ * \param[in] queue Pointer to the queue to free.
+ */
 void queue_free(queue_t* que);
 
 /**
- * \brief Pushes a data pointer into the queue.
- * 
- * \param[in] que Queue to be pushed into.
- * \param[in] data Pointer to be pushed into the queue.
-*/
+ * \brief Adds the given data to the back of a queue.
+ *
+ * \param[in,out] queue Pointer to the queue.
+ * \param[in] data Pointer to the data to be added.
+ */
 void queue_offer(queue_t* que, void* data);
 
 /**
- * \brief Polls a pointer from the queue.
- * 
- * \details The function fails if the provided queue is empty.
- * 
- * \param[in] que Queue to be polled from.
- * \returns Pointer polled from the queue.
-*/
+ * \brief Removes and returns the data stored at the front of a queue.
+ *
+ * \param[in,out] queue Pointer to the queue.
+ * \returns Pointer to the data removed from the front of the queue.
+ */
 void* queue_poll(queue_t* que);
 
 /**
- * \brief Peeks the last pointer in the queue.
- * 
- * \details The function fails if the provided queue is empty.
- * 
- * \param[in] que Queue to be peeked.
- * \returns Last pointer in the queue.
-*/
+ * \brief Retrieves the data stored at the front of a queue.
+ *
+ * \param[in] queue Pointer to the queue.
+ * \returns Pointer to the data at the front of the queue.
+ */
 void* queue_peek(queue_t* que);
 
 /**
- * \brief Checks if the queue has no items.
- * 
- * \param[in] que Queue to be checked.
- * \returns True if queue is empty, false otherwise.
-*/
+ * \brief Checks if a queue is empty.
+ *
+ * \param[in] queue Pointer to the queue.
+ * \returns `true` if the queue is empty, `false` otherwise.
+ */
 bool queue_empty(queue_t* que);
 
 #endif
