@@ -1,9 +1,6 @@
 #ifndef TAU_TYPEDEFS_H
 #define TAU_TYPEDEFS_H
 
-/** Represents a memory arena. */
-typedef struct arena_s arena_t;
-
 typedef struct queue_s queue_t;
 
 /** Indicates argument type. */

@@ -1,78 +1,81 @@
 /**
- * \file
+ * \file arena.h
  * 
- * Arena allocator.
-*/
+ * \brief Arena allocator interface.
+ * 
+ * \details An arena allocator is a memory allocation strategy that allocates
+ * memory from a fixed-size block of memory called an arena. It is particularly
+ * useful in situations where a large number of objects are allocated and
+ * deallocated together as a group, such as within a specific scope or during
+ * the execution of a function. Instead of individually allocating and
+ * deallocating memory for each object, the arena allocator allocates memory
+ * in bulk for the entire group. This improves memory allocation and
+ * deallocation efficiency by reducing the overhead associated with frequent
+ * memory management operations.
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
 
 #ifndef TAU_ARENA_H
 #define TAU_ARENA_H
 
 #include <stddef.h>
-#include <stdint.h>
-
-#include "typedefs.h"
 
 #define ARENA_DEFAULT_CAPACITY (8 * (1 << 10))
 
-struct arena_s
-{
-  void* begin; // Begin pointer of chunk.
-  void* end; // Past end pointer of chunk.
-  void* ptr; // Pointer to first available byte in chunk.
-  arena_t* next; // Pointer to next arena or null pointer.
-  // The actual memory chunk is allocated after the arena.
-};
+/**
+ * \brief Arena allocator.
+ */
+typedef struct arena_s arena_t;
 
 /**
  * \brief Initializes a new arena.
  * 
- * \returns New arena.
-*/
+ * \returns Pointer to the initialized arena.
+ */
 arena_t* arena_init(void);
 
 /**
- * \brief Initializes a new arena with the specified capacity.
+ * \brief Initializes a new arena with a specified capacity.
  * 
- * \param[in] cap Capacity in bytes.
- * \returns New arena.
-*/
+ * \param[in] cap The capacity of the arena in bytes.
+ * \returns Pointer to the initialized arena.
+ */
 arena_t* arena_init_capacity(size_t cap);
 
 /**
- * \brief Destroys an arena.
+ * \brief Frees the memory allocated by an arena.
  * 
- * \param[in] arena Arena to be destroyed.
-*/
+ * \param[in] arena Pointer to the arena to be freed.
+ */
 void arena_free(arena_t* arena);
 
 /**
- * \brief Returns the capacity of an arena.
+ * \brief Retrieves the capacity of an arena.
  * 
- * \param[in] arena Arena to be used.
- * \returns Arena capacity.
-*/
+ * \param[in] arena Pointer to the arena.
+ * \returns The capacity of the arena in bytes.
+ */
 size_t arena_capacity(arena_t* arena);
 
 /**
- * \brief Allocates memory using an arena.
+ * \brief Allocates memory from an arena.
  * 
- * \param[in] arena Arena to be used.
- * \param[in] size Number of bytes to be allocated.
- * \returns Pointer to newly allocated memory or null pointer if allocation
- * failed.
-*/
+ * \param[in] arena Pointer to the arena.
+ * \param[in] size The size of memory to allocate in bytes.
+ * \returns Pointer to the allocated memory, or NULL if allocation fails.
+ */
 void* arena_malloc(arena_t* arena, size_t size);
 
 /**
- * \brief Allocates memory for count object of size using an arena and
- * initializes all bytes to zero.
+ * \brief Allocates and initializes memory with zeros from an arena.
  * 
- * \param[in] arena Arena to be used.
- * \param[in] count Number of objects to be allocated.
- * \param[in] size Size of an object in bytes.
- * \returns Pointer to newly allocated memory or null pointer if allocation 
- * failed.
-*/
+ * \param[in] arena Pointer to the arena.
+ * \param[in] count The number of elements to allocate.
+ * \param[in] size The size of each element in bytes.
+ * \returns Pointer to the allocated memory, or NULL if allocation fails.
+ */
 void* arena_calloc(arena_t* arena, size_t count, size_t size);
 
 #endif

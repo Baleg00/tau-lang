@@ -14,8 +14,6 @@
 
 #include "diagnostics.h"
 
-#include "arena.h"
-
 void analyzer_init(arena_t* arena, analyzer_t* analyzer)
 {
   analyzer->arena = arena;

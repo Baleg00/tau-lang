@@ -13,8 +13,6 @@
 
 #include "diagnostics.h"
 
-#include "arena.h"
-
 void parser_init(parser_t* par, arena_t* arena)
 {
   par->arena = arena;

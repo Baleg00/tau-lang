@@ -1,7 +1,13 @@
+/**
+ * \file memtrace.c
+ * 
+ * \copyright Copyright (c) Róna Balázs. All rights reserved.
+ * \license 
+*/
+
 #define TAU_MEMTRACE_IMPL
 #include "memtrace.h"
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -11,44 +17,60 @@
 #include "log.h"
 #include "esc_seq.h"
 
-/** Indicates the function with which the memory was allocated. */
-typedef enum memtrace_alloc_kind_e {
+/**
+ * \brief Enumeration of memory allocation kinds.
+ */
+typedef enum memtrace_alloc_kind_e
+{
   MEMTRACE_MALLOC,
   MEMTRACE_CALLOC,
   MEMTRACE_REALLOC,
 } memtrace_alloc_kind_t;
 
-/** Allocation metadata. */
-typedef struct memtrace_meta_s {
+/**
+ * \brief Allocation metadata.
+ */
+typedef struct memtrace_meta_s
+{
   memtrace_alloc_kind_t alloc_kind; // Allcation kind.
   const char* file; // Path to source file.
   const char* func; // Name of containing function.
   int line; // Line number in source file.
 } memtrace_meta_t;
 
-/** Allocation data. */
-typedef struct memtrace_data_s {
+/**
+ * \brief Allocation data.
+ */
+typedef struct memtrace_data_s
+{
   void* ptr; // Pointer to memory.
   size_t size; // Size of allocation in bytes.
 } memtrace_data_t;
 
-/** Allocation object. */
-typedef struct memtrace_alloc_s {
+/**
+ * \brief Allocation object.
+ */
+typedef struct memtrace_alloc_s
+{
   memtrace_data_t data;
   memtrace_meta_t meta;
 
   struct memtrace_alloc_s *next; // Pointer to next allocation.
 } memtrace_alloc_t;
 
-/** Function to be called at program exit. */
+/**
+ * \brief Function to be called at program exit.
+ */
 void memtrace_atexit(void);
 
-/** Returns the root allocation object. */
+/**
+ * \brief Returns the root allocation object.
+ */
 memtrace_alloc_t* memtrace_alloc_root(void)
 {
   static memtrace_alloc_t* root = NULL;
 
-  // Initialize root
+  // Initialize root.
   if (root == NULL)
   {
     root = (memtrace_alloc_t*)calloc(1, sizeof(memtrace_alloc_t));

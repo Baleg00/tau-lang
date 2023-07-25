@@ -1,23 +1,32 @@
+/**
+ * \file arena.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "arena.h"
 
 #include <string.h>
 
-#include "util.h"
 #include "log.h"
-
 #include "memtrace.h"
+#include "util.h"
 
-typedef union arena_max_align_u
+struct arena_s
 {
-  uintmax_t a;
-  uintptr_t b;
-  long double c;
-} arena_max_align_t;
+  void* begin; // Begin pointer of chunk.
+  void* end; // Past end pointer of chunk.
+  void* ptr; // Pointer to first available byte in chunk.
+  arena_t* next; // Pointer to next arena or null pointer.
+  // The actual memory chunk is allocated after the arena.
+};
 
-#define ARENA_MAX_ALIGN (alignof(arena_max_align_t))
+/** Maximum possible alignment of any object. */
+#define ARENA_MAX_ALIGN (alignof(union { uintmax_t a; uintptr_t b; long double c; }))
 
 /**
- * \brief Aligns a pointer to `ARENA_MAX_ALIGN`.
+ * \brief Aligns a pointer to ARENA_MAX_ALIGN.
  * 
  * \param[in] PTR Pointer to be aligned.
  * \returns Aligned pointer.
@@ -25,7 +34,7 @@ typedef union arena_max_align_u
 #define arena_align(PTR) ((void*)(((uintptr_t)(PTR) + ARENA_MAX_ALIGN - 1) & ~(ARENA_MAX_ALIGN - 1)))
 
 /**
- * \brief Rounds a size up to the nearest multiple of `ARENA_MAX_ALIGN`.
+ * \brief Rounds a size up to the nearest multiple of ARENA_MAX_ALIGN.
  * 
  * \param[in] SIZE Size to be round up.
  * \returns Rounded up size.

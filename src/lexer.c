@@ -15,8 +15,6 @@
 
 #include "diagnostics.h"
 
-#include "arena.h"
-
 #define LEXER_MAX_BUFFER_SIZE 256
 
 void lexer_init(lexer_t* lex, arena_t* arena, const char* path, char* src)

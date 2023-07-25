@@ -1,9 +1,10 @@
 #ifndef TAU_ANALYZER_H
 #define TAU_ANALYZER_H
 
-#include "typedefs.h"
+#include "arena.h"
 #include "list.h"
 #include "stack.h"
+#include "typedefs.h"
 
 struct analyzer_s
 {

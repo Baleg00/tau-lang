@@ -11,8 +11,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "typedefs.h"
+#include "arena.h"
 #include "list.h"
+#include "typedefs.h"
 
 /** Platform specific byte size of a pointer. */
 #define TYPEDESC_PTR_SIZE sizeof(void*)

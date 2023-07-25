@@ -17,7 +17,6 @@
 #include "parser.h"
 #include "analzyer.h"
 
-#include "arena.h"
 #include "memtrace.h"
 
 #define COMPILER_MAX_BUFFER_SIZE 256

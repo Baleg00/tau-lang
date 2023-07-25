@@ -7,8 +7,6 @@
 #include "op.h"
 #include "ast.h"
 
-#include "arena.h"
-
 void typedesc_init(typedesc_t* desc, typedesc_kind_t kind, size_t size, size_t align)
 {
   desc->kind = kind;
