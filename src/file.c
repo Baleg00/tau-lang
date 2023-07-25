@@ -1,16 +1,21 @@
+/**
+ * \file file.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "file.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <stdarg.h>
-
-#include "util.h"
-#include "log.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "diagnostics.h"
-
+#include "log.h"
 #include "memtrace.h"
+#include "util.h"
 
 size_t file_read(const char* path, char* buf, size_t len)
 {
