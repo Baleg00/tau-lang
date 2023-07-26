@@ -22,29 +22,6 @@ typedef struct cli_s cli_t;
 /** Option callback type. */
 typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, const char*, void*);
 
-/** Indicates the crumb log kind. */
-typedef enum crumb_kind_e
-{
-  CRUMB_WARN, // Undesired code or behaviour.
-  CRUMB_ERROR // Illegal code or behaviour.
-} crumb_kind_t;
-
-/** Indicates the kind of a crumb log item. */
-typedef enum crumb_item_kind_e
-{
-  CRUMB_ITEM_MESSAGE, // Plain text.
-  CRUMB_ITEM_SNIPPET, // Source code snippet.
-} crumb_item_kind_t;
-
-/** Represents a crumb log message. */
-typedef struct crumb_item_message_s crumb_item_message_t;
-
-/** Represents a crumb log snippet. */
-typedef struct crumb_item_snippet_s crumb_item_snippet_t;
-
-/** Type large enough to hold any item kind. */
-typedef struct crumb_item_s crumb_item_t;
-
 /** Indicates the category of a token. */
 typedef enum token_flag_e
 {

@@ -1,20 +1,25 @@
+/**
+ * \file crumb.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "crumb.h"
 
-#include "util.h"
 #include "esc_seq.h"
-
 #include "file.h"
+#include "util.h"
 
-/** Global crumb file stream. */
-static FILE* crumb_file_g = NULL;
+static FILE* g_crumb_stream = NULL;
 
 void crumb_log_message(crumb_kind_t kind, crumb_item_message_t* item)
 {
   unused(kind);
 
-  fprintf(crumb_file_g, "\n    ");
-  vfprintf(crumb_file_g, item->msg, item->msg_args);
-  fputc('\n', crumb_file_g);
+  fprintf(g_crumb_stream, "\n    ");
+  vfprintf(g_crumb_stream, item->msg, item->msg_args);
+  fputc('\n', g_crumb_stream);
 }
 
 void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
@@ -25,13 +30,13 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
     char filename_buf[255];
     file_name(location_get_path(loc), filename_buf, sizeof(filename_buf));
 
-    fprintf(crumb_file_g, "\n[" ESC_FG_BRIGHT_BLACK "%s:%zu:%zu" ESC_RESET "]> %s", 
+    fprintf(g_crumb_stream, "\n[" ESC_FG_BRIGHT_BLACK "%s:%zu:%zu" ESC_RESET "]> %s", 
       filename_buf, location_get_row(loc) + 1, location_get_col(loc) + 1,
       crumb_kind_to_color(kind));
 
-    vfprintf(crumb_file_g, item->title, item->title_args);
+    vfprintf(g_crumb_stream, item->title, item->title_args);
 
-    fprintf(crumb_file_g, ESC_RESET "\n");
+    fprintf(g_crumb_stream, ESC_RESET "\n");
   }
 
   { // Print snippet and message
@@ -47,7 +52,7 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
       ++line_end;
 
     // Print the referenced line: <row> | <text>
-    fprintf(crumb_file_g, "    %s%zu" ESC_RESET " | %.*s%s%.*s" ESC_RESET "%.*s\n",
+    fprintf(g_crumb_stream, "    %s%zu" ESC_RESET " | %.*s%s%.*s" ESC_RESET "%.*s\n",
       crumb_kind_to_color(kind), // Row number color
       location_get_row(loc) + 1, // Row number
       (int)(location_get_ptr(loc) - line_begin), line_begin, // From line begin to referenced part
@@ -61,21 +66,21 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
         (int)(location_get_ptr(loc) - line_begin), line_begin);
 
       for (int i = 0; i < offset; ++i)
-        fputc(' ', crumb_file_g);
+        fputc(' ', g_crumb_stream);
 
-      fprintf(crumb_file_g, crumb_kind_to_color(kind));
+      fprintf(g_crumb_stream, crumb_kind_to_color(kind));
 
-      fputc('^', crumb_file_g);
+      fputc('^', g_crumb_stream);
 
       for (size_t i = 1; i < location_get_len(loc); ++i)
-        fputc('~', crumb_file_g);
+        fputc('~', g_crumb_stream);
 
-      fputc(' ', crumb_file_g);
+      fputc(' ', g_crumb_stream);
     }
 
     { // Print format string with arguments
-      vfprintf(crumb_file_g, item->msg, item->msg_args);
-      fprintf(crumb_file_g, ESC_RESET "\n");
+      vfprintf(g_crumb_stream, item->msg, item->msg_args);
+      fprintf(g_crumb_stream, ESC_RESET "\n");
     }
   }
 }
@@ -100,14 +105,14 @@ void crumb_log(crumb_kind_t kind, size_t count, ...)
   va_end(args);
 }
 
-void crumb_set_file(FILE* file)
+void crumb_set_stream(FILE* file)
 {
-  crumb_file_g = file;
+  g_crumb_stream = file;
 }
 
-FILE* crumb_get_file(void)
+FILE* crumb_get_stream(void)
 {
-  return crumb_file_g;
+  return g_crumb_stream;
 }
 
 const char* crumb_kind_to_color(crumb_kind_t kind)
