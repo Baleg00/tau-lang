@@ -1,28 +1,46 @@
+/**
+ * \file cli.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "cli.h"
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "arena.h"
+#include "memtrace.h"
 #include "util.h"
 
-#include "queue.h"
-
-#include "arena.h"
-
-void cli_init(cli_t* cli, cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count)
+struct cli_s
 {
+  cli_opt_t* opts; // Array of command-line options.
+  size_t opt_count; // Number of command-line options.
+
+  const char** usages; // Array of usage descriptions.
+  size_t usage_count; // Number of usage descriptions.
+};
+
+cli_t* cli_init(cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count)
+{
+  cli_t* cli = (cli_t*)malloc(sizeof(cli_t));
+  assert(cli != NULL);
+
   cli->opts = opts;
   cli->opt_count = opt_count;
-
   cli->usages = usages;
   cli->usage_count = usage_count;
+
+  return cli;
 }
 
 void cli_free(cli_t* cli)
 {
-  unused(cli);
+  free(cli);
 }
 
 void cli_parse(cli_t* cli, int argc, const char* argv[])

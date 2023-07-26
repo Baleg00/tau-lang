@@ -125,10 +125,9 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
   const char* usages[] = { "tau [option...] file..." };
 
-  cli_t cli;
-  cli_init(&cli, opts, countof(opts), usages, countof(usages));
-  cli_parse(&cli, argc, argv);
-  cli_free(&cli);
+  cli_t* cli = cli_init(opts, countof(opts), usages, countof(usages));
+  cli_parse(cli, argc, argv);
+  cli_free(cli);
 
   log_set_verbose(compiler->flags.verbose);
   log_set_level(compiler->args.log_level);

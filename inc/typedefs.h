@@ -1,27 +1,6 @@
 #ifndef TAU_TYPEDEFS_H
 #define TAU_TYPEDEFS_H
 
-typedef struct queue_s queue_t;
-
-/** Indicates argument type. */
-typedef enum cli_type_e
-{
-  CLI_TYPE_INTEGER, // Integer type
-  CLI_TYPE_FLOAT, // Floating-point type
-  CLI_TYPE_BOOLEAN, // Boolean type
-  CLI_TYPE_STRING, // String type
-  CLI_TYPE_SINK, // Absorbs all following arguments
-} cli_type_t;
-
-/** Represents a command-line option. */
-typedef struct cli_opt_s cli_opt_t;
-
-/** Represents a command-line interface instance. */
-typedef struct cli_s cli_t;
-
-/** Option callback type. */
-typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, const char*, void*);
-
 /** Indicates the category of a token. */
 typedef enum token_flag_e
 {
