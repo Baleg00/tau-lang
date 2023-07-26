@@ -11,6 +11,7 @@
 
 #include "arena.h"
 #include "list.h"
+#include "token.h"
 #include "typedefs.h"
 
 struct parser_s

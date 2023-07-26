@@ -9,7 +9,6 @@
 
 #include "crumb.h"
 
-#include "token.h"
 #include "ast.h"
 #include "shyd.h"
 
@@ -35,7 +34,7 @@ token_t* parser_next(parser_t* par)
   token_t* tok = parser_current(par);
   assert(tok != NULL);
 
-  if (tok->kind != TOK_EOF)
+  if (token_get_kind(tok) != TOK_EOF)
     par->cur = list_node_next(par->cur);
 
   return tok;
@@ -46,7 +45,7 @@ token_t* parser_peek(parser_t* par)
   token_t* tok = parser_current(par);
   assert(tok != NULL);
 
-  if (tok->kind == TOK_EOF)
+  if (token_get_kind(tok) == TOK_EOF)
     return tok;
 
   return (token_t*)list_node_get(list_node_next(par->cur));
@@ -54,7 +53,7 @@ token_t* parser_peek(parser_t* par)
 
 bool parser_consume(parser_t* par, token_kind_t kind)
 {
-  if (parser_current(par)->kind == kind)
+  if (token_get_kind(parser_current(par)) == kind)
   {
     parser_next(par);
     return true;
@@ -67,8 +66,8 @@ token_t* parser_expect(parser_t* par, token_kind_t kind)
 {
   token_t* tok = parser_current(par);
 
-  if (tok->kind != kind)
-    report_error_unexpected_token(tok->loc);
+  if (token_get_kind(tok) != kind)
+    report_error_unexpected_token(token_get_loc(tok));
 
   return parser_next(par);
 }
@@ -171,7 +170,7 @@ ast_node_t* parser_parse_type_array(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACKET_LEFT);
   
-  node->size = parser_current(par)->kind == TOK_PUNCT_BRACKET_RIGHT ? NULL : parser_parse_expr(par);
+  node->size = token_get_kind(parser_current(par)) == TOK_PUNCT_BRACKET_RIGHT ? NULL : parser_parse_expr(par);
   
   parser_expect(par, TOK_PUNCT_BRACKET_RIGHT);
 
@@ -250,7 +249,7 @@ ast_node_t* parser_parse_type_member(parser_t* par)
   assert(owner != NULL);
   ast_node_init((ast_node_t*)owner, AST_ID, parser_current(par));
 
-  if (parser_current(par)->kind == TOK_PUNCT_DOT)
+  if (token_get_kind(parser_current(par)) == TOK_PUNCT_DOT)
   {
     ast_type_member_t* type = (ast_type_member_t*)arena_malloc(par->arena, sizeof(ast_type_member_t));
     assert(type != NULL);
@@ -269,7 +268,7 @@ ast_node_t* parser_parse_type(parser_t* par)
 {
   ast_node_t* node;
 
-  switch (parser_current(par)->kind)
+  switch (token_get_kind(parser_current(par)))
   {
   case TOK_KW_MUT:
     return parser_parse_type_mut(par);
@@ -365,7 +364,7 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_ID:
     return parser_parse_type_member(par);                      
   default:
-    report_error_unexpected_token(parser_current(par)->loc);
+    report_error_unexpected_token(token_get_loc(parser_current(par)));
   }
 
   return NULL;
@@ -506,10 +505,10 @@ ast_node_t* parser_parse_stmt_expr(parser_t* par)
 
 ast_node_t* parser_parse_stmt(parser_t* par)
 {
-  switch (parser_current(par)->kind)
+  switch (token_get_kind(parser_current(par)))
   {
   case TOK_ID:
-    if (parser_peek(par)->kind == TOK_PUNCT_COLON)
+    if (token_get_kind(parser_peek(par)) == TOK_PUNCT_COLON)
       return parser_parse_decl_var(par);
     break;
   case TOK_KW_STRUCT:        return parser_parse_decl_struct(par);
@@ -571,7 +570,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   parser_expect(par, TOK_KW_FUN);
   
   // Parse generic parameters.
-  if (parser_current(par)->kind == TOK_PUNCT_LESS)
+  if (token_get_kind(parser_current(par)) == TOK_PUNCT_LESS)
   {
     generic_node = (ast_decl_generic_t*)arena_malloc(par->arena, sizeof(ast_decl_generic_t));
     assert(generic_node != NULL);
@@ -603,7 +602,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
         // Default parameters must be followed only by default parameters.
         if (seen_default)
-          report_error_missing_default_parameter(variadic_param->tok->loc, ((ast_param_t*)list_back(node->params))->tok->loc);
+          report_error_missing_default_parameter(token_get_loc(variadic_param->tok), token_get_loc(((ast_param_t*)list_back(node->params))->tok));
 
         list_push_back(node->params, variadic_param);
         break;
@@ -617,7 +616,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
       // Default parameters must be followed only by default parameters.
       if (seen_default && param->kind != AST_PARAM_DEFAULT)
-        report_error_missing_default_parameter(param->tok->loc, ((ast_param_t*)list_back(node->params))->tok->loc);
+        report_error_missing_default_parameter(token_get_loc(param->tok), token_get_loc(((ast_param_t*)list_back(node->params))->tok));
 
       list_push_back(node->params, param);
 
@@ -647,7 +646,7 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
   parser_expect(par, TOK_KW_FUN);
   
   // Parse generic parameters.
-  if (parser_current(par)->kind == TOK_PUNCT_LESS)
+  if (token_get_kind(parser_current(par)) == TOK_PUNCT_LESS)
   {
     generic_node = (ast_decl_generic_t*)arena_malloc(par->arena, sizeof(ast_decl_generic_t));
     assert(generic_node != NULL);
@@ -679,7 +678,7 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
 
         // Default parameters must be followed only by default parameters.
         if (seen_default)
-          report_error_missing_default_parameter(variadic_param->tok->loc, ((ast_param_t*)list_back(node->params))->tok->loc);
+          report_error_missing_default_parameter(token_get_loc(variadic_param->tok), token_get_loc(((ast_param_t*)list_back(node->params))->tok));
 
         list_push_back(node->params, variadic_param);
         break;
@@ -693,7 +692,7 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
 
       // Default parameters must be followed only by default parameters.
       if (seen_default && param->kind != AST_PARAM_DEFAULT)
-        report_error_missing_default_parameter(param->tok->loc, ((ast_param_t*)list_back(node->params))->tok->loc);
+        report_error_missing_default_parameter(token_get_loc(param->tok), token_get_loc(((ast_param_t*)list_back(node->params))->tok));
 
       list_push_back(node->params, param);
 
@@ -723,7 +722,7 @@ ast_node_t* parser_parse_decl_struct(parser_t* par)
   parser_expect(par, TOK_KW_STRUCT);
   
   // Parse generic parameters.
-  if (parser_current(par)->kind == TOK_PUNCT_LESS)
+  if (token_get_kind(parser_current(par)) == TOK_PUNCT_LESS)
   {
     generic_node = (ast_decl_generic_t*)arena_malloc(par->arena, sizeof(ast_decl_generic_t));
     assert(generic_node != NULL);
@@ -797,7 +796,7 @@ ast_node_t* parser_parse_decl_mod(parser_t* par)
 
 ast_node_t* parser_parse_decl(parser_t* par)
 {
-  switch (parser_current(par)->kind)
+  switch (token_get_kind(parser_current(par)))
   {
   case TOK_ID:        return parser_parse_decl_var(par);
   case TOK_KW_FUN:    return parser_parse_decl_fun(par);
@@ -806,7 +805,7 @@ ast_node_t* parser_parse_decl(parser_t* par)
   case TOK_KW_UNION:  return parser_parse_decl_union(par);
   case TOK_KW_ENUM:   return parser_parse_decl_enum(par);
   case TOK_KW_MOD:    return parser_parse_decl_mod(par);
-  default:            report_error_unexpected_token(parser_current(par)->loc);
+  default:            report_error_unexpected_token(token_get_loc(parser_current(par)));
   }
 
   return NULL;

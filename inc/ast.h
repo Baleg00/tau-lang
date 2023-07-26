@@ -15,6 +15,7 @@
 #include "list.h"
 #include "location.h"
 #include "stack.h"
+#include "token.h"
 #include "typedefs.h"
 
 /** Utility macro which expands to fields that all nodes must have. */
@@ -379,8 +380,8 @@ struct ast_prog_s
 */
 void ast_node_init(ast_node_t* node, ast_kind_t kind, token_t* tok);
 
-#define ast_id_ptr(NODE) (location_get_ptr(((ast_id_t*)(NODE))->tok->loc))
-#define ast_id_len(NODE) (location_get_len(((ast_id_t*)(NODE))->tok->loc))
+#define ast_id_ptr(NODE) (location_get_ptr(token_get_loc(((ast_id_t*)(NODE))->tok)))
+#define ast_id_len(NODE) (location_get_len(token_get_loc(((ast_id_t*)(NODE))->tok)))
 
 /**
  * \brief Destroys an AST node and all of its children.

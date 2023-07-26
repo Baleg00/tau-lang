@@ -13,6 +13,7 @@
 #include "arena.h"
 #include "list.h"
 #include "location.h"
+#include "token.h"
 #include "typedefs.h"
 
 struct lexer_s
@@ -48,7 +49,7 @@ void lexer_free(lexer_t* lex);
  * \param[in] lex Lexer to be used.
  * \returns Copy of current location.
  */
-location_t* lexer_location_copy(lexer_t* lex);
+location_t* lexer_copy_loc(lexer_t* lex);
 
 /**
  * \brief Initializes a new token using the current state.
