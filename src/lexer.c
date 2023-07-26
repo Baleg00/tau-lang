@@ -1,36 +1,52 @@
+/**
+ * \file lexer.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "lexer.h"
 
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
-#include "util.h"
-#include "log.h"
 #include "crumb.h"
-
-#include "file.h"
-
-#include "token.h"
-
 #include "diagnostics.h"
+#include "file.h"
+#include "list.h"
+#include "location.h"
+#include "log.h"
+#include "memtrace.h"
+#include "token.h"
+#include "util.h"
 
 #define LEXER_MAX_BUFFER_SIZE 256
 
-void lexer_init(lexer_t* lex, arena_t* arena, const char* path, char* src)
+struct lexer_s
 {
-  lex->arena = arena;
+  location_t* loc; // Current location in source file.
+};
+
+lexer_t* lexer_init(const char* path, char* src)
+{
+  lexer_t* lex = (lexer_t*)malloc(sizeof(lexer_t));
+  assert(lex != NULL);
 
   lex->loc = location_init(path, src, src, 0, 0, 0);
+
+  return lex;
 }
 
 void lexer_free(lexer_t* lex)
 {
   location_free(lex->loc);
+  free(lex);
 }
 
-location_t* lexer_copy_loc(lexer_t* lex)
+location_t* lexer_location_copy(lexer_t* lex)
 {
-  location_t* loc = location_init(
+  location_t* loc_copy = location_init(
     location_get_path(lex->loc),
     location_get_src(lex->loc),
     location_get_ptr(lex->loc),
@@ -39,12 +55,12 @@ location_t* lexer_copy_loc(lexer_t* lex)
     location_get_len(lex->loc)
   );
 
-  return loc;
+  return loc_copy;
 }
 
 token_t* lexer_token_init(lexer_t* lex, token_kind_t kind)
 {
-  location_t* loc = lexer_copy_loc(lex);
+  location_t* loc = lexer_location_copy(lex);
   token_t* tok = token_init(kind, loc);
   return tok;
 }
@@ -373,7 +389,7 @@ token_t* lexer_read_string(lexer_t* lex)
         if (!isxdigit(lexer_current(lex)))
         {
           location_set_len(token_get_loc(tok), 2);
-          location_set_ptr(lex->loc, location_get_ptr(lex->loc) - 2);
+          location_set_ptr(token_get_loc(tok), location_get_ptr(lex->loc) - 2);
           report_error_missing_hex_digits_in_escape_sequence(token_get_loc(tok));
         }
 
@@ -382,7 +398,7 @@ token_t* lexer_read_string(lexer_t* lex)
 
       default:
         location_set_len(token_get_loc(tok), 2);
-        location_set_ptr(lex->loc, location_get_ptr(lex->loc) - 2);
+        location_set_ptr(token_get_loc(tok), location_get_ptr(lex->loc) - 2);
         report_error_unknown_escape_sequence(token_get_loc(tok));
       }
     }
@@ -437,7 +453,7 @@ token_t* lexer_read_character(lexer_t* lex)
       if (!isxdigit(lexer_current(lex)))
       {
         location_set_len(token_get_loc(tok), 2);
-        location_set_ptr(lex->loc, location_get_ptr(lex->loc) - 2);
+        location_set_ptr(token_get_loc(tok), location_get_ptr(lex->loc) - 2);
         report_error_missing_hex_digits_in_escape_sequence(token_get_loc(tok));
       }
 
@@ -446,14 +462,14 @@ token_t* lexer_read_character(lexer_t* lex)
       if (len > 4)
       {
         location_set_len(token_get_loc(tok), len);
-        location_set_ptr(lex->loc, location_get_ptr(lex->loc) - len);
+        location_set_ptr(token_get_loc(tok), location_get_ptr(lex->loc) - len);
         report_error_too_many_hex_digits_in_escape_sequence(token_get_loc(tok));
       }
       break;
 
     default:
       location_set_len(token_get_loc(tok), 2);
-      location_set_ptr(lex->loc, location_get_ptr(lex->loc) - 2);
+      location_set_ptr(token_get_loc(tok), location_get_ptr(lex->loc) - 2);
       report_error_unknown_escape_sequence(token_get_loc(tok));
     }
   }

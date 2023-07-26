@@ -156,14 +156,11 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     log_trace("main", "(%s) Lexical analysis.", input_file_name);
 
-    arena_t* lexer_arena = arena_init();
-
-    lexer_t lexer;
-    lexer_init(&lexer, lexer_arena, input_file_path, src);
+    lexer_t* lexer = lexer_init(input_file_path, src);
 
     list_t* toks = list_init();
 
-    time_it(lexer, lexer_lex(&lexer, toks));
+    time_it(lexer, lexer_lex(lexer, toks));
 
     if (compiler->flags.dump_tokens)
       compiler_dump_tokens(compiler, input_file_path, input_file_name, toks);
@@ -201,8 +198,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     list_for_each(toks, LIST_FOR_EACH_FUNC_NAME(token_free));
     list_free(toks);
-    lexer_free(&lexer);
-    arena_free(lexer_arena);
+    lexer_free(lexer);
     
     free(src);
   }

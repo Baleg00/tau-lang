@@ -1,9 +1,6 @@
 #ifndef TAU_TYPEDEFS_H
 #define TAU_TYPEDEFS_H
 
-/** Represents a lexical analyzer. */
-typedef struct lexer_s lexer_t;
-
 /** Indicates the category of a node. */
 typedef enum ast_flag_e
 {
