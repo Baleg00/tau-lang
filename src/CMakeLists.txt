@@ -13,6 +13,7 @@ set(TAU_SOURCES
   ${TAU_SOURCE_DIR}/crumb.c
   ${TAU_SOURCE_DIR}/diagnostics.c
   ${TAU_SOURCE_DIR}/file.c
+  ${TAU_SOURCE_DIR}/hash.c
   ${TAU_SOURCE_DIR}/lexer.c
   ${TAU_SOURCE_DIR}/list.c
   ${TAU_SOURCE_DIR}/location.c

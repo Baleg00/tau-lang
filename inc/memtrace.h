@@ -14,7 +14,7 @@
  * the overall memory management of the application.
  * 
  * \copyright Copyright (c) Róna Balázs. All rights reserved.
- * \license 
+ * \license This project is released under the Apache 2.0 license.
 */
 
 #ifndef TAU_MEMTRACE_H

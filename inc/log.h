@@ -14,7 +14,7 @@
  * centralized and organized view of its runtime activities.
  * 
  * \copyright Copyright (c) Róna Balázs. All rights reserved.
- * \license 
+ * \license This project is released under the Apache 2.0 license.
 */
 
 #ifndef TAU_LOG_H

@@ -2,7 +2,7 @@
  * \file log.c
  * 
  * \copyright Copyright (c) Róna Balázs. All rights reserved.
- * \license 
+ * \license This project is released under the Apache 2.0 license.
 */
 
 #include "log.h"
