@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "util.h"
+#include "location.h"
 #include "log.h"
+#include "util.h"
+
 #include "crumb.h"
 
 #include "token.h"

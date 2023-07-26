@@ -12,6 +12,7 @@
 
 #include "arena.h"
 #include "list.h"
+#include "location.h"
 #include "typedefs.h"
 
 struct lexer_s

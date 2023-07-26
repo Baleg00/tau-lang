@@ -5,8 +5,6 @@
 
 #include "file.h"
 
-#include "location.h"
-
 /** Global crumb file stream. */
 static FILE* crumb_file_g = NULL;
 
@@ -25,10 +23,10 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
 
   { // Print message header: [<filename>:<row>:<column>]> <title>
     char filename_buf[255];
-    file_name(loc->path, filename_buf, sizeof(filename_buf));
+    file_name(location_get_path(loc), filename_buf, sizeof(filename_buf));
 
     fprintf(crumb_file_g, "\n[" ESC_FG_BRIGHT_BLACK "%s:%zu:%zu" ESC_RESET "]> %s", 
-      filename_buf, loc->row + 1, loc->col + 1,
+      filename_buf, location_get_row(loc) + 1, location_get_col(loc) + 1,
       crumb_kind_to_color(kind));
 
     vfprintf(crumb_file_g, item->title, item->title_args);
@@ -40,9 +38,9 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
     // Find line begin and end
     // `line_begin` points to the first character of the line
     // `line_end` points to the character after the last character of the line
-    const char *line_begin = loc->cur, *line_end = loc->cur;
+    const char *line_begin = location_get_ptr(loc), *line_end = location_get_ptr(loc);
 
-    while (line_begin > loc->src && *(line_begin - 1) != '\n')
+    while (line_begin > location_get_src(loc) && *(line_begin - 1) != '\n')
       --line_begin;
 
     while (*line_end != '\0' && *line_end != '\n')
@@ -51,16 +49,16 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
     // Print the referenced line: <row> | <text>
     fprintf(crumb_file_g, "    %s%zu" ESC_RESET " | %.*s%s%.*s" ESC_RESET "%.*s\n",
       crumb_kind_to_color(kind), // Row number color
-      loc->row + 1, // Row number
-      (int)(loc->cur - line_begin), line_begin, // From line begin to referenced part
+      location_get_row(loc) + 1, // Row number
+      (int)(location_get_ptr(loc) - line_begin), line_begin, // From line begin to referenced part
       crumb_kind_to_color(kind), // Highlight color
-      (int)loc->len, loc->cur, // Referenced part
-      (int)(line_end - loc->cur - loc->len), loc->cur + loc->len); // Rest of line
+      (int)location_get_len(loc), location_get_ptr(loc), // Referenced part
+      (int)(line_end - location_get_ptr(loc) - location_get_len(loc)), location_get_ptr(loc) + location_get_len(loc)); // Rest of line
 
     { // Print underline
       int offset = snprintf(NULL, 0, "    %zu | %.*s", 
-        loc->row + 1, 
-        (int)(loc->cur - line_begin), line_begin);
+        location_get_row(loc) + 1, 
+        (int)(location_get_ptr(loc) - line_begin), line_begin);
 
       for (int i = 0; i < offset; ++i)
         fputc(' ', crumb_file_g);
@@ -69,7 +67,7 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
 
       fputc('^', crumb_file_g);
 
-      for (size_t i = 1; i < loc->len; ++i)
+      for (size_t i = 1; i < location_get_len(loc); ++i)
         fputc('~', crumb_file_g);
 
       fputc(' ', crumb_file_g);

@@ -621,7 +621,7 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   case AST_UNKNOWN:
     break;
   case AST_ID:
-    fprintf(stream, ",\"id\":\"%.*s\"", (int)root->tok->loc->len, root->tok->loc->cur);
+    fprintf(stream, ",\"id\":\"%.*s\"", (int)location_get_len(root->tok->loc), location_get_ptr(root->tok->loc));
     break;
   case AST_TYPE_MUT:
     fprintf(stream, ",\"base_type\":");
@@ -689,7 +689,7 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   case AST_EXPR_LIT_CHAR:
   case AST_EXPR_LIT_BOOL:
   case AST_EXPR_LIT_NULL:
-    fprintf(stream, ",\"value\":\"%.*s\"", (int)root->tok->loc->len, root->tok->loc->cur);
+    fprintf(stream, ",\"value\":\"%.*s\"", (int)location_get_len(root->tok->loc), location_get_ptr(root->tok->loc));
     break;
   case AST_EXPR_OP:
     fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(((ast_expr_op_t*)root)->op_kind));
@@ -919,7 +919,7 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root)
       case AST_UNKNOWN:
         break;
       case AST_ID:
-        fprintf(stream, ",\"id\":\"%.*s\"", (int)root->tok->loc->len, root->tok->loc->cur);
+        fprintf(stream, ",\"id\":\"%.*s\"", (int)location_get_len(root->tok->loc), location_get_ptr(root->tok->loc));
         break;
       case AST_TYPE_MUT:
         fprintf(stream, ",\"base_type\":\"%p\"", (void*)((ast_type_mut_t*)root)->base_type);
@@ -987,7 +987,7 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root)
       case AST_EXPR_LIT_CHAR:
       case AST_EXPR_LIT_BOOL:
       case AST_EXPR_LIT_NULL:
-        fprintf(stream, ",\"value\":\"%.*s\"", (int)root->tok->loc->len, root->tok->loc->cur);
+        fprintf(stream, ",\"value\":\"%.*s\"", (int)location_get_len(root->tok->loc), location_get_ptr(root->tok->loc));
         break;
       case AST_EXPR_OP:
         fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(((ast_expr_op_t*)root)->op_kind));

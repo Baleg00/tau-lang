@@ -12,9 +12,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "typedefs.h"
 #include "list.h"
+#include "location.h"
 #include "stack.h"
+#include "typedefs.h"
 
 /** Utility macro which expands to fields that all nodes must have. */
 #define AST_NODE_HEADER\
@@ -378,8 +379,8 @@ struct ast_prog_s
 */
 void ast_node_init(ast_node_t* node, ast_kind_t kind, token_t* tok);
 
-#define ast_id_ptr(NODE) (((ast_id_t*)(NODE))->tok->loc->cur)
-#define ast_id_len(NODE) (((ast_id_t*)(NODE))->tok->loc->len)
+#define ast_id_ptr(NODE) (location_get_ptr(((ast_id_t*)(NODE))->tok->loc))
+#define ast_id_len(NODE) (location_get_len(((ast_id_t*)(NODE))->tok->loc))
 
 /**
  * \brief Destroys an AST node and all of its children.

@@ -45,9 +45,6 @@ typedef struct crumb_item_snippet_s crumb_item_snippet_t;
 /** Type large enough to hold any item kind. */
 typedef struct crumb_item_s crumb_item_t;
 
-/** Marks a location in a source file. */
-typedef struct location_s location_t;
-
 /** Indicates the category of a token. */
 typedef enum token_flag_e
 {

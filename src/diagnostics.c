@@ -7,7 +7,6 @@
 #include "log.h"
 #include "crumb.h"
 
-#include "location.h"
 #include "typedesc.h"
 
 #include "memtrace.h"

@@ -383,7 +383,7 @@ void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_
     {
       ast_decl_var_t* member = (ast_decl_var_t*)list_node_get(it);
 
-      if (strncmp(ast_id_ptr(member->id), tok_rhs->loc->cur, ast_id_len(member->id)) == 0)
+      if (strncmp(ast_id_ptr(member->id), location_get_ptr(tok_rhs->loc), ast_id_len(member->id)) == 0)
       {
         node->rhs = (ast_node_t*)member;
         node->desc = ast_desc_of((ast_node_t*)member);
@@ -398,7 +398,7 @@ void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_
     {
       ast_decl_var_t* member = (ast_decl_var_t*)list_node_get(it);
 
-      if (strncmp(ast_id_ptr(member->id), tok_rhs->loc->cur, ast_id_len(member->id)) == 0)
+      if (strncmp(ast_id_ptr(member->id), location_get_ptr(tok_rhs->loc), ast_id_len(member->id)) == 0)
       {
         node->rhs = (ast_node_t*)member;
         node->desc = ast_desc_of((ast_node_t*)member);
@@ -413,7 +413,7 @@ void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_
     {
       ast_enumerator_t* enumerator = (ast_enumerator_t*)list_node_get(it);
 
-      if (strncmp(ast_id_ptr(enumerator->id), tok_rhs->loc->cur, ast_id_len(enumerator->id)) == 0)
+      if (strncmp(ast_id_ptr(enumerator->id), location_get_ptr(tok_rhs->loc), ast_id_len(enumerator->id)) == 0)
       {
         node->rhs = (ast_node_t*)enumerator;
         node->desc = owner_desc;
@@ -428,7 +428,7 @@ void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_
     {
       ast_decl_t* decl = (ast_decl_t*)list_node_get(it);
 
-      if (strncmp(ast_id_ptr(decl->id), tok_rhs->loc->cur, ast_id_len(decl->id)) == 0)
+      if (strncmp(ast_id_ptr(decl->id), location_get_ptr(tok_rhs->loc), ast_id_len(decl->id)) == 0)
       {
         node->rhs = (ast_node_t*)decl;
         node->desc = ast_desc_of((ast_node_t*)decl);
@@ -466,7 +466,7 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_exp
   case AST_ID:
   {
     token_t* id_tok = node->tok;
-    symbol_t* id_sym = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
+    symbol_t* id_sym = symtable_lookup(table, location_get_ptr(id_tok->loc), location_get_len(id_tok->loc));
     
     if (id_sym == NULL)
       report_error_undefined_symbol(id_tok->loc);
@@ -515,7 +515,7 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_exp
 ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* table, ast_type_member_t* node)
 {
   token_t* owner_id_tok = node->owner->tok;
-  symbol_t* owner_sym = symtable_lookup(table, owner_id_tok->loc->cur, owner_id_tok->loc->len);
+  symbol_t* owner_sym = symtable_lookup(table, location_get_ptr(owner_id_tok->loc), location_get_len(owner_id_tok->loc));
 
   if (owner_sym == NULL)
     report_error_undefined_symbol(owner_id_tok->loc);
@@ -526,7 +526,7 @@ ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* table, 
   if (node->member->kind == AST_ID)
   {
     token_t* member_id_tok = node->member->tok;
-    symbol_t* member_sym = symtable_lookup(owner_sym->scope, member_id_tok->loc->cur, member_id_tok->loc->len);
+    symbol_t* member_sym = symtable_lookup(owner_sym->scope, location_get_ptr(member_id_tok->loc), location_get_len(member_id_tok->loc));
 
     if (member_sym == NULL)
       report_error_no_member_with_name(node->member->tok->loc);
@@ -546,7 +546,7 @@ static ast_node_t* analyzer_visit_type_id(analyzer_t* analyzer, symtable_t* tabl
   unused(analyzer);
 
   token_t* id_tok = node->tok;
-  symbol_t* id_sym = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
+  symbol_t* id_sym = symtable_lookup(table, location_get_ptr(id_tok->loc), location_get_len(id_tok->loc));
   
   if (id_sym == NULL)
     report_error_undefined_typename(id_tok->loc);
@@ -853,8 +853,8 @@ void analyzer_visit_decl_var(analyzer_t* analyzer, symtable_t* table, ast_decl_v
   node->desc = ast_desc_of(node->type);
 
   token_t* id_tok = node->id->tok;
-  symbol_t* var_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
+  symbol_t* var_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup(table, location_get_ptr(id_tok->loc), location_get_len(id_tok->loc));
   symbol_t* collision = symtable_insert(table, var_sym);
 
   if (collision != NULL && collision->node->kind == AST_DECL_VAR)
@@ -879,8 +879,8 @@ void analyzer_visit_decl_loop_var(analyzer_t* analyzer, symtable_t* table, ast_d
   node->desc = ast_desc_of(node->type);
 
   token_t* id_tok = node->id->tok;
-  symbol_t* var_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
+  symbol_t* var_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup(table, location_get_ptr(id_tok->loc), location_get_len(id_tok->loc));
   symbol_t* collision = symtable_insert(table, var_sym);
 
   assert(collision == NULL);
@@ -917,7 +917,7 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_decl_f
   node->desc = (typedesc_t*)fun_desc;
 
   token_t* id_tok = node->id->tok;
-  symbol_t* fun_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
+  symbol_t* fun_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
   fun_sym->scope = fun_table;
 
   symbol_t* collision = symtable_insert(table, fun_sym);
@@ -958,7 +958,7 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_decl_g
   node->desc = (typedesc_t*)gen_desc;
 
   token_t* id_tok = node->id->tok;
-  symbol_t* gen_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
+  symbol_t* gen_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
   gen_sym->scope = gen_table;
 
   symbol_t* collision = symtable_insert(table, gen_sym);
@@ -974,8 +974,8 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_decl_g
 void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_decl_struct_t* node)
 {
   token_t* id_tok = node->id->tok;
-  symbol_t* struct_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
+  symbol_t* struct_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup(table, location_get_ptr(id_tok->loc), location_get_len(id_tok->loc));
   symbol_t* collision = symtable_insert(table, struct_sym);
 
   if (collision != NULL)
@@ -1015,8 +1015,8 @@ void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* table, ast_dec
 void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_decl_union_t* node)
 {
   token_t* id_tok = node->id->tok;
-  symbol_t* union_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
+  symbol_t* union_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup(table, location_get_ptr(id_tok->loc), location_get_len(id_tok->loc));
   symbol_t* collision = symtable_insert(table, union_sym);
 
   if (collision != NULL)
@@ -1054,8 +1054,8 @@ void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* table, ast_decl
 void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_decl_enum_t* node)
 {
   token_t* id_tok = node->id->tok;
-  symbol_t* enum_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup(table, id_tok->loc->cur, id_tok->loc->len);
+  symbol_t* enum_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup(table, location_get_ptr(id_tok->loc), location_get_len(id_tok->loc));
   symbol_t* collision = symtable_insert(table, enum_sym);
 
   if (collision != NULL)
@@ -1082,7 +1082,7 @@ void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_decl_
 void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* table, ast_decl_mod_t* node)
 {
   token_t* id_tok = node->id->tok;
-  symbol_t* mod_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
+  symbol_t* mod_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, mod_sym);
 
   symtable_t* mod_table = NULL;
@@ -1144,7 +1144,7 @@ void analyzer_visit_decl(analyzer_t* analyzer, symtable_t* table, ast_decl_t* no
 void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_param_t* node)
 {
   token_t* id_tok = node->id->tok;
-  symbol_t* param_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
+  symbol_t* param_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, param_sym);
 
   if (collision != NULL && ast_is_param(collision->node))
@@ -1191,7 +1191,7 @@ void analyzer_visit_param_generic(analyzer_t* analyzer, symtable_t* table, ast_p
     node->desc = ast_desc_of(node->type);
 
   token_t* id_tok = node->id->tok;
-  symbol_t* param_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
+  symbol_t* param_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, param_sym);
 
   if (collision != NULL && ast_is_param(collision->node))
@@ -1203,7 +1203,7 @@ void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, symbol_t
   unused(analyzer);
 
   token_t* id_tok = node->id->tok;
-  symbol_t* enumerator_sym = symbol_init(id_tok->loc->cur, id_tok->loc->len, (ast_node_t*)node);
+  symbol_t* enumerator_sym = symbol_init(location_get_ptr(id_tok->loc), location_get_len(id_tok->loc), (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, enumerator_sym);
 
   if (collision != NULL)

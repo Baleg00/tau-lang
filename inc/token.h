@@ -11,8 +11,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "typedefs.h"
 #include "list.h"
+#include "location.h"
+#include "typedefs.h"
 
 struct token_s
 {

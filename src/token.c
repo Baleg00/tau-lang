@@ -2,8 +2,6 @@
 
 #include "util.h"
 
-#include "location.h"
-
 void token_init(token_t* tok, token_kind_t kind, location_t* loc)
 {
   tok->kind = kind;
@@ -26,7 +24,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
     fprintf(stream, "{\"kind\":\"%s\"", token_kind_to_string(tok->kind));
 
     if (token_is_literal(tok) || tok->kind == TOK_ID)
-      fprintf(stream, ",\"value\":\"%.*s\"", (int)tok->loc->len, tok->loc->cur);
+      fprintf(stream, ",\"value\":\"%.*s\"", (int)location_get_len(tok->loc), location_get_ptr(tok->loc));
 
     fputc('}', stream);
 

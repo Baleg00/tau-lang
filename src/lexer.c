@@ -10,7 +10,6 @@
 
 #include "file.h"
 
-#include "location.h"
 #include "token.h"
 
 #include "diagnostics.h"
@@ -21,10 +20,7 @@ void lexer_init(lexer_t* lex, arena_t* arena, const char* path, char* src)
 {
   lex->arena = arena;
 
-  lex->loc = (location_t*)arena_malloc(lex->arena, sizeof(location_t));
-  assert(lex->loc != NULL);
-
-  location_init(lex->loc, path, src, src, 0, 0, 0);
+  lex->loc = location_init(path, src, src, 0, 0, 0);
 }
 
 void lexer_free(lexer_t* lex)
@@ -34,10 +30,14 @@ void lexer_free(lexer_t* lex)
 
 location_t* lexer_location_copy(lexer_t* lex)
 {
-  location_t* loc = (location_t*)arena_malloc(lex->arena, sizeof(location_t));
-  assert(loc != NULL);
-
-  memcpy(loc, lex->loc, sizeof(location_t));
+  location_t* loc = location_init(
+    location_get_path(lex->loc),
+    location_get_src(lex->loc),
+    location_get_ptr(lex->loc),
+    location_get_row(lex->loc),
+    location_get_col(lex->loc),
+    location_get_len(lex->loc)
+  );
 
   return loc;
 }
@@ -56,68 +56,72 @@ token_t* lexer_token_init(lexer_t* lex, token_kind_t kind)
 
 bool lexer_is_space(lexer_t* lex)
 {
-  return isspace(*lex->loc->cur) != 0;
+  return isspace(*location_get_ptr(lex->loc)) != 0;
 }
 
 bool lexer_is_word_begin(lexer_t* lex)
 {
-  return isalpha(*lex->loc->cur) != 0 || *lex->loc->cur == '_';
+  return isalpha(*location_get_ptr(lex->loc)) != 0 || *location_get_ptr(lex->loc) == '_';
 }
 
 bool lexer_is_word(lexer_t* lex)
 {
-  return isalnum(*lex->loc->cur) != 0 || *lex->loc->cur == '_';
+  return isalnum(*location_get_ptr(lex->loc)) != 0 || *location_get_ptr(lex->loc) == '_';
 }
 
 bool lexer_is_decimal(lexer_t* lex)
 {
-  return isdigit(*lex->loc->cur) != 0;
+  return isdigit(*location_get_ptr(lex->loc)) != 0;
 }
 
 bool lexer_is_hexadecimal(lexer_t* lex)
 {
-  return isxdigit(*lex->loc->cur) != 0;
+  return isxdigit(*location_get_ptr(lex->loc)) != 0;
 }
 
 bool lexer_is_octal(lexer_t* lex)
 {
-  return '0' <= *lex->loc->cur && '7' >= *lex->loc->cur;
+  return '0' <= *location_get_ptr(lex->loc) && '7' >= *location_get_ptr(lex->loc);
 }
 
 bool lexer_is_binary(lexer_t* lex)
 {
-  return *lex->loc->cur == '0' || *lex->loc->cur == '1';
+  return *location_get_ptr(lex->loc) == '0' || *location_get_ptr(lex->loc) == '1';
 }
 
 bool lexer_is_punctuation(lexer_t* lex)
 {
-  return ispunct(*lex->loc->cur) != 0;
+  return ispunct(*location_get_ptr(lex->loc)) != 0;
 }
 
 char lexer_current(lexer_t* lex)
 {
-  return *lex->loc->cur;
+  return *location_get_ptr(lex->loc);
 }
 
 char lexer_next(lexer_t* lex)
 {
-  if (*lex->loc->cur == '\0')
+  if (*location_get_ptr(lex->loc) == '\0')
     return '\0';
   
-  if (*lex->loc->cur == '\n')
+  if (*location_get_ptr(lex->loc) == '\n')
   {
-    ++lex->loc->row;
-    lex->loc->col = 0;
+    location_set_row(lex->loc, location_get_row(lex->loc) + 1);
+    location_set_col(lex->loc, 0);
   }
   else
-    ++lex->loc->col;
+    location_set_col(lex->loc, location_get_col(lex->loc) + 1);
 
-  return *(lex->loc->cur++);
+  char ch = *location_get_ptr(lex->loc);
+
+  location_set_ptr(lex->loc, location_get_ptr(lex->loc) + 1);
+
+  return ch;
 }
 
 char lexer_peek(lexer_t* lex)
 {
-  return *lex->loc->cur == '\0' ? '\0' : *(lex->loc->cur + 1);
+  return *location_get_ptr(lex->loc) == '\0' ? '\0' : *(location_get_ptr(lex->loc) + 1);
 }
 
 bool lexer_consume(lexer_t* lex, char ch)
@@ -133,12 +137,12 @@ bool lexer_consume(lexer_t* lex, char ch)
 
 size_t lexer_skip(lexer_t* lex, bool(*pred)(lexer_t*))
 {
-  const char* begin = lex->loc->cur;
+  const char* begin = location_get_ptr(lex->loc);
 
-  while (*lex->loc->cur != '\0' && pred(lex))
+  while (*location_get_ptr(lex->loc) != '\0' && pred(lex))
     lexer_next(lex);
 
-  return (size_t)(lex->loc->cur - begin);
+  return (size_t)(location_get_ptr(lex->loc) - begin);
 }
 
 void lexer_skip_n(lexer_t* lex, size_t n)
@@ -202,12 +206,12 @@ token_t* lexer_read_word(lexer_t* lex)
   token_t* tok = lexer_token_init(lex, TOK_ID);
 
   size_t len = lexer_skip(lex, lexer_is_word);
-  tok->loc->len = len;
+  location_set_len(tok->loc, len);
 
   if (len > LEXER_MAX_BUFFER_SIZE - 1)
     report_error_identifier_too_long(tok->loc);
 
-  char* begin = tok->loc->cur;
+  const char* begin = location_get_ptr(tok->loc);
 
   char buf[LEXER_MAX_BUFFER_SIZE];
   strncpy(buf, begin, len);
@@ -230,7 +234,7 @@ token_t* lexer_read_octal_integer(lexer_t* lex)
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_octal);
-  tok->loc->len = len;
+  location_set_len(tok->loc, len);
 
   if (len == 2 || lexer_is_word(lex))
     report_error_ill_formed_integer_literal(tok->loc);
@@ -245,7 +249,7 @@ token_t* lexer_read_binary_integer(lexer_t* lex)
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_binary);
-  tok->loc->len = len;
+  location_set_len(tok->loc, len);
 
   if (len == 2 || lexer_is_word(lex))
     report_error_ill_formed_integer_literal(tok->loc);
@@ -263,7 +267,7 @@ token_t* lexer_read_decimal_number(lexer_t* lex)
   {
     if (!isdigit(lexer_peek(lex)))
     {
-      tok->loc->len = len;
+      location_set_len(tok->loc, len);
       return tok;
     }
 
@@ -286,7 +290,7 @@ token_t* lexer_read_decimal_number(lexer_t* lex)
       len += lexer_skip(lex, lexer_is_decimal);
     }
 
-    tok->loc->len = len;
+    location_set_len(tok->loc, len);
 
     if (lexer_is_word(lex))
       report_error_ill_formed_floating_point_literal(tok->loc);
@@ -295,7 +299,7 @@ token_t* lexer_read_decimal_number(lexer_t* lex)
     return tok;
   }
 
-  tok->loc->len = len;
+  location_set_len(tok->loc, len);
 
   if (lexer_is_word(lex))
     report_error_ill_formed_integer_literal(tok->loc);
@@ -310,7 +314,7 @@ token_t* lexer_read_hexadecimal_integer(lexer_t* lex)
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_hexadecimal);
-  tok->loc->len = len;
+  location_set_len(tok->loc, len);
 
   if (len == 2 || lexer_is_word(lex))
     report_error_ill_formed_integer_literal(tok->loc);
@@ -373,8 +377,8 @@ token_t* lexer_read_string(lexer_t* lex)
 
         if (!isxdigit(lexer_current(lex)))
         {
-          tok->loc->len = 2;
-          tok->loc->cur = lex->loc->cur - 2;
+          location_set_len(tok->loc, 2);
+          location_set_ptr(lex->loc, location_get_ptr(lex->loc) - 2);
           report_error_missing_hex_digits_in_escape_sequence(tok->loc);
         }
 
@@ -382,8 +386,8 @@ token_t* lexer_read_string(lexer_t* lex)
         break;
 
       default:
-        tok->loc->len = 2;
-        tok->loc->cur = lex->loc->cur - 2;
+        location_set_len(tok->loc, 2);
+        location_set_ptr(lex->loc, location_get_ptr(lex->loc) - 2);
         report_error_unknown_escape_sequence(tok->loc);
       }
     }
@@ -391,11 +395,11 @@ token_t* lexer_read_string(lexer_t* lex)
 
   if (ch != '"')
   {
-    tok->loc->len = 1;
+    location_set_len(tok->loc, 1);
     report_error_missing_terminating_double_quotes(tok->loc);
   }
 
-  tok->loc->len = len + 2;
+  location_set_len(tok->loc, len + 2);
 
   return tok;
 }
@@ -410,7 +414,7 @@ token_t* lexer_read_character(lexer_t* lex)
 
   if (lexer_current(lex) == '\'')
   {
-    tok->loc->len = 2;
+    location_set_len(tok->loc, 2);
     report_error_empty_character_literal(tok->loc);
   }
 
@@ -437,8 +441,8 @@ token_t* lexer_read_character(lexer_t* lex)
 
       if (!isxdigit(lexer_current(lex)))
       {
-        tok->loc->len = 2;
-        tok->loc->cur = lex->loc->cur - 2;
+        location_set_len(tok->loc, 2);
+        location_set_ptr(lex->loc, location_get_ptr(lex->loc) - 2);
         report_error_missing_hex_digits_in_escape_sequence(tok->loc);
       }
 
@@ -446,15 +450,15 @@ token_t* lexer_read_character(lexer_t* lex)
 
       if (len > 4)
       {
-        tok->loc->len = len;
-        tok->loc->cur = lex->loc->cur - len;
+        location_set_len(tok->loc, len);
+        location_set_ptr(lex->loc, location_get_ptr(lex->loc) - len);
         report_error_too_many_hex_digits_in_escape_sequence(tok->loc);
       }
       break;
 
     default:
-      tok->loc->len = 2;
-      tok->loc->cur = lex->loc->cur - 2;
+      location_set_len(tok->loc, 2);
+      location_set_ptr(lex->loc, location_get_ptr(lex->loc) - 2);
       report_error_unknown_escape_sequence(tok->loc);
     }
   }
@@ -463,11 +467,11 @@ token_t* lexer_read_character(lexer_t* lex)
 
   if (lexer_next(lex) != '\'')
   {
-    tok->loc->len = 1;
+    location_set_len(tok->loc, 1);
     report_error_missing_terminating_single_quote(tok->loc);
   }
 
-  tok->loc->len = len + 2;
+  location_set_len(tok->loc, len + 2);
 
   return tok;
 }
@@ -529,7 +533,7 @@ token_t* lexer_read_punctuation(lexer_t* lex)
   };
 
   token_t* tok = lexer_token_init(lex, TOK_UNKNOWN);
-  tok->loc->len = 1;
+  location_set_len(tok->loc, 1);
   
   token_kind_t kind = TOK_UNKNOWN;
 
@@ -650,12 +654,12 @@ token_t* lexer_read_punctuation(lexer_t* lex)
     report_error_unexpected_character(tok->loc);
 
   tok->kind = kind;
-  tok->loc->len = 0;
+  location_set_len(tok->loc, 0);
 
   for (size_t i = 0; i < countof(lookup); ++i)
     if (lookup[i].kind == kind)
     {
-      tok->loc->len = lookup[i].len;
+      location_set_len(tok->loc, lookup[i].len);
       break;
     }
 

@@ -1,6 +1,7 @@
 #ifndef TAU_DIAGNOSTICS_H
 #define TAU_DIAGNOSTICS_H
 
+#include "location.h"
 #include "typedefs.h"
 
 void report_error_unexpected_character(location_t* loc);

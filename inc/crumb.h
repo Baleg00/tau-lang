@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+#include "location.h"
 #include "typedefs.h"
 
 struct crumb_item_message_s
