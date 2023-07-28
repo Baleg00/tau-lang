@@ -59,9 +59,7 @@
 #define AST_PARAM_HEADER\
   struct\
   {\
-    ast_node_t* id; /** Parameter identifier. */\
     ast_node_t* type; /** Parameter type. */\
-    typedesc_t* desc; /** Type descriptor. */\
   }
 
 struct ast_node_s
@@ -328,36 +326,39 @@ struct ast_decl_generic_s
   ast_node_t* decl; // Declaration.
 };
 
-struct ast_param_s
+struct ast_decl_param_s
 {
   AST_NODE_HEADER;
+  AST_DECL_HEADER;
   AST_PARAM_HEADER;
 };
 
-struct ast_param_default_s
+struct ast_decl_param_default_s
 {
   AST_NODE_HEADER;
+  AST_DECL_HEADER;
   AST_PARAM_HEADER;
   ast_node_t* init; // Initializer expression.
 };
 
-struct ast_param_variadic_s
+struct ast_decl_param_variadic_s
 {
   AST_NODE_HEADER;
+  AST_DECL_HEADER;
   AST_PARAM_HEADER;
 };
 
-struct ast_param_generic_s
+struct ast_decl_param_generic_s
 {
   AST_NODE_HEADER;
+  AST_DECL_HEADER;
   AST_PARAM_HEADER;
 };
 
-struct ast_enumerator_s
+struct ast_decl_enum_constant_s
 {
   AST_NODE_HEADER;
-  ast_node_t* id; // Enumerator identifier.
-  typedesc_t* desc; // Type descriptor.
+  AST_DECL_HEADER;
 };
 
 struct ast_prog_s

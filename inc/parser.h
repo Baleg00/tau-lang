@@ -468,7 +468,7 @@ ast_node_t* parser_parse_decl(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Parameter node.
 */
-ast_node_t* parser_parse_param(parser_t* par);
+ast_node_t* parser_parse_decl_param(parser_t* par);
 
 /**
  * \brief Parses a variadic function parameter.
@@ -476,7 +476,7 @@ ast_node_t* parser_parse_param(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Variadic parameter node.
 */
-ast_node_t* parser_parse_variadic_param(parser_t* par);
+ast_node_t* parser_parse_decl_param_variadic(parser_t* par);
 
 /**
  * \brief Parses a generic parameter.
@@ -484,7 +484,7 @@ ast_node_t* parser_parse_variadic_param(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Generic parameter node.
 */
-ast_node_t* parser_parse_generic_param(parser_t* par);
+ast_node_t* parser_parse_decl_param_generic(parser_t* par);
 
 /**
  * \brief Parses an enumerator in an enum declaration.
@@ -492,7 +492,7 @@ ast_node_t* parser_parse_generic_param(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Enumerator node.
 */
-ast_node_t* parser_parse_enumerator(parser_t* par);
+ast_node_t* parser_parse_decl_enum_constant(parser_t* par);
 
 /**
  * \brief Processes a list of tokens and produces an abstract syntax tree.

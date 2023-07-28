@@ -51,12 +51,12 @@ void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* table, ast_decl_m
 void analyzer_visit_decl_generic(analyzer_t* analyzer, symtable_t* table, ast_decl_generic_t* node);
 void analyzer_visit_decl(analyzer_t* analyzer, symtable_t* table, ast_decl_t* node);
 
-void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_param_t* node);
-void analyzer_visit_param_default(analyzer_t* analyzer, symtable_t* table, ast_param_default_t* node);
-void analyzer_visit_param_variadic(analyzer_t* analyzer, symtable_t* table, ast_param_variadic_t* node);
-void analyzer_visit_param_generic(analyzer_t* analyzer, symtable_t* table, ast_param_generic_t* node);
+void analyzer_visit_decl_param(analyzer_t* analyzer, symtable_t* table, ast_decl_param_t* node);
+void analyzer_visit_decl_param_default(analyzer_t* analyzer, symtable_t* table, ast_decl_param_default_t* node);
+void analyzer_visit_decl_param_variadic(analyzer_t* analyzer, symtable_t* table, ast_decl_param_variadic_t* node);
+void analyzer_visit_decl_param_generic(analyzer_t* analyzer, symtable_t* table, ast_decl_param_generic_t* node);
 
-void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, symbol_t* enum_sym, ast_enumerator_t* node);
+void analyzer_visit_decl_enum_constant(analyzer_t* analyzer, symtable_t* table, symbol_t* enum_sym, ast_decl_enum_constant_t* node);
 
 void analyzer_visit_prog(analyzer_t* analyzer, symtable_t* table, ast_prog_t* node);
 

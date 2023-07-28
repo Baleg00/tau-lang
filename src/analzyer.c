@@ -411,11 +411,11 @@ void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* table, ast_
   case TYPEDESC_ENUM:
     LIST_FOR_LOOP(it, ((ast_decl_enum_t*)((typedesc_enum_t*)owner_desc)->node)->values)
     {
-      ast_enumerator_t* enumerator = (ast_enumerator_t*)list_node_get(it);
+      ast_decl_enum_constant_t* enum_constant = (ast_decl_enum_constant_t*)list_node_get(it);
 
-      if (strncmp(ast_id_ptr(enumerator->id), location_get_ptr(token_get_loc(tok_rhs)), ast_id_len(enumerator->id)) == 0)
+      if (strncmp(ast_id_ptr(enum_constant->id), location_get_ptr(token_get_loc(tok_rhs)), ast_id_len(enum_constant->id)) == 0)
       {
-        node->rhs = (ast_node_t*)enumerator;
+        node->rhs = (ast_node_t*)enum_constant;
         node->desc = owner_desc;
         return;
       }
@@ -554,11 +554,11 @@ static ast_node_t* analyzer_visit_type_id(analyzer_t* analyzer, symtable_t* tabl
   if (id_sym->node->kind != AST_DECL_STRUCT &&
       id_sym->node->kind != AST_DECL_UNION &&
       id_sym->node->kind != AST_DECL_ENUM &&
-      id_sym->node->kind != AST_PARAM_GENERIC)
+      id_sym->node->kind != AST_DECL_PARAM_GENERIC)
     report_error_symbol_is_not_a_typename(token_get_loc(id_tok));
 
-  if (id_sym->node->kind == AST_PARAM_GENERIC &&
-      ((ast_param_generic_t*)id_sym->node)->type->kind != AST_TYPE_TYPE)
+  if (id_sym->node->kind == AST_DECL_PARAM_GENERIC &&
+      ((ast_decl_param_generic_t*)id_sym->node)->type->kind != AST_TYPE_TYPE)
     report_error_symbol_is_not_a_typename(token_get_loc(id_tok));
 
   ast_node_free((ast_node_t*)node);
@@ -660,7 +660,7 @@ static void analyzer_visit_type_fun(analyzer_t* analyzer, symtable_t* table, ast
 
     LIST_FOR_LOOP(it, node->params)
     {
-      ast_param_t* param = (ast_param_t*)list_node_get(it);
+      ast_decl_param_t* param = (ast_decl_param_t*)list_node_get(it);
       list_push_back(desc->param_types, param->desc);
     }
   }
@@ -686,7 +686,7 @@ static void analyzer_visit_type_gen(analyzer_t* analyzer, symtable_t* table, ast
 
     LIST_FOR_LOOP(it, node->params)
     {
-      ast_param_t* param = (ast_param_t*)list_node_get(it);
+      ast_decl_param_t* param = (ast_decl_param_t*)list_node_get(it);
       list_push_back(desc->param_types, param->desc);
     }
   }
@@ -905,8 +905,8 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* table, ast_decl_f
 
     LIST_FOR_LOOP(it, node->params)
     {
-      ast_param_t* param = (ast_param_t*)list_node_get(it);
-      analyzer_visit_param(analyzer, fun_table, param);
+      ast_decl_param_t* param = (ast_decl_param_t*)list_node_get(it);
+      analyzer_visit_decl_param(analyzer, fun_table, param);
       list_push_back(fun_desc->param_types, param->desc);
     }
   }
@@ -946,8 +946,8 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* table, ast_decl_g
 
     LIST_FOR_LOOP(it, node->params)
     {
-      ast_param_t* param = (ast_param_t*)list_node_get(it);
-      analyzer_visit_param(analyzer, gen_table, param);
+      ast_decl_param_t* param = (ast_decl_param_t*)list_node_get(it);
+      analyzer_visit_decl_param(analyzer, gen_table, param);
       list_push_back(gen_desc->param_types, param->desc);
     }
   }
@@ -1074,7 +1074,7 @@ void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* table, ast_decl_
   enum_desc->node = (ast_decl_t*)node;
 
   LIST_FOR_LOOP(it, node->values)
-    analyzer_visit_enumerator(analyzer, enum_table, enum_sym, (ast_enumerator_t*)list_node_get(it));
+    analyzer_visit_decl_enum_constant(analyzer, enum_table, enum_sym, (ast_decl_enum_constant_t*)list_node_get(it));
 
   node->desc = (typedesc_t*)enum_desc;
 }
@@ -1120,7 +1120,7 @@ void analyzer_visit_decl_generic(analyzer_t* analyzer, symtable_t* table, ast_de
   symtable_t* generic_table = symtable_init(table);
 
   LIST_FOR_LOOP(it, node->params)
-    analyzer_visit_param_generic(analyzer, generic_table, (ast_param_generic_t*)list_node_get(it));
+    analyzer_visit_decl_param_generic(analyzer, generic_table, (ast_decl_param_generic_t*)list_node_get(it));
 
   analyzer_visit_decl(analyzer, generic_table, (ast_decl_t*)node->decl);
 }
@@ -1141,7 +1141,7 @@ void analyzer_visit_decl(analyzer_t* analyzer, symtable_t* table, ast_decl_t* no
   }
 }
 
-void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_param_t* node)
+void analyzer_visit_decl_param(analyzer_t* analyzer, symtable_t* table, ast_decl_param_t* node)
 {
   token_t* id_tok = node->id->tok;
   symbol_t* param_sym = symbol_init(location_get_ptr(token_get_loc(id_tok)), location_get_len(token_get_loc(id_tok)), (ast_node_t*)node);
@@ -1152,14 +1152,14 @@ void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_param_t* 
 
   switch (node->kind)
   {
-  case AST_PARAM_DEFAULT:
-    analyzer_visit_param_default(analyzer, table, (ast_param_default_t*)node);
+  case AST_DECL_PARAM_DEFAULT:
+    analyzer_visit_decl_param_default(analyzer, table, (ast_decl_param_default_t*)node);
     break;
-  case AST_PARAM_VARIADIC:
-    analyzer_visit_param_variadic(analyzer, table, (ast_param_variadic_t*)node);
+  case AST_DECL_PARAM_VARIADIC:
+    analyzer_visit_decl_param_variadic(analyzer, table, (ast_decl_param_variadic_t*)node);
     break;
-  case AST_PARAM_GENERIC:
-    analyzer_visit_param_generic(analyzer, table, (ast_param_generic_t*)node);
+  case AST_DECL_PARAM_GENERIC:
+    analyzer_visit_decl_param_generic(analyzer, table, (ast_decl_param_generic_t*)node);
     break;
   default:
     node->type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->type);
@@ -1168,7 +1168,7 @@ void analyzer_visit_param(analyzer_t* analyzer, symtable_t* table, ast_param_t* 
   }
 }
 
-void analyzer_visit_param_default(analyzer_t* analyzer, symtable_t* table, ast_param_default_t* node)
+void analyzer_visit_decl_param_default(analyzer_t* analyzer, symtable_t* table, ast_decl_param_default_t* node)
 {
   node->type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->type);
   node->desc = ast_desc_of(node->type);
@@ -1177,13 +1177,13 @@ void analyzer_visit_param_default(analyzer_t* analyzer, symtable_t* table, ast_p
     analyzer_visit_expr(analyzer, table, (ast_expr_t*)node->init);
 }
 
-void analyzer_visit_param_variadic(analyzer_t* analyzer, symtable_t* table, ast_param_variadic_t* node)
+void analyzer_visit_decl_param_variadic(analyzer_t* analyzer, symtable_t* table, ast_decl_param_variadic_t* node)
 {
   node->type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->type);
   node->desc = ast_desc_of(node->type);
 }
 
-void analyzer_visit_param_generic(analyzer_t* analyzer, symtable_t* table, ast_param_generic_t* node)
+void analyzer_visit_decl_param_generic(analyzer_t* analyzer, symtable_t* table, ast_decl_param_generic_t* node)
 {
   node->type = analyzer_visit_type(analyzer, table, (ast_type_t*)node->type);
 
@@ -1198,7 +1198,7 @@ void analyzer_visit_param_generic(analyzer_t* analyzer, symtable_t* table, ast_p
     report_error_parameter_redefinition(token_get_loc(id_tok), token_get_loc(collision->node->tok));
 }
 
-void analyzer_visit_enumerator(analyzer_t* analyzer, symtable_t* table, symbol_t* enum_sym, ast_enumerator_t* node)
+void analyzer_visit_decl_enum_constant(analyzer_t* analyzer, symtable_t* table, symbol_t* enum_sym, ast_decl_enum_constant_t* node)
 {
   unused(analyzer);
 

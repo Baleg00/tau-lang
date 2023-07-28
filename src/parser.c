@@ -105,7 +105,7 @@ list_t* parser_parse_generic_param_list(parser_t* par)
 
   if (!parser_consume(par, TOK_PUNCT_GREATER))
   {
-    params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_generic_param);
+    params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_decl_param_generic);
     parser_expect(par, TOK_PUNCT_GREATER);
   }
 
@@ -598,25 +598,25 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
       // parameter list.
       if (parser_consume(par, TOK_PUNCT_DOT_DOT_DOT))
       {
-        ast_node_t* variadic_param = parser_parse_variadic_param(par);
+        ast_node_t* variadic_param = parser_parse_decl_param_variadic(par);
 
         // Default parameters must be followed only by default parameters.
         if (seen_default)
-          report_error_missing_default_parameter(token_get_loc(variadic_param->tok), token_get_loc(((ast_param_t*)list_back(node->params))->tok));
+          report_error_missing_default_parameter(token_get_loc(variadic_param->tok), token_get_loc(((ast_decl_param_t*)list_back(node->params))->tok));
 
         list_push_back(node->params, variadic_param);
         break;
       }
 
       // Parse non-variadic parameter.
-      ast_node_t* param = parser_parse_param(par);
+      ast_node_t* param = parser_parse_decl_param(par);
 
       // Set flag variable if parameter is a default parameter.
-      seen_default = seen_default || param->kind == AST_PARAM_DEFAULT;
+      seen_default = seen_default || param->kind == AST_DECL_PARAM_DEFAULT;
 
       // Default parameters must be followed only by default parameters.
-      if (seen_default && param->kind != AST_PARAM_DEFAULT)
-        report_error_missing_default_parameter(token_get_loc(param->tok), token_get_loc(((ast_param_t*)list_back(node->params))->tok));
+      if (seen_default && param->kind != AST_DECL_PARAM_DEFAULT)
+        report_error_missing_default_parameter(token_get_loc(param->tok), token_get_loc(((ast_decl_param_t*)list_back(node->params))->tok));
 
       list_push_back(node->params, param);
 
@@ -674,25 +674,25 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
       // parameter list.
       if (parser_consume(par, TOK_PUNCT_DOT_DOT_DOT))
       {
-        ast_node_t* variadic_param = parser_parse_variadic_param(par);
+        ast_node_t* variadic_param = parser_parse_decl_param_variadic(par);
 
         // Default parameters must be followed only by default parameters.
         if (seen_default)
-          report_error_missing_default_parameter(token_get_loc(variadic_param->tok), token_get_loc(((ast_param_t*)list_back(node->params))->tok));
+          report_error_missing_default_parameter(token_get_loc(variadic_param->tok), token_get_loc(((ast_decl_param_t*)list_back(node->params))->tok));
 
         list_push_back(node->params, variadic_param);
         break;
       }
 
       // Parse non-variadic parameter.
-      ast_node_t* param = parser_parse_param(par);
+      ast_node_t* param = parser_parse_decl_param(par);
 
       // Set flag variable if parameter is a default parameter.
-      seen_default |= param->kind == AST_PARAM_DEFAULT;
+      seen_default |= param->kind == AST_DECL_PARAM_DEFAULT;
 
       // Default parameters must be followed only by default parameters.
-      if (seen_default && param->kind != AST_PARAM_DEFAULT)
-        report_error_missing_default_parameter(token_get_loc(param->tok), token_get_loc(((ast_param_t*)list_back(node->params))->tok));
+      if (seen_default && param->kind != AST_DECL_PARAM_DEFAULT)
+        report_error_missing_default_parameter(token_get_loc(param->tok), token_get_loc(((ast_decl_param_t*)list_back(node->params))->tok));
 
       list_push_back(node->params, param);
 
@@ -772,7 +772,7 @@ ast_node_t* parser_parse_decl_enum(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
   
-  node->values = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_enumerator);
+  node->values = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_enum_constant);
   
   return (ast_node_t*)node;
 }
@@ -811,7 +811,7 @@ ast_node_t* parser_parse_decl(parser_t* par)
   return NULL;
 }
 
-ast_node_t* parser_parse_param(parser_t* par)
+ast_node_t* parser_parse_decl_param(parser_t* par)
 {
   token_t* tok = parser_current(par);
   ast_node_t* id = parser_parse_id(par);
@@ -822,9 +822,9 @@ ast_node_t* parser_parse_param(parser_t* par)
   {
     ast_node_t* init = parser_parse_expr(par);
 
-    ast_param_default_t* node = (ast_param_default_t*)arena_malloc(par->arena, sizeof(ast_param_default_t));
+    ast_decl_param_default_t* node = (ast_decl_param_default_t*)arena_malloc(par->arena, sizeof(ast_decl_param_default_t));
     assert(node != NULL);
-    ast_node_init((ast_node_t*)node, AST_PARAM_DEFAULT, tok);
+    ast_node_init((ast_node_t*)node, AST_DECL_PARAM_DEFAULT, tok);
 
     node->id = id;
     node->type = type;
@@ -833,9 +833,9 @@ ast_node_t* parser_parse_param(parser_t* par)
     return (ast_node_t*)node;
   }
 
-  ast_param_t* node = (ast_param_t*)arena_malloc(par->arena, sizeof(ast_param_t));
+  ast_decl_param_t* node = (ast_decl_param_t*)arena_malloc(par->arena, sizeof(ast_decl_param_t));
   assert(node != NULL);
-  ast_node_init((ast_node_t*)node, AST_PARAM, tok);
+  ast_node_init((ast_node_t*)node, AST_DECL_PARAM, tok);
   
   node->id = id;
   node->type = type;
@@ -843,11 +843,11 @@ ast_node_t* parser_parse_param(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse_variadic_param(parser_t* par)
+ast_node_t* parser_parse_decl_param_variadic(parser_t* par)
 {
-  ast_param_variadic_t* node = (ast_param_variadic_t*)arena_malloc(par->arena, sizeof(ast_param_variadic_t));
+  ast_decl_param_variadic_t* node = (ast_decl_param_variadic_t*)arena_malloc(par->arena, sizeof(ast_decl_param_variadic_t));
   assert(node != NULL);
-  ast_node_init((ast_node_t*)node, AST_PARAM_VARIADIC, parser_current(par));
+  ast_node_init((ast_node_t*)node, AST_DECL_PARAM_VARIADIC, parser_current(par));
 
   node->id = parser_parse_id(par);
   
@@ -864,11 +864,11 @@ ast_node_t* parser_parse_variadic_param(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse_generic_param(parser_t* par)
+ast_node_t* parser_parse_decl_param_generic(parser_t* par)
 {
-  ast_param_generic_t* node = (ast_param_generic_t*)arena_malloc(par->arena, sizeof(ast_param_generic_t));
+  ast_decl_param_generic_t* node = (ast_decl_param_generic_t*)arena_malloc(par->arena, sizeof(ast_decl_param_generic_t));
   assert(node != NULL);
-  ast_node_init((ast_node_t*)node, AST_PARAM_GENERIC, parser_current(par));
+  ast_node_init((ast_node_t*)node, AST_DECL_PARAM_GENERIC, parser_current(par));
 
   node->id = parser_parse_id(par);
 
@@ -886,11 +886,11 @@ ast_node_t* parser_parse_generic_param(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse_enumerator(parser_t* par)
+ast_node_t* parser_parse_decl_enum_constant(parser_t* par)
 {
-  ast_enumerator_t* node = (ast_enumerator_t*)arena_malloc(par->arena, sizeof(ast_enumerator_t));
+  ast_decl_enum_constant_t* node = (ast_decl_enum_constant_t*)arena_malloc(par->arena, sizeof(ast_decl_enum_constant_t));
   assert(node != NULL);
-  ast_node_init((ast_node_t*)node, AST_ENUMERATOR, parser_current(par));
+  ast_node_init((ast_node_t*)node, AST_DECL_ENUM_CONSTANT, parser_current(par));
 
   node->id = parser_parse_id(par);
   

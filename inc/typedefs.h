@@ -75,13 +75,12 @@ typedef enum ast_kind_e
   AST_DECL_ENUM, // Enum declaration
   AST_DECL_MOD, // Module declaration
   AST_DECL_GENERIC, // Generic declaration
-
-  AST_PARAM = AST_FLAG_PARAM, // Function or generator parameter
-  AST_PARAM_DEFAULT, // Default parameter
-  AST_PARAM_VARIADIC, // Variadic parameter
-  AST_PARAM_GENERIC, // Generic parameter
-
-  AST_ENUMERATOR = AST_FLAG_ENUMERATOR, // Enumerator
+  
+  AST_DECL_PARAM = AST_FLAG_PARAM, // Parameter declaration
+  AST_DECL_PARAM_DEFAULT, // Default parameter declaration
+  AST_DECL_PARAM_VARIADIC, // Variadic parameter declaration
+  AST_DECL_PARAM_GENERIC, // Generic parameter declaration
+  AST_DECL_ENUM_CONSTANT = AST_FLAG_ENUMERATOR, // Enumerator
 
   AST_PROG = AST_FLAG_PROG, // Program
 } ast_kind_t;
@@ -200,20 +199,20 @@ typedef struct ast_decl_mod_s ast_decl_mod_t;
 /** Node type for generic declarations. */
 typedef struct ast_decl_generic_s ast_decl_generic_t;
 
-/** Node type for function or generator parameters. */
-typedef struct ast_param_s ast_param_t;
+/** Node type for function or generator parameter declarations. */
+typedef struct ast_decl_param_s ast_decl_param_t;
 
-/** Node type for default function or generator parameters. */
-typedef struct ast_param_default_s ast_param_default_t;
+/** Node type for default function or generator parameter declarations. */
+typedef struct ast_decl_param_default_s ast_decl_param_default_t;
 
-/** Node type for variadic parameters. */
-typedef struct ast_param_variadic_s ast_param_variadic_t;
+/** Node type for variadic parameter declarations. */
+typedef struct ast_decl_param_variadic_s ast_decl_param_variadic_t;
 
-/** Node type for generic parameters. */
-typedef struct ast_param_generic_s ast_param_generic_t;
+/** Node type for generic parameter declarations. */
+typedef struct ast_decl_param_generic_s ast_decl_param_generic_t;
 
-/** Node type for enumerators. */
-typedef struct ast_enumerator_s ast_enumerator_t;
+/** Node type for enum constants. */
+typedef struct ast_decl_enum_constant_s ast_decl_enum_constant_t;
 
 /** Node type for a program. */
 typedef struct ast_prog_s ast_prog_t;
