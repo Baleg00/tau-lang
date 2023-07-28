@@ -4,15 +4,15 @@
 /** Indicates the category of a node. */
 typedef enum ast_flag_e
 {
-  AST_FLAG_UNKNOWN    = 0, // Unknown
-  AST_FLAG_ID         = (1 << 0) << 8, // Identifier
-  AST_FLAG_TYPE       = (1 << 1) << 8, // Type
-  AST_FLAG_EXPR       = (1 << 2) << 8, // Expression
-  AST_FLAG_STMT       = (1 << 3) << 8, // Statement
-  AST_FLAG_DECL       = (1 << 4) << 8, // Declaration
-  AST_FLAG_PARAM      = (1 << 5) << 8, // Parameter
-  AST_FLAG_ENUMERATOR = (1 << 6) << 8, // Enumerator
-  AST_FLAG_PROG       = (1 << 7) << 8, // Program
+  AST_FLAG_UNKNOWN            = 0, // Unknown
+  AST_FLAG_ID                 = (1 << 0) << 8, // Identifier
+  AST_FLAG_TYPE               = (1 << 1) << 8, // Type
+  AST_FLAG_EXPR               = (1 << 2) << 8, // Expression
+  AST_FLAG_STMT               = (1 << 3) << 8, // Statement
+  AST_FLAG_DECL               = (1 << 4) << 8, // Declaration
+  AST_FLAG_DECL_PARAM         = (1 << 5) << 8 | AST_FLAG_DECL, // Parameter declaration
+  AST_FLAG_DECL_ENUM_CONSTANT = (1 << 6) << 8 | AST_FLAG_DECL, // Enum constant declaration
+  AST_FLAG_PROG               = (1 << 7) << 8, // Program
 } ast_flag_t;
 
 /** Indicates the kind of a node. */
@@ -76,11 +76,12 @@ typedef enum ast_kind_e
   AST_DECL_MOD, // Module declaration
   AST_DECL_GENERIC, // Generic declaration
   
-  AST_DECL_PARAM = AST_FLAG_PARAM, // Parameter declaration
+  AST_DECL_PARAM = AST_FLAG_DECL_PARAM, // Parameter declaration
   AST_DECL_PARAM_DEFAULT, // Default parameter declaration
   AST_DECL_PARAM_VARIADIC, // Variadic parameter declaration
   AST_DECL_PARAM_GENERIC, // Generic parameter declaration
-  AST_DECL_ENUM_CONSTANT = AST_FLAG_ENUMERATOR, // Enumerator
+  
+  AST_DECL_ENUM_CONSTANT = AST_FLAG_DECL_ENUM_CONSTANT, // Enum constant declaration
 
   AST_PROG = AST_FLAG_PROG, // Program
 } ast_kind_t;

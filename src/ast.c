@@ -1245,9 +1245,9 @@ bool ast_is_decl(ast_node_t* node)
   return node->kind & AST_FLAG_DECL;
 }
 
-bool ast_is_param(ast_node_t* node)
+bool ast_is_decl_param(ast_node_t* node)
 {
-  return node->kind & AST_FLAG_PARAM;
+  return node->kind & AST_FLAG_DECL_PARAM;
 }
 
 typedesc_t* ast_desc_of(ast_node_t* node)
@@ -1261,7 +1261,7 @@ typedesc_t* ast_desc_of(ast_node_t* node)
   if (ast_is_decl(node))
     return ((ast_decl_t*)node)->desc;
 
-  if (ast_is_param(node))
+  if (ast_is_decl_param(node))
     return ((ast_decl_param_t*)node)->desc;
 
   if (node->kind == AST_DECL_ENUM_CONSTANT)

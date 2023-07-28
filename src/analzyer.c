@@ -471,7 +471,7 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* table, ast_exp
     if (id_sym == NULL)
       report_error_undefined_symbol(token_get_loc(id_tok));
 
-    if (!ast_is_decl(id_sym->node) && !ast_is_param(id_sym->node))
+    if (!ast_is_decl(id_sym->node) && !ast_is_decl_param(id_sym->node))
       report_error_symbol_is_not_an_expression(token_get_loc(id_tok));
 
     return id_sym->node;
@@ -1147,7 +1147,7 @@ void analyzer_visit_decl_param(analyzer_t* analyzer, symtable_t* table, ast_decl
   symbol_t* param_sym = symbol_init(location_get_ptr(token_get_loc(id_tok)), location_get_len(token_get_loc(id_tok)), (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, param_sym);
 
-  if (collision != NULL && ast_is_param(collision->node))
+  if (collision != NULL && ast_is_decl_param(collision->node))
     report_error_parameter_redefinition(token_get_loc(id_tok), token_get_loc(collision->node->tok));
 
   switch (node->kind)
@@ -1194,7 +1194,7 @@ void analyzer_visit_decl_param_generic(analyzer_t* analyzer, symtable_t* table, 
   symbol_t* param_sym = symbol_init(location_get_ptr(token_get_loc(id_tok)), location_get_len(token_get_loc(id_tok)), (ast_node_t*)node);
   symbol_t* collision = symtable_insert(table, param_sym);
 
-  if (collision != NULL && ast_is_param(collision->node))
+  if (collision != NULL && ast_is_decl_param(collision->node))
     report_error_parameter_redefinition(token_get_loc(id_tok), token_get_loc(collision->node->tok));
 }
 

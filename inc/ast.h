@@ -449,12 +449,12 @@ bool ast_is_stmt(ast_node_t* node);
 bool ast_is_decl(ast_node_t* node);
 
 /**
- * \brief Checks if a node is a parameter.
+ * \brief Checks if a node is a parameter declaration.
  * 
  * \param[in] node Node to be checked.
- * \returns True if node is a parameter, false otherwise.
+ * \returns True if node is a parameter declaration, false otherwise.
 */
-bool ast_is_param(ast_node_t* node);
+bool ast_is_decl_param(ast_node_t* node);
 
 /**
  * \brief Queries the type descriptor of a node.
