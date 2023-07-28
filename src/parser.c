@@ -247,13 +247,13 @@ ast_node_t* parser_parse_type_member(parser_t* par)
 {
   ast_id_t* owner = (ast_id_t*)arena_malloc(par->arena, sizeof(ast_id_t));
   assert(owner != NULL);
-  ast_node_init((ast_node_t*)owner, AST_ID, parser_current(par));
+  ast_node_init((ast_node_t*)owner, AST_ID, parser_next(par));
 
-  if (token_get_kind(parser_current(par)) == TOK_PUNCT_DOT)
+  if (parser_consume(par, TOK_PUNCT_DOT))
   {
     ast_type_member_t* type = (ast_type_member_t*)arena_malloc(par->arena, sizeof(ast_type_member_t));
     assert(type != NULL);
-    ast_node_init((ast_node_t*)type, AST_ID, parser_current(par));
+    ast_node_init((ast_node_t*)type, AST_TYPE_MEMBER, parser_current(par));
 
     type->owner = (ast_node_t*)owner;
     type->member = parser_parse_type_member(par);
