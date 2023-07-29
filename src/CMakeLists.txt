@@ -32,6 +32,7 @@ set(TAU_SOURCES
   ${TAU_SOURCE_DIR}/timer.c
   ${TAU_SOURCE_DIR}/token.c
   ${TAU_SOURCE_DIR}/typedesc.c
+  ${TAU_SOURCE_DIR}/typetable.c
   ${TAU_SOURCE_DIR}/vm.c
 )
 

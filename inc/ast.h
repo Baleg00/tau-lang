@@ -26,20 +26,6 @@
     token_t* tok; /** First token in this node. */\
   }
 
-/** Utility macro which expands to fields that all type nodes must have. */
-#define AST_TYPE_HEADER\
-  struct\
-  {\
-    typedesc_t* desc; /** Type descriptor. */\
-  }
-
-/** Utility macro which expands to fields that all expression nodes must have. */
-#define AST_EXPR_HEADER\
-  struct\
-  {\
-    typedesc_t* desc; /** Type descriptor. */\
-  }
-
 /** Utility macro which expands to fields that all operator expression nodes must have. */
 #define AST_EXPR_OP_HEADER\
   struct\
@@ -52,7 +38,6 @@
   struct\
   {\
     ast_node_t* id; /** Declaration identifier */\
-    typedesc_t* desc; /** Type descriptor. */\
   }
 
 /** Utility macro which expands to fields that all parameter nodes must have. */
@@ -75,48 +60,41 @@ struct ast_id_s
 struct ast_type_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
 };
 
 struct ast_type_mut_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
   ast_node_t* base_type; // Underlying type.
 };
 
 struct ast_type_const_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
   ast_node_t* base_type; // Underlying type.
 };
 
 struct ast_type_ptr_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
   ast_node_t* base_type; // Pointed type.
 };
 
 struct ast_type_ref_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
   ast_node_t* base_type; // Referenced type.
 };
 
 struct ast_type_opt_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
   ast_node_t* base_type; // Underlying type.
 };
 
 struct ast_type_array_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
   ast_node_t* base_type; // Contained type.
   ast_node_t* size; // Size of array or null if not specified.
 };
@@ -124,7 +102,6 @@ struct ast_type_array_s
 struct ast_type_fun_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
   list_t* params; // List of function parameters.
   ast_node_t* return_type; // Return type.
 };
@@ -132,7 +109,6 @@ struct ast_type_fun_s
 struct ast_type_gen_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
   list_t* params; // List of generator parameters.
   ast_node_t* yield_type; // Yield type.
 };
@@ -140,7 +116,6 @@ struct ast_type_gen_s
 struct ast_type_member_s
 {
   AST_NODE_HEADER;
-  AST_TYPE_HEADER;
   ast_node_t* owner; // Owner node.
   ast_node_t* member; // Member node.
 };
@@ -148,26 +123,22 @@ struct ast_type_member_s
 struct ast_expr_s
 {
   AST_NODE_HEADER;
-  AST_EXPR_HEADER;
 };
 
 struct ast_expr_lit_s
 {
   AST_NODE_HEADER;
-  AST_EXPR_HEADER;
 };
 
 struct ast_expr_op_s
 {
   AST_NODE_HEADER;
-  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
 };
 
 struct ast_expr_op_bin_s
 {
   AST_NODE_HEADER;
-  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
   ast_node_t* lhs; // Left-hand side parameter.
   ast_node_t* rhs; // Right-hand side parameter.
@@ -176,7 +147,6 @@ struct ast_expr_op_bin_s
 struct ast_expr_op_un_s
 {
   AST_NODE_HEADER;
-  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
   ast_node_t* param; // Operator parameter.
 };
@@ -184,7 +154,6 @@ struct ast_expr_op_un_s
 struct ast_expr_op_call_s
 {
   AST_NODE_HEADER;
-  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
   ast_node_t* callee; // Expression to be called.
   list_t* params; // List of parameters.
@@ -455,13 +424,5 @@ bool ast_is_decl(ast_node_t* node);
  * \returns True if node is a parameter declaration, false otherwise.
 */
 bool ast_is_decl_param(ast_node_t* node);
-
-/**
- * \brief Queries the type descriptor of a node.
- *  
- * \param[in] node Node whose type descriptor is to be queried.
- * \returns Type descriptor of node.
- */
-typedesc_t* ast_desc_of(ast_node_t* node);
 
 #endif

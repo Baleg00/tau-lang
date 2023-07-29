@@ -16,6 +16,9 @@
 #include "parser.h"
 #include "analzyer.h"
 
+#include "symtable.h"
+#include "typetable.h"
+
 #include "memtrace.h"
 
 #define COMPILER_MAX_BUFFER_SIZE 256
@@ -183,12 +186,19 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     analyzer_t analyzer;
     analyzer_init(parser_arena, &analyzer);
-    time_it(analyzer, analyzer_analyze(&analyzer, (ast_node_t*)&root));
+
+    symtable_t* symtable = symtable_init(NULL);
+    typetable_t* typetable = typetable_init();
+
+    time_it(analyzer, analyzer_analyze(&analyzer, (ast_node_t*)&root, symtable, typetable));
 
     if (compiler->flags.dump_ast_flat)
       compiler_dump_ast_flat(compiler, input_file_path, input_file_name, (ast_node_t*)&root);
 
     log_trace("main", "(%s) Cleanup.", input_file_name);
+
+    symtable_free(symtable);
+    typetable_free(typetable);
 
     analyzer_free(&analyzer);
     
