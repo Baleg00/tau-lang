@@ -20,6 +20,7 @@
 #define TAU_LOCATION_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 /**
  * \brief Location in the source code.
@@ -45,6 +46,15 @@ location_t* location_init(const char *path, const char* src, const char* ptr, si
  * \param[in] loc Pointer to the location.
 */
 void location_free(location_t* loc);
+
+/**
+ * \brief Dump the JSON representation of a location to a file stream.
+ *
+ * \param[in] loc Pointer to the location.
+ * \param[in] stream Pointer to the file stream where the JSON dump will be
+ * written.
+ */
+void location_json_dump(location_t* loc, FILE* stream);
 
 /**
  * \brief Retrieves the file path associated with a location.

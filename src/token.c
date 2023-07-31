@@ -62,7 +62,9 @@ void token_list_json_dump(FILE* stream, list_t* list)
   {
     token_t* tok = (token_t*)list_node_get(it);
 
-    fprintf(stream, "{\"kind\":\"%s\"", token_kind_to_string(tok->kind));
+    fprintf(stream, "{\"kind\":\"%s\",\"loc\":", token_kind_to_string(tok->kind));
+
+    location_json_dump(tok->loc, stream);
 
     if (token_is_lit(tok) || tok->kind == TOK_ID)
       fprintf(stream, ",\"value\":\"%.*s\"", (int)location_get_len(tok->loc), location_get_ptr(tok->loc));

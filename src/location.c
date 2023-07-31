@@ -40,6 +40,13 @@ void location_free(location_t* loc)
   free(loc);
 }
 
+void location_json_dump(location_t* loc, FILE* stream)
+{
+  fprintf(stream,
+    "{\"path\":\"%s\",\"row\":\"%zu\",\"col\":\"%zu\",\"pos\":\"%zu\",\"len\":\"%zu\"}",
+    loc->path, loc->row, loc->col, (size_t)(loc->ptr - loc->src), loc->len);
+}
+
 const char* location_get_path(location_t* loc)
 {
   return loc->path;
