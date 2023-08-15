@@ -24,6 +24,7 @@ set(TAU_SOURCES
   ${TAU_SOURCE_DIR}/parser.c
   ${TAU_SOURCE_DIR}/queue.c
   ${TAU_SOURCE_DIR}/register.c
+  ${TAU_SOURCE_DIR}/set.c
   ${TAU_SOURCE_DIR}/shyd.c
   ${TAU_SOURCE_DIR}/stack.c
   ${TAU_SOURCE_DIR}/str.c

@@ -5,6 +5,7 @@ set(TAU_TEST_SOURCES
   ${TAU_TEST_DIR}/opcode_test.c
   ${TAU_TEST_DIR}/queue_test.c
   ${TAU_TEST_DIR}/register_test.c
+  ${TAU_TEST_DIR}/set_test.c
   ${TAU_TEST_DIR}/stack_test.c
   ${TAU_TEST_DIR}/tasm_test.c
   ${TAU_TEST_DIR}/vm_test.c
