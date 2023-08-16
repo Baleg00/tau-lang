@@ -2,7 +2,7 @@
 #define TAU_DIAGNOSTICS_H
 
 #include "location.h"
-#include "typedefs.h"
+#include "typedesc.h"
 
 void report_error_unexpected_character(location_t* loc);
 void report_error_identifier_too_long(location_t* loc);
