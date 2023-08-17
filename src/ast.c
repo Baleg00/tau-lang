@@ -13,8 +13,6 @@ void ast_node_init(ast_node_t* node, ast_kind_t kind, token_t* tok)
   node->tok = tok;
 }
 
-LIST_FOR_EACH_FUNC_DECL(ast_node_free, ast_node_t)
-
 static void ast_type_mut_free(ast_type_mut_t* node)
 {
   ast_node_t* base_type = node->base_type;
@@ -81,7 +79,7 @@ static void ast_type_fun_free(ast_type_fun_t* node)
   node->params = NULL;
 
   ast_node_free(return_type);
-  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(params, (list_for_each_func_t)ast_node_free);
   list_free(params);
 }
 
@@ -94,7 +92,7 @@ static void ast_type_gen_free(ast_type_gen_t* node)
   node->params = NULL;
 
   ast_node_free(yield_type);
-  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(params, (list_for_each_func_t)ast_node_free);
   list_free(params);
 }
 
@@ -145,7 +143,7 @@ static void ast_expr_op_call_free(ast_expr_op_call_t* node)
   node->params = NULL;
 
   ast_node_free(callee);
-  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(params, (list_for_each_func_t)ast_node_free);
   list_free(params);
 }
 
@@ -227,7 +225,7 @@ static void ast_stmt_block_free(ast_stmt_block_t* node)
 
   node->stmts = NULL;
 
-  list_for_each(stmts, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(stmts, (list_for_each_func_t)ast_node_free);
   list_free(stmts);
 }
 
@@ -280,7 +278,7 @@ static void ast_decl_fun_free(ast_decl_fun_t* node)
   node->stmt = NULL;
 
   ast_node_free(id);
-  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(params, (list_for_each_func_t)ast_node_free);
   list_free(params);
   ast_node_free(return_type);
   ast_node_free(stmt);
@@ -299,7 +297,7 @@ static void ast_decl_gen_free(ast_decl_gen_t* node)
   node->stmt = NULL;
 
   ast_node_free(id);
-  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(params, (list_for_each_func_t)ast_node_free);
   list_free(params);
   ast_node_free(yield_type);
   ast_node_free(stmt);
@@ -314,7 +312,7 @@ static void ast_decl_struct_free(ast_decl_struct_t* node)
   node->members = NULL;
 
   ast_node_free(id);
-  list_for_each(members, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(members, (list_for_each_func_t)ast_node_free);
   list_free(members);
 }
 
@@ -327,7 +325,7 @@ static void ast_decl_union_free(ast_decl_union_t* node)
   node->members = NULL;
 
   ast_node_free(id);
-  list_for_each(members, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(members, (list_for_each_func_t)ast_node_free);
   list_free(members);
 }
 
@@ -340,7 +338,7 @@ static void ast_decl_enum_free(ast_decl_enum_t* node)
   node->values = NULL;
 
   ast_node_free(id);
-  list_for_each(values, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(values, (list_for_each_func_t)ast_node_free);
   list_free(values);
 }
 
@@ -353,7 +351,7 @@ static void ast_decl_mod_free(ast_decl_mod_t* node)
   node->decls = NULL;
 
   ast_node_free(id);
-  list_for_each(decls, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(decls, (list_for_each_func_t)ast_node_free);
   list_free(decls);
 }
 
@@ -366,7 +364,7 @@ static void ast_decl_generic_free(ast_decl_generic_t* node)
   node->params = NULL;
 
   ast_node_free(decl);
-  list_for_each(params, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(params, (list_for_each_func_t)ast_node_free);
   list_free(params);
 }
 
@@ -436,7 +434,7 @@ static void ast_prog_free(ast_prog_t* node)
 
   node->decls = NULL;
 
-  list_for_each(decls, LIST_FOR_EACH_FUNC_NAME(ast_node_free));
+  list_for_each(decls, (list_for_each_func_t)ast_node_free);
   list_free(decls);
 }
 

@@ -50,28 +50,6 @@ typedef struct list_s list_t;
   )
 
 /**
- * \brief Macro for creating the name of a function which can be used with the
- * list_for_each function.
- *
- * \param[in] FUNC The name of the function.
- */
-#define LIST_FOR_EACH_FUNC_NAME(FUNC)\
-  FUNC##_list_for_each
-
-/**
- * \brief Macro for declaring a function that wraps another function so that it
- * can be used with list_for_each.
- *
- * \param[in] FUNC The name of the wrapped function.
- * \param[in] TYPE The type of the data in the list.
- */
-#define LIST_FOR_EACH_FUNC_DECL(FUNC, TYPE)\
-  void LIST_FOR_EACH_FUNC_NAME(FUNC)(void* data)\
-  {\
-    FUNC((TYPE*)data);\
-  }
-
-/**
  * \brief Initializes a list node with the given data.
  *
  * \param[in] data The data to be stored in the node.

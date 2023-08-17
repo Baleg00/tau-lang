@@ -10,8 +10,6 @@
 #include "memtrace.h"
 #include "util.h"
 
-LIST_FOR_EACH_FUNC_DECL(typedesc_free, typedesc_t)
-
 /** Utility macro which expands to fields that all types must have. */
 #define TYPEDESC_HEADER\
   struct\
@@ -227,7 +225,7 @@ static void typedesc_free_builtin(typedesc_t* desc)
 static void typedesc_free_fun(typedesc_fun_t* desc)
 {
   typedesc_free(desc->return_type);
-  list_for_each(desc->param_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_for_each(desc->param_types, (list_for_each_func_t)typedesc_free);
   list_free(desc->param_types);
   free(desc);
 }
@@ -235,21 +233,21 @@ static void typedesc_free_fun(typedesc_fun_t* desc)
 static void typedesc_free_gen(typedesc_gen_t* desc)
 {
   typedesc_free(desc->yield_type);
-  list_for_each(desc->param_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_for_each(desc->param_types, (list_for_each_func_t)typedesc_free);
   list_free(desc->param_types);
   free(desc);
 }
 
 static void typedesc_free_struct(typedesc_struct_t* desc)
 {
-  list_for_each(desc->member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_for_each(desc->member_types, (list_for_each_func_t)typedesc_free);
   list_free(desc->member_types);
   free(desc);
 }
 
 static void typedesc_free_union(typedesc_union_t* desc)
 {
-  list_for_each(desc->member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_for_each(desc->member_types, (list_for_each_func_t)typedesc_free);
   list_free(desc->member_types);
   free(desc);
 }
@@ -261,7 +259,7 @@ static void typedesc_free_enum(typedesc_enum_t* desc)
 
 static void typedesc_free_mod(typedesc_mod_t* desc)
 {
-  list_for_each(desc->member_types, LIST_FOR_EACH_FUNC_NAME(typedesc_free));
+  list_for_each(desc->member_types, (list_for_each_func_t)typedesc_free);
   list_free(desc->member_types);
   free(desc);
 }

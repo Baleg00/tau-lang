@@ -23,8 +23,6 @@
 
 #define COMPILER_MAX_BUFFER_SIZE 256
 
-LIST_FOR_EACH_FUNC_DECL(token_free, token_t)
-
 static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_data)
 {
   unused(cli);
@@ -206,7 +204,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     parser_free(&parser);
     arena_free(parser_arena);
 
-    list_for_each(toks, LIST_FOR_EACH_FUNC_NAME(token_free));
+    list_for_each(toks, (list_for_each_func_t)token_free);
     list_free(toks);
     lexer_free(lexer);
     
