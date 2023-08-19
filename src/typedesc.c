@@ -303,7 +303,6 @@ void typedesc_free(typedesc_t* desc)
   }
 }
 
-
 typedesc_kind_t typedesc_get_kind(typedesc_t* desc)
 {
   return desc->kind;

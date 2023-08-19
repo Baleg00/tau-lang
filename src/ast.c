@@ -1,460 +1,624 @@
+/**
+ * \file ast.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "ast.h"
 
+#include "memtrace.h"
+#include "set.h"
+#include "stack.h"
 #include "util.h"
 
-#include "location.h"
-#include "op.h"
+/**
+ * \brief Utility macro which expands to fields that all AST nodes must have.
+ */
+#define AST_NODE_HEADER\
+  struct\
+  {\
+    ast_kind_t kind; /** AST node kind. */\
+    token_t* tok; /** Pointer to the token associated with this AST node. */\
+  }
 
-#include "memtrace.h"
+/**
+ * \brief Utility macro which expands to fields that all typed AST nodes must
+ * have.
+ */
+#define AST_TYPED_HEADER\
+  struct\
+  {\
+    ast_node_t* type; /** Type. */\
+  }
 
-void ast_node_init(ast_node_t* node, ast_kind_t kind, token_t* tok)
+/**
+ * \brief Utility macro which expands to fields that all operator expression AST
+ * nodes must have.
+ */
+#define AST_EXPR_OP_HEADER\
+  struct\
+  {\
+    op_kind_t op_kind; /** Operation kind. */\
+  }
+
+/**
+ * \brief Utility macro which expands to fields that all declaration AST nodes
+ * must have.
+ */
+#define AST_DECL_HEADER\
+  struct\
+  {\
+    ast_node_t* id; /** Identifier. */\
+  }
+
+/**
+ * \brief Utility macro which expands to fields that all composite AST nodes
+ * must have.
+ */
+#define AST_COMPOSITE_HEADER\
+  struct\
+  {\
+    list_t* members; /** Members. */\
+  }
+
+/**
+ * \brief AST identifier node.
+ */
+typedef struct ast_id_s ast_id_t;
+
+/**
+ * \brief AST type node.
+ */
+typedef struct ast_type_s ast_type_t;
+
+/**
+ * \brief AST mutable type node.
+ */
+typedef struct ast_type_mut_s ast_type_mut_t;
+
+/**
+ * \brief AST constant type node.
+ */
+typedef struct ast_type_const_s ast_type_const_t;
+
+/**
+ * \brief AST pointer type node.
+ */
+typedef struct ast_type_ptr_s ast_type_ptr_t;
+
+/**
+ * \brief AST array type node.
+ */
+typedef struct ast_type_array_s ast_type_array_t;
+
+/**
+ * \brief AST reference type node.
+ */
+typedef struct ast_type_ref_s ast_type_ref_t;
+
+/**
+ * \brief AST optional type node.
+ */
+typedef struct ast_type_opt_s ast_type_opt_t;
+
+/**
+ * \brief AST function type node.
+ */
+typedef struct ast_type_fun_s ast_type_fun_t;
+
+/**
+ * \brief AST generator type node.
+ */
+typedef struct ast_type_gen_s ast_type_gen_t;
+
+/**
+ * \brief AST member type node.
+ */
+typedef struct ast_type_member_s ast_type_member_t;
+
+/**
+ * \brief AST expression node.
+ */
+typedef struct ast_expr_s ast_expr_t;
+
+/**
+ * \brief AST literal expression node.
+ */
+typedef struct ast_expr_lit_s ast_expr_lit_t;
+
+/**
+ * \brief AST operation expression node.
+ */
+typedef struct ast_expr_op_s ast_expr_op_t;
+
+/**
+ * \brief AST unary operation expression node.
+ */
+typedef struct ast_expr_op_un_s ast_expr_op_un_t;
+
+/**
+ * \brief AST binary operation expression node.
+ */
+typedef struct ast_expr_op_bin_s ast_expr_op_bin_t;
+
+/**
+ * \brief AST call expression node.
+ */
+typedef struct ast_expr_op_call_s ast_expr_op_call_t;
+
+/**
+ * \brief AST statement node.
+ */
+typedef struct ast_stmt_s ast_stmt_t;
+
+/**
+ * \brief AST if-else statement node.
+ */
+typedef struct ast_stmt_if_s ast_stmt_if_t;
+
+/**
+ * \brief AST for-loop statement node.
+ */
+typedef struct ast_stmt_for_s ast_stmt_for_t;
+
+/**
+ * \brief AST while-loop statement node.
+ */
+typedef struct ast_stmt_while_s ast_stmt_while_t;
+
+/**
+ * \brief AST break statement node.
+ */
+typedef struct ast_stmt_break_s ast_stmt_break_t;
+
+/**
+ * \brief AST continue statement node.
+ */
+typedef struct ast_stmt_continue_s ast_stmt_continue_t;
+
+/**
+ * \brief AST return statement node.
+ */
+typedef struct ast_stmt_return_s ast_stmt_return_t;
+
+/**
+ * \brief AST yield statement node.
+ */
+typedef struct ast_stmt_yield_s ast_stmt_yield_t;
+
+/**
+ * \brief AST expression statement node.
+ */
+typedef struct ast_stmt_expr_s ast_stmt_expr_t;
+
+/**
+ * \brief AST block statement node.
+ */
+typedef struct ast_stmt_block_s ast_stmt_block_t;
+
+/**
+ * \brief AST declaration node.
+ */
+typedef struct ast_decl_s ast_decl_t;
+
+/**
+ * \brief AST variable declaration node.
+ */
+typedef struct ast_decl_var_s ast_decl_var_t;
+
+/**
+ * \brief AST function declaration node.
+ */
+typedef struct ast_decl_fun_s ast_decl_fun_t;
+
+/**
+ * \brief AST generator declaration node.
+ */
+typedef struct ast_decl_gen_s ast_decl_gen_t;
+
+/**
+ * \brief AST structure declaration node.
+ */
+typedef struct ast_decl_struct_s ast_decl_struct_t;
+
+/**
+ * \brief AST union declaration node.
+ */
+typedef struct ast_decl_union_s ast_decl_union_t;
+
+/**
+ * \brief AST enumeration declaration node.
+ */
+typedef struct ast_decl_enum_s ast_decl_enum_t;
+
+/**
+ * \brief AST module declaration node.
+ */
+typedef struct ast_decl_mod_s ast_decl_mod_t;
+
+/**
+ * \brief AST parameter declaration node.
+ */
+typedef struct ast_decl_param_s ast_decl_param_t;
+
+/**
+ * \brief AST enumeration constant declaration node.
+ */
+typedef struct ast_decl_enum_constant_s ast_decl_enum_constant_t;
+
+/**
+ * \brief AST program node.
+ */
+typedef struct ast_prog_s ast_prog_t;
+
+struct ast_node_s
 {
+  AST_NODE_HEADER;
+};
+
+struct ast_id_s
+{
+  AST_NODE_HEADER;
+};
+
+struct ast_type_s
+{
+  AST_NODE_HEADER;
+};
+
+struct ast_type_mut_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* base_type;
+};
+
+struct ast_type_const_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* base_type;
+};
+
+struct ast_type_ptr_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* base_type;
+};
+
+struct ast_type_ref_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* base_type;
+};
+
+struct ast_type_opt_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* base_type;
+};
+
+struct ast_type_array_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* base_type;
+  ast_node_t* size;
+};
+
+struct ast_type_fun_s
+{
+  AST_NODE_HEADER;
+  list_t* params;
+  ast_node_t* return_type;
+};
+
+struct ast_type_gen_s
+{
+  AST_NODE_HEADER;
+  list_t* params;
+  ast_node_t* yield_type;
+};
+
+struct ast_type_member_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* owner;
+  ast_node_t* member;
+};
+
+struct ast_expr_s
+{
+  AST_NODE_HEADER;
+};
+
+struct ast_expr_lit_s
+{
+  AST_NODE_HEADER;
+};
+
+struct ast_expr_op_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_OP_HEADER;
+};
+
+struct ast_expr_op_bin_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_OP_HEADER;
+  ast_node_t* lhs;
+  ast_node_t* rhs;
+};
+
+struct ast_expr_op_un_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_OP_HEADER;
+  ast_node_t* expr;
+};
+
+struct ast_expr_op_call_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_OP_HEADER;
+  ast_node_t* callee;
+  list_t* params;
+};
+
+struct ast_stmt_s
+{
+  AST_NODE_HEADER;
+};
+
+struct ast_stmt_if_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* cond;
+  ast_node_t* stmt;
+  ast_node_t* stmt_else;
+};
+
+struct ast_stmt_for_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* var;
+  ast_node_t* range;
+  ast_node_t* stmt;
+};
+
+struct ast_stmt_while_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* cond;
+  ast_node_t* stmt;
+};
+
+struct ast_stmt_break_s
+{
+  AST_NODE_HEADER;
+};
+
+struct ast_stmt_continue_s
+{
+  AST_NODE_HEADER;
+};
+
+struct ast_stmt_return_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* expr;
+};
+
+struct ast_stmt_yield_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* expr;
+};
+
+struct ast_stmt_expr_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* expr;
+};
+
+struct ast_stmt_block_s
+{
+  AST_NODE_HEADER;
+  list_t* stmts;
+};
+
+struct ast_decl_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+};
+
+struct ast_decl_var_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_TYPED_HEADER;
+  ast_node_t* expr;
+};
+
+struct ast_decl_fun_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  list_t* params;
+  ast_node_t* return_type;
+  ast_node_t* stmt;
+};
+
+struct ast_decl_gen_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  list_t* params;
+  ast_node_t* yield_type;
+  ast_node_t* stmt;
+};
+
+struct ast_decl_struct_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_COMPOSITE_HEADER;
+};
+
+struct ast_decl_union_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_COMPOSITE_HEADER;
+};
+
+struct ast_decl_enum_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_COMPOSITE_HEADER;
+};
+
+struct ast_decl_mod_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  list_t* decls;
+};
+
+struct ast_decl_param_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_TYPED_HEADER;
+  ast_node_t* expr;
+  bool is_variadic;
+};
+
+struct ast_decl_enum_constant_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_TYPED_HEADER;
+};
+
+struct ast_prog_s
+{
+  AST_NODE_HEADER;
+  list_t* decls;
+};
+
+#undef AST_COMPOSITE_HEADER
+#undef AST_DECL_HEADER
+#undef AST_EXPR_OP_HEADER
+#undef AST_TYPED_HEADER
+#undef AST_NODE_HEADER
+
+ast_node_t* ast_node_init(ast_kind_t kind)
+{
+  size_t node_size = sizeof(ast_node_t);
+
+  switch (kind)
+  {
+  case AST_ID:                  node_size = sizeof(ast_id_t                 ); break;
+  case AST_PROG:                node_size = sizeof(ast_prog_t               ); break;
+  case AST_TYPE_MUT:            node_size = sizeof(ast_type_mut_t           ); break;
+  case AST_TYPE_CONST:          node_size = sizeof(ast_type_const_t         ); break;
+  case AST_TYPE_PTR:            node_size = sizeof(ast_type_ptr_t           ); break;
+  case AST_TYPE_ARRAY:          node_size = sizeof(ast_type_array_t         ); break;
+  case AST_TYPE_REF:            node_size = sizeof(ast_type_ref_t           ); break;
+  case AST_TYPE_OPT:            node_size = sizeof(ast_type_opt_t           ); break;
+  case AST_TYPE_FUN:            node_size = sizeof(ast_type_fun_t           ); break;
+  case AST_TYPE_GEN:            node_size = sizeof(ast_type_gen_t           ); break;
+  case AST_TYPE_TYPE:           node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_SELF:           node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_I8:             node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_I16:            node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_I32:            node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_I64:            node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_ISIZE:          node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_U8:             node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_U16:            node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_U32:            node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_U64:            node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_USIZE:          node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_F32:            node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_F64:            node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_BOOL:           node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_UNIT:           node_size = sizeof(ast_node_t               ); break;
+  case AST_TYPE_MEMBER:         node_size = sizeof(ast_type_member_t        ); break;
+  case AST_EXPR_LIT_INT:        node_size = sizeof(ast_expr_lit_t           ); break;
+  case AST_EXPR_LIT_FLT:        node_size = sizeof(ast_expr_lit_t           ); break;
+  case AST_EXPR_LIT_STR:        node_size = sizeof(ast_expr_lit_t           ); break;
+  case AST_EXPR_LIT_CHAR:       node_size = sizeof(ast_expr_lit_t           ); break;
+  case AST_EXPR_LIT_BOOL:       node_size = sizeof(ast_expr_lit_t           ); break;
+  case AST_EXPR_LIT_NULL:       node_size = sizeof(ast_expr_lit_t           ); break;
+  case AST_EXPR_OP:             node_size = sizeof(ast_expr_op_t            ); break;
+  case AST_STMT_IF:             node_size = sizeof(ast_stmt_if_t            ); break;
+  case AST_STMT_FOR:            node_size = sizeof(ast_stmt_for_t           ); break;
+  case AST_STMT_WHILE:          node_size = sizeof(ast_stmt_while_t         ); break;
+  case AST_STMT_BREAK:          node_size = sizeof(ast_stmt_break_t         ); break;
+  case AST_STMT_CONTINUE:       node_size = sizeof(ast_stmt_continue_t      ); break;
+  case AST_STMT_RETURN:         node_size = sizeof(ast_stmt_return_t        ); break;
+  case AST_STMT_YIELD:          node_size = sizeof(ast_stmt_yield_t         ); break;
+  case AST_STMT_BLOCK:          node_size = sizeof(ast_stmt_block_t         ); break;
+  case AST_STMT_EXPR:           node_size = sizeof(ast_stmt_expr_t          ); break;
+  case AST_DECL_VAR:            node_size = sizeof(ast_decl_var_t           ); break;
+  case AST_DECL_FUN:            node_size = sizeof(ast_decl_fun_t           ); break;
+  case AST_DECL_GEN:            node_size = sizeof(ast_decl_gen_t           ); break;
+  case AST_DECL_STRUCT:         node_size = sizeof(ast_decl_struct_t        ); break;
+  case AST_DECL_UNION:          node_size = sizeof(ast_decl_union_t         ); break;
+  case AST_DECL_ENUM:           node_size = sizeof(ast_decl_enum_t          ); break;
+  case AST_DECL_MOD:            node_size = sizeof(ast_decl_mod_t           ); break;
+  case AST_DECL_PARAM:          node_size = sizeof(ast_decl_param_t         ); break;
+  case AST_DECL_ENUM_CONSTANT:  node_size = sizeof(ast_decl_enum_constant_t ); break;
+  default: unreachable();
+  }
+
+  ast_node_t* node = (ast_node_t*)calloc(1, node_size);
+  assert(node != NULL);
+
   node->kind = kind;
-  node->tok = tok;
+  node->tok = NULL;
+
+  return node;
 }
 
-static void ast_type_mut_free(ast_type_mut_t* node)
-{
-  ast_node_t* base_type = node->base_type;
-
-  node->base_type = NULL;
-  
-  ast_node_free(base_type);
-}
-
-static void ast_type_const_free(ast_type_const_t* node)
-{
-  ast_node_t* base_type = node->base_type;
-
-  node->base_type = NULL;
-  
-  ast_node_free(base_type);
-}
-
-static void ast_type_ptr_free(ast_type_ptr_t* node)
-{
-  ast_node_t* base_type = node->base_type;
-
-  node->base_type = NULL;
-  
-  ast_node_free(base_type);
-}
-
-static void ast_type_array_free(ast_type_array_t* node)
-{
-  ast_node_t* base_type = node->base_type;
-  ast_node_t* size = node->size;
-
-  node->base_type = NULL;
-  node->size = NULL;
-  
-  ast_node_free(base_type);
-  ast_node_free(size);
-}
-
-static void ast_type_ref_free(ast_type_ref_t* node)
-{
-  ast_node_t* base_type = node->base_type;
-
-  node->base_type = NULL;
-  
-  ast_node_free(base_type);
-}
-
-static void ast_type_opt_free(ast_type_opt_t* node)
-{
-  ast_node_t* base_type = node->base_type;
-
-  node->base_type = NULL;
-  
-  ast_node_free(base_type);
-}
-
-static void ast_type_fun_free(ast_type_fun_t* node)
-{
-  ast_node_t* return_type = node->return_type;
-  list_t* params = node->params;
-
-  node->return_type = NULL;
-  node->params = NULL;
-
-  ast_node_free(return_type);
-  list_for_each(params, (list_for_each_func_t)ast_node_free);
-  list_free(params);
-}
-
-static void ast_type_gen_free(ast_type_gen_t* node)
-{
-  ast_node_t* yield_type = node->yield_type;
-  list_t* params = node->params;
-
-  node->yield_type = NULL;
-  node->params = NULL;
-
-  ast_node_free(yield_type);
-  list_for_each(params, (list_for_each_func_t)ast_node_free);
-  list_free(params);
-}
-
-static void ast_type_member_free(ast_type_member_t* node)
-{
-  ast_node_t* owner = node->owner;
-  ast_node_t* member = node->member;
-
-  node->owner = NULL;
-  node->member = NULL;
-
-  ast_node_free(owner);
-  ast_node_free(member);
-}
-
-static void ast_expr_lit_free(ast_expr_lit_t* node)
-{
-  unused(node);
-}
-
-static void ast_expr_op_un_free(ast_expr_op_un_t* node)
-{
-  ast_node_t* param = node->param;
-
-  node->param = NULL;
-
-  ast_node_free(param);
-}
-
-static void ast_expr_op_bin_free(ast_expr_op_bin_t* node)
-{
-  ast_node_t* lhs = node->lhs;
-  ast_node_t* rhs = node->rhs;
-
-  node->lhs = NULL;
-  node->rhs = NULL;
-
-  ast_node_free(lhs);
-  ast_node_free(rhs);
-}
-
-static void ast_expr_op_call_free(ast_expr_op_call_t* node)
-{
-  ast_node_t* callee = node->callee;
-  list_t* params = node->params;
-
-  node->callee = NULL;
-  node->params = NULL;
-
-  ast_node_free(callee);
-  list_for_each(params, (list_for_each_func_t)ast_node_free);
-  list_free(params);
-}
-
-static void ast_expr_op_free(ast_expr_op_t* node)
-{
-  if (op_is_unary(node->op_kind))
-    ast_expr_op_un_free((ast_expr_op_un_t*)node);
-  else if (op_is_binary(node->op_kind))
-    ast_expr_op_bin_free((ast_expr_op_bin_t*)node);
-  else if (node->op_kind == OP_CALL)
-    ast_expr_op_call_free((ast_expr_op_call_t*)node);
-  else
-    unreachable();
-}
-
-static void ast_stmt_if_free(ast_stmt_if_t* node)
-{
-  ast_node_t* cond = node->cond;
-  ast_node_t* stmt = node->stmt;
-  ast_node_t* stmt_else = node->stmt_else;
-
-  node->cond = NULL;
-  node->stmt = NULL;
-  node->stmt_else = NULL;
-
-  ast_node_free(cond);
-  ast_node_free(stmt);
-  ast_node_free(stmt_else);
-}
-
-static void ast_stmt_for_free(ast_stmt_for_t* node)
-{
-  ast_node_t* var = node->var;
-  ast_node_t* range = node->range;
-  ast_node_t* stmt = node->stmt;
-
-  node->var = NULL;
-  node->range = NULL;
-  node->stmt = NULL;
-
-  ast_node_free(var);
-  ast_node_free(range);
-  ast_node_free(stmt);
-}
-
-static void ast_stmt_while_free(ast_stmt_while_t* node)
-{
-  ast_node_t* cond = node->cond;
-  ast_node_t* stmt = node->stmt;
-
-  node->cond = NULL;
-  node->stmt = NULL;
-
-  ast_node_free(cond);
-  ast_node_free(stmt);
-}
-
-static void ast_stmt_return_free(ast_stmt_return_t* node)
-{
-  ast_node_t* expr = node->expr;
-
-  node->expr = NULL;
-
-  ast_node_free(expr);
-}
-
-static void ast_stmt_yield_free(ast_stmt_yield_t* node)
-{
-  ast_node_t* expr = node->expr;
-
-  node->expr = NULL;
-
-  ast_node_free(expr);
-}
-
-static void ast_stmt_block_free(ast_stmt_block_t* node)
-{
-  list_t* stmts = node->stmts;
-
-  node->stmts = NULL;
-
-  list_for_each(stmts, (list_for_each_func_t)ast_node_free);
-  list_free(stmts);
-}
-
-static void ast_stmt_expr_free(ast_stmt_expr_t* node)
-{
-  ast_node_t* expr = node->expr;
-
-  node->expr = NULL;
-
-  ast_node_free(expr);
-}
-
-static void ast_decl_var_free(ast_decl_var_t* node)
-{
-  ast_node_t* id = node->id;
-  ast_node_t* type = node->type;
-  ast_node_t* init = node->init;
-
-  node->id = NULL;
-  node->type = NULL;
-  node->init = NULL;
-
-  ast_node_free(id);
-  ast_node_free(type);
-  ast_node_free(init);
-}
-
-static void ast_decl_loop_var_free(ast_decl_loop_var_t* node)
-{
-  ast_node_t* id = node->id;
-  ast_node_t* type = node->type;
-
-  node->id = NULL;
-  node->type = NULL;
-
-  ast_node_free(id);
-  ast_node_free(type);
-}
-
-static void ast_decl_fun_free(ast_decl_fun_t* node)
-{
-  ast_node_t* id = node->id;
-  list_t* params = node->params;
-  ast_node_t* return_type = node->return_type;
-  ast_node_t* stmt = node->stmt;
-
-  node->id = NULL;
-  node->params = NULL;
-  node->return_type = NULL;
-  node->stmt = NULL;
-
-  ast_node_free(id);
-  list_for_each(params, (list_for_each_func_t)ast_node_free);
-  list_free(params);
-  ast_node_free(return_type);
-  ast_node_free(stmt);
-}
-
-static void ast_decl_gen_free(ast_decl_gen_t* node)
-{
-  ast_node_t* id = node->id;
-  list_t* params = node->params;
-  ast_node_t* yield_type = node->yield_type;
-  ast_node_t* stmt = node->stmt;
-
-  node->id = NULL;
-  node->params = NULL;
-  node->yield_type = NULL;
-  node->stmt = NULL;
-
-  ast_node_free(id);
-  list_for_each(params, (list_for_each_func_t)ast_node_free);
-  list_free(params);
-  ast_node_free(yield_type);
-  ast_node_free(stmt);
-}
-
-static void ast_decl_struct_free(ast_decl_struct_t* node)
-{
-  ast_node_t* id = node->id;
-  list_t* members = node->members;
-
-  node->id = NULL;
-  node->members = NULL;
-
-  ast_node_free(id);
-  list_for_each(members, (list_for_each_func_t)ast_node_free);
-  list_free(members);
-}
-
-static void ast_decl_union_free(ast_decl_union_t* node)
-{
-  ast_node_t* id = node->id;
-  list_t* members = node->members;
-
-  node->id = NULL;
-  node->members = NULL;
-
-  ast_node_free(id);
-  list_for_each(members, (list_for_each_func_t)ast_node_free);
-  list_free(members);
-}
-
-static void ast_decl_enum_free(ast_decl_enum_t* node)
-{
-  ast_node_t* id = node->id;
-  list_t* values = node->values;
-
-  node->id = NULL;
-  node->values = NULL;
-
-  ast_node_free(id);
-  list_for_each(values, (list_for_each_func_t)ast_node_free);
-  list_free(values);
-}
-
-static void ast_decl_mod_free(ast_decl_mod_t* node)
-{
-  ast_node_t* id = node->id;
-  list_t* decls = node->decls;
-
-  node->id = NULL;
-  node->decls = NULL;
-
-  ast_node_free(id);
-  list_for_each(decls, (list_for_each_func_t)ast_node_free);
-  list_free(decls);
-}
-
-static void ast_decl_generic_free(ast_decl_generic_t* node)
-{
-  ast_node_t* decl = node->decl;
-  list_t* params = node->params;
-
-  node->decl = NULL;
-  node->params = NULL;
-
-  ast_node_free(decl);
-  list_for_each(params, (list_for_each_func_t)ast_node_free);
-  list_free(params);
-}
-
-static void ast_param_free(ast_decl_param_t* node)
-{
-  ast_node_t* id = node->id;
-  ast_node_t* type = node->type;
-
-  node->id = NULL;
-  node->type = NULL;
-
-  ast_node_free(id);
-  ast_node_free(type);
-}
-
-static void ast_param_default_free(ast_decl_param_default_t* node)
-{
-  ast_node_t* id = node->id;
-  ast_node_t* type = node->type;
-  ast_node_t* init = node->init;
-
-  node->id = NULL;
-  node->type = NULL;
-  node->init = NULL;
-
-  ast_node_free(id);
-  ast_node_free(type);
-  ast_node_free(init);
-}
-
-static void ast_param_variadic_free(ast_decl_param_variadic_t* node)
-{
-  ast_node_t* id = node->id;
-  ast_node_t* type = node->type;
-
-  node->id = NULL;
-  node->type = NULL;
-
-  ast_node_free(id);
-  ast_node_free(type);
-}
-
-static void ast_param_generic_free(ast_decl_param_generic_t* node)
-{
-  ast_node_t* id = node->id;
-  ast_node_t* type = node->type;
-
-  node->id = NULL;
-  node->type = NULL;
-
-  ast_node_free(id);
-  ast_node_free(type);
-}
-
-static void ast_enumerator_free(ast_decl_enum_constant_t* node)
-{
-  ast_node_t* id = node->id;
-
-  node->id = NULL;
-
-  ast_node_free(id);
-}
-
-static void ast_prog_free(ast_prog_t* node)
-{
-  list_t* decls = node->decls;
-
-  node->decls = NULL;
-
-  list_for_each(decls, (list_for_each_func_t)ast_node_free);
-  list_free(decls);
-}
-
-void ast_node_free(ast_node_t* node)
+static void ast_node_collect(set_t* set, ast_node_t* node)
 {
   if (node == NULL)
     return;
 
+  set_add(set, node);
+
   switch (node->kind)
   {
-  case AST_UNKNOWN: break;
-  case AST_ID: break;
-  case AST_TYPE_MUT: ast_type_mut_free((ast_type_mut_t*)node); break;
-  case AST_TYPE_CONST: ast_type_const_free((ast_type_const_t*)node); break;
-  case AST_TYPE_PTR: ast_type_ptr_free((ast_type_ptr_t*)node); break;
-  case AST_TYPE_ARRAY: ast_type_array_free((ast_type_array_t*)node); break;
-  case AST_TYPE_REF: ast_type_ref_free((ast_type_ref_t*)node); break;
-  case AST_TYPE_OPT: ast_type_opt_free((ast_type_opt_t*)node); break;
-  case AST_TYPE_FUN: ast_type_fun_free((ast_type_fun_t*)node); break;
-  case AST_TYPE_GEN: ast_type_gen_free((ast_type_gen_t*)node); break;
+  case AST_ID:
+    break;
+  case AST_PROG:
+    LIST_FOR_LOOP(it, ast_get_decls(node))
+      ast_node_collect(set, (ast_node_t*)list_node_get(it));
+    break;
+  case AST_TYPE_MUT:
+  case AST_TYPE_CONST:
+  case AST_TYPE_PTR:
+  case AST_TYPE_ARRAY:
+  case AST_TYPE_REF:
+  case AST_TYPE_OPT:
+    ast_node_collect(set, ast_get_base_type(node));
+    break;
+  case AST_TYPE_FUN:
+    LIST_FOR_LOOP(it, ast_get_params(node))
+      ast_node_collect(set, (ast_node_t*)list_node_get(it));
+
+    ast_node_collect(set, ast_get_return_type(node));
+    break;
+  case AST_TYPE_GEN:
+    LIST_FOR_LOOP(it, ast_get_params(node))
+      ast_node_collect(set, (ast_node_t*)list_node_get(it));
+
+    ast_node_collect(set, ast_get_yield_type(node));
+    break;
   case AST_TYPE_TYPE:
   case AST_TYPE_SELF:
   case AST_TYPE_I8:
@@ -470,39 +634,132 @@ void ast_node_free(ast_node_t* node)
   case AST_TYPE_F32:
   case AST_TYPE_F64:
   case AST_TYPE_BOOL:
-  case AST_TYPE_UNIT: break;
-  case AST_TYPE_MEMBER: ast_type_member_free((ast_type_member_t*)node); break;
+  case AST_TYPE_UNIT:
+    break;
+  case AST_TYPE_MEMBER:
+    ast_node_collect(set, ast_get_owner(node));
+    ast_node_collect(set, ast_get_member(node));
+    break;
   case AST_EXPR_LIT_INT:
   case AST_EXPR_LIT_FLT:
   case AST_EXPR_LIT_STR:
   case AST_EXPR_LIT_CHAR:
   case AST_EXPR_LIT_BOOL:
-  case AST_EXPR_LIT_NULL: ast_expr_lit_free((ast_expr_lit_t*)node); break;
-  case AST_EXPR_OP: ast_expr_op_free((ast_expr_op_t*)node); break;
-  case AST_STMT_IF: ast_stmt_if_free((ast_stmt_if_t*)node); break;
-  case AST_STMT_FOR: ast_stmt_for_free((ast_stmt_for_t*)node); break;
-  case AST_STMT_WHILE: ast_stmt_while_free((ast_stmt_while_t*)node); break;
-  case AST_STMT_RETURN: ast_stmt_return_free((ast_stmt_return_t*)node); break;
-  case AST_STMT_YIELD: ast_stmt_yield_free((ast_stmt_yield_t*)node); break;
-  case AST_STMT_BLOCK: ast_stmt_block_free((ast_stmt_block_t*)node); break;
-  case AST_STMT_EXPR: ast_stmt_expr_free((ast_stmt_expr_t*)node); break;
-  case AST_DECL_VAR: ast_decl_var_free((ast_decl_var_t*)node); break;
-  case AST_DECL_LOOP_VAR: ast_decl_loop_var_free((ast_decl_loop_var_t*)node); break;
-  case AST_DECL_FUN: ast_decl_fun_free((ast_decl_fun_t*)node); break;
-  case AST_DECL_GEN: ast_decl_gen_free((ast_decl_gen_t*)node); break;
-  case AST_DECL_STRUCT: ast_decl_struct_free((ast_decl_struct_t*)node); break;
-  case AST_DECL_UNION: ast_decl_union_free((ast_decl_union_t*)node); break;
-  case AST_DECL_ENUM: ast_decl_enum_free((ast_decl_enum_t*)node); break;
-  case AST_DECL_MOD: ast_decl_mod_free((ast_decl_mod_t*)node); break;
-  case AST_DECL_GENERIC: ast_decl_generic_free((ast_decl_generic_t*)node); break;
-  case AST_DECL_PARAM: ast_param_free((ast_decl_param_t*)node); break;
-  case AST_DECL_PARAM_DEFAULT: ast_param_default_free((ast_decl_param_default_t*)node); break;
-  case AST_DECL_PARAM_VARIADIC: ast_param_variadic_free((ast_decl_param_variadic_t*)node); break;
-  case AST_DECL_PARAM_GENERIC: ast_param_generic_free((ast_decl_param_generic_t*)node); break;
-  case AST_DECL_ENUM_CONSTANT: ast_enumerator_free((ast_decl_enum_constant_t*)node); break;
-  case AST_PROG: ast_prog_free((ast_prog_t*)node); break;
+  case AST_EXPR_LIT_NULL:
+    break;
+  case AST_EXPR_OP:
+    if (op_is_unary(ast_get_op(node)))
+      ast_node_collect(set, ast_get_expr(node));
+    else if (op_is_binary(ast_get_op(node)))
+    {
+      ast_node_collect(set, ast_get_lhs(node));
+      ast_node_collect(set, ast_get_rhs(node));
+    }
+    else if (ast_get_op(node) == OP_CALL)
+    {
+      ast_node_collect(set, ast_get_callee(node));
+
+      LIST_FOR_LOOP(it, ast_get_params(node))
+        ast_node_collect(set, (ast_node_t*)list_node_get(it));
+    }
+    else
+      unreachable();
+    break;
+  case AST_STMT_IF:
+    ast_node_collect(set, ast_get_cond(node));
+    ast_node_collect(set, ast_get_stmt(node));
+    ast_node_collect(set, ast_get_stmt_else(node));
+    break;
+  case AST_STMT_FOR:
+    ast_node_collect(set, ast_get_var(node));
+    ast_node_collect(set, ast_get_range(node));
+    ast_node_collect(set, ast_get_stmt(node));
+    break;
+  case AST_STMT_WHILE:
+    ast_node_collect(set, ast_get_cond(node));
+    ast_node_collect(set, ast_get_stmt(node));
+    break;
+  case AST_STMT_BREAK:
+  case AST_STMT_CONTINUE:
+    break;
+  case AST_STMT_RETURN:
+    ast_node_collect(set, ast_get_expr(node));
+    break;
+  case AST_STMT_YIELD:
+    ast_node_collect(set, ast_get_expr(node));
+    break;
+  case AST_STMT_BLOCK:
+    LIST_FOR_LOOP(it, ast_get_stmts(node))
+      ast_node_collect(set, (ast_node_t*)list_node_get(it));
+    break;
+  case AST_STMT_EXPR:
+    ast_node_collect(set, ast_get_expr(node));
+    break;
+  case AST_DECL_VAR:
+    ast_node_collect(set, ast_get_id(node));
+    ast_node_collect(set, ast_get_type(node));
+    ast_node_collect(set, ast_get_expr(node));
+    break;
+  case AST_DECL_FUN:
+    LIST_FOR_LOOP(it, ast_get_params(node))
+      ast_node_collect(set, (ast_node_t*)list_node_get(it));
+
+    ast_node_collect(set, ast_get_id(node));
+    ast_node_collect(set, ast_get_return_type(node));
+    break;
+  case AST_DECL_GEN:
+    LIST_FOR_LOOP(it, ast_get_params(node))
+      ast_node_collect(set, (ast_node_t*)list_node_get(it));
+
+    ast_node_collect(set, ast_get_id(node));
+    ast_node_collect(set, ast_get_yield_type(node));
+    break;
+  case AST_DECL_STRUCT:
+  case AST_DECL_UNION:
+  case AST_DECL_ENUM:
+    LIST_FOR_LOOP(it, ast_get_members(node))
+      ast_node_collect(set, (ast_node_t*)list_node_get(it));
+
+    ast_node_collect(set, ast_get_id(node));
+    break;
+  case AST_DECL_MOD:
+    LIST_FOR_LOOP(it, ast_get_decls(node))
+      ast_node_collect(set, (ast_node_t*)list_node_get(it));
+
+    ast_node_collect(set, ast_get_id(node));
+    break;
+  case AST_DECL_PARAM:
+    ast_node_collect(set, ast_get_id(node));
+    ast_node_collect(set, ast_get_type(node));
+    ast_node_collect(set, ast_get_expr(node));
+    break;
+  case AST_DECL_ENUM_CONSTANT:
+    ast_node_collect(set, ast_get_id(node));
+    ast_node_collect(set, ast_get_type(node));
+    break;
   default: unreachable();
   }
+}
+
+static int cmp_ptr(void* lhs, void* rhs)
+{
+  return (int)((uintptr_t)lhs - (uintptr_t)rhs);
+}
+
+static void ast_node_free_impl(ast_node_t* node)
+{
+  free(node);
+}
+
+void ast_node_free(ast_node_t* node)
+{
+  set_t* node_set = set_init(cmp_ptr);
+
+  ast_node_collect(node_set, node);
+
+  set_for_each(node_set, (set_for_each_func_t)ast_node_free_impl);
+
+  set_free(node_set);
 }
 
 void ast_json_dump_list(FILE* stream, list_t* list)
@@ -535,48 +792,34 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
 
   switch (root->kind)
   {
-  case AST_UNKNOWN:
-    break;
   case AST_ID:
     fprintf(stream, ",\"id\":\"%.*s\"", (int)location_get_len(token_get_loc(root->tok)), location_get_ptr(token_get_loc(root->tok)));
     break;
   case AST_TYPE_MUT:
-    fprintf(stream, ",\"base_type\":");
-    ast_json_dump(stream, ((ast_type_mut_t*)root)->base_type);
-    break;
   case AST_TYPE_CONST:
-    fprintf(stream, ",\"base_type\":");
-    ast_json_dump(stream, ((ast_type_const_t*)root)->base_type);
-    break;
   case AST_TYPE_PTR:
+  case AST_TYPE_REF:
+  case AST_TYPE_OPT:
     fprintf(stream, ",\"base_type\":");
-    ast_json_dump(stream, ((ast_type_ptr_t*)root)->base_type);
+    ast_json_dump(stream, ast_get_base_type(root));
     break;
   case AST_TYPE_ARRAY:
     fprintf(stream, ",\"size\":");
-    ast_json_dump(stream, ((ast_type_array_t*)root)->size);
+    ast_json_dump(stream, ast_get_size(root));
     fprintf(stream, ",\"base_type\":");
-    ast_json_dump(stream, ((ast_type_array_t*)root)->base_type);
-    break;
-  case AST_TYPE_REF:
-    fprintf(stream, ",\"base_type\":");
-    ast_json_dump(stream, ((ast_type_ref_t*)root)->base_type);
-    break;
-  case AST_TYPE_OPT:
-    fprintf(stream, ",\"base_type\":");
-    ast_json_dump(stream, ((ast_type_opt_t*)root)->base_type);
+    ast_json_dump(stream, ast_get_base_type(root));
     break;
   case AST_TYPE_FUN:
     fprintf(stream, ",\"params\":");
-    ast_json_dump_list(stream, ((ast_type_fun_t*)root)->params);
+    ast_json_dump_list(stream, ast_get_params(root));
     fprintf(stream, ",\"return_type\":");
-    ast_json_dump(stream, ((ast_type_fun_t*)root)->return_type);
+    ast_json_dump(stream, ast_get_return_type(root));
     break;
   case AST_TYPE_GEN:
     fprintf(stream, ",\"params\":");
-    ast_json_dump_list(stream, ((ast_type_gen_t*)root)->params);
+    ast_json_dump_list(stream, ast_get_params(root));
     fprintf(stream, ",\"yield_type\":");
-    ast_json_dump(stream, ((ast_type_gen_t*)root)->yield_type);
+    ast_json_dump(stream, ast_get_yield_type(root));
     break;
   case AST_TYPE_TYPE:
   case AST_TYPE_I8:
@@ -596,9 +839,9 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     break;
   case AST_TYPE_MEMBER:
     fprintf(stream, ",\"owner\":");
-    ast_json_dump(stream, ((ast_type_member_t*)root)->owner);
+    ast_json_dump(stream, ast_get_owner(root));
     fprintf(stream, ",\"member\":");
-    ast_json_dump(stream, ((ast_type_member_t*)root)->member);
+    ast_json_dump(stream, ast_get_member(root));
     break;
   case AST_EXPR_LIT_INT:
   case AST_EXPR_LIT_FLT:
@@ -609,160 +852,127 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
     fprintf(stream, ",\"value\":\"%.*s\"", (int)location_get_len(token_get_loc(root->tok)), location_get_ptr(token_get_loc(root->tok)));
     break;
   case AST_EXPR_OP:
-    fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(((ast_expr_op_t*)root)->op_kind));
-    if (op_is_unary(((ast_expr_op_t*)root)->op_kind))
+    fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(ast_get_op(root)));
+    if (op_is_unary(ast_get_op(root)))
     {
-      fprintf(stream, ",\"param\":");
-      ast_json_dump(stream, ((ast_expr_op_un_t*)root)->param);
+      fprintf(stream, ",\"expr\":");
+      ast_json_dump(stream, ast_get_expr(root));
     }
-    else if (op_is_binary(((ast_expr_op_t*)root)->op_kind))
+    else if (op_is_binary(ast_get_op(root)))
     {
       fprintf(stream, ",\"lhs\":");
-      ast_json_dump(stream, ((ast_expr_op_bin_t*)root)->lhs);
+      ast_json_dump(stream, ast_get_lhs(root));
       fprintf(stream, ",\"rhs\":");
-      ast_json_dump(stream, ((ast_expr_op_bin_t*)root)->rhs);
+      ast_json_dump(stream, ast_get_rhs(root));
     }
-    else if (((ast_expr_op_t*)root)->op_kind == OP_CALL)
+    else if (ast_get_op(root) == OP_CALL)
     {
       fprintf(stream, ",\"callee\":");
-      ast_json_dump(stream, ((ast_expr_op_call_t*)root)->callee);
-      fprintf(stream, ",\"args\":");
-      ast_json_dump_list(stream, ((ast_expr_op_call_t*)root)->params);
+      ast_json_dump(stream, ast_get_callee(root));
+      fprintf(stream, ",\"params\":");
+      ast_json_dump_list(stream, ast_get_params(root));
     }
+    else
+      unreachable();
     break;
   case AST_STMT_IF:
     fprintf(stream, ",\"cond\":");
-    ast_json_dump(stream, ((ast_stmt_if_t*)root)->cond);
+    ast_json_dump(stream, ast_get_cond(root));
     fprintf(stream, ",\"stmt\":");
-    ast_json_dump(stream, ((ast_stmt_if_t*)root)->stmt);
+    ast_json_dump(stream, ast_get_stmt(root));
     fprintf(stream, ",\"stmt_else\":");
-    ast_json_dump(stream, ((ast_stmt_if_t*)root)->stmt_else);
+    ast_json_dump(stream, ast_get_stmt_else(root));
     break;
   case AST_STMT_FOR:
     fprintf(stream, ",\"var\":");
-    ast_json_dump(stream, ((ast_stmt_for_t*)root)->var);
+    ast_json_dump(stream, ast_get_var(root));
     fprintf(stream, ",\"range\":");
-    ast_json_dump(stream, ((ast_stmt_for_t*)root)->range);
+    ast_json_dump(stream, ast_get_range(root));
     fprintf(stream, ",\"stmt\":");
-    ast_json_dump(stream, ((ast_stmt_for_t*)root)->stmt);
+    ast_json_dump(stream, ast_get_stmt(root));
     break;
   case AST_STMT_WHILE:
     fprintf(stream, ",\"cond\":");
-    ast_json_dump(stream, ((ast_stmt_while_t*)root)->cond);
+    ast_json_dump(stream, ast_get_cond(root));
     fprintf(stream, ",\"stmt\":");
-    ast_json_dump(stream, ((ast_stmt_while_t*)root)->stmt);
+    ast_json_dump(stream, ast_get_stmt(root));
     break;
   case AST_STMT_BREAK:
-    break;
   case AST_STMT_CONTINUE:
     break;
   case AST_STMT_RETURN:
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, ((ast_stmt_return_t*)root)->expr);
-    break;
   case AST_STMT_YIELD:
     fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, ((ast_stmt_yield_t*)root)->expr);
+    ast_json_dump(stream, ast_get_expr(root));
     break;
   case AST_STMT_BLOCK:
     fprintf(stream, ",\"stmts\":");
-    ast_json_dump_list(stream, ((ast_stmt_block_t*)root)->stmts);
+    ast_json_dump_list(stream, ast_get_stmts(root));
     break;
   case AST_STMT_EXPR:
     fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, ((ast_stmt_expr_t*)root)->expr);
+    ast_json_dump(stream, ast_get_expr(root));
     break;
   case AST_DECL_VAR:
     fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_var_t*)root)->id);
+    ast_json_dump(stream, ast_get_id(root));
     fprintf(stream, ",\"type\":");
-    ast_json_dump(stream, ((ast_decl_var_t*)root)->type);
-    fprintf(stream, ",\"init\":");
-    ast_json_dump(stream, ((ast_decl_var_t*)root)->init);
-    break;
-  case AST_DECL_LOOP_VAR:
-    fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_loop_var_t*)root)->id);
-    fprintf(stream, ",\"type\":");
-    ast_json_dump(stream, ((ast_decl_loop_var_t*)root)->type);
+    ast_json_dump(stream, ast_get_type(root));
+    fprintf(stream, ",\"expr\":");
+    ast_json_dump(stream, ast_get_expr(root));
     break;
   case AST_DECL_FUN:
     fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_fun_t*)root)->id);
+    ast_json_dump(stream, ast_get_id(root));
     fprintf(stream, ",\"params\":");
-    ast_json_dump_list(stream, ((ast_decl_fun_t*)root)->params);
+    ast_json_dump_list(stream, ast_get_params(root));
     fprintf(stream, ",\"return_type\":");
-    ast_json_dump(stream, ((ast_decl_fun_t*)root)->return_type);
+    ast_json_dump(stream, ast_get_return_type(root));
     fprintf(stream, ",\"stmt\":");
-    ast_json_dump(stream, ((ast_decl_fun_t*)root)->stmt);
+    ast_json_dump(stream, ast_get_stmt(root));
     break;
   case AST_DECL_GEN:
     fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_gen_t*)root)->id);
+    ast_json_dump(stream, ast_get_id(root));
     fprintf(stream, ",\"params\":");
-    ast_json_dump_list(stream, ((ast_decl_gen_t*)root)->params);
+    ast_json_dump_list(stream, ast_get_params(root));
     fprintf(stream, ",\"yield_type\":");
-    ast_json_dump(stream, ((ast_decl_gen_t*)root)->yield_type);
+    ast_json_dump(stream, ast_get_yield_type(root));
     fprintf(stream, ",\"stmt\":");
-    ast_json_dump(stream, ((ast_decl_gen_t*)root)->stmt);
+    ast_json_dump(stream, ast_get_stmt(root));
     break;
   case AST_DECL_STRUCT:
-    fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_struct_t*)root)->id);
-    fprintf(stream, ",\"members\":");
-    ast_json_dump_list(stream, ((ast_decl_struct_t*)root)->members);
-    break;
   case AST_DECL_UNION:
-    fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_union_t*)root)->id);
-    fprintf(stream, ",\"members\":");
-    ast_json_dump_list(stream, ((ast_decl_union_t*)root)->members);
-    break;
   case AST_DECL_ENUM:
     fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_enum_t*)root)->id);
-    fprintf(stream, ",\"values\":");
-    ast_json_dump_list(stream, ((ast_decl_enum_t*)root)->values);
+    ast_json_dump(stream, ast_get_id(root));
+    fprintf(stream, ",\"members\":");
+    ast_json_dump_list(stream, ast_get_members(root));
     break;
   case AST_DECL_MOD:
     fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_mod_t*)root)->id);
+    ast_json_dump(stream, ast_get_id(root));
     fprintf(stream, ",\"decls\":");
-    ast_json_dump_list(stream, ((ast_decl_mod_t*)root)->decls);
+    ast_json_dump_list(stream, ast_get_decls(root));
     break;
   case AST_DECL_PARAM:
     fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_param_t*)root)->id);
+    ast_json_dump(stream, ast_get_id(root));
     fprintf(stream, ",\"type\":");
-    ast_json_dump(stream, ((ast_decl_param_t*)root)->type);
-    break;
-  case AST_DECL_PARAM_DEFAULT:
-    fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_param_default_t*)root)->id);
-    fprintf(stream, ",\"type\":");
-    ast_json_dump(stream, ((ast_decl_param_default_t*)root)->type);
-    fprintf(stream, ",\"init\":");
-    ast_json_dump(stream, ((ast_decl_param_default_t*)root)->init);
-    break;
-  case AST_DECL_PARAM_VARIADIC:
-    fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_param_variadic_t*)root)->id);
-    fprintf(stream, ",\"type\":");
-    ast_json_dump(stream, ((ast_decl_param_variadic_t*)root)->type);
-    break;
-  case AST_DECL_PARAM_GENERIC:
-    fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_param_generic_t*)root)->id);
-    fprintf(stream, ",\"type\":");
-    ast_json_dump(stream, ((ast_decl_param_generic_t*)root)->type);
+    ast_json_dump(stream, ast_get_type(root));
+    fprintf(stream, ",\"expr\":");
+    ast_json_dump(stream, ast_get_expr(root));
+    fprintf(stream, ",\"is_variadic\":%s", ast_is_variadic(root) ? "true" : "false");
     break;
   case AST_DECL_ENUM_CONSTANT:
     fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_enum_constant_t*)root)->id);
+    ast_json_dump(stream, ast_get_id(root));
+    fprintf(stream, ",\"type\":");
+    ast_json_dump(stream, ast_get_type(root));
     break;
   case AST_PROG:
     fprintf(stream, ",\"decls\":");
-    ast_json_dump_list(stream, ((ast_prog_t*)root)->decls);
+    ast_json_dump_list(stream, ast_get_decls(root));
     break;
   default:
     unreachable();
@@ -833,48 +1043,34 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root)
 
       switch (root->kind)
       {
-      case AST_UNKNOWN:
-        break;
       case AST_ID:
         fprintf(stream, ",\"id\":\"%.*s\"", (int)location_get_len(token_get_loc(root->tok)), location_get_ptr(token_get_loc(root->tok)));
         break;
       case AST_TYPE_MUT:
-        fprintf(stream, ",\"base_type\":\"%p\"", (void*)((ast_type_mut_t*)root)->base_type);
-        stack_push(nodes, ((ast_type_mut_t*)root)->base_type);
-        break;
       case AST_TYPE_CONST:
-        fprintf(stream, ",\"base_type\":\"%p\"", (void*)((ast_type_const_t*)root)->base_type);
-        stack_push(nodes, ((ast_type_const_t*)root)->base_type);
-        break;
       case AST_TYPE_PTR:
-        fprintf(stream, ",\"base_type\":\"%p\"", (void*)((ast_type_ptr_t*)root)->base_type);
-        stack_push(nodes, ((ast_type_ptr_t*)root)->base_type);
+      case AST_TYPE_REF:
+      case AST_TYPE_OPT:
+        fprintf(stream, ",\"base_type\":\"%p\"", (void*)ast_get_base_type(root));
+        stack_push(nodes, ast_get_base_type(root));
         break;
       case AST_TYPE_ARRAY:
-        fprintf(stream, ",\"size\":\"%p\"", (void*)((ast_type_array_t*)root)->size);
-        stack_push(nodes, ((ast_type_array_t*)root)->size);
-        fprintf(stream, ",\"base_type\":\"%p\"", (void*)((ast_type_array_t*)root)->base_type);
-        stack_push(nodes, ((ast_type_array_t*)root)->base_type);
-        break;
-      case AST_TYPE_REF:
-        fprintf(stream, ",\"base_type\":\"%p\"", (void*)((ast_type_ref_t*)root)->base_type);
-        stack_push(nodes, ((ast_type_ref_t*)root)->base_type);
-        break;
-      case AST_TYPE_OPT:
-        fprintf(stream, ",\"base_type\":\"%p\"", (void*)((ast_type_opt_t*)root)->base_type);
-        stack_push(nodes, ((ast_type_opt_t*)root)->base_type);
+        fprintf(stream, ",\"size\":\"%p\"", (void*)ast_get_size(root));
+        stack_push(nodes, ast_get_size(root));
+        fprintf(stream, ",\"base_type\":\"%p\"", (void*)ast_get_base_type(root));
+        stack_push(nodes, ast_get_base_type(root));
         break;
       case AST_TYPE_FUN:
         fprintf(stream, ",\"params\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_type_fun_t*)root)->params);
-        fprintf(stream, ",\"return_type\":\"%p\"", (void*)((ast_type_fun_t*)root)->return_type);
-        stack_push(nodes, ((ast_type_fun_t*)root)->return_type);
+        ast_json_dump_flat_list(stream, nodes, ast_get_params(root));
+        fprintf(stream, ",\"return_type\":\"%p\"", (void*)ast_get_return_type(root));
+        stack_push(nodes, ast_get_return_type(root));
         break;
       case AST_TYPE_GEN:
         fprintf(stream, ",\"params\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_type_gen_t*)root)->params);
-        fprintf(stream, ",\"yield_type\":\"%p\"", (void*)((ast_type_gen_t*)root)->yield_type);
-        stack_push(nodes, ((ast_type_gen_t*)root)->yield_type);
+        ast_json_dump_flat_list(stream, nodes, ast_get_params(root));
+        fprintf(stream, ",\"yield_type\":\"%p\"", (void*)ast_get_yield_type(root));
+        stack_push(nodes, ast_get_yield_type(root));
         break;
       case AST_TYPE_TYPE:
       case AST_TYPE_I8:
@@ -893,10 +1089,10 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root)
       case AST_TYPE_UNIT:
         break;
       case AST_TYPE_MEMBER:
-        fprintf(stream, ",\"owner\":\"%p\"", (void*)((ast_type_member_t*)root)->owner);
-        stack_push(nodes, ((ast_type_member_t*)root)->owner);
-        fprintf(stream, ",\"member\":\"%p\"", (void*)((ast_type_member_t*)root)->member);
-        stack_push(nodes, ((ast_type_member_t*)root)->member);
+        fprintf(stream, ",\"owner\":\"%p\"", (void*)ast_get_owner(root));
+        stack_push(nodes, ast_get_owner(root));
+        fprintf(stream, ",\"member\":\"%p\"", (void*)ast_get_member(root));
+        stack_push(nodes, ast_get_member(root));
         break;
       case AST_EXPR_LIT_INT:
       case AST_EXPR_LIT_FLT:
@@ -907,160 +1103,125 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root)
         fprintf(stream, ",\"value\":\"%.*s\"", (int)location_get_len(token_get_loc(root->tok)), location_get_ptr(token_get_loc(root->tok)));
         break;
       case AST_EXPR_OP:
-        fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(((ast_expr_op_t*)root)->op_kind));
-        if (op_is_unary(((ast_expr_op_t*)root)->op_kind))
+        fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(ast_get_op(root)));
+        if (op_is_unary(ast_get_op(root)))
         {
-          fprintf(stream, ",\"param\":\"%p\"", (void*)((ast_expr_op_un_t*)root)->param);
-          stack_push(nodes, ((ast_expr_op_un_t*)root)->param);
+          fprintf(stream, ",\"param\":\"%p\"", (void*)ast_get_expr(root));
+          stack_push(nodes, ast_get_expr(root));
         }
-        else if (op_is_binary(((ast_expr_op_t*)root)->op_kind))
+        else if (op_is_binary(ast_get_op(root)))
         {
-          fprintf(stream, ",\"lhs\":\"%p\"", (void*)((ast_expr_op_bin_t*)root)->lhs);
-          stack_push(nodes, ((ast_expr_op_bin_t*)root)->lhs);
-          fprintf(stream, ",\"rhs\":\"%p\"", (void*)((ast_expr_op_bin_t*)root)->rhs);
-          stack_push(nodes, ((ast_expr_op_bin_t*)root)->rhs);
+          fprintf(stream, ",\"lhs\":\"%p\"", (void*)ast_get_lhs(root));
+          stack_push(nodes, ast_get_lhs(root));
+          fprintf(stream, ",\"rhs\":\"%p\"", (void*)ast_get_rhs(root));
+          stack_push(nodes, ast_get_rhs(root));
         }
-        else if (((ast_expr_op_t*)root)->op_kind == OP_CALL)
+        else if (ast_get_op(root) == OP_CALL)
         {
-          fprintf(stream, ",\"callee\":\"%p\"", (void*)((ast_expr_op_call_t*)root)->callee);
-          stack_push(nodes, ((ast_expr_op_call_t*)root)->callee);
-          fprintf(stream, ",\"args\":");
-          ast_json_dump_flat_list(stream, nodes, ((ast_expr_op_call_t*)root)->params);
+          fprintf(stream, ",\"callee\":\"%p\"", (void*)ast_get_callee(root));
+          stack_push(nodes, ast_get_callee(root));
+          fprintf(stream, ",\"params\":");
+          ast_json_dump_flat_list(stream, nodes, ast_get_params(root));
         }
         break;
       case AST_STMT_IF:
-        fprintf(stream, ",\"cond\":\"%p\"", (void*)((ast_stmt_if_t*)root)->cond);
-        stack_push(nodes, ((ast_stmt_if_t*)root)->cond);
-        fprintf(stream, ",\"stmt\":\"%p\"", (void*)((ast_stmt_if_t*)root)->stmt);
-        stack_push(nodes, ((ast_stmt_if_t*)root)->stmt);
-        fprintf(stream, ",\"stmt_else\":\"%p\"", (void*)((ast_stmt_if_t*)root)->stmt_else);
-        stack_push(nodes, ((ast_stmt_if_t*)root)->stmt_else);
+        fprintf(stream, ",\"cond\":\"%p\"", (void*)ast_get_cond(root));
+        stack_push(nodes, ast_get_cond(root));
+        fprintf(stream, ",\"stmt\":\"%p\"", (void*)ast_get_stmt(root));
+        stack_push(nodes, ast_get_stmt(root));
+        fprintf(stream, ",\"stmt_else\":\"%p\"", (void*)ast_get_stmt_else(root));
+        stack_push(nodes, ast_get_stmt_else(root));
         break;
       case AST_STMT_FOR:
-        fprintf(stream, ",\"var\":\"%p\"", (void*)((ast_stmt_for_t*)root)->var);
-        stack_push(nodes, ((ast_stmt_for_t*)root)->var);
-        fprintf(stream, ",\"range\":\"%p\"", (void*)((ast_stmt_for_t*)root)->range);
-        stack_push(nodes, ((ast_stmt_for_t*)root)->range);
-        fprintf(stream, ",\"stmt\":\"%p\"", (void*)((ast_stmt_for_t*)root)->stmt);
-        stack_push(nodes, ((ast_stmt_for_t*)root)->stmt);
+        fprintf(stream, ",\"var\":\"%p\"", (void*)ast_get_var(root));
+        stack_push(nodes, ast_get_var(root));
+        fprintf(stream, ",\"range\":\"%p\"", (void*)ast_get_range(root));
+        stack_push(nodes, ast_get_range(root));
+        fprintf(stream, ",\"stmt\":\"%p\"", (void*)ast_get_stmt(root));
+        stack_push(nodes, ast_get_stmt(root));
         break;
       case AST_STMT_WHILE:
-        fprintf(stream, ",\"cond\":\"%p\"", (void*)((ast_stmt_while_t*)root)->cond);
-        stack_push(nodes, ((ast_stmt_while_t*)root)->cond);
-        fprintf(stream, ",\"stmt\":\"%p\"", (void*)((ast_stmt_while_t*)root)->stmt);
-        stack_push(nodes, ((ast_stmt_while_t*)root)->stmt);
+        fprintf(stream, ",\"cond\":\"%p\"", (void*)ast_get_cond(root));
+        stack_push(nodes, ast_get_cond(root));
+        fprintf(stream, ",\"stmt\":\"%p\"", (void*)ast_get_stmt(root));
+        stack_push(nodes, ast_get_stmt(root));
         break;
       case AST_STMT_BREAK:
-        break;
       case AST_STMT_CONTINUE:
         break;
       case AST_STMT_RETURN:
-        fprintf(stream, ",\"expr\":\"%p\"", (void*)((ast_stmt_return_t*)root)->expr);
-        stack_push(nodes, ((ast_stmt_return_t*)root)->expr);
-        break;
       case AST_STMT_YIELD:
-        fprintf(stream, ",\"expr\":\"%p\"", (void*)((ast_stmt_yield_t*)root)->expr);
-        stack_push(nodes, ((ast_stmt_yield_t*)root)->expr);
+        fprintf(stream, ",\"expr\":\"%p\"", (void*)ast_get_expr(root));
+        stack_push(nodes, ast_get_expr(root));
         break;
       case AST_STMT_BLOCK:
         fprintf(stream, ",\"stmts\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_stmt_block_t*)root)->stmts);
+        ast_json_dump_flat_list(stream, nodes, ast_get_stmts(root));
         break;
       case AST_STMT_EXPR:
-        fprintf(stream, ",\"expr\":\"%p\"", (void*)((ast_stmt_expr_t*)root)->expr);
-        stack_push(nodes, ((ast_stmt_expr_t*)root)->expr);
+        fprintf(stream, ",\"expr\":\"%p\"", (void*)ast_get_expr(root));
+        stack_push(nodes, ast_get_expr(root));
         break;
       case AST_DECL_VAR:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_var_t*)root)->id);
-        stack_push(nodes, ((ast_decl_var_t*)root)->id);
-        fprintf(stream, ",\"type\":\"%p\"", (void*)((ast_decl_var_t*)root)->type);
-        stack_push(nodes, ((ast_decl_var_t*)root)->type);
-        fprintf(stream, ",\"init\":\"%p\"", (void*)((ast_decl_var_t*)root)->init);
-        stack_push(nodes, ((ast_decl_var_t*)root)->init);
-        break;
-      case AST_DECL_LOOP_VAR:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_loop_var_t*)root)->id);
-        stack_push(nodes, ((ast_decl_loop_var_t*)root)->id);
-        fprintf(stream, ",\"type\":\"%p\"", (void*)((ast_decl_loop_var_t*)root)->type);
-        stack_push(nodes, ((ast_decl_loop_var_t*)root)->type);
+        fprintf(stream, ",\"id\":\"%p\"", (void*)ast_get_id(root));
+        stack_push(nodes, ast_get_id(root));
+        fprintf(stream, ",\"type\":\"%p\"", (void*)ast_get_type(root));
+        stack_push(nodes, ast_get_type(root));
+        fprintf(stream, ",\"expr\":\"%p\"", (void*)ast_get_expr(root));
+        stack_push(nodes, ast_get_expr(root));
         break;
       case AST_DECL_FUN:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_fun_t*)root)->id);
-        stack_push(nodes, ((ast_decl_fun_t*)root)->id);
+        fprintf(stream, ",\"id\":\"%p\"", (void*)ast_get_id(root));
+        stack_push(nodes, ast_get_id(root));
         fprintf(stream, ",\"params\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_decl_fun_t*)root)->params);
-        fprintf(stream, ",\"return_type\":\"%p\"", (void*)((ast_decl_fun_t*)root)->return_type);
-        stack_push(nodes, ((ast_decl_fun_t*)root)->return_type);
-        fprintf(stream, ",\"stmt\":\"%p\"", (void*)((ast_decl_fun_t*)root)->stmt);
-        stack_push(nodes, ((ast_decl_fun_t*)root)->stmt);
+        ast_json_dump_flat_list(stream, nodes, ast_get_params(root));
+        fprintf(stream, ",\"return_type\":\"%p\"", (void*)ast_get_return_type(root));
+        stack_push(nodes, ast_get_return_type(root));
+        fprintf(stream, ",\"stmt\":\"%p\"", (void*)ast_get_stmt(root));
+        stack_push(nodes, ast_get_stmt(root));
         break;
       case AST_DECL_GEN:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_gen_t*)root)->id);
-        stack_push(nodes, ((ast_decl_gen_t*)root)->id);
+        fprintf(stream, ",\"id\":\"%p\"", (void*)ast_get_id(root));
+        stack_push(nodes, ast_get_id(root));
         fprintf(stream, ",\"params\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_decl_gen_t*)root)->params);
-        fprintf(stream, ",\"yield_type\":\"%p\"", (void*)((ast_decl_gen_t*)root)->yield_type);
-        stack_push(nodes, ((ast_decl_gen_t*)root)->yield_type);
-        fprintf(stream, ",\"stmt\":\"%p\"", (void*)((ast_decl_gen_t*)root)->stmt);
-        stack_push(nodes, ((ast_decl_gen_t*)root)->stmt);
+        ast_json_dump_flat_list(stream, nodes, ast_get_params(root));
+        fprintf(stream, ",\"yield_type\":\"%p\"", (void*)ast_get_yield_type(root));
+        stack_push(nodes, ast_get_yield_type(root));
+        fprintf(stream, ",\"stmt\":\"%p\"", (void*)ast_get_stmt(root));
+        stack_push(nodes, ast_get_stmt(root));
         break;
       case AST_DECL_STRUCT:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_struct_t*)root)->id);
-        stack_push(nodes, ((ast_decl_struct_t*)root)->id);
-        fprintf(stream, ",\"members\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_decl_struct_t*)root)->members);
-        break;
       case AST_DECL_UNION:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_union_t*)root)->id);
-        stack_push(nodes, ((ast_decl_union_t*)root)->id);
-        fprintf(stream, ",\"members\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_decl_union_t*)root)->members);
-        break;
       case AST_DECL_ENUM:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_enum_t*)root)->id);
-        stack_push(nodes, ((ast_decl_enum_t*)root)->id);
-        fprintf(stream, ",\"values\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_decl_enum_t*)root)->values);
+        fprintf(stream, ",\"id\":\"%p\"", (void*)ast_get_id(root));
+        stack_push(nodes, ast_get_id(root));
+        fprintf(stream, ",\"members\":");
+        ast_json_dump_flat_list(stream, nodes, ast_get_members(root));
         break;
       case AST_DECL_MOD:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_mod_t*)root)->id);
-        stack_push(nodes, ((ast_decl_mod_t*)root)->id);
+        fprintf(stream, ",\"id\":\"%p\"", (void*)ast_get_id(root));
+        stack_push(nodes, ast_get_id(root));
         fprintf(stream, ",\"decls\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_decl_mod_t*)root)->decls);
+        ast_json_dump_flat_list(stream, nodes, ast_get_decls(root));
         break;
       case AST_DECL_PARAM:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_param_t*)root)->id);
-        stack_push(nodes, ((ast_decl_param_t*)root)->id);
-        fprintf(stream, ",\"type\":\"%p\"", (void*)((ast_decl_param_t*)root)->type);
-        stack_push(nodes, ((ast_decl_param_t*)root)->type);
-        break;
-      case AST_DECL_PARAM_DEFAULT:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_param_default_t*)root)->id);
-        stack_push(nodes, ((ast_decl_param_default_t*)root)->id);
-        fprintf(stream, ",\"type\":\"%p\"", (void*)((ast_decl_param_default_t*)root)->type);
-        stack_push(nodes, ((ast_decl_param_default_t*)root)->type);
-        fprintf(stream, ",\"init\":\"%p\"", (void*)((ast_decl_param_default_t*)root)->init);
-        stack_push(nodes, ((ast_decl_param_default_t*)root)->init);
-        break;
-      case AST_DECL_PARAM_VARIADIC:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_param_variadic_t*)root)->id);
-        stack_push(nodes, ((ast_decl_param_variadic_t*)root)->id);
-        fprintf(stream, ",\"type\":\"%p\"", (void*)((ast_decl_param_variadic_t*)root)->type);
-        stack_push(nodes, ((ast_decl_param_variadic_t*)root)->type);
-        break;
-      case AST_DECL_PARAM_GENERIC:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_param_generic_t*)root)->id);
-        stack_push(nodes, ((ast_decl_param_generic_t*)root)->id);
-        fprintf(stream, ",\"type\":\"%p\"", (void*)((ast_decl_param_generic_t*)root)->type);
-        stack_push(nodes, ((ast_decl_param_generic_t*)root)->type);
+        fprintf(stream, ",\"id\":\"%p\"", (void*)ast_get_id(root));
+        stack_push(nodes, ast_get_id(root));
+        fprintf(stream, ",\"type\":\"%p\"", (void*)ast_get_type(root));
+        stack_push(nodes, ast_get_type(root));
+        fprintf(stream, ",\"expr\":\"%p\"", (void*)ast_get_expr(root));
+        stack_push(nodes, ast_get_expr(root));
+        fprintf(stream, ",\"is_variadic\":%s", ast_is_variadic(root) ? "true" : "false");
         break;
       case AST_DECL_ENUM_CONSTANT:
-        fprintf(stream, ",\"id\":\"%p\"", (void*)((ast_decl_enum_constant_t*)root)->id);
-        stack_push(nodes, ((ast_decl_enum_constant_t*)root)->id);
+        fprintf(stream, ",\"id\":\"%p\"", (void*)ast_get_id(root));
+        stack_push(nodes, ast_get_id(root));
+        fprintf(stream, ",\"type\":\"%p\"", (void*)ast_get_type(root));
+        stack_push(nodes, ast_get_type(root));
         break;
       case AST_PROG:
         fprintf(stream, ",\"decls\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_prog_t*)root)->decls);
+        ast_json_dump_flat_list(stream, nodes, ast_get_decls(root));
         break;
       default:
         unreachable();
@@ -1080,7 +1241,6 @@ const char* ast_kind_to_string(ast_kind_t kind)
 {
   switch (kind)
   {
-  case AST_UNKNOWN:             return "AST_UNKNOWN";
   case AST_ID:                  return "AST_ID";
   case AST_TYPE_MUT:            return "AST_TYPE_MUT";
   case AST_TYPE_CONST:          return "AST_TYPE_CONST";
@@ -1123,24 +1283,444 @@ const char* ast_kind_to_string(ast_kind_t kind)
   case AST_STMT_BLOCK:          return "AST_STMT_BLOCK";
   case AST_STMT_EXPR:           return "AST_STMT_EXPR";
   case AST_DECL_VAR:            return "AST_DECL_VAR";
-  case AST_DECL_LOOP_VAR:       return "AST_DECL_LOOP_VAR";
   case AST_DECL_FUN:            return "AST_DECL_FUN";
   case AST_DECL_GEN:            return "AST_DECL_GEN";
   case AST_DECL_STRUCT:         return "AST_DECL_STRUCT";
   case AST_DECL_UNION:          return "AST_DECL_UNION";
   case AST_DECL_ENUM:           return "AST_DECL_ENUM";
   case AST_DECL_MOD:            return "AST_DECL_MOD";
-  case AST_DECL_GENERIC:        return "AST_DECL_GENERIC";
   case AST_DECL_PARAM:          return "AST_DECL_PARAM";
-  case AST_DECL_PARAM_DEFAULT:  return "AST_DECL_PARAM_DEFAULT";
-  case AST_DECL_PARAM_VARIADIC: return "AST_DECL_PARAM_VARIADIC";
-  case AST_DECL_PARAM_GENERIC:  return "AST_DECL_PARAM_GENERIC";
   case AST_DECL_ENUM_CONSTANT:  return "AST_DECL_ENUM_CONSTANT";
   case AST_PROG:                return "AST_PROG";
   default: unreachable();
   }
 
   return NULL;
+}
+
+ast_kind_t ast_get_kind(ast_node_t* node)
+{
+  return node->kind;
+}
+
+void ast_set_kind(ast_node_t* node, ast_kind_t kind)
+{
+  node->kind = kind;
+}
+
+token_t* ast_get_token(ast_node_t* node)
+{
+  return node->tok;
+}
+
+void ast_set_token(ast_node_t* node, token_t* tok)
+{
+  node->tok = tok;
+}
+
+op_kind_t ast_get_op(ast_node_t* node)
+{
+  assert(node->kind == AST_EXPR_OP);
+  return ((ast_expr_op_t*)node)->op_kind;
+}
+
+void ast_set_op(ast_node_t* node, op_kind_t op)
+{
+  assert(node->kind == AST_EXPR_OP);
+  ((ast_expr_op_t*)node)->op_kind = op;
+}
+
+ast_node_t* ast_get_id(ast_node_t* node)
+{
+  assert(node->kind & AST_FLAG_DECL);
+  return ((ast_decl_t*)node)->id;
+}
+
+void ast_set_id(ast_node_t* node, ast_node_t* id)
+{
+  assert(node->kind & AST_FLAG_DECL);
+  ((ast_decl_t*)node)->id = id;
+}
+
+ast_node_t* ast_get_type(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_DECL_VAR:            return ((ast_decl_var_t*           )node)->type;
+  case AST_DECL_PARAM:          return ((ast_decl_param_t*         )node)->type;
+  case AST_DECL_ENUM_CONSTANT:  return ((ast_decl_enum_constant_t* )node)->type;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_type(ast_node_t* node, ast_node_t* type)
+{
+  switch (node->kind)
+  {
+  case AST_DECL_VAR:            ((ast_decl_var_t*           )node)->type = type; break;
+  case AST_DECL_PARAM:          ((ast_decl_param_t*         )node)->type = type; break;
+  case AST_DECL_ENUM_CONSTANT:  ((ast_decl_enum_constant_t* )node)->type = type; break;
+  default: unreachable();
+  }
+}
+
+ast_node_t* ast_get_base_type(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_MUT:   return ((ast_type_mut_t*  )node)->base_type;
+  case AST_TYPE_CONST: return ((ast_type_const_t*)node)->base_type;
+  case AST_TYPE_PTR:   return ((ast_type_ptr_t*  )node)->base_type;
+  case AST_TYPE_ARRAY: return ((ast_type_array_t*)node)->base_type;
+  case AST_TYPE_REF:   return ((ast_type_ref_t*  )node)->base_type;
+  case AST_TYPE_OPT:   return ((ast_type_opt_t*  )node)->base_type;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_base_type(ast_node_t* node, ast_node_t* base_type)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_MUT:   ((ast_type_mut_t*  )node)->base_type = base_type; break;
+  case AST_TYPE_CONST: ((ast_type_const_t*)node)->base_type = base_type; break;
+  case AST_TYPE_PTR:   ((ast_type_ptr_t*  )node)->base_type = base_type; break;
+  case AST_TYPE_ARRAY: ((ast_type_array_t*)node)->base_type = base_type; break;
+  case AST_TYPE_REF:   ((ast_type_ref_t*  )node)->base_type = base_type; break;
+  case AST_TYPE_OPT:   ((ast_type_opt_t*  )node)->base_type = base_type; break;
+  default: unreachable();
+  }
+}
+
+ast_node_t* ast_get_size(ast_node_t* node)
+{
+  assert(node->kind == AST_TYPE_ARRAY);
+  return ((ast_type_array_t*)node)->size;
+}
+
+void ast_set_size(ast_node_t* node, ast_node_t* size)
+{
+  assert(node->kind == AST_TYPE_ARRAY);
+  ((ast_type_array_t*)node)->size = size;
+}
+
+list_t* ast_get_params(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_FUN: return ((ast_type_fun_t*)node)->params;
+  case AST_TYPE_GEN: return ((ast_type_gen_t*)node)->params;
+  case AST_DECL_FUN: return ((ast_decl_fun_t*)node)->params;
+  case AST_DECL_GEN: return ((ast_decl_gen_t*)node)->params;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_params(ast_node_t* node, list_t* params)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_FUN: ((ast_type_fun_t*)node)->params = params; break;
+  case AST_TYPE_GEN: ((ast_type_gen_t*)node)->params = params; break;
+  case AST_DECL_FUN: ((ast_decl_fun_t*)node)->params = params; break;
+  case AST_DECL_GEN: ((ast_decl_gen_t*)node)->params = params; break;
+  default: unreachable();
+  }
+}
+
+ast_node_t* ast_get_return_type(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_FUN: return ((ast_type_fun_t*)node)->return_type;
+  case AST_DECL_FUN: return ((ast_decl_fun_t*)node)->return_type;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_return_type(ast_node_t* node, ast_node_t* return_type)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_FUN: ((ast_type_fun_t*)node)->return_type = return_type; break;
+  case AST_DECL_FUN: ((ast_decl_fun_t*)node)->return_type = return_type; break;
+  default: unreachable();
+  }
+}
+
+ast_node_t* ast_get_yield_type(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_GEN: return ((ast_type_gen_t*)node)->yield_type;
+  case AST_DECL_GEN: return ((ast_decl_gen_t*)node)->yield_type;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_yield_type(ast_node_t* node, ast_node_t* yield_type)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_GEN: ((ast_type_gen_t*)node)->yield_type = yield_type; break;
+  case AST_DECL_GEN: ((ast_decl_gen_t*)node)->yield_type = yield_type; break;
+  default: unreachable();
+  }
+}
+
+ast_node_t* ast_get_owner(ast_node_t* node)
+{
+  assert(node->kind == AST_TYPE_MEMBER);
+  return ((ast_type_member_t*)node)->owner;
+}
+
+void ast_set_owner(ast_node_t* node, ast_node_t* owner)
+{
+  assert(node->kind == AST_TYPE_MEMBER);
+  ((ast_type_member_t*)node)->owner = owner;
+}
+
+ast_node_t* ast_get_member(ast_node_t* node)
+{
+  assert(node->kind == AST_TYPE_MEMBER);
+  return ((ast_type_member_t*)node)->member;
+}
+
+void ast_set_member(ast_node_t* node, ast_node_t* member)
+{
+  assert(node->kind == AST_TYPE_MEMBER);
+  ((ast_type_member_t*)node)->member = member;
+}
+
+ast_node_t* ast_get_lhs(ast_node_t* node)
+{
+  assert(node->kind == AST_EXPR_OP);
+  assert(op_is_binary(ast_get_op(node)));
+  return ((ast_expr_op_bin_t*)node)->lhs;
+}
+
+void ast_set_lhs(ast_node_t* node, ast_node_t* lhs)
+{
+  assert(node->kind == AST_EXPR_OP);
+  assert(op_is_binary(ast_get_op(node)));
+  ((ast_expr_op_bin_t*)node)->lhs = lhs;
+}
+
+ast_node_t* ast_get_rhs(ast_node_t* node)
+{
+  assert(node->kind == AST_EXPR_OP);
+  assert(op_is_binary(ast_get_op(node)));
+  return ((ast_expr_op_bin_t*)node)->rhs;
+}
+
+void ast_set_rhs(ast_node_t* node, ast_node_t* rhs)
+{
+  assert(node->kind == AST_EXPR_OP);
+  assert(op_is_binary(ast_get_op(node)));
+  ((ast_expr_op_bin_t*)node)->rhs = rhs;
+}
+
+ast_node_t* ast_get_callee(ast_node_t* node)
+{
+  assert(node->kind == AST_EXPR_OP);
+  assert(ast_get_op(node) == OP_CALL);
+  return ((ast_expr_op_call_t*)node)->callee;
+}
+
+void ast_set_callee(ast_node_t* node, ast_node_t* callee)
+{
+  assert(node->kind == AST_EXPR_OP);
+  assert(ast_get_op(node) == OP_CALL);
+  ((ast_expr_op_call_t*)node)->callee = callee;
+}
+
+ast_node_t* ast_get_cond(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_STMT_IF:    return ((ast_stmt_if_t*   )node)->cond;
+  case AST_STMT_WHILE: return ((ast_stmt_while_t*)node)->cond;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_cond(ast_node_t* node, ast_node_t* cond)
+{
+  switch (node->kind)
+  {
+  case AST_STMT_IF:    ((ast_stmt_if_t*   )node)->cond = cond; break;
+  case AST_STMT_WHILE: ((ast_stmt_while_t*)node)->cond = cond; break;
+  default: unreachable();
+  }
+}
+
+ast_node_t* ast_get_stmt(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_STMT_IF:    return ((ast_stmt_if_t*   )node)->stmt;
+  case AST_STMT_FOR:   return ((ast_stmt_for_t*  )node)->stmt;
+  case AST_STMT_WHILE: return ((ast_stmt_while_t*)node)->stmt;
+  case AST_DECL_FUN:   return ((ast_decl_fun_t*  )node)->stmt;
+  case AST_DECL_GEN:   return ((ast_decl_gen_t*  )node)->stmt;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_stmt(ast_node_t* node, ast_node_t* stmt)
+{
+  switch (node->kind)
+  {
+  case AST_STMT_IF:    ((ast_stmt_if_t*   )node)->stmt = stmt; break;
+  case AST_STMT_FOR:   ((ast_stmt_for_t*  )node)->stmt = stmt; break;
+  case AST_STMT_WHILE: ((ast_stmt_while_t*)node)->stmt = stmt; break;
+  case AST_DECL_FUN:   ((ast_decl_fun_t*  )node)->stmt = stmt; break;
+  case AST_DECL_GEN:   ((ast_decl_gen_t*  )node)->stmt = stmt; break;
+  default: unreachable();
+  }
+}
+
+ast_node_t* ast_get_stmt_else(ast_node_t* node)
+{
+  assert(node->kind == AST_STMT_IF);
+  return ((ast_stmt_if_t*)node)->stmt_else;
+}
+
+void ast_set_stmt_else(ast_node_t* node, ast_node_t* stmt_else)
+{
+  assert(node->kind == AST_STMT_IF);
+  ((ast_stmt_if_t*)node)->stmt_else = stmt_else;
+}
+
+ast_node_t* ast_get_var(ast_node_t* node)
+{
+  assert(node->kind == AST_STMT_FOR);
+  return ((ast_stmt_for_t*)node)->var;
+}
+
+void ast_set_var(ast_node_t* node, ast_node_t* var)
+{
+  assert(node->kind == AST_STMT_FOR);
+  ((ast_stmt_for_t*)node)->var = var;
+}
+
+ast_node_t* ast_get_range(ast_node_t* node)
+{
+  assert(node->kind == AST_STMT_FOR);
+  return ((ast_stmt_for_t*)node)->range;
+}
+
+void ast_set_range(ast_node_t* node, ast_node_t* range)
+{
+  assert(node->kind == AST_STMT_FOR);
+  ((ast_stmt_for_t*)node)->range = range;
+}
+
+ast_node_t* ast_get_expr(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_EXPR_OP:
+    assert(op_is_unary(ast_get_op(node)));
+    return ((ast_expr_op_un_t*)node)->expr;
+  case AST_STMT_RETURN: return ((ast_stmt_return_t*)node)->expr;
+  case AST_STMT_YIELD:  return ((ast_stmt_yield_t* )node)->expr;
+  case AST_STMT_EXPR:   return ((ast_stmt_expr_t*  )node)->expr;
+  case AST_DECL_VAR:    return ((ast_decl_var_t*   )node)->expr;
+  case AST_DECL_PARAM:  return ((ast_decl_param_t* )node)->expr;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_expr(ast_node_t* node, ast_node_t* expr)
+{
+  switch (node->kind)
+  {
+  case AST_EXPR_OP:
+    assert(op_is_unary(ast_get_op(node)));
+    ((ast_expr_op_un_t*)node)->expr = expr;
+    break;
+  case AST_STMT_RETURN: ((ast_stmt_return_t*)node)->expr = expr; break;
+  case AST_STMT_YIELD:  ((ast_stmt_yield_t* )node)->expr = expr; break;
+  case AST_STMT_EXPR:   ((ast_stmt_expr_t*  )node)->expr = expr; break;
+  case AST_DECL_VAR:    ((ast_decl_var_t*   )node)->expr = expr; break;
+  case AST_DECL_PARAM:  ((ast_decl_param_t* )node)->expr = expr; break;
+  default: unreachable();
+  }
+}
+
+list_t* ast_get_stmts(ast_node_t* node)
+{
+  assert(node->kind == AST_STMT_BLOCK);
+  return ((ast_stmt_block_t*)node)->stmts;
+}
+
+void ast_set_stmts(ast_node_t* node, list_t* stmts)
+{
+  assert(node->kind == AST_STMT_BLOCK);
+  ((ast_stmt_block_t*)node)->stmts = stmts;
+}
+
+list_t* ast_get_members(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_DECL_STRUCT: return ((ast_decl_struct_t*)node)->members;
+  case AST_DECL_UNION:  return ((ast_decl_union_t* )node)->members;
+  case AST_DECL_ENUM:   return ((ast_decl_enum_t*  )node)->members;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_members(ast_node_t* node, list_t* members)
+{
+  switch (node->kind)
+  {
+  case AST_DECL_STRUCT: ((ast_decl_struct_t*)node)->members = members; break;
+  case AST_DECL_UNION:  ((ast_decl_union_t* )node)->members = members; break;
+  case AST_DECL_ENUM:   ((ast_decl_enum_t*  )node)->members = members; break;
+  default: unreachable();
+  }
+}
+
+list_t* ast_get_decls(ast_node_t* node)
+{
+  switch (node->kind)
+  {
+  case AST_DECL_MOD: return ((ast_decl_mod_t*)node)->decls;
+  case AST_PROG:     return ((ast_prog_t*    )node)->decls;
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+void ast_set_decls(ast_node_t* node, list_t* decls)
+{
+  switch (node->kind)
+  {
+  case AST_DECL_MOD: ((ast_decl_mod_t*)node)->decls = decls; break;
+  case AST_PROG:     ((ast_prog_t*    )node)->decls = decls; break;
+  default: unreachable();
+  }
 }
 
 bool ast_is_type(ast_node_t* node)
@@ -1163,7 +1743,14 @@ bool ast_is_decl(ast_node_t* node)
   return node->kind & AST_FLAG_DECL;
 }
 
-bool ast_is_decl_param(ast_node_t* node)
+bool ast_is_variadic(ast_node_t* node)
 {
-  return node->kind & AST_FLAG_DECL_PARAM;
+  assert(node->kind == AST_DECL_PARAM);
+  return ((ast_decl_param_t*)node)->is_variadic;
+}
+
+void ast_set_variadic(ast_node_t* node, bool is_variadic)
+{
+  assert(node->kind == AST_DECL_PARAM);
+  ((ast_decl_param_t*)node)->is_variadic = is_variadic;
 }

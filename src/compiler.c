@@ -173,12 +173,12 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     parser_t parser;
     parser_init(&parser, parser_arena);
 
-    ast_prog_t root;
+    ast_node_t* root = ast_node_init(AST_PROG);
 
-    time_it(parser, parser_parse(&parser, toks, &root));
+    time_it(parser, parser_parse(&parser, toks, root));
 
     if (compiler->flags.dump_ast)
-      compiler_dump_ast(compiler, input_file_path, input_file_name, (ast_node_t*)&root);
+      compiler_dump_ast(compiler, input_file_path, input_file_name, root);
 
     log_trace("main", "(%s) Semantic analysis.", input_file_name);
 
@@ -188,10 +188,10 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     symtable_t* symtable = symtable_init(NULL);
     typetable_t* typetable = typetable_init();
 
-    time_it(analyzer, analyzer_analyze(&analyzer, (ast_node_t*)&root, symtable, typetable));
+    time_it(analyzer, analyzer_analyze(&analyzer, root, symtable, typetable));
 
     if (compiler->flags.dump_ast_flat)
-      compiler_dump_ast_flat(compiler, input_file_path, input_file_name, (ast_node_t*)&root);
+      compiler_dump_ast_flat(compiler, input_file_path, input_file_name, root);
 
     log_trace("main", "(%s) Cleanup.", input_file_name);
 
@@ -200,7 +200,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     analyzer_free(&analyzer);
     
-    ast_node_free((ast_node_t*)&root);
+    ast_node_free(root);
     parser_free(&parser);
     arena_free(parser_arena);
 

@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 
+#include "ast.h"
 #include "arena.h"
 #include "list.h"
 #include "token.h"
@@ -111,14 +112,6 @@ list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_fun
  * \returns List of parsed nodes.
 */
 list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func);
-
-/**
- * \brief Parses a generic parameter list.
- * 
- * \param[in] par Parser to be used.
- * \returns Parameter list.
-*/
-list_t* parser_parse_generic_param_list(parser_t* par);
 
 /**
  * \brief Parses an identifier token.
@@ -374,14 +367,6 @@ ast_node_t* parser_parse_stmt(parser_t* par);
 ast_node_t* parser_parse_decl_var(parser_t* par);
 
 /**
- * \brief Parses a for-loop iteration variable.
- * 
- * \param[in] par Parser to be used.
- * \returns Loop variable node.
-*/
-ast_node_t* parser_parse_decl_loop_var(parser_t* par);
-
-/**
  * \brief Parses a function declaration.
  * 
  * \details A function is introduced by the `fun` keyword followed by an
@@ -479,14 +464,6 @@ ast_node_t* parser_parse_decl_param(parser_t* par);
 ast_node_t* parser_parse_decl_param_variadic(parser_t* par);
 
 /**
- * \brief Parses a generic parameter.
- * 
- * \param[in] par Parser to be used.
- * \returns Generic parameter node.
-*/
-ast_node_t* parser_parse_decl_param_generic(parser_t* par);
-
-/**
  * \brief Parses an enumerator in an enum declaration.
  * 
  * \param[in] par Parser to be used.
@@ -501,6 +478,6 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par);
  * \param[in] toks List of tokens to be parsed.
  * \param[out] root Root node to be used.
 */
-void parser_parse(parser_t* par, list_t* toks, ast_prog_t* root);
+void parser_parse(parser_t* par, list_t* toks, ast_node_t* root);
 
 #endif
