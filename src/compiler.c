@@ -168,22 +168,21 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     log_trace("main", "(%s) Syntax analysis.", input_file_name);
 
-    arena_t* parser_arena = arena_init();
-
-    parser_t parser;
-    parser_init(&parser, parser_arena);
+    parser_t* parser = parser_init();
 
     ast_node_t* root = ast_node_init(AST_PROG);
 
-    time_it(parser, parser_parse(&parser, toks, root));
+    time_it(parser, parser_parse(parser, toks, root));
 
     if (compiler->flags.dump_ast)
       compiler_dump_ast(compiler, input_file_path, input_file_name, root);
 
     log_trace("main", "(%s) Semantic analysis.", input_file_name);
 
+    arena_t* analyzer_arena = arena_init();
+
     analyzer_t analyzer;
-    analyzer_init(parser_arena, &analyzer);
+    analyzer_init(analyzer_arena, &analyzer);
 
     symtable_t* symtable = symtable_init(NULL);
     typetable_t* typetable = typetable_init();
@@ -199,10 +198,10 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     typetable_free(typetable);
 
     analyzer_free(&analyzer);
+    arena_free(analyzer_arena);
     
     ast_node_free(root);
-    parser_free(&parser);
-    arena_free(parser_arena);
+    parser_free(parser);
 
     list_for_each(toks, (list_for_each_func_t)token_free);
     list_free(toks);

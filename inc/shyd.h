@@ -4,10 +4,11 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include "ast.h"
+#include "parser.h"
 #include "queue.h"
 #include "stack.h"
 #include "token.h"
-#include "typedefs.h"
 
 typedef enum shyd_kind_e
 {

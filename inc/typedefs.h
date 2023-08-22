@@ -1,14 +1,6 @@
 #ifndef TAU_TYPEDEFS_H
 #define TAU_TYPEDEFS_H
 
-/** Represents a syntax analyzer. */
-typedef struct parser_s parser_t;
-
-typedef struct ast_node_s ast_node_t;
-
-/** Function pointer type to be used when parsing lists. */
-typedef ast_node_t*(*parse_func_t)(parser_t*);
-
 /**
  * \brief Represents a symbol.
  * 

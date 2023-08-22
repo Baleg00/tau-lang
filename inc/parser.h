@@ -10,26 +10,21 @@
 #include <stdbool.h>
 
 #include "ast.h"
-#include "arena.h"
 #include "list.h"
 #include "token.h"
-#include "typedefs.h"
 
-struct parser_s
-{
-  arena_t* arena;
+/** Represents a syntax analyzer. */
+typedef struct parser_s parser_t;
 
-  list_t* toks; // List of tokens to be processed.
-  list_node_t* cur; // Current token in list.
-};
+/** Function pointer type to be used when parsing lists. */
+typedef ast_node_t*(*parse_func_t)(parser_t*);
 
 /**
- * \brief Initializes a parser instance.
+ * \brief Initializes a new parser.
  * 
- * \param[out] par Parser instance to be initialzed.
- * \param[in] arena Arena allocator to be used.
+ * \returns Pointer to the newly initialized parser.
 */
-void parser_init(parser_t* par, arena_t* arena);
+parser_t* parser_init(void);
 
 /**
  * \brief Destroys a parser.

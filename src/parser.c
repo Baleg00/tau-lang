@@ -3,25 +3,34 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "crumb.h"
+#include "diagnostics.h"
 #include "location.h"
 #include "log.h"
+#include "memtrace.h"
+#include "shyd.h"
 #include "util.h"
 
-#include "crumb.h"
-
-#include "ast.h"
-#include "shyd.h"
-
-#include "diagnostics.h"
-
-void parser_init(parser_t* par, arena_t* arena)
+struct parser_s
 {
-  par->arena = arena;
+  list_t* toks; // List of tokens to be processed.
+  list_node_t* cur; // Current token in list.
+};
+
+parser_t* parser_init(void)
+{
+  parser_t* par = (parser_t*)malloc(sizeof(parser_t));
+  assert(par != NULL);
+
+  par->toks = NULL;
+  par->cur = NULL;
+
+  return par;
 }
 
 void parser_free(parser_t* par)
 {
-  unused(par);
+  free(par);
 }
 
 token_t* parser_current(parser_t* par)
