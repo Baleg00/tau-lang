@@ -8,6 +8,7 @@ set(TAU_TEST_SOURCES
   ${TAU_TEST_DIR}/set_test.c
   ${TAU_TEST_DIR}/stack_test.c
   ${TAU_TEST_DIR}/tasm_test.c
+  ${TAU_TEST_DIR}/vector_test.c
   ${TAU_TEST_DIR}/vm_test.c
 )
 
