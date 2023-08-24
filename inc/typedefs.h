@@ -255,7 +255,4 @@ typedef enum addr_mode_e
 /** Represents a virtual machine instance. */
 typedef struct vm_s vm_t;
 
-/** Represents a compiler instance. */
-typedef struct compiler_s compiler_t;
-
 #endif

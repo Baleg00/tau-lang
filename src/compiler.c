@@ -1,27 +1,49 @@
 #include "compiler.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
-#include "util.h"
-#include "crumb.h"
-#include "timer.h"
-#include "file.h"
-
-#include "cli.h"
-
-#include "token.h"
-#include "lexer.h"
-#include "ast.h"
-#include "parser.h"
+#include "allocator.h"
 #include "analzyer.h"
-
-#include "symtable.h"
-#include "typetable.h"
-
+#include "arena.h"
+#include "ast.h"
+#include "cli.h"
+#include "crumb.h"
+#include "file.h"
+#include "lexer.h"
+#include "list.h"
+#include "log.h"
 #include "memtrace.h"
+#include "parser.h"
+#include "symtable.h"
+#include "timer.h"
+#include "token.h"
+#include "typetable.h"
+#include "util.h"
 
 #define COMPILER_MAX_BUFFER_SIZE 256
+
+struct compiler_s
+{
+  allocator_t* allocator;
+
+  list_t* input_files;
+
+  struct
+  {
+    bool verbose;
+    bool dump_tokens;
+    bool dump_ast;
+    bool dump_ast_flat;
+    bool dump_tasm;
+  } flags;
+
+  struct
+  {
+    log_level_t log_level;
+  } args;
+};
 
 static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_data)
 {
@@ -82,12 +104,14 @@ static void compiler_dump_ast_flat(compiler_t* compiler, const char* input_file_
   log_trace("main", "(%s) AST flat dump: %s", input_file_name, ast_file_path);
 }
 
-void compiler_init(compiler_t* compiler)
+compiler_t* compiler_init(void)
 {
+  compiler_t* compiler = (compiler_t*)allocator_allocate(allocator_global(), sizeof(compiler_t));
+
   log_set_stream(stdout);
   crumb_set_stream(stdout);
 
-  compiler->arena = arena_init();
+  compiler->allocator = arena_init();
 
   compiler->input_files = list_init();
 
@@ -98,13 +122,15 @@ void compiler_init(compiler_t* compiler)
   compiler->flags.dump_tasm = false;
 
   compiler->args.log_level = LOG_LEVEL_WARN;
+
+  return compiler;
 }
 
 void compiler_free(compiler_t* compiler)
 {
   list_free(compiler->input_files);
-
-  arena_free(compiler->arena);
+  allocator_free(compiler->allocator);
+  allocator_deallocate(allocator_global(), compiler);
 }
 
 int compiler_main(compiler_t* compiler, int argc, const char* argv[])
@@ -179,10 +205,8 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     log_trace("main", "(%s) Semantic analysis.", input_file_name);
 
-    arena_t* analyzer_arena = arena_init();
-
     analyzer_t analyzer;
-    analyzer_init(analyzer_arena, &analyzer);
+    analyzer_init(compiler->allocator, &analyzer);
 
     symtable_t* symtable = symtable_init(NULL);
     typetable_t* typetable = typetable_init();
@@ -198,7 +222,6 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     typetable_free(typetable);
 
     analyzer_free(&analyzer);
-    arena_free(analyzer_arena);
     
     ast_node_free(root);
     parser_free(parser);

@@ -14,9 +14,9 @@
 
 #include "diagnostics.h"
 
-void analyzer_init(arena_t* arena, analyzer_t* analyzer)
+void analyzer_init(allocator_t* allocator, analyzer_t* analyzer)
 {
-  analyzer->arena = arena;
+  analyzer->allocator = allocator;
   analyzer->ret_types = stack_init();
 }
 

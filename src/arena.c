@@ -13,20 +13,18 @@
 #include "memtrace.h"
 #include "util.h"
 
-struct arena_s
-{
-  void* begin; // Begin pointer of chunk.
-  void* end; // Past end pointer of chunk.
-  void* ptr; // Pointer to first available byte in chunk.
-  arena_t* next; // Pointer to next arena or null pointer.
-  // The actual memory chunk is allocated after the arena.
-};
-
-/** Maximum possible alignment of any object. */
-#define ARENA_MAX_ALIGN (alignof(union { uintmax_t a; uintptr_t b; long double c; }))
+/**
+ * \brief Default capacity of an arena allocator.
+ */
+#define ARENA_DEFAULT_CAPACITY (8 * (1 << 10))
 
 /**
- * \brief Aligns a pointer to ARENA_MAX_ALIGN.
+ * \brief Maximum possible alignment of any object.
+ */
+#define ARENA_MAX_ALIGN (alignof(union { uintmax_t imax; void* ptr; long double ld; }))
+
+/**
+ * \brief Aligns a pointer to `ARENA_MAX_ALIGN`.
  * 
  * \param[in] PTR Pointer to be aligned.
  * \returns Aligned pointer.
@@ -34,87 +32,148 @@ struct arena_s
 #define arena_align(PTR) ((void*)(((uintptr_t)(PTR) + ARENA_MAX_ALIGN - 1) & ~(ARENA_MAX_ALIGN - 1)))
 
 /**
- * \brief Rounds a size up to the nearest multiple of ARENA_MAX_ALIGN.
+ * \brief Rounds a size up to the nearest multiple of `ARENA_MAX_ALIGN`.
  * 
  * \param[in] SIZE Size to be round up.
  * \returns Rounded up size.
 */
 #define arena_round(SIZE) (((size_t)(SIZE) + ARENA_MAX_ALIGN - 1) / ARENA_MAX_ALIGN * ARENA_MAX_ALIGN)
 
-arena_t* arena_init(void)
+/**
+ * \brief Arena allocator chunk.
+ */
+typedef struct arena_chunk_s arena_chunk_t;
+
+struct arena_chunk_s
 {
-  return arena_init_capacity(ARENA_DEFAULT_CAPACITY);
+  void* begin; // Begin pointer of chunk.
+  void* end; // End pointer of chunk.
+  size_t capacity; // Chunk capacity.
+  void* ptr; // Pointer to first available byte in chunk.
+  arena_chunk_t* next; // Pointer to next arena or NULL.
+  // The actual memory chunk is allocated after the arena.
+};
+
+/**
+ * \brief Initializes a new chunk with a specified capacity.
+ * 
+ * \param[in] cap The capacity of the chunk.
+ * \returns Pointer to the initialized chunk.
+ */
+static arena_chunk_t* arena_chunk_init_with_capacity(size_t cap)
+{
+  size_t aligned_size = arena_round(sizeof(arena_chunk_t) + cap);
+
+  arena_chunk_t* chunk = (arena_chunk_t*)malloc(aligned_size);
+  assert(chunk != NULL);
+
+  void* unaligned_ptr = (void*)((uintptr_t)chunk + sizeof(arena_chunk_t));
+
+  chunk->begin = arena_align(unaligned_ptr);
+  chunk->end = (void*)((uintptr_t)chunk + aligned_size);
+  chunk->capacity = (size_t)((uintptr_t)chunk->end - (uintptr_t)chunk->begin);
+  chunk->ptr = chunk->begin;
+  chunk->next = NULL;
+
+  return chunk;
 }
 
-arena_t* arena_init_capacity(size_t cap)
-{
-  size_t aligned_size = arena_round(sizeof(arena_t) + cap);
-
-  arena_t* arena = (arena_t*)malloc(aligned_size);
-  assert(arena != NULL);
-
-  void* unaligned_ptr = (void*)((uintptr_t)arena + sizeof(arena_t));
-
-  arena->begin = arena_align(unaligned_ptr);
-  arena->end = (void*)((uintptr_t)arena + aligned_size);
-  arena->ptr = arena->begin;
-  arena->next = NULL;
-
-  return arena;
-}
-
-void arena_free(arena_t* arena)
-{
-  for (arena_t *it = arena, *next; it != NULL; it = next)
-  {
-    next = it->next;
-    free(it);
-  }
-}
-
-size_t arena_capacity(arena_t* arena)
-{
-  return (size_t)((uintptr_t)arena->end - (uintptr_t)arena->begin);
-}
-
-void* arena_malloc(arena_t* arena, size_t size)
+/**
+ * \brief Allocates memory using using an arena allocator.
+ * 
+ * \param[in] chunk Pointer to the first chunk of the arena allocator.
+ * \param[in] size Number of bytes to allocate.
+ * \returns Pointer to the allocated memory.
+ */
+static void* arena_allocate(arena_chunk_t* chunk, size_t size)
 {
   size_t aligned_size = arena_round(size);
 
-  if (arena_capacity(arena) < aligned_size)
+  if (chunk->capacity < aligned_size)
   {
-    log_error("arena", "Allocation size exceeds capacity! (size: %zu, capacity: %zu)", aligned_size, arena_capacity(arena));
+    log_error("arena", "Allocation size exceeds capacity! (size: %zu, capacity: %zu)", aligned_size, chunk->capacity);
     return NULL;
   }
 
-  arena_t* last = NULL;
+  arena_chunk_t* last = NULL;
 
-  while (arena != NULL && (uintptr_t)arena->ptr + aligned_size >= (uintptr_t)arena->end)
+  while (chunk != NULL && (uintptr_t)chunk->ptr + aligned_size >= (uintptr_t)chunk->end)
   {
-    last = arena;
-    arena = arena->next;
+    last = chunk;
+    chunk = chunk->next;
   }
 
-  if (arena == NULL)
+  if (chunk == NULL)
   {
-    arena = arena_init_capacity(arena_capacity(last));
-    last->next = arena;
+    chunk = arena_chunk_init_with_capacity(last->capacity);
+    last->next = chunk;
   }
 
-  void* ptr = arena->ptr;
-  arena->ptr = (void*)((uintptr_t)arena->ptr + aligned_size);
+  void* ptr = chunk->ptr;
+  chunk->ptr = (void*)((uintptr_t)chunk->ptr + aligned_size);
 
   return ptr;
 }
 
-void* arena_calloc(arena_t* arena, size_t count, size_t size)
+/**
+ * \brief Deallocates memory using an arena allocator.
+ * 
+ * \param[in] chunk Pointer to the first chunk of the arena allocator.
+ * \param[in] ptr Pointer to the memory to deallocate.
+ */
+static void arena_deallocate(arena_chunk_t* chunk, void* ptr)
 {
-  void* ptr = arena_malloc(arena, count * size);
+  unused(chunk);
+  unused(ptr);
+}
 
-  if (ptr == NULL)
-    return NULL;
+/**
+ * \brief Reallocates memory using an arena allocator.
+ * 
+ * \param[in] ctx Pointer to the first chunk of the arena allocator.
+ * \param[in] ptr Pointer to the memory to reallocate.
+ * \param[in] new_size The new size of the memory block.
+ * \returns Pointer to the reallocated memory.
+ */
+static void* arena_reallocate(arena_chunk_t* chunk, void* ptr, size_t new_size)
+{
+  unused(chunk);
+  unused(ptr);
+  unused(new_size);
+  return NULL;
+}
 
-  memset(ptr, 0, count * size);
+/**
+ * \brief Cleans up memory allocated by an arena allocator.
+ * 
+ * \param[in] ctx Pointer to the first chunk of the arena allocator.
+ */
+static void arena_cleanup(arena_chunk_t* chunk)
+{
+  for (arena_chunk_t* next; chunk != NULL; chunk = next)
+  {
+    next = chunk->next;
+    free(chunk);
+  }
+}
 
-  return ptr;
+allocator_t* arena_init(void)
+{
+  return arena_init_with_capacity(ARENA_DEFAULT_CAPACITY);
+}
+
+allocator_t* arena_init_with_capacity(size_t cap)
+{
+  arena_chunk_t* chunk = arena_chunk_init_with_capacity(cap);
+  return allocator_init(chunk,
+    (allocator_allocate_func_t)arena_allocate,
+    (allocator_deallocate_func_t)arena_deallocate,
+    (allocator_reallocate_func_t)arena_reallocate,
+    (allocator_cleanup_func_t)arena_cleanup);
+}
+
+size_t arena_capacity(allocator_t* alloc)
+{
+  arena_chunk_t* arena = (arena_chunk_t*)allocator_context(alloc);
+  return arena->capacity;
 }

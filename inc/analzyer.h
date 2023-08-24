@@ -1,7 +1,7 @@
 #ifndef TAU_ANALYZER_H
 #define TAU_ANALYZER_H
 
-#include "arena.h"
+#include "allocator.h"
 #include "list.h"
 #include "stack.h"
 #include "typedefs.h"
@@ -9,7 +9,7 @@
 
 struct analyzer_s
 {
-  arena_t* arena;
+  allocator_t* allocator;
 
   symtable_t* symtable;
   typetable_t* typetable;
@@ -17,7 +17,7 @@ struct analyzer_s
   stack_t* ret_types;
 };
 
-void analyzer_init(arena_t* arena, analyzer_t* analyzer);
+void analyzer_init(allocator_t* allocator, analyzer_t* analyzer);
 void analyzer_free(analyzer_t* analyzer);
 
 void analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* scope, ast_node_t* node);

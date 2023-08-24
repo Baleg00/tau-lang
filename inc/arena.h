@@ -22,60 +22,29 @@
 
 #include <stddef.h>
 
-#define ARENA_DEFAULT_CAPACITY (8 * (1 << 10))
+#include "allocator.h"
 
 /**
- * \brief Arena allocator.
- */
-typedef struct arena_s arena_t;
-
-/**
- * \brief Initializes a new arena.
+ * \brief Initializes a new arena allocator.
  * 
- * \returns Pointer to the initialized arena.
+ * \returns Pointer to the initialized arena allocator.
  */
-arena_t* arena_init(void);
+allocator_t* arena_init(void);
 
 /**
- * \brief Initializes a new arena with a specified capacity.
+ * \brief Initializes a new arena allocator with a specified capacity.
  * 
  * \param[in] cap The capacity of the arena in bytes.
- * \returns Pointer to the initialized arena.
+ * \returns Pointer to the initialized arena allocator.
  */
-arena_t* arena_init_capacity(size_t cap);
+allocator_t* arena_init_with_capacity(size_t cap);
 
 /**
- * \brief Frees the memory allocated by an arena.
+ * \brief Retrieves the capacity of an arena allocator.
  * 
- * \param[in] arena Pointer to the arena to be freed.
+ * \param[in] alloc Pointer to the arena allocator.
+ * \returns The capacity of the arena allocator in bytes.
  */
-void arena_free(arena_t* arena);
-
-/**
- * \brief Retrieves the capacity of an arena.
- * 
- * \param[in] arena Pointer to the arena.
- * \returns The capacity of the arena in bytes.
- */
-size_t arena_capacity(arena_t* arena);
-
-/**
- * \brief Allocates memory from an arena.
- * 
- * \param[in] arena Pointer to the arena.
- * \param[in] size The size of memory to allocate in bytes.
- * \returns Pointer to the allocated memory, or NULL if allocation fails.
- */
-void* arena_malloc(arena_t* arena, size_t size);
-
-/**
- * \brief Allocates and initializes memory with zeros from an arena.
- * 
- * \param[in] arena Pointer to the arena.
- * \param[in] count The number of elements to allocate.
- * \param[in] size The size of each element in bytes.
- * \returns Pointer to the allocated memory, or NULL if allocation fails.
- */
-void* arena_calloc(arena_t* arena, size_t count, size_t size);
+size_t arena_capacity(allocator_t* alloc);
 
 #endif
