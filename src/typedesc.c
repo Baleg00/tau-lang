@@ -7,7 +7,11 @@
 
 #include "typedesc.h"
 
+#include <string.h>
+
+#include "allocator.h"
 #include "memtrace.h"
+#include "vector.h"
 #include "util.h"
 
 /** Utility macro which expands to fields that all types must have. */
@@ -25,6 +29,71 @@
   {\
     ast_node_t* node; /** Declaration node. */\
   }\
+
+/**
+ * \brief Type descriptor for mutable types.
+ */
+typedef struct typedesc_mut_s typedesc_mut_t;
+
+/**
+ * \brief Type descriptor for constant types.
+ */
+typedef struct typedesc_const_s typedesc_const_t;
+
+/**
+ * \brief Type descriptor for pointer types.
+ */
+typedef struct typedesc_ptr_s typedesc_ptr_t;
+
+/**
+ * \brief Type descriptor for array types.
+ */
+typedef struct typedesc_array_s typedesc_array_t;
+
+/**
+ * \brief Type descriptor for reference types.
+ */
+typedef struct typedesc_ref_s typedesc_ref_t;
+
+/**
+ * \brief Type descriptor for optional types.
+ */
+typedef struct typedesc_opt_s typedesc_opt_t;
+
+/**
+ * \brief Type descriptor for declarations.
+ */
+typedef struct typedesc_decl_s typedesc_decl_t;
+
+/**
+ * \brief Type descriptor for functions.
+ */
+typedef struct typedesc_fun_s typedesc_fun_t;
+
+/**
+ * \brief Type descriptor for generators.
+ */
+typedef struct typedesc_gen_s typedesc_gen_t;
+
+/**
+ * \brief Type descriptor for structures.
+ */
+typedef struct typedesc_struct_s typedesc_struct_t;
+
+/**
+ * \brief Type descriptor for unions.
+ */
+typedef struct typedesc_union_s typedesc_union_t;
+
+/**
+ * \brief Type descriptor for enumerations.
+ */
+typedef struct typedesc_enum_s typedesc_enum_t;
+
+/**
+ * \brief Type descriptor for modules.
+ */
+typedef struct typedesc_mod_s typedesc_mod_t;
 
 /** Base type for all types. */
 struct typedesc_s
@@ -131,6 +200,11 @@ struct typedesc_mod_s
 #undef TYPEDESC_DECL_HEADER
 #undef TYPEDESC_HEADER
 
+/**
+ * \brief Vector of all allocated type descriptors.
+ */
+static vector_t* g_descriptors = NULL;
+
 typedesc_t* typedesc_init(typedesc_kind_t kind)
 {
   size_t desc_size = sizeof(typedesc_t);
@@ -168,139 +242,46 @@ typedesc_t* typedesc_init(typedesc_kind_t kind)
   default: unreachable();
   }
 
-  typedesc_t* desc = (typedesc_t*)calloc(1, desc_size);
+  typedesc_t* desc = (typedesc_t*)allocator_allocate(allocator_global(), desc_size);
   assert(desc != NULL);
 
+  memset(desc, 0, desc_size);
+
   desc->kind = kind;
+
+  if (g_descriptors == NULL)
+    g_descriptors = vector_init();
+
+  vector_push(g_descriptors, desc);
 
   return desc;
 }
 
-static void typedesc_free_type(typedesc_t* desc)
+void typedesc_cleanup(void)
 {
-  free(desc);
-}
-
-static void typedesc_free_mut(typedesc_mut_t* desc)
-{
-  typedesc_free(desc->base_type);
-  free(desc);
-}
-
-static void typedesc_free_const(typedesc_const_t* desc)
-{
-  typedesc_free(desc->base_type);
-  free(desc);
-}
-
-static void typedesc_free_ptr(typedesc_ptr_t* desc)
-{
-  typedesc_free(desc->base_type);
-  free(desc);
-}
-
-static void typedesc_free_array(typedesc_array_t* desc)
-{
-  typedesc_free(desc->base_type);
-  free(desc);
-}
-
-static void typedesc_free_ref(typedesc_ref_t* desc)
-{
-  typedesc_free(desc->base_type);
-  free(desc);
-}
-
-static void typedesc_free_opt(typedesc_opt_t* desc)
-{
-  typedesc_free(desc->base_type);
-  free(desc);
-}
-
-static void typedesc_free_builtin(typedesc_t* desc)
-{
-  free(desc);
-}
-
-static void typedesc_free_fun(typedesc_fun_t* desc)
-{
-  typedesc_free(desc->return_type);
-  list_for_each(desc->param_types, (list_for_each_func_t)typedesc_free);
-  list_free(desc->param_types);
-  free(desc);
-}
-
-static void typedesc_free_gen(typedesc_gen_t* desc)
-{
-  typedesc_free(desc->yield_type);
-  list_for_each(desc->param_types, (list_for_each_func_t)typedesc_free);
-  list_free(desc->param_types);
-  free(desc);
-}
-
-static void typedesc_free_struct(typedesc_struct_t* desc)
-{
-  list_for_each(desc->member_types, (list_for_each_func_t)typedesc_free);
-  list_free(desc->member_types);
-  free(desc);
-}
-
-static void typedesc_free_union(typedesc_union_t* desc)
-{
-  list_for_each(desc->member_types, (list_for_each_func_t)typedesc_free);
-  list_free(desc->member_types);
-  free(desc);
-}
-
-static void typedesc_free_enum(typedesc_enum_t* desc)
-{
-  free(desc);
-}
-
-static void typedesc_free_mod(typedesc_mod_t* desc)
-{
-  list_for_each(desc->member_types, (list_for_each_func_t)typedesc_free);
-  list_free(desc->member_types);
-  free(desc);
-}
-
-void typedesc_free(typedesc_t* desc)
-{
-  if (desc == NULL)
-    return;
-
-  switch (desc->kind)
+  for (size_t i = 0; i < vector_size(g_descriptors); i++)
   {
-  case TYPEDESC_TYPE:   typedesc_free_type   (                    desc); break;
-  case TYPEDESC_MUT:    typedesc_free_mut    ((typedesc_mut_t*)   desc); break;
-  case TYPEDESC_CONST:  typedesc_free_const  ((typedesc_const_t*) desc); break;
-  case TYPEDESC_PTR:    typedesc_free_ptr    ((typedesc_ptr_t*)   desc); break;
-  case TYPEDESC_ARRAY:  typedesc_free_array  ((typedesc_array_t*) desc); break;
-  case TYPEDESC_REF:    typedesc_free_ref    ((typedesc_ref_t*)   desc); break;
-  case TYPEDESC_OPT:    typedesc_free_opt    ((typedesc_opt_t*)   desc); break;
-  case TYPEDESC_I8:
-  case TYPEDESC_I16:
-  case TYPEDESC_I32:
-  case TYPEDESC_I64:
-  case TYPEDESC_ISIZE:
-  case TYPEDESC_U8:
-  case TYPEDESC_U16:
-  case TYPEDESC_U32:
-  case TYPEDESC_U64:
-  case TYPEDESC_USIZE:
-  case TYPEDESC_F32:
-  case TYPEDESC_F64:
-  case TYPEDESC_BOOL:
-  case TYPEDESC_UNIT:
-  case TYPEDESC_NULL:   typedesc_free_builtin(                    desc); break;
-  case TYPEDESC_FUN:    typedesc_free_fun    ((typedesc_fun_t*)   desc); break;
-  case TYPEDESC_GEN:    typedesc_free_gen    ((typedesc_gen_t*)   desc); break;
-  case TYPEDESC_STRUCT: typedesc_free_struct ((typedesc_struct_t*)desc); break;
-  case TYPEDESC_UNION:  typedesc_free_union  ((typedesc_union_t*) desc); break;
-  case TYPEDESC_ENUM:   typedesc_free_enum   ((typedesc_enum_t*)  desc); break;
-  case TYPEDESC_MOD:    typedesc_free_mod    ((typedesc_mod_t*)   desc); break;
-  default: unreachable();
+    typedesc_t* desc = (typedesc_t*)vector_get(g_descriptors, i);
+
+    switch (desc->kind)
+    {
+    case TYPEDESC_FUN:
+    case TYPEDESC_GEN:
+      list_free(typedesc_get_params(desc));
+      break;
+    case TYPEDESC_STRUCT:
+    case TYPEDESC_UNION:
+    case TYPEDESC_ENUM:
+    case TYPEDESC_MOD:
+      list_free(typedesc_get_members(desc));
+      break;
+    default: fallthrough();
+    }
+
+    allocator_deallocate(allocator_global(), desc);
   }
+
+  vector_free(g_descriptors);
 }
 
 typedesc_kind_t typedesc_get_kind(typedesc_t* desc)

@@ -129,7 +129,6 @@ void typetable_free(typetable_t* table)
     for (typetable_entry_t *it = table->buckets[i], *next; it != NULL; it = next, ++j)
     {
       next = it->next;
-      typedesc_free(it->desc);
       free(it);
     }
 

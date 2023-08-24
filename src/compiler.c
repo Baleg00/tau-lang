@@ -129,6 +129,9 @@ compiler_t* compiler_init(void)
 void compiler_free(compiler_t* compiler)
 {
   list_free(compiler->input_files);
+
+  typedesc_cleanup();
+
   allocator_free(compiler->allocator);
   allocator_deallocate(allocator_global(), compiler);
 }

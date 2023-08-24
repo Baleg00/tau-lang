@@ -81,71 +81,6 @@ typedef enum typedesc_kind_e
 typedef struct typedesc_s typedesc_t;
 
 /**
- * \brief Type descriptor for mutable types.
- */
-typedef struct typedesc_mut_s typedesc_mut_t;
-
-/**
- * \brief Type descriptor for constant types.
- */
-typedef struct typedesc_const_s typedesc_const_t;
-
-/**
- * \brief Type descriptor for pointer types.
- */
-typedef struct typedesc_ptr_s typedesc_ptr_t;
-
-/**
- * \brief Type descriptor for array types.
- */
-typedef struct typedesc_array_s typedesc_array_t;
-
-/**
- * \brief Type descriptor for reference types.
- */
-typedef struct typedesc_ref_s typedesc_ref_t;
-
-/**
- * \brief Type descriptor for optional types.
- */
-typedef struct typedesc_opt_s typedesc_opt_t;
-
-/**
- * \brief Type descriptor for declarations.
- */
-typedef struct typedesc_decl_s typedesc_decl_t;
-
-/**
- * \brief Type descriptor for functions.
- */
-typedef struct typedesc_fun_s typedesc_fun_t;
-
-/**
- * \brief Type descriptor for generators.
- */
-typedef struct typedesc_gen_s typedesc_gen_t;
-
-/**
- * \brief Type descriptor for structures.
- */
-typedef struct typedesc_struct_s typedesc_struct_t;
-
-/**
- * \brief Type descriptor for unions.
- */
-typedef struct typedesc_union_s typedesc_union_t;
-
-/**
- * \brief Type descriptor for enumerations.
- */
-typedef struct typedesc_enum_s typedesc_enum_t;
-
-/**
- * \brief Type descriptor for modules.
- */
-typedef struct typedesc_mod_s typedesc_mod_t;
-
-/**
  * \brief Initializes a new type descriptor with the specified kind.
  * 
  * \param[in] kind The kind of the type descriptor.
@@ -154,11 +89,9 @@ typedef struct typedesc_mod_s typedesc_mod_t;
 typedesc_t* typedesc_init(typedesc_kind_t kind);
 
 /**
- * \brief Frees the memory allocated for a type descriptor.
- * 
- * \param[in] tok The type descriptor to be freed.
- */
-void typedesc_free(typedesc_t* desc);
+ * \brief Frees all memory allocated by type descriptors.
+*/
+void typedesc_cleanup(void);
 
 /**
  * \brief Retrieves the kind of the type descriptor.
