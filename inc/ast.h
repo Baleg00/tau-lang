@@ -27,29 +27,13 @@
 #include "token.h"
 
 /**
- * \brief Flags that specify the category of an AST node.
- */
-typedef enum ast_flag_e
-{
-  AST_FLAG_TYPE      = (1 << 0) << 8, // Type.
-  AST_FLAG_TYPED     = (1 << 1) << 8, // Typed.
-  AST_FLAG_EXPR      = (1 << 2) << 8, // Expression.
-  AST_FLAG_STMT      = (1 << 3) << 8, // Statement.
-  AST_FLAG_DECL      = (1 << 4) << 8, // Declaration.
-  AST_FLAG_GENERIC   = (1 << 5) << 8, // Generic.
-  AST_FLAG_COMPOSITE = (1 << 6) << 8, // Composite.
-} ast_flag_t;
-
-/**
  * \brief Enumeration of AST node kinds.
  */
 typedef enum ast_kind_e
 {
   AST_ID, // Identifier.
 
-  AST_PROG, // Program.
-
-  AST_TYPE_MUT = AST_FLAG_TYPE, // Mutable type.
+  AST_TYPE_MUT, // Mutable type.
   AST_TYPE_CONST, // Compile-time type.
   AST_TYPE_PTR, // Pointer type.
   AST_TYPE_ARRAY, // Array type.
@@ -75,7 +59,7 @@ typedef enum ast_kind_e
   AST_TYPE_UNIT, // Built-in type `unit`.
   AST_TYPE_MEMBER, // Member type.
 
-  AST_EXPR_LIT_INT = AST_FLAG_EXPR, // Literal integer expression.
+  AST_EXPR_LIT_INT, // Literal integer expression.
   AST_EXPR_LIT_FLT, // Literal float expression.
   AST_EXPR_LIT_STR, // Literal string expression.
   AST_EXPR_LIT_CHAR, // Literal character expression.
@@ -83,7 +67,7 @@ typedef enum ast_kind_e
   AST_EXPR_LIT_NULL, // Literal null expression.
   AST_EXPR_OP, // Operation expression.
   
-  AST_STMT_IF = AST_FLAG_STMT, // If statement.
+  AST_STMT_IF, // If statement.
   AST_STMT_FOR, // For statement.
   AST_STMT_WHILE, // While statement.
   AST_STMT_BREAK, // Break statement.
@@ -93,17 +77,17 @@ typedef enum ast_kind_e
   AST_STMT_BLOCK, // Block statement.
   AST_STMT_EXPR, // Expression statement.
 
-  AST_DECL_MOD = AST_FLAG_DECL, // Module declaration.
-  AST_DECL_ENUM = AST_FLAG_DECL | AST_FLAG_COMPOSITE, // Enum declaration.
-
-  AST_DECL_FUN = AST_FLAG_DECL | AST_FLAG_GENERIC, // Function declaration.
-  AST_DECL_GEN, // Generator declaration.
-  AST_DECL_STRUCT = AST_FLAG_DECL | AST_FLAG_GENERIC | AST_FLAG_COMPOSITE, // Struct declaration.
-  AST_DECL_UNION, // Union declaration.
-  
-  AST_DECL_VAR = AST_FLAG_DECL | AST_FLAG_TYPED, // Variable declaration.
+  AST_DECL_VAR, // Variable declaration.
   AST_DECL_PARAM, // Parameter declaration.
+  AST_DECL_FUN, // Function declaration.
+  AST_DECL_GEN, // Generator declaration.
+  AST_DECL_STRUCT, // Struct declaration.
+  AST_DECL_UNION, // Union declaration.
+  AST_DECL_ENUM, // Enum declaration.
   AST_DECL_ENUM_CONSTANT, // Enum constant declaration.
+  AST_DECL_MOD, // Module declaration.  
+
+  AST_PROG, // Program.
 } ast_kind_t;
 
 /**

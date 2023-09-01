@@ -518,47 +518,154 @@ typedesc_t* typedesc_remove_opt(typedesc_t* desc)
 
 bool typedesc_is_modifier(typedesc_t* desc)
 {
-  return desc->kind & TYPEDESC_FLAG_MODIFIER;
+  switch (desc->kind)
+  {
+  case TYPEDESC_MUT:
+  case TYPEDESC_CONST:
+  case TYPEDESC_PTR:
+  case TYPEDESC_ARRAY:
+  case TYPEDESC_REF:
+  case TYPEDESC_OPT:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_builtin(typedesc_t* desc)
 {
-  return desc->kind & TYPEDESC_FLAG_BUILTIN;
+  switch (desc->kind)
+  {
+  case TYPEDESC_I8:
+  case TYPEDESC_I16:
+  case TYPEDESC_I32:
+  case TYPEDESC_I64:
+  case TYPEDESC_ISIZE:
+  case TYPEDESC_U8:
+  case TYPEDESC_U16:
+  case TYPEDESC_U32:
+  case TYPEDESC_U64:
+  case TYPEDESC_USIZE:
+  case TYPEDESC_F32:
+  case TYPEDESC_F64:
+  case TYPEDESC_BOOL:
+  case TYPEDESC_UNIT:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_integer(typedesc_t* desc)
 {
-  return desc->kind & TYPEDESC_FLAG_INTEGER;
+  switch (desc->kind)
+  {
+  case TYPEDESC_I8:
+  case TYPEDESC_I16:
+  case TYPEDESC_I32:
+  case TYPEDESC_I64:
+  case TYPEDESC_ISIZE:
+  case TYPEDESC_U8:
+  case TYPEDESC_U16:
+  case TYPEDESC_U32:
+  case TYPEDESC_U64:
+  case TYPEDESC_USIZE:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_float(typedesc_t* desc)
 {
-  return desc->kind & TYPEDESC_FLAG_FLOAT;
+  switch (desc->kind)
+  {
+  case TYPEDESC_F32:
+  case TYPEDESC_F64:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_arithmetic(typedesc_t* desc)
 {
-  return desc->kind & TYPEDESC_FLAG_ARITHMETIC;
+  switch (desc->kind)
+  {
+  case TYPEDESC_I8:
+  case TYPEDESC_I16:
+  case TYPEDESC_I32:
+  case TYPEDESC_I64:
+  case TYPEDESC_ISIZE:
+  case TYPEDESC_U8:
+  case TYPEDESC_U16:
+  case TYPEDESC_U32:
+  case TYPEDESC_U64:
+  case TYPEDESC_USIZE:
+  case TYPEDESC_F32:
+  case TYPEDESC_F64:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_signed(typedesc_t* desc)
 {
-  return desc->kind & TYPEDESC_FLAG_SIGNED;
+  switch (desc->kind)
+  {
+  case TYPEDESC_I8:
+  case TYPEDESC_I16:
+  case TYPEDESC_I32:
+  case TYPEDESC_I64:
+  case TYPEDESC_ISIZE:
+  case TYPEDESC_F32:
+  case TYPEDESC_F64:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_unsigned(typedesc_t* desc)
 {
-  return desc->kind & TYPEDESC_FLAG_UNSIGNED;
+  switch (desc->kind)
+  {
+  case TYPEDESC_U8:
+  case TYPEDESC_U16:
+  case TYPEDESC_U32:
+  case TYPEDESC_U64:
+  case TYPEDESC_USIZE:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_invokable(typedesc_t* desc)
 {
-  return desc->kind & TYPEDESC_FLAG_INVOKABLE;
+  switch (desc->kind)
+  {
+  case TYPEDESC_FUN:
+  case TYPEDESC_GEN:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_composite(typedesc_t* desc)
 {
-  return desc->kind & TYPEDESC_FLAG_COMPOSITE;
+  switch (desc->kind)
+  {
+  case TYPEDESC_STRUCT:
+  case TYPEDESC_UNION:
+  case TYPEDESC_ENUM:
+  case TYPEDESC_MOD:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_type(typedesc_t* desc)

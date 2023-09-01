@@ -25,51 +25,37 @@
 #include "list.h"
 
 /**
- * \brief Flags that specify the category of a type descriptor.
- */
-typedef enum typedesc_flag_e
-{
-  TYPEDESC_FLAG_MODIFIER   = (1 << 0) << 8, // Type modifier (pointer, reference etc.)
-  TYPEDESC_FLAG_BUILTIN    = (1 << 1) << 8, // Built-in type (i32, unit etc.)
-  TYPEDESC_FLAG_INTEGER    = (1 << 2) << 8, // Integer type (i32, u32 etc.)
-  TYPEDESC_FLAG_FLOAT      = (1 << 3) << 8, // Floating-point type (f32, f64)
-  TYPEDESC_FLAG_ARITHMETIC = (1 << 4) << 8, // Arithmetic type (i32, f32 etc.)
-  TYPEDESC_FLAG_SIGNED     = (1 << 5) << 8, // Signed arithmetic type (i8, i16 etc.)
-  TYPEDESC_FLAG_UNSIGNED   = (1 << 6) << 8, // Unsigned arithmetic type (u8, u16 etc.)
-  TYPEDESC_FLAG_INVOKABLE  = (1 << 7) << 8, // Invokable type (fun, gen)
-  TYPEDESC_FLAG_COMPOSITE  = (1 << 8) << 8, // Composite type (struct, union etc.)
-} typedesc_flag_t;
-
-/**
  * \brief Enumeration of type descriptor kinds.
  */
 typedef enum typedesc_kind_e
 {
-  TYPEDESC_TYPE, // Type of type
-  TYPEDESC_MUT = TYPEDESC_FLAG_MODIFIER, // Mutable type
+  TYPEDESC_MUT, // Mutable type
   TYPEDESC_CONST, // Compile-time type
   TYPEDESC_PTR, // Pointer type
   TYPEDESC_ARRAY, // Array type
   TYPEDESC_REF, // Reference type
   TYPEDESC_OPT, // Optional type
-  TYPEDESC_I8 = TYPEDESC_FLAG_INTEGER | TYPEDESC_FLAG_ARITHMETIC | TYPEDESC_FLAG_SIGNED | TYPEDESC_FLAG_BUILTIN, // Built-in type i8
+
+  TYPEDESC_I8, // Built-in type i8
   TYPEDESC_I16, // Built-in type i16
   TYPEDESC_I32, // Built-in type i32
   TYPEDESC_I64, // Built-in type i64
   TYPEDESC_ISIZE, // Built-in type isize
-  TYPEDESC_U8 = TYPEDESC_FLAG_INTEGER | TYPEDESC_FLAG_ARITHMETIC | TYPEDESC_FLAG_UNSIGNED | TYPEDESC_FLAG_BUILTIN, // Built-in type u8
+  TYPEDESC_U8, // Built-in type u8
   TYPEDESC_U16, // Built-in type u16
   TYPEDESC_U32, // Built-in type u32
   TYPEDESC_U64, // Built-in type u64
   TYPEDESC_USIZE, // Built-in type usize
-  TYPEDESC_F32 = TYPEDESC_FLAG_FLOAT | TYPEDESC_FLAG_ARITHMETIC | TYPEDESC_FLAG_SIGNED | TYPEDESC_FLAG_BUILTIN, // Built-in type f32
+  TYPEDESC_F32, // Built-in type f32
   TYPEDESC_F64, // Built-in type f64
-  TYPEDESC_BOOL = TYPEDESC_FLAG_BUILTIN, // Built-in type bool
+  TYPEDESC_BOOL, // Built-in type bool
   TYPEDESC_UNIT, // Built-in type unit
   TYPEDESC_NULL, // Null type
-  TYPEDESC_FUN = TYPEDESC_FLAG_INVOKABLE, // Function type
+  TYPEDESC_TYPE, // Type of type
+  
+  TYPEDESC_FUN, // Function type
   TYPEDESC_GEN, // Generator type
-  TYPEDESC_STRUCT = TYPEDESC_FLAG_COMPOSITE, // Struct type
+  TYPEDESC_STRUCT, // Struct type
   TYPEDESC_UNION, // Union type
   TYPEDESC_ENUM, // Enum type
   TYPEDESC_MOD, // Module type

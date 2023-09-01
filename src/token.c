@@ -188,15 +188,125 @@ const char* token_kind_to_string(token_kind_t kind)
 
 bool token_is_lit(token_t* tok)
 {
-  return tok->kind & TOK_FLAG_LIT;
+  switch (tok->kind)
+  {
+  case TOK_LIT_INT:
+  case TOK_LIT_FLT:
+  case TOK_LIT_STR:
+  case TOK_LIT_CHAR:
+  case TOK_LIT_BOOL:
+  case TOK_LIT_NULL:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool token_is_kw(token_t* tok)
 {
-  return tok->kind & TOK_FLAG_KW;
+  switch (tok->kind)
+  {
+  case TOK_KW_IS:
+  case TOK_KW_AS:
+  case TOK_KW_SIZEOF:
+  case TOK_KW_ALIGNOF:
+  case TOK_KW_TYPEOF:
+  case TOK_KW_IN:
+  case TOK_KW_FUN:
+  case TOK_KW_GEN:
+  case TOK_KW_STRUCT:
+  case TOK_KW_UNION:
+  case TOK_KW_ENUM:
+  case TOK_KW_MOD:
+  case TOK_KW_USE:
+  case TOK_KW_IF:
+  case TOK_KW_THEN:
+  case TOK_KW_ELSE:
+  case TOK_KW_FOR:
+  case TOK_KW_WHILE:
+  case TOK_KW_DO:
+  case TOK_KW_BREAK:
+  case TOK_KW_CONTINUE:
+  case TOK_KW_RETURN:
+  case TOK_KW_YIELD:
+  case TOK_KW_MUT:
+  case TOK_KW_CONST:
+  case TOK_KW_TYPE:
+  case TOK_KW_I8:
+  case TOK_KW_I16:
+  case TOK_KW_I32:
+  case TOK_KW_I64:
+  case TOK_KW_ISIZE:
+  case TOK_KW_U8:
+  case TOK_KW_U16:
+  case TOK_KW_U32:
+  case TOK_KW_U64:
+  case TOK_KW_USIZE:
+  case TOK_KW_F32:
+  case TOK_KW_F64:
+  case TOK_KW_BOOL:
+  case TOK_KW_UNIT:
+  case TOK_KW_SELF:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool token_is_punct(token_t* tok)
 {
-  return tok->kind & TOK_FLAG_PUNCT;
+  switch (tok->kind)
+  {
+  case TOK_PUNCT_PLUS:
+  case TOK_PUNCT_PLUS_PLUS:
+  case TOK_PUNCT_PLUS_EQUAL:
+  case TOK_PUNCT_MINUS:
+  case TOK_PUNCT_MINUS_MINUS:
+  case TOK_PUNCT_MINUS_EQUAL:
+  case TOK_PUNCT_ASTERISK:
+  case TOK_PUNCT_ASTERISK_EQUAL:
+  case TOK_PUNCT_ASTERISK_DOT:
+  case TOK_PUNCT_SLASH:
+  case TOK_PUNCT_SLASH_EQUAL:
+  case TOK_PUNCT_PERCENT:
+  case TOK_PUNCT_PERCENT_EQUAL:
+  case TOK_PUNCT_AMPERSAND:
+  case TOK_PUNCT_AMPERSAND_AMPERSAND:
+  case TOK_PUNCT_AMPERSAND_EQUAL:
+  case TOK_PUNCT_BAR:
+  case TOK_PUNCT_BAR_BAR:
+  case TOK_PUNCT_BAR_EQUAL:
+  case TOK_PUNCT_HAT:
+  case TOK_PUNCT_HAT_EQUAL:
+  case TOK_PUNCT_TILDE:
+  case TOK_PUNCT_LESS:
+  case TOK_PUNCT_LESS_LESS:
+  case TOK_PUNCT_LESS_LESS_EQUAL:
+  case TOK_PUNCT_LESS_EQUAL:
+  case TOK_PUNCT_GREATER:
+  case TOK_PUNCT_GREATER_GREATER:
+  case TOK_PUNCT_GREATER_GREATER_EQUAL:
+  case TOK_PUNCT_GREATER_EQUAL:
+  case TOK_PUNCT_BANG:
+  case TOK_PUNCT_BANG_EQUAL:
+  case TOK_PUNCT_DOT:
+  case TOK_PUNCT_DOT_DOT:
+  case TOK_PUNCT_DOT_DOT_DOT:
+  case TOK_PUNCT_QUESTION:
+  case TOK_PUNCT_QUESTION_DOT:
+  case TOK_PUNCT_EQUAL:
+  case TOK_PUNCT_EQUAL_EQUAL:
+  case TOK_PUNCT_COMMA:
+  case TOK_PUNCT_COLON:
+  case TOK_PUNCT_SEMICOLON:
+  case TOK_PUNCT_PAREN_LEFT:
+  case TOK_PUNCT_PAREN_RIGHT:
+  case TOK_PUNCT_BRACKET_LEFT:
+  case TOK_PUNCT_BRACKET_RIGHT:
+  case TOK_PUNCT_BRACE_LEFT:
+  case TOK_PUNCT_BRACE_RIGHT:
+    return true;
+  default:
+    return false;
+  }
 }

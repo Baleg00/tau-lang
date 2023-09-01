@@ -1626,22 +1626,92 @@ void ast_set_decls(ast_node_t* node, list_t* decls)
 
 bool ast_is_type(ast_node_t* node)
 {
-  return node->kind & AST_FLAG_TYPE;
+  switch (node->kind)
+  {
+  case AST_TYPE_MUT:
+  case AST_TYPE_CONST:
+  case AST_TYPE_PTR:
+  case AST_TYPE_ARRAY:
+  case AST_TYPE_REF:
+  case AST_TYPE_OPT:
+  case AST_TYPE_FUN:
+  case AST_TYPE_GEN:
+  case AST_TYPE_TYPE:
+  case AST_TYPE_SELF:
+  case AST_TYPE_I8:
+  case AST_TYPE_I16:
+  case AST_TYPE_I32:
+  case AST_TYPE_I64:
+  case AST_TYPE_ISIZE:
+  case AST_TYPE_U8:
+  case AST_TYPE_U16:
+  case AST_TYPE_U32:
+  case AST_TYPE_U64:
+  case AST_TYPE_USIZE:
+  case AST_TYPE_F32:
+  case AST_TYPE_F64:
+  case AST_TYPE_BOOL:
+  case AST_TYPE_UNIT:
+  case AST_TYPE_MEMBER:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool ast_is_expr(ast_node_t* node)
 {
-  return node->kind & AST_FLAG_EXPR;
+  switch (node->kind)
+  {
+  case AST_EXPR_LIT_INT:
+  case AST_EXPR_LIT_FLT:
+  case AST_EXPR_LIT_STR:
+  case AST_EXPR_LIT_CHAR:
+  case AST_EXPR_LIT_BOOL:
+  case AST_EXPR_LIT_NULL:
+  case AST_EXPR_OP:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool ast_is_stmt(ast_node_t* node)
 {
-  return node->kind & AST_FLAG_STMT;
+  switch (node->kind)
+  {
+  case AST_STMT_IF:
+  case AST_STMT_FOR:
+  case AST_STMT_WHILE:
+  case AST_STMT_BREAK:
+  case AST_STMT_CONTINUE:
+  case AST_STMT_RETURN:
+  case AST_STMT_YIELD:
+  case AST_STMT_BLOCK:
+  case AST_STMT_EXPR:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool ast_is_decl(ast_node_t* node)
 {
-  return node->kind & AST_FLAG_DECL;
+  switch (node->kind)
+  {
+  case AST_DECL_VAR:
+  case AST_DECL_PARAM:
+  case AST_DECL_FUN:
+  case AST_DECL_GEN:
+  case AST_DECL_STRUCT:
+  case AST_DECL_UNION:
+  case AST_DECL_ENUM:
+  case AST_DECL_ENUM_CONSTANT:
+  case AST_DECL_MOD:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool ast_is_variadic(ast_node_t* node)

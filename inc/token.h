@@ -25,35 +25,22 @@
 #include "location.h"
 
 /**
- * \brief Flags that specify the category of a token.
- */
-typedef enum token_flag_e
-{
-  TOK_FLAG_UNKNOWN = 0, // Unknown
-  TOK_FLAG_ID      = (1 << 0) << 8, // Identifier
-  TOK_FLAG_LIT     = (1 << 1) << 8, // Literal
-  TOK_FLAG_KW      = (1 << 2) << 8, // Keyword
-  TOK_FLAG_PUNCT   = (1 << 3) << 8, // Punctuation
-  TOK_FLAG_EOF     = (1 << 4) << 8 // End of file
-} token_flag_t;
-
-/**
  * \brief Enumeration of token kinds.
  */
 typedef enum token_kind_e
 {
-  TOK_UNKNOWN = TOK_FLAG_UNKNOWN, // Unknown token
+  TOK_UNKNOWN, // Unknown token
 
-  TOK_ID = TOK_FLAG_ID, // Identifier
+  TOK_ID, // Identifier
 
-  TOK_LIT_INT = TOK_FLAG_LIT, // Literal integer (e.g. 123)
+  TOK_LIT_INT, // Literal integer (e.g. 123)
   TOK_LIT_FLT, // Literal float (e.g. 1.23)
   TOK_LIT_STR, // Literal string (e.g. "abc")
   TOK_LIT_CHAR, // Literal character (e.g. 'a')
   TOK_LIT_BOOL, // Literal boolean
   TOK_LIT_NULL, // Literal null
 
-  TOK_KW_IS = TOK_FLAG_KW, // Keyword `is`
+  TOK_KW_IS, // Keyword `is`
   TOK_KW_AS, // Keyword `as`
   TOK_KW_SIZEOF, // Keyword `sizeof`
   TOK_KW_ALIGNOF, // Keyword `alignof`
@@ -95,7 +82,7 @@ typedef enum token_kind_e
   TOK_KW_BOOL, // Keyword `bool`
   TOK_KW_UNIT, // Keyword `unit`
 
-  TOK_PUNCT_PLUS = TOK_FLAG_PUNCT, // Punctuation `+`
+  TOK_PUNCT_PLUS, // Punctuation `+`
   TOK_PUNCT_PLUS_PLUS, // Punctuation `++`
   TOK_PUNCT_PLUS_EQUAL, // Punctuation `+=`
   TOK_PUNCT_MINUS, // Punctuation `-`
@@ -144,7 +131,7 @@ typedef enum token_kind_e
   TOK_PUNCT_BRACE_LEFT, // Punctuation `{`
   TOK_PUNCT_BRACE_RIGHT, // Punctuation `}`
 
-  TOK_EOF = TOK_FLAG_EOF // End of file
+  TOK_EOF, // End of file
 } token_kind_t;
 
 /**
