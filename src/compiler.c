@@ -131,6 +131,7 @@ void compiler_free(compiler_t* compiler)
   list_free(compiler->input_files);
 
   typedesc_cleanup();
+  ast_cleanup();
 
   allocator_free(compiler->allocator);
   allocator_deallocate(allocator_global(), compiler);
@@ -226,7 +227,6 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     analyzer_free(&analyzer);
     
-    ast_node_free(root);
     parser_free(parser);
 
     list_for_each(toks, (list_for_each_func_t)token_free);

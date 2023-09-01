@@ -120,11 +120,9 @@ typedef struct ast_node_s ast_node_t;
 ast_node_t* ast_node_init(ast_kind_t kind);
 
 /**
- * \brief Destroys an AST node and all of its children.
- * 
- * \param[in] node Node to be destroyed.
+ * \brief Frees all memory allocated by AST nodes.
 */
-void ast_node_free(ast_node_t* node);
+void ast_cleanup(void);
 
 /**
  * \brief Writes a JSON dump of an AST into a stream.

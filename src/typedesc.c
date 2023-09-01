@@ -259,6 +259,9 @@ typedesc_t* typedesc_init(typedesc_kind_t kind)
 
 void typedesc_cleanup(void)
 {
+  if (g_descriptors == NULL)
+    return;
+
   for (size_t i = 0; i < vector_size(g_descriptors); i++)
   {
     typedesc_t* desc = (typedesc_t*)vector_get(g_descriptors, i);
@@ -282,6 +285,7 @@ void typedesc_cleanup(void)
   }
 
   vector_free(g_descriptors);
+  g_descriptors = NULL;
 }
 
 typedesc_kind_t typedesc_get_kind(typedesc_t* desc)

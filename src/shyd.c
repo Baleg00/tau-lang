@@ -342,8 +342,10 @@ void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 
 void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
+  unused(shyd);
+
   ast_node_t* node = ast_node_init(AST_EXPR_OP);
-  ast_set_token(node, parser_current(shyd->par));
+  ast_set_token(node, elem->tok);
   ast_set_op(node, elem->op);
 
   if (stack_empty(node_stack))

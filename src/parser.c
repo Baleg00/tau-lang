@@ -109,10 +109,7 @@ list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_f
 ast_node_t* parser_parse_id(parser_t* par)
 {
   ast_node_t* node = ast_node_init(AST_ID);
-  ast_set_token(node, parser_current(par));
-
-  parser_expect(par, TOK_ID);
-
+  ast_set_token(node, parser_expect(par, TOK_ID));
   return node;
 }
 

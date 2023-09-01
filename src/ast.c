@@ -7,10 +7,13 @@
 
 #include "ast.h"
 
+#include <string.h>
+
+#include "allocator.h"
 #include "memtrace.h"
-#include "set.h"
 #include "stack.h"
 #include "util.h"
+#include "vector.h"
 
 /**
  * \brief Utility macro which expands to fields that all AST nodes must have.
@@ -514,6 +517,8 @@ struct ast_prog_s
 #undef AST_TYPED_HEADER
 #undef AST_NODE_HEADER
 
+static vector_t* g_ast_nodes = NULL;
+
 ast_node_t* ast_node_init(ast_kind_t kind)
 {
   size_t node_size = sizeof(ast_node_t);
@@ -575,191 +580,63 @@ ast_node_t* ast_node_init(ast_kind_t kind)
   default: unreachable();
   }
 
-  ast_node_t* node = (ast_node_t*)calloc(1, node_size);
+  ast_node_t* node = (ast_node_t*)allocator_allocate(allocator_global(), node_size);
   assert(node != NULL);
+
+  memset(node, 0, node_size);
 
   node->kind = kind;
   node->tok = NULL;
 
+  if (g_ast_nodes == NULL)
+    g_ast_nodes = vector_init();
+
+  vector_push(g_ast_nodes, node);
+
   return node;
 }
 
-static void ast_node_collect(set_t* set, ast_node_t* node)
+void ast_cleanup(void)
 {
-  if (node == NULL)
+  if (g_ast_nodes == NULL)
     return;
 
-  set_add(set, node);
-
-  switch (node->kind)
+  for (size_t i = 0; i < vector_size(g_ast_nodes); i++)
   {
-  case AST_ID:
-    break;
-  case AST_PROG:
-    LIST_FOR_LOOP(it, ast_get_decls(node))
-      ast_node_collect(set, (ast_node_t*)list_node_get(it));
-    break;
-  case AST_TYPE_MUT:
-  case AST_TYPE_CONST:
-  case AST_TYPE_PTR:
-  case AST_TYPE_ARRAY:
-  case AST_TYPE_REF:
-  case AST_TYPE_OPT:
-    ast_node_collect(set, ast_get_base_type(node));
-    break;
-  case AST_TYPE_FUN:
-    LIST_FOR_LOOP(it, ast_get_params(node))
-      ast_node_collect(set, (ast_node_t*)list_node_get(it));
+    ast_node_t* node = (ast_node_t*)vector_get(g_ast_nodes, i);
 
-    ast_node_collect(set, ast_get_return_type(node));
-    break;
-  case AST_TYPE_GEN:
-    LIST_FOR_LOOP(it, ast_get_params(node))
-      ast_node_collect(set, (ast_node_t*)list_node_get(it));
-
-    ast_node_collect(set, ast_get_yield_type(node));
-    break;
-  case AST_TYPE_TYPE:
-  case AST_TYPE_SELF:
-  case AST_TYPE_I8:
-  case AST_TYPE_I16:
-  case AST_TYPE_I32:
-  case AST_TYPE_I64:
-  case AST_TYPE_ISIZE:
-  case AST_TYPE_U8:
-  case AST_TYPE_U16:
-  case AST_TYPE_U32:
-  case AST_TYPE_U64:
-  case AST_TYPE_USIZE:
-  case AST_TYPE_F32:
-  case AST_TYPE_F64:
-  case AST_TYPE_BOOL:
-  case AST_TYPE_UNIT:
-    break;
-  case AST_TYPE_MEMBER:
-    ast_node_collect(set, ast_get_owner(node));
-    ast_node_collect(set, ast_get_member(node));
-    break;
-  case AST_EXPR_LIT_INT:
-  case AST_EXPR_LIT_FLT:
-  case AST_EXPR_LIT_STR:
-  case AST_EXPR_LIT_CHAR:
-  case AST_EXPR_LIT_BOOL:
-  case AST_EXPR_LIT_NULL:
-    break;
-  case AST_EXPR_OP:
-    if (op_is_unary(ast_get_op(node)))
-      ast_node_collect(set, ast_get_expr(node));
-    else if (op_is_binary(ast_get_op(node)))
+    switch (node->kind)
     {
-      ast_node_collect(set, ast_get_lhs(node));
-      ast_node_collect(set, ast_get_rhs(node));
+    case AST_PROG:
+    case AST_DECL_MOD:
+      list_free(ast_get_decls(node));
+      break;
+    case AST_EXPR_OP:
+      if (ast_get_op(node) == OP_CALL)
+        list_free(ast_get_params(node));
+      break;
+    case AST_TYPE_FUN:
+    case AST_TYPE_GEN:
+    case AST_DECL_FUN:
+    case AST_DECL_GEN:
+      list_free(ast_get_params(node));
+      break;
+    case AST_STMT_BLOCK:
+      list_free(ast_get_stmts(node));
+      break;
+    case AST_DECL_STRUCT:
+    case AST_DECL_UNION:
+    case AST_DECL_ENUM:
+      list_free(ast_get_members(node));
+      break;
+    default: fallthrough();
     }
-    else if (ast_get_op(node) == OP_CALL)
-    {
-      ast_node_collect(set, ast_get_callee(node));
 
-      LIST_FOR_LOOP(it, ast_get_params(node))
-        ast_node_collect(set, (ast_node_t*)list_node_get(it));
-    }
-    else
-      unreachable();
-    break;
-  case AST_STMT_IF:
-    ast_node_collect(set, ast_get_cond(node));
-    ast_node_collect(set, ast_get_stmt(node));
-    ast_node_collect(set, ast_get_stmt_else(node));
-    break;
-  case AST_STMT_FOR:
-    ast_node_collect(set, ast_get_var(node));
-    ast_node_collect(set, ast_get_range(node));
-    ast_node_collect(set, ast_get_stmt(node));
-    break;
-  case AST_STMT_WHILE:
-    ast_node_collect(set, ast_get_cond(node));
-    ast_node_collect(set, ast_get_stmt(node));
-    break;
-  case AST_STMT_BREAK:
-  case AST_STMT_CONTINUE:
-    break;
-  case AST_STMT_RETURN:
-    ast_node_collect(set, ast_get_expr(node));
-    break;
-  case AST_STMT_YIELD:
-    ast_node_collect(set, ast_get_expr(node));
-    break;
-  case AST_STMT_BLOCK:
-    LIST_FOR_LOOP(it, ast_get_stmts(node))
-      ast_node_collect(set, (ast_node_t*)list_node_get(it));
-    break;
-  case AST_STMT_EXPR:
-    ast_node_collect(set, ast_get_expr(node));
-    break;
-  case AST_DECL_VAR:
-    ast_node_collect(set, ast_get_id(node));
-    ast_node_collect(set, ast_get_type(node));
-    ast_node_collect(set, ast_get_expr(node));
-    break;
-  case AST_DECL_FUN:
-    LIST_FOR_LOOP(it, ast_get_params(node))
-      ast_node_collect(set, (ast_node_t*)list_node_get(it));
-
-    ast_node_collect(set, ast_get_id(node));
-    ast_node_collect(set, ast_get_return_type(node));
-    break;
-  case AST_DECL_GEN:
-    LIST_FOR_LOOP(it, ast_get_params(node))
-      ast_node_collect(set, (ast_node_t*)list_node_get(it));
-
-    ast_node_collect(set, ast_get_id(node));
-    ast_node_collect(set, ast_get_yield_type(node));
-    break;
-  case AST_DECL_STRUCT:
-  case AST_DECL_UNION:
-  case AST_DECL_ENUM:
-    LIST_FOR_LOOP(it, ast_get_members(node))
-      ast_node_collect(set, (ast_node_t*)list_node_get(it));
-
-    ast_node_collect(set, ast_get_id(node));
-    break;
-  case AST_DECL_MOD:
-    LIST_FOR_LOOP(it, ast_get_decls(node))
-      ast_node_collect(set, (ast_node_t*)list_node_get(it));
-
-    ast_node_collect(set, ast_get_id(node));
-    break;
-  case AST_DECL_PARAM:
-    ast_node_collect(set, ast_get_id(node));
-    ast_node_collect(set, ast_get_type(node));
-    ast_node_collect(set, ast_get_expr(node));
-    break;
-  case AST_DECL_ENUM_CONSTANT:
-    ast_node_collect(set, ast_get_id(node));
-    ast_node_collect(set, ast_get_type(node));
-    break;
-  default: unreachable();
+    allocator_deallocate(allocator_global(), node);
   }
-}
 
-static int cmp_ptr(void* lhs, void* rhs)
-{
-  return (int)((uintptr_t)lhs - (uintptr_t)rhs);
-}
-
-static void ast_node_free_impl(ast_node_t* node)
-{
-  free(node);
-}
-
-void ast_node_free(ast_node_t* node)
-{
-  set_t* node_set = set_init(cmp_ptr);
-
-  ast_node_collect(node_set, node);
-
-  set_for_each(node_set, (set_for_each_func_t)ast_node_free_impl);
-
-  set_free(node_set);
+  vector_free(g_ast_nodes);
+  g_ast_nodes = NULL;
 }
 
 void ast_json_dump_list(FILE* stream, list_t* list)
@@ -1332,14 +1209,38 @@ void ast_set_op(ast_node_t* node, op_kind_t op)
 
 ast_node_t* ast_get_id(ast_node_t* node)
 {
-  assert(node->kind & AST_FLAG_DECL);
-  return ((ast_decl_t*)node)->id;
+  switch (node->kind)
+  {
+  case AST_DECL_VAR:           return ((ast_decl_var_t*)          node)->id;
+  case AST_DECL_FUN:           return ((ast_decl_fun_t*)          node)->id;
+  case AST_DECL_GEN:           return ((ast_decl_gen_t*)          node)->id;
+  case AST_DECL_STRUCT:        return ((ast_decl_struct_t*)       node)->id;
+  case AST_DECL_UNION:         return ((ast_decl_union_t*)        node)->id;
+  case AST_DECL_ENUM:          return ((ast_decl_enum_t*)         node)->id;
+  case AST_DECL_MOD:           return ((ast_decl_mod_t*)          node)->id;
+  case AST_DECL_PARAM:         return ((ast_decl_param_t*)        node)->id;
+  case AST_DECL_ENUM_CONSTANT: return ((ast_decl_enum_constant_t*)node)->id;
+  default: unreachable();
+  }
+
+  return NULL;
 }
 
 void ast_set_id(ast_node_t* node, ast_node_t* id)
 {
-  assert(node->kind & AST_FLAG_DECL);
-  ((ast_decl_t*)node)->id = id;
+  switch (node->kind)
+  {
+  case AST_DECL_VAR:           ((ast_decl_var_t*)          node)->id = id; break;
+  case AST_DECL_FUN:           ((ast_decl_fun_t*)          node)->id = id; break;
+  case AST_DECL_GEN:           ((ast_decl_gen_t*)          node)->id = id; break;
+  case AST_DECL_STRUCT:        ((ast_decl_struct_t*)       node)->id = id; break;
+  case AST_DECL_UNION:         ((ast_decl_union_t*)        node)->id = id; break;
+  case AST_DECL_ENUM:          ((ast_decl_enum_t*)         node)->id = id; break;
+  case AST_DECL_MOD:           ((ast_decl_mod_t*)          node)->id = id; break;
+  case AST_DECL_PARAM:         ((ast_decl_param_t*)        node)->id = id; break;
+  case AST_DECL_ENUM_CONSTANT: ((ast_decl_enum_constant_t*)node)->id = id; break;
+  default: unreachable();
+  }
 }
 
 ast_node_t* ast_get_type(ast_node_t* node)
