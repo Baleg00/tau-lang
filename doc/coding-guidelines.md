@@ -1,25 +1,12 @@
-# Coding Guidelines for the Tau Compiler
+<p align="center">
+  <img src="../img/logo.svg" alt="Tau Logo" width="80%">
+</p>
 
-- [Introduction](#introduction)
-- [Definitions](#definitions)
-- [Naming Conventions](#naming-conventions)
-  - [Variable Naming Conventions](#variable-naming-conventions)
-  - [Type Naming Conventions](#type-naming-conventions)
-  - [Enumeration Naming Conventions](#enumeration-naming-conventions)
-  - [Function Naming Conventions](#function-naming-conventions)
-  - [Preprocessor Naming Conventions](#preprocessor-naming-conventions)
-- [Formatting](#formatting)
-  - [Source File Formatting](#source-file-formatting)
-  - [Comment Formatting](#comment-formatting)
-  - [Function Formatting](#function-formatting)
+<h2 align="center">Coding Guidelines for the Tau Project</h2>
 
----
-
-## Introduction
-
-Welcome to the coding guidelines for the **Tau Compiler**. These guidelines are
-intended to ensure consistent, readable, and maintainable code across the project.
-Adhering to these guidelines will enhance collaboration and overall code quality.
+Welcome to our coding guidelines. These guidelines are intended to ensure
+consistent, readable, and maintainable code across the project. Adhering to
+these guidelines will enhance collaboration and overall code quality.
 
 ## Definitions
 
@@ -52,25 +39,25 @@ Adhering to these guidelines will enhance collaboration and overall code quality
 4. If entities conceptually form a hierarchy, parts of their names **SHOULD** be
    ordered accordingly. (e.g., `animal_mammal_carnivore_cat`)
 
-### Variable Naming Conventions
+### Variables
 
 1. Variable names **MUST NOT** begin with an underscore. This ensures clarity
    and compatibility with programming language standards.
 2. Global variables **MUST** have the `g_` prefix. This ensures an easy way of
    distinguishing between global and local variables.
 
-### Type Naming Conventions
+### Types
 
 1. User-defined data types **MUST** end with the `_t` suffix.
 2. Function pointer types **MUST** end with the `_func_t` suffix.
 
-### Enumeration Naming Conventions
+### Enumerations
 
 1. Enumeration constant names **MUST** utilize the *SCREAMING_SNAKE_CASE* style,
    wherein words consist only of uppercase ASCII characters and are separated by
    underscores. (e.g., `FOO_BAR`)
 
-### Function Naming Conventions
+### Functions
 
 1. Functions **MUST** begin with a prefix that is unique to the specific header
    or module which the function is declared in.
@@ -79,14 +66,14 @@ Adhering to these guidelines will enhance collaboration and overall code quality
    data. (e.g., `foo_get_bar` where `foo` is the unique prefix and `bar` is the
    accessed data)
 
-### Preprocessor Naming Conventions
+### Preprocessor Macros
 
 1. Macros **MUST** utilize the *SCREAMING_SNAKE_CASE* style.
 2. Include guard macros **MUST** have the following format: `TAU_{MODULE NAME}_H`
 
 ## Formatting
 
-### Source File Formatting
+### Source Files
 
 1. Code **MUST** be indented using 2 spaces.
 2. The length of a line **SHOULD NOT** exceed 80 characters.
@@ -102,7 +89,7 @@ Adhering to these guidelines will enhance collaboration and overall code quality
    7. Global variable declarations
    8. Function declarations
 
-### Comment Formatting
+### Comments
 
 1. Multi-line documentation comments **MUST** utilize the *Javadoc* style, which
    consists of a C-style comments block starting with two asterisks.
@@ -117,7 +104,7 @@ Adhering to these guidelines will enhance collaboration and overall code quality
 7. Documentation comments **SHOULD** be provided for declarations in private
    header files and all source files.
 
-### Function Formatting
+### Functions
 
 1. Functions **SHOULD** not exceed 20 lines in length, excluding the signature
    and braces.
