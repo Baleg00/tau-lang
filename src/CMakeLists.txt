@@ -37,5 +37,25 @@ set(TAU_SOURCES
 
 add_library(${TAU_LIBRARY_NAME} STATIC ${TAU_SOURCES})
 
+llvm_map_components_to_libnames(LLVM_LIBS
+  support
+  core
+  
+  irreader
+  
+  executionengine
+  jitlink
+  mcjit
+
+  exegesisx86
+  x86targetmca
+  x86codegen
+  x86disassembler
+  x86asmparser
+  x86desc
+  x86info
+)
+
 add_executable(${TAU_EXECUTABLE_NAME} main.c)
-target_link_libraries(${TAU_EXECUTABLE_NAME} PUBLIC ${TAU_LIBRARY_NAME})
+
+target_link_libraries(${TAU_EXECUTABLE_NAME} PUBLIC ${LLVM_LIBS} ${TAU_LIBRARY_NAME})

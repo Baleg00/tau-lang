@@ -5,6 +5,18 @@ project(tau
   DESCRIPTION "A strictly typed, compiled, general purpose programming language."
   LANGUAGES C)
 
+find_package(LLVM 17 REQUIRED CONFIG)
+
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+message(STATUS "LLVM Include Directories: ${LLVM_INCLUDE_DIRS}")
+message(STATUS "LLVM Library Directories: ${LLVM_LIBRARY_DIRS}")
+message(STATUS "LLVM Definitions: ${LLVM_DEFINITIONS}")
+
+include_directories(${LLVM_INCLUDE_DIRS})
+link_directories(${LLVM_LIBRARY_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+
 include(CTest)
 enable_testing()
 
