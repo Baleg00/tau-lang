@@ -1,7 +1,7 @@
 if(MSVC)
-  add_compile_options(/Wall /WX)
+  add_compile_options(/Wall /WX /FIbase.h)
 else()
-  add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+  add_compile_options(-Wall -Wextra -Wpedantic -Werror -include base.h)
 endif()
 
 set(TAU_SOURCES
@@ -21,22 +21,18 @@ set(TAU_SOURCES
   ${TAU_SOURCE_DIR}/log.c
   ${TAU_SOURCE_DIR}/memtrace.c
   ${TAU_SOURCE_DIR}/op.c
-  ${TAU_SOURCE_DIR}/opcode.c
   ${TAU_SOURCE_DIR}/parser.c
   ${TAU_SOURCE_DIR}/queue.c
-  ${TAU_SOURCE_DIR}/register.c
   ${TAU_SOURCE_DIR}/set.c
   ${TAU_SOURCE_DIR}/shyd.c
   ${TAU_SOURCE_DIR}/stack.c
   ${TAU_SOURCE_DIR}/str.c
   ${TAU_SOURCE_DIR}/symtable.c
-  ${TAU_SOURCE_DIR}/tasm.c
   ${TAU_SOURCE_DIR}/timer.c
   ${TAU_SOURCE_DIR}/token.c
   ${TAU_SOURCE_DIR}/typedesc.c
   ${TAU_SOURCE_DIR}/typetable.c
   ${TAU_SOURCE_DIR}/vector.c
-  ${TAU_SOURCE_DIR}/vm.c
 )
 
 add_library(${TAU_LIBRARY_NAME} STATIC ${TAU_SOURCES})

@@ -283,12 +283,12 @@ void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg
   unused(arg);
   unused(user_ptr);
 
-  printf("Usage:\n");
+  puts("Usage:\n");
 
   for (size_t i = 0; i < cli->usage_count; ++i)
     printf("\t%s\n", cli->usages[i]);
   
-  printf("\nOptions:\n");
+  puts("\nOptions:\n");
 
   for (size_t i = 0; i < cli->opt_count; ++i)
   {
@@ -299,10 +299,10 @@ void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg
 
     for (size_t j = 0; j < cli->opts[i].name_count; ++j)
     {
-      printf(cli->opts[i].names[j]);
+      puts(cli->opts[i].names[j]);
 
       if (j + 1 < cli->opts[i].name_count)
-        printf(", ");
+        puts(", ");
     }
 
     printf("\t\t%s\n", cli->opts[i].desc);

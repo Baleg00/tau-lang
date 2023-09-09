@@ -246,7 +246,7 @@ ast_node_t* parser_parse_type_member(parser_t* par)
 
 ast_node_t* parser_parse_type(parser_t* par)
 {
-  ast_node_t* node;
+  ast_node_t* node = NULL;
 
   switch (token_get_kind(parser_current(par)))
   {

@@ -68,7 +68,7 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
       for (int i = 0; i < offset; ++i)
         fputc(' ', g_crumb_stream);
 
-      fprintf(g_crumb_stream, crumb_kind_to_color(kind));
+      fputs(crumb_kind_to_color(kind), g_crumb_stream);
 
       fputc('^', g_crumb_stream);
 

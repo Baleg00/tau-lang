@@ -8,7 +8,6 @@
 #include "timer.h"
 
 #ifdef _WIN32
-# include <profileapi.h>
 # include <windows.h>
 #else
 # include <time.h>
