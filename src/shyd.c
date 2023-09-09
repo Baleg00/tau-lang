@@ -184,7 +184,7 @@ bool shyd_parse_call(shyd_t* shyd)
   if (!shyd->prev_term)
     return false;
 
-  ast_node_t* node = ast_node_init(AST_EXPR_OP);
+  ast_node_t* node = ast_node_init(AST_EXPR_OP_CALL);
   ast_set_token(node, parser_current(shyd->par));
   ast_set_op(node, OP_CALL);
 
@@ -268,7 +268,6 @@ bool shyd_parse_operator(shyd_t* shyd)
   case TOK_PUNCT_QUESTION_DOT:          op = OP_NULL_SAFE_MEMBER; break;
   case TOK_PUNCT_EQUAL:                 op = OP_ASSIGN; break;
   case TOK_PUNCT_EQUAL_EQUAL:           op = OP_COMP_EQ; break;
-  case TOK_PUNCT_SEMICOLON:             op = OP_SEMICOLON; break;
   default: return false;
   }
 
@@ -328,7 +327,7 @@ void shyd_postfix(shyd_t* shyd)
 
 void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_node_t* node = ast_node_init(AST_EXPR_OP);
+  ast_node_t* node = ast_node_init(AST_EXPR_OP_UNARY);
   ast_set_token(node, parser_current(shyd->par));
   ast_set_op(node, elem->op);
 
@@ -344,7 +343,7 @@ void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
   unused(shyd);
 
-  ast_node_t* node = ast_node_init(AST_EXPR_OP);
+  ast_node_t* node = ast_node_init(AST_EXPR_OP_BINARY);
   ast_set_token(node, elem->tok);
   ast_set_op(node, elem->op);
 

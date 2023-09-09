@@ -558,7 +558,9 @@ ast_node_t* ast_node_init(ast_kind_t kind)
   case AST_EXPR_LIT_CHAR:       node_size = sizeof(ast_expr_lit_t           ); break;
   case AST_EXPR_LIT_BOOL:       node_size = sizeof(ast_expr_lit_t           ); break;
   case AST_EXPR_LIT_NULL:       node_size = sizeof(ast_expr_lit_t           ); break;
-  case AST_EXPR_OP:             node_size = sizeof(ast_expr_op_t            ); break;
+  case AST_EXPR_OP_UNARY:       node_size = sizeof(ast_expr_op_un_t         ); break;
+  case AST_EXPR_OP_BINARY:      node_size = sizeof(ast_expr_op_bin_t        ); break;
+  case AST_EXPR_OP_CALL:        node_size = sizeof(ast_expr_op_call_t       ); break;
   case AST_STMT_IF:             node_size = sizeof(ast_stmt_if_t            ); break;
   case AST_STMT_FOR:            node_size = sizeof(ast_stmt_for_t           ); break;
   case AST_STMT_WHILE:          node_size = sizeof(ast_stmt_while_t         ); break;
@@ -611,9 +613,8 @@ void ast_cleanup(void)
     case AST_DECL_MOD:
       list_free(ast_get_decls(node));
       break;
-    case AST_EXPR_OP:
-      if (ast_get_op(node) == OP_CALL)
-        list_free(ast_get_params(node));
+    case AST_EXPR_OP_CALL:
+      list_free(ast_get_params(node));
       break;
     case AST_TYPE_FUN:
     case AST_TYPE_GEN:
@@ -728,29 +729,24 @@ void ast_json_dump(FILE* stream, ast_node_t* root)
   case AST_EXPR_LIT_NULL:
     fprintf(stream, ",\"value\":\"%.*s\"", (int)location_get_len(token_get_loc(root->tok)), location_get_ptr(token_get_loc(root->tok)));
     break;
-  case AST_EXPR_OP:
+  case AST_EXPR_OP_UNARY:
     fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(ast_get_op(root)));
-    if (op_is_unary(ast_get_op(root)))
-    {
-      fprintf(stream, ",\"expr\":");
-      ast_json_dump(stream, ast_get_expr(root));
-    }
-    else if (op_is_binary(ast_get_op(root)))
-    {
-      fprintf(stream, ",\"lhs\":");
-      ast_json_dump(stream, ast_get_lhs(root));
-      fprintf(stream, ",\"rhs\":");
-      ast_json_dump(stream, ast_get_rhs(root));
-    }
-    else if (ast_get_op(root) == OP_CALL)
-    {
-      fprintf(stream, ",\"callee\":");
-      ast_json_dump(stream, ast_get_callee(root));
-      fprintf(stream, ",\"params\":");
-      ast_json_dump_list(stream, ast_get_params(root));
-    }
-    else
-      unreachable();
+    fprintf(stream, ",\"expr\":");
+    ast_json_dump(stream, ast_get_expr(root));
+    break;
+  case AST_EXPR_OP_BINARY:
+    fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(ast_get_op(root)));
+    fprintf(stream, ",\"lhs\":");
+    ast_json_dump(stream, ast_get_lhs(root));
+    fprintf(stream, ",\"rhs\":");
+    ast_json_dump(stream, ast_get_rhs(root));
+    break;
+  case AST_EXPR_OP_CALL:
+    fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(ast_get_op(root)));
+    fprintf(stream, ",\"callee\":");
+    ast_json_dump(stream, ast_get_callee(root));
+    fprintf(stream, ",\"params\":");
+    ast_json_dump_list(stream, ast_get_params(root));
     break;
   case AST_STMT_IF:
     fprintf(stream, ",\"cond\":");
@@ -979,27 +975,24 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root)
       case AST_EXPR_LIT_NULL:
         fprintf(stream, ",\"value\":\"%.*s\"", (int)location_get_len(token_get_loc(root->tok)), location_get_ptr(token_get_loc(root->tok)));
         break;
-      case AST_EXPR_OP:
+      case AST_EXPR_OP_UNARY:
         fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(ast_get_op(root)));
-        if (op_is_unary(ast_get_op(root)))
-        {
-          fprintf(stream, ",\"param\":\"%p\"", (void*)ast_get_expr(root));
-          stack_push(nodes, ast_get_expr(root));
-        }
-        else if (op_is_binary(ast_get_op(root)))
-        {
-          fprintf(stream, ",\"lhs\":\"%p\"", (void*)ast_get_lhs(root));
-          stack_push(nodes, ast_get_lhs(root));
-          fprintf(stream, ",\"rhs\":\"%p\"", (void*)ast_get_rhs(root));
-          stack_push(nodes, ast_get_rhs(root));
-        }
-        else if (ast_get_op(root) == OP_CALL)
-        {
-          fprintf(stream, ",\"callee\":\"%p\"", (void*)ast_get_callee(root));
-          stack_push(nodes, ast_get_callee(root));
-          fprintf(stream, ",\"params\":");
-          ast_json_dump_flat_list(stream, nodes, ast_get_params(root));
-        }
+        fprintf(stream, ",\"expr\":\"%p\"", (void*)ast_get_expr(root));
+        stack_push(nodes, ast_get_expr(root));
+        break;
+      case AST_EXPR_OP_BINARY:
+        fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(ast_get_op(root)));
+        fprintf(stream, ",\"lhs\":\"%p\"", (void*)ast_get_lhs(root));
+        stack_push(nodes, ast_get_lhs(root));
+        fprintf(stream, ",\"rhs\":\"%p\"", (void*)ast_get_rhs(root));
+        stack_push(nodes, ast_get_rhs(root));
+        break;
+      case AST_EXPR_OP_CALL:
+        fprintf(stream, ",\"op_kind\":\"%s\"", op_kind_to_string(ast_get_op(root)));
+        fprintf(stream, ",\"callee\":\"%p\"", (void*)ast_get_callee(root));
+        stack_push(nodes, ast_get_callee(root));
+        fprintf(stream, ",\"params\":");
+        ast_json_dump_flat_list(stream, nodes, ast_get_params(root));
         break;
       case AST_STMT_IF:
         fprintf(stream, ",\"cond\":\"%p\"", (void*)ast_get_cond(root));
@@ -1149,7 +1142,9 @@ const char* ast_kind_to_string(ast_kind_t kind)
   case AST_EXPR_LIT_CHAR:       return "AST_EXPR_LIT_CHAR";
   case AST_EXPR_LIT_BOOL:       return "AST_EXPR_LIT_BOOL";
   case AST_EXPR_LIT_NULL:       return "AST_EXPR_LIT_NULL";
-  case AST_EXPR_OP:             return "AST_EXPR_OP";
+  case AST_EXPR_OP_UNARY:       return "AST_EXPR_OP_UNARY";
+  case AST_EXPR_OP_BINARY:      return "AST_EXPR_OP_BINARY";
+  case AST_EXPR_OP_CALL:        return "AST_EXPR_OP_CALL";
   case AST_STMT_IF:             return "AST_STMT_IF";
   case AST_STMT_FOR:            return "AST_STMT_FOR";
   case AST_STMT_WHILE:          return "AST_STMT_WHILE";
@@ -1197,14 +1192,31 @@ void ast_set_token(ast_node_t* node, token_t* tok)
 
 op_kind_t ast_get_op(ast_node_t* node)
 {
-  assert(node->kind == AST_EXPR_OP);
-  return ((ast_expr_op_t*)node)->op_kind;
+  switch (node->kind)
+  {
+  case AST_EXPR_OP_UNARY:
+  case AST_EXPR_OP_BINARY:
+  case AST_EXPR_OP_CALL:
+    return ((ast_expr_op_t*)node)->op_kind;
+  default:
+    unreachable();
+  }
+
+  return OP_UNKNOWN;
 }
 
 void ast_set_op(ast_node_t* node, op_kind_t op)
 {
-  assert(node->kind == AST_EXPR_OP);
-  ((ast_expr_op_t*)node)->op_kind = op;
+  switch (node->kind)
+  {
+  case AST_EXPR_OP_UNARY:
+  case AST_EXPR_OP_BINARY:
+  case AST_EXPR_OP_CALL:
+    ((ast_expr_op_t*)node)->op_kind = op;
+    break;
+  default:
+    unreachable();
+  }
 }
 
 ast_node_t* ast_get_id(ast_node_t* node)
@@ -1405,42 +1417,42 @@ void ast_set_member(ast_node_t* node, ast_node_t* member)
 
 ast_node_t* ast_get_lhs(ast_node_t* node)
 {
-  assert(node->kind == AST_EXPR_OP);
+  assert(node->kind == AST_EXPR_OP_BINARY);
   assert(op_is_binary(ast_get_op(node)));
   return ((ast_expr_op_bin_t*)node)->lhs;
 }
 
 void ast_set_lhs(ast_node_t* node, ast_node_t* lhs)
 {
-  assert(node->kind == AST_EXPR_OP);
+  assert(node->kind == AST_EXPR_OP_BINARY);
   assert(op_is_binary(ast_get_op(node)));
   ((ast_expr_op_bin_t*)node)->lhs = lhs;
 }
 
 ast_node_t* ast_get_rhs(ast_node_t* node)
 {
-  assert(node->kind == AST_EXPR_OP);
+  assert(node->kind == AST_EXPR_OP_BINARY);
   assert(op_is_binary(ast_get_op(node)));
   return ((ast_expr_op_bin_t*)node)->rhs;
 }
 
 void ast_set_rhs(ast_node_t* node, ast_node_t* rhs)
 {
-  assert(node->kind == AST_EXPR_OP);
+  assert(node->kind == AST_EXPR_OP_BINARY);
   assert(op_is_binary(ast_get_op(node)));
   ((ast_expr_op_bin_t*)node)->rhs = rhs;
 }
 
 ast_node_t* ast_get_callee(ast_node_t* node)
 {
-  assert(node->kind == AST_EXPR_OP);
+  assert(node->kind == AST_EXPR_OP_CALL);
   assert(ast_get_op(node) == OP_CALL);
   return ((ast_expr_op_call_t*)node)->callee;
 }
 
 void ast_set_callee(ast_node_t* node, ast_node_t* callee)
 {
-  assert(node->kind == AST_EXPR_OP);
+  assert(node->kind == AST_EXPR_OP_CALL);
   assert(ast_get_op(node) == OP_CALL);
   ((ast_expr_op_call_t*)node)->callee = callee;
 }
@@ -1535,8 +1547,7 @@ ast_node_t* ast_get_expr(ast_node_t* node)
 {
   switch (node->kind)
   {
-  case AST_EXPR_OP:
-    assert(op_is_unary(ast_get_op(node)));
+  case AST_EXPR_OP_UNARY:
     return ((ast_expr_op_un_t*)node)->expr;
   case AST_STMT_RETURN: return ((ast_stmt_return_t*)node)->expr;
   case AST_STMT_YIELD:  return ((ast_stmt_yield_t* )node)->expr;
@@ -1553,8 +1564,7 @@ void ast_set_expr(ast_node_t* node, ast_node_t* expr)
 {
   switch (node->kind)
   {
-  case AST_EXPR_OP:
-    assert(op_is_unary(ast_get_op(node)));
+  case AST_EXPR_OP_UNARY:
     ((ast_expr_op_un_t*)node)->expr = expr;
     break;
   case AST_STMT_RETURN: ((ast_stmt_return_t*)node)->expr = expr; break;
@@ -1669,7 +1679,9 @@ bool ast_is_expr(ast_node_t* node)
   case AST_EXPR_LIT_CHAR:
   case AST_EXPR_LIT_BOOL:
   case AST_EXPR_LIT_NULL:
-  case AST_EXPR_OP:
+  case AST_EXPR_OP_UNARY:
+  case AST_EXPR_OP_BINARY:
+  case AST_EXPR_OP_CALL:
     return true;
   default:
     return false;

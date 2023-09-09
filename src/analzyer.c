@@ -264,7 +264,6 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* scope, ast_
 
       typetable_insert(analyzer->typetable, node, range_desc);
       break;
-    case OP_SEMICOLON: // TODO
     default:
       unreachable();
     }
@@ -524,7 +523,9 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_nod
   case AST_EXPR_LIT_NULL:
     typetable_insert(analyzer->typetable, node, typedesc_init(TYPEDESC_NULL));
     break;
-  case AST_EXPR_OP:
+  case AST_EXPR_OP_UNARY:
+  case AST_EXPR_OP_BINARY:
+  case AST_EXPR_OP_CALL:
     analyzer_visit_expr_op(analyzer, scope, node);
     break;
   default:
