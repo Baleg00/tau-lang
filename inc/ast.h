@@ -27,6 +27,66 @@
 #include "token.h"
 
 /**
+ * \brief Utility macro which expands to fields that all AST nodes must have.
+ */
+#define AST_NODE_HEADER\
+  struct\
+  {\
+    ast_kind_t kind; /** AST node kind. */\
+    token_t* tok; /** Pointer to the token associated with this AST node. */\
+  }
+
+/**
+ * \brief Utility macro which expands to fields that all type modifier AST nodes
+ * must have.
+ */
+#define AST_MODIFIER_HEADER\
+  struct\
+  {\
+    ast_node_t* base_type; /** Type modifier base type. */\
+  }
+
+/**
+ * \brief Utility macro which expands to fields that all typed AST nodes must
+ * have.
+ */
+#define AST_TYPED_HEADER\
+  struct\
+  {\
+    ast_node_t* type; /** Type. */\
+  }
+
+/**
+ * \brief Utility macro which expands to fields that all operator expression AST
+ * nodes must have.
+ */
+#define AST_EXPR_OP_HEADER\
+  struct\
+  {\
+    op_kind_t op_kind; /** Operation kind. */\
+  }
+
+/**
+ * \brief Utility macro which expands to fields that all declaration AST nodes
+ * must have.
+ */
+#define AST_DECL_HEADER\
+  struct\
+  {\
+    ast_node_t* id; /** Identifier. */\
+  }
+
+/**
+ * \brief Utility macro which expands to fields that all composite AST nodes
+ * must have.
+ */
+#define AST_COMPOSITE_HEADER\
+  struct\
+  {\
+    list_t* members; /** Members. */\
+  }
+
+/**
  * \brief Enumeration of AST node kinds.
  */
 typedef enum ast_kind_e
@@ -95,7 +155,390 @@ typedef enum ast_kind_e
 /**
  * \brief AST node.
  */
-typedef struct ast_node_s ast_node_t;
+typedef struct ast_node_s
+{
+  AST_NODE_HEADER;
+} ast_node_t;
+
+/**
+ * \brief AST identifier node.
+ */
+typedef struct ast_id_s
+{
+  AST_NODE_HEADER;
+} ast_id_t;
+
+/**
+ * \brief AST type node.
+ */
+typedef struct ast_type_s
+{
+  AST_NODE_HEADER;
+} ast_type_t;
+
+/**
+ * \brief AST type modifier node.
+ */
+typedef struct ast_type_modifier_s
+{
+  AST_NODE_HEADER;
+  AST_MODIFIER_HEADER;
+} ast_type_modifier_t;
+
+/**
+ * \brief AST mutable type node.
+ */
+typedef struct ast_type_mut_s
+{
+  AST_NODE_HEADER;
+  AST_MODIFIER_HEADER;
+} ast_type_mut_t;
+
+/**
+ * \brief AST constant type node.
+ */
+typedef struct ast_type_const_s
+{
+  AST_NODE_HEADER;
+  AST_MODIFIER_HEADER;
+} ast_type_const_t;
+
+/**
+ * \brief AST pointer type node.
+ */
+typedef struct ast_type_ptr_s
+{
+  AST_NODE_HEADER;
+  AST_MODIFIER_HEADER;
+} ast_type_ptr_t;
+
+/**
+ * \brief AST reference type node.
+ */
+typedef struct ast_type_ref_s
+{
+  AST_NODE_HEADER;
+  AST_MODIFIER_HEADER;
+} ast_type_ref_t;
+
+/**
+ * \brief AST optional type node.
+ */
+typedef struct ast_type_opt_s
+{
+  AST_NODE_HEADER;
+  AST_MODIFIER_HEADER;
+} ast_type_opt_t;
+
+/**
+ * \brief AST array type node.
+ */
+typedef struct ast_type_array_s
+{
+  AST_NODE_HEADER;
+  AST_MODIFIER_HEADER;
+  ast_node_t* size;
+} ast_type_array_t;
+
+/**
+ * \brief AST function type node.
+ */
+typedef struct ast_type_fun_s
+{
+  AST_NODE_HEADER;
+  list_t* params; // List of parameter types.
+  ast_node_t* return_type; // Return type.
+} ast_type_fun_t;
+
+/**
+ * \brief AST generator type node.
+ */
+typedef struct ast_type_gen_s
+{
+  AST_NODE_HEADER;
+  list_t* params; // List of parameter types.
+  ast_node_t* yield_type; // Yield type.
+} ast_type_gen_t;
+
+/**
+ * \brief AST member type node.
+ */
+typedef struct ast_type_member_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* owner; // Owner type.
+  ast_node_t* member; // Member type.
+} ast_type_member_t;
+
+/**
+ * \brief AST expression node.
+ */
+typedef struct ast_expr_s
+{
+  AST_NODE_HEADER;
+} ast_expr_t;
+
+/**
+ * \brief AST literal expression node.
+ */
+typedef struct ast_expr_lit_s
+{
+  AST_NODE_HEADER;
+} ast_expr_lit_t;
+
+/**
+ * \brief AST operation expression node.
+ */
+typedef struct ast_expr_op_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_OP_HEADER;
+} ast_expr_op_t;
+
+/**
+ * \brief AST binary operation expression node.
+ */
+typedef struct ast_expr_op_bin_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_OP_HEADER;
+  ast_node_t* lhs; // Left-hand side expression.
+  ast_node_t* rhs; // Right-hand side expression.
+} ast_expr_op_bin_t;
+
+/**
+ * \brief AST unary operation expression node.
+ */
+typedef struct ast_expr_op_un_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_OP_HEADER;
+  ast_node_t* expr; // Expression.
+} ast_expr_op_un_t;
+
+/**
+ * \brief AST call operation expression node.
+ */
+typedef struct ast_expr_op_call_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_OP_HEADER;
+  ast_node_t* callee; // Callee expression.
+  list_t* params; // List of parameter expressions.
+} ast_expr_op_call_t;
+
+/**
+ * \brief AST statement node.
+ */
+typedef struct ast_stmt_s
+{
+  AST_NODE_HEADER;
+} ast_stmt_t;
+
+/**
+ * \brief AST if statement node.
+ */
+typedef struct ast_stmt_if_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* cond; // Condition expression.
+  ast_node_t* stmt; // Main body statement.
+  ast_node_t* stmt_else; // Else statement.
+} ast_stmt_if_t;
+
+/**
+ * \brief AST for statement node.
+ */
+typedef struct ast_stmt_for_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* var; // Loop variable declaration.
+  ast_node_t* range; // Range expression.
+  ast_node_t* stmt; // Main body statement.
+} ast_stmt_for_t;
+
+/**
+ * \brief AST while statement node.
+ */
+typedef struct ast_stmt_while_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* cond; // Condition expression.
+  ast_node_t* stmt; // Main body statement.
+} ast_stmt_while_t;
+
+/**
+ * \brief AST break statement node.
+ */
+typedef struct ast_stmt_break_s
+{
+  AST_NODE_HEADER;
+} ast_stmt_break_t;
+
+/**
+ * \brief AST continue statement node.
+ */
+typedef struct ast_stmt_continue_s
+{
+  AST_NODE_HEADER;
+} ast_stmt_continue_t;
+
+/**
+ * \brief AST return statement node.
+ */
+typedef struct ast_stmt_return_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* expr; // Expression.
+} ast_stmt_return_t;
+
+/**
+ * \brief AST yield statement node.
+ */
+typedef struct ast_stmt_yield_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* expr; // Expression.
+} ast_stmt_yield_t;
+
+/**
+ * \brief AST expression statement node.
+ */
+typedef struct ast_stmt_expr_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* expr; // Expression.
+} ast_stmt_expr_t;
+
+/**
+ * \brief AST block statement node.
+ */
+typedef struct ast_stmt_block_s
+{
+  AST_NODE_HEADER;
+  list_t* stmts; // List of statements.
+} ast_stmt_block_t;
+
+/**
+ * \brief AST declaration node.
+ */
+typedef struct ast_decl_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+} ast_decl_t;
+
+/**
+ * \brief AST variable declaration node.
+ */
+typedef struct ast_decl_var_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_TYPED_HEADER;
+  ast_node_t* expr; // Initializer expression.
+} ast_decl_var_t;
+
+/**
+ * \brief AST function declaration node.
+ */
+typedef struct ast_decl_fun_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  list_t* params; // List of parameter declarations.
+  ast_node_t* return_type; // Return type.
+  ast_node_t* stmt; // Body statement.
+} ast_decl_fun_t;
+
+/**
+ * \brief AST generator declaration node.
+ */
+typedef struct ast_decl_gen_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  list_t* params; // List of parameter declarations.
+  ast_node_t* yield_type; // Yield type.
+  ast_node_t* stmt; // Body statement.
+} ast_decl_gen_t;
+
+/**
+ * \brief AST structure declaration node.
+ */
+typedef struct ast_decl_struct_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_COMPOSITE_HEADER;
+} ast_decl_struct_t;
+
+/**
+ * \brief AST union declaration node.
+ */
+typedef struct ast_decl_union_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_COMPOSITE_HEADER;
+} ast_decl_union_t;
+
+/**
+ * \brief AST enumerator declaration node.
+ */
+typedef struct ast_decl_enum_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_COMPOSITE_HEADER;
+} ast_decl_enum_t;
+
+/**
+ * \brief AST module declaration node.
+ */
+typedef struct ast_decl_mod_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  list_t* decls; // List of declarations.
+} ast_decl_mod_t;
+
+/**
+ * \brief AST parameter declaration node.
+ */
+typedef struct ast_decl_param_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_TYPED_HEADER;
+  ast_node_t* expr; // Default value expression.
+  bool is_variadic; // Variadic flag.
+} ast_decl_param_t;
+
+/**
+ * \brief AST enumeration constant declaration node.
+ */
+typedef struct ast_decl_enum_constant_s
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_TYPED_HEADER;
+} ast_decl_enum_constant_t;
+
+/**
+ * \brief AST program node.
+ */
+typedef struct ast_prog_s
+{
+  AST_NODE_HEADER;
+  list_t* decls; // List of declarations.
+} ast_prog_t;
+
+#undef AST_COMPOSITE_HEADER
+#undef AST_DECL_HEADER
+#undef AST_EXPR_OP_HEADER
+#undef AST_TYPED_HEADER
+#undef AST_NODE_HEADER
 
 /**
  * \brief Initializes a new AST node with the specified kind.
@@ -136,390 +579,6 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root);
 const char* ast_kind_to_string(ast_kind_t kind);
 
 /**
- * \brief Retrieves the kind of an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The kind of the AST node.
- */
-ast_kind_t ast_get_kind(ast_node_t* node);
-
-/**
- * \brief Sets the kind of an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] kind The kind to set.
- */
-void ast_set_kind(ast_node_t* node, ast_kind_t kind);
-
-/**
- * \brief Retrieves the token associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns Pointer to the token associated with the node.
- */
-token_t* ast_get_token(ast_node_t* node);
-
-/**
- * \brief Sets the token associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] tok Pointer to the token to be associated with the AST node.
- */
-void ast_set_token(ast_node_t* node, token_t* tok);
-
-/**
- * \brief Retrieves the operation kind associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The operation kind associated with the node.
- */
-op_kind_t ast_get_op(ast_node_t* node);
-
-/**
- * \brief Sets the operation kind associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] op The operation kind to be associated with the AST node.
- */
-void ast_set_op(ast_node_t* node, op_kind_t op);
-
-/**
- * \brief Retrieves the identifier associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The identifier associated with the node.
- */
-ast_node_t* ast_get_id(ast_node_t* node);
-
-/**
- * \brief Sets the identifier associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] id The identifier to be set.
- */
-void ast_set_id(ast_node_t* node, ast_node_t* id);
-
-/**
- * \brief Retrieves the type associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The type associated with the node.
- */
-ast_node_t* ast_get_type(ast_node_t* node);
-
-/**
- * \brief Sets the type associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] type The type to be set.
- */
-void ast_set_type(ast_node_t* node, ast_node_t* type);
-
-/**
- * \brief Retrieves the base type associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The base type associated with the node.
- */
-ast_node_t* ast_get_base_type(ast_node_t* node);
-
-/**
- * \brief Sets the base type associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] base_type The base type to be set.
- */
-void ast_set_base_type(ast_node_t* node, ast_node_t* base_type);
-
-/**
- * \brief Retrieves the size associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The size associated with the node.
- */
-ast_node_t* ast_get_size(ast_node_t* node);
-
-/**
- * \brief Sets the size associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] size The size to be set.
- */
-void ast_set_size(ast_node_t* node, ast_node_t* size);
-
-/**
- * \brief Retrieves the parameters associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The parameters associated with the node.
- */
-list_t* ast_get_params(ast_node_t* node);
-
-/**
- * \brief Sets the parameters associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] params The parameters to be set.
- */
-void ast_set_params(ast_node_t* node, list_t* params);
-
-/**
- * \brief Retrieves the return type associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The return type associated with the node.
- */
-ast_node_t* ast_get_return_type(ast_node_t* node);
-
-/**
- * \brief Sets the return type associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] return_type The return type to be set.
- */
-void ast_set_return_type(ast_node_t* node, ast_node_t* return_type);
-
-/**
- * \brief Retrieves the yield type associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The yield type associated with the node.
- */
-ast_node_t* ast_get_yield_type(ast_node_t* node);
-
-/**
- * \brief Sets the yield type associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] yield_type The yield type to be set.
- */
-void ast_set_yield_type(ast_node_t* node, ast_node_t* yield_type);
-
-/**
- * \brief Retrieves the owner associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The owner associated with the node.
- */
-ast_node_t* ast_get_owner(ast_node_t* node);
-
-/**
- * \brief Sets the owner associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] owner The owner to be set.
- */
-void ast_set_owner(ast_node_t* node, ast_node_t* owner);
-
-/**
- * \brief Retrieves the member associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The member associated with the node.
- */
-ast_node_t* ast_get_member(ast_node_t* node);
-
-/**
- * \brief Sets the member associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] member The member to be set.
- */
-void ast_set_member(ast_node_t* node, ast_node_t* member);
-
-/**
- * \brief Retrieves the left-hand side node associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The left-hand side node associated with the node.
- */
-ast_node_t* ast_get_lhs(ast_node_t* node);
-
-/**
- * \brief Sets the left-hand side node associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] lhs The left-hand side node to be set.
- */
-void ast_set_lhs(ast_node_t* node, ast_node_t* lhs);
-
-/**
- * \brief Retrieves the right-hand side node associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The right-hand side node associated with the node.
- */
-ast_node_t* ast_get_rhs(ast_node_t* node);
-
-/**
- * \brief Sets the right-hand side node associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] rhs The right-hand side node to be set.
- */
-void ast_set_rhs(ast_node_t* node, ast_node_t* rhs);
-
-/**
- * \brief Retrieves the callee associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The callee associated with the node.
- */
-ast_node_t* ast_get_callee(ast_node_t* node);
-
-/**
- * \brief Sets the callee associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] callee The callee to be set.
- */
-void ast_set_callee(ast_node_t* node, ast_node_t* callee);
-
-/**
- * \brief Retrieves the condition associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The condition associated with the node.
- */
-ast_node_t* ast_get_cond(ast_node_t* node);
-
-/**
- * \brief Sets the condition associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] cond The condition to be set.
- */
-void ast_set_cond(ast_node_t* node, ast_node_t* cond);
-
-/**
- * \brief Retrieves the statement associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The statement associated with the node.
- */
-ast_node_t* ast_get_stmt(ast_node_t* node);
-
-/**
- * \brief Sets the statement associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] stmt The statement to be set.
- */
-void ast_set_stmt(ast_node_t* node, ast_node_t* stmt);
-
-/**
- * \brief Retrieves the else statement associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The else statement associated with the node.
- */
-ast_node_t* ast_get_stmt_else(ast_node_t* node);
-
-/**
- * \brief Sets the else statement associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] else_stmt The else statement to be set.
- */
-void ast_set_stmt_else(ast_node_t* node, ast_node_t* stmt_else);
-
-/**
- * \brief Retrieves the variable associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The variable associated with the node.
- */
-ast_node_t* ast_get_var(ast_node_t* node);
-
-/**
- * \brief Sets the variable associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] var The variable to be set.
- */
-void ast_set_var(ast_node_t* node, ast_node_t* var);
-
-/**
- * \brief Retrieves the range associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The range associated with the node.
- */
-ast_node_t* ast_get_range(ast_node_t* node);
-
-/**
- * \brief Sets the range associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] range The range to be set.
- */
-void ast_set_range(ast_node_t* node, ast_node_t* range);
-
-/**
- * \brief Retrieves the expression associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The expression associated with the node.
- */
-ast_node_t* ast_get_expr(ast_node_t* node);
-
-/**
- * \brief Sets the expression associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] expr The expression to be set.
- */
-void ast_set_expr(ast_node_t* node, ast_node_t* expr);
-
-/**
- * \brief Retrieves the statements associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The statements associated with the node.
- */
-list_t* ast_get_stmts(ast_node_t* node);
-
-/**
- * \brief Sets the statements associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] stmts The statements to be set.
- */
-void ast_set_stmts(ast_node_t* node, list_t* stmts);
-
-/**
- * \brief Retrieves the members associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The members associated with the node.
- */
-list_t* ast_get_members(ast_node_t* node);
-
-/**
- * \brief Sets the members associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] members The members to be set.
- */
-void ast_set_members(ast_node_t* node, list_t* members);
-
-/**
- * \brief Retrieves the declarations associated with an AST node.
- *
- * \param[in] node Pointer to the AST node.
- * \returns The declarations associated with the node.
- */
-list_t* ast_get_decls(ast_node_t* node);
-
-/**
- * \brief Sets the declarations associated with an AST node.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] decls The declarations to be set.
- */
-void ast_set_decls(ast_node_t* node, list_t* decls);
-
-/**
  * \brief Checks if a node is a type.
  * 
  * \param[in] node Node to be checked.
@@ -550,21 +609,5 @@ bool ast_is_stmt(ast_node_t* node);
  * \returns `true` if node is a declaration, `false` otherwise.
 */
 bool ast_is_decl(ast_node_t* node);
-
-/**
- * \brief Checks if a node is variadic.
- * 
- * \param[in] node Node to be checked.
- * \returns `true` if node is variadic, `false` otherwise.
-*/
-bool ast_is_variadic(ast_node_t* node);
-
-/**
- * \brief Sets wether an AST node is variadic.
- *
- * \param[in,out] node Pointer to the AST node.
- * \param[in] is_variadic The value to be set.
- */
-void ast_set_variadic(ast_node_t* node, bool is_variadic);
 
 #endif

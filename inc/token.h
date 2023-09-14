@@ -137,7 +137,11 @@ typedef enum token_kind_e
 /**
  * \brief Structure representing a token.
  */
-typedef struct token_s token_t;
+typedef struct token_s
+{
+  token_kind_t kind; // Token kind.
+  location_t* loc; // Token location in the source code.
+} token_t;
 
 /**
  * \brief Initializes a new token with the specified kind and location.
@@ -154,38 +158,6 @@ token_t* token_init(token_kind_t kind, location_t* loc);
  * \param[in] tok The token to be freed.
  */
 void token_free(token_t* tok);
-
-/**
- * \brief Get the kind of the given token.
- *
- * \param[in] tok Pointer to the token.
- * \returns The kind of the token.
- */
-token_kind_t token_get_kind(token_t* tok);
-
-/**
- * \brief Set the kind of the given token.
- *
- * \param[out] tok Pointer to the token.
- * \param[in] kind The kind to set for the token.
- */
-void token_set_kind(token_t* tok, token_kind_t kind);
-
-/**
- * \brief Get the source code location associated with the given token.
- *
- * \param[in] tok Pointer to the token.
- * \returns The source code location of the token.
- */
-location_t* token_get_loc(token_t* tok);
-
-/**
- * \brief Set the source code location for the given token.
- *
- * \param[out] tok Pointer to the token.
- * \param[in] loc The source code location to set for the token.
- */
-void token_set_loc(token_t* tok, location_t* loc);
 
 /**
  * \brief Dumps the JSON representation of a list of tokens to the specified

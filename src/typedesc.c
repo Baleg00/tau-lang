@@ -14,192 +14,6 @@
 #include "vector.h"
 #include "util.h"
 
-/** Utility macro which expands to fields that all types must have. */
-#define TYPEDESC_HEADER\
-  struct\
-  {\
-    typedesc_kind_t kind; /** Type kind. */\
-    size_t size; /** Byte size of type. */\
-    size_t align; /** Memory alignment of type. */\
-  }\
-
-/** Utility macro which expands to fields that all declared types must have. */
-#define TYPEDESC_DECL_HEADER\
-  struct\
-  {\
-    ast_node_t* node; /** Declaration node. */\
-  }\
-
-/**
- * \brief Type descriptor for mutable types.
- */
-typedef struct typedesc_mut_s typedesc_mut_t;
-
-/**
- * \brief Type descriptor for constant types.
- */
-typedef struct typedesc_const_s typedesc_const_t;
-
-/**
- * \brief Type descriptor for pointer types.
- */
-typedef struct typedesc_ptr_s typedesc_ptr_t;
-
-/**
- * \brief Type descriptor for array types.
- */
-typedef struct typedesc_array_s typedesc_array_t;
-
-/**
- * \brief Type descriptor for reference types.
- */
-typedef struct typedesc_ref_s typedesc_ref_t;
-
-/**
- * \brief Type descriptor for optional types.
- */
-typedef struct typedesc_opt_s typedesc_opt_t;
-
-/**
- * \brief Type descriptor for declarations.
- */
-typedef struct typedesc_decl_s typedesc_decl_t;
-
-/**
- * \brief Type descriptor for functions.
- */
-typedef struct typedesc_fun_s typedesc_fun_t;
-
-/**
- * \brief Type descriptor for generators.
- */
-typedef struct typedesc_gen_s typedesc_gen_t;
-
-/**
- * \brief Type descriptor for structures.
- */
-typedef struct typedesc_struct_s typedesc_struct_t;
-
-/**
- * \brief Type descriptor for unions.
- */
-typedef struct typedesc_union_s typedesc_union_t;
-
-/**
- * \brief Type descriptor for enumerations.
- */
-typedef struct typedesc_enum_s typedesc_enum_t;
-
-/**
- * \brief Type descriptor for modules.
- */
-typedef struct typedesc_mod_s typedesc_mod_t;
-
-/** Base type for all types. */
-struct typedesc_s
-{
-  TYPEDESC_HEADER;
-};
-
-/** Type for mutable types. */
-struct typedesc_mut_s
-{
-  TYPEDESC_HEADER;
-  typedesc_t* base_type; // Underlying type.
-};
-
-/** Type for compile-time types. */
-struct typedesc_const_s
-{
-  TYPEDESC_HEADER;
-  typedesc_t* base_type; // Underlying type.
-};
-
-/** Type for pointer types. */
-struct typedesc_ptr_s
-{
-  TYPEDESC_HEADER;
-  typedesc_t* base_type; // Underlying type.
-};
-
-/** Type for array types. */
-struct typedesc_array_s
-{
-  TYPEDESC_HEADER;
-  typedesc_t* base_type; // Underlying type.
-};
-
-/** Type for reference types. */
-struct typedesc_ref_s
-{
-  TYPEDESC_HEADER;
-  typedesc_t* base_type; // Underlying type.
-};
-
-/** Type for optional types. */
-struct typedesc_opt_s
-{
-  TYPEDESC_HEADER;
-  typedesc_t* base_type; // Underlying type.
-};
-
-/** Type for function types. */
-struct typedesc_fun_s
-{
-  TYPEDESC_HEADER;
-  list_t* param_types; // Parameter types.
-  typedesc_t* return_type; // Return type.
-};
-
-/** Type for generator types. */
-struct typedesc_gen_s
-{
-  TYPEDESC_HEADER;
-  list_t* param_types; // List of parameter types.
-  typedesc_t* yield_type; // Yield type.
-};
-
-/** Base type for all declared types. */
-struct typedesc_decl_s
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-};
-
-/** Type for struct types. */
-struct typedesc_struct_s
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-  list_t* member_types; // List of member types.
-};
-
-/** Type for union types. */
-struct typedesc_union_s
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-  list_t* member_types; // List of member types.
-};
-
-/** Type for enum types. */
-struct typedesc_enum_s
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-};
-
-/** Type for module types. */
-struct typedesc_mod_s
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-  list_t* member_types; // List of member types.
-};
-
-#undef TYPEDESC_DECL_HEADER
-#undef TYPEDESC_HEADER
-
 /**
  * \brief Vector of all allocated type descriptors.
  */
@@ -269,14 +83,19 @@ void typedesc_cleanup(void)
     switch (desc->kind)
     {
     case TYPEDESC_FUN:
+      list_free(((typedesc_fun_t*)desc)->param_types);
+      break;
     case TYPEDESC_GEN:
-      list_free(typedesc_get_params(desc));
+      list_free(((typedesc_gen_t*)desc)->param_types);
       break;
     case TYPEDESC_STRUCT:
+      list_free(((typedesc_struct_t*)desc)->member_types);
+      break;
     case TYPEDESC_UNION:
-    case TYPEDESC_ENUM:
+      list_free(((typedesc_union_t*)desc)->member_types);
+      break;
     case TYPEDESC_MOD:
-      list_free(typedesc_get_members(desc));
+      list_free(((typedesc_mod_t*)desc)->member_types);
       break;
     default: fallthrough();
     }
@@ -286,162 +105,6 @@ void typedesc_cleanup(void)
 
   vector_free(g_descriptors);
   g_descriptors = NULL;
-}
-
-typedesc_kind_t typedesc_get_kind(typedesc_t* desc)
-{
-  return desc->kind;
-}
-
-void typedesc_set_kind(typedesc_t* desc, typedesc_kind_t kind)
-{
-  desc->kind = kind;
-}
-
-size_t typedesc_get_size(typedesc_t* desc)
-{
-  return desc->size;
-}
-
-void typedesc_set_size(typedesc_t* desc, size_t size)
-{
-  desc->size = size;
-}
-
-size_t typedesc_get_align(typedesc_t* desc)
-{
-  return desc->align;
-}
-
-void typedesc_set_align(typedesc_t* desc, size_t align)
-{
-  desc->align = align;
-}
-
-ast_node_t* typedesc_get_node(typedesc_t* desc)
-{
-  switch (desc->kind)
-  {
-  case TYPEDESC_STRUCT: return ((typedesc_struct_t*)desc)->node;
-  case TYPEDESC_UNION:  return ((typedesc_union_t*) desc)->node;
-  case TYPEDESC_ENUM:   return ((typedesc_enum_t*)  desc)->node;
-  case TYPEDESC_MOD:    return ((typedesc_mod_t*)   desc)->node;
-  default: unreachable();
-  }
-
-  return NULL;
-}
-
-void typedesc_set_node(typedesc_t* desc, ast_node_t* node)
-{
-  switch (desc->kind)
-  {
-  case TYPEDESC_STRUCT: ((typedesc_struct_t*)desc)->node = node; break;
-  case TYPEDESC_UNION:  ((typedesc_union_t*) desc)->node = node; break;
-  case TYPEDESC_ENUM:   ((typedesc_enum_t*)  desc)->node = node; break;
-  case TYPEDESC_MOD:    ((typedesc_mod_t*)   desc)->node = node; break;
-  default: unreachable();
-  }
-}
-
-typedesc_t* typedesc_get_base(typedesc_t* desc)
-{
-  switch (desc->kind)
-  {
-  case TYPEDESC_MUT:   return ((typedesc_mut_t*)  desc)->base_type;
-  case TYPEDESC_CONST: return ((typedesc_const_t*)desc)->base_type;
-  case TYPEDESC_PTR:   return ((typedesc_ptr_t*)  desc)->base_type;
-  case TYPEDESC_ARRAY: return ((typedesc_array_t*)desc)->base_type;
-  case TYPEDESC_REF:   return ((typedesc_ref_t*)  desc)->base_type;
-  case TYPEDESC_OPT:   return ((typedesc_opt_t*)  desc)->base_type;
-  default: unreachable();
-  }
-
-  return NULL;
-}
-
-void typedesc_set_base(typedesc_t* desc, typedesc_t* base_type)
-{
-  switch (desc->kind)
-  {
-  case TYPEDESC_MUT:   ((typedesc_mut_t*)  desc)->base_type = base_type; break;
-  case TYPEDESC_CONST: ((typedesc_const_t*)desc)->base_type = base_type; break;
-  case TYPEDESC_PTR:   ((typedesc_ptr_t*)  desc)->base_type = base_type; break;
-  case TYPEDESC_ARRAY: ((typedesc_array_t*)desc)->base_type = base_type; break;
-  case TYPEDESC_REF:   ((typedesc_ref_t*)  desc)->base_type = base_type; break;
-  case TYPEDESC_OPT:   ((typedesc_opt_t*)  desc)->base_type = base_type; break;
-  default: unreachable();
-  }
-}
-
-typedesc_t* typedesc_get_return(typedesc_t* desc)
-{
-  assert(desc->kind == TYPEDESC_FUN);
-  return ((typedesc_fun_t*)desc)->return_type;
-}
-
-void typedesc_set_return(typedesc_t* desc, typedesc_t* return_type)
-{
-  assert(desc->kind == TYPEDESC_FUN);
-  ((typedesc_fun_t*)desc)->return_type = return_type;
-}
-
-typedesc_t* typedesc_get_yield(typedesc_t* desc)
-{
-  assert(desc->kind == TYPEDESC_GEN);
-  return ((typedesc_gen_t*)desc)->yield_type;
-}
-
-void typedesc_set_yield(typedesc_t* desc, typedesc_t* yield_type)
-{
-  assert(desc->kind == TYPEDESC_GEN);
-  ((typedesc_gen_t*)desc)->yield_type = yield_type;
-}
-
-list_t* typedesc_get_params(typedesc_t* desc)
-{
-  switch (desc->kind)
-  {
-  case TYPEDESC_FUN: return ((typedesc_fun_t*)desc)->param_types;
-  case TYPEDESC_GEN: return ((typedesc_gen_t*)desc)->param_types;
-  default: unreachable();
-  }
-
-  return NULL;
-}
-
-void typedesc_set_params(typedesc_t* desc, list_t* param_types)
-{
-  switch (desc->kind)
-  {
-  case TYPEDESC_FUN: ((typedesc_fun_t*)desc)->param_types = param_types; break;
-  case TYPEDESC_GEN: ((typedesc_gen_t*)desc)->param_types = param_types; break;
-  default: unreachable();
-  }
-}
-
-list_t* typedesc_get_members(typedesc_t* desc)
-{
-  switch (desc->kind)
-  {
-  case TYPEDESC_STRUCT: return ((typedesc_struct_t*)desc)->member_types;
-  case TYPEDESC_UNION:  return ((typedesc_union_t*) desc)->member_types;
-  case TYPEDESC_MOD:    return ((typedesc_mod_t*)   desc)->member_types;
-  default: unreachable();
-  }
-
-  return NULL;
-}
-
-void typedesc_set_members(typedesc_t* desc, list_t* member_types)
-{
-  switch (desc->kind)
-  {
-  case TYPEDESC_STRUCT: ((typedesc_struct_t*)desc)->member_types = member_types; break;
-  case TYPEDESC_UNION:  ((typedesc_union_t*) desc)->member_types = member_types; break;
-  case TYPEDESC_MOD:    ((typedesc_mod_t*)   desc)->member_types = member_types; break;
-  default: unreachable();
-  }
 }
 
 typedesc_t* typedesc_add_mut(typedesc_t* base_type)
@@ -488,32 +151,32 @@ typedesc_t* typedesc_add_opt(typedesc_t* base_type)
 
 typedesc_t* typedesc_remove_mut(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_MUT ? typedesc_get_base(desc) : desc;
+  return desc->kind == TYPEDESC_MUT ? ((typedesc_mut_t*)desc)->base_type : desc;
 }
 
 typedesc_t* typedesc_remove_const(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_CONST ? typedesc_get_base(desc) : desc;
+  return desc->kind == TYPEDESC_CONST ? ((typedesc_const_t*)desc)->base_type : desc;
 }
 
 typedesc_t* typedesc_remove_ptr(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_PTR ? typedesc_get_base(desc) : desc;
+  return desc->kind == TYPEDESC_PTR ? ((typedesc_ptr_t*)desc)->base_type : desc;
 }
 
 typedesc_t* typedesc_remove_array(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_ARRAY ? typedesc_get_base(desc) : desc;
+  return desc->kind == TYPEDESC_ARRAY ? ((typedesc_array_t*)desc)->base_type : desc;
 }
 
 typedesc_t* typedesc_remove_ref(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_REF ? typedesc_get_base(desc) : desc;
+  return desc->kind == TYPEDESC_REF ? ((typedesc_ref_t*)desc)->base_type : desc;
 }
 
 typedesc_t* typedesc_remove_opt(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_OPT ? typedesc_get_base(desc) : desc;
+  return desc->kind == TYPEDESC_OPT ? ((typedesc_opt_t*)desc)->base_type : desc;
 }
 
 bool typedesc_is_modifier(typedesc_t* desc)
@@ -668,144 +331,20 @@ bool typedesc_is_composite(typedesc_t* desc)
   }
 }
 
-bool typedesc_is_type(typedesc_t* desc)
+bool typedesc_is_decl(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_TYPE;
-}
-
-bool typedesc_is_mut(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_MUT;
-}
-
-bool typedesc_is_const(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_CONST;
-}
-
-bool typedesc_is_ptr(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_PTR;
-}
-
-bool typedesc_is_array(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_ARRAY;
-}
-
-bool typedesc_is_ref(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_REF;
-}
-
-bool typedesc_is_opt(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_OPT;
-}
-
-bool typedesc_is_i8(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_I8;
-}
-
-bool typedesc_is_i16(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_I16;
-}
-
-bool typedesc_is_i32(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_I32;
-}
-
-bool typedesc_is_i64(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_I64;
-}
-
-bool typedesc_is_isize(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_ISIZE;
-}
-
-bool typedesc_is_u8(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_U8;
-}
-
-bool typedesc_is_u16(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_U16;
-}
-
-bool typedesc_is_u32(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_U32;
-}
-
-bool typedesc_is_u64(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_U64;
-}
-
-bool typedesc_is_usize(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_USIZE;
-}
-
-bool typedesc_is_f32(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_F32;
-}
-
-bool typedesc_is_f64(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_F64;
-}
-
-bool typedesc_is_bool(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_BOOL;
-}
-
-bool typedesc_is_unit(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_UNIT;
-}
-
-bool typedesc_is_null(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_NULL;
-}
-
-bool typedesc_is_fun(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_FUN;
-}
-
-bool typedesc_is_gen(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_GEN;
-}
-
-bool typedesc_is_struct(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_STRUCT;
-}
-
-bool typedesc_is_union(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_UNION;
-}
-
-bool typedesc_is_enum(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_ENUM;
-}
-
-bool typedesc_is_mod(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_MOD;
+  switch (desc->kind)
+  {
+  case TYPEDESC_FUN:
+  case TYPEDESC_GEN:
+  case TYPEDESC_STRUCT:
+  case TYPEDESC_UNION:
+  case TYPEDESC_ENUM:
+  case TYPEDESC_MOD:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool typedesc_is_same(typedesc_t* first, typedesc_t* second)
@@ -814,15 +353,34 @@ bool typedesc_is_same(typedesc_t* first, typedesc_t* second)
     return false;
 
   if (typedesc_is_modifier(first))
-    return typedesc_is_same(typedesc_get_base(first), typedesc_get_base(second));
+    return typedesc_is_same(((typedesc_modifier_t*)first)->base_type, ((typedesc_modifier_t*)second)->base_type);
 
   if (typedesc_is_invokable(first))
   {
-    if (list_size(typedesc_get_params(first)) != list_size(typedesc_get_params(second)))
+    if (!typedesc_is_invokable(second))
+      return false;
+    
+    list_t *first_params, *second_params;
+
+    switch (first->kind)
+    {
+    case TYPEDESC_FUN: first_params = ((typedesc_fun_t*)first)->param_types; break;
+    case TYPEDESC_GEN: first_params = ((typedesc_gen_t*)first)->param_types; break;
+    default: unreachable();
+    }
+
+    switch (second->kind)
+    {
+    case TYPEDESC_FUN: second_params = ((typedesc_fun_t*)second)->param_types; break;
+    case TYPEDESC_GEN: second_params = ((typedesc_gen_t*)second)->param_types; break;
+    default: unreachable();
+    }
+
+    if (list_size(first_params) != list_size(second_params))
       return false;
 
-    list_node_t* lhs_it = list_front_node(typedesc_get_params(first));
-    list_node_t* rhs_it = list_front_node(typedesc_get_params(second));
+    list_node_t* lhs_it = list_front_node(first_params);
+    list_node_t* rhs_it = list_front_node(second_params);
     
     for (; lhs_it != NULL && rhs_it != NULL; lhs_it = list_node_next(lhs_it), rhs_it = list_node_next(rhs_it))
       if (!typedesc_is_same((typedesc_t*)list_node_get(lhs_it), (typedesc_t*)list_node_get(rhs_it)))
@@ -830,16 +388,19 @@ bool typedesc_is_same(typedesc_t* first, typedesc_t* second)
 
     switch (first->kind)
     {
-    case TYPEDESC_FUN: return typedesc_is_same(typedesc_get_return(first), typedesc_get_return(second));
-    case TYPEDESC_GEN: return typedesc_is_same(typedesc_get_yield(first), typedesc_get_yield(second));
+    case TYPEDESC_FUN: return typedesc_is_same(((typedesc_fun_t*)first)->return_type, ((typedesc_fun_t*)second)->return_type);
+    case TYPEDESC_GEN: return typedesc_is_same(((typedesc_gen_t*)first)->yield_type, ((typedesc_gen_t*)second)->yield_type);
     default: unreachable();
     }
 
     return false;
   }
 
-  if (typedesc_is_composite(first))
-    return typedesc_get_node(first) == typedesc_get_node(second);
+  if (typedesc_is_decl(first))
+    if (!typedesc_is_decl(second))
+      return false;
+    else
+      return ((typedesc_decl_t*)first)->node == ((typedesc_decl_t*)second)->node;
 
   return true;
 }

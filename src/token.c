@@ -11,12 +11,6 @@
 #include "memtrace.h"
 #include "util.h"
 
-struct token_s
-{
-  token_kind_t kind; // Token kind.
-  location_t* loc; // Token location in the source code.
-};
-
 token_t* token_init(token_kind_t kind, location_t* loc)
 {
   token_t* tok = (token_t*)malloc(sizeof(token_t));
@@ -34,26 +28,6 @@ void token_free(token_t* tok)
   free(tok);
 }
 
-token_kind_t token_get_kind(token_t* tok)
-{
-  return tok->kind;
-}
-
-void token_set_kind(token_t* tok, token_kind_t kind)
-{
-  tok->kind = kind;
-}
-
-location_t* token_get_loc(token_t* tok)
-{
-  return tok->loc;
-}
-
-void token_set_loc(token_t* tok, location_t* loc)
-{
-  tok->loc = loc;
-}
-
 void token_list_json_dump(FILE* stream, list_t* list)
 {
   fputc('[', stream);
@@ -67,7 +41,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
     location_json_dump(tok->loc, stream);
 
     if (token_is_lit(tok) || tok->kind == TOK_ID)
-      fprintf(stream, ",\"value\":\"%.*s\"", (int)location_get_len(tok->loc), location_get_ptr(tok->loc));
+      fprintf(stream, ",\"value\":\"%.*s\"", (int)tok->loc->len, tok->loc->ptr);
 
     fputc('}', stream);
 

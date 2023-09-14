@@ -25,7 +25,15 @@
 /**
  * \brief Location in the source code.
  */
-typedef struct location_s location_t;
+typedef struct location_s
+{
+  const char* path; // Path to the source file.
+  const char* src; // Pointer to beginning of the source string.
+  const char* ptr; // Pointer to marked location in the source string.
+  size_t row; // The row number in the source file.
+  size_t col; // The column number in the row.
+  size_t len; // The character length of marked location.
+} location_t;
 
 /**
  * \brief Initializes a location.
@@ -55,101 +63,5 @@ void location_free(location_t* loc);
  * written.
  */
 void location_json_dump(location_t* loc, FILE* stream);
-
-/**
- * \brief Retrieves the file path associated with a location.
- *
- * \param[in] loc Pointer to the location.
- * \returns Pointer to the path string.
- */
-const char* location_get_path(location_t* loc);
-
-/**
- * \brief Sets the file path associated with a location.
- *
- * \param[out] loc Pointer to the location.
- * \param[in] path Pointer to the path string.
- */
-void location_set_path(location_t* loc, const char* path);
-
-/**
- * \brief Retrieves the source code associated with a location.
- *
- * \param[in] loc Pointer to the location.
- * \returns Pointer to the source code string.
- */
-const char* location_get_src(location_t* loc);
-
-/**
- * \brief Sets the source code associated with a location.
- *
- * \param[out] loc Pointer to the location.
- * \param[in] src Pointer to the source code string.
- */
-void location_set_src(location_t* loc, const char* src);
-
-/**
- * \brief Retrieves a pointer to a location.
- *
- * \param[in] loc Pointer to the location.
- * \returns Pointer to the current character string.
- */
-const char* location_get_ptr(location_t* loc);
-
-/**
- * \brief Sets the pointer to a location.
- *
- * \param[out] loc Pointer to the location.
- * \param[in] ptr Pointer to the current character string.
- */
-void location_set_ptr(location_t* loc, const char* ptr);
-
-/**
- * \brief Retrieves the row number associated with a location.
- *
- * \param[in] loc Pointer to the location.
- * \returns The row number.
- */
-size_t location_get_row(location_t* loc);
-
-/**
- * \brief Sets the row number associated with a location.
- *
- * \param[out] loc Pointer to the location.
- * \param[in] row The row number.
- */
-void location_set_row(location_t* loc, size_t row);
-
-/**
- * \brief Retrieves the column number associated with a location.
- *
- * \param[in] loc Pointer to the location.
- * \returns The column number.
- */
-size_t location_get_col(location_t* loc);
-
-/**
- * \brief Sets the column number associated with a location.
- *
- * \param[out] loc Pointer to the location.
- * \param[in] col The column number.
- */
-void location_set_col(location_t* loc, size_t col);
-
-/**
- * \brief Retrieves the length associated with a location.
- *
- * \param[in] loc Pointer to the location.
- * \returns The length.
- */
-size_t location_get_len(location_t* loc);
-
-/**
- * \brief Sets the length associated with a location.
- *
- * \param[out] loc Pointer to the location.
- * \param[in] len The length.
- */
-void location_set_len(location_t* loc, size_t len);
 
 #endif

@@ -74,7 +74,7 @@ void shyd_flush_for_op(shyd_t* shyd, op_kind_t op)
 
 bool shyd_parse_typed_expr(shyd_t* shyd)
 {
-  switch (token_get_kind(parser_current(shyd->par)))
+  switch (parser_current(shyd->par)->kind)
   {
   case TOK_KW_IS:
   case TOK_KW_AS:
@@ -91,7 +91,7 @@ bool shyd_parse_typed_expr(shyd_t* shyd)
 
   shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
   
-  switch (token_get_kind(parser_current(shyd->par)))
+  switch (parser_current(shyd->par)->kind)
   {
   case TOK_KW_IS:      elem->op = OP_IS; break;
   case TOK_KW_AS:      elem->op = OP_AS; break;
@@ -184,17 +184,17 @@ bool shyd_parse_call(shyd_t* shyd)
   if (!shyd->prev_term)
     return false;
 
-  ast_node_t* node = ast_node_init(AST_EXPR_OP_CALL);
-  ast_set_token(node, parser_current(shyd->par));
-  ast_set_op(node, OP_CALL);
+  ast_expr_op_call_t* node = (ast_expr_op_call_t*)ast_node_init(AST_EXPR_OP_CALL);
+  node->tok = parser_current(shyd->par);
+  node->op_kind = OP_CALL;
 
   parser_expect(shyd->par, TOK_PUNCT_PAREN_LEFT);
 
-  ast_set_params(node, NULL);
+  node->params = NULL;
 
   if (!parser_consume(shyd->par, TOK_PUNCT_PAREN_RIGHT))
   {
-    ast_set_params(node, parser_parse_delimited_list(shyd->par, TOK_PUNCT_COMMA, parser_parse_expr));
+    node->params = parser_parse_delimited_list(shyd->par, TOK_PUNCT_COMMA, parser_parse_expr);
 
     parser_expect(shyd->par, TOK_PUNCT_PAREN_RIGHT);
   }
@@ -229,7 +229,7 @@ bool shyd_parse_operator(shyd_t* shyd)
 {
   op_kind_t op = OP_UNKNOWN;
 
-  switch (token_get_kind(parser_current(shyd->par)))
+  switch (parser_current(shyd->par)->kind)
   {
   case TOK_PUNCT_PLUS:                  op = shyd->prev_term ? OP_ARIT_ADD : OP_ARIT_POS; break;
   case TOK_PUNCT_PLUS_PLUS:             op = shyd->prev_term ? OP_ARIT_INC_POST : OP_ARIT_INC_PRE; break;
@@ -286,7 +286,7 @@ bool shyd_parse_operator(shyd_t* shyd)
 
 bool shyd_postfix_step(shyd_t* shyd)
 {
-  switch (token_get_kind(parser_current(shyd->par)))
+  switch (parser_current(shyd->par)->kind)
   {
   case TOK_KW_IS:
   case TOK_KW_AS:
@@ -299,7 +299,7 @@ bool shyd_postfix_step(shyd_t* shyd)
   default: fallthrough();
   }
 
-  if (token_get_kind(parser_current(shyd->par)) == TOK_ID || token_is_lit(parser_current(shyd->par)))
+  if (parser_current(shyd->par)->kind == TOK_ID || token_is_lit(parser_current(shyd->par)))
     return shyd_parse_term(shyd);
   else if (token_is_punct(parser_current(shyd->par)))
     return shyd_parse_operator(shyd);
@@ -316,10 +316,10 @@ void shyd_postfix(shyd_t* shyd)
     shyd_elem_t* elem = (shyd_elem_t*)stack_pop(shyd->op_stack);
     
     if (elem->kind == SHYD_PAREN_OPEN)
-      report_error_missing_closing_parenthesis(token_get_loc(elem->tok));
+      report_error_missing_closing_parenthesis(elem->tok->loc);
     
     if (elem->kind == SHYD_BRACKET_OPEN)
-      report_error_missing_closing_bracket(token_get_loc(elem->tok));
+      report_error_missing_closing_bracket(elem->tok->loc);
 
     queue_offer(shyd->out_queue, elem);
   }
@@ -327,14 +327,14 @@ void shyd_postfix(shyd_t* shyd)
 
 void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_node_t* node = ast_node_init(AST_EXPR_OP_UNARY);
-  ast_set_token(node, parser_current(shyd->par));
-  ast_set_op(node, elem->op);
+  ast_expr_op_un_t* node = (ast_expr_op_un_t*)ast_node_init(AST_EXPR_OP_UNARY);
+  node->tok = parser_current(shyd->par);
+  node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
-    report_error_missing_unary_argument(token_get_loc(ast_get_token(node)));
+    report_error_missing_unary_argument(node->tok->loc);
 
-  ast_set_expr(node, (ast_node_t*)stack_pop(node_stack));
+  node->expr = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, node);
 }
@@ -343,19 +343,19 @@ void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
   unused(shyd);
 
-  ast_node_t* node = ast_node_init(AST_EXPR_OP_BINARY);
-  ast_set_token(node, elem->tok);
-  ast_set_op(node, elem->op);
+  ast_expr_op_bin_t* node = (ast_expr_op_bin_t*)ast_node_init(AST_EXPR_OP_BINARY);
+  node->tok = elem->tok;
+  node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
-    report_error_missing_binary_argument(token_get_loc(ast_get_token(node)));
+    report_error_missing_binary_argument(node->tok->loc);
 
-  ast_set_rhs(node, (ast_node_t*)stack_pop(node_stack));
+  node->rhs = (ast_node_t*)stack_pop(node_stack);
 
   if (stack_empty(node_stack))
-    report_error_missing_binary_argument(token_get_loc(ast_get_token(node)));
+    report_error_missing_binary_argument(node->tok->loc);
 
-  ast_set_lhs(node, (ast_node_t*)stack_pop(node_stack));
+  node->lhs = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, node);
 }
@@ -365,9 +365,9 @@ void shyd_ast_op_call(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   unused(shyd);
 
   if (stack_empty(node_stack))
-    report_error_missing_callee(token_get_loc(ast_get_token(elem->node)));
+    report_error_missing_callee(elem->node->tok->loc);
 
-  ast_set_callee(elem->node, (ast_node_t*)stack_pop(node_stack));
+  ((ast_expr_op_call_t*)elem->node)->callee = (ast_node_t*)stack_pop(node_stack);
 
   stack_push(node_stack, elem->node);
 }
@@ -378,7 +378,7 @@ void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 
   ast_node_t* node = NULL;
 
-  switch (token_get_kind(elem->tok))
+  switch (elem->tok->kind)
   {
   case TOK_ID:       node = ast_node_init(AST_ID           ); break;
   case TOK_LIT_INT:  node = ast_node_init(AST_EXPR_LIT_INT ); break;
@@ -387,10 +387,10 @@ void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   case TOK_LIT_CHAR: node = ast_node_init(AST_EXPR_LIT_CHAR); break;
   case TOK_LIT_BOOL: node = ast_node_init(AST_EXPR_LIT_BOOL); break;
   case TOK_LIT_NULL: node = ast_node_init(AST_EXPR_LIT_NULL); break;
-  default: report_error_unexpected_token(token_get_loc(elem->tok));
+  default: report_error_unexpected_token(elem->tok->loc);
   }
 
-  ast_set_token(node, elem->tok);
+  node->tok = elem->tok;
 
   stack_push(node_stack, node);
 }

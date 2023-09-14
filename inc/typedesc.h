@@ -25,6 +25,35 @@
 #include "list.h"
 
 /**
+ * \brief Utility macro which expands to fields that all types must have.
+ */
+#define TYPEDESC_HEADER\
+  struct\
+  {\
+    typedesc_kind_t kind; /** Type kind. */\
+    size_t size; /** Byte size of type. */\
+    size_t align; /** Memory alignment of type. */\
+  }\
+
+/**
+ * \brief Utility macro which expands to fields that all type modifiers must have.
+ */
+#define TYPEDESC_MODIFIER_HEADER\
+  struct\
+  {\
+    typedesc_t* base_type; /** Underlying type. */\
+  }\
+
+/**
+ * \brief Utility macro which expands to fields that all declared types must have.
+ */
+#define TYPEDESC_DECL_HEADER\
+  struct\
+  {\
+    ast_node_t* node; /** Declaration node. */\
+  }\
+
+/**
  * \brief Enumeration of type descriptor kinds.
  */
 typedef enum typedesc_kind_e
@@ -64,7 +93,144 @@ typedef enum typedesc_kind_e
 /**
  * \brief Type descriptor.
  */
-typedef struct typedesc_s typedesc_t;
+typedef struct typedesc_s
+{
+  TYPEDESC_HEADER;
+} typedesc_t;
+
+/**
+ * \brief Type descriptor for type modifiers.
+ */
+typedef struct typedesc_modifier_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_MODIFIER_HEADER;
+} typedesc_modifier_t;
+
+/**
+ * \brief Type descriptor for mutable types.
+ */
+typedef struct typedesc_mut_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_MODIFIER_HEADER;
+} typedesc_mut_t;
+
+/**
+ * \brief Type descriptor for constant types.
+ */
+typedef struct typedesc_const_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_MODIFIER_HEADER;
+} typedesc_const_t;
+
+/**
+ * \brief Type descriptor for pointer types.
+ */
+typedef struct typedesc_ptr_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_MODIFIER_HEADER;
+} typedesc_ptr_t;
+
+/**
+ * \brief Type descriptor for array types.
+ */
+typedef struct typedesc_array_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_MODIFIER_HEADER;
+} typedesc_array_t;
+
+/**
+ * \brief Type descriptor for reference types.
+ */
+typedef struct typedesc_ref_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_MODIFIER_HEADER;
+} typedesc_ref_t;
+
+/**
+ * \brief Type descriptor for optional types.
+ */
+typedef struct typedesc_opt_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_MODIFIER_HEADER;
+} typedesc_opt_t;
+
+/**
+ * \brief Type descriptor for functions.
+ */
+typedef struct typedesc_fun_s
+{
+  TYPEDESC_HEADER;
+  list_t* param_types; // Parameter types.
+  typedesc_t* return_type; // Return type.
+} typedesc_fun_t;
+
+/**
+ * \brief Type descriptor for generators.
+ */
+typedef struct typedesc_gen_s
+{
+  TYPEDESC_HEADER;
+  list_t* param_types; // List of parameter types.
+  typedesc_t* yield_type; // Yield type.
+} typedesc_gen_t;
+
+/**
+ * \brief Type descriptor for declarations.
+ */
+typedef struct typedesc_decl_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
+} typedesc_decl_t;
+
+/**
+ * \brief Type descriptor for structures.
+ */
+typedef struct typedesc_struct_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
+  list_t* member_types; // List of member types.
+} typedesc_struct_t;
+
+/**
+ * \brief Type descriptor for unions.
+ */
+typedef struct typedesc_union_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
+  list_t* member_types; // List of member types.
+} typedesc_union_t;
+
+/**
+ * \brief Type descriptor for enumerations.
+ */
+typedef struct typedesc_enum_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
+} typedesc_enum_t;
+
+/**
+ * \brief Type descriptor for modules.
+ */
+typedef struct typedesc_mod_s
+{
+  TYPEDESC_HEADER;
+  TYPEDESC_DECL_HEADER;
+  list_t* member_types; // List of member types.
+} typedesc_mod_t;
+
+#undef TYPEDESC_DECL_HEADER
+#undef TYPEDESC_HEADER
 
 /**
  * \brief Initializes a new type descriptor with the specified kind.
@@ -78,150 +244,6 @@ typedesc_t* typedesc_init(typedesc_kind_t kind);
  * \brief Frees all memory allocated by type descriptors.
 */
 void typedesc_cleanup(void);
-
-/**
- * \brief Retrieves the kind of the type descriptor.
- *
- * \param[in] desc Pointer to the type descriptor.
- * \returns The kind of the type descriptor.
- */
-typedesc_kind_t typedesc_get_kind(typedesc_t* desc);
-
-/**
- * \brief Sets the kind of the type descriptor.
- *
- * \param[in,out] desc Pointer to the type descriptor.
- * \param[in] kind The kind to set.
- */
-void typedesc_set_kind(typedesc_t* desc, typedesc_kind_t kind);
-
-/**
- * \brief Retrieves the size of the type described.
- *
- * \param[in] desc Pointer to the type descriptor.
- * \returns The size of the type.
- */
-size_t typedesc_get_size(typedesc_t* desc);
-
-/**
- * \brief Sets the size of the type described.
- *
- * \param[in,out] desc Pointer to the type descriptor.
- * \param[in] size The size to set.
- */
-void typedesc_set_size(typedesc_t* desc, size_t size);
-
-/**
- * \brief Retrieves the alignment of the type described.
- *
- * \param[in] desc Pointer to the type descriptor.
- * \returns The alignment of the type.
- */
-size_t typedesc_get_align(typedesc_t* desc);
-
-/**
- * \brief Sets the alignment of the type described.
- *
- * \param[in,out] desc Pointer to the type descriptor.
- * \param[in] align The alignment to set.
- */
-void typedesc_set_align(typedesc_t* desc, size_t align);
-
-/**
- * \brief Retrieves the associated AST node of the type descriptor.
- *
- * \param[in] desc Pointer to the type descriptor.
- * \returns The associated AST node.
- */
-ast_node_t* typedesc_get_node(typedesc_t* desc);
-
-/**
- * \brief Sets the associated AST node of the type descriptor.
- *
- * \param[in,out] desc Pointer to the type descriptor.
- * \param[in] node The AST node to set.
- */
-void typedesc_set_node(typedesc_t* desc, ast_node_t* node);
-
-/**
- * \brief Retrieves the base type descriptor of the type described.
- *
- * \param[in] desc Pointer to the type descriptor.
- * \returns The base type descriptor.
- */
-typedesc_t* typedesc_get_base(typedesc_t* desc);
-
-/**
- * \brief Sets the base type descriptor of the type described.
- *
- * \param[in,out] desc Pointer to the type descriptor.
- * \param[in] base_type The base type descriptor to set.
- */
-void typedesc_set_base(typedesc_t* desc, typedesc_t* base_type);
-
-/**
- * \brief Retrieves the return type descriptor of the type described.
- *
- * \param[in] desc Pointer to the type descriptor.
- * \returns The return type descriptor.
- */
-typedesc_t* typedesc_get_return(typedesc_t* desc);
-
-/**
- * \brief Sets the return type descriptor of the type described.
- *
- * \param[in,out] desc Pointer to the type descriptor.
- * \param[in] return_type The return type descriptor to set.
- */
-void typedesc_set_return(typedesc_t* desc, typedesc_t* return_type);
-
-/**
- * \brief Retrieves the yield type descriptor of the type described.
- *
- * \param[in] desc Pointer to the type descriptor.
- * \returns The yield type descriptor.
- */
-typedesc_t* typedesc_get_yield(typedesc_t* desc);
-
-/**
- * \brief Sets the yield type descriptor of the type described.
- *
- * \param[in,out] desc Pointer to the type descriptor.
- * \param[in] yield_type The yield type descriptor to set.
- */
-void typedesc_set_yield(typedesc_t* desc, typedesc_t* yield_type);
-
-/**
- * \brief Retrieves the list of parameter type descriptors of the type described.
- *
- * \param[in] desc Pointer to the type descriptor.
- * \returns The list of parameter type descriptors.
- */
-list_t* typedesc_get_params(typedesc_t* desc);
-
-/**
- * \brief Sets the list of parameter type descriptors of the type described.
- *
- * \param[in,out] desc Pointer to the type descriptor.
- * \param[in] param_types The list of parameter type descriptors to set.
- */
-void typedesc_set_params(typedesc_t* desc, list_t* param_types);
-
-/**
- * \brief Retrieves the list of member type descriptors of the type described.
- *
- * \param[in] desc Pointer to the type descriptor.
- * \returns The list of member type descriptors.
- */
-list_t* typedesc_get_members(typedesc_t* desc);
-
-/**
- * \brief Sets the list of member type descriptors of the type described.
- *
- * \param[in,out] desc Pointer to the type descriptor.
- * \param[in] member_types The list of member type descriptors to set.
- */
-void typedesc_set_members(typedesc_t* desc, list_t* member_types);
 
 /**
  * \brief Creates a new mutable type descriptor based on the provided base type
@@ -407,243 +429,12 @@ bool typedesc_is_invokable(typedesc_t* desc);
 bool typedesc_is_composite(typedesc_t* desc);
 
 /**
- * \brief Checks if the given type descriptor is a typename.
+ * \brief Checks if the given type descriptor is a declared type.
  *
  * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a typename, otherwise `false`.
+ * \returns `true` if the descriptor is a declared type, otherwise `false`.
  */
-bool typedesc_is_type(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is a mutable type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a mutable type, otherwise `false`.
- */
-bool typedesc_is_mut(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is a constant type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a constant type, otherwise `false`.
- */
-bool typedesc_is_const(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is a pointer type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a pointer type, otherwise `false`.
- */
-bool typedesc_is_ptr(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is an array type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is an array type, otherwise `false`.
- */
-bool typedesc_is_array(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is a reference type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a reference type, otherwise `false`.
- */
-bool typedesc_is_ref(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is an optional type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is an optional type, otherwise `false`.
- */
-bool typedesc_is_opt(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `i8` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `i8` type, otherwise
- * `false`.
- */
-bool typedesc_is_i8(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `i16` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `i16` type, otherwise
- * `false`.
- */
-bool typedesc_is_i16(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `i32` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `i32` type, otherwise
- * `false`.
- */
-bool typedesc_is_i32(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `i64` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `i64` type, otherwise
- * `false`.
- */
-bool typedesc_is_i64(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `isize` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `isize` type, otherwise
- * `false`.
- */
-bool typedesc_is_isize(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `u8` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `u8` type, otherwise
- * `false`.
- */
-bool typedesc_is_u8(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `u16` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `u16` type, otherwise
- * `false`.
- */
-bool typedesc_is_u16(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `u32` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `u32` type, otherwise
- * `false`.
- */
-bool typedesc_is_u32(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `u64` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `u64` type, otherwise
- * `false`.
- */
-bool typedesc_is_u64(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `usize` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `usize` type, otherwise
- * `false`.
- */
-bool typedesc_is_usize(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `f32` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `f32` type, otherwise
- * `false`.
- */
-bool typedesc_is_f32(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `f64` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `f64` type, otherwise
- * `false`.
- */
-bool typedesc_is_f64(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `bool` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `bool` type, otherwise
- * `false`.
- */
-bool typedesc_is_bool(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `unit` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `unit` type, otherwise
- * `false`.
- */
-bool typedesc_is_unit(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is the built-in `null` type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is the built-in `null` type, otherwise
- * `false`.
- */
-bool typedesc_is_null(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is a function type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a function type, otherwise `false`.
- */
-bool typedesc_is_fun(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is a generator type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a generator type, otherwise `false`.
- */
-bool typedesc_is_gen(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is a structure type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a structure type, otherwise `false`.
- */
-bool typedesc_is_struct(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is a union type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a union type, otherwise `false`.
- */
-bool typedesc_is_union(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is an enumeration type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is an enumeration type, otherwise `false`.
- */
-bool typedesc_is_enum(typedesc_t* desc);
-
-/**
- * \brief Checks if the given type descriptor is a module type.
- *
- * \param[in] desc The type descriptor.
- * \returns `true` if the descriptor is a module type, otherwise `false`.
- */
-bool typedesc_is_mod(typedesc_t* desc);
+bool typedesc_is_decl(typedesc_t* desc);
 
 /**
  * \brief Checks if two type descriptors represent the same type.
