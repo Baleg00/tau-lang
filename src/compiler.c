@@ -11,6 +11,7 @@
 #include "cli.h"
 #include "crumb.h"
 #include "file.h"
+#include "generator.h"
 #include "lexer.h"
 #include "list.h"
 #include "log.h"
@@ -36,7 +37,7 @@ struct compiler_s
     bool dump_tokens;
     bool dump_ast;
     bool dump_ast_flat;
-    bool dump_tasm;
+    bool dump_ll;
   } flags;
 
   struct
@@ -104,6 +105,26 @@ static void compiler_dump_ast_flat(compiler_t* compiler, const char* input_file_
   log_trace("main", "(%s) AST flat dump: %s", input_file_name, ast_file_path);
 }
 
+static void compiler_dump_ll(compiler_t* compiler, const char* input_file_path, const char* input_file_name, LLVMModuleRef llvm_module)
+{
+  unused(compiler);
+
+  char ll_file_path[COMPILER_MAX_BUFFER_SIZE];
+  strcpy(ll_file_path, input_file_path);
+  strcat(ll_file_path, ".ll");
+
+  FILE* ll_file = fopen(ll_file_path, "w");
+  assert(ll_file != NULL);
+
+  char* ll_str = LLVMPrintModuleToString(llvm_module);
+  fputs(ll_str, ll_file);
+  LLVMDisposeMessage(ll_str);
+
+  fclose(ll_file);
+
+  log_trace("main", "(%s) LLVM IR dump: %s", input_file_name, ll_file_path);
+}
+
 compiler_t* compiler_init(void)
 {
   compiler_t* compiler = (compiler_t*)allocator_allocate(allocator_global(), sizeof(compiler_t));
@@ -119,7 +140,7 @@ compiler_t* compiler_init(void)
   compiler->flags.dump_tokens = false;
   compiler->flags.dump_ast = false;
   compiler->flags.dump_ast_flat = false;
-  compiler->flags.dump_tasm = false;
+  compiler->flags.dump_ll = false;
 
   compiler->args.log_level = LOG_LEVEL_WARN;
 
@@ -147,7 +168,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     cli_opt_flag(cli_names("--dump-toks"),     1, "Dump tokens into json file.",   &compiler->flags.dump_tokens),
     cli_opt_flag(cli_names("--dump-ast"),      1, "Dump AST into json file.",      &compiler->flags.dump_ast),
     cli_opt_flag(cli_names("--dump-ast-flat"), 1, "Dump flat AST into json file.", &compiler->flags.dump_ast_flat),
-    cli_opt_flag(cli_names("--dump-tasm"),     1, "Dump assembly into tasm file.", &compiler->flags.dump_tasm),
+    cli_opt_flag(cli_names("--dump-ll"),       1, "Dump LLVM IR into ll file.",    &compiler->flags.dump_ll),
     
     cli_opt_int(cli_names("--log-level"), 1, 'N', 1, &compiler->args.log_level, NULL, NULL, "Set log level.", NULL, NULL),
     
@@ -191,7 +212,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     list_t* toks = list_init();
 
-    time_it(lexer, lexer_lex(lexer, toks));
+    time_it("lexer", lexer_lex(lexer, toks));
 
     if (compiler->flags.dump_tokens)
       compiler_dump_tokens(compiler, input_file_path, input_file_name, toks);
@@ -202,7 +223,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     ast_node_t* root = ast_node_init(AST_PROG);
 
-    time_it(parser, parser_parse(parser, toks, root));
+    time_it("parser", parser_parse(parser, toks, root));
 
     if (compiler->flags.dump_ast)
       compiler_dump_ast(compiler, input_file_path, input_file_name, root);
@@ -215,12 +236,24 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     symtable_t* symtable = symtable_init(NULL);
     typetable_t* typetable = typetable_init();
 
-    time_it(analyzer, analyzer_analyze(&analyzer, root, symtable, typetable));
+    time_it("analyzer", analyzer_analyze(&analyzer, root, symtable, typetable));
 
     if (compiler->flags.dump_ast_flat)
       compiler_dump_ast_flat(compiler, input_file_path, input_file_name, root);
 
+    log_trace("main", "(%s) IR generation.", input_file_name);
+
+    generator_t* generator = generator_init();
+    LLVMModuleRef llvm_module = NULL;
+
+    time_it("generator", llvm_module = generator_generate(generator, root));
+
+    if (compiler->flags.dump_ll)
+      compiler_dump_ll(compiler, input_file_path, input_file_name, llvm_module);
+
     log_trace("main", "(%s) Cleanup.", input_file_name);
+
+    generator_free(generator);
 
     symtable_free(symtable);
     typetable_free(typetable);

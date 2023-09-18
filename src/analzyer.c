@@ -494,10 +494,26 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
     if (id_sym == NULL)
       report_error_undefined_symbol(id_tok->loc);
 
-    if (!ast_is_decl(id_sym->node))
-      report_error_symbol_is_not_an_expression(id_tok->loc);
+    switch (id_sym->node->kind)
+    {
+    case AST_DECL_VAR:
+    case AST_DECL_PARAM:
+    case AST_DECL_FUN:
+    {
+      ast_expr_decl_t* decl = (ast_expr_decl_t*)ast_node_init(AST_EXPR_DECL);
+      decl->tok = node->tok;
+      decl->decl = id_sym->node;
 
-    return id_sym->node;
+      typedesc_t* desc = typetable_lookup(analyzer->typetable, decl->decl);
+      assert(desc != NULL);
+
+      typetable_insert(analyzer->typetable, (ast_node_t*)decl, desc);
+
+      return (ast_node_t*)decl;
+    }
+    default:
+      report_error_symbol_is_not_an_expression(id_tok->loc);
+    }
   }
   case AST_EXPR_LIT_INT:
     typetable_insert(analyzer->typetable, (ast_node_t*)node, typedesc_init(TYPEDESC_I32));

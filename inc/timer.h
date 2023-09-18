@@ -42,10 +42,10 @@ uint64_t timer_now(void);
  */
 #define time_it(NAME, STMT)\
   do {\
-    uint64_t time_begin_##NAME = timer_now();\
+    uint64_t time_it_begin = timer_now();\
     { STMT; }\
-    uint64_t time_end_##NAME = timer_now();\
-    log_debug("timer", "(" #NAME ") Elapsed time: %.5lf ms", (double)(time_end_##NAME - time_begin_##NAME) / (double)timer_freq() * 1000.0);\
-  } while (0);
+    uint64_t time_it_end = timer_now();\
+    log_debug("timer", "(" NAME ") Elapsed time: %.5lf ms", (double)(time_it_end - time_it_begin) / (double)timer_freq() * 1000.0);\
+  } while (0)\
 
 #endif

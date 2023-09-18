@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <llvm-c/Core.h>
+
 #include "list.h"
 #include "op.h"
 #include "token.h"
@@ -34,6 +36,15 @@
   {\
     ast_kind_t kind; /** AST node kind. */\
     token_t* tok; /** Pointer to the token associated with this AST node. */\
+  }
+
+/**
+ * \brief Utility macro which expands to fields that all type AST nodes must have.
+ */
+#define AST_TYPE_HEADER\
+  struct\
+  {\
+    LLVMTypeRef llvm_type;\
   }
 
 /**
@@ -54,6 +65,17 @@
   struct\
   {\
     ast_node_t* type; /** Type. */\
+  }
+
+/**
+ * \brief Utility macro which expands to fields that all expression AST nodes
+ * must have.
+ */
+#define AST_EXPR_HEADER\
+  struct\
+  {\
+    LLVMTypeRef llvm_type;\
+    LLVMValueRef llvm_value;\
   }
 
 /**
@@ -128,6 +150,7 @@ typedef enum ast_kind_e
   AST_EXPR_OP_UNARY, // Unary operation expression.
   AST_EXPR_OP_BINARY, // Binary operation expression.
   AST_EXPR_OP_CALL, // Call operation expression.
+  AST_EXPR_DECL, // Declaration expression.
   
   AST_STMT_IF, // If statement.
   AST_STMT_FOR, // For statement.
@@ -174,6 +197,7 @@ typedef struct ast_id_s
 typedef struct ast_type_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
 } ast_type_t;
 
 /**
@@ -182,6 +206,7 @@ typedef struct ast_type_s
 typedef struct ast_type_modifier_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   AST_MODIFIER_HEADER;
 } ast_type_modifier_t;
 
@@ -191,6 +216,7 @@ typedef struct ast_type_modifier_s
 typedef struct ast_type_mut_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   AST_MODIFIER_HEADER;
 } ast_type_mut_t;
 
@@ -200,6 +226,7 @@ typedef struct ast_type_mut_s
 typedef struct ast_type_const_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   AST_MODIFIER_HEADER;
 } ast_type_const_t;
 
@@ -209,6 +236,7 @@ typedef struct ast_type_const_s
 typedef struct ast_type_ptr_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   AST_MODIFIER_HEADER;
 } ast_type_ptr_t;
 
@@ -218,6 +246,7 @@ typedef struct ast_type_ptr_s
 typedef struct ast_type_ref_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   AST_MODIFIER_HEADER;
 } ast_type_ref_t;
 
@@ -227,6 +256,7 @@ typedef struct ast_type_ref_s
 typedef struct ast_type_opt_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   AST_MODIFIER_HEADER;
 } ast_type_opt_t;
 
@@ -236,6 +266,7 @@ typedef struct ast_type_opt_s
 typedef struct ast_type_array_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   AST_MODIFIER_HEADER;
   ast_node_t* size;
 } ast_type_array_t;
@@ -246,6 +277,7 @@ typedef struct ast_type_array_s
 typedef struct ast_type_fun_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   list_t* params; // List of parameter types.
   ast_node_t* return_type; // Return type.
 } ast_type_fun_t;
@@ -256,6 +288,7 @@ typedef struct ast_type_fun_s
 typedef struct ast_type_gen_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   list_t* params; // List of parameter types.
   ast_node_t* yield_type; // Yield type.
 } ast_type_gen_t;
@@ -266,6 +299,7 @@ typedef struct ast_type_gen_s
 typedef struct ast_type_member_s
 {
   AST_NODE_HEADER;
+  AST_TYPE_HEADER;
   ast_node_t* owner; // Owner type.
   ast_node_t* member; // Member type.
 } ast_type_member_t;
@@ -276,6 +310,7 @@ typedef struct ast_type_member_s
 typedef struct ast_expr_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
 } ast_expr_t;
 
 /**
@@ -284,6 +319,7 @@ typedef struct ast_expr_s
 typedef struct ast_expr_lit_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
 } ast_expr_lit_t;
 
 /**
@@ -292,6 +328,7 @@ typedef struct ast_expr_lit_s
 typedef struct ast_expr_op_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
 } ast_expr_op_t;
 
@@ -301,6 +338,7 @@ typedef struct ast_expr_op_s
 typedef struct ast_expr_op_bin_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
   ast_node_t* lhs; // Left-hand side expression.
   ast_node_t* rhs; // Right-hand side expression.
@@ -312,6 +350,7 @@ typedef struct ast_expr_op_bin_s
 typedef struct ast_expr_op_un_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
   ast_node_t* expr; // Expression.
 } ast_expr_op_un_t;
@@ -322,10 +361,21 @@ typedef struct ast_expr_op_un_s
 typedef struct ast_expr_op_call_s
 {
   AST_NODE_HEADER;
+  AST_EXPR_HEADER;
   AST_EXPR_OP_HEADER;
   ast_node_t* callee; // Callee expression.
   list_t* params; // List of parameter expressions.
 } ast_expr_op_call_t;
+
+/**
+ * \brief AST variable expression node.
+ */
+typedef struct ast_expr_decl_s
+{
+  AST_NODE_HEADER;
+  AST_EXPR_HEADER;
+  ast_node_t* decl; // Declaration.
+} ast_expr_decl_t;
 
 /**
  * \brief AST statement node.
@@ -437,6 +487,9 @@ typedef struct ast_decl_var_s
   AST_DECL_HEADER;
   AST_TYPED_HEADER;
   ast_node_t* expr; // Initializer expression.
+
+  LLVMTypeRef llvm_type;
+  LLVMValueRef llvm_value;
 } ast_decl_var_t;
 
 /**
@@ -449,6 +502,9 @@ typedef struct ast_decl_fun_s
   list_t* params; // List of parameter declarations.
   ast_node_t* return_type; // Return type.
   ast_node_t* stmt; // Body statement.
+
+  LLVMTypeRef llvm_type;
+  LLVMValueRef llvm_value;
 } ast_decl_fun_t;
 
 /**
@@ -513,6 +569,9 @@ typedef struct ast_decl_param_s
   AST_TYPED_HEADER;
   ast_node_t* expr; // Default value expression.
   bool is_variadic; // Variadic flag.
+
+  LLVMTypeRef llvm_type;
+  LLVMValueRef llvm_value;
 } ast_decl_param_t;
 
 /**
