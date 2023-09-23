@@ -394,6 +394,12 @@ typedef struct ast_stmt_if_s
   ast_node_t* cond; // Condition expression.
   ast_node_t* stmt; // Main body statement.
   ast_node_t* stmt_else; // Else statement.
+
+  LLVMValueRef llvm_value;
+
+  LLVMBasicBlockRef llvm_then;
+  LLVMBasicBlockRef llvm_else;
+  LLVMBasicBlockRef llvm_end;
 } ast_stmt_if_t;
 
 /**
@@ -505,6 +511,9 @@ typedef struct ast_decl_fun_s
 
   LLVMTypeRef llvm_type;
   LLVMValueRef llvm_value;
+
+  LLVMBasicBlockRef llvm_entry;
+  LLVMBasicBlockRef llvm_end;
 } ast_decl_fun_t;
 
 /**
