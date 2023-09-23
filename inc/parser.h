@@ -1,8 +1,20 @@
 /**
- * \file
+ * \file parser.h
  * 
- * Syntax analyzer.
-*/
+ * \brief Syntax analyzer interface.
+ * 
+ * \details A syntax analyzer, also known as a parser, is a crucial component in
+ * a compiler. Its primary function is to analyze the structure of the source
+ * code and ensure that it adheres to the language's specified syntax rules.
+ * This involves checking the order and arrangement of tokens to determine if
+ * they form valid statements or expressions. If the code follows the correct
+ * syntax, the syntax analyzer generates a data structure called the Abstract
+ * Syntax Tree (AST). If errors are detected, it provides meaningful error
+ * messages to aid developers in fixing the issues.
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
 
 #ifndef TAU_PARSER_H
 #define TAU_PARSER_H

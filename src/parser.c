@@ -1,3 +1,10 @@
+/**
+ * \file parser.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "parser.h"
 
 #include <stdlib.h>
