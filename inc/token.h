@@ -46,6 +46,7 @@ typedef enum token_kind_e
   TOK_KW_ALIGNOF, // Keyword `alignof`
   TOK_KW_TYPEOF, // Keyword `typeof`
   TOK_KW_IN, // Keyword `in`
+  TOK_KW_EXTERN, // Keyword `extern`
   TOK_KW_FUN, // Keyword `fun`
   TOK_KW_GEN, // Keyword `gen`
   TOK_KW_STRUCT, // Keyword `struct`
@@ -130,6 +131,7 @@ typedef enum token_kind_e
   TOK_PUNCT_BRACKET_RIGHT, // Punctuation `]`
   TOK_PUNCT_BRACE_LEFT, // Punctuation `{`
   TOK_PUNCT_BRACE_RIGHT, // Punctuation `}`
+  TOK_PUNCT_HASH, // Punctuation `#`
 
   TOK_EOF, // End of file
 } token_kind_t;

@@ -70,6 +70,7 @@ const char* token_kind_to_string(token_kind_t kind)
   case TOK_KW_ALIGNOF:                  return "TOK_KW_ALIGNOF";
   case TOK_KW_TYPEOF:                   return "TOK_KW_TYPEOF";
   case TOK_KW_IN:                       return "TOK_KW_IN";
+  case TOK_KW_EXTERN:                   return "TOK_KW_EXTERN";
   case TOK_KW_FUN:                      return "TOK_KW_FUN";
   case TOK_KW_GEN:                      return "TOK_KW_GEN";
   case TOK_KW_STRUCT:                   return "TOK_KW_STRUCT";
@@ -153,6 +154,7 @@ const char* token_kind_to_string(token_kind_t kind)
   case TOK_PUNCT_BRACKET_RIGHT:         return "TOK_PUNCT_BRACKET_RIGHT";
   case TOK_PUNCT_BRACE_LEFT:            return "TOK_PUNCT_BRACE_LEFT";
   case TOK_PUNCT_BRACE_RIGHT:           return "TOK_PUNCT_BRACE_RIGHT";
+  case TOK_PUNCT_HASH:                  return "TOK_PUNCT_HASH";
   case TOK_EOF:                         return "TOK_EOF";
   default: unreachable();
   }
@@ -186,6 +188,7 @@ bool token_is_kw(token_t* tok)
   case TOK_KW_ALIGNOF:
   case TOK_KW_TYPEOF:
   case TOK_KW_IN:
+  case TOK_KW_EXTERN:
   case TOK_KW_FUN:
   case TOK_KW_GEN:
   case TOK_KW_STRUCT:
@@ -279,6 +282,7 @@ bool token_is_punct(token_t* tok)
   case TOK_PUNCT_BRACKET_RIGHT:
   case TOK_PUNCT_BRACE_LEFT:
   case TOK_PUNCT_BRACE_RIGHT:
+  case TOK_PUNCT_HASH:
     return true;
   default:
     return false;

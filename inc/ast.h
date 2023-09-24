@@ -96,6 +96,7 @@
   struct\
   {\
     ast_node_t* id; /** Identifier. */\
+    list_t* attrs; /** Attributes. */\
   }
 
 /**
@@ -170,7 +171,9 @@ typedef enum ast_kind_e
   AST_DECL_UNION, // Union declaration.
   AST_DECL_ENUM, // Enum declaration.
   AST_DECL_ENUM_CONSTANT, // Enum constant declaration.
-  AST_DECL_MOD, // Module declaration.  
+  AST_DECL_MOD, // Module declaration.
+
+  AST_ATTR, // Attribute.
 
   AST_PROG, // Program.
 } ast_kind_t;
@@ -508,6 +511,7 @@ typedef struct ast_decl_fun_s
   list_t* params; // List of parameter declarations.
   ast_node_t* return_type; // Return type.
   ast_node_t* stmt; // Body statement.
+  bool is_extern; // External flag.
 
   LLVMTypeRef llvm_type;
   LLVMValueRef llvm_value;
@@ -592,6 +596,16 @@ typedef struct ast_decl_enum_constant_s
   AST_DECL_HEADER;
   AST_TYPED_HEADER;
 } ast_decl_enum_constant_t;
+
+/**
+ * \brief AST attribute node.
+ */
+typedef struct ast_attr_s
+{
+  AST_NODE_HEADER;
+  ast_node_t* id; // Identifier.
+  list_t* params; // List of parameter expressions.
+} ast_attr_t;
 
 /**
  * \brief AST program node.

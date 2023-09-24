@@ -23,61 +23,62 @@ ast_node_t* ast_node_init(ast_kind_t kind)
 
   switch (kind)
   {
-  case AST_ID:                  node_size = sizeof(ast_id_t                 ); break;
-  case AST_PROG:                node_size = sizeof(ast_prog_t               ); break;
-  case AST_TYPE_MUT:            node_size = sizeof(ast_type_mut_t           ); break;
-  case AST_TYPE_CONST:          node_size = sizeof(ast_type_const_t         ); break;
-  case AST_TYPE_PTR:            node_size = sizeof(ast_type_ptr_t           ); break;
-  case AST_TYPE_ARRAY:          node_size = sizeof(ast_type_array_t         ); break;
-  case AST_TYPE_REF:            node_size = sizeof(ast_type_ref_t           ); break;
-  case AST_TYPE_OPT:            node_size = sizeof(ast_type_opt_t           ); break;
-  case AST_TYPE_FUN:            node_size = sizeof(ast_type_fun_t           ); break;
-  case AST_TYPE_GEN:            node_size = sizeof(ast_type_gen_t           ); break;
-  case AST_TYPE_TYPE:           node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_SELF:           node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_I8:             node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_I16:            node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_I32:            node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_I64:            node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_ISIZE:          node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_U8:             node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_U16:            node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_U32:            node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_U64:            node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_USIZE:          node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_F32:            node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_F64:            node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_BOOL:           node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_UNIT:           node_size = sizeof(ast_type_t               ); break;
-  case AST_TYPE_MEMBER:         node_size = sizeof(ast_type_member_t        ); break;
-  case AST_EXPR_LIT_INT:        node_size = sizeof(ast_expr_lit_t           ); break;
-  case AST_EXPR_LIT_FLT:        node_size = sizeof(ast_expr_lit_t           ); break;
-  case AST_EXPR_LIT_STR:        node_size = sizeof(ast_expr_lit_t           ); break;
-  case AST_EXPR_LIT_CHAR:       node_size = sizeof(ast_expr_lit_t           ); break;
-  case AST_EXPR_LIT_BOOL:       node_size = sizeof(ast_expr_lit_t           ); break;
-  case AST_EXPR_LIT_NULL:       node_size = sizeof(ast_expr_lit_t           ); break;
-  case AST_EXPR_OP_UNARY:       node_size = sizeof(ast_expr_op_un_t         ); break;
-  case AST_EXPR_OP_BINARY:      node_size = sizeof(ast_expr_op_bin_t        ); break;
-  case AST_EXPR_OP_CALL:        node_size = sizeof(ast_expr_op_call_t       ); break;
-  case AST_EXPR_DECL:           node_size = sizeof(ast_expr_decl_t          ); break;
-  case AST_STMT_IF:             node_size = sizeof(ast_stmt_if_t            ); break;
-  case AST_STMT_FOR:            node_size = sizeof(ast_stmt_for_t           ); break;
-  case AST_STMT_WHILE:          node_size = sizeof(ast_stmt_while_t         ); break;
-  case AST_STMT_BREAK:          node_size = sizeof(ast_stmt_break_t         ); break;
-  case AST_STMT_CONTINUE:       node_size = sizeof(ast_stmt_continue_t      ); break;
-  case AST_STMT_RETURN:         node_size = sizeof(ast_stmt_return_t        ); break;
-  case AST_STMT_YIELD:          node_size = sizeof(ast_stmt_yield_t         ); break;
-  case AST_STMT_BLOCK:          node_size = sizeof(ast_stmt_block_t         ); break;
-  case AST_STMT_EXPR:           node_size = sizeof(ast_stmt_expr_t          ); break;
-  case AST_DECL_VAR:            node_size = sizeof(ast_decl_var_t           ); break;
-  case AST_DECL_FUN:            node_size = sizeof(ast_decl_fun_t           ); break;
-  case AST_DECL_GEN:            node_size = sizeof(ast_decl_gen_t           ); break;
-  case AST_DECL_STRUCT:         node_size = sizeof(ast_decl_struct_t        ); break;
-  case AST_DECL_UNION:          node_size = sizeof(ast_decl_union_t         ); break;
-  case AST_DECL_ENUM:           node_size = sizeof(ast_decl_enum_t          ); break;
-  case AST_DECL_MOD:            node_size = sizeof(ast_decl_mod_t           ); break;
-  case AST_DECL_PARAM:          node_size = sizeof(ast_decl_param_t         ); break;
-  case AST_DECL_ENUM_CONSTANT:  node_size = sizeof(ast_decl_enum_constant_t ); break;
+  case AST_ID:                  node_size = sizeof(ast_id_t                ); break;
+  case AST_TYPE_MUT:            node_size = sizeof(ast_type_mut_t          ); break;
+  case AST_TYPE_CONST:          node_size = sizeof(ast_type_const_t        ); break;
+  case AST_TYPE_PTR:            node_size = sizeof(ast_type_ptr_t          ); break;
+  case AST_TYPE_ARRAY:          node_size = sizeof(ast_type_array_t        ); break;
+  case AST_TYPE_REF:            node_size = sizeof(ast_type_ref_t          ); break;
+  case AST_TYPE_OPT:            node_size = sizeof(ast_type_opt_t          ); break;
+  case AST_TYPE_FUN:            node_size = sizeof(ast_type_fun_t          ); break;
+  case AST_TYPE_GEN:            node_size = sizeof(ast_type_gen_t          ); break;
+  case AST_TYPE_TYPE:           node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_SELF:           node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_I8:             node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_I16:            node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_I32:            node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_I64:            node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_ISIZE:          node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_U8:             node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_U16:            node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_U32:            node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_U64:            node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_USIZE:          node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_F32:            node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_F64:            node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_BOOL:           node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_UNIT:           node_size = sizeof(ast_type_t              ); break;
+  case AST_TYPE_MEMBER:         node_size = sizeof(ast_type_member_t       ); break;
+  case AST_EXPR_LIT_INT:        node_size = sizeof(ast_expr_lit_t          ); break;
+  case AST_EXPR_LIT_FLT:        node_size = sizeof(ast_expr_lit_t          ); break;
+  case AST_EXPR_LIT_STR:        node_size = sizeof(ast_expr_lit_t          ); break;
+  case AST_EXPR_LIT_CHAR:       node_size = sizeof(ast_expr_lit_t          ); break;
+  case AST_EXPR_LIT_BOOL:       node_size = sizeof(ast_expr_lit_t          ); break;
+  case AST_EXPR_LIT_NULL:       node_size = sizeof(ast_expr_lit_t          ); break;
+  case AST_EXPR_OP_UNARY:       node_size = sizeof(ast_expr_op_un_t        ); break;
+  case AST_EXPR_OP_BINARY:      node_size = sizeof(ast_expr_op_bin_t       ); break;
+  case AST_EXPR_OP_CALL:        node_size = sizeof(ast_expr_op_call_t      ); break;
+  case AST_EXPR_DECL:           node_size = sizeof(ast_expr_decl_t         ); break;
+  case AST_STMT_IF:             node_size = sizeof(ast_stmt_if_t           ); break;
+  case AST_STMT_FOR:            node_size = sizeof(ast_stmt_for_t          ); break;
+  case AST_STMT_WHILE:          node_size = sizeof(ast_stmt_while_t        ); break;
+  case AST_STMT_BREAK:          node_size = sizeof(ast_stmt_break_t        ); break;
+  case AST_STMT_CONTINUE:       node_size = sizeof(ast_stmt_continue_t     ); break;
+  case AST_STMT_RETURN:         node_size = sizeof(ast_stmt_return_t       ); break;
+  case AST_STMT_YIELD:          node_size = sizeof(ast_stmt_yield_t        ); break;
+  case AST_STMT_BLOCK:          node_size = sizeof(ast_stmt_block_t        ); break;
+  case AST_STMT_EXPR:           node_size = sizeof(ast_stmt_expr_t         ); break;
+  case AST_DECL_VAR:            node_size = sizeof(ast_decl_var_t          ); break;
+  case AST_DECL_FUN:            node_size = sizeof(ast_decl_fun_t          ); break;
+  case AST_DECL_GEN:            node_size = sizeof(ast_decl_gen_t          ); break;
+  case AST_DECL_STRUCT:         node_size = sizeof(ast_decl_struct_t       ); break;
+  case AST_DECL_UNION:          node_size = sizeof(ast_decl_union_t        ); break;
+  case AST_DECL_ENUM:           node_size = sizeof(ast_decl_enum_t         ); break;
+  case AST_DECL_MOD:            node_size = sizeof(ast_decl_mod_t          ); break;
+  case AST_DECL_PARAM:          node_size = sizeof(ast_decl_param_t        ); break;
+  case AST_DECL_ENUM_CONSTANT:  node_size = sizeof(ast_decl_enum_constant_t); break;
+  case AST_ATTR:                node_size = sizeof(ast_attr_t              ); break;
+  case AST_PROG:                node_size = sizeof(ast_prog_t              ); break;
   default: unreachable();
   }
 
@@ -108,18 +109,59 @@ void ast_cleanup(void)
 
     switch (node->kind)
     {
-    case AST_PROG:         list_free(((ast_prog_t*        )node)->decls  ); break;
-    case AST_DECL_MOD:     list_free(((ast_decl_mod_t*    )node)->decls  ); break;
-    case AST_EXPR_OP_CALL: list_free(((ast_expr_op_call_t*)node)->params ); break;
-    case AST_TYPE_FUN:     list_free(((ast_type_fun_t*    )node)->params ); break;
-    case AST_TYPE_GEN:     list_free(((ast_type_gen_t*    )node)->params ); break;
-    case AST_DECL_FUN:     list_free(((ast_decl_fun_t*    )node)->params ); break;
-    case AST_DECL_GEN:     list_free(((ast_decl_gen_t*    )node)->params ); break;
-    case AST_STMT_BLOCK:   list_free(((ast_stmt_block_t*  )node)->stmts  ); break;
-    case AST_DECL_STRUCT:  list_free(((ast_decl_struct_t* )node)->members); break;
-    case AST_DECL_UNION:   list_free(((ast_decl_union_t*  )node)->members); break;
-    case AST_DECL_ENUM:    list_free(((ast_decl_enum_t*   )node)->members); break;
-    default: fallthrough();
+    case AST_TYPE_FUN:
+      list_free(((ast_type_fun_t*)node)->params);
+      break;
+    case AST_TYPE_GEN:
+      list_free(((ast_type_gen_t*)node)->params);
+      break;
+    case AST_EXPR_OP_CALL:
+      list_free(((ast_expr_op_call_t*)node)->params);
+      break;
+    case AST_STMT_BLOCK:
+      list_free(((ast_stmt_block_t*)node)->stmts);
+      break;
+    case AST_DECL_VAR:
+      list_free(((ast_decl_var_t*)node)->attrs);
+      break;
+    case AST_DECL_PARAM:
+      list_free(((ast_decl_param_t*)node)->attrs);
+      break;
+    case AST_DECL_FUN:
+      list_free(((ast_decl_fun_t*)node)->attrs);
+      list_free(((ast_decl_fun_t*)node)->params);
+      break;
+    case AST_DECL_GEN:
+      list_free(((ast_decl_gen_t*)node)->attrs);
+      list_free(((ast_decl_gen_t*)node)->params);
+      break;
+    case AST_DECL_STRUCT:
+      list_free(((ast_decl_struct_t*)node)->attrs);
+      list_free(((ast_decl_struct_t*)node)->members);
+      break;
+    case AST_DECL_UNION:
+      list_free(((ast_decl_union_t*)node)->attrs);
+      list_free(((ast_decl_union_t*)node)->members);
+      break;
+    case AST_DECL_ENUM:
+      list_free(((ast_decl_enum_t*)node)->attrs);
+      list_free(((ast_decl_enum_t*)node)->members);
+      break;
+    case AST_DECL_ENUM_CONSTANT:
+      list_free(((ast_decl_enum_constant_t*)node)->attrs);
+      break;
+    case AST_DECL_MOD:
+      list_free(((ast_decl_mod_t*)node)->attrs);
+      list_free(((ast_decl_mod_t*)node)->decls);
+      break;
+    case AST_ATTR:
+      list_free(((ast_attr_t*)node)->params);
+      break;
+    case AST_PROG:
+      list_free(((ast_prog_t*)node)->decls);
+      break;
+    default:
+      fallthrough();
     }
 
     allocator_deallocate(allocator_global(), node);
@@ -285,14 +327,29 @@ void ast_json_dump(FILE* stream, ast_node_t* node)
   case AST_DECL_VAR:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, ((ast_decl_var_t*)node)->id);
+    fprintf(stream, ",\"attrs\":");
+    ast_json_dump_list(stream, ((ast_decl_var_t*)node)->attrs);
     fprintf(stream, ",\"type\":");
     ast_json_dump(stream, ((ast_decl_var_t*)node)->type);
     fprintf(stream, ",\"expr\":");
     ast_json_dump(stream, ((ast_decl_var_t*)node)->expr);
     break;
+  case AST_DECL_PARAM:
+    fprintf(stream, ",\"id\":");
+    ast_json_dump(stream, ((ast_decl_param_t*)node)->id);
+    fprintf(stream, ",\"attrs\":");
+    ast_json_dump_list(stream, ((ast_decl_param_t*)node)->attrs);
+    fprintf(stream, ",\"type\":");
+    ast_json_dump(stream, ((ast_decl_param_t*)node)->type);
+    fprintf(stream, ",\"expr\":");
+    ast_json_dump(stream, ((ast_decl_param_t*)node)->expr);
+    fprintf(stream, ",\"is_variadic\":%s", ((ast_decl_param_t*)node)->is_variadic ? "true" : "false");
+    break;
   case AST_DECL_FUN:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, ((ast_decl_fun_t*)node)->id);
+    fprintf(stream, ",\"attrs\":");
+    ast_json_dump_list(stream, ((ast_decl_fun_t*)node)->attrs);
     fprintf(stream, ",\"params\":");
     ast_json_dump_list(stream, ((ast_decl_fun_t*)node)->params);
     fprintf(stream, ",\"return_type\":");
@@ -303,6 +360,8 @@ void ast_json_dump(FILE* stream, ast_node_t* node)
   case AST_DECL_GEN:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, ((ast_decl_gen_t*)node)->id);
+    fprintf(stream, ",\"attrs\":");
+    ast_json_dump_list(stream, ((ast_decl_gen_t*)node)->attrs);
     fprintf(stream, ",\"params\":");
     ast_json_dump_list(stream, ((ast_decl_gen_t*)node)->params);
     fprintf(stream, ",\"yield_type\":");
@@ -313,41 +372,48 @@ void ast_json_dump(FILE* stream, ast_node_t* node)
   case AST_DECL_STRUCT:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, ((ast_decl_struct_t*)node)->id);
+    fprintf(stream, ",\"attrs\":");
+    ast_json_dump_list(stream, ((ast_decl_struct_t*)node)->attrs);
     fprintf(stream, ",\"members\":");
     ast_json_dump_list(stream, ((ast_decl_struct_t*)node)->members);
     break;
   case AST_DECL_UNION:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, ((ast_decl_union_t*)node)->id);
+    fprintf(stream, ",\"attrs\":");
+    ast_json_dump_list(stream, ((ast_decl_union_t*)node)->attrs);
     fprintf(stream, ",\"members\":");
     ast_json_dump_list(stream, ((ast_decl_union_t*)node)->members);
     break;
   case AST_DECL_ENUM:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, ((ast_decl_enum_t*)node)->id);
+    fprintf(stream, ",\"attrs\":");
+    ast_json_dump_list(stream, ((ast_decl_enum_t*)node)->attrs);
     fprintf(stream, ",\"members\":");
     ast_json_dump_list(stream, ((ast_decl_enum_t*)node)->members);
-    break;
-  case AST_DECL_MOD:
-    fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_mod_t*)node)->id);
-    fprintf(stream, ",\"decls\":");
-    ast_json_dump_list(stream, ((ast_decl_mod_t*)node)->decls);
-    break;
-  case AST_DECL_PARAM:
-    fprintf(stream, ",\"id\":");
-    ast_json_dump(stream, ((ast_decl_param_t*)node)->id);
-    fprintf(stream, ",\"type\":");
-    ast_json_dump(stream, ((ast_decl_param_t*)node)->type);
-    fprintf(stream, ",\"expr\":");
-    ast_json_dump(stream, ((ast_decl_param_t*)node)->expr);
-    fprintf(stream, ",\"is_variadic\":%s", ((ast_decl_param_t*)node)->is_variadic ? "true" : "false");
     break;
   case AST_DECL_ENUM_CONSTANT:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, ((ast_decl_enum_constant_t*)node)->id);
+    fprintf(stream, ",\"attrs\":");
+    ast_json_dump_list(stream, ((ast_decl_enum_constant_t*)node)->attrs);
     fprintf(stream, ",\"type\":");
     ast_json_dump(stream, ((ast_decl_enum_constant_t*)node)->type);
+    break;
+  case AST_DECL_MOD:
+    fprintf(stream, ",\"id\":");
+    ast_json_dump(stream, ((ast_decl_mod_t*)node)->id);
+    fprintf(stream, ",\"attrs\":");
+    ast_json_dump_list(stream, ((ast_decl_mod_t*)node)->attrs);
+    fprintf(stream, ",\"decls\":");
+    ast_json_dump_list(stream, ((ast_decl_mod_t*)node)->decls);
+    break;
+  case AST_ATTR:
+    fprintf(stream, ",\"id\":");
+    ast_json_dump(stream, ((ast_attr_t*)node)->id);
+    fprintf(stream, ",\"params\":");
+    ast_json_dump_list(stream, ((ast_attr_t*)node)->params);
     break;
   case AST_PROG:
     fprintf(stream, ",\"decls\":");
@@ -548,14 +614,29 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* node)
       case AST_DECL_VAR:
         fprintf(stream, ",\"id\":%p", ((ast_decl_var_t*)node)->id);
         stack_push(nodes, ((ast_decl_var_t*)node)->id);
+        fprintf(stream, ",\"attrs\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_var_t*)node)->attrs);
         fprintf(stream, ",\"type\":%p", ((ast_decl_var_t*)node)->type);
         stack_push(nodes, ((ast_decl_var_t*)node)->type);
         fprintf(stream, ",\"expr\":%p", ((ast_decl_var_t*)node)->expr);
         stack_push(nodes, ((ast_decl_var_t*)node)->expr);
         break;
+      case AST_DECL_PARAM:
+        fprintf(stream, ",\"id\":%p", ((ast_decl_param_t*)node)->id);
+        stack_push(nodes, ((ast_decl_param_t*)node)->id);
+        fprintf(stream, ",\"attrs\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_param_t*)node)->attrs);
+        fprintf(stream, ",\"type\":%p", ((ast_decl_param_t*)node)->type);
+        stack_push(nodes, ((ast_decl_param_t*)node)->type);
+        fprintf(stream, ",\"expr\":%p", ((ast_decl_param_t*)node)->expr);
+        stack_push(nodes, ((ast_decl_param_t*)node)->expr);
+        fprintf(stream, ",\"is_variadic\":%s", ((ast_decl_param_t*)node)->is_variadic ? "true" : "false");
+        break;
       case AST_DECL_FUN:
         fprintf(stream, ",\"id\":%p", ((ast_decl_fun_t*)node)->id);
         stack_push(nodes, ((ast_decl_fun_t*)node)->id);
+        fprintf(stream, ",\"attrs\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_fun_t*)node)->attrs);
         fprintf(stream, ",\"params\":");
         ast_json_dump_flat_list(stream, nodes, ((ast_decl_fun_t*)node)->params);
         fprintf(stream, ",\"return_type\":%p", ((ast_decl_fun_t*)node)->return_type);
@@ -566,6 +647,8 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* node)
       case AST_DECL_GEN:
         fprintf(stream, ",\"id\":%p", ((ast_decl_gen_t*)node)->id);
         stack_push(nodes, ((ast_decl_gen_t*)node)->id);
+        fprintf(stream, ",\"attrs\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_gen_t*)node)->attrs);
         fprintf(stream, ",\"params\":");
         ast_json_dump_flat_list(stream, nodes, ((ast_decl_gen_t*)node)->params);
         fprintf(stream, ",\"yield_type\":%p", ((ast_decl_gen_t*)node)->yield_type);
@@ -576,41 +659,48 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* node)
       case AST_DECL_STRUCT:
         fprintf(stream, ",\"id\":%p", ((ast_decl_struct_t*)node)->id);
         stack_push(nodes, ((ast_decl_struct_t*)node)->id);
+        fprintf(stream, ",\"attrs\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_struct_t*)node)->attrs);
         fprintf(stream, ",\"members\":");
         ast_json_dump_flat_list(stream, nodes, ((ast_decl_struct_t*)node)->members);
         break;
       case AST_DECL_UNION:
         fprintf(stream, ",\"id\":%p", ((ast_decl_union_t*)node)->id);
         stack_push(nodes, ((ast_decl_union_t*)node)->id);
+        fprintf(stream, ",\"attrs\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_union_t*)node)->attrs);
         fprintf(stream, ",\"members\":");
         ast_json_dump_flat_list(stream, nodes, ((ast_decl_union_t*)node)->members);
         break;
       case AST_DECL_ENUM:
         fprintf(stream, ",\"id\":%p", ((ast_decl_enum_t*)node)->id);
         stack_push(nodes, ((ast_decl_enum_t*)node)->id);
+        fprintf(stream, ",\"attrs\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_enum_t*)node)->attrs);
         fprintf(stream, ",\"members\":");
         ast_json_dump_flat_list(stream, nodes, ((ast_decl_enum_t*)node)->members);
-        break;
-      case AST_DECL_MOD:
-        fprintf(stream, ",\"id\":%p", ((ast_decl_mod_t*)node)->id);
-        stack_push(nodes, ((ast_decl_mod_t*)node)->id);
-        fprintf(stream, ",\"decls\":");
-        ast_json_dump_flat_list(stream, nodes, ((ast_decl_mod_t*)node)->decls);
-        break;
-      case AST_DECL_PARAM:
-        fprintf(stream, ",\"id\":%p", ((ast_decl_param_t*)node)->id);
-        stack_push(nodes, ((ast_decl_param_t*)node)->id);
-        fprintf(stream, ",\"type\":%p", ((ast_decl_param_t*)node)->type);
-        stack_push(nodes, ((ast_decl_param_t*)node)->type);
-        fprintf(stream, ",\"expr\":%p", ((ast_decl_param_t*)node)->expr);
-        stack_push(nodes, ((ast_decl_param_t*)node)->expr);
-        fprintf(stream, ",\"is_variadic\":%s", ((ast_decl_param_t*)node)->is_variadic ? "true" : "false");
         break;
       case AST_DECL_ENUM_CONSTANT:
         fprintf(stream, ",\"id\":%p", ((ast_decl_enum_constant_t*)node)->id);
         stack_push(nodes, ((ast_decl_enum_constant_t*)node)->id);
+        fprintf(stream, ",\"attrs\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_enum_constant_t*)node)->attrs);
         fprintf(stream, ",\"type\":%p", ((ast_decl_enum_constant_t*)node)->type);
         stack_push(nodes, ((ast_decl_enum_constant_t*)node)->type);
+        break;
+      case AST_DECL_MOD:
+        fprintf(stream, ",\"id\":%p", ((ast_decl_mod_t*)node)->id);
+        stack_push(nodes, ((ast_decl_mod_t*)node)->id);
+        fprintf(stream, ",\"attrs\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_mod_t*)node)->attrs);
+        fprintf(stream, ",\"decls\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_decl_mod_t*)node)->decls);
+        break;
+      case AST_ATTR:
+        fprintf(stream, ",\"id\":%p", ((ast_attr_t*)node)->id);
+        stack_push(nodes, ((ast_attr_t*)node)->id);
+        fprintf(stream, ",\"params\":");
+        ast_json_dump_flat_list(stream, nodes, ((ast_attr_t*)node)->params);
         break;
       case AST_PROG:
         fprintf(stream, ",\"decls\":");
@@ -634,60 +724,61 @@ const char* ast_kind_to_string(ast_kind_t kind)
 {
   switch (kind)
   {
-  case AST_ID:                  return "AST_ID";
-  case AST_TYPE_MUT:            return "AST_TYPE_MUT";
-  case AST_TYPE_CONST:          return "AST_TYPE_CONST";
-  case AST_TYPE_PTR:            return "AST_TYPE_PTR";
-  case AST_TYPE_ARRAY:          return "AST_TYPE_ARRAY";
-  case AST_TYPE_REF:            return "AST_TYPE_REF";
-  case AST_TYPE_OPT:            return "AST_TYPE_OPT";
-  case AST_TYPE_FUN:            return "AST_TYPE_FUN";
-  case AST_TYPE_GEN:            return "AST_TYPE_GEN";
-  case AST_TYPE_TYPE:           return "AST_TYPE_TYPE";
-  case AST_TYPE_I8:             return "AST_TYPE_I8";
-  case AST_TYPE_I16:            return "AST_TYPE_I16";
-  case AST_TYPE_I32:            return "AST_TYPE_I32";
-  case AST_TYPE_I64:            return "AST_TYPE_I64";
-  case AST_TYPE_ISIZE:          return "AST_TYPE_ISIZE";
-  case AST_TYPE_U8:             return "AST_TYPE_U8";
-  case AST_TYPE_U16:            return "AST_TYPE_U16";
-  case AST_TYPE_U32:            return "AST_TYPE_U32";
-  case AST_TYPE_U64:            return "AST_TYPE_U64";
-  case AST_TYPE_USIZE:          return "AST_TYPE_USIZE";
-  case AST_TYPE_F32:            return "AST_TYPE_F32";
-  case AST_TYPE_F64:            return "AST_TYPE_F64";
-  case AST_TYPE_BOOL:           return "AST_TYPE_BOOL";
-  case AST_TYPE_UNIT:           return "AST_TYPE_UNIT";
-  case AST_TYPE_MEMBER:         return "AST_TYPE_MEMBER";
-  case AST_EXPR_LIT_INT:        return "AST_EXPR_LIT_INT";
-  case AST_EXPR_LIT_FLT:        return "AST_EXPR_LIT_FLT";
-  case AST_EXPR_LIT_STR:        return "AST_EXPR_LIT_STR";
-  case AST_EXPR_LIT_CHAR:       return "AST_EXPR_LIT_CHAR";
-  case AST_EXPR_LIT_BOOL:       return "AST_EXPR_LIT_BOOL";
-  case AST_EXPR_LIT_NULL:       return "AST_EXPR_LIT_NULL";
-  case AST_EXPR_OP_UNARY:       return "AST_EXPR_OP_UNARY";
-  case AST_EXPR_OP_BINARY:      return "AST_EXPR_OP_BINARY";
-  case AST_EXPR_OP_CALL:        return "AST_EXPR_OP_CALL";
-  case AST_EXPR_DECL:            return "AST_EXPR_DECL";
-  case AST_STMT_IF:             return "AST_STMT_IF";
-  case AST_STMT_FOR:            return "AST_STMT_FOR";
-  case AST_STMT_WHILE:          return "AST_STMT_WHILE";
-  case AST_STMT_BREAK:          return "AST_STMT_BREAK";
-  case AST_STMT_CONTINUE:       return "AST_STMT_CONTINUE";
-  case AST_STMT_RETURN:         return "AST_STMT_RETURN";
-  case AST_STMT_YIELD:          return "AST_STMT_YIELD";
-  case AST_STMT_BLOCK:          return "AST_STMT_BLOCK";
-  case AST_STMT_EXPR:           return "AST_STMT_EXPR";
-  case AST_DECL_VAR:            return "AST_DECL_VAR";
-  case AST_DECL_FUN:            return "AST_DECL_FUN";
-  case AST_DECL_GEN:            return "AST_DECL_GEN";
-  case AST_DECL_STRUCT:         return "AST_DECL_STRUCT";
-  case AST_DECL_UNION:          return "AST_DECL_UNION";
-  case AST_DECL_ENUM:           return "AST_DECL_ENUM";
-  case AST_DECL_MOD:            return "AST_DECL_MOD";
-  case AST_DECL_PARAM:          return "AST_DECL_PARAM";
-  case AST_DECL_ENUM_CONSTANT:  return "AST_DECL_ENUM_CONSTANT";
-  case AST_PROG:                return "AST_PROG";
+  case AST_ID:                 return "AST_ID";
+  case AST_TYPE_MUT:           return "AST_TYPE_MUT";
+  case AST_TYPE_CONST:         return "AST_TYPE_CONST";
+  case AST_TYPE_PTR:           return "AST_TYPE_PTR";
+  case AST_TYPE_ARRAY:         return "AST_TYPE_ARRAY";
+  case AST_TYPE_REF:           return "AST_TYPE_REF";
+  case AST_TYPE_OPT:           return "AST_TYPE_OPT";
+  case AST_TYPE_FUN:           return "AST_TYPE_FUN";
+  case AST_TYPE_GEN:           return "AST_TYPE_GEN";
+  case AST_TYPE_TYPE:          return "AST_TYPE_TYPE";
+  case AST_TYPE_I8:            return "AST_TYPE_I8";
+  case AST_TYPE_I16:           return "AST_TYPE_I16";
+  case AST_TYPE_I32:           return "AST_TYPE_I32";
+  case AST_TYPE_I64:           return "AST_TYPE_I64";
+  case AST_TYPE_ISIZE:         return "AST_TYPE_ISIZE";
+  case AST_TYPE_U8:            return "AST_TYPE_U8";
+  case AST_TYPE_U16:           return "AST_TYPE_U16";
+  case AST_TYPE_U32:           return "AST_TYPE_U32";
+  case AST_TYPE_U64:           return "AST_TYPE_U64";
+  case AST_TYPE_USIZE:         return "AST_TYPE_USIZE";
+  case AST_TYPE_F32:           return "AST_TYPE_F32";
+  case AST_TYPE_F64:           return "AST_TYPE_F64";
+  case AST_TYPE_BOOL:          return "AST_TYPE_BOOL";
+  case AST_TYPE_UNIT:          return "AST_TYPE_UNIT";
+  case AST_TYPE_MEMBER:        return "AST_TYPE_MEMBER";
+  case AST_EXPR_LIT_INT:       return "AST_EXPR_LIT_INT";
+  case AST_EXPR_LIT_FLT:       return "AST_EXPR_LIT_FLT";
+  case AST_EXPR_LIT_STR:       return "AST_EXPR_LIT_STR";
+  case AST_EXPR_LIT_CHAR:      return "AST_EXPR_LIT_CHAR";
+  case AST_EXPR_LIT_BOOL:      return "AST_EXPR_LIT_BOOL";
+  case AST_EXPR_LIT_NULL:      return "AST_EXPR_LIT_NULL";
+  case AST_EXPR_OP_UNARY:      return "AST_EXPR_OP_UNARY";
+  case AST_EXPR_OP_BINARY:     return "AST_EXPR_OP_BINARY";
+  case AST_EXPR_OP_CALL:       return "AST_EXPR_OP_CALL";
+  case AST_EXPR_DECL:          return "AST_EXPR_DECL";
+  case AST_STMT_IF:            return "AST_STMT_IF";
+  case AST_STMT_FOR:           return "AST_STMT_FOR";
+  case AST_STMT_WHILE:         return "AST_STMT_WHILE";
+  case AST_STMT_BREAK:         return "AST_STMT_BREAK";
+  case AST_STMT_CONTINUE:      return "AST_STMT_CONTINUE";
+  case AST_STMT_RETURN:        return "AST_STMT_RETURN";
+  case AST_STMT_YIELD:         return "AST_STMT_YIELD";
+  case AST_STMT_BLOCK:         return "AST_STMT_BLOCK";
+  case AST_STMT_EXPR:          return "AST_STMT_EXPR";
+  case AST_DECL_VAR:           return "AST_DECL_VAR";
+  case AST_DECL_FUN:           return "AST_DECL_FUN";
+  case AST_DECL_GEN:           return "AST_DECL_GEN";
+  case AST_DECL_STRUCT:        return "AST_DECL_STRUCT";
+  case AST_DECL_UNION:         return "AST_DECL_UNION";
+  case AST_DECL_ENUM:          return "AST_DECL_ENUM";
+  case AST_DECL_MOD:           return "AST_DECL_MOD";
+  case AST_DECL_PARAM:         return "AST_DECL_PARAM";
+  case AST_DECL_ENUM_CONSTANT: return "AST_DECL_ENUM_CONSTANT";
+  case AST_ATTR:               return "AST_ATTR";
+  case AST_PROG:               return "AST_PROG";
   default: unreachable();
   }
 

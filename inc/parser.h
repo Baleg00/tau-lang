@@ -129,6 +129,14 @@ list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_f
 ast_node_t* parser_parse_id(parser_t* par);
 
 /**
+ * \brief Parses an attribute.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Attribute node.
+*/
+ast_node_t* parser_parse_attr(parser_t* par);
+
+/**
  * \brief Parses a mutable type.
  * 
  * \details Mutable types are prefixed with the `mut` keyword.
@@ -381,9 +389,10 @@ ast_node_t* parser_parse_decl_var(parser_t* par);
  * enclosed within braces (`{}`) if it consists of multiple statements.
  * 
  * \param[in] par Parser to be used.
+ * \param[in] is_extern `true` if the function is external, `false` otherwise.
  * \returns Function declaration node.
 */
-ast_node_t* parser_parse_decl_fun(parser_t* par);
+ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern);
 
 /**
  * \brief Parses a generator declaration.
@@ -444,6 +453,22 @@ ast_node_t* parser_parse_decl_enum(parser_t* par);
  * \returns Module declaration node.
 */
 ast_node_t* parser_parse_decl_mod(parser_t* par);
+
+/**
+ * \brief Parses a declaration with attributes.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Declaration node.
+*/
+ast_node_t* parser_parse_decl_with_attrs(parser_t* par);
+
+/**
+ * \brief Parses an external declaration.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Declaration node.
+*/
+ast_node_t* parser_parse_decl_extern(parser_t* par);
 
 /**
  * \brief Parses a declaration.

@@ -1018,9 +1018,12 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* scope, ast_decl_f
   if (collision != NULL)
     report_error_symbol_redeclaration(node->tok->loc);
 
-  stack_push(analyzer->ret_types, return_desc);
-  analyzer_visit_stmt(analyzer, fun_table, (ast_stmt_t*)node->stmt);
-  stack_pop(analyzer->ret_types);
+  if (!node->is_extern)
+  {
+    stack_push(analyzer->ret_types, return_desc);
+    analyzer_visit_stmt(analyzer, fun_table, (ast_stmt_t*)node->stmt);
+    stack_pop(analyzer->ret_types);
+  }
 }
 
 void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* scope, ast_decl_gen_t* node)

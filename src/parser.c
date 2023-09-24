@@ -120,6 +120,23 @@ ast_node_t* parser_parse_id(parser_t* par)
   return node;
 }
 
+ast_node_t* parser_parse_attr(parser_t* par)
+{
+  ast_attr_t* node = (ast_attr_t*)ast_node_init(AST_ATTR);
+  node->tok = parser_current(par);
+
+  node->id = parser_parse_id(par);
+
+  if (parser_consume(par, TOK_PUNCT_PAREN_LEFT))
+  {
+    node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_expr);
+
+    parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
+  }
+
+  return (ast_node_t*)node;
+}
+
 ast_node_t* parser_parse_type_mut(parser_t* par)
 {
   ast_type_mut_t* node = (ast_type_mut_t*)ast_node_init(AST_TYPE_MUT);
@@ -496,10 +513,12 @@ ast_node_t* parser_parse_decl_var(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse_decl_fun(parser_t* par)
+ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern)
 {
   ast_decl_fun_t* node = (ast_decl_fun_t*)ast_node_init(AST_DECL_FUN);
   node->tok = parser_current(par);
+  
+  node->is_extern = is_extern;
 
   parser_expect(par, TOK_KW_FUN);
 
@@ -560,7 +579,9 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   parser_expect(par, TOK_PUNCT_COLON);
 
   node->return_type = parser_parse_type(par);
-  node->stmt = parser_parse_stmt(par);
+
+  if (!is_extern)
+    node->stmt = parser_parse_stmt(par);
   
   return (ast_node_t*)node;
 }
@@ -700,18 +721,59 @@ ast_node_t* parser_parse_decl_mod(parser_t* par)
   return (ast_node_t*)node;
 }
 
+ast_node_t* parser_parse_decl_with_attrs(parser_t* par)
+{
+  parser_expect(par, TOK_PUNCT_HASH);
+  parser_expect(par, TOK_PUNCT_BRACKET_LEFT);
+
+  list_t* attrs = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_attr);
+
+  parser_expect(par, TOK_PUNCT_BRACKET_RIGHT);
+
+  ast_decl_t* node = (ast_decl_t*)parser_parse_decl(par);
+  
+  if (node->attrs != NULL)
+  {
+    while (!list_empty(attrs))
+      list_push_back(node->attrs, list_pop_front(attrs));
+
+    list_free(attrs);
+  }
+  else
+    node->attrs = attrs;
+
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_decl_extern(parser_t* par)
+{
+  parser_expect(par, TOK_KW_EXTERN);
+
+  ast_decl_t* node = NULL;
+
+  switch (parser_current(par)->kind)
+  {
+  case TOK_KW_FUN: node = (ast_decl_t*)parser_parse_decl_fun(par, true); break;
+  default:         report_error_unexpected_token(parser_current(par)->loc);
+  }
+
+  return (ast_node_t*)node;
+}
+
 ast_node_t* parser_parse_decl(parser_t* par)
 {
   switch (parser_current(par)->kind)
   {
-  case TOK_ID:        return parser_parse_decl_var   (par);
-  case TOK_KW_FUN:    return parser_parse_decl_fun   (par);
-  case TOK_KW_GEN:    return parser_parse_decl_gen   (par);
-  case TOK_KW_STRUCT: return parser_parse_decl_struct(par);
-  case TOK_KW_UNION:  return parser_parse_decl_union (par);
-  case TOK_KW_ENUM:   return parser_parse_decl_enum  (par);
-  case TOK_KW_MOD:    return parser_parse_decl_mod   (par);
-  default:            report_error_unexpected_token(parser_current(par)->loc);
+  case TOK_ID:         return parser_parse_decl_var       (par);
+  case TOK_KW_EXTERN:  return parser_parse_decl_extern    (par);
+  case TOK_KW_FUN:     return parser_parse_decl_fun       (par, false);
+  case TOK_KW_GEN:     return parser_parse_decl_gen       (par);
+  case TOK_KW_STRUCT:  return parser_parse_decl_struct    (par);
+  case TOK_KW_UNION:   return parser_parse_decl_union     (par);
+  case TOK_KW_ENUM:    return parser_parse_decl_enum      (par);
+  case TOK_KW_MOD:     return parser_parse_decl_mod       (par);
+  case TOK_PUNCT_HASH: return parser_parse_decl_with_attrs(par);
+  default:             report_error_unexpected_token(parser_current(par)->loc);
   }
 
   return NULL;

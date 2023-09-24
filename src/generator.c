@@ -43,11 +43,19 @@ void generator_visit_type_ptr(generator_t* gen, ast_type_ptr_t* node)
   node->llvm_type = LLVMPointerType(((ast_type_t*)node->base_type)->llvm_type, 0);
 }
 
+void generator_visit_type_array(generator_t* gen, ast_type_array_t* node)
+{
+  generator_visit_type(gen, (ast_type_t*)node->base_type);
+
+  node->llvm_type = LLVMArrayType2(((ast_type_t*)node->base_type)->llvm_type, 0);
+}
+
 void generator_visit_type(generator_t* gen, ast_type_t* node)
 {
   switch (node->kind)
   {
   case AST_TYPE_PTR:   generator_visit_type_ptr  (gen, (ast_type_ptr_t*  )node); break;
+  case AST_TYPE_ARRAY: generator_visit_type_array(gen, (ast_type_array_t*)node); break;
   case AST_TYPE_I8:    node->llvm_type = LLVMInt8TypeInContext  (gen->ctx); break;
   case AST_TYPE_I16:   node->llvm_type = LLVMInt16TypeInContext (gen->ctx); break;
   case AST_TYPE_I32:   node->llvm_type = LLVMInt32TypeInContext (gen->ctx); break;
@@ -82,6 +90,18 @@ void generator_visit_expr_lit(generator_t* gen, LLVMBuilderRef builder, ast_decl
 
     node->llvm_type = LLVMInt32TypeInContext(gen->ctx);
     node->llvm_value = LLVMConstInt(node->llvm_type, lit_value, false);
+    break;
+  }
+  case AST_EXPR_LIT_STR:
+  {
+    char* lit_value = allocator_allocate(allocator_global(), lit_len - 1);
+    memcpy(lit_value, lit_str + 1, lit_len - 2);
+    lit_value[lit_len - 2] = '\0';
+
+    node->llvm_value = LLVMBuildGlobalStringPtr(builder, lit_value, "global_str");
+    node->llvm_type = LLVMTypeOf(node->llvm_value);
+
+    allocator_deallocate(allocator_global(), lit_value);
     break;
   }
   default:
@@ -270,6 +290,7 @@ void generator_visit_stmt(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun
   case AST_STMT_IF:     generator_visit_stmt_if    (gen, builder, fun_node, (ast_stmt_if_t*    )node); break;
   case AST_STMT_RETURN: generator_visit_stmt_return(gen, builder, fun_node, (ast_stmt_return_t*)node); break;
   case AST_STMT_BLOCK:  generator_visit_stmt_block (gen, builder, fun_node, (ast_stmt_block_t* )node); break;
+  case AST_STMT_EXPR:   generator_visit_expr       (gen, builder, fun_node, (ast_expr_t*       )((ast_stmt_expr_t*)node)->expr); break;
   default: unreachable();
   }
 }
@@ -308,11 +329,28 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
     }
   }
 
+  bool is_vararg = false;
+  LLVMCallConv callconv = LLVMCCallConv;
+
+  if (node->attrs != NULL)
+    LIST_FOR_LOOP(it, node->attrs)
+    {
+      ast_attr_t* attr_node = (ast_attr_t*)list_node_get(it);
+
+      const char* attr_id_ptr = attr_node->id->tok->loc->ptr;
+      size_t attr_id_len = attr_node->id->tok->loc->len;
+
+      if (strncmp("cdecl", attr_id_ptr, attr_id_len) == 0)
+        callconv = LLVMCCallConv;
+      else if (strncmp("vararg", attr_id_ptr, attr_id_len) == 0)
+        is_vararg = true;
+    }
+
   node->llvm_type = LLVMFunctionType(
     ((ast_type_t*)node->return_type)->llvm_type,
     param_types,
     (uint32_t)param_count,
-    false
+    is_vararg
   );
 
   if (param_types != NULL)
@@ -328,18 +366,23 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
 
   allocator_deallocate(allocator_global(), fun_id_str);
 
-  node->llvm_entry = LLVMAppendBasicBlockInContext(gen->ctx, node->llvm_value, "entry");
+  LLVMSetFunctionCallConv(node->llvm_value, callconv);
 
-  LLVMBuilderRef builder = LLVMCreateBuilderInContext(gen->ctx);
-  LLVMPositionBuilderAtEnd(builder, node->llvm_entry);
+  if (!node->is_extern)
+  {
+    node->llvm_entry = LLVMAppendBasicBlockInContext(gen->ctx, node->llvm_value, "entry");
 
-  size_t i = 0;
-  LIST_FOR_LOOP(it, node->params)
-    generator_visit_decl_param(gen, builder, node, (ast_decl_param_t*)list_node_get(it), i++);
+    LLVMBuilderRef builder = LLVMCreateBuilderInContext(gen->ctx);
+    LLVMPositionBuilderAtEnd(builder, node->llvm_entry);
 
-  generator_visit_stmt(gen, builder, node, (ast_stmt_t*)node->stmt);
+    size_t i = 0;
+    LIST_FOR_LOOP(it, node->params)
+      generator_visit_decl_param(gen, builder, node, (ast_decl_param_t*)list_node_get(it), i++);
 
-  LLVMDisposeBuilder(builder);
+    generator_visit_stmt(gen, builder, node, (ast_stmt_t*)node->stmt);
+
+    LLVMDisposeBuilder(builder);
+  }
 }
 
 void generator_visit_decl_param(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_decl_param_t* node, size_t idx)
