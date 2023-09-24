@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <llvm-c/BitWriter.h>
+#include <llvm-c/Core.h>
+#include <llvm-c/Target.h>
+
 #include "allocator.h"
 #include "analzyer.h"
 #include "arena.h"
@@ -38,6 +42,7 @@ struct compiler_s
     bool dump_ast;
     bool dump_ast_flat;
     bool dump_ll;
+    bool dump_bc;
   } flags;
 
   struct
@@ -125,6 +130,19 @@ static void compiler_dump_ll(compiler_t* compiler, const char* input_file_path, 
   log_trace("main", "(%s) LLVM IR dump: %s", input_file_name, ll_file_path);
 }
 
+static void compiler_dump_bc(compiler_t* compiler, const char* input_file_path, const char* input_file_name, LLVMModuleRef llvm_module)
+{
+  unused(compiler);
+
+  char bc_file_path[COMPILER_MAX_BUFFER_SIZE];
+  strcpy(bc_file_path, input_file_path);
+  strcat(bc_file_path, ".bc");
+
+  LLVMWriteBitcodeToFile(llvm_module, bc_file_path);
+  
+  log_trace("main", "(%s) LLVM bitcode dump: %s", input_file_name, bc_file_path);
+}
+
 compiler_t* compiler_init(void)
 {
   compiler_t* compiler = (compiler_t*)allocator_allocate(allocator_global(), sizeof(compiler_t));
@@ -160,15 +178,18 @@ void compiler_free(compiler_t* compiler)
 
 int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 {
+  LLVMInitializeNativeTarget();
+
   cli_opt_t opts[] = {
     cli_opt_help(),
     cli_opt_version(TAU_VERSION),
     cli_opt_verbose(&compiler->flags.verbose),
 
-    cli_opt_flag(cli_names("--dump-toks"),     1, "Dump tokens into json file.",   &compiler->flags.dump_tokens),
-    cli_opt_flag(cli_names("--dump-ast"),      1, "Dump AST into json file.",      &compiler->flags.dump_ast),
-    cli_opt_flag(cli_names("--dump-ast-flat"), 1, "Dump flat AST into json file.", &compiler->flags.dump_ast_flat),
-    cli_opt_flag(cli_names("--dump-ll"),       1, "Dump LLVM IR into ll file.",    &compiler->flags.dump_ll),
+    cli_opt_flag(cli_names("--dump-toks"),     1, "Dump tokens into json file.",     &compiler->flags.dump_tokens),
+    cli_opt_flag(cli_names("--dump-ast"),      1, "Dump AST into json file.",        &compiler->flags.dump_ast),
+    cli_opt_flag(cli_names("--dump-ast-flat"), 1, "Dump flat AST into json file.",   &compiler->flags.dump_ast_flat),
+    cli_opt_flag(cli_names("--dump-ll"),       1, "Dump LLVM IR into ll file.",      &compiler->flags.dump_ll),
+    cli_opt_flag(cli_names("--dump-bc"),       1, "Dump LLVM bitcode into bc file.", &compiler->flags.dump_bc),
     
     cli_opt_int(cli_names("--log-level"), 1, 'N', 1, &compiler->args.log_level, NULL, NULL, "Set log level.", NULL, NULL),
     
@@ -230,13 +251,9 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     log_trace("main", "(%s) Semantic analysis.", input_file_name);
 
-    analyzer_t analyzer;
-    analyzer_init(compiler->allocator, &analyzer);
+    analyzer_t* analyzer = analyzer_init();
 
-    symtable_t* symtable = symtable_init(NULL);
-    typetable_t* typetable = typetable_init();
-
-    time_it("analyzer", analyzer_analyze(&analyzer, root, symtable, typetable));
+    time_it("analyzer", analyzer_analyze(analyzer, root));
 
     if (compiler->flags.dump_ast_flat)
       compiler_dump_ast_flat(compiler, input_file_path, input_file_name, root);
@@ -251,14 +268,14 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     if (compiler->flags.dump_ll)
       compiler_dump_ll(compiler, input_file_path, input_file_name, llvm_module);
 
+    if (compiler->flags.dump_bc)
+      compiler_dump_bc(compiler, input_file_path, input_file_name, llvm_module);
+
     log_trace("main", "(%s) Cleanup.", input_file_name);
 
     generator_free(generator);
 
-    symtable_free(symtable);
-    typetable_free(typetable);
-
-    analyzer_free(&analyzer);
+    analyzer_free(analyzer);
     
     parser_free(parser);
 

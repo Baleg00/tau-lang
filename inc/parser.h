@@ -25,10 +25,14 @@
 #include "list.h"
 #include "token.h"
 
-/** Represents a syntax analyzer. */
+/**
+ * \brief Represents a syntax analyzer.
+ */
 typedef struct parser_s parser_t;
 
-/** Function pointer type to be used when parsing lists. */
+/**
+ * \brief Function pointer type to be used when parsing lists.
+ */
 typedef ast_node_t*(*parse_func_t)(parser_t*);
 
 /**

@@ -137,7 +137,7 @@ typedef enum token_kind_e
 } token_kind_t;
 
 /**
- * \brief Structure representing a token.
+ * \brief Represents a token.
  */
 typedef struct token_s
 {

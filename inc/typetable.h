@@ -23,8 +23,12 @@
 #include "typedesc.h"
 
 /**
- * \brief Represents a typetable that stores mappings of AST nodes to their
- * type descriptors.
+ * \brief Represents a type table.
+ *
+ * \details This structure represents a type table, which is used to store and
+ * manage type information. The type table is responsible for associating AST
+ * nodes with their corresponding type descriptors. It plays a critical role in
+ * type checking and resolution during compilation.
  */
 typedef struct typetable_s typetable_t;
 

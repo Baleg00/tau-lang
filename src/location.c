@@ -7,13 +7,13 @@
 
 #include "location.h"
 
+#include "allocator.h"
 #include "memtrace.h"
 #include "util.h"
 
 location_t* location_init(const char* path, const char* src, const char* ptr, size_t row, size_t col, size_t len)
 {
-  location_t* loc = (location_t*)malloc(sizeof(location_t));
-  assert(loc != NULL);
+  location_t* loc = (location_t*)allocator_allocate(allocator_global(), sizeof(location_t));
 
   loc->path = path;
   loc->src = src;
@@ -27,7 +27,7 @@ location_t* location_init(const char* path, const char* src, const char* ptr, si
 
 void location_free(location_t* loc)
 {
-  free(loc);
+  allocator_deallocate(allocator_global(), loc);
 }
 
 void location_json_dump(location_t* loc, FILE* stream)

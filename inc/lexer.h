@@ -20,13 +20,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "typedefs.h"
-
 #include "location.h"
 #include "token.h"
 
 /**
- * \brief Lexical analyzer.
+ * \brief Represents a lexical analyzer.
  */
 typedef struct lexer_s lexer_t;
 

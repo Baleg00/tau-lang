@@ -1,7 +1,14 @@
+/**
+ * \file symtable.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "symtable.h"
 
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "ast.h"
@@ -10,7 +17,25 @@
 #include "typedesc.h"
 #include "util.h"
 
+/**
+ * \brief The initial capacity of a symbol table.
+ *
+ * \details This macro defines the initial number of buckets in a symbol table's
+ * hash table when the symbol table is first created. A larger initial capacity
+ * can reduce the likelihood of hash collisions and improve symbol lookup
+ * performance.
+ */
 #define SYMTABLE_INITIAL_CAPACITY 16
+
+/**
+ * \brief The load factor threshold for symbol table resizing.
+ *
+ * \details This macro defines the load factor threshold at which a symbol table
+ * should be resized (rehashed) to maintain efficient symbol lookup operations.
+ * When the number of symbols in the table exceeds this threshold as a ratio of
+ * the capacity, a resizing operation is triggered to prevent hash collisions
+ * and ensure performance.
+ */
 #define SYMTABLE_LOAD_FACTOR 0.75
 
 symbol_t* symbol_init(const char* id, size_t len, ast_node_t* node)

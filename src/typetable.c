@@ -15,7 +15,11 @@
 #include "util.h"
 
 /**
- * \brief The initial capacity of the typetable when it is created.
+ * \brief The initial capacity for the type table.
+ *
+ * \details This macro defines the initial capacity for the type table, which
+ * represents the number of buckets used to store type information. Increasing
+ * this capacity may improve performance when dealing with a large number of types.
  */
 #define TYPETABLE_INITIAL_CAPACITY 16
 
@@ -30,23 +34,25 @@
 #define TYPETABLE_LOAD_FACTOR 0.75
 
 /**
- * \brief Represents an entry in the typetable.
+ * \brief Represents an entry in a type table.
+ *
+ * \details This structure holds information about a type entry in a type table.
+ * It includes a reference to the AST node and the associated type descriptor.
  */
 typedef struct typetable_entry_s typetable_entry_t;
 
 struct typetable_entry_s
 {
-  ast_node_t* node; // Pointer to the AST node associated with this entry.
-  typedesc_t* desc; // Pointer to the type descriptor associated with the node.
-
-  typetable_entry_t* next; // Pointer to the next entry in the same bucket.
+  ast_node_t* node; // A pointer to the AST node associated with the type.
+  typedesc_t* desc; // A pointer to the descriptor of the type.
+  typetable_entry_t* next; // A pointer to the next entry in case of collisions.
 };
 
 struct typetable_s
 {
-  size_t size; // Number of entries currently stored in the table.
-  size_t capacity; // Current capacity of the table.
-  typetable_entry_t** buckets; // Array of bucket pointers to store the entries.
+  size_t size; // The number of type entries in the table.
+  size_t capacity; // The total capacity of the table.
+  typetable_entry_t** buckets; // An array of buckets for storing type entries.
 };
 
 static typetable_entry_t* typetable_entry_init(ast_node_t* node, typedesc_t* desc)
