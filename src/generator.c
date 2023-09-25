@@ -1,5 +1,6 @@
 #include "generator.h"
 
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,41 +75,80 @@ void generator_visit_type(generator_t* gen, ast_type_t* node)
   }
 }
 
-void generator_visit_expr_lit(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node)
+void generator_visit_expr_lit_int(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node)
 {
-  size_t lit_len = node->tok->loc->len;
+  node->llvm_type = LLVMInt32TypeInContext(gen->ctx);
+  node->llvm_value = LLVMConstIntOfStringAndSize(node->llvm_type, node->tok->loc->ptr, (uint32_t)node->tok->loc->len, 10);
+}
 
-  char* lit_str = allocator_allocate(allocator_global(), lit_len + 1);
-  memcpy(lit_str, node->tok->loc->ptr, lit_len);
-  lit_str[lit_len] = '\0';
+void generator_visit_expr_lit_flt(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node)
+{
+  node->llvm_type = LLVMFloatTypeInContext(gen->ctx);
+  node->llvm_value = LLVMConstRealOfStringAndSize(node->llvm_type, node->tok->loc->ptr, (uint32_t)node->tok->loc->len);
+}
 
-  switch (node->kind)
-  {
-  case AST_EXPR_LIT_INT:
-  {
-    uint64_t lit_value = strtoull(lit_str, NULL, 10);
+void generator_visit_expr_lit_str(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node)
+{
+  size_t lit_len = 0;
 
-    node->llvm_type = LLVMInt32TypeInContext(gen->ctx);
-    node->llvm_value = LLVMConstInt(node->llvm_type, lit_value, false);
-    break;
-  }
-  case AST_EXPR_LIT_STR:
-  {
-    char* lit_value = allocator_allocate(allocator_global(), lit_len - 1);
-    memcpy(lit_value, lit_str + 1, lit_len - 2);
-    lit_value[lit_len - 2] = '\0';
+  for (char* ch = (char*)node->tok->loc->ptr + 1; *ch != '"'; ch++, lit_len++)
+    if (*ch == '\\')
+    {
+      ch++;
 
-    node->llvm_value = LLVMBuildGlobalStringPtr(builder, lit_value, "global_str");
-    node->llvm_type = LLVMTypeOf(node->llvm_value);
+      switch (*ch)
+      {
+      case '\\':
+      case 'b':
+      case 'f':
+      case 'n':
+      case 'r':
+      case 't':
+      case '\'':
+      case '"':
+        break;
+      default:
+        unreachable();
+      }
+    }
 
-    allocator_deallocate(allocator_global(), lit_value);
-    break;
-  }
-  default:
-    unreachable();
-  }
+  char* lit_value = allocator_allocate(allocator_global(), lit_len + 1);
 
-  allocator_deallocate(allocator_global(), lit_str);
+  for (char *ch = (char*)node->tok->loc->ptr + 1, *ptr = lit_value; *ch != '"'; ch++, ptr++)
+    if (*ch == '\\')
+    {
+      ch++;
+
+      switch (*ch)
+      {
+      case '\\': *ptr = '\\'; break;
+      case 'b':  *ptr = '\b'; break;
+      case 'f':  *ptr = '\f'; break;
+      case 'n':  *ptr = '\n'; break;
+      case 'r':  *ptr = '\r'; break;
+      case 't':  *ptr = '\t'; break;
+      case '\'': *ptr = '\''; break;
+      case '"':  *ptr = '"';  break;
+      default: unreachable();
+      }
+    }
+    else
+      *ptr = *ch;
+
+  lit_value[lit_len] = '\0';
+
+  node->llvm_value = LLVMBuildGlobalStringPtr(builder, lit_value, "global_str");
+  node->llvm_type = LLVMTypeOf(node->llvm_value);
+
+  allocator_deallocate(allocator_global(), lit_value);
+}
+
+void generator_visit_expr_lit_bool(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node)
+{
+  bool lit_value = strncmp("true", node->tok->loc->ptr, node->tok->loc->len) == 0;
+
+  node->llvm_type = LLVMInt1TypeInContext(gen->ctx);
+  node->llvm_value = LLVMConstInt(node->llvm_type, (uint32_t)lit_value, false);
 }
 
 void generator_visit_expr_op_unary(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
@@ -218,12 +258,10 @@ void generator_visit_expr(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun
 {
   switch (node->kind)
   {
-  case AST_EXPR_LIT_INT:
-  case AST_EXPR_LIT_FLT:
-  case AST_EXPR_LIT_STR:
-  case AST_EXPR_LIT_CHAR:
-  case AST_EXPR_LIT_BOOL:
-  case AST_EXPR_LIT_NULL:  generator_visit_expr_lit      (gen, builder, fun_node, (ast_expr_lit_t*    )node); break;
+  case AST_EXPR_LIT_INT:   generator_visit_expr_lit_int  (gen, builder, fun_node, (ast_expr_lit_t*    )node); break;
+  case AST_EXPR_LIT_FLT:   generator_visit_expr_lit_flt  (gen, builder, fun_node, (ast_expr_lit_t*    )node); break;
+  case AST_EXPR_LIT_STR:   generator_visit_expr_lit_str  (gen, builder, fun_node, (ast_expr_lit_t*    )node); break;
+  case AST_EXPR_LIT_BOOL:  generator_visit_expr_lit_bool (gen, builder, fun_node, (ast_expr_lit_t*    )node); break;
   case AST_EXPR_OP_UNARY:  generator_visit_expr_op_unary (gen, builder, fun_node, (ast_expr_op_un_t*  )node); break;
   case AST_EXPR_OP_BINARY: generator_visit_expr_op_binary(gen, builder, fun_node, (ast_expr_op_bin_t* )node); break;
   case AST_EXPR_OP_CALL:   generator_visit_expr_op_call  (gen, builder, fun_node, (ast_expr_op_call_t*)node); break;

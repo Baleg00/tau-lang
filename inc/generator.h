@@ -15,7 +15,10 @@ void generator_visit_type_ptr(generator_t* gen, ast_type_ptr_t* node);
 void generator_visit_type_array(generator_t* gen, ast_type_array_t* node);
 void generator_visit_type(generator_t* gen, ast_type_t* node);
 
-void generator_visit_expr_lit(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node);
+void generator_visit_expr_lit_int(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node);
+void generator_visit_expr_lit_flt(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node);
+void generator_visit_expr_lit_str(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node);
+void generator_visit_expr_lit_bool(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_lit_t* node);
 void generator_visit_expr_op_unary(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 void generator_visit_expr_op_binary(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 void generator_visit_expr_op_call(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_op_call_t* node);
