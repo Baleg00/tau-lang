@@ -233,24 +233,32 @@ void generator_visit_expr_op_call(generator_t* gen, LLVMBuilderRef builder, ast_
   node->llvm_type = LLVMGetReturnType(((ast_expr_t*)node->callee)->llvm_type);
 }
 
+void generator_visit_expr_decl_var(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
+{
+  node->llvm_type = ((ast_decl_var_t*)node->decl)->llvm_type;
+  node->llvm_value = ((ast_decl_var_t*)node->decl)->llvm_value;
+}
+
+void generator_visit_expr_decl_param(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
+{
+  node->llvm_type = ((ast_decl_param_t*)node->decl)->llvm_type;
+  node->llvm_value = ((ast_decl_param_t*)node->decl)->llvm_value;
+}
+
+void generator_visit_expr_decl_fun(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
+{
+  node->llvm_type = ((ast_decl_fun_t*)node->decl)->llvm_type;
+  node->llvm_value = ((ast_decl_fun_t*)node->decl)->llvm_value;
+}
+
 void generator_visit_expr_decl(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
 {
   switch (node->decl->kind)
   {
-  case AST_DECL_VAR:
-    node->llvm_type = ((ast_decl_var_t*)node->decl)->llvm_type;
-    node->llvm_value = ((ast_decl_var_t*)node->decl)->llvm_value;
-    break;
-  case AST_DECL_PARAM:
-    node->llvm_type = ((ast_decl_param_t*)node->decl)->llvm_type;
-    node->llvm_value = ((ast_decl_param_t*)node->decl)->llvm_value;
-    break;
-  case AST_DECL_FUN:
-    node->llvm_type = ((ast_decl_fun_t*)node->decl)->llvm_type;
-    node->llvm_value = ((ast_decl_fun_t*)node->decl)->llvm_value;
-    break;
-  default:
-    unreachable();
+  case AST_DECL_VAR:   generator_visit_expr_decl_var  (gen, builder, fun_node, node); break;
+  case AST_DECL_PARAM: generator_visit_expr_decl_param(gen, builder, fun_node, node); break;
+  case AST_DECL_FUN:   generator_visit_expr_decl_fun  (gen, builder, fun_node, node); break;
+  default: unreachable();
   }
 }
 
@@ -340,8 +348,6 @@ void generator_visit_decl_var(generator_t* gen, LLVMBuilderRef builder, ast_decl
 
   node->llvm_type = ((ast_type_t*)node->type)->llvm_type;
   node->llvm_value = ((ast_expr_t*)node->expr)->llvm_value;
-
-  assert(node->llvm_type == ((ast_expr_t*)node->expr)->llvm_type);
 }
 
 void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)

@@ -22,6 +22,9 @@ void generator_visit_expr_lit_bool(generator_t* gen, LLVMBuilderRef builder, ast
 void generator_visit_expr_op_unary(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 void generator_visit_expr_op_binary(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 void generator_visit_expr_op_call(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_op_call_t* node);
+void generator_visit_expr_decl_var(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_decl_t* node);
+void generator_visit_expr_decl_param(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_decl_t* node);
+void generator_visit_expr_decl_fun(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_decl_t* node);
 void generator_visit_expr_decl(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_decl_t* node);
 void generator_visit_expr(generator_t* gen, LLVMBuilderRef builder, ast_decl_fun_t* fun_node, ast_expr_t* node);
 
