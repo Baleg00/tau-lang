@@ -190,6 +190,14 @@ size_t lexer_skip(lexer_t* lex, bool(*pred)(lexer_t*));
 void lexer_skip_n(lexer_t* lex, size_t n);
 
 /**
+ * \brief Skips an integer suffix if present.
+ *
+ * \param[in] lex Pointer to the lexer.
+ * \returns The number of characters skipped.
+ */
+size_t lexer_skip_integer_suffix(lexer_t* lex);
+
+/**
  * \brief Reads a word token from the lexer.
  *
  * \param[in] lex Pointer to the lexer.

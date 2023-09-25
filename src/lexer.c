@@ -162,6 +162,45 @@ void lexer_skip_n(lexer_t* lex, size_t n)
     lexer_next(lex);
 }
 
+size_t lexer_skip_integer_suffix(lexer_t* lex)
+{
+  location_t* loc = lexer_location_copy(lex);
+
+  loc->len = lexer_skip(lex, lexer_is_word);
+
+  switch (loc->len)
+  {
+  case 0:
+    break;
+  case 2:
+    if (strncmp("iz", loc->ptr, loc->len) == 0 ||
+        strncmp("uz", loc->ptr, loc->len) == 0 ||
+        strncmp("i8", loc->ptr, loc->len) == 0 ||
+        strncmp("u8", loc->ptr, loc->len) == 0)
+      break;
+    
+    report_error_invalid_integer_suffix(loc);
+  case 3:
+    if (strncmp("i16", loc->ptr, loc->len) == 0 ||
+        strncmp("u16", loc->ptr, loc->len) == 0 ||
+        strncmp("i32", loc->ptr, loc->len) == 0 ||
+        strncmp("u32", loc->ptr, loc->len) == 0 ||
+        strncmp("i64", loc->ptr, loc->len) == 0 ||
+        strncmp("u64", loc->ptr, loc->len) == 0)
+      break;
+    
+    report_error_invalid_integer_suffix(loc);
+  default:
+    report_error_invalid_integer_suffix(loc);
+  }
+
+  size_t len = loc->len;
+
+  location_free(loc);
+  
+  return len;
+}
+
 token_t* lexer_read_word(lexer_t* lex)
 {
   static const struct {
@@ -246,6 +285,8 @@ token_t* lexer_read_octal_integer(lexer_t* lex)
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_octal);
+  len += lexer_skip_integer_suffix(lex);
+
   tok->loc->len = len;
 
   if (len == 2 || lexer_is_word(lex))
@@ -261,6 +302,8 @@ token_t* lexer_read_binary_integer(lexer_t* lex)
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_binary);
+  len += lexer_skip_integer_suffix(lex);
+  
   tok->loc->len = len;
 
   if (len == 2 || lexer_is_word(lex))
@@ -311,6 +354,8 @@ token_t* lexer_read_decimal_number(lexer_t* lex)
     return tok;
   }
 
+  len += lexer_skip_integer_suffix(lex);
+
   tok->loc->len = len;
 
   if (lexer_is_word(lex))
@@ -326,6 +371,8 @@ token_t* lexer_read_hexadecimal_integer(lexer_t* lex)
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_hexadecimal);
+  len += lexer_skip_integer_suffix(lex);
+  
   tok->loc->len = len;
 
   if (len == 2 || lexer_is_word(lex))

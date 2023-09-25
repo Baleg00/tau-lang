@@ -74,6 +74,13 @@ void report_error_ill_formed_integer_literal(location_t* loc)
   exit(EXIT_FAILURE);
 }
 
+void report_error_invalid_integer_suffix(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Invalid integer suffix.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
 void report_error_ill_formed_floating_point_literal(location_t* loc)
 {
   crumb_error(1, crumb_snippet(loc, "Ill-formed float literal.", NULL, "", NULL));

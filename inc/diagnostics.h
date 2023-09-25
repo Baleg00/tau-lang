@@ -13,6 +13,7 @@ void report_error_missing_hex_digits_in_escape_sequence(location_t* loc);
 void report_error_too_many_hex_digits_in_escape_sequence(location_t* loc);
 void report_error_unknown_escape_sequence(location_t* loc);
 void report_error_ill_formed_integer_literal(location_t* loc);
+void report_error_invalid_integer_suffix(location_t* loc);
 void report_error_ill_formed_floating_point_literal(location_t* loc);
 void report_error_unexpected_token(location_t* loc);
 void report_error_failed_to_open_file(const char* path);
