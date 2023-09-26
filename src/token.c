@@ -28,7 +28,19 @@ void token_free(token_t* tok)
   allocator_deallocate(allocator_global(), tok);
 }
 
-void token_list_json_dump(FILE* stream, list_t* list)
+void token_json_dump(FILE* stream, token_t* tok)
+{
+  fprintf(stream, "{\"kind\":\"%s\",\"loc\":", token_kind_to_string(tok->kind));
+
+  location_json_dump(tok->loc, stream);
+
+  if (token_is_literal(tok) || tok->kind == TOK_ID)
+    fprintf(stream, ",\"value\":\"%.*s\"", (int)tok->loc->len, tok->loc->ptr);
+
+  fputc('}', stream);
+}
+
+void token_json_dump_list(FILE* stream, list_t* list)
 {
   fputc('[', stream);
 
@@ -36,14 +48,7 @@ void token_list_json_dump(FILE* stream, list_t* list)
   {
     token_t* tok = (token_t*)list_node_get(it);
 
-    fprintf(stream, "{\"kind\":\"%s\",\"loc\":", token_kind_to_string(tok->kind));
-
-    location_json_dump(tok->loc, stream);
-
-    if (token_is_lit(tok) || tok->kind == TOK_ID)
-      fprintf(stream, ",\"value\":\"%.*s\"", (int)tok->loc->len, tok->loc->ptr);
-
-    fputc('}', stream);
+    token_json_dump(stream, tok);
 
     if (list_node_next(it) != NULL)
       fputc(',', stream);
@@ -162,7 +167,7 @@ const char* token_kind_to_string(token_kind_t kind)
   return NULL;
 }
 
-bool token_is_lit(token_t* tok)
+bool token_is_literal(token_t* tok)
 {
   switch (tok->kind)
   {
@@ -178,7 +183,7 @@ bool token_is_lit(token_t* tok)
   }
 }
 
-bool token_is_kw(token_t* tok)
+bool token_is_keyword(token_t* tok)
 {
   switch (tok->kind)
   {
@@ -230,7 +235,7 @@ bool token_is_kw(token_t* tok)
   }
 }
 
-bool token_is_punct(token_t* tok)
+bool token_is_punctuation(token_t* tok)
 {
   switch (tok->kind)
   {

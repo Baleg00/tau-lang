@@ -162,13 +162,21 @@ token_t* token_init(token_kind_t kind, location_t* loc);
 void token_free(token_t* tok);
 
 /**
+ * \brief Dumps the JSON representation of a token to the specified stream.
+ * 
+ * \param[in] stream The stream to write the JSON output to.
+ * \param[in] tok Pointer to the token to be dumped.
+ */
+void token_json_dump(FILE* stream, token_t* tok);
+
+/**
  * \brief Dumps the JSON representation of a list of tokens to the specified
  * stream.
  * 
  * \param[in] stream The stream to write the JSON output to.
  * \param[in] list The list of tokens to be dumped.
  */
-void token_list_json_dump(FILE* stream, list_t* list);
+void token_json_dump_list(FILE* stream, list_t* list);
 
 /**
  * \brief Converts a token kind to its corresponding string representation.
@@ -184,7 +192,7 @@ const char* token_kind_to_string(token_kind_t kind);
  * \param[in] tok The token to be checked.
  * \returns `true` if the token is a literal token, `false` otherwise.
  */
-bool token_is_lit(token_t* tok);
+bool token_is_literal(token_t* tok);
 
 /**
  * \brief Checks if a token is a keyword token.
@@ -192,7 +200,7 @@ bool token_is_lit(token_t* tok);
  * \param[in] tok The token to be checked.
  * \returns `true` if the token is a keyword token, `false` otherwise.
  */
-bool token_is_kw(token_t* tok);
+bool token_is_keyword(token_t* tok);
 
 /**
  * \brief Checks if a token is a punctuation token.
@@ -200,6 +208,6 @@ bool token_is_kw(token_t* tok);
  * \param[in] tok The token to be checked.
  * \returns `true` if the token is a punctuation token, `false` otherwise.
  */
-bool token_is_punct(token_t* tok);
+bool token_is_punctuation(token_t* tok);
 
 #endif

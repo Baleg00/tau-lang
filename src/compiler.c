@@ -70,7 +70,7 @@ static void compiler_dump_tokens(compiler_t* compiler, const char* input_file_pa
 
   FILE* toks_file = fopen(tokens_file_path, "w");
   assert(toks_file != NULL);
-  token_list_json_dump(toks_file, tokens);
+  token_json_dump_list(toks_file, tokens);
   fclose(toks_file);
 
   log_trace("main", "(%s) Token dump: %s", input_file_name, tokens_file_path);

@@ -299,9 +299,9 @@ bool shyd_postfix_step(shyd_t* shyd)
   default: fallthrough();
   }
 
-  if (parser_current(shyd->par)->kind == TOK_ID || token_is_lit(parser_current(shyd->par)))
+  if (parser_current(shyd->par)->kind == TOK_ID || token_is_literal(parser_current(shyd->par)))
     return shyd_parse_term(shyd);
-  else if (token_is_punct(parser_current(shyd->par)))
+  else if (token_is_punctuation(parser_current(shyd->par)))
     return shyd_parse_operator(shyd);
 
   return false;
