@@ -153,28 +153,48 @@ bool set_remove(set_t* set, void* data)
     set_node_t* parent = node->parent;
     set_node_t* temp = node->right;
 
-    set_node_free(node);
-
     if (parent == NULL)
+    {
+      if (temp != NULL)
+        temp->parent = NULL;
+        
       set->root = temp;
+    }
     else if (node == parent->left)
       parent->left = temp;
     else
       parent->right = temp;
+
+    set_node_free(node);
   }
   else if (node->right == NULL)
   {
     set_node_t* parent = node->parent;
     set_node_t* temp = node->left;
 
-    set_node_free(node);
-
     if (parent == NULL)
+    {
+      if (temp != NULL)
+        temp->parent = NULL;
+      
       set->root = temp;
+    }
     else if (node == parent->left)
+    {
+      if (temp != NULL)
+        temp->parent = parent;
+      
       parent->left = temp;
+    }
     else
+    {
+      if (temp != NULL)
+        temp->parent = parent;
+      
       parent->right = temp;
+    }
+
+    set_node_free(node);
   }
   else
   {
@@ -184,7 +204,10 @@ bool set_remove(set_t* set, void* data)
       min_node = min_node->left;
 
     node->data = min_node->data;
-    min_node->right->parent = min_node->parent;
+
+    if (min_node->right != NULL)
+      min_node->right->parent = min_node->parent;
+    
     min_node->parent->left = min_node->right;
 
     set_node_free(min_node);
