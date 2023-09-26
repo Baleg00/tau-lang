@@ -218,6 +218,30 @@ test()
       end()
     end()
 
+    describe("string_clear")
+      it("should clear string")
+        string_t* str = string_init_cstr("foo");
+
+        string_clear(str);
+
+        assert_true(string_compare_cstr(str, "") == 0);
+
+        string_free(str);
+      end()
+    end()
+
+    describe("string_copy")
+      it("should copy string")
+        string_t* str = string_init_cstr("foo");
+        string_t* copy = string_copy(str);
+
+        assert_true(string_compare(str, copy) == 0);
+
+        string_free(copy);
+        string_free(str);
+      end()
+    end()
+
     describe("string_substr")
       it("should create empty substring")
         string_t* str1 = string_init_cstr("foo");
@@ -681,6 +705,98 @@ test()
         assert_true(string_compare_cstr(str, "foar") == 0);
 
         string_free(rep);
+        string_free(str);
+      end()
+    end()
+
+    describe("string_find")
+      it("should not find sub-string")
+        string_t* str = string_init_cstr("foo");
+        string_t* sub = string_init_cstr("bar");
+
+        size_t pos = string_find(str, sub);
+
+        assert_equal(pos, 3);
+
+        string_free(sub);
+        string_free(str);
+      end()
+
+      it("should find sub-string at start")
+        string_t* str = string_init_cstr("foobar");
+        string_t* sub = string_init_cstr("foo");
+
+        size_t pos = string_find(str, sub);
+
+        assert_equal(pos, 0);
+
+        string_free(sub);
+        string_free(str);
+      end()
+
+      it("should find sub-string at end")
+        string_t* str = string_init_cstr("foobar");
+        string_t* sub = string_init_cstr("bar");
+
+        size_t pos = string_find(str, sub);
+
+        assert_equal(pos, 3);
+
+        string_free(sub);
+        string_free(str);
+      end()
+
+      it("should find sub-string in middle")
+        string_t* str = string_init_cstr("foobar");
+        string_t* sub = string_init_cstr("oba");
+
+        size_t pos = string_find(str, sub);
+
+        assert_equal(pos, 2);
+
+        string_free(sub);
+        string_free(str);
+      end()
+    end()
+
+    describe("string_find_cstr")
+      it("should not find sub-string")
+        string_t* str = string_init_cstr("foo");
+
+        size_t pos = string_find_cstr(str, "bar");
+
+        assert_equal(pos, 3);
+
+        string_free(str);
+      end()
+
+      it("should find sub-string at start")
+        string_t* str = string_init_cstr("foobar");
+
+        size_t pos = string_find_cstr(str, "foo");
+
+        assert_equal(pos, 0);
+
+        string_free(str);
+      end()
+
+      it("should find sub-string at end")
+        string_t* str = string_init_cstr("foobar");
+
+        size_t pos = string_find_cstr(str, "bar");
+
+        assert_equal(pos, 3);
+
+        string_free(str);
+      end()
+
+      it("should find sub-string in middle")
+        string_t* str = string_init_cstr("foobar");
+
+        size_t pos = string_find_cstr(str, "oba");
+
+        assert_equal(pos, 2);
+
         string_free(str);
       end()
     end()

@@ -17,7 +17,7 @@
 struct string_s 
 {
   size_t cap; // Maxmimum capacity of the buffer.
-  size_t len; // Length of the string. (excluding the terminating null character).
+  size_t len; // Length of the string (excluding the terminating null character).
   char* buf; // Pointer to character buffer.
   bool owning; // `true` if the buffer is owned by the string, `false` otherwise.
 };
@@ -101,40 +101,25 @@ void string_reserve(string_t* str, size_t cap)
   if (str->cap >= cap)
     return;
 
-  if (!str->owning)
-  {
-    log_warn("string", "Cannot expand not owned buffer.");
-    return;
-  }
+  assert(str->owning);
 
   char* new_buf = (char*)realloc(str->buf, cap * sizeof(char));
+  assert(new_buf != NULL);
 
-  if (new_buf == NULL)
-    log_warn("string", "Failed to reserve space for string. Requested capacity: %zu", cap);
-  else
-  {
-    str->cap = cap;
-    str->buf = new_buf;
-  }
+  str->cap = cap;
+  str->buf = new_buf;
 }
 
 void string_fit(string_t* str)
 {
   if (!str->owning)
-  {
-    log_warn("string", "Cannot shrink not owned buffer.");
     return;
-  }
 
   char* new_buf = (char*)realloc(str->buf, str->len + 1);
+  assert(new_buf != NULL);
 
-  if (new_buf == NULL)
-    log_warn("string", "Failed to fit string capacity.");
-  else
-  {
-    str->cap = str->len + 1;
-    str->buf = new_buf;
-  }
+  str->cap = str->len + 1;
+  str->buf = new_buf;
 }
 
 void string_append(string_t* str, string_t* other)
@@ -180,11 +165,24 @@ void string_erase(string_t* str, size_t pos, size_t len)
   memmove(str->buf + pos, str->buf + pos + len, str->len - pos - len + 1);
 }
 
+void string_clear(string_t* str)
+{
+  str->buf[0] = '\0';
+  str->len = 0;
+}
+
+string_t* string_copy(string_t* str)
+{
+  return string_init_cstr(str->buf);
+}
+
 string_t* string_substr(string_t* str, size_t begin, size_t len)
 {
   string_t* result = string_init_capacity(len + 1);
+
   result->len = len;
   strncpy(result->buf, str->buf + begin, len);
+
   return result;
 }
 
@@ -261,28 +259,15 @@ bool string_ends_with_cstr(string_t* str, const char* suffix)
 
 bool string_contains(string_t* str, string_t* sub)
 {
-  for (size_t i = 0; i <= str->len - sub->len;)
-  {
-    size_t j = 0;
-
-    for (; j < sub->len; j++)
-      if (str->buf[i + j] != sub->buf[j])
-        break;
-
-    if (j == sub->len)
-      return true;
-    else if (j == 0)
-      i++;
-    else
-      i += j;
-  }
-
-  return false;
+  return string_contains_cstr(str, sub->buf);
 }
 
 bool string_contains_cstr(string_t* str, const char* sub)
 {
   size_t sub_len = strlen(sub);
+
+  if (sub_len > str->len)
+    return false;
 
   for (size_t i = 0; i <= str->len - sub_len;)
   {
@@ -337,4 +322,35 @@ void string_replace_with_csubstr(string_t* str, size_t pos, size_t len, const ch
   memcpy(str->buf + pos, rep + rep_pos, rep_len - rep_pos);
 
   str->len = new_len;
+}
+
+size_t string_find(string_t* str, string_t* sub)
+{
+  return string_find_cstr(str, sub->buf);
+}
+
+size_t string_find_cstr(string_t* str, const char* sub)
+{
+  size_t sub_len = strlen(sub);
+
+  if (sub_len > str->len)
+    return str->len;
+
+  for (size_t i = 0; i <= str->len - sub_len;)
+  {
+    size_t j = 0;
+
+    for (; j < sub_len; j++)
+      if (str->buf[i + j] != sub[j])
+        break;
+
+    if (j == sub_len)
+      return i;
+    else if (j == 0)
+      i++;
+    else
+      i += j;
+  }
+
+  return str->len;
 }

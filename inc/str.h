@@ -55,7 +55,7 @@ string_t* string_init_capacity(size_t cap);
  * \note The string does not take ownership of the provided buffer. Its capacity
  * will not be changed and it will not be freed when the string is destroyed.
  * 
- * \param[in] buf Pointer to character buffer to be used.
+ * \param[in] buf Pointer to the character buffer to be used.
  * \param[in] cap The capacity of the buffer.
  * \returns Pointer to the newly initalized string.
  */
@@ -85,7 +85,7 @@ char* string_begin(string_t* str);
 char* string_end(string_t* str);
 
 /**
- * \brief Returns the length of the string.
+ * \brief Returns the length of a string.
  * 
  * \not The terminating null character is not included in the length.
  * 
@@ -159,6 +159,21 @@ void string_insert_cstr(string_t* str, size_t pos, const char* other);
  * \param[in] len Number of characters to erase.
 */
 void string_erase(string_t* str, size_t pos, size_t len);
+
+/**
+ * \brief Clears the contents of a string.
+ * 
+ * \param[in,out] str Pointer to the string.
+*/
+void string_clear(string_t* str);
+
+/**
+ * \brief Creates a copy of a string.
+ * 
+ * \param[in] str Pointer to the string.
+ * \returns Pointer to the copy.
+*/
+string_t* string_copy(string_t* str);
 
 /**
  * \brief Creates a new sub-string from another string.
@@ -253,10 +268,10 @@ bool string_ends_with_cstr(string_t* str, const char* suffix);
 bool string_contains(string_t* str, string_t* sub);
 
 /**
- * \brief Checks if a string contains the specified c-sub-string.
+ * \brief Checks if a string contains the specified c-string.
  * 
  * \param str Pointer to the string.
- * \param sub Pointer to the c-sub-string.
+ * \param sub Pointer to the c-string.
  * \returns `true` if the string contains the specified sub-string, `false`
  * otherwise.
  */
@@ -305,5 +320,23 @@ void string_replace_with_cstr(string_t* str, size_t pos, size_t len, const char*
  * \param rep_pos Start of the sub-string in the replacement c-string.
  */
 void string_replace_with_csubstr(string_t* str, size_t pos, size_t len, const char* rep, size_t rep_pos);
+
+/**
+ * \brief Finds the first occurrence of a sub-string.
+ * 
+ * \param str Pointer to the string.
+ * \param sub Pointer to the sub-string.
+ * \returns The position of the first occurrence of the sub-string.
+ */
+size_t string_find(string_t* str, string_t* sub);
+
+/**
+ * \brief Finds the first occurrence of a c-string.
+ * 
+ * \param str Pointer to the string.
+ * \param sub Pointer to the c-string.
+ * \returns The position of the first occurrence of the c-string.
+ */
+size_t string_find_cstr(string_t* str, const char* sub);
 
 #endif
