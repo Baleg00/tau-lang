@@ -32,9 +32,8 @@ struct analyzer_s
 analyzer_t* analyzer_init(void)
 {
   analyzer_t* analyzer = (analyzer_t*)allocator_allocate(allocator_global(), sizeof(analyzer_t));
+  memset(analyzer, 0, sizeof(analyzer_t));
 
-  analyzer->symtable = symtable_init(NULL);
-  analyzer->typetable = typetable_init();
   analyzer->ret_types = stack_init();
 
   return analyzer;
@@ -42,8 +41,6 @@ analyzer_t* analyzer_init(void)
 
 void analyzer_free(analyzer_t* analyzer)
 {
-  symtable_free(analyzer->symtable);
-  typetable_free(analyzer->typetable);
   stack_free(analyzer->ret_types);
   allocator_deallocate(allocator_global(), analyzer);
 }
@@ -1271,9 +1268,12 @@ void analyzer_visit_prog(analyzer_t* analyzer, symtable_t* scope, ast_prog_t* no
     analyzer_visit_decl(analyzer, prog_table, (ast_decl_t*)list_node_get(it));
 }
 
-void analyzer_analyze(analyzer_t* analyzer, ast_node_t* node)
+void analyzer_analyze(analyzer_t* analyzer, symtable_t* symtable, typetable_t* typetable, ast_node_t* node)
 {
   assert(node->kind == AST_PROG);
+
+  analyzer->symtable = symtable;
+  analyzer->typetable = typetable;
 
   analyzer_visit_prog(analyzer, analyzer->symtable, (ast_prog_t*)node);
 }

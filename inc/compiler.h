@@ -2,7 +2,7 @@
 #define TAU_COMPILER_H
 
 /**
- * \brief Compiler context.
+ * \brief Represents a compiler context.
  */
 typedef struct compiler_s compiler_t;
 

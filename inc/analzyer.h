@@ -404,8 +404,10 @@ void analyzer_visit_prog(analyzer_t* analyzer, symtable_t* scope, ast_prog_t* no
  * \brief Analyzes a program.
  *
  * \param[in] analyzer Pointer to the semantic analyzer.
- * \param[in] node Pointer to the root program node.
+ * \param[in,out] symtable Pointer to the symbol table to be used.
+ * \param[in,out] typetable Pointer to the type table to be used.
+ * \param[in,out] node Pointer to the root program node.
  */
-void analyzer_analyze(analyzer_t* analyzer, ast_node_t* node);
+void analyzer_analyze(analyzer_t* analyzer, symtable_t* symtable, typetable_t* typetable, ast_node_t* node);
 
 #endif

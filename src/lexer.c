@@ -29,18 +29,15 @@ struct lexer_s
   location_t* loc; // Current location in source file.
 };
 
-lexer_t* lexer_init(const char* path, char* src)
+lexer_t* lexer_init(void)
 {
   lexer_t* lex = (lexer_t*)allocator_allocate(allocator_global(), sizeof(lexer_t));
-
-  lex->loc = location_init(path, src, src, 0, 0, 0);
-
+  memset(lex, 0, sizeof(lexer_t));
   return lex;
 }
 
 void lexer_free(lexer_t* lex)
 {
-  location_free(lex->loc);
   allocator_deallocate(allocator_global(), lex);
 }
 
@@ -750,8 +747,13 @@ token_t* lexer_read_next(lexer_t* lex)
   return NULL;
 }
 
-void lexer_lex(lexer_t* lex, list_t* toks)
+void lexer_lex(lexer_t* lex, const char* path, char* src, list_t* toks)
 {
+  lex->loc = location_init(path, src, src, 0, 0, 0);
+
   while (list_empty(toks) || ((token_t*)list_back(toks))->kind != TOK_EOF)
     list_push_back(toks, lexer_read_next(lex));
+
+  location_free(lex->loc);
+  lex->loc = NULL;
 }

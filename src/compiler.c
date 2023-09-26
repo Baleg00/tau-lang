@@ -31,8 +31,6 @@
 
 struct compiler_s
 {
-  allocator_t* allocator;
-
   list_t* input_files;
 
   struct
@@ -150,8 +148,6 @@ compiler_t* compiler_init(void)
   log_set_stream(stdout);
   crumb_set_stream(stdout);
 
-  compiler->allocator = arena_init();
-
   compiler->input_files = list_init();
 
   compiler->flags.verbose = false;
@@ -172,7 +168,6 @@ void compiler_free(compiler_t* compiler)
   typedesc_cleanup();
   ast_cleanup();
 
-  allocator_free(compiler->allocator);
   allocator_deallocate(allocator_global(), compiler);
 }
 
@@ -229,22 +224,20 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     log_trace("main", "(%s) Lexical analysis.", input_file_name);
 
-    lexer_t* lexer = lexer_init(input_file_path, src);
+    lexer_t* lexer = lexer_init();
+    list_t* tokens = list_init();
 
-    list_t* toks = list_init();
-
-    time_it("lexer", lexer_lex(lexer, toks));
+    time_it("lexer", lexer_lex(lexer, input_file_path, src, tokens));
 
     if (compiler->flags.dump_tokens)
-      compiler_dump_tokens(compiler, input_file_path, input_file_name, toks);
+      compiler_dump_tokens(compiler, input_file_path, input_file_name, tokens);
 
     log_trace("main", "(%s) Syntax analysis.", input_file_name);
 
     parser_t* parser = parser_init();
+    ast_node_t* root = NULL;
 
-    ast_node_t* root = ast_node_init(AST_PROG);
-
-    time_it("parser", parser_parse(parser, toks, root));
+    time_it("parser", parser_parse(parser, tokens, &root));
 
     if (compiler->flags.dump_ast)
       compiler_dump_ast(compiler, input_file_path, input_file_name, root);
@@ -252,18 +245,21 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     log_trace("main", "(%s) Semantic analysis.", input_file_name);
 
     analyzer_t* analyzer = analyzer_init();
+    symtable_t* symtable = symtable_init(NULL);
+    typetable_t* typetable = typetable_init();
 
-    time_it("analyzer", analyzer_analyze(analyzer, root));
+    time_it("analyzer", analyzer_analyze(analyzer, symtable, typetable, root));
 
     if (compiler->flags.dump_ast_flat)
       compiler_dump_ast_flat(compiler, input_file_path, input_file_name, root);
 
-    log_trace("main", "(%s) IR generation.", input_file_name);
+    log_trace("main", "(%s) LLVM IR generation.", input_file_name);
 
     generator_t* generator = generator_init();
-    LLVMModuleRef llvm_module = NULL;
+    LLVMContextRef llvm_ctx = LLVMContextCreate();
+    LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", llvm_ctx);
 
-    time_it("generator", llvm_module = generator_generate(generator, root));
+    time_it("generator", generator_generate(generator, llvm_ctx, llvm_module, typetable, root));
 
     if (compiler->flags.dump_ll)
       compiler_dump_ll(compiler, input_file_path, input_file_name, llvm_module);
@@ -273,14 +269,18 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     log_trace("main", "(%s) Cleanup.", input_file_name);
 
+    LLVMDisposeModule(llvm_module);
+    LLVMContextDispose(llvm_ctx);
     generator_free(generator);
 
+    typetable_free(typetable);
+    symtable_free(symtable);
     analyzer_free(analyzer);
     
     parser_free(parser);
 
-    list_for_each(toks, (list_for_each_func_t)token_free);
-    list_free(toks);
+    list_for_each(tokens, (list_for_each_func_t)token_free);
+    list_free(tokens);
     lexer_free(lexer);
     
     free(src);

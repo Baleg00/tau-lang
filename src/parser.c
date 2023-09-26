@@ -28,10 +28,7 @@ struct parser_s
 parser_t* parser_init(void)
 {
   parser_t* par = (parser_t*)allocator_allocate(allocator_global(), sizeof(parser_t));
-
-  par->toks = NULL;
-  par->cur = NULL;
-
+  memset(par, 0, sizeof(parser_t));
   return par;
 }
 
@@ -806,12 +803,13 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par)
   return (ast_node_t*)node;
 }
 
-void parser_parse(parser_t* par, list_t* toks, ast_node_t* root)
+void parser_parse(parser_t* par, list_t* toks, ast_node_t** node)
 {
   par->toks = toks;
   par->cur = list_front_node(toks);
   
-  assert(root->kind == AST_PROG);
-  root->tok = parser_current(par);
-  ((ast_prog_t*)root)->decls = parser_parse_terminated_list(par, TOK_EOF, parser_parse_decl);
+  *node = ast_node_init(AST_PROG);
+  (*node)->tok = parser_current(par);
+
+  ((ast_prog_t*)*node)->decls = parser_parse_terminated_list(par, TOK_EOF, parser_parse_decl);
 }

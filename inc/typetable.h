@@ -28,7 +28,8 @@
  * \details This structure represents a type table, which is used to store and
  * manage type information. The type table is responsible for associating AST
  * nodes with their corresponding type descriptors. It plays a critical role in
- * type checking and resolution during compilation.
+ * type checking and resolution during compilation. It owns neither the AST nodes
+ * nor the associated type descriptors.
  */
 typedef struct typetable_s typetable_t;
 
@@ -54,7 +55,7 @@ void typetable_free(typetable_t* table);
  * \param[in] node Pointer to the AST node.
  * \param[in] desc Pointer to the type descriptor to insert.
  *
- * \returns true if the insertion was successful, false otherwise.
+ * \returns `true` if the insertion was successful, `false` otherwise.
  */
 bool typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc);
 

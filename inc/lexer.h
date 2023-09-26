@@ -29,13 +29,11 @@
 typedef struct lexer_s lexer_t;
 
 /**
- * \brief Initializes a lexer with the provided parameters.
+ * \brief Initializes a new lexer.
  *
- * \param[in] path The path of the source file.
- * \param[in] src Pointer to the source code.
  * \returns Pointer to the newly initialized lexer.
  */
-lexer_t* lexer_init(const char* path, char* src);
+lexer_t* lexer_init(void);
 
 /**
  * \brief Frees resources associated with a lexer.
@@ -281,8 +279,10 @@ token_t* lexer_read_next(lexer_t* lex);
  * \brief Lexes the source code and generates a list of tokens.
  *
  * \param[in] lex Pointer to the lexer.
+ * \param[in] path The path of the source file.
+ * \param[in] src Pointer to the source code.
  * \param[out] toks Pointer to the list where the tokens will be stored.
  */
-void lexer_lex(lexer_t* lex, list_t* toks);
+void lexer_lex(lexer_t* lex, const char* path, char* src, list_t* toks);
 
 #endif
