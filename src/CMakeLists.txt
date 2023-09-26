@@ -27,6 +27,7 @@ set(TAU_SOURCES
   ${TAU_SOURCE_DIR}/set.c
   ${TAU_SOURCE_DIR}/shyd.c
   ${TAU_SOURCE_DIR}/stack.c
+  ${TAU_SOURCE_DIR}/str_view.c
   ${TAU_SOURCE_DIR}/str.c
   ${TAU_SOURCE_DIR}/symtable.c
   ${TAU_SOURCE_DIR}/timer.c
