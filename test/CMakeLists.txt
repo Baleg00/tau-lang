@@ -5,6 +5,7 @@ set(TAU_TEST_SOURCES
   ${TAU_TEST_DIR}/queue_test.c
   ${TAU_TEST_DIR}/set_test.c
   ${TAU_TEST_DIR}/stack_test.c
+  ${TAU_TEST_DIR}/str_test.c
   ${TAU_TEST_DIR}/vector_test.c
 )
 
