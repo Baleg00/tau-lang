@@ -30,7 +30,7 @@ void token_free(token_t* tok)
 
 void token_json_dump(FILE* stream, token_t* tok)
 {
-  fprintf(stream, "{\"kind\":\"%s\",\"loc\":", token_kind_to_string(tok->kind));
+  fprintf(stream, "{\"kind\":\"%s\",\"loc\":", token_kind_to_cstr(tok->kind));
 
   location_json_dump(tok->loc, stream);
 
@@ -57,7 +57,7 @@ void token_json_dump_list(FILE* stream, list_t* list)
   fputc(']', stream);
 }
 
-const char* token_kind_to_string(token_kind_t kind)
+const char* token_kind_to_cstr(token_kind_t kind)
 {
   switch (kind)
   {
@@ -165,6 +165,16 @@ const char* token_kind_to_string(token_kind_t kind)
   }
 
   return NULL;
+}
+
+string_t* token_to_string(token_t* tok)
+{
+  return location_to_string(tok->loc);
+}
+
+string_view_t token_to_string_view(token_t* tok)
+{
+  return location_to_string_view(tok->loc);
 }
 
 bool token_is_literal(token_t* tok)

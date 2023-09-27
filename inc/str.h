@@ -18,8 +18,9 @@
 #ifndef TAU_STR_H
 #define TAU_STR_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 
 /**
  * \brief Represents a string.
@@ -36,10 +37,19 @@ string_t* string_init(void);
 /**
  * \brief Initializes a new string from a c-string.
  * 
- * \param[in] cstr Pointer to c-string.
+ * \param[in] cstr Pointer to the c-string.
  * \returns Pointer to the newly initalized string.
  */
-string_t* string_init_cstr(char* cstr);
+string_t* string_init_with_cstr(const char* cstr);
+
+/**
+ * \brief Initializes a new string from a c-string with a specified length.
+ * 
+ * \param[in] cstr Pointer to the c-string.
+ * \param[in] len The length of the string.
+ * \returns Pointer to the newly initalized string.
+ */
+string_t* string_init_with_cstr_and_length(const char* cstr, size_t len);
 
 /**
  * \brief Initializes a new string with the specified capacity.
@@ -47,7 +57,7 @@ string_t* string_init_cstr(char* cstr);
  * \param[in] cap Initial capacity.
  * \returns Pointer to the newly initalized string.
  */
-string_t* string_init_capacity(size_t cap);
+string_t* string_init_with_capacity(size_t cap);
 
 /**
  * \brief Initializes a new string using the specified buffer and capacity.
@@ -59,7 +69,7 @@ string_t* string_init_capacity(size_t cap);
  * \param[in] cap The capacity of the buffer.
  * \returns Pointer to the newly initalized string.
  */
-string_t* string_init_buffer(char* buf, size_t cap);
+string_t* string_init_with_buffer(char* buf, size_t cap);
 
 /**
  * \brief Frees all resources associated with a string.
@@ -116,6 +126,16 @@ void string_reserve(string_t* str, size_t cap);
  * \param[in,out] str Pointer to the string.
 */
 void string_fit(string_t* str);
+
+/**
+ * \brief Uses a string as a format specifier and writes to a stream.
+ * 
+ * \param stream Pointer to the stream.
+ * \param fmt Pointer to the format string.
+ * \param ... Arguments according to the format string.
+ * \returns The number of characters written.
+ */
+int string_printf(FILE* stream, string_t* fmt, ...);
 
 /**
  * \brief Appends a string to the end of another.

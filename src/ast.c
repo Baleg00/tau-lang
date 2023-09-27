@@ -197,7 +197,7 @@ void ast_json_dump(FILE* stream, ast_node_t* node)
     return;
   }
 
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_string(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
 
   switch (node->kind)
   {
@@ -484,7 +484,7 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* node)
       else
         is_first = false;
 
-      fprintf(stream, "\"%p\":{\"kind\":\"%s\"", (void*)node, ast_kind_to_string(node->kind));
+      fprintf(stream, "\"%p\":{\"kind\":\"%s\"", (void*)node, ast_kind_to_cstr(node->kind));
 
       switch (node->kind)
       {
@@ -720,7 +720,7 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* node)
   stack_free(nodes);
 }
 
-const char* ast_kind_to_string(ast_kind_t kind)
+const char* ast_kind_to_cstr(ast_kind_t kind)
 {
   switch (kind)
   {

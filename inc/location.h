@@ -22,6 +22,9 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include "str_view.h"
+#include "str.h"
+
 /**
  * \brief Location in the source code.
  */
@@ -63,5 +66,21 @@ void location_free(location_t* loc);
  * written.
  */
 void location_json_dump(location_t* loc, FILE* stream);
+
+/**
+ * \brief Creates a string from a location.
+ * 
+ * \param loc Pointer to the location.
+ * \returns Pointer to the string.
+ */
+string_t* location_to_string(location_t* loc);
+
+/**
+ * \brief Creates a string view of a location.
+ * 
+ * \param loc Pointer to the location.
+ * \returns The string view.
+ */
+string_view_t location_to_string_view(location_t* loc);
 
 #endif

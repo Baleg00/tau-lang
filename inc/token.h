@@ -23,6 +23,8 @@
 
 #include "list.h"
 #include "location.h"
+#include "str_view.h"
+#include "str.h"
 
 /**
  * \brief Enumeration of token kinds.
@@ -179,12 +181,28 @@ void token_json_dump(FILE* stream, token_t* tok);
 void token_json_dump_list(FILE* stream, list_t* list);
 
 /**
- * \brief Converts a token kind to its corresponding string representation.
+ * \brief Converts a token kind to its corresponding c-string representation.
  * 
  * \param[in] kind The token kind to be converted.
- * \returns The string representation of the token kind.
+ * \returns The c-string representation of the token kind.
  */
-const char* token_kind_to_string(token_kind_t kind);
+const char* token_kind_to_cstr(token_kind_t kind);
+
+/**
+ * \brief Creates a string from a token.
+ * 
+ * \param tok Pointer to the token.
+ * \returns Pointer to the string.
+ */
+string_t* token_to_string(token_t* tok);
+
+/**
+ * \brief Creates a string view of a token.
+ * 
+ * \param tok Pointer to the token.
+ * \returns The string view.
+ */
+string_view_t token_to_string_view(token_t* tok);
 
 /**
  * \brief Checks if a token is a literal token.

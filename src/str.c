@@ -7,6 +7,7 @@
 
 #include "str.h"
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,21 +25,26 @@ struct string_s
 
 string_t* string_init(void)
 {
-  return string_init_capacity(1);
+  return string_init_with_capacity(1);
 }
 
-string_t* string_init_cstr(char* cstr)
+string_t* string_init_with_cstr(const char* cstr)
 {
-  size_t len = strlen(cstr);
-  string_t* str = string_init_capacity(len + 1);
+  return string_init_with_cstr_and_length(cstr, strlen(cstr));
+}
 
+string_t* string_init_with_cstr_and_length(const char* cstr, size_t len)
+{
+  string_t* str = string_init_with_capacity(len + 1);
+
+  memcpy(str->buf, cstr, len);
+  str->buf[len] = '\0';
   str->len = len;
-  strcpy(str->buf, cstr);
   
   return str;
 }
 
-string_t* string_init_capacity(size_t cap)
+string_t* string_init_with_capacity(size_t cap)
 {
   string_t* str = (string_t*)malloc(sizeof(string_t));
   assert(str != NULL);
@@ -53,7 +59,7 @@ string_t* string_init_capacity(size_t cap)
   return str;
 }
 
-string_t* string_init_buffer(char* buf, size_t cap)
+string_t* string_init_with_buffer(char* buf, size_t cap)
 {
   assert(buf != NULL);
   
@@ -122,6 +128,18 @@ void string_fit(string_t* str)
   str->buf = new_buf;
 }
 
+int string_printf(FILE* stream, string_t* fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+
+  int result = vfprintf(stream, fmt->buf, args);
+
+  va_end(args);
+
+  return result;
+}
+
 void string_append(string_t* str, string_t* other)
 {
   string_append_cstr(str, other->buf);
@@ -173,12 +191,12 @@ void string_clear(string_t* str)
 
 string_t* string_copy(string_t* str)
 {
-  return string_init_cstr(str->buf);
+  return string_init_with_cstr(str->buf);
 }
 
 string_t* string_substr(string_t* str, size_t begin, size_t len)
 {
-  string_t* result = string_init_capacity(len + 1);
+  string_t* result = string_init_with_capacity(len + 1);
 
   result->len = len;
   strncpy(result->buf, str->buf + begin, len);
@@ -216,7 +234,7 @@ string_t* string_escape(string_t* str)
       ++len;
     }
 
-  string_t* result = string_init_capacity(len + 1);
+  string_t* result = string_init_with_capacity(len + 1);
 
   for (char *ch = str->buf, *rch = result->buf; *ch != '\0'; ++ch, ++rch)
     switch (*ch)

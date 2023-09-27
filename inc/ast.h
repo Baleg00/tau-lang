@@ -658,7 +658,7 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root);
  * \param[in] kind Node kind.
  * \returns String representation.
 */
-const char* ast_kind_to_string(ast_kind_t kind);
+const char* ast_kind_to_cstr(ast_kind_t kind);
 
 /**
  * \brief Checks if a node is a type.
