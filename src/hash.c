@@ -7,7 +7,7 @@
 
 #include "hash.h"
 
-hash_t hash_digest(const void* data, size_t size)
+size_t hash_digest(const void* data, size_t size)
 {
   /**
    * FNV-1a hash
@@ -21,7 +21,7 @@ hash_t hash_digest(const void* data, size_t size)
    * https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
   */
  
-  hash_t h = 0xCBF29CE484222325ULL;
+  size_t h = 0xCBF29CE484222325ULL;
 
   for (size_t i = 0; i < size; ++i)
   {
@@ -30,4 +30,14 @@ hash_t hash_digest(const void* data, size_t size)
   }
 
   return h;
+}
+
+size_t hash_combine_with_data(size_t seed, const void* data, size_t size)
+{
+  return hash_combine_with_hash(seed, hash_digest(data, size));
+}
+
+size_t hash_combine_with_hash(size_t seed, size_t hash)
+{
+  return hash + 0x9E3779B9ULL + (seed << 6) + (seed >> 2);
 }

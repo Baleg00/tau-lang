@@ -18,17 +18,32 @@
 #include <stdint.h>
 
 /**
- * \brief Hash value.
- */
-typedef uint64_t hash_t;
-
-/**
- * \brief Generates a hash code for the given data.
+ * \brief Generates a hash value for a given data.
  *
  * \param[in] data Pointer to the data to be hashed.
  * \param[in] size The size of the data in bytes.
- * \returns The generated hash code.
+ * \returns The generated hash value.
  */
-hash_t hash_digest(const void* data, size_t size);
+size_t hash_digest(const void* data, size_t size);
+
+/**
+ * \brief Combines a seed with the hash value of a given data.
+ * 
+ * \param seed The seed.
+ * \param data Pointer to the data.
+ * \param size Size of the data in bytes.
+ * \returns The combined hash value.
+ */
+size_t hash_combine_with_data(size_t seed, const void* data, size_t size);
+
+/**
+ * \brief Combines a seed with a hash value.
+ * 
+ * \param seed The seed.
+ * \param data Pointer to the data.
+ * \param size Size of the data in bytes.
+ * \returns The combined hash value.
+ */
+size_t hash_combine_with_hash(size_t seed, size_t hash);
 
 #endif

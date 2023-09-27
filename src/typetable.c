@@ -69,7 +69,7 @@ static typetable_entry_t* typetable_entry_init(ast_node_t* node, typedesc_t* des
 
 static void typetable_insert_entry(typetable_t* table, typetable_entry_t* entry)
 {
-  hash_t h = hash_digest(&entry->node, sizeof(ast_node_t*));
+  size_t h = hash_digest(&entry->node, sizeof(ast_node_t*));
   size_t idx = h % table->capacity;
 
   if (table->buckets[idx] == NULL)
@@ -147,7 +147,7 @@ bool typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc)
   if (((double)table->size + 1) / (double)table->capacity >= TYPETABLE_LOAD_FACTOR)
     typetable_expand(table);
 
-  hash_t h = hash_digest(&node, sizeof(ast_node_t*));
+  size_t h = hash_digest(&node, sizeof(ast_node_t*));
   size_t idx = h % table->capacity;
 
   if (table->buckets[idx] == NULL)
@@ -172,7 +172,7 @@ bool typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc)
 
 typedesc_t* typetable_lookup(typetable_t* table, ast_node_t* node)
 {
-  hash_t h = hash_digest(&node, sizeof(ast_node_t*));
+  size_t h = hash_digest(&node, sizeof(ast_node_t*));
   size_t idx = h % table->capacity;
 
   if (table->buckets[idx] == NULL)
