@@ -112,6 +112,15 @@ void list_node_set(list_node_t* node, void* data);
 list_t* list_init(void);
 
 /**
+ * \brief Initializes a new list from a memory buffer.
+ *
+ * \param[in] buffer Pointer to the memory buffer.
+ * \param[in] length The number of elements in the buffer.
+ * \returns Pointer to the initialized list.
+ */
+list_t* list_init_from_buffer(void* buffer, size_t length);
+
+/**
  * \brief Frees the resources associated with a list.
  *
  * \param[in] list Pointer to the list to free.
@@ -259,5 +268,16 @@ size_t list_size(list_t* list);
  * \param[in] func The function to be applied to each element.
  */
 void list_for_each(list_t* list, list_for_each_func_t func);
+
+/**
+ * \brief Writes every element of a list into a memory buffer.
+ * 
+ * \note The memory buffer must be large enough to hold all elements, otherwise
+ * a buffer overflow will occur.
+ * 
+ * \param list Pointer to the list.
+ * \param buffer Pointer to the memory buffer.
+ */
+void list_to_buffer(list_t* list, void* buffer);
 
 #endif

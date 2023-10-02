@@ -29,6 +29,40 @@ test()
         assert_equal(list_size(list), 0);
       end()
     end()
+
+    describe("list_init_from_buffer")
+      it("should init list from non-empty buffer")
+        int data1 = 1;
+        int data2 = 2;
+        int data3 = 3;
+
+        void* buffer[] = { &data1, &data2, &data3 };
+
+        list = list_init_from_buffer(buffer, 3);
+
+        assert_equal(list_size(list), 3);
+
+        list_node_t* node = list_front_node(list);
+
+        assert_ptr_equal(list_node_get(node), &data1);
+        node = list_node_next(node);
+        assert_ptr_equal(list_node_get(node), &data2);
+        node = list_node_next(node);
+        assert_ptr_equal(list_node_get(node), &data3);
+        node = list_node_next(node);
+        assert_null(node);
+
+        list_free(list);
+      end()
+
+      it("should init list from empty buffer")
+        list = list_init_from_buffer(NULL, 0);
+
+        assert_equal(list_size(list), 0);
+        
+        list_free(list);
+      end()
+    end()
       
     describe("list_size")
       before_each()
@@ -511,6 +545,30 @@ test()
         list = NULL;
 
         list_for_each(list, iter_increment);
+      end()
+    end()
+
+    describe("list_to_buffer")
+      it("should write list to buffer")
+        list = list_init();
+
+        int data1 = 1;
+        int data2 = 2;
+        int data3 = 3;
+
+        list_push_back(list, &data1);
+        list_push_back(list, &data2);
+        list_push_back(list, &data3);
+
+        void* buffer[3];
+
+        list_to_buffer(list, buffer);
+
+        assert_ptr_equal(buffer[0], &data1);
+        assert_ptr_equal(buffer[1], &data2);
+        assert_ptr_equal(buffer[2], &data3);
+
+        list_free(list);
       end()
     end()
   end()

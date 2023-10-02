@@ -32,6 +32,23 @@ typedef struct vector_s vector_t;
 vector_t* vector_init(void);
 
 /**
+ * \brief Initializes a new vector with the specified capacity.
+ *
+ * \param[in] capacity The capacity of the vector.
+ * \returns A pointer to the newly initialized vector.
+ */
+vector_t* vector_init_with_capacity(size_t capacity);
+
+/**
+ * \brief Initializes a new vector from a memory buffer.
+ *
+ * \param[in] buffer Pointer to the memory buffer.
+ * \param[in] length The number of elements in the buffer.
+ * \returns Pointer to the initialized vector.
+ */
+vector_t* vector_init_from_buffer(void* buffer, size_t length);
+
+/**
  * \brief Frees the resources associated with the vector.
  *
  * \param[in] vec Pointer to the vector to be freed.
@@ -114,5 +131,16 @@ size_t vector_size(vector_t* vec);
  * \returns `true` if the vector is empty, `false` otherwise.
  */
 bool vector_empty(vector_t* vec);
+
+/**
+ * \brief Writes every element of a vector into a memory buffer.
+ * 
+ * \note The memory buffer must be large enough to hold all elements, otherwise
+ * a buffer overflow will occur.
+ * 
+ * \param vec Pointer to the vector.
+ * \param buffer Pointer to the memory buffer.
+ */
+void vector_to_buffer(vector_t* vec, void* buffer);
 
 #endif

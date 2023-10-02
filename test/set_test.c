@@ -109,6 +109,45 @@ test()
       end()
     end()
 
+    describe("set_get")
+      it("should retrieve elements")
+        set_t* set = set_init(cmp_int);
+
+        int data1 = 1;
+        int data4 = 4;
+        int data5 = 5;
+
+        set_add(set, &data1);
+        set_add(set, &data5);
+        set_add(set, &data4);
+
+        assert_ptr_equal(set_get(set, &data1), &data1);
+        assert_ptr_equal(set_get(set, &data5), &data5);
+        assert_ptr_equal(set_get(set, &data4), &data4);
+
+        set_free(set);
+      end()
+
+      it("should not retrieve elements")
+        set_t* set = set_init(cmp_int);
+
+        int data1 = 1;
+        int data2 = 2;
+        int data3 = 3;
+        int data4 = 4;
+        int data5 = 5;
+
+        set_add(set, &data1);
+        set_add(set, &data5);
+        set_add(set, &data4);
+
+        assert_null(set_get(set, &data2));
+        assert_null(set_get(set, &data3));
+
+        set_free(set);
+      end()
+    end()
+
     describe("set_contains")
       it("should check if the set contains elements")
         set_t* set = set_init(cmp_int);

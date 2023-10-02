@@ -30,12 +30,32 @@ static void vector_expand(vector_t* vec)
 
 vector_t* vector_init(void)
 {
+  return vector_init_with_capacity(VECTOR_INITIAL_CAPACITY);
+}
+
+vector_t* vector_init_with_capacity(size_t capacity)
+{
+  assert(capacity > 0);
+
   vector_t* vec = (vector_t*)malloc(sizeof(vector_t));
   assert(vec != NULL);
 
   vec->size = 0;
-  vec->capacity = VECTOR_INITIAL_CAPACITY;
-  vec->data = (void**)malloc(sizeof(void*) * VECTOR_INITIAL_CAPACITY);
+  vec->capacity = capacity;
+  vec->data = (void**)malloc(sizeof(void*) * capacity);
+
+  return vec;
+}
+
+vector_t* vector_init_from_buffer(void* buffer, size_t length)
+{
+  if (length == 0)
+    return vector_init();
+
+  vector_t* vec = vector_init_with_capacity(length);
+
+  memcpy(vec->data, buffer, sizeof(void*) * length);
+  vec->size = length;
 
   return vec;
 }
@@ -113,4 +133,9 @@ size_t vector_size(vector_t* vec)
 bool vector_empty(vector_t* vec)
 {
   return vec->size == 0;
+}
+
+void vector_to_buffer(vector_t* vec, void* buffer)
+{
+  memcpy(buffer, vec->data, sizeof(void*) * vec->size);
 }

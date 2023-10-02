@@ -68,6 +68,15 @@ bool set_add(set_t* set, void* data);
 bool set_remove(set_t* set, void* data);
 
 /**
+ * \brief Retrieves the specified data from the set.
+ *
+ * \param[in] set Pointer to the set.
+ * \param[in] data Pointer to the data to be retrieved.
+ * \returns The data if it is present in the set, NULL otherwise.
+ */
+void* set_get(set_t* set, void* data);
+
+/**
  * \brief Checks if the set contains the specified data.
  *
  * \param[in] set Pointer to the set.

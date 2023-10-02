@@ -32,10 +32,12 @@ list_node_t* list_node_init(void* data)
 {
   list_node_t* node = (list_node_t*)malloc(sizeof(list_node_t));
   assert(node != NULL);
+
   node->data = data;
   node->owner = NULL;
   node->prev = NULL;
   node->next = NULL;
+
   return node;
 }
 
@@ -78,9 +80,21 @@ list_t* list_init(void)
 {
   list_t* list = (list_t*)malloc(sizeof(list_t));
   assert(list != NULL);
+
   list->len = 0;
   list->head = NULL;
   list->tail = NULL;
+
+  return list;
+}
+
+list_t* list_init_from_buffer(void* buffer, size_t length)
+{
+  list_t* list = list_init();
+
+  for (size_t i = 0; i < length; i++)
+    list_push_back(list, ((void**)buffer)[i]);
+
   return list;
 }
 
@@ -315,4 +329,12 @@ void list_for_each(list_t* list, list_for_each_func_t func)
 {
   LIST_FOR_LOOP(node, list)
     func(list_node_get(node));
+}
+
+void list_to_buffer(list_t* list, void* buffer)
+{
+  size_t i = 0;
+
+  LIST_FOR_LOOP(node, list)
+    ((void**)buffer)[i++] = list_node_get(node);
 }

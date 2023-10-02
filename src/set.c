@@ -218,6 +218,25 @@ bool set_remove(set_t* set, void* data)
   return true;
 }
 
+void* set_get(set_t* set, void* data)
+{
+  set_node_t* node = set->root;
+
+  while (node != NULL)
+  {
+    int rel = set->cmp(data, node->data);
+
+    if (rel < 0)
+      node = node->left;
+    else if (rel > 0)
+      node = node->right;
+    else
+      return node->data;
+  }
+
+  return NULL;
+}
+
 bool set_contains(set_t* set, void* data)
 {
   set_node_t* node = set->root;

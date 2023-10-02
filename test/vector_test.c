@@ -7,12 +7,42 @@ test()
     describe("vector_init")
       it("should initialize a new vector")
         vector_t* vec = vector_init();
+
         assert_not_null(vec);
+
         vector_free(vec);
       end()
     end()
 
-    describe("vector_push and vector_get")
+    describe("vector_init_from_buffer")
+      it("should initialize vector from empty buffer")
+        vector_t* vec = vector_init_from_buffer(NULL, 0);
+
+        assert_not_null(vec);
+        
+        vector_free(vec);
+      end()
+
+      it("should initialize vector from non-empty buffer")
+        int data1 = 1;
+        int data2 = 2;
+        int data3 = 3;
+
+        void* buffer[] = { &data1, &data2, &data3 };
+
+        vector_t* vec = vector_init_from_buffer(buffer, 3);
+
+        assert_not_null(vec);
+        assert_equal(vector_size(vec), 3);
+        assert_equal(vector_get(vec, 0), &data1);
+        assert_equal(vector_get(vec, 1), &data2);
+        assert_equal(vector_get(vec, 2), &data3);
+        
+        vector_free(vec);
+      end()
+    end()
+
+    describe("vector_push, vector_get")
       it("should add elements to the vector and retrieve them")
         vector_t* vec = vector_init();
 
@@ -124,6 +154,30 @@ test()
         vector_push(vec, &data2);
 
         assert_equal(vector_size(vec), 2);
+
+        vector_free(vec);
+      end()
+    end()
+
+    describe("vector_to_buffer")
+      it("should write vector to buffer")
+        vector_t* vec = vector_init();
+
+        int data1 = 1;
+        int data2 = 2;
+        int data3 = 3;
+
+        vector_push(vec, &data1);
+        vector_push(vec, &data2);
+        vector_push(vec, &data3);
+
+        void* buffer[3];
+
+        vector_to_buffer(vec, buffer);
+
+        assert_ptr_equal(buffer[0], &data1);
+        assert_ptr_equal(buffer[1], &data2);
+        assert_ptr_equal(buffer[2], &data3);
 
         vector_free(vec);
       end()
