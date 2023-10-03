@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "allocator.h"
 #include "crumb.h"
 #include "diagnostics.h"
 #include "file.h"
@@ -31,14 +30,14 @@ struct lexer_s
 
 lexer_t* lexer_init(void)
 {
-  lexer_t* lex = (lexer_t*)allocator_allocate(allocator_global(), sizeof(lexer_t));
+  lexer_t* lex = (lexer_t*)malloc(sizeof(lexer_t));
   memset(lex, 0, sizeof(lexer_t));
   return lex;
 }
 
 void lexer_free(lexer_t* lex)
 {
-  allocator_deallocate(allocator_global(), lex);
+  free(lex);
 }
 
 location_t* lexer_location_copy(lexer_t* lex)

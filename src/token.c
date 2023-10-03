@@ -7,14 +7,13 @@
 
 #include "token.h"
 
-#include "allocator.h"
 #include "location.h"
 #include "memtrace.h"
 #include "util.h"
 
 token_t* token_init(token_kind_t kind, location_t* loc)
 {
-  token_t* tok = (token_t*)allocator_allocate(allocator_global(), sizeof(token_t));
+  token_t* tok = (token_t*)malloc(sizeof(token_t));
 
   tok->kind = kind;
   tok->loc = loc;
@@ -25,7 +24,7 @@ token_t* token_init(token_kind_t kind, location_t* loc)
 void token_free(token_t* tok)
 {
   location_free(tok->loc);
-  allocator_deallocate(allocator_global(), tok);
+  free(tok);
 }
 
 void token_json_dump(FILE* stream, token_t* tok)

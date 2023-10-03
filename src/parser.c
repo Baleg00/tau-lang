@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "allocator.h"
 #include "crumb.h"
 #include "diagnostics.h"
 #include "location.h"
@@ -27,14 +26,14 @@ struct parser_s
 
 parser_t* parser_init(void)
 {
-  parser_t* par = (parser_t*)allocator_allocate(allocator_global(), sizeof(parser_t));
+  parser_t* par = (parser_t*)malloc(sizeof(parser_t));
   memset(par, 0, sizeof(parser_t));
   return par;
 }
 
 void parser_free(parser_t* par)
 {
-  allocator_deallocate(allocator_global(), par);
+  free(par);
 }
 
 token_t* parser_current(parser_t* par)

@@ -105,6 +105,7 @@ void* memtrace_malloc(size_t size, const char* file, int line, const char* func)
   {
     log_warn("memtrace", "Allocating 0 bytes.");
     debugbreak();
+    return NULL;
   }
 
   void* ptr = malloc(size);
@@ -139,6 +140,7 @@ void* memtrace_calloc(size_t count, size_t size, const char* file, int line, con
   {
     log_warn("memtrace", "Allocating 0 bytes.", file, line);
     debugbreak();
+    return NULL;
   }
 
   void* ptr = calloc(count, size);
@@ -176,6 +178,8 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
   {
     log_warn("memtrace", "Reallocating 0 bytes.");
     debugbreak();
+    memtrace_free(ptr, file, line, func);
+    return NULL;
   }
 
   memtrace_alloc_t* alloc = memtrace_alloc_root();

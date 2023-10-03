@@ -9,7 +9,6 @@
 
 #include <string.h>
 
-#include "allocator.h"
 #include "memtrace.h"
 #include "stack.h"
 #include "util.h"
@@ -82,7 +81,7 @@ ast_node_t* ast_node_init(ast_kind_t kind)
   default: unreachable();
   }
 
-  ast_node_t* node = (ast_node_t*)allocator_allocate(allocator_global(), node_size);
+  ast_node_t* node = (ast_node_t*)malloc(node_size);
   assert(node != NULL);
 
   memset(node, 0, node_size);
@@ -164,7 +163,7 @@ void ast_cleanup(void)
       fallthrough();
     }
 
-    allocator_deallocate(allocator_global(), node);
+    free(node);
   }
 
   vector_free(g_ast_nodes);

@@ -16,8 +16,8 @@
 #include <llvm-c/Analysis.h>
 #include <llvm-c/Core.h>
 
-#include "allocator.h"
 #include "location.h"
+#include "memtrace.h"
 #include "token.h"
 #include "util.h"
 
@@ -31,14 +31,14 @@ struct generator_s
 
 generator_t* generator_init(void)
 {
-  generator_t* gen = (generator_t*)allocator_allocate(allocator_global(), sizeof(generator_t));
+  generator_t* gen = (generator_t*)malloc(sizeof(generator_t));
   memset(gen, 0, sizeof(generator_t));
   return gen;
 }
 
 void generator_free(generator_t* gen)
 {
-  allocator_deallocate(allocator_global(), gen);
+  free(gen);
 }
 
 void generator_visit_type_ptr(generator_t* gen, ast_type_ptr_t* node)
@@ -116,7 +116,7 @@ void generator_visit_expr_lit_str(generator_t* gen, ast_decl_fun_t* fun_node, as
       }
     }
 
-  char* lit_value = allocator_allocate(allocator_global(), lit_len + 1);
+  char* lit_value = malloc(lit_len + 1);
 
   for (char *ch = (char*)node->tok->loc->ptr + 1, *ptr = lit_value; *ch != '"'; ch++, ptr++)
     if (*ch == '\\')
@@ -144,7 +144,7 @@ void generator_visit_expr_lit_str(generator_t* gen, ast_decl_fun_t* fun_node, as
   node->llvm_value = LLVMBuildGlobalStringPtr(gen->builder, lit_value, "global_str");
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 
-  allocator_deallocate(allocator_global(), lit_value);
+  free(lit_value);
 }
 
 void generator_visit_expr_lit_bool(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_lit_t* node)
@@ -214,7 +214,7 @@ void generator_visit_expr_op_call(generator_t* gen, ast_decl_fun_t* fun_node, as
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->callee);
   
-  LLVMValueRef* param_values = allocator_allocate(allocator_global(), list_size(node->params) * sizeof(LLVMValueRef));
+  LLVMValueRef* param_values = malloc(list_size(node->params) * sizeof(LLVMValueRef));
 
   size_t i = 0;
   LIST_FOR_LOOP(it, node->params)
@@ -232,7 +232,7 @@ void generator_visit_expr_op_call(generator_t* gen, ast_decl_fun_t* fun_node, as
     (uint32_t)list_size(node->params),
     "call2_tmp");
 
-  allocator_deallocate(allocator_global(), param_values);
+  free(param_values);
 
   node->llvm_type = LLVMGetReturnType(((ast_expr_t*)node->callee)->llvm_type);
 }
@@ -364,7 +364,7 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
   if (node->params != NULL)
   {
     param_count = list_size(node->params);
-    param_types = allocator_allocate(allocator_global(), param_count * sizeof(LLVMTypeRef));
+    param_types = malloc(param_count * sizeof(LLVMTypeRef));
 
     size_t i = 0;
     LIST_FOR_LOOP(it, node->params)
@@ -402,17 +402,17 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
   );
 
   if (param_types != NULL)
-    allocator_deallocate(allocator_global(), param_types);
+    free(param_types);
 
   size_t fun_id_len = node->id->tok->loc->len;
 
-  char* fun_id_str = allocator_allocate(allocator_global(), fun_id_len + 1);
+  char* fun_id_str = malloc(fun_id_len + 1);
   memcpy(fun_id_str, node->id->tok->loc->ptr, fun_id_len);
   fun_id_str[fun_id_len] = '\0';
 
   node->llvm_value = LLVMAddFunction(gen->module, fun_id_str, node->llvm_type);
 
-  allocator_deallocate(allocator_global(), fun_id_str);
+  free(fun_id_str);
 
   LLVMSetFunctionCallConv(node->llvm_value, callconv);
 

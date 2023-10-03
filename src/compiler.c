@@ -8,7 +8,6 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/Target.h>
 
-#include "allocator.h"
 #include "analzyer.h"
 #include "arena.h"
 #include "ast.h"
@@ -143,7 +142,7 @@ static void compiler_dump_bc(compiler_t* compiler, const char* input_file_path, 
 
 compiler_t* compiler_init(void)
 {
-  compiler_t* compiler = (compiler_t*)allocator_allocate(allocator_global(), sizeof(compiler_t));
+  compiler_t* compiler = (compiler_t*)malloc(sizeof(compiler_t));
 
   log_set_stream(stdout);
   crumb_set_stream(stdout);
@@ -165,10 +164,9 @@ void compiler_free(compiler_t* compiler)
 {
   list_free(compiler->input_files);
 
-  typedesc_cleanup();
   ast_cleanup();
 
-  allocator_deallocate(allocator_global(), compiler);
+  free(compiler);
 }
 
 int compiler_main(compiler_t* compiler, int argc, const char* argv[])
@@ -247,8 +245,9 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     analyzer_t* analyzer = analyzer_init();
     symtable_t* symtable = symtable_init(NULL);
     typetable_t* typetable = typetable_init();
+    typebuilder_t* builder = typebuilder_init();
 
-    time_it("analyzer", analyzer_analyze(analyzer, symtable, typetable, root));
+    time_it("analyzer", analyzer_analyze(analyzer, symtable, typetable, builder, root));
 
     if (compiler->flags.dump_ast_flat)
       compiler_dump_ast_flat(compiler, input_file_path, input_file_name, root);
@@ -273,6 +272,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     LLVMContextDispose(llvm_ctx);
     generator_free(generator);
 
+    typebuilder_free(builder);
     typetable_free(typetable);
     symtable_free(symtable);
     analyzer_free(analyzer);

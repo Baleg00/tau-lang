@@ -31,8 +31,6 @@
   struct\
   {\
     typedesc_kind_t kind; /** Type kind. */\
-    size_t size; /** Byte size of type. */\
-    size_t align; /** Memory alignment of type. */\
   }\
 
 /**
@@ -64,7 +62,6 @@ typedef enum typedesc_kind_e
   TYPEDESC_ARRAY, // Array type
   TYPEDESC_REF, // Reference type
   TYPEDESC_OPT, // Optional type
-
   TYPEDESC_I8, // Built-in type i8
   TYPEDESC_I16, // Built-in type i16
   TYPEDESC_I32, // Built-in type i32
@@ -81,7 +78,6 @@ typedef enum typedesc_kind_e
   TYPEDESC_UNIT, // Built-in type unit
   TYPEDESC_NULL, // Null type
   TYPEDESC_TYPE, // Type of type
-  
   TYPEDESC_FUN, // Function type
   TYPEDESC_GEN, // Generator type
   TYPEDESC_STRUCT, // Struct type
@@ -141,6 +137,7 @@ typedef struct typedesc_array_s
 {
   TYPEDESC_HEADER;
   TYPEDESC_MODIFIER_HEADER;
+  size_t length; // Number of elements in the array.
 } typedesc_array_t;
 
 /**
@@ -197,7 +194,7 @@ typedef struct typedesc_struct_s
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
-  list_t* member_types; // List of member types.
+  list_t* field_types; // List of field types.
 } typedesc_struct_t;
 
 /**
@@ -207,7 +204,7 @@ typedef struct typedesc_union_s
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
-  list_t* member_types; // List of member types.
+  list_t* field_types; // List of field types.
 } typedesc_union_t;
 
 /**
@@ -241,117 +238,11 @@ typedef struct typedesc_mod_s
 typedesc_t* typedesc_init(typedesc_kind_t kind);
 
 /**
- * \brief Frees all memory allocated by type descriptors.
-*/
-void typedesc_cleanup(void);
-
-/**
- * \brief Creates a new mutable type descriptor based on the provided base type
- * descriptor.
- *
- * \param[in] base_type The base type descriptor.
- * \returns A newly created mutable type descriptor.
+ * \brief Frees all resources associated with a type descriptor.
+ * 
+ * \param desc Pointer to the type descriptor to be freed.
  */
-typedesc_t* typedesc_add_mut(typedesc_t* base_type);
-
-/**
- * \brief Creates a new constant type descriptor based on the provided base type
- * descriptor.
- *
- * \param[in] base_type The base type descriptor.
- * \returns A newly created constant type descriptor.
- */
-typedesc_t* typedesc_add_const(typedesc_t* base_type);
-
-/**
- * \brief Creates a new pointer type descriptor based on the provided base type
- * descriptor.
- *
- * \param[in] base_type The base type descriptor.
- * \returns A newly created pointer type descriptor.
- */
-typedesc_t* typedesc_add_ptr(typedesc_t* base_type);
-
-/**
- * \brief Creates a new array type descriptor based on the provided base type
- * descriptor.
- *
- * \param[in] base_type The base type descriptor.
- * \returns A newly created array type descriptor.
- */
-typedesc_t* typedesc_add_array(typedesc_t* base_type);
-
-/**
- * \brief Creates a new reference type descriptor based on the provided base
- * type descriptor.
- *
- * \param[in] base_type The base type descriptor.
- * \returns A newly created reference type descriptor.
- */
-typedesc_t* typedesc_add_ref(typedesc_t* base_type);
-
-/**
- * \brief Creates a new optional type descriptor based on the provided base type
- * descriptor.
- *
- * \param[in] base_type The base type descriptor.
- * \returns A newly created optional type descriptor.
- */
-typedesc_t* typedesc_add_opt(typedesc_t* base_type);
-
-/**
- * \brief Removed the topmost mutable qualifier from the provided type
- * descriptor, if present.
- *
- * \param[in] desc The type descriptor.
- * \returns A type descriptor with the mutable qualifier removed.
- */
-typedesc_t* typedesc_remove_mut(typedesc_t* desc);
-
-/**
- * \brief Removed the topmost constant qualifier from the provided type
- * descriptor, if present.
- *
- * \param[in] desc The type descriptor.
- * \returns A type descriptor with the constant qualifier removed.
- */
-typedesc_t* typedesc_remove_const(typedesc_t* desc);
-
-/**
- * \brief Removed the topmost pointer from the provided type descriptor, if
- * present.
- *
- * \param[in] desc The type descriptor.
- * \returns A type descriptor with the pointer removed.
- */
-typedesc_t* typedesc_remove_ptr(typedesc_t* desc);
-
-/**
- * \brief Removed the topmost array specifier from the provided type descriptor,
- * if present.
- *
- * \param[in] desc The type descriptor.
- * \returns A type descriptor with the array specifier removed.
- */
-typedesc_t* typedesc_remove_array(typedesc_t* desc);
-
-/**
- * \brief Removed the topmost reference specifier from the provided type
- * descriptor, if present.
- *
- * \param[in] desc The type descriptor.
- * \returns A type descriptor with the reference specifier removed.
- */
-typedesc_t* typedesc_remove_ref(typedesc_t* desc);
-
-/**
- * \brief Removed the topmost optional specifier from the provided type
- * descriptor, if present.
- *
- * \param[in] desc The type descriptor.
- * \returns A type descriptor with the optional specifier removed.
- */
-typedesc_t* typedesc_remove_opt(typedesc_t* desc);
+void typedesc_free(typedesc_t* desc);
 
 /**
  * \brief Checks if the given type descriptor is a modifier.
@@ -435,14 +326,5 @@ bool typedesc_is_composite(typedesc_t* desc);
  * \returns `true` if the descriptor is a declared type, otherwise `false`.
  */
 bool typedesc_is_decl(typedesc_t* desc);
-
-/**
- * \brief Checks if two type descriptors represent the same type.
- *
- * \param[in] lhs Pointer to the first type descriptor.
- * \param[in] rhs Pointer to the second type descriptor.
- * \return `true` if the type descriptors are the same, `false` otherwise.
- */
-bool typedesc_is_same(typedesc_t* first, typedesc_t* second);
 
 #endif
