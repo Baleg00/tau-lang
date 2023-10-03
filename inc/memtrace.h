@@ -23,6 +23,43 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#ifdef TAU_DEBUG
+# ifndef TAU_MEMTRACE_IMPL
+/**
+ * \brief Macro for memory allocation using memtrace_malloc.
+ *
+ * \param[in] SIZE The size of the memory to allocate.
+ * \returns A pointer to the allocated memory.
+ */
+#   define malloc(SIZE)        memtrace_malloc(SIZE, __FILE__, __LINE__, __func__)
+
+/**
+ * \brief Macro for array allocation using memtrace_calloc.
+ *
+ * \param[in] COUNT The number of elements in the array.
+ * \param[in] SIZE The size of each element in the array.
+ * \returns A pointer to the allocated memory.
+ */
+#   define calloc(COUNT, SIZE) memtrace_calloc(COUNT, SIZE, __FILE__, __LINE__, __func__)
+
+/**
+ * \brief Macro for memory reallocation using memtrace_realloc.
+ *
+ * \param[in] PTR A pointer to the previously allocated memory block.
+ * \param[in] SIZE The new size of the memory block.
+ * \returns A pointer to the reallocated memory block.
+ */
+#   define realloc(PTR, SIZE)  memtrace_realloc(PTR, SIZE, __FILE__, __LINE__, __func__)
+
+/**
+ * \brief Macro for memory deallocation using memtrace_free.
+ *
+ * \param[in] PTR A pointer to the memory block to deallocate.
+ */
+#   define free(PTR)           memtrace_free(PTR, __FILE__, __LINE__, __func__)
+# endif
+#endif
+
 /**
  * \brief Allocates memory of the specified size and tracks the allocation
  * using memory tracing.
@@ -71,42 +108,5 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
  * \param[in] func The function name where the memory deallocation occurs.
  */
 void memtrace_free(void* ptr, const char* file, int line, const char* func);
-
-#ifdef TAU_DEBUG
-# ifndef TAU_MEMTRACE_IMPL
-/**
- * \brief Macro for memory allocation using memtrace_malloc.
- *
- * \param[in] SIZE The size of the memory to allocate.
- * \returns A pointer to the allocated memory.
- */
-#   define malloc(SIZE)        memtrace_malloc(SIZE, __FILE__, __LINE__, __func__)
-
-/**
- * \brief Macro for array allocation using memtrace_calloc.
- *
- * \param[in] COUNT The number of elements in the array.
- * \param[in] SIZE The size of each element in the array.
- * \returns A pointer to the allocated memory.
- */
-#   define calloc(COUNT, SIZE) memtrace_calloc(COUNT, SIZE, __FILE__, __LINE__, __func__)
-
-/**
- * \brief Macro for memory reallocation using memtrace_realloc.
- *
- * \param[in] PTR A pointer to the previously allocated memory block.
- * \param[in] SIZE The new size of the memory block.
- * \returns A pointer to the reallocated memory block.
- */
-#   define realloc(PTR, SIZE)  memtrace_realloc(PTR, SIZE, __FILE__, __LINE__, __func__)
-
-/**
- * \brief Macro for memory deallocation using memtrace_free.
- *
- * \param[in] PTR A pointer to the memory block to deallocate.
- */
-#   define free(PTR)           memtrace_free(PTR, __FILE__, __LINE__, __func__)
-# endif
-#endif
 
 #endif

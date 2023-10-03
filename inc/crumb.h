@@ -22,6 +22,52 @@
 #include "location.h"
 
 /**
+ * \brief Initializes a crumb message item.
+ * 
+ * \param[in] MSG Message format string to be displayed.
+ * \param[in] MSG_ARGS Variadic argument list for message.
+*/
+#define crumb_message(MSG, MSG_ARGS)\
+  ((crumb_item_t){\
+    .kind = CRUMB_ITEM_MESSAGE,\
+    .msg = (crumb_item_message_t){\
+      .msg = (MSG),\
+      .msg_args = (MSG_ARGS)\
+    }\
+  })
+
+/**
+ * \brief Initializes a crumb snippet item.
+ * 
+ * \param[in] LOC Source code location to be referenced.
+ * \param[in] TITLE Title format string to be displayed.
+ * \param[in] TITLE_ARGS Variadic argument list for title.
+ * \param[in] MSG Message format string to be displayed.
+ * \param[in] MSG_ARGS Variadic argument list for message.
+*/
+#define crumb_snippet(LOC, TITLE, TITLE_ARGS, MSG, MSG_ARGS)\
+  ((crumb_item_t){\
+    .kind = CRUMB_ITEM_SNIPPET,\
+    .snip = (crumb_item_snippet_t){\
+      .loc = (LOC),\
+      .title = (TITLE),\
+      .title_args = (TITLE_ARGS),\
+      .msg = (MSG),\
+      .msg_args = (MSG_ARGS)\
+    }\
+  })
+
+/**
+ * \brief Logs a crumb warning message to the output stream.
+ */
+#define crumb_warn(...)  crumb_log(CRUMB_WARN , __VA_ARGS__)
+
+/**
+ * \brief Logs an crumb error message to the output stream.
+ */
+#define crumb_error(...) crumb_log(CRUMB_ERROR, __VA_ARGS__)
+
+/**
  * \brief Enumeration of crumb kinds.
  */
 typedef enum crumb_kind_e
@@ -75,42 +121,6 @@ typedef struct crumb_item_t
 } crumb_item_t;
 
 /**
- * \brief Initializes a crumb message item.
- * 
- * \param[in] MSG Message format string to be displayed.
- * \param[in] MSG_ARGS Variadic argument list for message.
-*/
-#define crumb_message(MSG, MSG_ARGS)\
-  ((crumb_item_t){\
-    .kind = CRUMB_ITEM_MESSAGE,\
-    .msg = (crumb_item_message_t){\
-      .msg = (MSG),\
-      .msg_args = (MSG_ARGS)\
-    }\
-  })
-
-/**
- * \brief Initializes a crumb snippet item.
- * 
- * \param[in] LOC Source code location to be referenced.
- * \param[in] TITLE Title format string to be displayed.
- * \param[in] TITLE_ARGS Variadic argument list for title.
- * \param[in] MSG Message format string to be displayed.
- * \param[in] MSG_ARGS Variadic argument list for message.
-*/
-#define crumb_snippet(LOC, TITLE, TITLE_ARGS, MSG, MSG_ARGS)\
-  ((crumb_item_t){\
-    .kind = CRUMB_ITEM_SNIPPET,\
-    .snip = (crumb_item_snippet_t){\
-      .loc = (LOC),\
-      .title = (TITLE),\
-      .title_args = (TITLE_ARGS),\
-      .msg = (MSG),\
-      .msg_args = (MSG_ARGS)\
-    }\
-  })
-
-/**
  * \brief Logs crumb messages to the output stream.
  * 
  * \param kind Crumb message kind.
@@ -148,15 +158,5 @@ const char* crumb_kind_to_color(crumb_kind_t kind);
  * \returns The string representation of the crumb kind.
  */
 const char* crumb_kind_to_string(crumb_kind_t kind);
-
-/**
- * \brief Logs a crumb warning message to the output stream.
- */
-#define crumb_warn(...)   crumb_log(CRUMB_WARN , __VA_ARGS__)
-
-/**
- * \brief Logs an crumb error message to the output stream.
- */
-#define crumb_error(...)  crumb_log(CRUMB_ERROR, __VA_ARGS__)
 
 #endif

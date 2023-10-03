@@ -24,6 +24,48 @@
 #include <stdbool.h>
 
 /**
+ * \brief Logs a message with the TRACE log level.
+ *
+ * \param[in] ... The message to log, formatted as a printf-style format string.
+ */
+#define log_trace(...) log_log(LOG_LEVEL_TRACE, __FILE__, __LINE__, __func__, __VA_ARGS__)
+
+/**
+ * \brief Logs a message with the DEBUG log level.
+ *
+ * \param[in] ... The message to log, formatted as a printf-style format string.
+ */
+#define log_debug(...) log_log(LOG_LEVEL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
+
+/**
+ * \brief Logs a message with the INFO log level.
+ *
+ * \param[in] ... The message to log, formatted as a printf-style format string.
+ */
+#define log_info(...)  log_log(LOG_LEVEL_INFO , __FILE__, __LINE__, __func__, __VA_ARGS__)
+
+/**
+ * \brief Logs a message with the WARN log level.
+ *
+ * \param[in] ... The message to log, formatted as a printf-style format string.
+ */
+#define log_warn(...)  log_log(LOG_LEVEL_WARN , __FILE__, __LINE__, __func__, __VA_ARGS__)
+
+/**
+ * \brief Logs a message with the ERROR log level.
+ *
+ * \param[in] ... The message to log, formatted as a printf-style format string.
+ */
+#define log_error(...) log_log(LOG_LEVEL_ERROR, __FILE__, __LINE__, __func__, __VA_ARGS__)
+
+/**
+ * \brief Logs a message with the FATAL log level.
+ *
+ * \param[in] ... The message to log, formatted as a printf-style format string.
+ */
+#define log_fatal(...) log_log(LOG_LEVEL_FATAL, __FILE__, __LINE__, __func__, __VA_ARGS__)
+
+/**
  * \brief Enumeration of log levels.
  */
 typedef enum log_level_e
@@ -106,47 +148,5 @@ void log_set_verbose(bool value);
  * \returns The current verbosity mode.
  */
 bool log_get_verbose(void);
-
-/**
- * \brief Logs a message with the TRACE log level.
- *
- * \param[in] ... The message to log, formatted as a printf-style format string.
- */
-#define log_trace(...)  log_log(LOG_LEVEL_TRACE, __FILE__, __LINE__, __func__, __VA_ARGS__)
-
-/**
- * \brief Logs a message with the DEBUG log level.
- *
- * \param[in] ... The message to log, formatted as a printf-style format string.
- */
-#define log_debug(...)  log_log(LOG_LEVEL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
-
-/**
- * \brief Logs a message with the INFO log level.
- *
- * \param[in] ... The message to log, formatted as a printf-style format string.
- */
-#define log_info(...)   log_log(LOG_LEVEL_INFO , __FILE__, __LINE__, __func__, __VA_ARGS__)
-
-/**
- * \brief Logs a message with the WARN log level.
- *
- * \param[in] ... The message to log, formatted as a printf-style format string.
- */
-#define log_warn(...)   log_log(LOG_LEVEL_WARN , __FILE__, __LINE__, __func__, __VA_ARGS__)
-
-/**
- * \brief Logs a message with the ERROR log level.
- *
- * \param[in] ... The message to log, formatted as a printf-style format string.
- */
-#define log_error(...)  log_log(LOG_LEVEL_ERROR, __FILE__, __LINE__, __func__, __VA_ARGS__)
-
-/**
- * \brief Logs a message with the FATAL log level.
- *
- * \param[in] ... The message to log, formatted as a printf-style format string.
- */
-#define log_fatal(...)  log_log(LOG_LEVEL_FATAL, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #endif

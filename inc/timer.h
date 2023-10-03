@@ -21,20 +21,6 @@
 #include "log.h"
 
 /**
- * \brief Returns the frequency of the timer in ticks per second.
- * 
- * \returns The frequency of the timer.
- */
-uint64_t timer_freq(void);
-
-/**
- * \brief Returns the current value of the timer in ticks.
- * 
- * \returns The current value of the timer.
- */
-uint64_t timer_now(void);
-
-/**
  * \brief Measures the execution time of a given statement and logs the elapsed time in milliseconds.
  *
  * \param[in] NAME The name for identifying the measurement.
@@ -47,5 +33,19 @@ uint64_t timer_now(void);
     uint64_t time_it_end = timer_now();\
     log_debug("timer", "(" NAME ") Elapsed time: %.5lf ms", (double)(time_it_end - time_it_begin) / (double)timer_freq() * 1000.0);\
   } while (0)\
+
+/**
+ * \brief Returns the frequency of the timer in ticks per second.
+ * 
+ * \returns The frequency of the timer.
+ */
+uint64_t timer_freq(void);
+
+/**
+ * \brief Returns the current value of the timer in ticks.
+ * 
+ * \returns The current value of the timer.
+ */
+uint64_t timer_now(void);
 
 #endif

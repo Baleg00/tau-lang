@@ -24,6 +24,160 @@
 #include "queue.h"
 
 /**
+ * \brief Initalizes an integer option.
+ */
+#define cli_opt_int(...)  (cli_opt_t){ CLI_TYPE_INTEGER, __VA_ARGS__ }
+
+/**
+ * \brief Initalizes a floating-point option.
+ */
+#define cli_opt_flt(...)  (cli_opt_t){ CLI_TYPE_FLOAT  , __VA_ARGS__ }
+
+/**
+ * \brief Initalizes a boolean option.
+ */
+#define cli_opt_bool(...) (cli_opt_t){ CLI_TYPE_BOOLEAN, __VA_ARGS__ }
+
+/**
+ * \brief Initalizes a string option.
+ */
+#define cli_opt_str(...)  (cli_opt_t){ CLI_TYPE_STRING , __VA_ARGS__ }
+
+/**
+ * \brief Initializes a help option.
+ * 
+ * \details Initializes a boolean option with "--help" and "-h" as names. If
+ * present the option prints all command-line interface usages and option
+ * descriptions to the standard output.
+ * 
+ * \returns New help option.
+*/
+#define cli_opt_help()\
+  ((cli_opt_t){\
+    .type = CLI_TYPE_BOOLEAN,\
+    .names = (const char*[]){ "-h", "--help" },\
+    .name_count = 2,\
+    .arg_num = 'N',\
+    .arg_max = 0,\
+    .data = NULL,\
+    .default_data = NULL,\
+    .data_count = NULL,\
+    .desc = "Display this message.",\
+    .callback = cli_help_callback,\
+    .user_ptr = NULL\
+  })
+
+/**
+ * \brief Initializes a version option.
+ * 
+ * \details Initializes a boolean option with "--version" as name. If present
+ * the option prints the program version represented by `VER` to the standard
+ * output.
+ * 
+ * \param[in] VER String representation of program version.
+ * \returns New version option.
+*/
+#define cli_opt_version(VER)\
+  ((cli_opt_t){\
+    .type = CLI_TYPE_BOOLEAN,\
+    .names = (const char*[]){ "--version" },\
+    .name_count = 1,\
+    .arg_num = 'N',\
+    .arg_max = 0,\
+    .data = NULL,\
+    .default_data = NULL,\
+    .data_count = NULL,\
+    .desc = "Display version.",\
+    .callback = cli_version_callback,\
+    .user_ptr = (VER)\
+  })
+
+/**
+ * \brief Initializes a verbose option.
+ * 
+ * \details Initializes a boolean option with "--verbose" and "-v" as names. If
+ * present the option sets the boolean variable pointed to by `DATA` to `true`.
+ * 
+ * \param[out] DATA Pointer to boolean variable.
+ * \returns New verbose option.
+*/
+#define cli_opt_verbose(DATA)\
+  ((cli_opt_t){\
+    .type = CLI_TYPE_BOOLEAN,\
+    .names = (const char*[]){ "-v", "--verbose" },\
+    .name_count = 2,\
+    .arg_num = 'N',\
+    .arg_max = 0,\
+    .data = NULL,\
+    .default_data = NULL,\
+    .data_count = NULL,\
+    .desc = "Enable verbose mode.",\
+    .callback = cli_verbose_callback,\
+    .user_ptr = (DATA)\
+  })
+
+/**
+ * \brief Initializes a sink.
+ * 
+ * \details The sink options absorbs at most `ARG_MAX` arguments if no other
+ * options match.
+ * 
+ * \param[in] ARG_MAX Maximum number of arguments to be absorbed.
+ * \param[out] DATA Pointer to buffer where the arguments will be written to or NULL.
+ * \param[out] DATA_COUNT Pointer to counter to be set to the number of arguments read or NULL.
+ * \param[out] CALLBACK Pointer to function to be called when an argument is read or NULL.
+ * \param[in,out] USER_PTR Pointer to user provided data to be passed to callback function.
+ * \returns New sink option.
+*/
+#define cli_opt_sink(ARG_MAX, DATA, DATA_COUNT, CALLBACK, USER_PTR)\
+  ((cli_opt_t){\
+    .type = CLI_TYPE_SINK,\
+    .names = NULL,\
+    .name_count = 0,\
+    .arg_num = '\0',\
+    .arg_max = (ARG_MAX),\
+    .data = (DATA),\
+    .default_data = NULL,\
+    .data_count = (DATA_COUNT),\
+    .desc = NULL,\
+    .callback = (CALLBACK),\
+    .user_ptr = (USER_PTR)\
+  })
+
+/**
+ * \brief Initializes a flag option.
+ * 
+ * \details Initializes a boolean option which takes 0 positional arguments and
+ * if present sets the boolean variable pointed to by `FLAG` to `true`.
+ * 
+ * \param[in] NAMES Array of option names.
+ * \param[in] NAME_COUNT Number of option names.
+ * \param[in] DESC Brief option description.
+ * \param[out] FLAG Pointer to flag variable to be set if option is present.
+ * \returns New flag option.
+*/
+#define cli_opt_flag(NAMES, NAME_COUNT, DESC, FLAG)\
+  ((cli_opt_t){\
+    .type = CLI_TYPE_BOOLEAN,\
+    .names = (NAMES),\
+    .name_count = (NAME_COUNT),\
+    .arg_num = 'N',\
+    .arg_max = 0,\
+    .data = NULL,\
+    .default_data = NULL,\
+    .data_count = NULL,\
+    .desc = (DESC),\
+    .callback = cli_flag_callback,\
+    .user_ptr = (FLAG)\
+  })
+
+/**
+ * \brief Macro for initializing a list of option names.
+ */
+#define cli_names(...)\
+  ((const char*[]){ __VA_ARGS__ })
+
+/**
  * \brief Enumeration of command-line argument types.
  */
 typedef enum cli_type_e
@@ -190,159 +344,5 @@ void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* 
  * \param[in] user_ptr Pointer to user-defined data.
  */
 void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr);
-
-/**
- * \brief Initalizes an integer option.
- */
-#define cli_opt_int(...)  (cli_opt_t){ CLI_TYPE_INTEGER, __VA_ARGS__ }
-
-/**
- * \brief Initalizes a floating-point option.
- */
-#define cli_opt_flt(...)  (cli_opt_t){ CLI_TYPE_FLOAT  , __VA_ARGS__ }
-
-/**
- * \brief Initalizes a boolean option.
- */
-#define cli_opt_bool(...) (cli_opt_t){ CLI_TYPE_BOOLEAN, __VA_ARGS__ }
-
-/**
- * \brief Initalizes a string option.
- */
-#define cli_opt_str(...)  (cli_opt_t){ CLI_TYPE_STRING , __VA_ARGS__ }
-
-/**
- * \brief Initializes a help option.
- * 
- * \details Initializes a boolean option with "--help" and "-h" as names. If
- * present the option prints all command-line interface usages and option
- * descriptions to the standard output.
- * 
- * \returns New help option.
-*/
-#define cli_opt_help()\
-  ((cli_opt_t){\
-    .type = CLI_TYPE_BOOLEAN,\
-    .names = (const char*[]){ "-h", "--help" },\
-    .name_count = 2,\
-    .arg_num = 'N',\
-    .arg_max = 0,\
-    .data = NULL,\
-    .default_data = NULL,\
-    .data_count = NULL,\
-    .desc = "Display this message.",\
-    .callback = cli_help_callback,\
-    .user_ptr = NULL\
-  })
-
-/**
- * \brief Initializes a version option.
- * 
- * \details Initializes a boolean option with "--version" as name. If present
- * the option prints the program version represented by `VER` to the standard
- * output.
- * 
- * \param[in] VER String representation of program version.
- * \returns New version option.
-*/
-#define cli_opt_version(VER)\
-  ((cli_opt_t){\
-    .type = CLI_TYPE_BOOLEAN,\
-    .names = (const char*[]){ "--version" },\
-    .name_count = 1,\
-    .arg_num = 'N',\
-    .arg_max = 0,\
-    .data = NULL,\
-    .default_data = NULL,\
-    .data_count = NULL,\
-    .desc = "Display version.",\
-    .callback = cli_version_callback,\
-    .user_ptr = (VER)\
-  })
-
-/**
- * \brief Initializes a verbose option.
- * 
- * \details Initializes a boolean option with "--verbose" and "-v" as names. If
- * present the option sets the boolean variable pointed to by `DATA` to `true`.
- * 
- * \param[out] DATA Pointer to boolean variable.
- * \returns New verbose option.
-*/
-#define cli_opt_verbose(DATA)\
-  ((cli_opt_t){\
-    .type = CLI_TYPE_BOOLEAN,\
-    .names = (const char*[]){ "-v", "--verbose" },\
-    .name_count = 2,\
-    .arg_num = 'N',\
-    .arg_max = 0,\
-    .data = NULL,\
-    .default_data = NULL,\
-    .data_count = NULL,\
-    .desc = "Enable verbose mode.",\
-    .callback = cli_verbose_callback,\
-    .user_ptr = (DATA)\
-  })
-
-/**
- * \brief Initializes a sink.
- * 
- * \details The sink options absorbs at most `ARG_MAX` arguments if no other
- * options match.
- * 
- * \param[in] ARG_MAX Maximum number of arguments to be absorbed.
- * \param[out] DATA Pointer to buffer where the arguments will be written to or NULL.
- * \param[out] DATA_COUNT Pointer to counter to be set to the number of arguments read or NULL.
- * \param[out] CALLBACK Pointer to function to be called when an argument is read or NULL.
- * \param[in,out] USER_PTR Pointer to user provided data to be passed to callback function.
- * \returns New sink option.
-*/
-#define cli_opt_sink(ARG_MAX, DATA, DATA_COUNT, CALLBACK, USER_PTR)\
-  ((cli_opt_t){\
-    .type = CLI_TYPE_SINK,\
-    .names = NULL,\
-    .name_count = 0,\
-    .arg_num = '\0',\
-    .arg_max = (ARG_MAX),\
-    .data = (DATA),\
-    .default_data = NULL,\
-    .data_count = (DATA_COUNT),\
-    .desc = NULL,\
-    .callback = (CALLBACK),\
-    .user_ptr = (USER_PTR)\
-  })
-
-/**
- * \brief Initializes a flag option.
- * 
- * \details Initializes a boolean option which takes 0 positional arguments and
- * if present sets the boolean variable pointed to by `FLAG` to `true`.
- * 
- * \param[in] NAMES Array of option names.
- * \param[in] NAME_COUNT Number of option names.
- * \param[in] DESC Brief option description.
- * \param[out] FLAG Pointer to flag variable to be set if option is present.
- * \returns New flag option.
-*/
-#define cli_opt_flag(NAMES, NAME_COUNT, DESC, FLAG)\
-  ((cli_opt_t){\
-    .type = CLI_TYPE_BOOLEAN,\
-    .names = (NAMES),\
-    .name_count = (NAME_COUNT),\
-    .arg_num = 'N',\
-    .arg_max = 0,\
-    .data = NULL,\
-    .default_data = NULL,\
-    .data_count = NULL,\
-    .desc = (DESC),\
-    .callback = cli_flag_callback,\
-    .user_ptr = (FLAG)\
-  })
-
-/**
- * \brief Macro for initializing a list of option names.
- */
-#define cli_names(...)\
-  ((const char*[]){ __VA_ARGS__ })
 
 #endif

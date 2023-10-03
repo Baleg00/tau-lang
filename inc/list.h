@@ -22,6 +22,19 @@
 #include <stddef.h>
 
 /**
+ * \brief Macro for iterating over each element in a list using a for loop.
+ *
+ * \param[in] VAR The name of the variable to use for iteration.
+ * \param[in] LIST The list to iterate over.
+ */
+#define LIST_FOR_LOOP(VAR, LIST)\
+  for (\
+    list_node_t* (VAR) = (LIST) == NULL ? NULL : list_front_node((LIST));\
+    (VAR) != NULL;\
+    (VAR) = list_node_next((VAR))\
+  )
+
+/**
  * \brief Function type to serve as parameter in `list_for_each`.
  */
 typedef void(*list_for_each_func_t)(void*);
@@ -35,19 +48,6 @@ typedef struct list_node_t list_node_t;
  * \brief Linked list data structure.
  */
 typedef struct list_t list_t;
-
-/**
- * \brief Macro for iterating over each element in a list using a for loop.
- *
- * \param[in] VAR The name of the variable to use for iteration.
- * \param[in] LIST The list to iterate over.
- */
-#define LIST_FOR_LOOP(VAR, LIST)\
-  for (\
-    list_node_t* (VAR) = (LIST) == NULL ? NULL : list_front_node((LIST));\
-    (VAR) != NULL;\
-    (VAR) = list_node_next((VAR))\
-  )
 
 /**
  * \brief Initializes a list node with the given data.
