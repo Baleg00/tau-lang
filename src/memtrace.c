@@ -30,7 +30,7 @@ typedef enum memtrace_alloc_kind_e
 /**
  * \brief Allocation metadata.
  */
-typedef struct memtrace_meta_s
+typedef struct memtrace_meta_t
 {
   memtrace_alloc_kind_t alloc_kind; // Allcation kind.
   const char* file; // Path to source file.
@@ -41,7 +41,7 @@ typedef struct memtrace_meta_s
 /**
  * \brief Allocation data.
  */
-typedef struct memtrace_data_s
+typedef struct memtrace_data_t
 {
   void* ptr; // Pointer to memory.
   size_t size; // Size of allocation in bytes.
@@ -50,12 +50,12 @@ typedef struct memtrace_data_s
 /**
  * \brief Allocation object.
  */
-typedef struct memtrace_alloc_s
+typedef struct memtrace_alloc_t
 {
   memtrace_data_t data;
   memtrace_meta_t meta;
 
-  struct memtrace_alloc_s *next; // Pointer to next allocation.
+  struct memtrace_alloc_t *next; // Pointer to next allocation.
 } memtrace_alloc_t;
 
 /**

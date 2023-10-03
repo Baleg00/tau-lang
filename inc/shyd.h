@@ -20,7 +20,7 @@ typedef enum shyd_kind_e
   SHYD_BRACKET_OPEN,
 } shyd_kind_t;
 
-typedef struct shyd_elem_s
+typedef struct shyd_elem_t
 {
   shyd_kind_t kind;
   token_t* tok;
@@ -28,7 +28,7 @@ typedef struct shyd_elem_s
   op_kind_t op;
 } shyd_elem_t;
 
-typedef struct shyd_s
+typedef struct shyd_t
 {
   parser_t* par;
 

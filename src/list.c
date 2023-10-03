@@ -13,7 +13,7 @@
 
 #include "memtrace.h"
 
-struct list_node_s
+struct list_node_t
 {
   void* data; // Pointer to the stored data.
   list_t* owner; // Pointer to the list which the node belongs to.
@@ -21,7 +21,7 @@ struct list_node_s
   list_node_t* next; // Pointer to the next node or NULL.
 };
 
-struct list_s
+struct list_t
 {
   list_node_t* head; // Pointer to the first node in the list or NULL.
   list_node_t* tail; // Pointer to the last node in the list or NULL.

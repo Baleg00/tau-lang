@@ -16,7 +16,7 @@
 #include "memtrace.h"
 #include "util.h"
 
-struct cli_s
+struct cli_t
 {
   cli_opt_t* opts; // Array of command-line options.
   size_t opt_count; // Number of command-line options.

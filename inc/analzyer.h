@@ -28,7 +28,7 @@
 /**
  * \brief Represents a semantic analyzer.
  */
-typedef struct analyzer_s analyzer_t;
+typedef struct analyzer_t analyzer_t;
 
 /**
  * \brief Initializes a new semantic analyzer.

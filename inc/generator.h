@@ -25,7 +25,7 @@
 /**
  * \brief Represents a generator for LLVM IR code.
  */
-typedef struct generator_s generator_t;
+typedef struct generator_t generator_t;
 
 /**
  * \brief Initializes a new generator.

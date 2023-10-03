@@ -25,7 +25,7 @@
 /**
  * \brief Represents a string.
  */
-typedef struct string_s string_t;
+typedef struct string_t string_t;
 
 /**
  * \brief Initializes a new empty string.

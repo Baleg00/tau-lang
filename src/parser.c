@@ -18,7 +18,7 @@
 #include "shyd.h"
 #include "util.h"
 
-struct parser_s
+struct parser_t
 {
   list_t* toks; // List of tokens to be processed.
   list_node_t* cur; // Current token in list.

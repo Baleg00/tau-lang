@@ -22,7 +22,7 @@
 /**
  * \brief Stack data structure.
  */
-typedef struct stack_s stack_t;
+typedef struct stack_t stack_t;
 
 /**
  * \brief Initializes a new empty stack.

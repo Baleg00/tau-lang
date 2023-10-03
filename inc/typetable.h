@@ -31,7 +31,7 @@
  * type checking and resolution during compilation. It owns neither the AST nodes
  * nor the associated type descriptors.
  */
-typedef struct typetable_s typetable_t;
+typedef struct typetable_t typetable_t;
 
 /**
  * \brief Initializes a new typetable.

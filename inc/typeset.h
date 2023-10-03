@@ -30,7 +30,7 @@
  * the set is destroyed. Avoid manually freeing types that are part of a type set
  * to prevent double-free errors.
  */
-typedef struct typeset_s typeset_t;
+typedef struct typeset_t typeset_t;
 
 /**
  * \brief Initializes a new type set.

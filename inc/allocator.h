@@ -56,7 +56,7 @@ typedef void(*allocator_cleanup_func_t)(void* /* ctx */);
 /**
  * \brief Memory allocator structure.
  */
-typedef struct allocator_s allocator_t;
+typedef struct allocator_t allocator_t;
 
 /**
  * \brief Initializes a memory allocator with the provided functions and

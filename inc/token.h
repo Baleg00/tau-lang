@@ -141,7 +141,7 @@ typedef enum token_kind_e
 /**
  * \brief Represents a token.
  */
-typedef struct token_s
+typedef struct token_t
 {
   token_kind_t kind; // Token kind.
   location_t* loc; // Token location in the source code.

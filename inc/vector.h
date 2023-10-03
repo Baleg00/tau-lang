@@ -22,7 +22,7 @@
 /**
  * \brief Dynamic array-based vector data structure.
  */
-typedef struct vector_s vector_t;
+typedef struct vector_t vector_t;
 
 /**
  * \brief Initializes a new vector.

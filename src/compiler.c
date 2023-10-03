@@ -28,7 +28,7 @@
 
 #define COMPILER_MAX_BUFFER_SIZE 256
 
-struct compiler_s
+struct compiler_t
 {
   list_t* input_files;
 

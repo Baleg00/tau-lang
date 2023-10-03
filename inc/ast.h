@@ -181,7 +181,7 @@ typedef enum ast_kind_e
 /**
  * \brief AST node.
  */
-typedef struct ast_node_s
+typedef struct ast_node_t
 {
   AST_NODE_HEADER;
 } ast_node_t;
@@ -189,7 +189,7 @@ typedef struct ast_node_s
 /**
  * \brief AST identifier node.
  */
-typedef struct ast_id_s
+typedef struct ast_id_t
 {
   AST_NODE_HEADER;
 } ast_id_t;
@@ -197,7 +197,7 @@ typedef struct ast_id_s
 /**
  * \brief AST type node.
  */
-typedef struct ast_type_s
+typedef struct ast_type_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -206,7 +206,7 @@ typedef struct ast_type_s
 /**
  * \brief AST type modifier node.
  */
-typedef struct ast_type_modifier_s
+typedef struct ast_type_modifier_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -216,7 +216,7 @@ typedef struct ast_type_modifier_s
 /**
  * \brief AST mutable type node.
  */
-typedef struct ast_type_mut_s
+typedef struct ast_type_mut_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -226,7 +226,7 @@ typedef struct ast_type_mut_s
 /**
  * \brief AST constant type node.
  */
-typedef struct ast_type_const_s
+typedef struct ast_type_const_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -236,7 +236,7 @@ typedef struct ast_type_const_s
 /**
  * \brief AST pointer type node.
  */
-typedef struct ast_type_ptr_s
+typedef struct ast_type_ptr_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -246,7 +246,7 @@ typedef struct ast_type_ptr_s
 /**
  * \brief AST reference type node.
  */
-typedef struct ast_type_ref_s
+typedef struct ast_type_ref_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -256,7 +256,7 @@ typedef struct ast_type_ref_s
 /**
  * \brief AST optional type node.
  */
-typedef struct ast_type_opt_s
+typedef struct ast_type_opt_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -266,7 +266,7 @@ typedef struct ast_type_opt_s
 /**
  * \brief AST array type node.
  */
-typedef struct ast_type_array_s
+typedef struct ast_type_array_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -277,7 +277,7 @@ typedef struct ast_type_array_s
 /**
  * \brief AST function type node.
  */
-typedef struct ast_type_fun_s
+typedef struct ast_type_fun_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -288,7 +288,7 @@ typedef struct ast_type_fun_s
 /**
  * \brief AST generator type node.
  */
-typedef struct ast_type_gen_s
+typedef struct ast_type_gen_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -299,7 +299,7 @@ typedef struct ast_type_gen_s
 /**
  * \brief AST member type node.
  */
-typedef struct ast_type_member_s
+typedef struct ast_type_member_t
 {
   AST_NODE_HEADER;
   AST_TYPE_HEADER;
@@ -310,7 +310,7 @@ typedef struct ast_type_member_s
 /**
  * \brief AST expression node.
  */
-typedef struct ast_expr_s
+typedef struct ast_expr_t
 {
   AST_NODE_HEADER;
   AST_EXPR_HEADER;
@@ -319,7 +319,7 @@ typedef struct ast_expr_s
 /**
  * \brief AST literal expression node.
  */
-typedef struct ast_expr_lit_s
+typedef struct ast_expr_lit_t
 {
   AST_NODE_HEADER;
   AST_EXPR_HEADER;
@@ -328,7 +328,7 @@ typedef struct ast_expr_lit_s
 /**
  * \brief AST operation expression node.
  */
-typedef struct ast_expr_op_s
+typedef struct ast_expr_op_t
 {
   AST_NODE_HEADER;
   AST_EXPR_HEADER;
@@ -338,7 +338,7 @@ typedef struct ast_expr_op_s
 /**
  * \brief AST binary operation expression node.
  */
-typedef struct ast_expr_op_bin_s
+typedef struct ast_expr_op_bin_t
 {
   AST_NODE_HEADER;
   AST_EXPR_HEADER;
@@ -350,7 +350,7 @@ typedef struct ast_expr_op_bin_s
 /**
  * \brief AST unary operation expression node.
  */
-typedef struct ast_expr_op_un_s
+typedef struct ast_expr_op_un_t
 {
   AST_NODE_HEADER;
   AST_EXPR_HEADER;
@@ -361,7 +361,7 @@ typedef struct ast_expr_op_un_s
 /**
  * \brief AST call operation expression node.
  */
-typedef struct ast_expr_op_call_s
+typedef struct ast_expr_op_call_t
 {
   AST_NODE_HEADER;
   AST_EXPR_HEADER;
@@ -373,7 +373,7 @@ typedef struct ast_expr_op_call_s
 /**
  * \brief AST variable expression node.
  */
-typedef struct ast_expr_decl_s
+typedef struct ast_expr_decl_t
 {
   AST_NODE_HEADER;
   AST_EXPR_HEADER;
@@ -383,7 +383,7 @@ typedef struct ast_expr_decl_s
 /**
  * \brief AST statement node.
  */
-typedef struct ast_stmt_s
+typedef struct ast_stmt_t
 {
   AST_NODE_HEADER;
 } ast_stmt_t;
@@ -391,7 +391,7 @@ typedef struct ast_stmt_s
 /**
  * \brief AST if statement node.
  */
-typedef struct ast_stmt_if_s
+typedef struct ast_stmt_if_t
 {
   AST_NODE_HEADER;
   ast_node_t* cond; // Condition expression.
@@ -408,7 +408,7 @@ typedef struct ast_stmt_if_s
 /**
  * \brief AST for statement node.
  */
-typedef struct ast_stmt_for_s
+typedef struct ast_stmt_for_t
 {
   AST_NODE_HEADER;
   ast_node_t* var; // Loop variable declaration.
@@ -419,7 +419,7 @@ typedef struct ast_stmt_for_s
 /**
  * \brief AST while statement node.
  */
-typedef struct ast_stmt_while_s
+typedef struct ast_stmt_while_t
 {
   AST_NODE_HEADER;
   ast_node_t* cond; // Condition expression.
@@ -429,7 +429,7 @@ typedef struct ast_stmt_while_s
 /**
  * \brief AST break statement node.
  */
-typedef struct ast_stmt_break_s
+typedef struct ast_stmt_break_t
 {
   AST_NODE_HEADER;
 } ast_stmt_break_t;
@@ -437,7 +437,7 @@ typedef struct ast_stmt_break_s
 /**
  * \brief AST continue statement node.
  */
-typedef struct ast_stmt_continue_s
+typedef struct ast_stmt_continue_t
 {
   AST_NODE_HEADER;
 } ast_stmt_continue_t;
@@ -445,7 +445,7 @@ typedef struct ast_stmt_continue_s
 /**
  * \brief AST return statement node.
  */
-typedef struct ast_stmt_return_s
+typedef struct ast_stmt_return_t
 {
   AST_NODE_HEADER;
   ast_node_t* expr; // Expression.
@@ -454,7 +454,7 @@ typedef struct ast_stmt_return_s
 /**
  * \brief AST yield statement node.
  */
-typedef struct ast_stmt_yield_s
+typedef struct ast_stmt_yield_t
 {
   AST_NODE_HEADER;
   ast_node_t* expr; // Expression.
@@ -463,7 +463,7 @@ typedef struct ast_stmt_yield_s
 /**
  * \brief AST expression statement node.
  */
-typedef struct ast_stmt_expr_s
+typedef struct ast_stmt_expr_t
 {
   AST_NODE_HEADER;
   ast_node_t* expr; // Expression.
@@ -472,7 +472,7 @@ typedef struct ast_stmt_expr_s
 /**
  * \brief AST block statement node.
  */
-typedef struct ast_stmt_block_s
+typedef struct ast_stmt_block_t
 {
   AST_NODE_HEADER;
   list_t* stmts; // List of statements.
@@ -481,7 +481,7 @@ typedef struct ast_stmt_block_s
 /**
  * \brief AST declaration node.
  */
-typedef struct ast_decl_s
+typedef struct ast_decl_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -490,7 +490,7 @@ typedef struct ast_decl_s
 /**
  * \brief AST variable declaration node.
  */
-typedef struct ast_decl_var_s
+typedef struct ast_decl_var_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -504,7 +504,7 @@ typedef struct ast_decl_var_s
 /**
  * \brief AST function declaration node.
  */
-typedef struct ast_decl_fun_s
+typedef struct ast_decl_fun_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -523,7 +523,7 @@ typedef struct ast_decl_fun_s
 /**
  * \brief AST generator declaration node.
  */
-typedef struct ast_decl_gen_s
+typedef struct ast_decl_gen_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -535,7 +535,7 @@ typedef struct ast_decl_gen_s
 /**
  * \brief AST structure declaration node.
  */
-typedef struct ast_decl_struct_s
+typedef struct ast_decl_struct_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -545,7 +545,7 @@ typedef struct ast_decl_struct_s
 /**
  * \brief AST union declaration node.
  */
-typedef struct ast_decl_union_s
+typedef struct ast_decl_union_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -555,7 +555,7 @@ typedef struct ast_decl_union_s
 /**
  * \brief AST enumerator declaration node.
  */
-typedef struct ast_decl_enum_s
+typedef struct ast_decl_enum_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -565,7 +565,7 @@ typedef struct ast_decl_enum_s
 /**
  * \brief AST module declaration node.
  */
-typedef struct ast_decl_mod_s
+typedef struct ast_decl_mod_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -575,7 +575,7 @@ typedef struct ast_decl_mod_s
 /**
  * \brief AST parameter declaration node.
  */
-typedef struct ast_decl_param_s
+typedef struct ast_decl_param_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -590,7 +590,7 @@ typedef struct ast_decl_param_s
 /**
  * \brief AST enumeration constant declaration node.
  */
-typedef struct ast_decl_enum_constant_s
+typedef struct ast_decl_enum_constant_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
@@ -600,7 +600,7 @@ typedef struct ast_decl_enum_constant_s
 /**
  * \brief AST attribute node.
  */
-typedef struct ast_attr_s
+typedef struct ast_attr_t
 {
   AST_NODE_HEADER;
   ast_node_t* id; // Identifier.
@@ -610,7 +610,7 @@ typedef struct ast_attr_s
 /**
  * \brief AST program node.
  */
-typedef struct ast_prog_s
+typedef struct ast_prog_t
 {
   AST_NODE_HEADER;
   list_t* decls; // List of declarations.

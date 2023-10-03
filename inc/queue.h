@@ -24,7 +24,7 @@
 /**
  * \brief Queue data structure.
  */
-typedef struct queue_s queue_t;
+typedef struct queue_t queue_t;
 
 /**
  * \brief Initializes a new empty queue.

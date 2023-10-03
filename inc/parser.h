@@ -28,7 +28,7 @@
 /**
  * \brief Represents a syntax analyzer.
  */
-typedef struct parser_s parser_t;
+typedef struct parser_t parser_t;
 
 /**
  * \brief Function pointer type to be used when parsing lists.

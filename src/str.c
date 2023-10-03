@@ -15,7 +15,7 @@
 #include "memtrace.h"
 #include "util.h"
 
-struct string_s 
+struct string_t 
 {
   size_t cap; // Maxmimum capacity of the buffer.
   size_t len; // Length of the string (excluding the terminating null character).

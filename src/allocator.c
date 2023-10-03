@@ -10,7 +10,7 @@
 #include "memtrace.h"
 #include "util.h"
 
-struct allocator_s
+struct allocator_t
 {
   void* ctx; // Pointer to the allocator context data.
   allocator_allocate_func_t alloc_func; // Pointer to the allocation function.

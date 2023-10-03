@@ -38,19 +38,19 @@ typedef enum cli_type_e
 /**
  * \brief Command-line interface.
  */
-typedef struct cli_s cli_t;
+typedef struct cli_t cli_t;
 
 /**
  * \brief Command-line option.
  */
-typedef struct cli_opt_s cli_opt_t;
+typedef struct cli_opt_t cli_opt_t;
 
 /**
  * \brief Command-line option callback type.
  */
 typedef void(*cli_callback_t)(cli_t*, queue_t*, cli_opt_t*, const char*, void*);
 
-struct cli_opt_s
+struct cli_opt_t
 {
   cli_type_t type; // Option type.
 

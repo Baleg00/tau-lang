@@ -13,9 +13,9 @@
 /**
  * \brief Node in a binary search tree.
  */
-typedef struct set_node_s set_node_t;
+typedef struct set_node_t set_node_t;
 
-struct set_node_s
+struct set_node_t
 {
   void* data; // Pointer to the data stored in the node.
   set_node_t* parent; // Pointer to the parent node.
@@ -23,7 +23,7 @@ struct set_node_s
   set_node_t* right; // Pointer to the right child node.
 };
 
-struct set_s
+struct set_t
 {
   set_cmp_func_t cmp; // Comparison function used to order elements in the set.
   size_t size; // Number of elements in the set.

@@ -15,7 +15,7 @@
 #include "set.h"
 #include "util.h"
 
-struct typeset_s
+struct typeset_t
 {
   typedesc_t* desc_i8;
   typedesc_t* desc_i16;

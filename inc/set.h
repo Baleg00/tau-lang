@@ -22,7 +22,7 @@
 /**
  * \brief Set data structure.
  */
-typedef struct set_s set_t;
+typedef struct set_t set_t;
 
 /**
  * \brief Comparison function type used to order elements in a set.

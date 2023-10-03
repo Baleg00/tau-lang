@@ -28,9 +28,9 @@ typedef enum test_context_kind_e
 } test_context_kind_t;
 
 /** Represents a test context. */
-typedef struct test_context_s test_context_t;
+typedef struct test_context_t test_context_t;
 
-struct test_context_s
+struct test_context_t
 {
   test_context_kind_t kind; /** Context kind. */
 

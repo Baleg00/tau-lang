@@ -39,16 +39,16 @@
  * \details This structure holds information about a type entry in a type table.
  * It includes a reference to the AST node and the associated type descriptor.
  */
-typedef struct typetable_entry_s typetable_entry_t;
+typedef struct typetable_entry_t typetable_entry_t;
 
-struct typetable_entry_s
+struct typetable_entry_t
 {
   ast_node_t* node; // A pointer to the AST node associated with the type.
   typedesc_t* desc; // A pointer to the descriptor of the type.
   typetable_entry_t* next; // A pointer to the next entry in case of collisions.
 };
 
-struct typetable_s
+struct typetable_t
 {
   size_t size; // The number of type entries in the table.
   size_t capacity; // The total capacity of the table.

@@ -89,7 +89,7 @@ typedef enum typedesc_kind_e
 /**
  * \brief Type descriptor.
  */
-typedef struct typedesc_s
+typedef struct typedesc_t
 {
   TYPEDESC_HEADER;
 } typedesc_t;
@@ -97,7 +97,7 @@ typedef struct typedesc_s
 /**
  * \brief Type descriptor for type modifiers.
  */
-typedef struct typedesc_modifier_s
+typedef struct typedesc_modifier_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_MODIFIER_HEADER;
@@ -106,7 +106,7 @@ typedef struct typedesc_modifier_s
 /**
  * \brief Type descriptor for mutable types.
  */
-typedef struct typedesc_mut_s
+typedef struct typedesc_mut_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_MODIFIER_HEADER;
@@ -115,7 +115,7 @@ typedef struct typedesc_mut_s
 /**
  * \brief Type descriptor for constant types.
  */
-typedef struct typedesc_const_s
+typedef struct typedesc_const_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_MODIFIER_HEADER;
@@ -124,7 +124,7 @@ typedef struct typedesc_const_s
 /**
  * \brief Type descriptor for pointer types.
  */
-typedef struct typedesc_ptr_s
+typedef struct typedesc_ptr_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_MODIFIER_HEADER;
@@ -133,7 +133,7 @@ typedef struct typedesc_ptr_s
 /**
  * \brief Type descriptor for array types.
  */
-typedef struct typedesc_array_s
+typedef struct typedesc_array_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_MODIFIER_HEADER;
@@ -143,7 +143,7 @@ typedef struct typedesc_array_s
 /**
  * \brief Type descriptor for reference types.
  */
-typedef struct typedesc_ref_s
+typedef struct typedesc_ref_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_MODIFIER_HEADER;
@@ -152,7 +152,7 @@ typedef struct typedesc_ref_s
 /**
  * \brief Type descriptor for optional types.
  */
-typedef struct typedesc_opt_s
+typedef struct typedesc_opt_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_MODIFIER_HEADER;
@@ -161,7 +161,7 @@ typedef struct typedesc_opt_s
 /**
  * \brief Type descriptor for functions.
  */
-typedef struct typedesc_fun_s
+typedef struct typedesc_fun_t
 {
   TYPEDESC_HEADER;
   list_t* param_types; // Parameter types.
@@ -171,7 +171,7 @@ typedef struct typedesc_fun_s
 /**
  * \brief Type descriptor for generators.
  */
-typedef struct typedesc_gen_s
+typedef struct typedesc_gen_t
 {
   TYPEDESC_HEADER;
   list_t* param_types; // List of parameter types.
@@ -181,7 +181,7 @@ typedef struct typedesc_gen_s
 /**
  * \brief Type descriptor for declarations.
  */
-typedef struct typedesc_decl_s
+typedef struct typedesc_decl_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
@@ -190,7 +190,7 @@ typedef struct typedesc_decl_s
 /**
  * \brief Type descriptor for structures.
  */
-typedef struct typedesc_struct_s
+typedef struct typedesc_struct_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
@@ -200,7 +200,7 @@ typedef struct typedesc_struct_s
 /**
  * \brief Type descriptor for unions.
  */
-typedef struct typedesc_union_s
+typedef struct typedesc_union_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
@@ -210,7 +210,7 @@ typedef struct typedesc_union_s
 /**
  * \brief Type descriptor for enumerations.
  */
-typedef struct typedesc_enum_s
+typedef struct typedesc_enum_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
@@ -219,7 +219,7 @@ typedef struct typedesc_enum_s
 /**
  * \brief Type descriptor for modules.
  */
-typedef struct typedesc_mod_s
+typedef struct typedesc_mod_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;

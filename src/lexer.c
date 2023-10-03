@@ -23,7 +23,7 @@
 
 #define LEXER_MAX_BUFFER_SIZE 256
 
-struct lexer_s
+struct lexer_t
 {
   location_t* loc; // Current location in source file.
 };

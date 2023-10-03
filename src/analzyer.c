@@ -22,7 +22,7 @@
 #include "typedesc.h"
 #include "util.h"
 
-struct analyzer_s
+struct analyzer_t
 {
   symtable_t* symtable; // Pointer to the root symbol table.
   typetable_t* typetable; // Pointer to the type table.

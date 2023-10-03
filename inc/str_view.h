@@ -22,7 +22,7 @@
 /**
  * \brief Represents a lightweight, readonly, non-owning string.
  */
-typedef struct string_view_s
+typedef struct string_view_t
 {
   size_t len; // Length of the string (excluding the terminating null character).
   const char* buf; // Pointer to character buffer.

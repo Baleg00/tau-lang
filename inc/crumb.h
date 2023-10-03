@@ -42,7 +42,7 @@ typedef enum crumb_item_kind_e
 /**
  * \brief Crumb message item.
 */
-typedef struct crumb_item_message_s
+typedef struct crumb_item_message_t
 {
   const char* msg; // Message format string.
   va_list msg_args; // Message arguments.
@@ -51,7 +51,7 @@ typedef struct crumb_item_message_s
 /**
  * \brief Crumb snippet item.
  */
-typedef struct crumb_item_snippet_s
+typedef struct crumb_item_snippet_t
 {
   location_t* loc; // Source code location.
   const char* title; // Title format string.
@@ -63,7 +63,7 @@ typedef struct crumb_item_snippet_s
 /**
  * \brief Crumb item.
  */
-typedef struct crumb_item_s
+typedef struct crumb_item_t
 {
   crumb_item_kind_t kind; // Item kind.
 

@@ -21,7 +21,7 @@
 #include "token.h"
 #include "util.h"
 
-struct generator_s
+struct generator_t
 {
   typetable_t* typetable; // The type table for resolving types.
   LLVMContextRef context; // The LLVM context for code generation.

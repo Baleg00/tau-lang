@@ -4,7 +4,7 @@
 /**
  * \brief Represents a compiler context.
  */
-typedef struct compiler_s compiler_t;
+typedef struct compiler_t compiler_t;
 
 compiler_t* compiler_init(void);
 void compiler_free(compiler_t* compiler);

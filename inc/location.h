@@ -28,7 +28,7 @@
 /**
  * \brief Location in the source code.
  */
-typedef struct location_s
+typedef struct location_t
 {
   const char* path; // Path to the source file.
   const char* src; // Pointer to beginning of the source string.

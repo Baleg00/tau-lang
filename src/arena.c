@@ -42,9 +42,9 @@
 /**
  * \brief Arena allocator chunk.
  */
-typedef struct arena_chunk_s arena_chunk_t;
+typedef struct arena_chunk_t arena_chunk_t;
 
-struct arena_chunk_s
+struct arena_chunk_t
 {
   void* begin; // Begin pointer of chunk.
   void* end; // End pointer of chunk.

@@ -29,12 +29,12 @@ typedef void(*list_for_each_func_t)(void*);
 /**
  * \brief Node of a linked list.
  */
-typedef struct list_node_s list_node_t;
+typedef struct list_node_t list_node_t;
 
 /**
  * \brief Linked list data structure.
  */
-typedef struct list_s list_t;
+typedef struct list_t list_t;
 
 /**
  * \brief Macro for iterating over each element in a list using a for loop.

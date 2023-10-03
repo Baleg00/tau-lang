@@ -31,7 +31,7 @@
  * and associated AST node. Symbols are used to store and manage identifiers
  * in the symbol table.
  */
-typedef struct symbol_s symbol_t;
+typedef struct symbol_t symbol_t;
 
 /**
  * \brief Represents a symbol table.
@@ -40,9 +40,9 @@ typedef struct symbol_s symbol_t;
  * which are identifiers associated with their respective AST nodes. Symbol
  * tables are organized hierarchically and can have parent tables.
  */
-typedef struct symtable_s symtable_t;
+typedef struct symtable_t symtable_t;
 
-struct symbol_s
+struct symbol_t
 {
   symtable_t* scope; // The symbol's lexical scope (parent symbol table).
   const char* id; // The symbol's identifier.
@@ -51,7 +51,7 @@ struct symbol_s
   symbol_t* next; // The next symbol in the same bucket (for handling collisions).
 };
 
-struct symtable_s
+struct symtable_t
 {
   symtable_t* parent; // The parent symbol table (lexical scope).
   list_t* children; // List of child symbol tables (nested scopes).

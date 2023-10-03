@@ -28,7 +28,7 @@
  * including freeing it when the builder is destroyed. Avoid manually freeing
  * types that are returned by a type builder to prevent double-free errors.
  */
-typedef struct typebuilder_s typebuilder_t;
+typedef struct typebuilder_t typebuilder_t;
 
 /**
  * \brief Initializes a new type builder.

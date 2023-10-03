@@ -14,7 +14,7 @@
 
 #define VECTOR_INITIAL_CAPACITY ((size_t)16)
 
-struct vector_s
+struct vector_t
 {
   size_t size;
   size_t capacity;

@@ -26,7 +26,7 @@
 /**
  * \brief Represents a lexical analyzer.
  */
-typedef struct lexer_s lexer_t;
+typedef struct lexer_t lexer_t;
 
 /**
  * \brief Initializes a new lexer.

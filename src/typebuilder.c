@@ -5,7 +5,7 @@
 #include "memtrace.h"
 #include "typeset.h"
 
-struct typebuilder_s
+struct typebuilder_t
 {
   typeset_t* typeset;
 };
