@@ -13,8 +13,6 @@ const char* op_kind_to_string(op_kind_t kind)
 {
   switch (kind)
   {
-  case OP_IS:               return "OP_IS";
-  case OP_AS:               return "OP_AS";
   case OP_SIZEOF:           return "OP_SIZEOF";
   case OP_ALIGNOF:          return "OP_ALIGNOF";
   case OP_TYPEOF:           return "OP_TYPEOF";
@@ -59,9 +57,10 @@ const char* op_kind_to_string(op_kind_t kind)
   case OP_SUBS:             return "OP_SUBS";
   case OP_IND:              return "OP_IND";
   case OP_ADDR:             return "OP_ADDR";
-  case OP_MEMBER:           return "OP_MEMBER";
-  case OP_IND_MEMBER:       return "OP_IND_MEMBER";
-  case OP_NULL_SAFE_MEMBER: return "OP_NULL_SAFE_MEMBER";
+  case OP_REF:              return "OP_REF";
+  case OP_ACCESS:           return "OP_ACCESS";
+  case OP_IND_ACCESS:       return "OP_IND_ACCESS";
+  case OP_NULL_SAFE_ACCESS: return "OP_NULL_SAFE_ACCESS";
   case OP_RANGE:            return "OP_RANGE";
   case OP_CALL:             return "OP_CALL";
   default: unreachable();
@@ -74,9 +73,9 @@ int op_precedence(op_kind_t kind)
 {
   switch (kind)
   {
-  case OP_MEMBER:
-  case OP_IND_MEMBER:
-  case OP_NULL_SAFE_MEMBER:
+  case OP_ACCESS:
+  case OP_IND_ACCESS:
+  case OP_NULL_SAFE_ACCESS:
   case OP_ARIT_INC_POST:
   case OP_ARIT_DEC_POST:
   case OP_SUBS:
@@ -94,55 +93,52 @@ int op_precedence(op_kind_t kind)
   case OP_LOGIC_NOT:
   case OP_IND:
   case OP_ADDR:
+  case OP_REF:
     return 1;
   
-  case OP_AS:
-    return 2;
-
   case OP_ARIT_MUL:
   case OP_ARIT_DIV:
   case OP_ARIT_MOD:
-    return 3;
+    return 2;
 
   case OP_ARIT_ADD:
   case OP_ARIT_SUB:
-    return 4;
+    return 3;
 
   case OP_RANGE:
-    return 5;
+    return 4;
 
   case OP_BIT_LSH:
   case OP_BIT_RSH:
-    return 6;
+    return 5;
 
-  case OP_IS:
   case OP_IN:
-    return 7;
+    return 6;
 
   case OP_COMP_LT:
   case OP_COMP_LE:
   case OP_COMP_GT:
   case OP_COMP_GE:
-    return 8;
+    return 7;
 
   case OP_COMP_EQ:
   case OP_COMP_NE:
-    return 9;
+    return 8;
 
   case OP_BIT_AND:
-    return 10;
+    return 9;
 
   case OP_BIT_XOR:
-    return 11;
+    return 10;
 
   case OP_BIT_OR:
-    return 12;
+    return 11;
 
   case OP_LOGIC_AND:
-    return 13;
+    return 12;
 
   case OP_LOGIC_OR:
-    return 14;
+    return 13;
 
   case OP_ASSIGN:
   case OP_ARIT_ADD_ASSIGN:
@@ -155,7 +151,7 @@ int op_precedence(op_kind_t kind)
   case OP_BIT_XOR_ASSIGN:
   case OP_BIT_LSH_ASSIGN:
   case OP_BIT_RSH_ASSIGN:
-    return 15;
+    return 14;
 
   default:
     unreachable();
@@ -168,8 +164,6 @@ bool op_is_binary(op_kind_t kind)
 {
   switch (kind)
   {
-  case OP_IS:
-  case OP_AS:
   case OP_IN:
   case OP_ARIT_ADD:
   case OP_ARIT_SUB:
@@ -201,9 +195,9 @@ bool op_is_binary(op_kind_t kind)
   case OP_BIT_LSH_ASSIGN:
   case OP_BIT_RSH_ASSIGN:
   case OP_SUBS:
-  case OP_MEMBER:
-  case OP_IND_MEMBER:
-  case OP_NULL_SAFE_MEMBER:
+  case OP_ACCESS:
+  case OP_IND_ACCESS:
+  case OP_NULL_SAFE_ACCESS:
   case OP_RANGE:
     return true;
   default:
@@ -228,6 +222,7 @@ bool op_is_unary(op_kind_t kind)
   case OP_BIT_NOT:
   case OP_IND:
   case OP_ADDR:
+  case OP_REF:
     return true;
   default:
     return false;
@@ -238,8 +233,6 @@ bool op_is_left_assoc(op_kind_t kind)
 {
   switch (kind)
   {
-  case OP_IS:
-  case OP_AS:
   case OP_IN:
   case OP_ARIT_INC_POST:
   case OP_ARIT_DEC_POST:
@@ -262,9 +255,9 @@ bool op_is_left_assoc(op_kind_t kind)
   case OP_COMP_GT:
   case OP_COMP_GE:
   case OP_SUBS:
-  case OP_MEMBER:
-  case OP_IND_MEMBER:
-  case OP_NULL_SAFE_MEMBER:
+  case OP_ACCESS:
+  case OP_IND_ACCESS:
+  case OP_NULL_SAFE_ACCESS:
   case OP_RANGE:
   case OP_CALL:
     return true;
@@ -299,6 +292,7 @@ bool op_is_right_assoc(op_kind_t kind)
   case OP_BIT_RSH_ASSIGN:
   case OP_IND:
   case OP_ADDR:
+  case OP_REF:
     return true;
   default:
     return false;

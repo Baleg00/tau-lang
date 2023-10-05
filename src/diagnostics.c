@@ -236,6 +236,20 @@ void report_error_expected_optional_type(location_t* loc)
   exit(EXIT_FAILURE);
 }
 
+void report_error_expected_mutable_type(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Expected mutable type.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
+void report_error_expected_constant_type(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Expected constant type.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
 void report_warning_mixed_signedness(location_t* loc)
 {
   crumb_warn(1, crumb_snippet(loc, "Mixed signedness.", NULL, "", NULL));

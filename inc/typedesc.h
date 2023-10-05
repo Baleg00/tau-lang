@@ -240,7 +240,7 @@ typedesc_t* typedesc_init(typedesc_kind_t kind);
 /**
  * \brief Frees all resources associated with a type descriptor.
  * 
- * \param desc Pointer to the type descriptor to be freed.
+ * \param[in] desc Pointer to the type descriptor to be freed.
  */
 void typedesc_free(typedesc_t* desc);
 
@@ -326,5 +326,156 @@ bool typedesc_is_composite(typedesc_t* desc);
  * \returns `true` if the descriptor is a declared type, otherwise `false`.
  */
 bool typedesc_is_decl(typedesc_t* desc);
+
+/**
+ * \brief Removes the topmost modifier from a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the modifier.
+ */
+typedesc_t* typedesc_remove_modifier(typedesc_t* desc);
+
+/**
+ * \brief Removes the topmost mutable modifier from a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the mutable modifier.
+ */
+typedesc_t* typedesc_remove_mut(typedesc_t* desc);
+
+/**
+ * \brief Removes the topmost constant modifier from a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the constant modifier.
+ */
+typedesc_t* typedesc_remove_const(typedesc_t* desc);
+
+/**
+ * \brief Removes the topmost pointer modifier from a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the pointer modifier.
+ */
+typedesc_t* typedesc_remove_ptr(typedesc_t* desc);
+
+/**
+ * \brief Removes the topmost array modifier from a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the array modifier.
+ */
+typedesc_t* typedesc_remove_array(typedesc_t* desc);
+
+/**
+ * \brief Removes the topmost reference modifier from a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the reference modifier.
+ */
+typedesc_t* typedesc_remove_ref(typedesc_t* desc);
+
+/**
+ * \brief Removes the topmost optional modifier from a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the optional modifier.
+ */
+typedesc_t* typedesc_remove_opt(typedesc_t* desc);
+
+/**
+ * \brief Removes the topmost constant and mutable modifiers from a type
+ * descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the constant and mutable
+ * modifiers.
+ */
+typedesc_t* typedesc_remove_const_mut(typedesc_t* desc);
+
+/**
+ * \brief Removes the topmost constant, mutable and reference modifiers from a
+ * type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the constant, mutable and
+ * reference modifiers.
+ */
+typedesc_t* typedesc_remove_const_mut_ref(typedesc_t* desc);
+
+/**
+ * \brief Removes all topmost mutable, constant, reference and optional modifiers
+ * from a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without modifiers.
+ */
+typedesc_t* typedesc_underlying_type(typedesc_t* desc);
+
+/**
+ * \brief Checks if a modifier can be added to a type descriptor.
+ * 
+ * \param[in] kind The modifier kind.
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns `true` if the modifier can be added, `false` otherwise.
+ */
+bool typedesc_check_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc);
+
+/**
+ * \brief Checks if a mutable modifier can be added to a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns `true` if a mutable modifier can be added, `false` otherwise.
+ */
+bool typedesc_check_can_add_mut(typedesc_t* desc);
+
+/**
+ * \brief Checks if a constant modifier can be added to a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns `true` if a constant modifier can be added, `false` otherwise.
+ */
+bool typedesc_check_can_add_const(typedesc_t* desc);
+
+/**
+ * \brief Checks if a pointer modifier can be added to a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns `true` if a pointer modifier can be added, `false` otherwise.
+ */
+bool typedesc_check_can_add_ptr(typedesc_t* desc);
+
+/**
+ * \brief Checks if an array modifier can be added to a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns `true` if an array modifier can be added, `false` otherwise.
+ */
+bool typedesc_check_can_add_array(typedesc_t* desc);
+
+/**
+ * \brief Checks if a reference modifier can be added to a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns `true` if a reference modifier can be added, `false` otherwise.
+ */
+bool typedesc_check_can_add_ref(typedesc_t* desc);
+
+/**
+ * \brief Checks if an optional modifier can be added to a type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns `true` if an optional modifier can be added, `false` otherwise.
+ */
+bool typedesc_check_can_add_opt(typedesc_t* desc);
+
+/**
+ * \brief Checks if a type descriptor is implicitly convertible to another.
+ * 
+ * \param[in] from_desc Pointer to the type descriptor to convert from.
+ * \param[in] to_desc Pointer to the type descriptor to convert into.
+ * \returns `true` if the implicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc);
 
 #endif

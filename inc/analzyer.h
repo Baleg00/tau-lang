@@ -45,24 +45,6 @@ analyzer_t* analyzer_init(void);
 void analyzer_free(analyzer_t* analyzer);
 
 /**
- * \brief Visits and analyzes a binary expression with the `is` operator.
- *
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \param[in] scope Pointer to the current symbol table scope.
- * \param[in] node Pointer to the binary expression node.
- */
-void analyzer_visit_expr_op_is(analyzer_t* analyzer, symtable_t* scope, ast_expr_op_bin_t* node);
-
-/**
- * \brief Visits and analyzes a binary expression with the `as` operator.
- *
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \param[in] scope Pointer to the current symbol table scope.
- * \param[in] node Pointer to the binary expression node.
- */
-void analyzer_visit_expr_op_as(analyzer_t* analyzer, symtable_t* scope, ast_expr_op_bin_t* node);
-
-/**
  * \brief Visits and analyzes a unary expression.
  *
  * \param[in] analyzer Pointer to the semantic analyzer.

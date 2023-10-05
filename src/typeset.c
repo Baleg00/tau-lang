@@ -267,6 +267,8 @@ void typeset_free(typeset_t* typeset)
 
 static typedesc_t* typeset_lookup_modifier(typeset_t* typeset, typedesc_kind_t kind, typedesc_t* base_type)
 {
+  assert(typedesc_check_can_add_modifier(kind, base_type));
+
   typedesc_modifier_t* desc = (typedesc_modifier_t*)typedesc_init(kind);
   desc->base_type = base_type;
 

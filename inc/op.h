@@ -25,63 +25,62 @@ typedef enum op_kind_e
 {
   OP_UNKNOWN, // Unknown operator
 
-  OP_IS, // "is" type check
-  OP_AS, // "as" type cast
-  OP_SIZEOF, // "sizeof" size of expression type
-  OP_ALIGNOF, // "alignof" align of expression type
-  OP_TYPEOF, // "typeof" type of expression
-  OP_IN, // "in" in range
+  OP_SIZEOF, // Size-of operator `sizeof`
+  OP_ALIGNOF, // Alignment-of operator `alignof`
+  OP_TYPEOF, // Type-of operator `typeof`
+  OP_IN, // In-range operator `in`
   
-  OP_ARIT_INC_PRE, // "++" arithmetic pre increment
-  OP_ARIT_INC_POST, // "++" arithmetic post increment
-  OP_ARIT_DEC_PRE, // "--" arithmetic pre decrement
-  OP_ARIT_DEC_POST, // "--" arithmetic post decrement
-  OP_ARIT_POS, // "+" arithmetic positive
-  OP_ARIT_NEG, // "-" arithmetic negative
-  OP_ARIT_ADD, // "+" arithmetic add
-  OP_ARIT_SUB, // "-" arithmetic subtract
-  OP_ARIT_MUL, // "*" arithmetic multiply
-  OP_ARIT_DIV, // "/" arithmetic divide
-  OP_ARIT_MOD, // "%" arithmetic modulo
+  OP_ARIT_INC_PRE, // Arithmetic pre-increment operator `++`
+  OP_ARIT_INC_POST, // Arithmetic post-increment operator `++`
+  OP_ARIT_DEC_PRE, // Arithmetic pre-decrement operator `--`
+  OP_ARIT_DEC_POST, // Arithmetic post-decrement operator `--`
+  OP_ARIT_POS, // Arithmetic positive operator `+`
+  OP_ARIT_NEG, // Arithmetic negative operator `-`
+  OP_ARIT_ADD, // Arithmetic add operator `+`
+  OP_ARIT_SUB, // Arithmetic subtract operator `-`
+  OP_ARIT_MUL, // Arithmetic multiply operator `*`
+  OP_ARIT_DIV, // Arithmetic divide operator `/`
+  OP_ARIT_MOD, // Arithmetic modulo operator `%`
   
-  OP_BIT_AND, // "&" bitwise and
-  OP_BIT_OR, // "|" bitwise or
-  OP_BIT_XOR, // "^" bitwise xor
-  OP_BIT_NOT, // "~" bitwise not
-  OP_BIT_LSH, // "<<" bitwise left shift
-  OP_BIT_RSH, // ">>" bitwise right shift
+  OP_BIT_AND, // Bitwise and operator `&`
+  OP_BIT_OR, // Bitwise or operator `|`
+  OP_BIT_XOR, // Bitwise xor operator `^`
+  OP_BIT_NOT, // Bitwise not operator `~`
+  OP_BIT_LSH, // Bitwise left-shift operator `<<`
+  OP_BIT_RSH, // Bitwise right-shift operator `>>`
 
-  OP_LOGIC_AND, // "&&" logical and
-  OP_LOGIC_OR, // "||" logical or
-  OP_LOGIC_NOT, // "!" logical not
+  OP_LOGIC_AND, // Logical and operator `&&`
+  OP_LOGIC_OR, // Logical or operator `||`
+  OP_LOGIC_NOT, // Logical not operator `!`
 
-  OP_COMP_EQ, // "==" comparison equal
-  OP_COMP_NE, // "!=" comparison not equal
-  OP_COMP_LT, // "<" comparison less than
-  OP_COMP_LE, // "<=" comparison less equal
-  OP_COMP_GT, // ">" comparison greater than
-  OP_COMP_GE, // ">=" comparison greater equal
+  OP_COMP_EQ, // Comparison equal operator `==`
+  OP_COMP_NE, // Comparison not-equal operator `!=`
+  OP_COMP_LT, // Comparison less-than operator `<`
+  OP_COMP_LE, // Comparison less-equal operator `<=`
+  OP_COMP_GT, // Comparison greater-than operator `>`
+  OP_COMP_GE, // Comparison greater-equal operator `>=`
 
-  OP_ASSIGN, // "=" assign
-  OP_ARIT_ADD_ASSIGN, // "+=" arithmetic add assign
-  OP_ARIT_SUB_ASSIGN, // "-=" arithmetic subtract assign
-  OP_ARIT_MUL_ASSIGN, // "*=" arithmetic multiply assign
-  OP_ARIT_DIV_ASSIGN, // "/=" arithmetic divide assign
-  OP_ARIT_MOD_ASSIGN, // "%=" arithmetic modulo assign
-  OP_BIT_AND_ASSIGN, // "&=" bitwise and assign
-  OP_BIT_OR_ASSIGN, // "|=" bitwise or assign
-  OP_BIT_XOR_ASSIGN, // "^=" bitwise xor assign
-  OP_BIT_LSH_ASSIGN, // "<<=" bitwise left shift assign
-  OP_BIT_RSH_ASSIGN, // ">>=" bitwise right shift assign
+  OP_ASSIGN, // Assignment operator `=`
+  OP_ARIT_ADD_ASSIGN, // Arithmetic add-assign operator `+=`
+  OP_ARIT_SUB_ASSIGN, // Arithmetic subtract-assign operator `-=`
+  OP_ARIT_MUL_ASSIGN, // Arithmetic multiply-assign operator `*=`
+  OP_ARIT_DIV_ASSIGN, // Arithmetic divide-assign operator `/=`
+  OP_ARIT_MOD_ASSIGN, // Arithmetic modulo-assign operator `%=`
+  OP_BIT_AND_ASSIGN, // Bitwise and-assign operator `&=`
+  OP_BIT_OR_ASSIGN, // Bitwise or-assign operator `|=`
+  OP_BIT_XOR_ASSIGN, // Bitwise xor-assign operator `^=`
+  OP_BIT_LSH_ASSIGN, // Bitwise left-shift-assign operator `<<=`
+  OP_BIT_RSH_ASSIGN, // Bitwise right-shift-assign operator `>>=`
 
-  OP_SUBS, // "[]" subscript
-  OP_IND, // "*" indirection
-  OP_ADDR, // "&" address of
-  OP_MEMBER, // "." member access
-  OP_IND_MEMBER, // "*." indirect member access
-  OP_NULL_SAFE_MEMBER, // "?." null-safe member access
-  OP_RANGE, // ".." generate range
-  OP_CALL, // "()" function call
+  OP_SUBS, // Subscript operator `[]`
+  OP_IND, // Indirection operator `*`
+  OP_ADDR, // Address-of operator `&`
+  OP_REF, // Reference-to operator `^`
+  OP_ACCESS, // Access operator `.`
+  OP_IND_ACCESS, // Indirect-access operator `*.`
+  OP_NULL_SAFE_ACCESS, // Null-safe-access operator `?.`
+  OP_RANGE, // Range operator `..`
+  OP_CALL, // Call operator `()`
 } op_kind_t;
 
 /**

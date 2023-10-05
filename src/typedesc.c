@@ -278,3 +278,147 @@ bool typedesc_is_decl(typedesc_t* desc)
     return false;
   }
 }
+
+typedesc_t* typedesc_remove_modifier(typedesc_t* desc)
+{
+  return typedesc_is_modifier(desc) ? ((typedesc_modifier_t*)desc)->base_type : desc;
+}
+
+typedesc_t* typedesc_remove_mut(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_MUT ? ((typedesc_mut_t*)desc)->base_type : desc;
+}
+
+typedesc_t* typedesc_remove_const(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_CONST ? ((typedesc_const_t*)desc)->base_type : desc;
+}
+
+typedesc_t* typedesc_remove_ptr(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_PTR ? ((typedesc_ptr_t*)desc)->base_type : desc;
+}
+
+typedesc_t* typedesc_remove_array(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_ARRAY ? ((typedesc_array_t*)desc)->base_type : desc;
+}
+
+typedesc_t* typedesc_remove_ref(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_REF ? ((typedesc_ref_t*)desc)->base_type : desc;
+}
+
+typedesc_t* typedesc_remove_opt(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_OPT ? ((typedesc_opt_t*)desc)->base_type : desc;
+}
+
+typedesc_t* typedesc_remove_const_mut(typedesc_t* desc)
+{
+  return typedesc_remove_mut(typedesc_remove_const(desc));
+}
+
+typedesc_t* typedesc_remove_const_mut_ref(typedesc_t* desc)
+{
+  return typedesc_remove_ref(typedesc_remove_const_mut(desc));
+}
+
+typedesc_t* typedesc_underlying_type(typedesc_t* desc)
+{
+  while (desc->kind == TYPEDESC_MUT ||
+         desc->kind == TYPEDESC_CONST ||
+         desc->kind == TYPEDESC_REF ||
+         desc->kind == TYPEDESC_OPT)
+    desc = ((typedesc_modifier_t*)desc)->base_type;
+
+  return desc;
+}
+
+bool typedesc_check_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc)
+{
+  switch (kind)
+  {
+  case TYPEDESC_MUT:   return typedesc_check_can_add_mut  (desc);
+  case TYPEDESC_CONST: return typedesc_check_can_add_const(desc);
+  case TYPEDESC_PTR:   return typedesc_check_can_add_ptr  (desc);
+  case TYPEDESC_ARRAY: return typedesc_check_can_add_array(desc);
+  case TYPEDESC_REF:   return typedesc_check_can_add_ref  (desc);
+  case TYPEDESC_OPT:   return typedesc_check_can_add_opt  (desc);
+  default: unreachable();
+  }
+
+  return false;
+}
+
+bool typedesc_check_can_add_mut(typedesc_t* desc)
+{
+  return desc->kind != TYPEDESC_MUT &&
+         desc->kind != TYPEDESC_CONST;
+}
+
+bool typedesc_check_can_add_const(typedesc_t* desc)
+{
+  return desc->kind != TYPEDESC_CONST;
+}
+
+bool typedesc_check_can_add_ptr(typedesc_t* desc)
+{
+  if (desc->kind == TYPEDESC_MUT)
+    return ((typedesc_mut_t*)desc)->base_type->kind != TYPEDESC_REF;
+
+  return desc->kind != TYPEDESC_CONST &&
+         desc->kind != TYPEDESC_REF;
+}
+
+bool typedesc_check_can_add_array(typedesc_t* desc)
+{
+  return typedesc_check_can_add_ptr(desc);
+}
+
+bool typedesc_check_can_add_ref(typedesc_t* desc)
+{
+  if (desc->kind == TYPEDESC_MUT)
+    return ((typedesc_mut_t*)desc)->base_type->kind != TYPEDESC_REF;
+  
+  return desc->kind != TYPEDESC_CONST &&
+         desc->kind != TYPEDESC_REF;
+}
+
+bool typedesc_check_can_add_opt(typedesc_t* desc)
+{
+  if (desc->kind == TYPEDESC_MUT)
+    return ((typedesc_mut_t*)desc)->base_type->kind != TYPEDESC_REF &&
+           ((typedesc_mut_t*)desc)->base_type->kind != TYPEDESC_OPT;
+
+  return desc->kind != TYPEDESC_OPT &&
+         desc->kind != TYPEDESC_CONST &&
+         desc->kind != TYPEDESC_REF;
+}
+
+bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc)
+{
+  if (to_desc->kind == TYPEDESC_CONST &&
+      from_desc->kind != TYPEDESC_CONST)
+    return false;
+
+  to_desc = typedesc_remove_const_mut(to_desc);
+  from_desc = typedesc_remove_const_mut(from_desc);
+
+  if (to_desc->kind == TYPEDESC_REF)
+  {
+    if (from_desc->kind != TYPEDESC_REF)
+      return false;
+
+    to_desc = typedesc_remove_ref(to_desc);
+    from_desc = typedesc_remove_ref(from_desc);
+
+    if (to_desc->kind == TYPEDESC_MUT &&
+        from_desc->kind != TYPEDESC_MUT)
+      return false;
+  }
+  else
+    from_desc = typedesc_remove_ref(from_desc);
+
+  return to_desc == from_desc;
+}
