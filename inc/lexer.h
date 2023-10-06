@@ -196,6 +196,20 @@ void lexer_skip_n(lexer_t* lex, size_t n);
 size_t lexer_skip_integer_suffix(lexer_t* lex);
 
 /**
+ * \brief Skips a line comment.
+ *
+ * \param[in] lex Pointer to the lexer.
+ */
+void lexer_skip_comment_line(lexer_t* lex);
+
+/**
+ * \brief Skips a block comment.
+ *
+ * \param[in] lex Pointer to the lexer.
+ */
+void lexer_skip_comment_block(lexer_t* lex);
+
+/**
  * \brief Reads a word token from the lexer.
  *
  * \param[in] lex Pointer to the lexer.

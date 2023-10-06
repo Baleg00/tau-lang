@@ -197,6 +197,20 @@ size_t lexer_skip_integer_suffix(lexer_t* lex)
   return len;
 }
 
+void lexer_skip_comment_line(lexer_t* lex)
+{
+  while (lexer_current(lex) != '\n' && lexer_current(lex) != '\0')
+    lexer_next(lex);
+}
+
+void lexer_skip_comment_block(lexer_t* lex)
+{
+  for (;; lexer_next(lex))
+    if (lexer_consume(lex, '*'))
+      if (lexer_consume(lex, '/'))
+        break;
+}
+
 token_t* lexer_read_word(lexer_t* lex)
 {
   static const struct {
@@ -587,9 +601,6 @@ token_t* lexer_read_punctuation(lexer_t* lex)
     { TOK_PUNCT_BRACE_RIGHT,           1 },
     { TOK_PUNCT_HASH,                  1 },
   };
-
-  token_t* tok = lexer_token_init(lex, TOK_UNKNOWN);
-  tok->loc->len = 1;
   
   token_kind_t kind = TOK_UNKNOWN;
 
@@ -615,8 +626,18 @@ token_t* lexer_read_punctuation(lexer_t* lex)
     else
       kind = TOK_PUNCT_ASTERISK;
   else if (lexer_consume(lex, '/'))
-    if (lexer_consume(lex, '='))
+    if (lexer_consume(lex, '/'))
+    {
+      lexer_skip_comment_line(lex);
+      return lexer_read_next(lex);
+    }
+    else if (lexer_consume(lex, '='))
       kind = TOK_PUNCT_SLASH_EQUAL;
+    else if (lexer_consume(lex, '*'))
+    {
+      lexer_skip_comment_block(lex);
+      return lexer_read_next(lex);
+    }
     else
       kind = TOK_PUNCT_SLASH;
   else if (lexer_consume(lex, '%'))
@@ -709,9 +730,9 @@ token_t* lexer_read_punctuation(lexer_t* lex)
   else if (lexer_consume(lex, '#'))
     kind = TOK_PUNCT_HASH;
   else
-    report_error_unexpected_character(tok->loc);
+    report_error_unexpected_character(lex->loc);
 
-  tok->kind = kind;
+  token_t* tok = lexer_token_init(lex, kind);
   tok->loc->len = 0;
 
   for (size_t i = 0; i < countof(lookup); ++i)
