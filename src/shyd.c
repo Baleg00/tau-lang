@@ -86,7 +86,7 @@ bool shyd_parse_typed_expr(shyd_t* shyd)
     if (shyd->prev_term)
       return false;
   default:
-    fallthrough();
+    noop();
   }
 
   shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
@@ -95,7 +95,7 @@ bool shyd_parse_typed_expr(shyd_t* shyd)
   {
   case TOK_KW_SIZEOF:  elem->op = OP_SIZEOF; break;
   case TOK_KW_ALIGNOF: elem->op = OP_ALIGNOF; break;
-  default: fallthrough();
+  default: noop();
   }
 
   stack_push(shyd->op_stack, elem);
@@ -229,43 +229,43 @@ bool shyd_parse_operator(shyd_t* shyd)
 
   switch (parser_current(shyd->par)->kind)
   {
-  case TOK_PUNCT_PLUS:                  op = shyd->prev_term ? OP_ARIT_ADD : OP_ARIT_POS; break;
+  case TOK_PUNCT_PLUS:                  op = shyd->prev_term ? OP_ARIT_ADD      : OP_ARIT_POS;     break;
   case TOK_PUNCT_PLUS_PLUS:             op = shyd->prev_term ? OP_ARIT_INC_POST : OP_ARIT_INC_PRE; break;
-  case TOK_PUNCT_PLUS_EQUAL:            op = OP_ARIT_ADD_ASSIGN; break;
-  case TOK_PUNCT_MINUS:                 op = shyd->prev_term ? OP_ARIT_SUB : OP_ARIT_NEG; break;
+  case TOK_PUNCT_MINUS:                 op = shyd->prev_term ? OP_ARIT_SUB      : OP_ARIT_NEG;     break;
   case TOK_PUNCT_MINUS_MINUS:           op = shyd->prev_term ? OP_ARIT_DEC_POST : OP_ARIT_DEC_PRE; break;
-  case TOK_PUNCT_MINUS_EQUAL:           op = OP_ARIT_SUB_ASSIGN; break;
-  case TOK_PUNCT_ASTERISK:              op = shyd->prev_term ? OP_ARIT_MUL : OP_IND; break;
-  case TOK_PUNCT_ASTERISK_EQUAL:        op = OP_ARIT_MUL_ASSIGN; break;
-  case TOK_PUNCT_ASTERISK_DOT:          op = OP_IND_ACCESS; break;
-  case TOK_PUNCT_SLASH:                 op = OP_ARIT_DIV; break;
-  case TOK_PUNCT_SLASH_EQUAL:           op = OP_ARIT_DIV_ASSIGN; break;
-  case TOK_PUNCT_PERCENT:               op = OP_ARIT_MOD; break;
-  case TOK_PUNCT_PERCENT_EQUAL:         op = OP_ARIT_MOD_ASSIGN; break;
-  case TOK_PUNCT_AMPERSAND:             op = shyd->prev_term ? OP_BIT_AND : OP_ADDR; break;
-  case TOK_PUNCT_AMPERSAND_AMPERSAND:   op = OP_LOGIC_AND; break;
-  case TOK_PUNCT_AMPERSAND_EQUAL:       op = OP_BIT_AND_ASSIGN; break;
-  case TOK_PUNCT_BAR:                   op = OP_BIT_OR; break;
-  case TOK_PUNCT_BAR_BAR:               op = OP_LOGIC_OR; break;
-  case TOK_PUNCT_BAR_EQUAL:             op = OP_BIT_OR_ASSIGN; break;
-  case TOK_PUNCT_HAT:                   op = shyd->prev_term ? OP_BIT_XOR : OP_REF; break;
-  case TOK_PUNCT_HAT_EQUAL:             op = OP_BIT_XOR_ASSIGN; break;
-  case TOK_PUNCT_TILDE:                 op = OP_BIT_NOT; break;
-  case TOK_PUNCT_LESS:                  op = OP_COMP_LT; break;
-  case TOK_PUNCT_LESS_LESS:             op = OP_BIT_LSH; break;
-  case TOK_PUNCT_LESS_LESS_EQUAL:       op = OP_BIT_LSH_ASSIGN; break;
-  case TOK_PUNCT_LESS_EQUAL:            op = OP_COMP_LE; break;
-  case TOK_PUNCT_GREATER:               op = OP_COMP_GT; break;
-  case TOK_PUNCT_GREATER_GREATER:       op = OP_BIT_RSH; break;
-  case TOK_PUNCT_GREATER_GREATER_EQUAL: op = OP_BIT_RSH_ASSIGN; break;
-  case TOK_PUNCT_GREATER_EQUAL:         op = OP_COMP_GE; break;
-  case TOK_PUNCT_BANG:                  op = OP_LOGIC_NOT; break;
-  case TOK_PUNCT_BANG_EQUAL:            op = OP_COMP_NE; break;
-  case TOK_PUNCT_DOT:                   op = OP_ACCESS; break;
-  case TOK_PUNCT_DOT_DOT:               op = OP_RANGE; break;
+  case TOK_PUNCT_ASTERISK:              op = shyd->prev_term ? OP_ARIT_MUL      : OP_IND;          break;
+  case TOK_PUNCT_AMPERSAND:             op = shyd->prev_term ? OP_BIT_AND       : OP_ADDR;         break;
+  case TOK_PUNCT_PLUS_EQUAL:            op = OP_ARIT_ADD_ASSIGN;  break;
+  case TOK_PUNCT_MINUS_EQUAL:           op = OP_ARIT_SUB_ASSIGN;  break;
+  case TOK_PUNCT_ASTERISK_EQUAL:        op = OP_ARIT_MUL_ASSIGN;  break;
+  case TOK_PUNCT_ASTERISK_DOT:          op = OP_IND_ACCESS;       break;
+  case TOK_PUNCT_SLASH:                 op = OP_ARIT_DIV;         break;
+  case TOK_PUNCT_SLASH_EQUAL:           op = OP_ARIT_DIV_ASSIGN;  break;
+  case TOK_PUNCT_PERCENT:               op = OP_ARIT_MOD;         break;
+  case TOK_PUNCT_PERCENT_EQUAL:         op = OP_ARIT_MOD_ASSIGN;  break;
+  case TOK_PUNCT_AMPERSAND_AMPERSAND:   op = OP_LOGIC_AND;        break;
+  case TOK_PUNCT_AMPERSAND_EQUAL:       op = OP_BIT_AND_ASSIGN;   break;
+  case TOK_PUNCT_BAR:                   op = OP_BIT_OR;           break;
+  case TOK_PUNCT_BAR_BAR:               op = OP_LOGIC_OR;         break;
+  case TOK_PUNCT_BAR_EQUAL:             op = OP_BIT_OR_ASSIGN;    break;
+  case TOK_PUNCT_HAT:                   op = OP_BIT_XOR;          break;
+  case TOK_PUNCT_HAT_EQUAL:             op = OP_BIT_XOR_ASSIGN;   break;
+  case TOK_PUNCT_TILDE:                 op = OP_BIT_NOT;          break;
+  case TOK_PUNCT_LESS:                  op = OP_COMP_LT;          break;
+  case TOK_PUNCT_LESS_LESS:             op = OP_BIT_LSH;          break;
+  case TOK_PUNCT_LESS_LESS_EQUAL:       op = OP_BIT_LSH_ASSIGN;   break;
+  case TOK_PUNCT_LESS_EQUAL:            op = OP_COMP_LE;          break;
+  case TOK_PUNCT_GREATER:               op = OP_COMP_GT;          break;
+  case TOK_PUNCT_GREATER_GREATER:       op = OP_BIT_RSH;          break;
+  case TOK_PUNCT_GREATER_GREATER_EQUAL: op = OP_BIT_RSH_ASSIGN;   break;
+  case TOK_PUNCT_GREATER_EQUAL:         op = OP_COMP_GE;          break;
+  case TOK_PUNCT_BANG:                  op = OP_LOGIC_NOT;        break;
+  case TOK_PUNCT_BANG_EQUAL:            op = OP_COMP_NE;          break;
+  case TOK_PUNCT_DOT:                   op = OP_ACCESS;           break;
+  case TOK_PUNCT_DOT_DOT:               op = OP_RANGE;            break;
   case TOK_PUNCT_QUESTION_DOT:          op = OP_NULL_SAFE_ACCESS; break;
-  case TOK_PUNCT_EQUAL:                 op = OP_ASSIGN; break;
-  case TOK_PUNCT_EQUAL_EQUAL:           op = OP_COMP_EQ; break;
+  case TOK_PUNCT_EQUAL:                 op = OP_ASSIGN;           break;
+  case TOK_PUNCT_EQUAL_EQUAL:           op = OP_COMP_EQ;          break;
   default: return false;
   }
 
@@ -294,7 +294,7 @@ bool shyd_postfix_step(shyd_t* shyd)
   case TOK_PUNCT_PAREN_RIGHT: return shyd_parse_paren_close(shyd);
   case TOK_PUNCT_BRACKET_LEFT: return shyd_parse_bracket_open(shyd);
   case TOK_PUNCT_BRACKET_RIGHT: return shyd_parse_bracket_close(shyd);
-  default: fallthrough();
+  default: noop();
   }
 
   if (parser_current(shyd->par)->kind == TOK_ID || token_is_literal(parser_current(shyd->par)))

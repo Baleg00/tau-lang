@@ -488,7 +488,7 @@ ast_node_t* parser_parse_stmt(parser_t* par)
   case TOK_KW_RETURN:        return parser_parse_stmt_return(par);
   case TOK_KW_YIELD:         return parser_parse_stmt_yield(par);
   case TOK_PUNCT_BRACE_LEFT: return parser_parse_stmt_block(par);
-  default: fallthrough();
+  default: noop();
   }
 
   return parser_parse_stmt_expr(par);
@@ -557,7 +557,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern)
       seen_default = seen_default || param->expr != NULL;
 
       // Default parameters must be followed only by default parameters.
-      if (seen_default && param->expr != NULL)
+      if (seen_default && param->expr == NULL)
         report_error_missing_default_parameter(
           param->tok->loc,
           ((ast_node_t*)list_back(node->params))->tok->loc

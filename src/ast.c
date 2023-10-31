@@ -160,7 +160,7 @@ void ast_cleanup(void)
       list_free(((ast_prog_t*)node)->decls);
       break;
     default:
-      fallthrough();
+      noop();
     }
 
     free(node);

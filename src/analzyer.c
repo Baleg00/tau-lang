@@ -130,14 +130,6 @@ void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* scope, ast_e
     node_desc = typebuilder_build_ptr(analyzer->builder, typedesc_remove_const_mut_ref(expr_desc));
     break;
   }
-  case OP_REF:
-  {
-    if (node->expr->kind != AST_EXPR_DECL)
-      report_error_expected_reference_type(node->expr->tok->loc);
-
-    node_desc = typebuilder_build_ref(analyzer->builder, typedesc_remove_const_mut_ref(expr_desc));
-    break;
-  }
   default:
     unreachable();
   }

@@ -93,14 +93,14 @@
  */
 #define unused(X) ((void)(1 ? 0 : ((void)(X), 0)))
 
-#ifdef fallthrough
-# undef fallthrough
+#ifdef noop
+# undef noop
 #endif
 
 /**
- * \brief Marks a fallthrough case in a switch statement.
+ * \brief Creates a statement which does nothing.
  */
-#define fallthrough() do {} while (0)
+#define noop() do {} while (0)
 
 #ifdef TAU_DEBUG
 # ifdef _MSC_VER

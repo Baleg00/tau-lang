@@ -75,7 +75,6 @@ typedef enum op_kind_e
   OP_SUBS, // Subscript operator `[]`
   OP_IND, // Indirection operator `*`
   OP_ADDR, // Address-of operator `&`
-  OP_REF, // Reference-to operator `^`
   OP_ACCESS, // Access operator `.`
   OP_IND_ACCESS, // Indirect-access operator `*.`
   OP_NULL_SAFE_ACCESS, // Null-safe-access operator `?.`

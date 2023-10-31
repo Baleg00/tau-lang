@@ -107,7 +107,7 @@ void report_error_missing_default_parameter(location_t* param_loc, location_t* f
   crumb_item_t items[] = {
     crumb_snippet(param_loc, "Parameter missing default value.", NULL, "", NULL),
     crumb_message("A default parameter must only be followed by default parameters.", NULL),
-    crumb_snippet(first_param_loc, "", NULL, "First default parameter appears here.", NULL)
+    crumb_snippet(first_param_loc, "", NULL, "Last default parameter appears here.", NULL)
   };
   crumb_error(countof(items), items[0], items[1], items[2]);
   debugbreak();

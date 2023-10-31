@@ -57,7 +57,6 @@ const char* op_kind_to_string(op_kind_t kind)
   case OP_SUBS:             return "OP_SUBS";
   case OP_IND:              return "OP_IND";
   case OP_ADDR:             return "OP_ADDR";
-  case OP_REF:              return "OP_REF";
   case OP_ACCESS:           return "OP_ACCESS";
   case OP_IND_ACCESS:       return "OP_IND_ACCESS";
   case OP_NULL_SAFE_ACCESS: return "OP_NULL_SAFE_ACCESS";
@@ -93,7 +92,6 @@ int op_precedence(op_kind_t kind)
   case OP_LOGIC_NOT:
   case OP_IND:
   case OP_ADDR:
-  case OP_REF:
     return 1;
   
   case OP_ARIT_MUL:
@@ -222,7 +220,6 @@ bool op_is_unary(op_kind_t kind)
   case OP_BIT_NOT:
   case OP_IND:
   case OP_ADDR:
-  case OP_REF:
     return true;
   default:
     return false;
@@ -292,7 +289,6 @@ bool op_is_right_assoc(op_kind_t kind)
   case OP_BIT_RSH_ASSIGN:
   case OP_IND:
   case OP_ADDR:
-  case OP_REF:
     return true;
   default:
     return false;
