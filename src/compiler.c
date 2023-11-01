@@ -223,19 +223,19 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     log_trace("main", "(%s) Lexical analysis.", input_file_name);
 
     lexer_t* lexer = lexer_init();
-    list_t* tokens = list_init();
+    list_t* toks = NULL;
 
-    time_it("lexer", lexer_lex(lexer, input_file_path, src, tokens));
+    time_it("lexer", toks = lexer_lex(lexer, input_file_path, src));
 
     if (compiler->flags.dump_tokens)
-      compiler_dump_tokens(compiler, input_file_path, input_file_name, tokens);
+      compiler_dump_tokens(compiler, input_file_path, input_file_name, toks);
 
     log_trace("main", "(%s) Syntax analysis.", input_file_name);
 
     parser_t* parser = parser_init();
     ast_node_t* root = NULL;
 
-    time_it("parser", parser_parse(parser, tokens, &root));
+    time_it("parser", root = parser_parse(parser, toks));
 
     if (compiler->flags.dump_ast)
       compiler_dump_ast(compiler, input_file_path, input_file_name, root);
@@ -279,8 +279,8 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     
     parser_free(parser);
 
-    list_for_each(tokens, (list_for_each_func_t)token_free);
-    list_free(tokens);
+    list_for_each(toks, (list_for_each_func_t)token_free);
+    list_free(toks);
     lexer_free(lexer);
     
     free(src);

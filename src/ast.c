@@ -347,6 +347,8 @@ void ast_json_dump(FILE* stream, ast_node_t* node)
   case AST_DECL_FUN:
     fprintf(stream, ",\"id\":");
     ast_json_dump(stream, ((ast_decl_fun_t*)node)->id);
+    fprintf(stream, ",\"is_extern\":%s", ((ast_decl_fun_t*)node)->is_extern ? "true" : "false");
+    fprintf(stream, ",\"abi\":\"%s\"", abi_kind_to_cstr(((ast_decl_fun_t*)node)->abi));
     fprintf(stream, ",\"attrs\":");
     ast_json_dump_list(stream, ((ast_decl_fun_t*)node)->attrs);
     fprintf(stream, ",\"params\":");
@@ -634,6 +636,8 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* node)
       case AST_DECL_FUN:
         fprintf(stream, ",\"id\":%p", ((ast_decl_fun_t*)node)->id);
         stack_push(nodes, ((ast_decl_fun_t*)node)->id);
+        fprintf(stream, ",\"is_extern\":%s", ((ast_decl_fun_t*)node)->is_extern ? "true" : "false");
+        fprintf(stream, ",\"abi\":\"%s\"", abi_kind_to_cstr(((ast_decl_fun_t*)node)->abi));
         fprintf(stream, ",\"attrs\":");
         ast_json_dump_flat_list(stream, nodes, ((ast_decl_fun_t*)node)->attrs);
         fprintf(stream, ",\"params\":");
@@ -778,6 +782,24 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_DECL_ENUM_CONSTANT: return "AST_DECL_ENUM_CONSTANT";
   case AST_ATTR:               return "AST_ATTR";
   case AST_PROG:               return "AST_PROG";
+  default: unreachable();
+  }
+
+  return NULL;
+}
+
+const char* abi_kind_to_cstr(abi_kind_t kind)
+{
+  switch (kind)
+  {
+  case ABI_CDECL:      return "cdecl";
+  case ABI_STDCALL:    return "stdcall";
+  case ABI_WIN64:      return "win64";
+  case ABI_SYSV64:     return "sysv64";
+  case ABI_AAPCS:      return "aapcs";
+  case ABI_FASTCALL:   return "fastcall";
+  case ABI_VECTORCALL: return "vectorcall";
+  case ABI_THISCALL:   return "thiscall";
   default: unreachable();
   }
 

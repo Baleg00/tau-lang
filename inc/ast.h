@@ -179,6 +179,21 @@ typedef enum ast_kind_e
 } ast_kind_t;
 
 /**
+ * \brief Enumeration of ABI (Application Binary Interface) kinds.
+ */
+typedef enum abi_kind_t
+{
+  ABI_CDECL, // Standard C calling convention, parameters pushed onto the stack.
+  ABI_STDCALL, // Win32 API standard calling convention.
+  ABI_WIN64, // Windows 64-bit calling convention.
+  ABI_SYSV64, // Calling convention of 64-bit Unix-like operating systems.
+  ABI_AAPCS, // ARM Architecture Procedure Call Standard.
+  ABI_FASTCALL, // Fast parameter passing via registers.
+  ABI_VECTORCALL, // Calling convention for SIMD (Single Instruction, Multiple Data) operations.
+  ABI_THISCALL, // Windows C++ method calling convention.
+} abi_kind_t;
+
+/**
  * \brief AST node.
  */
 typedef struct ast_node_t
@@ -511,7 +526,8 @@ typedef struct ast_decl_fun_t
   list_t* params; // List of parameter declarations.
   ast_node_t* return_type; // Return type.
   ast_node_t* stmt; // Body statement.
-  bool is_extern; // External flag.
+  bool is_extern; // Is external.
+  abi_kind_t abi; // ABI kind.
 
   LLVMTypeRef llvm_type;
   LLVMValueRef llvm_value;
@@ -659,6 +675,14 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* root);
  * \returns String representation.
 */
 const char* ast_kind_to_cstr(ast_kind_t kind);
+
+/**
+ * \brief Returns a string representation of an ABI kind.
+ * 
+ * \param[in] kind ABI kind.
+ * \returns String representation.
+*/
+const char* abi_kind_to_cstr(abi_kind_t kind);
 
 /**
  * \brief Checks if a node is a type.

@@ -384,3 +384,10 @@ void report_error_expected_module(location_t* loc)
   debugbreak();
   exit(EXIT_FAILURE);
 }
+
+void report_error_unknown_abi(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Unknown ABI.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}

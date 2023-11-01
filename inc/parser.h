@@ -512,8 +512,8 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \param[in] toks List of tokens to be parsed.
- * \param[out] node Pointer to a node pointer where the root node is to be written.
+ * \returns Pointer to the root node.
 */
-void parser_parse(parser_t* par, list_t* toks, ast_node_t** node);
+ast_node_t* parser_parse(parser_t* par, list_t* toks);
 
 #endif

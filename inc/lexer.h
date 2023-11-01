@@ -295,8 +295,8 @@ token_t* lexer_read_next(lexer_t* lex);
  * \param[in] lex Pointer to the lexer.
  * \param[in] path The path of the source file.
  * \param[in] src Pointer to the source code.
- * \param[out] toks Pointer to the list where the tokens will be stored.
+ * \returns A list of tokens.
  */
-void lexer_lex(lexer_t* lex, const char* path, char* src, list_t* toks);
+list_t* lexer_lex(lexer_t* lex, const char* path, char* src);
 
 #endif

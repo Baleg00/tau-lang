@@ -281,7 +281,7 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_KW_GEN:             return parser_parse_type_gen     (par);
   case TOK_KW_SELF:
     node = ast_node_init(AST_TYPE_SELF);
-    node->tok = parser_current(par);
+    node->tok = parser_expect(par, AST_TYPE_SELF);
     break;
   case TOK_KW_I8:
     node = ast_node_init(AST_TYPE_I8);
@@ -515,6 +515,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern)
   node->tok = parser_current(par);
   
   node->is_extern = is_extern;
+  node->abi = ABI_CDECL;
 
   parser_expect(par, TOK_KW_FUN);
 
@@ -744,14 +745,51 @@ ast_node_t* parser_parse_decl_with_attrs(parser_t* par)
 ast_node_t* parser_parse_decl_extern(parser_t* par)
 {
   parser_expect(par, TOK_KW_EXTERN);
+  
+  abi_kind_t abi = ABI_CDECL;
 
-  ast_decl_t* node = NULL;
+  if (parser_current(par)->kind == TOK_LIT_STR)
+  {
+    static struct {
+      abi_kind_t abi;
+      const char* str;
+    } abis[] = {
+      { ABI_CDECL,      "\"cdecl\""      },
+      { ABI_STDCALL,    "\"stdcall\""    },
+      { ABI_WIN64,      "\"win64\""      },
+      { ABI_SYSV64,     "\"sysv64\""     },
+      { ABI_AAPCS,      "\"aapcs\""      },
+      { ABI_FASTCALL,   "\"fastcall\""   },
+      { ABI_VECTORCALL, "\"vectorcall\"" },
+      { ABI_THISCALL,   "\"thiscall\""   }
+    };
+
+    token_t* abi_tok = parser_expect(par, TOK_LIT_STR);
+
+    string_view_t abi_str_view = token_to_string_view(abi_tok);
+
+    bool found_abi = false;
+
+    for (size_t i = 0; i < countof(abis) && !found_abi; i++)
+      if (string_view_compare_cstr(abi_str_view, abis[i].str) == 0)
+      {
+        abi = abis[i].abi;
+        found_abi = true;
+      }
+
+    if (!found_abi)
+      report_error_unknown_abi(abi_tok->loc);
+  }
+
+  ast_decl_fun_t* node = NULL;
 
   switch (parser_current(par)->kind)
   {
-  case TOK_KW_FUN: node = (ast_decl_t*)parser_parse_decl_fun(par, true); break;
+  case TOK_KW_FUN: node = (ast_decl_fun_t*)parser_parse_decl_fun(par, true); break;
   default:         report_error_unexpected_token(parser_current(par)->loc);
   }
+
+  node->abi = abi;
 
   return (ast_node_t*)node;
 }
@@ -802,13 +840,15 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par)
   return (ast_node_t*)node;
 }
 
-void parser_parse(parser_t* par, list_t* toks, ast_node_t** node)
+ast_node_t* parser_parse(parser_t* par, list_t* toks)
 {
   par->toks = toks;
   par->cur = list_front_node(toks);
-  
-  *node = ast_node_init(AST_PROG);
-  (*node)->tok = parser_current(par);
 
-  ((ast_prog_t*)*node)->decls = parser_parse_terminated_list(par, TOK_EOF, parser_parse_decl);
+  ast_node_t* root = ast_node_init(AST_PROG);
+  root->tok = parser_current(par);
+
+  ((ast_prog_t*)root)->decls = parser_parse_terminated_list(par, TOK_EOF, parser_parse_decl);
+
+  return root;
 }

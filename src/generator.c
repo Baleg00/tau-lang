@@ -380,6 +380,20 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
   bool is_vararg = false;
   LLVMCallConv callconv = LLVMCCallConv;
 
+  if (node->is_extern)
+    switch (node->abi)
+    {
+    case ABI_CDECL:      callconv = LLVMCCallConv;             break;
+    case ABI_STDCALL:    callconv = LLVMX86StdcallCallConv;    break;
+    case ABI_WIN64:      callconv = LLVMWin64CallConv;         break;
+    case ABI_SYSV64:     callconv = LLVMX8664SysVCallConv;     break;
+    case ABI_AAPCS:      callconv = LLVMARMAAPCSCallConv;      break;
+    case ABI_FASTCALL:   callconv = LLVMFastCallConv;          break;
+    case ABI_VECTORCALL: callconv = LLVMX86VectorCallCallConv; break;
+    case ABI_THISCALL:   callconv = LLVMX86ThisCallCallConv;   break;
+    default: unreachable();
+    }
+
   if (node->attrs != NULL)
     LIST_FOR_LOOP(it, node->attrs)
     {
@@ -388,9 +402,7 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
       const char* attr_id_ptr = attr_node->id->tok->loc->ptr;
       size_t attr_id_len = attr_node->id->tok->loc->len;
 
-      if (strncmp("cdecl", attr_id_ptr, attr_id_len) == 0)
-        callconv = LLVMCCallConv;
-      else if (strncmp("vararg", attr_id_ptr, attr_id_len) == 0)
+      if (strncmp("vararg", attr_id_ptr, attr_id_len) == 0)
         is_vararg = true;
     }
 

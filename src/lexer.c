@@ -28,15 +28,18 @@ struct lexer_t
   location_t* loc; // Current location in source file.
 };
 
-lexer_t* lexer_init(void)
+lexer_t* lexer_init(const char* path, char* src)
 {
   lexer_t* lex = (lexer_t*)malloc(sizeof(lexer_t));
-  memset(lex, 0, sizeof(lexer_t));
+  
+  lex->loc = location_init(NULL, NULL, NULL, 0, 0, 0);
+
   return lex;
 }
 
 void lexer_free(lexer_t* lex)
 {
+  location_free(lex->loc);
   free(lex);
 }
 
@@ -767,13 +770,19 @@ token_t* lexer_read_next(lexer_t* lex)
   return NULL;
 }
 
-void lexer_lex(lexer_t* lex, const char* path, char* src, list_t* toks)
+list_t* lexer_lex(lexer_t* lex, const char* path, char* src)
 {
-  lex->loc = location_init(path, src, src, 0, 0, 0);
+  lex->loc->path = path;
+  lex->loc->src = src;
+  lex->loc->ptr = src;
+  lex->loc->row = 0;
+  lex->loc->col = 0;
+  lex->loc->len = 0;
+
+  list_t* toks = list_init();
 
   while (list_empty(toks) || ((token_t*)list_back(toks))->kind != TOK_EOF)
     list_push_back(toks, lexer_read_next(lex));
 
-  location_free(lex->loc);
-  lex->loc = NULL;
+  return toks;
 }
