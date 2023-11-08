@@ -183,6 +183,7 @@ typedef enum ast_kind_e
  */
 typedef enum abi_kind_t
 {
+  ABI_TAU, // The default Tau calling convention.
   ABI_CDECL, // Standard C calling convention, parameters pushed onto the stack.
   ABI_STDCALL, // Win32 API standard calling convention.
   ABI_WIN64, // Windows 64-bit calling convention.
@@ -298,6 +299,8 @@ typedef struct ast_type_fun_t
   AST_TYPE_HEADER;
   list_t* params; // List of parameter types.
   ast_node_t* return_type; // Return type.
+  bool is_vararg; // Is variadic.
+  abi_kind_t abi; // The function ABI.
 } ast_type_fun_t;
 
 /**
@@ -527,7 +530,8 @@ typedef struct ast_decl_fun_t
   ast_node_t* return_type; // Return type.
   ast_node_t* stmt; // Body statement.
   bool is_extern; // Is external.
-  abi_kind_t abi; // ABI kind.
+  bool is_vararg; // Is variadic.
+  abi_kind_t abi; // The function ABI.
 
   LLVMTypeRef llvm_type;
   LLVMValueRef llvm_value;

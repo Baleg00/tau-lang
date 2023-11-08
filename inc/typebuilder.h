@@ -218,9 +218,11 @@ typedesc_t* typebuilder_build_unit(typebuilder_t* builder);
  * \param[in] return_type The return type of the function.
  * \param[in] param_types An array of parameter types for the function.
  * \param[in] param_count The number of parameters.
+ * \param[in] is_vararg `true` if the function is variadic, `false` otherwise.
+ * \param[in] abi The function ABI.
  * \returns A pointer to the newly created function type descriptor.
  */
-typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count);
+typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count, bool is_vararg, abi_kind_t abi);
 
 /**
  * \brief Builds a generator type with the provided yield type and parameter types.

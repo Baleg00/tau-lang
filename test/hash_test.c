@@ -30,7 +30,7 @@ test()
         size_t seed = hash_digest("secret", 6);
         size_t combined = hash_combine_with_data(seed, "password", 8);
 
-        assert_equal(combined, 0x3EDF81215E25A365ULL);
+        assert_equal(combined, 0x95FC71CF9E056A34ULL);
       end()
     end()
 
@@ -40,7 +40,7 @@ test()
         size_t hash = hash_digest("password", 8);
         size_t combined = hash_combine_with_hash(seed, hash);
 
-        assert_equal(combined, 0x3EDF81215E25A365ULL);
+        assert_equal(combined, 0x95FC71CF9E056A34ULL);
       end()
     end()
   end()

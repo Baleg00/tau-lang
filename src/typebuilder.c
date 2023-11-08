@@ -126,9 +126,9 @@ typedesc_t* typebuilder_build_unit(typebuilder_t* builder)
   return typeset_lookup_unit(builder->typeset);
 }
 
-typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count)
+typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count, bool is_vararg, abi_kind_t abi)
 {
-  return typeset_lookup_fun(builder->typeset, return_type, param_types, param_count);
+  return typeset_lookup_fun(builder->typeset, return_type, param_types, param_count, is_vararg, abi);
 }
 
 typedesc_t* typebuilder_build_gen(typebuilder_t* builder, typedesc_t* yield_type, typedesc_t* param_types[], size_t param_count)

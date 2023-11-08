@@ -63,6 +63,9 @@ static int typeset_cmp_fun(void* lhs, void* rhs)
     lhs_hash = hash_combine_with_data(lhs_hash, &param_desc, sizeof(typedesc_t*));
   }
 
+  lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->is_vararg, sizeof(bool));
+  lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->abi, sizeof(abi_kind_t));
+
   size_t rhs_hash = hash_digest(&rhs_desc->return_type, sizeof(typedesc_t*));
 
   LIST_FOR_LOOP(it, rhs_desc->param_types)
@@ -70,6 +73,9 @@ static int typeset_cmp_fun(void* lhs, void* rhs)
     typedesc_t* param_desc = (typedesc_t*)list_node_get(it);
     rhs_hash = hash_combine_with_data(rhs_hash, &param_desc, sizeof(typedesc_t*));
   }
+
+  rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->is_vararg, sizeof(bool));
+  rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->abi, sizeof(abi_kind_t));
 
   if (lhs_hash < rhs_hash)
     return -1;
@@ -398,11 +404,13 @@ typedesc_t* typeset_lookup_unit(typeset_t* typeset)
   return typeset->desc_unit;
 }
 
-typedesc_t* typeset_lookup_fun(typeset_t* typeset, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count)
+typedesc_t* typeset_lookup_fun(typeset_t* typeset, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count, bool is_vararg, abi_kind_t abi)
 {
   typedesc_fun_t* desc = (typedesc_fun_t*)typedesc_init(TYPEDESC_FUN);
   desc->return_type = return_type;
   desc->param_types = param_count == 0 ? NULL : list_init_from_buffer(param_types, param_count);
+  desc->is_vararg = is_vararg;
+  desc->abi = abi;
 
   typedesc_t* result = (typedesc_t*)set_get(typeset->set_fun, desc);
 

@@ -39,5 +39,5 @@ size_t hash_combine_with_data(size_t seed, const void* data, size_t size)
 
 size_t hash_combine_with_hash(size_t seed, size_t hash)
 {
-  return hash + 0x9E3779B9ULL + (seed << 6) + (seed >> 2);
+  return seed ^ (hash + 0x9E3779B9ULL + (seed << 6) + (seed >> 2));
 }

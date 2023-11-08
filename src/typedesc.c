@@ -328,8 +328,7 @@ typedesc_t* typedesc_underlying_type(typedesc_t* desc)
 {
   while (desc->kind == TYPEDESC_MUT ||
          desc->kind == TYPEDESC_CONST ||
-         desc->kind == TYPEDESC_REF ||
-         desc->kind == TYPEDESC_OPT)
+         desc->kind == TYPEDESC_REF)
     desc = ((typedesc_modifier_t*)desc)->base_type;
 
   return desc;
@@ -364,8 +363,7 @@ bool typedesc_check_can_add_const(typedesc_t* desc)
 
 bool typedesc_check_can_add_ptr(typedesc_t* desc)
 {
-  if (desc->kind == TYPEDESC_MUT)
-    return ((typedesc_mut_t*)desc)->base_type->kind != TYPEDESC_REF;
+  desc = typedesc_remove_mut(desc);
 
   return desc->kind != TYPEDESC_CONST &&
          desc->kind != TYPEDESC_REF;
@@ -378,8 +376,7 @@ bool typedesc_check_can_add_array(typedesc_t* desc)
 
 bool typedesc_check_can_add_ref(typedesc_t* desc)
 {
-  if (desc->kind == TYPEDESC_MUT)
-    return ((typedesc_mut_t*)desc)->base_type->kind != TYPEDESC_REF;
+  desc = typedesc_remove_mut(desc);
   
   return desc->kind != TYPEDESC_CONST &&
          desc->kind != TYPEDESC_REF;
@@ -387,9 +384,7 @@ bool typedesc_check_can_add_ref(typedesc_t* desc)
 
 bool typedesc_check_can_add_opt(typedesc_t* desc)
 {
-  if (desc->kind == TYPEDESC_MUT)
-    return ((typedesc_mut_t*)desc)->base_type->kind != TYPEDESC_REF &&
-           ((typedesc_mut_t*)desc)->base_type->kind != TYPEDESC_OPT;
+  desc = typedesc_remove_mut(desc);
 
   return desc->kind != TYPEDESC_OPT &&
          desc->kind != TYPEDESC_CONST &&
@@ -421,4 +416,103 @@ bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_de
     from_desc = typedesc_remove_ref(from_desc);
 
   return to_desc == from_desc;
+}
+
+size_t typedesc_integer_bits(typedesc_t* desc)
+{
+  assert(typedesc_is_integer(desc));
+
+  switch (desc->kind)
+  {
+  case TYPEDESC_I8:
+  case TYPEDESC_U8:
+    return 8;
+  case TYPEDESC_I16:
+  case TYPEDESC_U16:
+    return 16;
+  case TYPEDESC_I32:
+  case TYPEDESC_U32:
+    return 32;
+  case TYPEDESC_I64:
+  case TYPEDESC_U64:
+    return 64;
+  case TYPEDESC_ISIZE:
+  case TYPEDESC_USIZE:
+    return sizeof(void*) * 8;
+  default:
+    unreachable();
+  }
+
+  return 0;
+}
+
+typedesc_t* typedesc_arithmetic_promote(typedesc_t* lhs_desc, typedesc_t* rhs_desc)
+{
+  assert(typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc));
+
+  if (lhs_desc->kind == rhs_desc->kind)
+    return lhs_desc;
+
+  if (typedesc_is_float(lhs_desc) && !typedesc_is_float(rhs_desc))
+    return lhs_desc;
+
+  if (!typedesc_is_float(lhs_desc) && typedesc_is_float(rhs_desc))
+    return rhs_desc;
+
+  if (typedesc_is_float(lhs_desc) && typedesc_is_float(rhs_desc))
+    if (lhs_desc->kind == TYPEDESC_F64)
+      return lhs_desc;
+    else
+      return rhs_desc;
+
+  if (typedesc_integer_bits(lhs_desc) < typedesc_integer_bits(rhs_desc))
+    return rhs_desc;
+  
+  return lhs_desc;
+}
+
+bool typedesc_is_callable(typedesc_t* desc)
+{
+  desc = typedesc_remove_const_mut(desc);
+
+  if (desc->kind == TYPEDESC_REF)
+  {
+    desc = typedesc_remove_ptr(typedesc_remove_mut(typedesc_remove_ref(desc)));
+
+    if (desc->kind == TYPEDESC_FUN || desc->kind == TYPEDESC_GEN)
+      return true;
+  }
+  else if (desc->kind == TYPEDESC_PTR)
+  {
+    desc = typedesc_remove_ptr(desc);
+
+    if (desc->kind == TYPEDESC_FUN || desc->kind == TYPEDESC_GEN)
+      return true;
+  }
+
+  return false;
+}
+
+typedesc_t* typedesc_underlying_callable(typedesc_t* desc)
+{
+  desc = typedesc_remove_const_mut(desc);
+
+  if (desc->kind == TYPEDESC_REF)
+  {
+    desc = typedesc_remove_ptr(typedesc_remove_mut(typedesc_remove_ref(desc)));
+
+    if (desc->kind == TYPEDESC_FUN || desc->kind == TYPEDESC_GEN)
+      return desc;
+  }
+  else if (desc->kind == TYPEDESC_PTR)
+  {
+    desc = typedesc_remove_ptr(desc);
+
+    if (desc->kind == TYPEDESC_FUN || desc->kind == TYPEDESC_GEN)
+      return desc;
+  }
+
+  unreachable();
+
+  return NULL;
 }

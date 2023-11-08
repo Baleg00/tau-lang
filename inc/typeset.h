@@ -248,9 +248,11 @@ typedesc_t* typeset_lookup_unit(typeset_t* typeset);
  * \param[in] return_type The return type of the function.
  * \param[in] param_types The parameter types of the function.
  * \param[in] param_count The number of parameters.
+ * \param[in] is_vararg `true` if the function is variadic, `false` otherwise.
+ * \param[in] abi The function ABI.
  * \return A type descriptor for the function type.
  */
-typedesc_t* typeset_lookup_fun(typeset_t* typeset, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count);
+typedesc_t* typeset_lookup_fun(typeset_t* typeset, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count, bool is_vararg, abi_kind_t abi);
 
 /**
  * \brief Retrieves a type descriptor for a generator type.

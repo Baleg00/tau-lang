@@ -394,9 +394,10 @@ ast_node_t* parser_parse_decl_var(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \param[in] is_extern `true` if the function is external, `false` otherwise.
+ * \param[in] abi The function ABI.
  * \returns Function declaration node.
 */
-ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern);
+ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern, abi_kind_t abi);
 
 /**
  * \brief Parses a generator declaration.

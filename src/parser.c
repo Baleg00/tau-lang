@@ -24,6 +24,35 @@ struct parser_t
   list_node_t* cur; // Current token in list.
 };
 
+static abi_kind_t parser_parse_abi(parser_t* par)
+{
+  static struct {
+    const char* str;
+    abi_kind_t abi;
+  } str_abi_map[] = {
+    { "\"Tau\"",        ABI_TAU        },
+    { "\"cdecl\"",      ABI_CDECL      },
+    { "\"stdcall\"",    ABI_STDCALL    },
+    { "\"win64\"",      ABI_WIN64      },
+    { "\"sysv64\"",     ABI_SYSV64     },
+    { "\"aapcs\"",      ABI_AAPCS      },
+    { "\"fastcall\"",   ABI_FASTCALL   },
+    { "\"vectorcall\"", ABI_VECTORCALL },
+    { "\"thiscall\"",   ABI_THISCALL   },
+  };
+
+  token_t* abi_tok = parser_expect(par, TOK_LIT_STR);
+  string_view_t abi_str_view = token_to_string_view(abi_tok);
+
+  for (size_t i = 0; i < countof(str_abi_map); i++)
+    if (string_view_compare_cstr(abi_str_view, str_abi_map[i].str) == 0)
+      return str_abi_map[i].abi;
+
+  report_error_unknown_abi(abi_tok->loc);
+
+  return 0;
+}
+
 parser_t* parser_init(void)
 {
   parser_t* par = (parser_t*)malloc(sizeof(parser_t));
@@ -213,6 +242,11 @@ ast_node_t* parser_parse_type_fun(parser_t* par)
 {
   ast_type_fun_t* node = (ast_type_fun_t*)ast_node_init(AST_TYPE_FUN);
   node->tok = parser_current(par);
+  
+  node->abi = ABI_TAU;
+
+  if (parser_consume(par, TOK_KW_EXTERN))
+    node->abi = parser_parse_abi(par);
 
   parser_expect(par, TOK_KW_FUN);
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
@@ -509,27 +543,25 @@ ast_node_t* parser_parse_decl_var(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern)
+ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern, abi_kind_t abi)
 {
   ast_decl_fun_t* node = (ast_decl_fun_t*)ast_node_init(AST_DECL_FUN);
   node->tok = parser_current(par);
   
   node->is_extern = is_extern;
-  node->abi = ABI_CDECL;
+  node->abi = abi;
 
   parser_expect(par, TOK_KW_FUN);
 
   node->id = parser_parse_id(par);
   
   // Parse parameters.
-  node->params = NULL;
+  node->params = list_init();
 
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
 
   if (!parser_consume(par, TOK_PUNCT_PAREN_RIGHT))
   {
-    node->params = list_init();
-
     for (bool seen_default = false;;)
     {
       // Parse variadic parameter.
@@ -537,17 +569,31 @@ ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern)
       // parameter list.
       if (parser_consume(par, TOK_PUNCT_DOT_DOT_DOT))
       {
-        ast_decl_param_t* variadic_param = (ast_decl_param_t*)parser_parse_decl_param(par);
-        assert(variadic_param->expr == NULL);
+        // Tau-style variadic parameter.
+        if (parser_current(par)->kind == TOK_ID)
+        {
+          ast_decl_param_t* variadic_param = (ast_decl_param_t*)parser_parse_decl_param(par);
+          assert(variadic_param->expr == NULL);
 
-        // Default parameters must be followed only by default parameters.
-        if (seen_default)
-          report_error_missing_default_parameter(
-            variadic_param->tok->loc,
-            ((ast_node_t*)list_back(node->params))->tok->loc
-          );
+          variadic_param->is_variadic = true;
 
-        list_push_back(node->params, variadic_param);
+          // Default parameters must be followed only by default parameters.
+          if (seen_default)
+            report_error_missing_default_parameter(
+              variadic_param->tok->loc,
+              ((ast_node_t*)list_back(node->params))->tok->loc
+            );
+
+          list_push_back(node->params, variadic_param);
+        }
+        // C-style variadic parameter.
+        else
+        {
+          // Function must be extern "cdecl".
+          assert(node->is_extern && node->abi == ABI_CDECL);
+          node->is_vararg = true;
+        }
+        
         break;
       }
 
@@ -593,14 +639,12 @@ ast_node_t* parser_parse_decl_gen(parser_t* par)
   node->id = parser_parse_id(par);
   
   // Parse parameters.
-  node->params = NULL;
+  node->params = list_init();
 
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
 
   if (!parser_consume(par, TOK_PUNCT_PAREN_RIGHT))
   {
-    node->params = list_init();
-
     for (bool seen_default = false;;)
     {
       // Parse variadic parameter.
@@ -749,47 +793,15 @@ ast_node_t* parser_parse_decl_extern(parser_t* par)
   abi_kind_t abi = ABI_CDECL;
 
   if (parser_current(par)->kind == TOK_LIT_STR)
-  {
-    static struct {
-      abi_kind_t abi;
-      const char* str;
-    } abis[] = {
-      { ABI_CDECL,      "\"cdecl\""      },
-      { ABI_STDCALL,    "\"stdcall\""    },
-      { ABI_WIN64,      "\"win64\""      },
-      { ABI_SYSV64,     "\"sysv64\""     },
-      { ABI_AAPCS,      "\"aapcs\""      },
-      { ABI_FASTCALL,   "\"fastcall\""   },
-      { ABI_VECTORCALL, "\"vectorcall\"" },
-      { ABI_THISCALL,   "\"thiscall\""   }
-    };
-
-    token_t* abi_tok = parser_expect(par, TOK_LIT_STR);
-
-    string_view_t abi_str_view = token_to_string_view(abi_tok);
-
-    bool found_abi = false;
-
-    for (size_t i = 0; i < countof(abis) && !found_abi; i++)
-      if (string_view_compare_cstr(abi_str_view, abis[i].str) == 0)
-      {
-        abi = abis[i].abi;
-        found_abi = true;
-      }
-
-    if (!found_abi)
-      report_error_unknown_abi(abi_tok->loc);
-  }
+    abi = parser_parse_abi(par);
 
   ast_decl_fun_t* node = NULL;
 
   switch (parser_current(par)->kind)
   {
-  case TOK_KW_FUN: node = (ast_decl_fun_t*)parser_parse_decl_fun(par, true); break;
+  case TOK_KW_FUN: node = (ast_decl_fun_t*)parser_parse_decl_fun(par, true, abi); break;
   default:         report_error_unexpected_token(parser_current(par)->loc);
   }
-
-  node->abi = abi;
 
   return (ast_node_t*)node;
 }
@@ -800,7 +812,7 @@ ast_node_t* parser_parse_decl(parser_t* par)
   {
   case TOK_ID:         return parser_parse_decl_var       (par);
   case TOK_KW_EXTERN:  return parser_parse_decl_extern    (par);
-  case TOK_KW_FUN:     return parser_parse_decl_fun       (par, false);
+  case TOK_KW_FUN:     return parser_parse_decl_fun       (par, false, ABI_TAU);
   case TOK_KW_GEN:     return parser_parse_decl_gen       (par);
   case TOK_KW_STRUCT:  return parser_parse_decl_struct    (par);
   case TOK_KW_UNION:   return parser_parse_decl_union     (par);

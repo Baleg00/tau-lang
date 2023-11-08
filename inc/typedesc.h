@@ -166,6 +166,8 @@ typedef struct typedesc_fun_t
   TYPEDESC_HEADER;
   list_t* param_types; // Parameter types.
   typedesc_t* return_type; // Return type.
+  bool is_vararg; // Is variadic.
+  abi_kind_t abi; // The function ABI.
 } typedesc_fun_t;
 
 /**
@@ -404,8 +406,8 @@ typedesc_t* typedesc_remove_const_mut(typedesc_t* desc);
 typedesc_t* typedesc_remove_const_mut_ref(typedesc_t* desc);
 
 /**
- * \brief Removes all topmost mutable, constant, reference and optional modifiers
- * from a type descriptor.
+ * \brief Removes all topmost mutable, constant and reference modifiers from a
+ * type descriptor.
  * 
  * \param[in] desc Pointer to the type descriptor.
  * \returns Pointer to the type descriptor without modifiers.
@@ -477,5 +479,39 @@ bool typedesc_check_can_add_opt(typedesc_t* desc);
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
 bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc);
+
+/**
+ * \brief Retrieves the bit-width of an integer type descriptor.
+ * 
+ * \param desc Pointer to the type descriptor.
+ * \returns The bit-width of the type.
+ */
+size_t typedesc_integer_bits(typedesc_t* desc);
+
+/**
+ * \brief Performs type promotion using the specified arithmetic types.
+ * 
+ * \param lhs_desc Pointer to the type descriptor.
+ * \param rhs_desc Pointer to the type descriptor.
+ * \returns Pointer to the promoted type.
+ */
+typedesc_t* typedesc_arithmetic_promote(typedesc_t* lhs_desc, typedesc_t* rhs_desc);
+
+/**
+ * \brief Checks if the given type descriptor is a callable type.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns `true` if the type descriptor is a callable, `false` otherwise.
+ */
+bool typedesc_is_callable(typedesc_t* desc);
+
+/**
+ * \brief Removes all modifiers and returns the underlying callable type of the
+ * given type descriptor.
+ * 
+ * \param desc Pointer to callable type descriptor.
+ * \returns Pointer to the underlying callable type descriptor.
+ */
+typedesc_t* typedesc_underlying_callable(typedesc_t* desc);
 
 #endif

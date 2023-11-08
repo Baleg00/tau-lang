@@ -58,6 +58,14 @@ void generator_visit_type_ptr(generator_t* gen, ast_type_ptr_t* node);
 void generator_visit_type_array(generator_t* gen, ast_type_array_t* node);
 
 /**
+ * \brief Visits and generates code for a function type in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] node Pointer to the AST node representing the function type.
+ */
+void generator_visit_type_fun(generator_t* gen, ast_type_fun_t* node);
+
+/**
  * \brief Visits and generates code for a type in the AST.
  *
  * \param[in] gen Pointer to the generator.

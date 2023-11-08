@@ -28,7 +28,7 @@ struct lexer_t
   location_t* loc; // Current location in source file.
 };
 
-lexer_t* lexer_init(const char* path, char* src)
+lexer_t* lexer_init(void)
 {
   lexer_t* lex = (lexer_t*)malloc(sizeof(lexer_t));
   

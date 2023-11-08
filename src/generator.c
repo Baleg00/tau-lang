@@ -55,12 +55,46 @@ void generator_visit_type_array(generator_t* gen, ast_type_array_t* node)
   node->llvm_type = LLVMArrayType2(((ast_type_t*)node->base_type)->llvm_type, 0);
 }
 
+void generator_visit_type_fun(generator_t* gen, ast_type_fun_t* node)
+{
+  generator_visit_type(gen, (ast_type_t*)node->return_type);
+
+  size_t param_count = list_size(node->params);
+  LLVMTypeRef* param_types = NULL;
+
+  if (param_count > 0)
+  {
+    param_types = malloc(param_count * sizeof(LLVMTypeRef));
+
+    size_t i = 0;
+    LIST_FOR_LOOP(it, node->params)
+    {
+      ast_type_t* param_type = (ast_type_t*)list_node_get(it);
+
+      generator_visit_type(gen, param_type);
+
+      param_types[i++] = param_type->llvm_type;
+    }
+  }
+  
+  node->llvm_type = LLVMFunctionType(
+    ((ast_type_t*)node->return_type)->llvm_type,
+    param_types,
+    (uint32_t)param_count,
+    node->is_vararg
+  );
+
+  if (param_types != NULL)
+    free(param_types);
+}
+
 void generator_visit_type(generator_t* gen, ast_type_t* node)
 {
   switch (node->kind)
   {
   case AST_TYPE_PTR:   generator_visit_type_ptr  (gen, (ast_type_ptr_t*  )node); break;
   case AST_TYPE_ARRAY: generator_visit_type_array(gen, (ast_type_array_t*)node); break;
+  case AST_TYPE_FUN:   generator_visit_type_fun  (gen, (ast_type_fun_t*  )node); break;
   case AST_TYPE_I8:    node->llvm_type = LLVMInt8TypeInContext  (gen->context); break;
   case AST_TYPE_I16:   node->llvm_type = LLVMInt16TypeInContext (gen->context); break;
   case AST_TYPE_I32:   node->llvm_type = LLVMInt32TypeInContext (gen->context); break;
@@ -358,12 +392,11 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
 {
   generator_visit_type(gen, (ast_type_t*)node->return_type);
 
-  size_t param_count = 0;
+  size_t param_count = list_size(node->params);
   LLVMTypeRef* param_types = NULL;
 
-  if (node->params != NULL)
+  if (param_count > 0)
   {
-    param_count = list_size(node->params);
     param_types = malloc(param_count * sizeof(LLVMTypeRef));
 
     size_t i = 0;
@@ -376,13 +409,13 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
       param_types[i++] = ((ast_type_t*)param->type)->llvm_type;
     }
   }
-
-  bool is_vararg = false;
+  
   LLVMCallConv callconv = LLVMCCallConv;
 
   if (node->is_extern)
     switch (node->abi)
     {
+    case ABI_TAU:
     case ABI_CDECL:      callconv = LLVMCCallConv;             break;
     case ABI_STDCALL:    callconv = LLVMX86StdcallCallConv;    break;
     case ABI_WIN64:      callconv = LLVMWin64CallConv;         break;
@@ -394,23 +427,11 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
     default: unreachable();
     }
 
-  if (node->attrs != NULL)
-    LIST_FOR_LOOP(it, node->attrs)
-    {
-      ast_attr_t* attr_node = (ast_attr_t*)list_node_get(it);
-
-      const char* attr_id_ptr = attr_node->id->tok->loc->ptr;
-      size_t attr_id_len = attr_node->id->tok->loc->len;
-
-      if (strncmp("vararg", attr_id_ptr, attr_id_len) == 0)
-        is_vararg = true;
-    }
-
   node->llvm_type = LLVMFunctionType(
     ((ast_type_t*)node->return_type)->llvm_type,
     param_types,
     (uint32_t)param_count,
-    is_vararg
+    node->is_vararg
   );
 
   if (param_types != NULL)
