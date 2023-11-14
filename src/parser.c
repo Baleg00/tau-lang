@@ -22,6 +22,7 @@ struct parser_t
 {
   list_t* toks; // List of tokens to be processed.
   list_node_t* cur; // Current token in list.
+  bool ignore_newlines; // Ignore newlines.
 };
 
 static abi_kind_t parser_parse_abi(parser_t* par)
@@ -53,6 +54,17 @@ static abi_kind_t parser_parse_abi(parser_t* par)
   return 0;
 }
 
+static void parser_skip_newlines(parser_t* par)
+{
+  token_t* tok = (token_t*)list_node_get(par->cur);
+
+  while (par->ignore_newlines && tok->kind == TOK_NEWLINE)
+  {
+    par->cur = list_node_next(par->cur);
+    tok = (token_t*)list_node_get(par->cur);
+  }
+}
+
 parser_t* parser_init(void)
 {
   parser_t* par = (parser_t*)malloc(sizeof(parser_t));
@@ -67,13 +79,14 @@ void parser_free(parser_t* par)
 
 token_t* parser_current(parser_t* par)
 {
+  parser_skip_newlines(par);
+
   return (token_t*)list_node_get(par->cur);
 }
 
 token_t* parser_next(parser_t* par)
 {
   token_t* tok = parser_current(par);
-  assert(tok != NULL);
 
   if (tok->kind != TOK_EOF)
     par->cur = list_node_next(par->cur);
@@ -84,12 +97,16 @@ token_t* parser_next(parser_t* par)
 token_t* parser_peek(parser_t* par)
 {
   token_t* tok = parser_current(par);
-  assert(tok != NULL);
 
   if (tok->kind == TOK_EOF)
     return tok;
 
-  return (token_t*)list_node_get(list_node_next(par->cur));
+  list_node_t* next = list_node_next(par->cur);
+
+  while (par->ignore_newlines && (tok = (token_t*)list_node_get(next))->kind == TOK_NEWLINE)
+    next = list_node_next(next);
+
+  return tok;
 }
 
 bool parser_consume(parser_t* par, token_kind_t kind)
@@ -111,6 +128,11 @@ token_t* parser_expect(parser_t* par, token_kind_t kind)
     report_error_unexpected_token(tok->loc);
 
   return parser_next(par);
+}
+
+void parser_set_ignore_newline(parser_t* par, bool ignore)
+{
+  par->ignore_newlines = ignore;
 }
 
 list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func)
@@ -856,6 +878,8 @@ ast_node_t* parser_parse(parser_t* par, list_t* toks)
 {
   par->toks = toks;
   par->cur = list_front_node(toks);
+
+  parser_set_ignore_newline(par, true);
 
   ast_node_t* root = ast_node_init(AST_PROG);
   root->tok = parser_current(par);

@@ -159,6 +159,7 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_PUNCT_BRACE_LEFT:            return "TOK_PUNCT_BRACE_LEFT";
   case TOK_PUNCT_BRACE_RIGHT:           return "TOK_PUNCT_BRACE_RIGHT";
   case TOK_PUNCT_HASH:                  return "TOK_PUNCT_HASH";
+  case TOK_NEWLINE:                     return "TOK_NEWLINE";
   case TOK_EOF:                         return "TOK_EOF";
   default: unreachable();
   }

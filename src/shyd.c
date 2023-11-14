@@ -407,6 +407,8 @@ void shyd_ast_op(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 
 ast_node_t* shyd_ast(parser_t* par)
 {
+  parser_set_ignore_newline(par, false);
+
   shyd_t* shyd = shyd_init(par);
 
   shyd_postfix(shyd);
@@ -435,6 +437,8 @@ ast_node_t* shyd_ast(parser_t* par)
   stack_free(node_stack);
 
   shyd_free(shyd);
+
+  parser_set_ignore_newline(par, true);
 
   return root;
 }

@@ -26,6 +26,7 @@
 struct lexer_t
 {
   location_t* loc; // Current location in source file.
+  list_t* toks; // List of tokens.
 };
 
 lexer_t* lexer_init(void)
@@ -116,6 +117,12 @@ char lexer_next(lexer_t* lex)
   
   if (*lex->loc->ptr == '\n')
   {
+    location_t* loc = lexer_location_copy(lex);
+    loc->len = 1;
+
+    token_t* tok = token_init(TOK_NEWLINE, loc);
+    list_push_back(lex->toks, tok);
+
     lex->loc->row += 1;
     lex->loc->col = 0;
   }
@@ -779,10 +786,10 @@ list_t* lexer_lex(lexer_t* lex, const char* path, char* src)
   lex->loc->col = 0;
   lex->loc->len = 0;
 
-  list_t* toks = list_init();
+  lex->toks = list_init();
 
-  while (list_empty(toks) || ((token_t*)list_back(toks))->kind != TOK_EOF)
-    list_push_back(toks, lexer_read_next(lex));
+  while (list_empty(lex->toks) || ((token_t*)list_back(lex->toks))->kind != TOK_EOF)
+    list_push_back(lex->toks, lexer_read_next(lex));
 
-  return toks;
+  return lex->toks;
 }

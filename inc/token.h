@@ -135,6 +135,8 @@ typedef enum token_kind_e
   TOK_PUNCT_BRACE_RIGHT, // Punctuation `}`
   TOK_PUNCT_HASH, // Punctuation `#`
 
+  TOK_NEWLINE, // Newline
+
   TOK_EOF, // End of file
 } token_kind_t;
 

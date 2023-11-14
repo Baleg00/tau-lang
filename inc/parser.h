@@ -99,6 +99,15 @@ bool parser_consume(parser_t* par, token_kind_t kind);
 token_t* parser_expect(parser_t* par, token_kind_t kind);
 
 /**
+ * \brief Toggles whether the parser should ignore newlines when fetching tokens
+ * or not.
+ * 
+ * \param par Parser to be used.
+ * \param ignore `true` if newlines should be ignored, `false` otherwise.
+ */
+void parser_set_ignore_newline(parser_t* par, bool ignore);
+
+/**
  * \brief Parses a list of nodes delimited by a specific token.
  * 
  * \details Parses nodes until the next token's kind does not match the
