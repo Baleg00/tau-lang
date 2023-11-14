@@ -41,6 +41,13 @@ void generator_free(generator_t* gen)
   free(gen);
 }
 
+void generator_visit_type_mut(generator_t* gen, ast_type_mut_t* node)
+{
+  generator_visit_type(gen, (ast_type_t*)node->base_type);
+
+  node->llvm_type = ((ast_type_t*)node->base_type)->llvm_type;
+}
+
 void generator_visit_type_ptr(generator_t* gen, ast_type_ptr_t* node)
 {
   generator_visit_type(gen, (ast_type_t*)node->base_type);
@@ -92,6 +99,7 @@ void generator_visit_type(generator_t* gen, ast_type_t* node)
 {
   switch (node->kind)
   {
+  case AST_TYPE_MUT:   generator_visit_type_mut  (gen, (ast_type_mut_t*  )node); break;
   case AST_TYPE_PTR:   generator_visit_type_ptr  (gen, (ast_type_ptr_t*  )node); break;
   case AST_TYPE_ARRAY: generator_visit_type_array(gen, (ast_type_array_t*)node); break;
   case AST_TYPE_FUN:   generator_visit_type_fun  (gen, (ast_type_fun_t*  )node); break;
@@ -195,6 +203,21 @@ void generator_visit_expr_op_unary(generator_t* gen, ast_decl_fun_t* fun_node, a
 
   switch (node->op_kind)
   {
+  case OP_ARIT_INC_PRE:
+  {
+    assert(node->expr->kind == AST_EXPR_DECL);
+
+    ast_decl_var_t* decl = (ast_decl_var_t*)((ast_expr_decl_t*)node->expr)->decl;
+
+    LLVMValueRef value = LLVMBuildLoad2(gen->builder, decl->llvm_type, decl->llvm_value, "load_tmp");
+    LLVMValueRef one = LLVMConstInt(decl->llvm_type, 1, false);
+    LLVMValueRef inc_value = LLVMBuildAdd(gen->builder, value, one, "pre_inc_tmp");
+    LLVMBuildStore(gen->builder, inc_value, decl->llvm_value);
+
+    node->llvm_type = decl->llvm_type;
+    node->llvm_value = inc_value;
+    break;
+  }
   case OP_ARIT_POS:
     node->llvm_type = ((ast_expr_t*)node->expr)->llvm_type;
     node->llvm_value = ((ast_expr_t*)node->expr)->llvm_value;
@@ -274,7 +297,7 @@ void generator_visit_expr_op_call(generator_t* gen, ast_decl_fun_t* fun_node, as
 void generator_visit_expr_decl_var(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
 {
   node->llvm_type = ((ast_decl_var_t*)node->decl)->llvm_type;
-  node->llvm_value = ((ast_decl_var_t*)node->decl)->llvm_value;
+  node->llvm_value = LLVMBuildLoad2(gen->builder, node->llvm_type, ((ast_decl_var_t*)node->decl)->llvm_value, "load_tmp");
 }
 
 void generator_visit_expr_decl_param(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
@@ -316,16 +339,39 @@ void generator_visit_expr(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_t
   }
 }
 
-void generator_visit_stmt_if(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_if_t* node)
+void generator_visit_stmt_while(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_while_t* node)
 {
+  node->llvm_cond = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "while_cond");
+  node->llvm_loop = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "while_loop");
+  node->llvm_end = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "while_end");
+
+  LLVMBuildBr(gen->builder, node->llvm_cond);
+
+  LLVMPositionBuilderAtEnd(gen->builder, node->llvm_cond);
+
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->cond);
 
+  LLVMBuildCondBr(gen->builder, ((ast_expr_t*)node->cond)->llvm_value, node->llvm_loop, node->llvm_end);
+
+  LLVMPositionBuilderAtEnd(gen->builder, node->llvm_loop);
+
+  generator_visit_stmt(gen, fun_node, (ast_stmt_t*)node->stmt);
+
+  LLVMBuildBr(gen->builder, node->llvm_cond);
+
+  LLVMPositionBuilderAtEnd(gen->builder, node->llvm_end);
+}
+
+void generator_visit_stmt_if(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_if_t* node)
+{
   node->llvm_then = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "if_then");
 
   if (node->stmt_else != NULL)
     node->llvm_else = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "if_else");
   
   node->llvm_end = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "if_end");
+
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->cond);
 
   node->llvm_value = LLVMBuildCondBr(gen->builder, ((ast_expr_t*)node->cond)->llvm_value, node->llvm_then, node->stmt_else != NULL ? node->llvm_else : node->llvm_end);
 
@@ -372,6 +418,7 @@ void generator_visit_stmt(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_t
   {
   case AST_DECL_VAR:    generator_visit_decl_var   (gen, fun_node, (ast_decl_var_t*   )node); break;
   case AST_STMT_IF:     generator_visit_stmt_if    (gen, fun_node, (ast_stmt_if_t*    )node); break;
+  case AST_STMT_WHILE:  generator_visit_stmt_while (gen, fun_node, (ast_stmt_while_t* )node); break;
   case AST_STMT_RETURN: generator_visit_stmt_return(gen, fun_node, (ast_stmt_return_t*)node); break;
   case AST_STMT_BLOCK:  generator_visit_stmt_block (gen, fun_node, (ast_stmt_block_t* )node); break;
   case AST_STMT_EXPR:   generator_visit_expr       (gen, fun_node, (ast_expr_t*       )((ast_stmt_expr_t*)node)->expr); break;
@@ -385,7 +432,9 @@ void generator_visit_decl_var(generator_t* gen, ast_decl_fun_t* fun_node, ast_de
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
   node->llvm_type = ((ast_type_t*)node->type)->llvm_type;
-  node->llvm_value = ((ast_expr_t*)node->expr)->llvm_value;
+  node->llvm_value = LLVMBuildAlloca(gen->builder, node->llvm_type, "alloca_tmp");
+
+  LLVMBuildStore(gen->builder, ((ast_expr_t*)node->expr)->llvm_value, node->llvm_value);
 }
 
 void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)

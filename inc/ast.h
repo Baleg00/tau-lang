@@ -442,6 +442,10 @@ typedef struct ast_stmt_while_t
   AST_NODE_HEADER;
   ast_node_t* cond; // Condition expression.
   ast_node_t* stmt; // Main body statement.
+
+  LLVMBasicBlockRef llvm_cond;
+  LLVMBasicBlockRef llvm_loop;
+  LLVMBasicBlockRef llvm_end;
 } ast_stmt_while_t;
 
 /**

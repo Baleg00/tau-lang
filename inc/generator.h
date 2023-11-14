@@ -42,6 +42,14 @@ generator_t* generator_init(void);
 void generator_free(generator_t* gen);
 
 /**
+ * \brief Visits and generates code for a mutable type in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] node Pointer to the AST node representing the mutable type.
+ */
+void generator_visit_type_mut(generator_t* gen, ast_type_mut_t* node);
+
+/**
  * \brief Visits and generates code for a pointer type in the AST.
  *
  * \param[in] gen Pointer to the generator.
@@ -194,6 +202,15 @@ void generator_visit_expr_decl(generator_t* gen, ast_decl_fun_t* fun_node, ast_e
  * \param[in] node Pointer to the AST node representing the expression.
  */
 void generator_visit_expr(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_t* node);
+
+/**
+ * \brief Visits and generates code for a while statement in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the while statement.
+ */
+void generator_visit_stmt_while(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_while_t* node);
 
 /**
  * \brief Visits and generates code for an if-else statement in the AST.
