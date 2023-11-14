@@ -28,6 +28,7 @@ struct analyzer_t
   typetable_t* typetable; // Pointer to the type table.
   typebuilder_t* builder; // Pointer to the type builder.
   stack_t* ret_types; // Stack of expected return types.
+  stack_t* loops; // Stack of loop statement nodes.
 };
 
 analyzer_t* analyzer_init(void)
@@ -36,6 +37,7 @@ analyzer_t* analyzer_init(void)
   memset(analyzer, 0, sizeof(analyzer_t));
 
   analyzer->ret_types = stack_init();
+  analyzer->loops = stack_init();
 
   return analyzer;
 }
@@ -43,6 +45,7 @@ analyzer_t* analyzer_init(void)
 void analyzer_free(analyzer_t* analyzer)
 {
   stack_free(analyzer->ret_types);
+  stack_free(analyzer->loops);
   free(analyzer);
 }
 
@@ -795,7 +798,11 @@ void analyzer_visit_stmt_for(analyzer_t* analyzer, symtable_t* scope, ast_stmt_f
   if (typedesc_underlying_type(range_desc)->kind != TYPEDESC_GEN)
     report_error_expected_generator_type(node->range->tok->loc);
 
+  stack_push(analyzer->loops, node);
+
   analyzer_visit_stmt(analyzer, for_table, (ast_stmt_t*)node->stmt);
+
+  stack_pop(analyzer->loops);
 }
 
 void analyzer_visit_stmt_while(analyzer_t* analyzer, symtable_t* scope, ast_stmt_while_t* node)
@@ -810,21 +817,31 @@ void analyzer_visit_stmt_while(analyzer_t* analyzer, symtable_t* scope, ast_stmt
   if (typedesc_underlying_type(cond_desc)->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);
 
+  stack_push(analyzer->loops, node);
+
   analyzer_visit_stmt(analyzer, while_table, (ast_stmt_t*)node->stmt);
+
+  stack_pop(analyzer->loops);
 }
 
 void analyzer_visit_stmt_break(analyzer_t* analyzer, symtable_t* scope, ast_stmt_break_t* node)
 {
-  unused(analyzer);
   unused(scope);
-  unused(node);
+
+  if (stack_empty(analyzer->loops))
+    report_error_break_outside_loop(node->tok->loc);
+
+  node->loop = (ast_node_t*)stack_peek(analyzer->loops);
 }
 
 void analyzer_visit_stmt_continue(analyzer_t* analyzer, symtable_t* scope, ast_stmt_continue_t* node)
 {
-  unused(analyzer);
   unused(scope);
-  unused(node);
+
+  if (stack_empty(analyzer->loops))
+    report_error_continue_outside_loop(node->tok->loc);
+
+  node->loop = (ast_node_t*)stack_peek(analyzer->loops);
 }
 
 typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* scope, ast_stmt_return_t* node)

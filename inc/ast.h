@@ -416,8 +416,6 @@ typedef struct ast_stmt_if_t
   ast_node_t* stmt; // Main body statement.
   ast_node_t* stmt_else; // Else statement.
 
-  LLVMValueRef llvm_value;
-
   LLVMBasicBlockRef llvm_then;
   LLVMBasicBlockRef llvm_else;
   LLVMBasicBlockRef llvm_end;
@@ -454,6 +452,7 @@ typedef struct ast_stmt_while_t
 typedef struct ast_stmt_break_t
 {
   AST_NODE_HEADER;
+  ast_node_t* loop; // Associated loop statement.
 } ast_stmt_break_t;
 
 /**
@@ -462,6 +461,7 @@ typedef struct ast_stmt_break_t
 typedef struct ast_stmt_continue_t
 {
   AST_NODE_HEADER;
+  ast_node_t* loop; // Associated loop statement.
 } ast_stmt_continue_t;
 
 /**

@@ -213,6 +213,24 @@ void generator_visit_expr(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_t
 void generator_visit_stmt_while(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_while_t* node);
 
 /**
+ * \brief Visits and generates code for a break statement in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the break statement.
+ */
+void generator_visit_stmt_break(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_break_t* node);
+
+/**
+ * \brief Visits and generates code for a continue statement in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the continue statement.
+ */
+void generator_visit_stmt_continue(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_continue_t* node);
+
+/**
  * \brief Visits and generates code for an if-else statement in the AST.
  *
  * \param[in] gen Pointer to the generator.

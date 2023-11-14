@@ -56,5 +56,7 @@ void report_error_missing_binary_argument(location_t* loc);
 void report_error_missing_callee(location_t* loc);
 void report_error_expected_module(location_t* loc);
 void report_error_unknown_abi(location_t* loc);
+void report_error_break_outside_loop(location_t* loc);
+void report_error_continue_outside_loop(location_t* loc);
 
 #endif

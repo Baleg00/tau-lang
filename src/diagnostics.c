@@ -391,3 +391,17 @@ void report_error_unknown_abi(location_t* loc)
   debugbreak();
   exit(EXIT_FAILURE);
 }
+
+void report_error_break_outside_loop(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Break statement is not within a loop.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
+void report_error_continue_outside_loop(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Continue statement is not within a loop.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}

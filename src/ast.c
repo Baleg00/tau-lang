@@ -307,7 +307,12 @@ void ast_json_dump(FILE* stream, ast_node_t* node)
     ast_json_dump(stream, ((ast_stmt_while_t*)node)->stmt);
     break;
   case AST_STMT_BREAK:
+    fprintf(stream, ",\"loop\":");
+    ast_json_dump(stream, ((ast_stmt_break_t*)node)->loop);
+    break;
   case AST_STMT_CONTINUE:
+    fprintf(stream, ",\"loop\":");
+    ast_json_dump(stream, ((ast_stmt_continue_t*)node)->loop);
     break;
   case AST_STMT_RETURN:
     fprintf(stream, ",\"expr\":");
@@ -599,7 +604,12 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* node)
         stack_push(nodes, ((ast_stmt_while_t*)node)->stmt);
         break;
       case AST_STMT_BREAK:
+        fprintf(stream, ",\"loop\":%p", ((ast_stmt_break_t*)node)->loop);
+        stack_push(nodes, ((ast_stmt_break_t*)node)->loop);
+        break;
       case AST_STMT_CONTINUE:
+        fprintf(stream, ",\"loop\":%p", ((ast_stmt_continue_t*)node)->loop);
+        stack_push(nodes, ((ast_stmt_continue_t*)node)->loop);
         break;
       case AST_STMT_RETURN:
         fprintf(stream, ",\"expr\":%p", ((ast_stmt_return_t*)node)->expr);

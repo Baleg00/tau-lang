@@ -341,40 +341,58 @@ void generator_visit_expr(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_t
 
 void generator_visit_stmt_while(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_while_t* node)
 {
-  node->llvm_cond = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "while_cond");
-  node->llvm_loop = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "while_loop");
-  node->llvm_end = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "while_end");
+  node->llvm_cond = LLVMCreateBasicBlockInContext(gen->context, "while_cond");
+  node->llvm_loop = LLVMCreateBasicBlockInContext(gen->context, "while_loop");
+  node->llvm_end = LLVMCreateBasicBlockInContext(gen->context, "while_end");
 
   LLVMBuildBr(gen->builder, node->llvm_cond);
-
+  LLVMAppendExistingBasicBlock(fun_node->llvm_value, node->llvm_cond);
   LLVMPositionBuilderAtEnd(gen->builder, node->llvm_cond);
 
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->cond);
 
   LLVMBuildCondBr(gen->builder, ((ast_expr_t*)node->cond)->llvm_value, node->llvm_loop, node->llvm_end);
-
+  LLVMAppendExistingBasicBlock(fun_node->llvm_value, node->llvm_loop);
   LLVMPositionBuilderAtEnd(gen->builder, node->llvm_loop);
 
   generator_visit_stmt(gen, fun_node, (ast_stmt_t*)node->stmt);
 
   LLVMBuildBr(gen->builder, node->llvm_cond);
-
+  LLVMAppendExistingBasicBlock(fun_node->llvm_value, node->llvm_end);
   LLVMPositionBuilderAtEnd(gen->builder, node->llvm_end);
+}
+
+void generator_visit_stmt_break(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_break_t* node)
+{
+  switch (node->loop->kind)
+  {
+  case AST_STMT_WHILE: LLVMBuildBr(gen->builder, ((ast_stmt_while_t*)node->loop)->llvm_end); break;
+  default: unreachable();
+  }
+}
+
+void generator_visit_stmt_continue(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_continue_t* node)
+{
+  switch (node->loop->kind)
+  {
+  case AST_STMT_WHILE: LLVMBuildBr(gen->builder, ((ast_stmt_while_t*)node->loop)->llvm_cond); break;
+  default: unreachable();
+  }
 }
 
 void generator_visit_stmt_if(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_if_t* node)
 {
-  node->llvm_then = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "if_then");
+  node->llvm_then = LLVMCreateBasicBlockInContext(gen->context, "if_then");
 
   if (node->stmt_else != NULL)
-    node->llvm_else = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "if_else");
+    node->llvm_else = LLVMCreateBasicBlockInContext(gen->context, "if_else");
   
-  node->llvm_end = LLVMAppendBasicBlockInContext(gen->context, fun_node->llvm_value, "if_end");
+  node->llvm_end = LLVMCreateBasicBlockInContext(gen->context, "if_end");
 
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->cond);
 
-  node->llvm_value = LLVMBuildCondBr(gen->builder, ((ast_expr_t*)node->cond)->llvm_value, node->llvm_then, node->stmt_else != NULL ? node->llvm_else : node->llvm_end);
-
+  LLVMBuildCondBr(gen->builder, ((ast_expr_t*)node->cond)->llvm_value, node->llvm_then, node->stmt_else != NULL ? node->llvm_else : node->llvm_end);
+  LLVMAppendExistingBasicBlock(fun_node->llvm_value, node->llvm_then);
   LLVMPositionBuilderAtEnd(gen->builder, node->llvm_then);
 
   generator_visit_stmt(gen, fun_node, (ast_stmt_t*)node->stmt);
@@ -384,6 +402,7 @@ void generator_visit_stmt_if(generator_t* gen, ast_decl_fun_t* fun_node, ast_stm
 
   if (node->stmt_else != NULL)
   {
+    LLVMAppendExistingBasicBlock(fun_node->llvm_value, node->llvm_else);
     LLVMPositionBuilderAtEnd(gen->builder, node->llvm_else);
 
     generator_visit_stmt(gen, fun_node, (ast_stmt_t*)node->stmt_else);
@@ -392,6 +411,7 @@ void generator_visit_stmt_if(generator_t* gen, ast_decl_fun_t* fun_node, ast_stm
       LLVMBuildBr(gen->builder, node->llvm_end);
   }
 
+  LLVMAppendExistingBasicBlock(fun_node->llvm_value, node->llvm_end);
   LLVMPositionBuilderAtEnd(gen->builder, node->llvm_end);
 }
 
@@ -416,12 +436,14 @@ void generator_visit_stmt(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_t
 {
   switch (node->kind)
   {
-  case AST_DECL_VAR:    generator_visit_decl_var   (gen, fun_node, (ast_decl_var_t*   )node); break;
-  case AST_STMT_IF:     generator_visit_stmt_if    (gen, fun_node, (ast_stmt_if_t*    )node); break;
-  case AST_STMT_WHILE:  generator_visit_stmt_while (gen, fun_node, (ast_stmt_while_t* )node); break;
-  case AST_STMT_RETURN: generator_visit_stmt_return(gen, fun_node, (ast_stmt_return_t*)node); break;
-  case AST_STMT_BLOCK:  generator_visit_stmt_block (gen, fun_node, (ast_stmt_block_t* )node); break;
-  case AST_STMT_EXPR:   generator_visit_expr       (gen, fun_node, (ast_expr_t*       )((ast_stmt_expr_t*)node)->expr); break;
+  case AST_DECL_VAR:      generator_visit_decl_var     (gen, fun_node, (ast_decl_var_t*     )node); break;
+  case AST_STMT_IF:       generator_visit_stmt_if      (gen, fun_node, (ast_stmt_if_t*      )node); break;
+  case AST_STMT_WHILE:    generator_visit_stmt_while   (gen, fun_node, (ast_stmt_while_t*   )node); break;
+  case AST_STMT_BREAK:    generator_visit_stmt_break   (gen, fun_node, (ast_stmt_break_t*   )node); break;
+  case AST_STMT_CONTINUE: generator_visit_stmt_continue(gen, fun_node, (ast_stmt_continue_t*)node); break;
+  case AST_STMT_RETURN:   generator_visit_stmt_return  (gen, fun_node, (ast_stmt_return_t*  )node); break;
+  case AST_STMT_BLOCK:    generator_visit_stmt_block   (gen, fun_node, (ast_stmt_block_t*   )node); break;
+  case AST_STMT_EXPR:     generator_visit_expr         (gen, fun_node, (ast_expr_t*         )((ast_stmt_expr_t*)node)->expr); break;
   default: unreachable();
   }
 }
