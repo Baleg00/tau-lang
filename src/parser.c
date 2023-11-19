@@ -503,6 +503,18 @@ ast_node_t* parser_parse_stmt_yield(parser_t* par)
   return (ast_node_t*)node;
 }
 
+ast_node_t* parser_parse_stmt_defer(parser_t* par)
+{
+  ast_stmt_defer_t* node = (ast_stmt_defer_t*)ast_node_init(AST_STMT_DEFER);
+  node->tok = parser_current(par);
+
+  parser_expect(par, TOK_KW_DEFER);
+  
+  node->stmt = parser_parse_stmt(par);
+  
+  return (ast_node_t*)node;
+}
+
 ast_node_t* parser_parse_stmt_block(parser_t* par)
 {
   ast_stmt_block_t* node = (ast_stmt_block_t*)ast_node_init(AST_STMT_BLOCK);
@@ -543,6 +555,7 @@ ast_node_t* parser_parse_stmt(parser_t* par)
   case TOK_KW_CONTINUE:      return parser_parse_stmt_continue(par);
   case TOK_KW_RETURN:        return parser_parse_stmt_return(par);
   case TOK_KW_YIELD:         return parser_parse_stmt_yield(par);
+  case TOK_KW_DEFER:         return parser_parse_stmt_defer(par);
   case TOK_PUNCT_BRACE_LEFT: return parser_parse_stmt_block(par);
   default: noop();
   }

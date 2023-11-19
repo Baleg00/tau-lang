@@ -355,6 +355,17 @@ ast_node_t* parser_parse_stmt_return(parser_t* par);
 ast_node_t* parser_parse_stmt_yield(parser_t* par);
 
 /**
+ * \brief Parses a defer-statement.
+ * 
+ * \details A defer-statement is introduced by the `defer` keyword and must be
+ * followed by a statement.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Defer-statement node.
+*/
+ast_node_t* parser_parse_stmt_defer(parser_t* par);
+
+/**
  * \brief Parses a block-statement.
  * 
  * \details A block-statement is a collection of statements enclosed within

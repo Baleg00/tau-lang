@@ -160,6 +160,7 @@ typedef enum ast_kind_e
   AST_STMT_CONTINUE, // Continue statement.
   AST_STMT_RETURN, // Return statement.
   AST_STMT_YIELD, // Yield statement.
+  AST_STMT_DEFER, // Defer statement.
   AST_STMT_BLOCK, // Block statement.
   AST_STMT_EXPR, // Expression statement.
 
@@ -481,6 +482,15 @@ typedef struct ast_stmt_yield_t
   AST_NODE_HEADER;
   ast_node_t* expr; // Expression.
 } ast_stmt_yield_t;
+
+/**
+ * \brief AST defer statement node.
+ */
+typedef struct ast_stmt_defer_t
+{
+  AST_NODE_HEADER;
+  ast_node_t* stmt; // Statement.
+} ast_stmt_defer_t;
 
 /**
  * \brief AST expression statement node.

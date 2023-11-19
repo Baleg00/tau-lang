@@ -16,7 +16,6 @@
 #include "location.h"
 #include "memtrace.h"
 #include "op.h"
-#include "stack.h"
 #include "symtable.h"
 #include "token.h"
 #include "typedesc.h"
@@ -27,8 +26,7 @@ struct analyzer_t
   symtable_t* symtable; // Pointer to the root symbol table.
   typetable_t* typetable; // Pointer to the type table.
   typebuilder_t* builder; // Pointer to the type builder.
-  stack_t* ret_types; // Stack of expected return types.
-  stack_t* loops; // Stack of loop statement nodes.
+  list_t* scopes; // List of nodes representing scopes.
 };
 
 analyzer_t* analyzer_init(void)
@@ -36,17 +34,101 @@ analyzer_t* analyzer_init(void)
   analyzer_t* analyzer = (analyzer_t*)malloc(sizeof(analyzer_t));
   memset(analyzer, 0, sizeof(analyzer_t));
 
-  analyzer->ret_types = stack_init();
-  analyzer->loops = stack_init();
+  analyzer->scopes = list_init();
 
   return analyzer;
 }
 
 void analyzer_free(analyzer_t* analyzer)
 {
-  stack_free(analyzer->ret_types);
-  stack_free(analyzer->loops);
+  list_free(analyzer->scopes);
   free(analyzer);
+}
+
+ast_node_t* analyzer_scope_top(analyzer_t* analyzer)
+{
+  return (ast_node_t*)list_front(analyzer->scopes);
+}
+
+void analyzer_scope_push(analyzer_t* analyzer, ast_node_t* node)
+{
+  list_push_front(analyzer->scopes, node);
+}
+
+ast_decl_fun_t* analyzer_scope_top_fun(analyzer_t* analyzer)
+{
+  LIST_FOR_LOOP(it, analyzer->scopes)
+  {
+    ast_node_t* node = (ast_node_t*)list_node_get(it);
+
+    if (node->kind == AST_DECL_FUN)
+      return (ast_decl_fun_t*)node;
+  }
+
+  unreachable();
+
+  return NULL;
+}
+
+ast_decl_gen_t* analyzer_scope_top_gen(analyzer_t* analyzer)
+{
+  LIST_FOR_LOOP(it, analyzer->scopes)
+  {
+    ast_node_t* node = (ast_node_t*)list_node_get(it);
+
+    if (node->kind == AST_DECL_GEN)
+      return (ast_decl_gen_t*)node;
+  }
+
+  unreachable();
+
+  return NULL;
+}
+
+ast_node_t* analyzer_scope_pop(analyzer_t* analyzer)
+{
+  return (ast_node_t*)list_pop_front(analyzer->scopes);
+}
+
+bool analyzer_scope_within_fun(analyzer_t* analyzer)
+{
+  LIST_FOR_LOOP(it, analyzer->scopes)
+    if (((ast_node_t*)list_node_get(it))->kind == AST_DECL_FUN)
+      return true;
+
+  return false;
+}
+
+bool analyzer_scope_within_gen(analyzer_t* analyzer)
+{
+  LIST_FOR_LOOP(it, analyzer->scopes)
+    if (((ast_node_t*)list_node_get(it))->kind == AST_DECL_GEN)
+      return true;
+
+  return false;
+}
+
+bool analyzer_scope_within_loop(analyzer_t* analyzer)
+{
+  LIST_FOR_LOOP(it, analyzer->scopes)
+    switch (((ast_node_t*)list_node_get(it))->kind)
+    {
+    case AST_STMT_WHILE:
+    case AST_STMT_FOR:   return true;
+    case AST_STMT_DEFER: return false;
+    default: noop();
+    }
+
+  return false;
+}
+
+bool analyzer_scope_within_defer(analyzer_t* analyzer)
+{
+  LIST_FOR_LOOP(it, analyzer->scopes)
+    if (((ast_node_t*)list_node_get(it))->kind == AST_STMT_DEFER)
+      return true;
+
+  return false;
 }
 
 void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* scope, ast_expr_op_un_t* node)
@@ -798,11 +880,9 @@ void analyzer_visit_stmt_for(analyzer_t* analyzer, symtable_t* scope, ast_stmt_f
   if (typedesc_underlying_type(range_desc)->kind != TYPEDESC_GEN)
     report_error_expected_generator_type(node->range->tok->loc);
 
-  stack_push(analyzer->loops, node);
-
+  analyzer_scope_push(analyzer, (ast_node_t*)node);
   analyzer_visit_stmt(analyzer, for_table, (ast_stmt_t*)node->stmt);
-
-  stack_pop(analyzer->loops);
+  analyzer_scope_pop(analyzer);
 }
 
 void analyzer_visit_stmt_while(analyzer_t* analyzer, symtable_t* scope, ast_stmt_while_t* node)
@@ -817,35 +897,39 @@ void analyzer_visit_stmt_while(analyzer_t* analyzer, symtable_t* scope, ast_stmt
   if (typedesc_underlying_type(cond_desc)->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);
 
-  stack_push(analyzer->loops, node);
-
+  analyzer_scope_push(analyzer, (ast_node_t*)node);
   analyzer_visit_stmt(analyzer, while_table, (ast_stmt_t*)node->stmt);
-
-  stack_pop(analyzer->loops);
+  analyzer_scope_pop(analyzer);
 }
 
 void analyzer_visit_stmt_break(analyzer_t* analyzer, symtable_t* scope, ast_stmt_break_t* node)
 {
   unused(scope);
 
-  if (stack_empty(analyzer->loops))
+  if (!analyzer_scope_within_loop(analyzer))
     report_error_break_outside_loop(node->tok->loc);
 
-  node->loop = (ast_node_t*)stack_peek(analyzer->loops);
+  node->loop = analyzer_scope_top(analyzer);
 }
 
 void analyzer_visit_stmt_continue(analyzer_t* analyzer, symtable_t* scope, ast_stmt_continue_t* node)
 {
   unused(scope);
 
-  if (stack_empty(analyzer->loops))
+  if (!analyzer_scope_within_loop(analyzer))
     report_error_continue_outside_loop(node->tok->loc);
 
-  node->loop = (ast_node_t*)stack_peek(analyzer->loops);
+  node->loop = analyzer_scope_top(analyzer);
 }
 
 typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* scope, ast_stmt_return_t* node)
 {
+  if (!analyzer_scope_within_fun(analyzer))
+    report_error_return_outside_function(node->tok->loc);
+
+  if (analyzer_scope_within_defer(analyzer))
+    report_error_return_inside_defer(node->tok->loc);
+
   typedesc_t* expr_desc = typebuilder_build_unit(analyzer->builder);
 
   if (node->expr != NULL)
@@ -856,7 +940,10 @@ typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* scope, 
     assert(expr_desc != NULL);
   }
 
-  typedesc_t* expected_desc = (typedesc_t*)stack_peek(analyzer->ret_types);
+  ast_decl_fun_t* fun_node = analyzer_scope_top_fun(analyzer);
+
+  typedesc_t* expected_desc = typetable_lookup(analyzer->typetable, fun_node->return_type);
+  assert(expected_desc != NULL);
 
   if (!typedesc_is_implicitly_convertible(expr_desc, expected_desc))
     report_error_incompatible_return_type(node->tok->loc);
@@ -866,17 +953,31 @@ typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* scope, 
 
 typedesc_t* analyzer_visit_stmt_yield(analyzer_t* analyzer, symtable_t* scope, ast_stmt_yield_t* node)
 {
+  if (!analyzer_scope_within_gen(analyzer))
+    report_error_yield_outside_generator(node->tok->loc);
+  
+  if (analyzer_scope_within_defer(analyzer))
+    report_error_yield_inside_defer(node->tok->loc);
+
   node->expr = analyzer_visit_expr(analyzer, scope, (ast_expr_t*)node->expr);
 
   typedesc_t* expr_desc = typetable_lookup(analyzer->typetable, node->expr);
   assert(expr_desc != NULL);
 
-  typedesc_t* expected_desc = stack_peek(analyzer->ret_types);
-  
+  ast_decl_gen_t* gen_node = analyzer_scope_top_gen(analyzer);
+
+  typedesc_t* expected_desc = typetable_lookup(analyzer->typetable, gen_node->yield_type);
+  assert(expected_desc != NULL);
+
   if (!typedesc_is_implicitly_convertible(expr_desc, expected_desc))
     report_error_incompatible_return_type(node->tok->loc);
 
   return expr_desc;
+}
+
+void analyzer_visit_stmt_defer(analyzer_t* analyzer, symtable_t* scope, ast_stmt_defer_t* node)
+{
+  analyzer_visit_stmt(analyzer, scope, (ast_stmt_t*)node->stmt);
 }
 
 void analyzer_visit_stmt_block(analyzer_t* analyzer, symtable_t* scope, ast_stmt_block_t* node)
@@ -909,6 +1010,7 @@ void analyzer_visit_stmt(analyzer_t* analyzer, symtable_t* scope, ast_stmt_t* no
   case AST_STMT_CONTINUE: analyzer_visit_stmt_continue(analyzer, scope, (ast_stmt_continue_t*)node); break;
   case AST_STMT_RETURN:   analyzer_visit_stmt_return  (analyzer, scope, (ast_stmt_return_t*  )node); break;
   case AST_STMT_YIELD:    analyzer_visit_stmt_yield   (analyzer, scope, (ast_stmt_yield_t*   )node); break;
+  case AST_STMT_DEFER:    analyzer_visit_stmt_defer   (analyzer, scope, (ast_stmt_defer_t*   )node); break;
   case AST_STMT_BLOCK:    analyzer_visit_stmt_block   (analyzer, scope, (ast_stmt_block_t*   )node); break;
   case AST_STMT_EXPR:     analyzer_visit_stmt_expr    (analyzer, scope, (ast_stmt_expr_t*    )node); break;
   default: unreachable();
@@ -1020,9 +1122,9 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* scope, ast_decl_f
 
   if (!node->is_extern)
   {
-    stack_push(analyzer->ret_types, return_desc);
+    analyzer_scope_push(analyzer, (ast_node_t*)node);
     analyzer_visit_stmt(analyzer, fun_table, (ast_stmt_t*)node->stmt);
-    stack_pop(analyzer->ret_types);
+    analyzer_scope_pop(analyzer);
   }
 }
 
@@ -1069,9 +1171,9 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* scope, ast_decl_g
   if (collision != NULL)
     report_error_symbol_redeclaration(node->tok->loc);
   
-  stack_push(analyzer->ret_types, yield_desc);
+  analyzer_scope_push(analyzer, (ast_node_t*)node);
   analyzer_visit_stmt(analyzer, gen_table, (ast_stmt_t*)node->stmt);
-  stack_pop(analyzer->ret_types);
+  analyzer_scope_pop(analyzer);
 }
 
 void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* scope, ast_decl_struct_t* node)

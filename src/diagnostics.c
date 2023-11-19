@@ -405,3 +405,31 @@ void report_error_continue_outside_loop(location_t* loc)
   debugbreak();
   exit(EXIT_FAILURE);
 }
+
+void report_error_return_outside_function(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Return statement is not within a function.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
+void report_error_yield_outside_generator(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Yield statement is not within a generator.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
+void report_error_return_inside_defer(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Return statement is within a defer.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
+void report_error_yield_inside_defer(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Yield statement is within a defer.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}

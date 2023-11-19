@@ -66,6 +66,7 @@ typedef enum token_kind_e
   TOK_KW_CONTINUE, // Keyword `continue`
   TOK_KW_RETURN, // Keyword `return`
   TOK_KW_YIELD, // Keyword `yield`
+  TOK_KW_DEFER, // Keyword `defer`
   TOK_KW_MUT, // Keyword `mut`
   TOK_KW_CONST, // Keyword `const`
   TOK_KW_TYPE, // Keyword `type`

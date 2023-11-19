@@ -65,6 +65,7 @@ ast_node_t* ast_node_init(ast_kind_t kind)
   case AST_STMT_CONTINUE:       node_size = sizeof(ast_stmt_continue_t     ); break;
   case AST_STMT_RETURN:         node_size = sizeof(ast_stmt_return_t       ); break;
   case AST_STMT_YIELD:          node_size = sizeof(ast_stmt_yield_t        ); break;
+  case AST_STMT_DEFER:          node_size = sizeof(ast_stmt_defer_t        ); break;
   case AST_STMT_BLOCK:          node_size = sizeof(ast_stmt_block_t        ); break;
   case AST_STMT_EXPR:           node_size = sizeof(ast_stmt_expr_t         ); break;
   case AST_DECL_VAR:            node_size = sizeof(ast_decl_var_t          ); break;
@@ -321,6 +322,10 @@ void ast_json_dump(FILE* stream, ast_node_t* node)
   case AST_STMT_YIELD:
     fprintf(stream, ",\"expr\":");
     ast_json_dump(stream, ((ast_stmt_yield_t*)node)->expr);
+    break;
+  case AST_STMT_DEFER:
+    fprintf(stream, ",\"stmt\":");
+    ast_json_dump(stream, ((ast_stmt_defer_t*)node)->stmt);
     break;
   case AST_STMT_BLOCK:
     fprintf(stream, ",\"stmts\":");
@@ -619,6 +624,10 @@ void ast_json_dump_flat(FILE* stream, ast_node_t* node)
         fprintf(stream, ",\"expr\":%p", ((ast_stmt_yield_t*)node)->expr);
         stack_push(nodes, ((ast_stmt_yield_t*)node)->expr);
         break;
+      case AST_STMT_DEFER:
+        fprintf(stream, ",\"stmt\":%p", ((ast_stmt_defer_t*)node)->stmt);
+        stack_push(nodes, ((ast_stmt_defer_t*)node)->stmt);
+        break;
       case AST_STMT_BLOCK:
         fprintf(stream, ",\"stmts\":");
         ast_json_dump_flat_list(stream, nodes, ((ast_stmt_block_t*)node)->stmts);
@@ -785,6 +794,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_STMT_CONTINUE:      return "AST_STMT_CONTINUE";
   case AST_STMT_RETURN:        return "AST_STMT_RETURN";
   case AST_STMT_YIELD:         return "AST_STMT_YIELD";
+  case AST_STMT_DEFER:         return "AST_STMT_DEFER";
   case AST_STMT_BLOCK:         return "AST_STMT_BLOCK";
   case AST_STMT_EXPR:          return "AST_STMT_EXPR";
   case AST_DECL_VAR:           return "AST_DECL_VAR";
@@ -889,6 +899,7 @@ bool ast_is_stmt(ast_node_t* node)
   case AST_STMT_CONTINUE:
   case AST_STMT_RETURN:
   case AST_STMT_YIELD:
+  case AST_STMT_DEFER:
   case AST_STMT_BLOCK:
   case AST_STMT_EXPR:
     return true;

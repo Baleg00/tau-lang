@@ -58,5 +58,9 @@ void report_error_expected_module(location_t* loc);
 void report_error_unknown_abi(location_t* loc);
 void report_error_break_outside_loop(location_t* loc);
 void report_error_continue_outside_loop(location_t* loc);
+void report_error_return_outside_function(location_t* loc);
+void report_error_yield_outside_generator(location_t* loc);
+void report_error_return_inside_defer(location_t* loc);
+void report_error_yield_inside_defer(location_t* loc);
 
 #endif

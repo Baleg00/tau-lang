@@ -251,6 +251,7 @@ token_t* lexer_read_word(lexer_t* lex)
     { "continue", TOK_KW_CONTINUE },
     { "return",   TOK_KW_RETURN   },
     { "yield",    TOK_KW_YIELD    },
+    { "defer",    TOK_KW_DEFER    },
     { "mut",      TOK_KW_MUT      },
     { "const",    TOK_KW_CONST    },
     { "type",     TOK_KW_TYPE     },

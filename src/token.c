@@ -92,6 +92,7 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_CONTINUE:                 return "TOK_KW_CONTINUE";
   case TOK_KW_RETURN:                   return "TOK_KW_RETURN";
   case TOK_KW_YIELD:                    return "TOK_KW_YIELD";
+  case TOK_KW_DEFER:                    return "TOK_KW_DEFER";
   case TOK_KW_MUT:                      return "TOK_KW_MUT";
   case TOK_KW_CONST:                    return "TOK_KW_CONST";
   case TOK_KW_TYPE:                     return "TOK_KW_TYPE";
@@ -221,6 +222,7 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_CONTINUE:
   case TOK_KW_RETURN:
   case TOK_KW_YIELD:
+  case TOK_KW_DEFER:
   case TOK_KW_MUT:
   case TOK_KW_CONST:
   case TOK_KW_TYPE:

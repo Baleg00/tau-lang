@@ -45,6 +45,78 @@ analyzer_t* analyzer_init(void);
 void analyzer_free(analyzer_t* analyzer);
 
 /**
+ * \brief Retrieves the top node from the scope stack.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns Pointer to the node.
+ */
+ast_node_t* analyzer_scope_top(analyzer_t* analyzer);
+
+/**
+ * \brief Retrieves the top function declaration node from the scope stack.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns Pointer to the node.
+ */
+ast_decl_fun_t* analyzer_scope_top_fun(analyzer_t* analyzer);
+
+/**
+ * \brief Retrieves the top generator declaration node from the scope stack.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns Pointer to the node.
+ */
+ast_decl_gen_t* analyzer_scope_top_gen(analyzer_t* analyzer);
+
+/**
+ * \brief Push a node onto the scope stack.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \param[in] node Pointer to the node.
+ */
+void analyzer_scope_push(analyzer_t* analyzer, ast_node_t* node);
+
+/**
+ * \brief Remove and return the top node from the scope stack.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns node Pointer to the node.
+ */
+ast_node_t* analyzer_scope_pop(analyzer_t* analyzer);
+
+/**
+ * \brief Determines if the current scope is within a function.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns `true` if the current scope is within a function, `false` otherwise.
+ */
+bool analyzer_scope_within_fun(analyzer_t* analyzer);
+
+/**
+ * \brief Determines if the current scope is within a generator.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns `true` if the current scope is within a generator, `false` otherwise.
+ */
+bool analyzer_scope_within_gen(analyzer_t* analyzer);
+
+/**
+ * \brief Determines if the current scope is within a loop.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns `true` if the current scope is within a loop, `false` otherwise.
+ */
+bool analyzer_scope_within_loop(analyzer_t* analyzer);
+
+/**
+ * \brief Determines if the current scope is within a defer statement.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns `true` if the current scope is within a defer statement, `false` otherwise.
+ */
+bool analyzer_scope_within_defer(analyzer_t* analyzer);
+
+/**
  * \brief Visits and analyzes a unary expression.
  *
  * \param[in] analyzer Pointer to the semantic analyzer.
@@ -273,6 +345,15 @@ typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* scope, 
  * \returns A pointer to the type descriptor of the yielded expression.
  */
 typedesc_t* analyzer_visit_stmt_yield(analyzer_t* analyzer, symtable_t* scope, ast_stmt_yield_t* node);
+
+/**
+ * \brief Visits and analyzes a defer statment.
+ *
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \param[in] scope Pointer to the current symbol table scope.
+ * \param[in] node Pointer to the defer statement node.
+ */
+void analyzer_visit_stmt_defer(analyzer_t* analyzer, symtable_t* scope, ast_stmt_defer_t* node);
 
 /**
  * \brief Visits and analyzes a block statment.
