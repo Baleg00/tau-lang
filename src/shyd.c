@@ -63,12 +63,12 @@ void shyd_flush_for_op(shyd_t* shyd, op_kind_t op)
   {
     shyd_elem_t* elem = (shyd_elem_t*)stack_peek(shyd->op_stack);
 
-    if (elem->kind == SHYD_PAREN_OPEN || 
-      elem->kind == SHYD_BRACKET_OPEN || 
-      op_precedence(elem->op) > op_precedence(op))
-      return;
-
-    queue_offer(shyd->out_queue, stack_pop(shyd->op_stack));
+    if (elem->kind != SHYD_PAREN_OPEN && elem->kind != SHYD_BRACKET_OPEN &&
+      (op_precedence(elem->op) < op_precedence(op) ||
+      (op_precedence(elem->op) == op_precedence(op) && op_is_left_assoc(op))))
+      queue_offer(shyd->out_queue, stack_pop(shyd->op_stack));
+    else
+      break;
   }
 }
 
@@ -326,7 +326,7 @@ void shyd_postfix(shyd_t* shyd)
 void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
   ast_expr_op_un_t* node = (ast_expr_op_un_t*)ast_node_init(AST_EXPR_OP_UNARY);
-  node->tok = parser_current(shyd->par);
+  node->tok = elem->tok;
   node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
