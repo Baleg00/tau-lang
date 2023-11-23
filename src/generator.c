@@ -341,6 +341,7 @@ void generator_visit_expr_op_binary(generator_t* gen, ast_decl_fun_t* fun_node, 
   case OP_COMP_LE:   generator_visit_expr_op_binary_comp_le  (gen, fun_node, node); break;
   case OP_COMP_GT:   generator_visit_expr_op_binary_comp_gt  (gen, fun_node, node); break;
   case OP_COMP_GE:   generator_visit_expr_op_binary_comp_ge  (gen, fun_node, node); break;
+  case OP_ASSIGN:    generator_visit_expr_op_binary_assign   (gen, fun_node, node); break;
   default: unreachable();
   }
 }
@@ -559,6 +560,19 @@ void generator_visit_expr_op_binary_comp_ge(generator_t* gen, ast_decl_fun_t* fu
 
   node->llvm_value = LLVMBuildICmp(gen->builder, LLVMIntSGE, lhs_value, rhs_value, "icmp_sge_tmp");
   node->llvm_type = LLVMTypeOf(node->llvm_value);
+}
+
+void generator_visit_expr_op_binary_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMBuildStore(gen->builder, rhs_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
 }
 
 void generator_visit_expr_op_call(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_call_t* node)

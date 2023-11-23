@@ -429,6 +429,17 @@ void generator_visit_expr_op_binary_comp_gt(generator_t* gen, ast_decl_fun_t* fu
 void generator_visit_expr_op_binary_comp_ge(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
+ * \brief Visits and generates code for a binary assignment operation expression
+ * in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary assignment
+ * operation expression.
+ */
+void generator_visit_expr_op_binary_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
  * \brief Visits and generates code for a call expression in the AST.
  *
  * \param[in] gen Pointer to the generator.

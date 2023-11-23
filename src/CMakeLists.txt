@@ -58,6 +58,8 @@ llvm_map_components_to_libnames(LLVM_LIBS
   x86asmparser
   x86desc
   x86info
+  
+  passes
 )
 
 add_executable(${TAU_EXECUTABLE_NAME} main.c)

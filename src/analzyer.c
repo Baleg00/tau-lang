@@ -301,6 +301,20 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* scope, ast_
     node_desc = typebuilder_build_bool(analyzer->builder);
     break;
   }
+  case OP_ASSIGN:
+  {
+    if (typedesc_remove_const_mut(lhs_desc)->kind != TYPEDESC_REF)
+      report_error_expected_reference_type(node->lhs->tok->loc);
+
+    if (typedesc_remove_const_mut_ref(lhs_desc)->kind != TYPEDESC_MUT)
+      report_error_expected_mutable_type(node->lhs->tok->loc);
+
+    if (typedesc_remove_mut(typedesc_remove_const_mut_ref(lhs_desc)) != typedesc_remove_mut(typedesc_remove_const_mut_ref(rhs_desc)))
+      report_error_type_mismatch(node->lhs->tok->loc, lhs_desc, rhs_desc);
+
+    node_desc = lhs_desc;
+    break;
+  }
   default:
     unreachable();
   }
