@@ -266,6 +266,7 @@ bool shyd_parse_operator(shyd_t* shyd)
   case TOK_PUNCT_QUESTION_DOT:          op = OP_NULL_SAFE_ACCESS; break;
   case TOK_PUNCT_EQUAL:                 op = OP_ASSIGN;           break;
   case TOK_PUNCT_EQUAL_EQUAL:           op = OP_COMP_EQ;          break;
+  case TOK_KW_AWAIT:                    op = OP_AWAIT;            break;
   default: return false;
   }
 
@@ -299,7 +300,8 @@ bool shyd_postfix_step(shyd_t* shyd)
 
   if (parser_current(shyd->par)->kind == TOK_ID || token_is_literal(parser_current(shyd->par)))
     return shyd_parse_term(shyd);
-  else if (token_is_punctuation(parser_current(shyd->par)))
+  else if (token_is_punctuation(parser_current(shyd->par)) ||
+           parser_current(shyd->par)->kind == TOK_KW_AWAIT)
     return shyd_parse_operator(shyd);
 
   return false;

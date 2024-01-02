@@ -62,6 +62,7 @@ const char* op_kind_to_string(op_kind_t kind)
   case OP_NULL_SAFE_ACCESS: return "OP_NULL_SAFE_ACCESS";
   case OP_RANGE:            return "OP_RANGE";
   case OP_CALL:             return "OP_CALL";
+  case OP_AWAIT:            return "OP_AWAIT";
   default: unreachable();
   }
 
@@ -92,6 +93,7 @@ int op_precedence(op_kind_t kind)
   case OP_LOGIC_NOT:
   case OP_IND:
   case OP_ADDR:
+  case OP_AWAIT:
     return 1;
   
   case OP_ARIT_MUL:
@@ -220,6 +222,7 @@ bool op_is_unary(op_kind_t kind)
   case OP_BIT_NOT:
   case OP_IND:
   case OP_ADDR:
+  case OP_AWAIT:
     return true;
   default:
     return false;
@@ -289,6 +292,7 @@ bool op_is_right_assoc(op_kind_t kind)
   case OP_BIT_RSH_ASSIGN:
   case OP_IND:
   case OP_ADDR:
+  case OP_AWAIT:
     return true;
   default:
     return false;

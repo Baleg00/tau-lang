@@ -80,6 +80,7 @@ typedef enum op_kind_e
   OP_NULL_SAFE_ACCESS, // Null-safe-access operator `?.`
   OP_RANGE, // Range operator `..`
   OP_CALL, // Call operator `()`
+  OP_AWAIT, // Await operator `await`
 } op_kind_t;
 
 /**
