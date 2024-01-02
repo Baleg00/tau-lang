@@ -45,30 +45,6 @@ analyzer_t* analyzer_init(void);
 void analyzer_free(analyzer_t* analyzer);
 
 /**
- * \brief Retrieves the top node from the scope stack.
- * 
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns Pointer to the node.
- */
-ast_node_t* analyzer_scope_top(analyzer_t* analyzer);
-
-/**
- * \brief Retrieves the top function declaration node from the scope stack.
- * 
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns Pointer to the node.
- */
-ast_decl_fun_t* analyzer_scope_top_fun(analyzer_t* analyzer);
-
-/**
- * \brief Retrieves the top generator declaration node from the scope stack.
- * 
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns Pointer to the node.
- */
-ast_decl_gen_t* analyzer_scope_top_gen(analyzer_t* analyzer);
-
-/**
  * \brief Push a node onto the scope stack.
  * 
  * \param[in] analyzer Pointer to the semantic analyzer.
@@ -80,41 +56,65 @@ void analyzer_scope_push(analyzer_t* analyzer, ast_node_t* node);
  * \brief Remove and return the top node from the scope stack.
  * 
  * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns node Pointer to the node.
+ * \returns Pointer to the node.
  */
 ast_node_t* analyzer_scope_pop(analyzer_t* analyzer);
 
 /**
- * \brief Determines if the current scope is within a function.
+ * \brief Retrieves the innermost loop node from the scope stack.
  * 
  * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns `true` if the current scope is within a function, `false` otherwise.
+ * \returns Pointer to the node or NULL if there is no matching scope.
  */
-bool analyzer_scope_within_fun(analyzer_t* analyzer);
+ast_node_t* analyzer_scope_innermost_loop(analyzer_t* analyzer);
 
 /**
- * \brief Determines if the current scope is within a generator.
+ * \brief Retrieves the innermost function node from the scope stack.
  * 
  * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns `true` if the current scope is within a generator, `false` otherwise.
+ * \returns Pointer to the node or NULL if there is no matching scope.
  */
-bool analyzer_scope_within_gen(analyzer_t* analyzer);
+ast_node_t* analyzer_scope_innermost_fun(analyzer_t* analyzer);
 
 /**
- * \brief Determines if the current scope is within a loop.
+ * \brief Retrieves the innermost generator node from the scope stack.
  * 
  * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns `true` if the current scope is within a loop, `false` otherwise.
+ * \returns Pointer to the node or NULL if there is no matching scope.
  */
-bool analyzer_scope_within_loop(analyzer_t* analyzer);
+ast_node_t* analyzer_scope_innermost_gen(analyzer_t* analyzer);
 
 /**
- * \brief Determines if the current scope is within a defer statement.
+ * \brief Retrieves the innermost defer node from the scope stack.
  * 
  * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns `true` if the current scope is within a defer statement, `false` otherwise.
+ * \returns Pointer to the node or NULL if there is no matching scope.
  */
-bool analyzer_scope_within_defer(analyzer_t* analyzer);
+ast_node_t* analyzer_scope_innermost_defer(analyzer_t* analyzer);
+
+/**
+ * \brief Determines if an early exit is possible from the current scope.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns `true` if an early exit is possible, `false` otherwise.
+ */
+bool analyzer_scope_can_early_exit_loop(analyzer_t* analyzer);
+
+/**
+ * \brief Determines if a return is possible from the current scope.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns `true` if a return is possible, `false` otherwise.
+ */
+bool analyzer_scope_can_return(analyzer_t* analyzer);
+
+/**
+ * \brief Determines if a yield is possible from the current scope.
+ * 
+ * \param[in] analyzer Pointer to the semantic analyzer.
+ * \returns `true` if a yield is possible, `false` otherwise.
+ */
+bool analyzer_scope_can_yield(analyzer_t* analyzer);
 
 /**
  * \brief Visits and analyzes a unary expression.
