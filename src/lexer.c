@@ -23,6 +23,116 @@
 
 #define LEXER_MAX_BUFFER_SIZE 256
 
+static const struct {
+  const char* const keyword;
+  const token_kind_t kind;
+} KEYWORD_LOOKUP_TABLE[] = {
+  { "is",       TOK_KW_IS       },
+  { "as",       TOK_KW_AS       },
+  { "sizeof",   TOK_KW_SIZEOF   },
+  { "alignof",  TOK_KW_ALIGNOF  },
+  { "typeof",   TOK_KW_TYPEOF   },
+  { "in",       TOK_KW_IN       },
+  { "pub",      TOK_KW_PUB      },
+  { "extern",   TOK_KW_EXTERN   },
+  { "async",    TOK_KW_ASYNC    },
+  { "await",    TOK_KW_AWAIT    },
+  { "fun",      TOK_KW_FUN      },
+  { "gen",      TOK_KW_GEN      },
+  { "struct",   TOK_KW_STRUCT   },
+  { "union",    TOK_KW_UNION    },
+  { "enum",     TOK_KW_ENUM     },
+  { "mod",      TOK_KW_MOD      },
+  { "use",      TOK_KW_USE      },
+  { "if",       TOK_KW_IF       },
+  { "then",     TOK_KW_THEN     },
+  { "else",     TOK_KW_ELSE     },
+  { "for",      TOK_KW_FOR      },
+  { "while",    TOK_KW_WHILE    },
+  { "do",       TOK_KW_DO       },
+  { "break",    TOK_KW_BREAK    },
+  { "continue", TOK_KW_CONTINUE },
+  { "return",   TOK_KW_RETURN   },
+  { "yield",    TOK_KW_YIELD    },
+  { "defer",    TOK_KW_DEFER    },
+  { "mut",      TOK_KW_MUT      },
+  { "const",    TOK_KW_CONST    },
+  { "type",     TOK_KW_TYPE     },
+  { "Self",     TOK_KW_SELF     },
+  { "i8",       TOK_KW_I8       },
+  { "i16",      TOK_KW_I16      },
+  { "i32",      TOK_KW_I32      },
+  { "i64",      TOK_KW_I64      },
+  { "isize",    TOK_KW_ISIZE    },
+  { "u8",       TOK_KW_U8       },
+  { "u16",      TOK_KW_U16      },
+  { "u32",      TOK_KW_U32      },
+  { "u64",      TOK_KW_U64      },
+  { "usize",    TOK_KW_USIZE    },
+  { "f32",      TOK_KW_F32      },
+  { "f64",      TOK_KW_F64      },
+  { "bool",     TOK_KW_BOOL     },
+  { "unit",     TOK_KW_UNIT     },
+  { "true",     TOK_LIT_BOOL    },
+  { "false",    TOK_LIT_BOOL    },
+  { "null",     TOK_LIT_NULL    },
+};
+
+static const struct {
+  const token_kind_t kind;
+  const size_t len;
+} PUNCT_LOOKUP_TABLE[] = {
+  { TOK_PUNCT_PLUS,                  1 },
+  { TOK_PUNCT_PLUS_PLUS,             2 },
+  { TOK_PUNCT_PLUS_EQUAL,            2 },
+  { TOK_PUNCT_MINUS,                 1 },
+  { TOK_PUNCT_MINUS_MINUS,           2 },
+  { TOK_PUNCT_MINUS_EQUAL,           2 },
+  { TOK_PUNCT_ASTERISK,              1 },
+  { TOK_PUNCT_ASTERISK_EQUAL,        2 },
+  { TOK_PUNCT_ASTERISK_DOT,          2 },
+  { TOK_PUNCT_SLASH,                 1 },
+  { TOK_PUNCT_SLASH_EQUAL,           2 },
+  { TOK_PUNCT_PERCENT,               1 },
+  { TOK_PUNCT_PERCENT_EQUAL,         2 },
+  { TOK_PUNCT_AMPERSAND,             1 },
+  { TOK_PUNCT_AMPERSAND_AMPERSAND,   2 },
+  { TOK_PUNCT_AMPERSAND_EQUAL,       2 },
+  { TOK_PUNCT_BAR,                   1 },
+  { TOK_PUNCT_BAR_BAR,               2 },
+  { TOK_PUNCT_BAR_EQUAL,             2 },
+  { TOK_PUNCT_HAT,                   1 },
+  { TOK_PUNCT_HAT_EQUAL,             2 },
+  { TOK_PUNCT_TILDE,                 1 },
+  { TOK_PUNCT_LESS,                  1 },
+  { TOK_PUNCT_LESS_LESS,             2 },
+  { TOK_PUNCT_LESS_LESS_EQUAL,       3 },
+  { TOK_PUNCT_LESS_EQUAL,            2 },
+  { TOK_PUNCT_GREATER,               1 },
+  { TOK_PUNCT_GREATER_GREATER,       2 },
+  { TOK_PUNCT_GREATER_GREATER_EQUAL, 3 },
+  { TOK_PUNCT_GREATER_EQUAL,         2 },
+  { TOK_PUNCT_BANG,                  1 },
+  { TOK_PUNCT_BANG_EQUAL,            2 },
+  { TOK_PUNCT_DOT,                   1 },
+  { TOK_PUNCT_DOT_DOT,               2 },
+  { TOK_PUNCT_DOT_DOT_DOT,           3 },
+  { TOK_PUNCT_QUESTION,              1 },
+  { TOK_PUNCT_QUESTION_DOT,          2 },
+  { TOK_PUNCT_EQUAL,                 1 },
+  { TOK_PUNCT_EQUAL_EQUAL,           2 },
+  { TOK_PUNCT_COMMA,                 1 },
+  { TOK_PUNCT_COLON,                 1 },
+  { TOK_PUNCT_SEMICOLON,             1 },
+  { TOK_PUNCT_PAREN_LEFT,            1 },
+  { TOK_PUNCT_PAREN_RIGHT,           1 },
+  { TOK_PUNCT_BRACKET_LEFT,          1 },
+  { TOK_PUNCT_BRACKET_RIGHT,         1 },
+  { TOK_PUNCT_BRACE_LEFT,            1 },
+  { TOK_PUNCT_BRACE_RIGHT,           1 },
+  { TOK_PUNCT_HASH,                  1 },
+};
+
 struct lexer_t
 {
   location_t* loc; // Current location in source file.
@@ -223,58 +333,6 @@ void lexer_skip_comment_block(lexer_t* lex)
 
 token_t* lexer_read_word(lexer_t* lex)
 {
-  static const struct {
-    const char* const keyword;
-    const token_kind_t kind;
-  } lookup[] = {
-    { "is",       TOK_KW_IS       },
-    { "as",       TOK_KW_AS       },
-    { "sizeof",   TOK_KW_SIZEOF   },
-    { "alignof",  TOK_KW_ALIGNOF  },
-    { "typeof",   TOK_KW_TYPEOF   },
-    { "in",       TOK_KW_IN       },
-    { "extern",   TOK_KW_EXTERN   },
-    { "fun",      TOK_KW_FUN      },
-    { "gen",      TOK_KW_GEN      },
-    { "struct",   TOK_KW_STRUCT   },
-    { "union",    TOK_KW_UNION    },
-    { "enum",     TOK_KW_ENUM     },
-    { "mod",      TOK_KW_MOD      },
-    { "use",      TOK_KW_USE      },
-    { "if",       TOK_KW_IF       },
-    { "then",     TOK_KW_THEN     },
-    { "else",     TOK_KW_ELSE     },
-    { "for",      TOK_KW_FOR      },
-    { "while",    TOK_KW_WHILE    },
-    { "do",       TOK_KW_DO       },
-    { "break",    TOK_KW_BREAK    },
-    { "continue", TOK_KW_CONTINUE },
-    { "return",   TOK_KW_RETURN   },
-    { "yield",    TOK_KW_YIELD    },
-    { "defer",    TOK_KW_DEFER    },
-    { "mut",      TOK_KW_MUT      },
-    { "const",    TOK_KW_CONST    },
-    { "type",     TOK_KW_TYPE     },
-    { "Self",     TOK_KW_SELF     },
-    { "i8",       TOK_KW_I8       },
-    { "i16",      TOK_KW_I16      },
-    { "i32",      TOK_KW_I32      },
-    { "i64",      TOK_KW_I64      },
-    { "isize",    TOK_KW_ISIZE    },
-    { "u8",       TOK_KW_U8       },
-    { "u16",      TOK_KW_U16      },
-    { "u32",      TOK_KW_U32      },
-    { "u64",      TOK_KW_U64      },
-    { "usize",    TOK_KW_USIZE    },
-    { "f32",      TOK_KW_F32      },
-    { "f64",      TOK_KW_F64      },
-    { "bool",     TOK_KW_BOOL     },
-    { "unit",     TOK_KW_UNIT     },
-    { "true",     TOK_LIT_BOOL    },
-    { "false",    TOK_LIT_BOOL    },
-    { "null",     TOK_LIT_NULL    },
-  };
-
   token_t* tok = lexer_token_init(lex, TOK_ID);
 
   size_t len = lexer_skip(lex, lexer_is_word);
@@ -289,10 +347,10 @@ token_t* lexer_read_word(lexer_t* lex)
   strncpy(buf, begin, len);
   buf[len] = '\0';
 
-  for (size_t i = 0; i < countof(lookup); ++i)
-    if (strcmp(lookup[i].keyword, buf) == 0)
+  for (size_t i = 0; i < countof(KEYWORD_LOOKUP_TABLE); ++i)
+    if (strcmp(KEYWORD_LOOKUP_TABLE[i].keyword, buf) == 0)
     {
-      tok->kind = lookup[i].kind;
+      tok->kind = KEYWORD_LOOKUP_TABLE[i].kind;
       break;
     }
 
@@ -558,61 +616,6 @@ token_t* lexer_read_character(lexer_t* lex)
 
 token_t* lexer_read_punctuation(lexer_t* lex)
 {
-  static const struct {
-    const token_kind_t kind;
-    const size_t len;
-  } lookup[] = {
-    { TOK_PUNCT_PLUS,                  1 },
-    { TOK_PUNCT_PLUS_PLUS,             2 },
-    { TOK_PUNCT_PLUS_EQUAL,            2 },
-    { TOK_PUNCT_MINUS,                 1 },
-    { TOK_PUNCT_MINUS_MINUS,           2 },
-    { TOK_PUNCT_MINUS_EQUAL,           2 },
-    { TOK_PUNCT_ASTERISK,              1 },
-    { TOK_PUNCT_ASTERISK_EQUAL,        2 },
-    { TOK_PUNCT_ASTERISK_DOT,          2 },
-    { TOK_PUNCT_SLASH,                 1 },
-    { TOK_PUNCT_SLASH_EQUAL,           2 },
-    { TOK_PUNCT_PERCENT,               1 },
-    { TOK_PUNCT_PERCENT_EQUAL,         2 },
-    { TOK_PUNCT_AMPERSAND,             1 },
-    { TOK_PUNCT_AMPERSAND_AMPERSAND,   2 },
-    { TOK_PUNCT_AMPERSAND_EQUAL,       2 },
-    { TOK_PUNCT_BAR,                   1 },
-    { TOK_PUNCT_BAR_BAR,               2 },
-    { TOK_PUNCT_BAR_EQUAL,             2 },
-    { TOK_PUNCT_HAT,                   1 },
-    { TOK_PUNCT_HAT_EQUAL,             2 },
-    { TOK_PUNCT_TILDE,                 1 },
-    { TOK_PUNCT_LESS,                  1 },
-    { TOK_PUNCT_LESS_LESS,             2 },
-    { TOK_PUNCT_LESS_LESS_EQUAL,       3 },
-    { TOK_PUNCT_LESS_EQUAL,            2 },
-    { TOK_PUNCT_GREATER,               1 },
-    { TOK_PUNCT_GREATER_GREATER,       2 },
-    { TOK_PUNCT_GREATER_GREATER_EQUAL, 3 },
-    { TOK_PUNCT_GREATER_EQUAL,         2 },
-    { TOK_PUNCT_BANG,                  1 },
-    { TOK_PUNCT_BANG_EQUAL,            2 },
-    { TOK_PUNCT_DOT,                   1 },
-    { TOK_PUNCT_DOT_DOT,               2 },
-    { TOK_PUNCT_DOT_DOT_DOT,           3 },
-    { TOK_PUNCT_QUESTION,              1 },
-    { TOK_PUNCT_QUESTION_DOT,          2 },
-    { TOK_PUNCT_EQUAL,                 1 },
-    { TOK_PUNCT_EQUAL_EQUAL,           2 },
-    { TOK_PUNCT_COMMA,                 1 },
-    { TOK_PUNCT_COLON,                 1 },
-    { TOK_PUNCT_SEMICOLON,             1 },
-    { TOK_PUNCT_PAREN_LEFT,            1 },
-    { TOK_PUNCT_PAREN_RIGHT,           1 },
-    { TOK_PUNCT_BRACKET_LEFT,          1 },
-    { TOK_PUNCT_BRACKET_RIGHT,         1 },
-    { TOK_PUNCT_BRACE_LEFT,            1 },
-    { TOK_PUNCT_BRACE_RIGHT,           1 },
-    { TOK_PUNCT_HASH,                  1 },
-  };
-  
   token_kind_t kind = TOK_UNKNOWN;
 
   if (lexer_consume(lex, '+'))
@@ -746,10 +749,10 @@ token_t* lexer_read_punctuation(lexer_t* lex)
   token_t* tok = lexer_token_init(lex, kind);
   tok->loc->len = 0;
 
-  for (size_t i = 0; i < countof(lookup); ++i)
-    if (lookup[i].kind == kind)
+  for (size_t i = 0; i < countof(PUNCT_LOOKUP_TABLE); ++i)
+    if (PUNCT_LOOKUP_TABLE[i].kind == kind)
     {
-      tok->loc->len = lookup[i].len;
+      tok->loc->len = PUNCT_LOOKUP_TABLE[i].len;
       break;
     }
 

@@ -48,7 +48,10 @@ typedef enum token_kind_e
   TOK_KW_ALIGNOF, // Keyword `alignof`
   TOK_KW_TYPEOF, // Keyword `typeof`
   TOK_KW_IN, // Keyword `in`
+  TOK_KW_PUB, // Keyword `pub`
   TOK_KW_EXTERN, // Keyword `extern`
+  TOK_KW_ASYNC, // Keyword `async`
+  TOK_KW_AWAIT, // Keyword `await`
   TOK_KW_FUN, // Keyword `fun`
   TOK_KW_GEN, // Keyword `gen`
   TOK_KW_STRUCT, // Keyword `struct`

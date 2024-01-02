@@ -74,7 +74,10 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_ALIGNOF:                  return "TOK_KW_ALIGNOF";
   case TOK_KW_TYPEOF:                   return "TOK_KW_TYPEOF";
   case TOK_KW_IN:                       return "TOK_KW_IN";
+  case TOK_KW_PUB:                      return "TOK_KW_PUB";
   case TOK_KW_EXTERN:                   return "TOK_KW_EXTERN";
+  case TOK_KW_ASYNC:                    return "TOK_KW_ASYNC";
+  case TOK_KW_AWAIT:                    return "TOK_KW_AWAIT";
   case TOK_KW_FUN:                      return "TOK_KW_FUN";
   case TOK_KW_GEN:                      return "TOK_KW_GEN";
   case TOK_KW_STRUCT:                   return "TOK_KW_STRUCT";
@@ -204,7 +207,10 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_ALIGNOF:
   case TOK_KW_TYPEOF:
   case TOK_KW_IN:
+  case TOK_KW_PUB:
   case TOK_KW_EXTERN:
+  case TOK_KW_ASYNC:
+  case TOK_KW_AWAIT:
   case TOK_KW_FUN:
   case TOK_KW_GEN:
   case TOK_KW_STRUCT:
