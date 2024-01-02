@@ -39,7 +39,7 @@ typedef ast_node_t*(*parse_func_t)(parser_t*);
  * \brief Initializes a new parser.
  * 
  * \returns Pointer to the newly initialized parser.
-*/
+ */
 parser_t* parser_init(void);
 
 /**
@@ -48,7 +48,7 @@ parser_t* parser_init(void);
  * \details It is the caller's responsibility to properly free the AST.
  * 
  * \param[in] par Parser to be destroyed.
-*/
+ */
 void parser_free(parser_t* par);
 
 /**
@@ -56,7 +56,7 @@ void parser_free(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Current token.
-*/
+ */
 token_t* parser_current(parser_t* par);
 
 /**
@@ -67,7 +67,7 @@ token_t* parser_current(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Next token or an EOF token if there is no next token.
-*/
+ */
 token_t* parser_next(parser_t* par);
 
 /**
@@ -75,7 +75,7 @@ token_t* parser_next(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Next token or an EOF token if there is no next token.
-*/
+ */
 token_t* parser_peek(parser_t* par);
 
 /**
@@ -85,7 +85,7 @@ token_t* parser_peek(parser_t* par);
  * \param[in] par Parser to be used.
  * \param[in] kind Expected token kind.
  * \returns True if token kinds match, false otherwise.
-*/
+ */
 bool parser_consume(parser_t* par, token_kind_t kind);
 
 /**
@@ -95,17 +95,52 @@ bool parser_consume(parser_t* par, token_kind_t kind);
  * \param[in] par Parser to be used.
  * \param[in] kind Expected token kind.
  * \returns Current token.
-*/
+ */
 token_t* parser_expect(parser_t* par, token_kind_t kind);
 
 /**
  * \brief Toggles whether the parser should ignore newlines when fetching tokens
  * or not.
  * 
- * \param par Parser to be used.
- * \param ignore `true` if newlines should be ignored, `false` otherwise.
+ * \param[in] par Parser to be used.
+ * \param[in] ignore `true` if newlines should be ignored, `false` otherwise.
  */
 void parser_set_ignore_newline(parser_t* par, bool ignore);
+
+/**
+ * \brief Clears the parser's declaration context.
+ * 
+ * \param[in] par Parser to be used.
+ */
+void parser_decl_context_clear(parser_t* par);
+
+/**
+ * \brief Parses an attribute list and updates the declaration context.
+ * 
+ * \param[in] par Parser to be used.
+ */
+void parser_parse_decl_context_attrs(parser_t* par);
+
+/**
+ * \brief Parses a public modifier and updates the declaration context.
+ * 
+ * \param[in] par Parser to be used.
+ */
+void parser_parse_decl_context_pub(parser_t* par);
+
+/**
+ * \brief Parses an external modifier and updates the declaration context.
+ * 
+ * \param[in] par Parser to be used.
+ */
+void parser_parse_decl_context_extern(parser_t* par);
+
+/**
+ * \brief Parses an async modifier and updates the declaration context.
+ * 
+ * \param[in] par Parser to be used.
+ */
+void parser_parse_decl_context_async(parser_t* par);
 
 /**
  * \brief Parses a list of nodes delimited by a specific token.
@@ -117,7 +152,7 @@ void parser_set_ignore_newline(parser_t* par, bool ignore);
  * \param[in] delim Delimiter token kind.
  * \param[in] parse_func Function to be used for parsing a node.
  * \returns List of parsed nodes.
-*/
+ */
 list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func);
 
 /**
@@ -130,15 +165,23 @@ list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_fun
  * \param[in] termin Terminator token kind.
  * \param[in] parse_func Function to be used for parsing a node.
  * \returns List of parsed nodes.
-*/
+ */
 list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func);
+
+/**
+ * \brief Parses an ABI string literal and returns the corresponding ABI kind.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns The ABI kind.
+ */
+abi_kind_t parser_parse_abi(parser_t* par);
 
 /**
  * \brief Parses an identifier token.
  * 
  * \param[in] par Parser to be used.
  * \returns Identifier node.
-*/
+ */
 ast_node_t* parser_parse_id(parser_t* par);
 
 /**
@@ -146,7 +189,7 @@ ast_node_t* parser_parse_id(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Attribute node.
-*/
+ */
 ast_node_t* parser_parse_attr(parser_t* par);
 
 /**
@@ -156,7 +199,7 @@ ast_node_t* parser_parse_attr(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Mutable type node.
-*/
+ */
 ast_node_t* parser_parse_type_mut(parser_t* par);
 
 /**
@@ -166,7 +209,7 @@ ast_node_t* parser_parse_type_mut(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Compile-time type node.
-*/
+ */
 ast_node_t* parser_parse_type_const(parser_t* par);
 
 /**
@@ -176,7 +219,7 @@ ast_node_t* parser_parse_type_const(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Pointer type node.
-*/
+ */
 ast_node_t* parser_parse_type_ptr(parser_t* par);
 
 /**
@@ -188,7 +231,7 @@ ast_node_t* parser_parse_type_ptr(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Array type node.
-*/
+ */
 ast_node_t* parser_parse_type_array(parser_t* par);
 
 /**
@@ -198,7 +241,7 @@ ast_node_t* parser_parse_type_array(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Reference type node.
-*/
+ */
 ast_node_t* parser_parse_type_ref(parser_t* par);
 
 /**
@@ -208,8 +251,8 @@ ast_node_t* parser_parse_type_ref(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Optional type node.
-*/
-ast_node_t* parser_parse_type_optional(parser_t* par);
+ */
+ast_node_t* parser_parse_type_opt(parser_t* par);
 
 /**
  * \brief Parses a function type.
@@ -221,7 +264,7 @@ ast_node_t* parser_parse_type_optional(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Function type node.
-*/
+ */
 ast_node_t* parser_parse_type_fun(parser_t* par);
 
 /**
@@ -234,7 +277,7 @@ ast_node_t* parser_parse_type_fun(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Generator type node.
-*/
+ */
 ast_node_t* parser_parse_type_gen(parser_t* par);
 
 /**
@@ -245,7 +288,7 @@ ast_node_t* parser_parse_type_gen(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Member type node.
-*/
+ */
 ast_node_t* parser_parse_type_member(parser_t* par);
 
 /**
@@ -253,7 +296,7 @@ ast_node_t* parser_parse_type_member(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Type node.
-*/
+ */
 ast_node_t* parser_parse_type(parser_t* par);
 
 /**
@@ -261,7 +304,7 @@ ast_node_t* parser_parse_type(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Expression node.
-*/
+ */
 ast_node_t* parser_parse_expr(parser_t* par);
 
 /**
@@ -275,7 +318,7 @@ ast_node_t* parser_parse_expr(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns If-statement node.
-*/
+ */
 ast_node_t* parser_parse_stmt_if(parser_t* par);
 
 /**
@@ -289,8 +332,16 @@ ast_node_t* parser_parse_stmt_if(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns For-loop node.
-*/
+ */
 ast_node_t* parser_parse_stmt_for(parser_t* par);
+
+/**
+ * \brief Parses the loop variable of a for-loop.
+ * 
+ * \param[in] par Parser to be used.
+ * \return Loop variable node.
+ */
+ast_node_t* parser_parse_stmt_for_var(parser_t* par);
 
 /**
  * \brief Parses a while-loop.
@@ -302,7 +353,7 @@ ast_node_t* parser_parse_stmt_for(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns While-loop node.
-*/
+ */
 ast_node_t* parser_parse_stmt_while(parser_t* par);
 
 /**
@@ -313,7 +364,7 @@ ast_node_t* parser_parse_stmt_while(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Break-statement node.
-*/
+ */
 ast_node_t* parser_parse_stmt_break(parser_t* par);
 
 /**
@@ -325,7 +376,7 @@ ast_node_t* parser_parse_stmt_break(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Continue-statement node.
-*/
+ */
 ast_node_t* parser_parse_stmt_continue(parser_t* par);
 
 /**
@@ -338,7 +389,7 @@ ast_node_t* parser_parse_stmt_continue(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Return-statement node.
-*/
+ */
 ast_node_t* parser_parse_stmt_return(parser_t* par);
 
 /**
@@ -351,7 +402,7 @@ ast_node_t* parser_parse_stmt_return(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Yield-statement node.
-*/
+ */
 ast_node_t* parser_parse_stmt_yield(parser_t* par);
 
 /**
@@ -362,7 +413,7 @@ ast_node_t* parser_parse_stmt_yield(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Defer-statement node.
-*/
+ */
 ast_node_t* parser_parse_stmt_defer(parser_t* par);
 
 /**
@@ -374,7 +425,7 @@ ast_node_t* parser_parse_stmt_defer(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Block-statement node.
-*/
+ */
 ast_node_t* parser_parse_stmt_block(parser_t* par);
 
 /**
@@ -382,7 +433,7 @@ ast_node_t* parser_parse_stmt_block(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Expression-statement node.
-*/
+ */
 ast_node_t* parser_parse_stmt_expr(parser_t* par);
 
 /**
@@ -390,7 +441,7 @@ ast_node_t* parser_parse_stmt_expr(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Statement node.
-*/
+ */
 ast_node_t* parser_parse_stmt(parser_t* par);
 
 /**
@@ -402,7 +453,7 @@ ast_node_t* parser_parse_stmt(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Variable declaration node.
-*/
+ */
 ast_node_t* parser_parse_decl_var(parser_t* par);
 
 /**
@@ -413,11 +464,9 @@ ast_node_t* parser_parse_decl_var(parser_t* par);
  * enclosed within braces (`{}`) if it consists of multiple statements.
  * 
  * \param[in] par Parser to be used.
- * \param[in] is_extern `true` if the function is external, `false` otherwise.
- * \param[in] abi The function ABI.
  * \returns Function declaration node.
-*/
-ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern, abi_kind_t abi);
+ */
+ast_node_t* parser_parse_decl_fun(parser_t* par);
 
 /**
  * \brief Parses a generator declaration.
@@ -428,7 +477,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par, bool is_extern, abi_kind_t abi)
  * 
  * \param[in] par Parser to be used.
  * \returns Generator declaration node.
-*/
+ */
 ast_node_t* parser_parse_decl_gen(parser_t* par);
 
 /**
@@ -440,8 +489,16 @@ ast_node_t* parser_parse_decl_gen(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Struct declaration node.
-*/
+ */
 ast_node_t* parser_parse_decl_struct(parser_t* par);
+
+/**
+ * \brief Parses a struct member declaration.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Struct member declaration node.
+ */
+ast_node_t* parser_parse_decl_struct_member(parser_t* par);
 
 /**
  * \brief Parses a union declaration.
@@ -452,8 +509,16 @@ ast_node_t* parser_parse_decl_struct(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Union declaration node.
-*/
+ */
 ast_node_t* parser_parse_decl_union(parser_t* par);
+
+/**
+ * \brief Parses a union member declaration.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Union member declaration node.
+ */
+ast_node_t* parser_parse_decl_union_member(parser_t* par);
 
 /**
  * \brief Parses an enum declaration.
@@ -464,7 +529,7 @@ ast_node_t* parser_parse_decl_union(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Enum declaration node.
-*/
+ */
 ast_node_t* parser_parse_decl_enum(parser_t* par);
 
 /**
@@ -476,56 +541,47 @@ ast_node_t* parser_parse_decl_enum(parser_t* par);
  * 
  * \param[in] par Parser to be used.
  * \returns Module declaration node.
-*/
+ */
 ast_node_t* parser_parse_decl_mod(parser_t* par);
-
-/**
- * \brief Parses a declaration with attributes.
- * 
- * \param[in] par Parser to be used.
- * \returns Declaration node.
-*/
-ast_node_t* parser_parse_decl_with_attrs(parser_t* par);
-
-/**
- * \brief Parses an external declaration.
- * 
- * \param[in] par Parser to be used.
- * \returns Declaration node.
-*/
-ast_node_t* parser_parse_decl_extern(parser_t* par);
 
 /**
  * \brief Parses a declaration.
  * 
  * \param[in] par Parser to be used.
  * \returns Declaration node.
-*/
+ */
 ast_node_t* parser_parse_decl(parser_t* par);
 
+/**
+ * \brief Parses a declaration inside a module.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Declaration node.
+ */
+ast_node_t* parser_parse_decl_in_mod(parser_t* par);
+
+/**
+ * \brief Parses a top level declaration.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Declaration node.
+ */
+ast_node_t* parser_parse_decl_top_level(parser_t* par);
 
 /**
  * \brief Parses a simple function parameter.
  * 
  * \param[in] par Parser to be used.
  * \returns Parameter node.
-*/
+ */
 ast_node_t* parser_parse_decl_param(parser_t* par);
-
-/**
- * \brief Parses a variadic function parameter.
- * 
- * \param[in] par Parser to be used.
- * \returns Variadic parameter node.
-*/
-ast_node_t* parser_parse_decl_param_variadic(parser_t* par);
 
 /**
  * \brief Parses an enumerator in an enum declaration.
  * 
  * \param[in] par Parser to be used.
  * \returns Enumerator node.
-*/
+ */
 ast_node_t* parser_parse_decl_enum_constant(parser_t* par);
 
 /**
@@ -534,7 +590,7 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par);
  * \param[in] par Parser to be used.
  * \param[in] toks List of tokens to be parsed.
  * \returns Pointer to the root node.
-*/
+ */
 ast_node_t* parser_parse(parser_t* par, list_t* toks);
 
 #endif

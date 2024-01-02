@@ -141,6 +141,7 @@ typedef enum ast_kind_e
   AST_TYPE_BOOL, // Built-in type `bool`.
   AST_TYPE_UNIT, // Built-in type `unit`.
   AST_TYPE_MEMBER, // Member type.
+  AST_TYPE_DECL, // Declaration type.
 
   AST_EXPR_LIT_INT, // Literal integer expression.
   AST_EXPR_LIT_FLT, // Literal float expression.
@@ -301,6 +302,7 @@ typedef struct ast_type_fun_t
   list_t* params; // List of parameter types.
   ast_node_t* return_type; // Return type.
   bool is_vararg; // Is variadic.
+  bool is_async; // Is asynchronous.
   abi_kind_t abi; // The function ABI.
 } ast_type_fun_t;
 
@@ -325,6 +327,16 @@ typedef struct ast_type_member_t
   ast_node_t* owner; // Owner type.
   ast_node_t* member; // Member type.
 } ast_type_member_t;
+
+/**
+ * \brief AST declaration type node.
+ */
+typedef struct ast_type_decl_t
+{
+  AST_NODE_HEADER;
+  AST_TYPE_HEADER;
+  ast_node_t* decl; // Declaration.
+} ast_type_decl_t;
 
 /**
  * \brief AST expression node.
@@ -528,6 +540,9 @@ typedef struct ast_decl_var_t
   AST_DECL_HEADER;
   AST_TYPED_HEADER;
   ast_node_t* expr; // Initializer expression.
+  bool is_pub; // Is public.
+  bool is_extern; // Is external.
+  abi_kind_t abi; // Application Binary Interface.
 
   LLVMTypeRef llvm_type;
   LLVMValueRef llvm_value;
@@ -543,9 +558,11 @@ typedef struct ast_decl_fun_t
   list_t* params; // List of parameter declarations.
   ast_node_t* return_type; // Return type.
   ast_node_t* stmt; // Body statement.
-  bool is_extern; // Is external.
+  bool is_pub; // Is public.
   bool is_vararg; // Is variadic.
-  abi_kind_t abi; // The function ABI.
+  bool is_async; // Is asynchronous.
+  bool is_extern; // Is external.
+  abi_kind_t abi; // Application Binary Interface.
 
   LLVMTypeRef llvm_type;
   LLVMValueRef llvm_value;
@@ -564,6 +581,7 @@ typedef struct ast_decl_gen_t
   list_t* params; // List of parameter declarations.
   ast_node_t* yield_type; // Yield type.
   ast_node_t* stmt; // Body statement.
+  bool is_pub; // Is public.
 } ast_decl_gen_t;
 
 /**
@@ -574,6 +592,9 @@ typedef struct ast_decl_struct_t
   AST_NODE_HEADER;
   AST_DECL_HEADER;
   AST_COMPOSITE_HEADER;
+  bool is_pub; // Is public.
+
+  LLVMTypeRef llvm_type;
 } ast_decl_struct_t;
 
 /**
@@ -584,6 +605,9 @@ typedef struct ast_decl_union_t
   AST_NODE_HEADER;
   AST_DECL_HEADER;
   AST_COMPOSITE_HEADER;
+  bool is_pub; // Is public.
+
+  LLVMTypeRef llvm_type;
 } ast_decl_union_t;
 
 /**
@@ -594,6 +618,7 @@ typedef struct ast_decl_enum_t
   AST_NODE_HEADER;
   AST_DECL_HEADER;
   AST_COMPOSITE_HEADER;
+  bool is_pub; // Is public.
 } ast_decl_enum_t;
 
 /**
@@ -604,6 +629,7 @@ typedef struct ast_decl_mod_t
   AST_NODE_HEADER;
   AST_DECL_HEADER;
   list_t* decls; // List of declarations.
+  bool is_pub; // Is public.
 } ast_decl_mod_t;
 
 /**
