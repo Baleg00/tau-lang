@@ -182,13 +182,13 @@ void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* scope, ast_e
   case OP_ARIT_INC_PRE:
   case OP_ARIT_DEC_PRE:
   {
-    if (typedesc_remove_const_mut(expr_desc)->kind != TYPEDESC_REF)
+    if (typedesc_remove_const(expr_desc)->kind != TYPEDESC_REF)
       report_error_expected_reference_type(node->expr->tok->loc);
 
-    if (typedesc_remove_const_mut_ref(expr_desc)->kind != TYPEDESC_MUT)
+    if (typedesc_remove_const_ref(expr_desc)->kind != TYPEDESC_MUT)
       report_error_expected_mutable_type(node->expr->tok->loc);
 
-    if (!typedesc_is_arithmetic(typedesc_underlying_type(expr_desc)))
+    if (!typedesc_is_arithmetic(typedesc_remove_const_ref_mut(expr_desc)))
       report_error_expected_arithmetic_type(node->expr->tok->loc);
 
     node_desc = typedesc_remove_const(expr_desc);
@@ -197,53 +197,52 @@ void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* scope, ast_e
   case OP_ARIT_INC_POST:
   case OP_ARIT_DEC_POST:
   {
-    if (typedesc_remove_const_mut(expr_desc)->kind != TYPEDESC_REF)
+    if (typedesc_remove_const(expr_desc)->kind != TYPEDESC_REF)
       report_error_expected_reference_type(node->expr->tok->loc);
 
-    if (typedesc_remove_const_mut_ref(expr_desc)->kind != TYPEDESC_MUT)
+    if (typedesc_remove_const_ref(expr_desc)->kind != TYPEDESC_MUT)
       report_error_expected_mutable_type(node->expr->tok->loc);
 
-    if (!typedesc_is_arithmetic(typedesc_underlying_type(expr_desc)))
+    if (!typedesc_is_arithmetic(typedesc_remove_const_ref_mut(expr_desc)))
       report_error_expected_arithmetic_type(node->expr->tok->loc);
 
-    node_desc = typedesc_underlying_type(expr_desc);
+    node_desc = typedesc_remove_const_ref_mut(expr_desc);
     break;
   }
   case OP_ARIT_POS:
   case OP_ARIT_NEG:
   case OP_BIT_NOT:
   {
-    if (!typedesc_is_arithmetic(typedesc_underlying_type(expr_desc)))
+    if (!typedesc_is_arithmetic(typedesc_remove_const_ref_mut(expr_desc)))
       report_error_expected_arithmetic_type(node->expr->tok->loc);
 
-    node_desc = typedesc_underlying_type(expr_desc);
+    node_desc = typedesc_remove_const_ref_mut(expr_desc);
     break;
   }
   case OP_LOGIC_NOT:
   {
-    if (typedesc_underlying_type(expr_desc)->kind != TYPEDESC_BOOL)
+    if (typedesc_remove_const_ref_mut(expr_desc)->kind != TYPEDESC_BOOL)
       report_error_expected_bool_type(node->expr->tok->loc);
 
-    node_desc = typedesc_underlying_type(expr_desc);
+    node_desc = typedesc_remove_const_ref_mut(expr_desc);
     break;
   }
   case OP_IND:
   {
-    if (typedesc_underlying_type(expr_desc)->kind != TYPEDESC_PTR)
+    if (typedesc_remove_const_ref_mut(expr_desc)->kind != TYPEDESC_PTR)
       report_error_expected_ptr_type(node->expr->tok->loc);
     
-    typedesc_t* pointed_desc = ((typedesc_ptr_t*)typedesc_underlying_type(expr_desc))->base_type;
+    typedesc_t* pointed_desc = ((typedesc_ptr_t*)typedesc_remove_const_ref_mut(expr_desc))->base_type;
 
     node_desc = typebuilder_build_ref(analyzer->builder, pointed_desc);
     break;
   }
   case OP_ADDR:
   {
-    if (node->expr->kind != AST_EXPR_DECL &&
-        typedesc_remove_const_mut(expr_desc)->kind != TYPEDESC_REF)
+    if (typedesc_remove_const(expr_desc)->kind != TYPEDESC_REF)
       report_error_expected_reference_type(node->expr->tok->loc);
 
-    node_desc = typebuilder_build_ptr(analyzer->builder, typedesc_remove_const_mut_ref(expr_desc));
+    node_desc = typebuilder_build_ptr(analyzer->builder, typedesc_remove_const_ref(expr_desc));
     break;
   }
   default:
@@ -280,37 +279,37 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* scope, ast_
   case OP_BIT_OR:
   case OP_BIT_XOR:
   {
-    if (!typedesc_is_arithmetic(typedesc_underlying_type(lhs_desc)))
+    if (!typedesc_is_arithmetic(typedesc_remove_const_ref_mut(lhs_desc)))
       report_error_expected_arithmetic_type(node->lhs->tok->loc);
 
-    if (!typedesc_is_arithmetic(typedesc_underlying_type(rhs_desc)))
+    if (!typedesc_is_arithmetic(typedesc_remove_const_ref_mut(rhs_desc)))
       report_error_expected_arithmetic_type(node->rhs->tok->loc);
 
-    if (typedesc_is_signed(typedesc_underlying_type(lhs_desc)) != typedesc_is_signed(typedesc_underlying_type(rhs_desc)))
+    if (typedesc_is_signed(typedesc_remove_const_ref_mut(lhs_desc)) != typedesc_is_signed(typedesc_remove_const_ref_mut(rhs_desc)))
       report_warning_mixed_signedness(node->tok->loc);
 
-    node_desc = typedesc_arithmetic_promote(typedesc_underlying_type(lhs_desc), typedesc_underlying_type(rhs_desc));
+    node_desc = typedesc_arithmetic_promote(typedesc_remove_const_ref_mut(lhs_desc), typedesc_remove_const_ref_mut(rhs_desc));
     break;
   }
   case OP_BIT_LSH:
   case OP_BIT_RSH:
   {
-    if (!typedesc_is_integer(typedesc_underlying_type(lhs_desc)))
+    if (!typedesc_is_integer(typedesc_remove_const_ref_mut(lhs_desc)))
       report_error_expected_integer_type(node->lhs->tok->loc);
 
-    if (!typedesc_is_integer(typedesc_underlying_type(rhs_desc)))
+    if (!typedesc_is_integer(typedesc_remove_const_ref_mut(rhs_desc)))
       report_error_expected_integer_type(node->rhs->tok->loc);
 
-    node_desc = typedesc_underlying_type(lhs_desc);
+    node_desc = typedesc_remove_const_ref_mut(lhs_desc);
     break;
   }
   case OP_LOGIC_AND:
   case OP_LOGIC_OR:
   {
-    if (typedesc_underlying_type(lhs_desc)->kind != TYPEDESC_BOOL)
+    if (typedesc_remove_const_ref_mut(lhs_desc)->kind != TYPEDESC_BOOL)
       report_error_expected_bool_type(node->lhs->tok->loc);
 
-    if (typedesc_underlying_type(rhs_desc)->kind != TYPEDESC_BOOL)
+    if (typedesc_remove_const_ref_mut(rhs_desc)->kind != TYPEDESC_BOOL)
       report_error_expected_bool_type(node->rhs->tok->loc);
 
     node_desc = typebuilder_build_bool(analyzer->builder);
@@ -323,10 +322,10 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* scope, ast_
   case OP_COMP_GT:
   case OP_COMP_GE:
   {
-    if (!typedesc_is_arithmetic(typedesc_underlying_type(lhs_desc)))
+    if (!typedesc_is_arithmetic(typedesc_remove_const_ref_mut(lhs_desc)))
       report_error_expected_arithmetic_type(node->lhs->tok->loc);
 
-    if (!typedesc_is_arithmetic(typedesc_underlying_type(rhs_desc)))
+    if (!typedesc_is_arithmetic(typedesc_remove_const_ref_mut(rhs_desc)))
       report_error_expected_arithmetic_type(node->rhs->tok->loc);
 
     node_desc = typebuilder_build_bool(analyzer->builder);
@@ -334,13 +333,13 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* scope, ast_
   }
   case OP_ASSIGN:
   {
-    if (typedesc_remove_const_mut(lhs_desc)->kind != TYPEDESC_REF)
+    if (typedesc_remove_const(lhs_desc)->kind != TYPEDESC_REF)
       report_error_expected_reference_type(node->lhs->tok->loc);
 
-    if (typedesc_remove_const_mut_ref(lhs_desc)->kind != TYPEDESC_MUT)
+    if (typedesc_remove_const_ref(lhs_desc)->kind != TYPEDESC_MUT)
       report_error_expected_mutable_type(node->lhs->tok->loc);
 
-    if (typedesc_remove_mut(typedesc_remove_const_mut_ref(lhs_desc)) != typedesc_remove_mut(typedesc_remove_const_mut_ref(rhs_desc)))
+    if (typedesc_remove_const_ref_mut(lhs_desc) != typedesc_remove_const_ref_mut(rhs_desc))
       report_error_type_mismatch(node->lhs->tok->loc, lhs_desc, rhs_desc);
 
     node_desc = lhs_desc;
@@ -473,29 +472,35 @@ void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* scope, ast_
   switch (node->op_kind)
   {
   case OP_ACCESS:
-    if (!typedesc_is_composite(typedesc_remove_const_mut_ref(lhs_desc)))
+  {
+    if (!typedesc_is_composite(typedesc_remove_const_ref_mut(lhs_desc)))
       report_error_expected_owner(node->lhs->tok->loc);
 
-    owner_desc = typedesc_remove_const_mut_ref(lhs_desc);
+    owner_desc = typedesc_remove_const_ref_mut(lhs_desc);
     break;
+  }
   case OP_IND_ACCESS:
-    if (typedesc_remove_const_mut_ref(lhs_desc)->kind != TYPEDESC_PTR)
+  {
+    if (typedesc_remove_const_ref_mut(lhs_desc)->kind != TYPEDESC_PTR)
       report_error_expected_ptr_type(node->lhs->tok->loc);
 
-    if (!typedesc_is_composite(typedesc_remove_const_mut_ref(((typedesc_ptr_t*)typedesc_remove_const_mut_ref(lhs_desc))->base_type)))
+    if (!typedesc_is_composite(typedesc_remove_mut(((typedesc_ptr_t*)typedesc_remove_const_ref_mut(lhs_desc))->base_type)))
       report_error_expected_ptr_to_owner(node->lhs->tok->loc);
 
-    owner_desc = typedesc_remove_const_mut_ref(((typedesc_ptr_t*)typedesc_remove_const_mut_ref(lhs_desc))->base_type);
+    owner_desc = typedesc_remove_mut(((typedesc_ptr_t*)typedesc_remove_const_ref_mut(lhs_desc))->base_type);
     break;
+  }
   case OP_NULL_SAFE_ACCESS:
-    if (typedesc_remove_const_mut_ref(lhs_desc)->kind != TYPEDESC_OPT)
+  {
+    if (typedesc_remove_const_ref_mut(lhs_desc)->kind != TYPEDESC_OPT)
       report_error_expected_optional_type(node->lhs->tok->loc);
 
-    if (!typedesc_is_composite(typedesc_remove_const_mut_ref(((typedesc_opt_t*)typedesc_remove_const_mut_ref(lhs_desc))->base_type)))
+    if (!typedesc_is_composite(typedesc_remove_mut(((typedesc_opt_t*)typedesc_remove_const_ref_mut(lhs_desc))->base_type)))
       report_error_expected_owner(node->lhs->tok->loc);
 
-    owner_desc = typedesc_remove_const_mut_ref(((typedesc_opt_t*)typedesc_remove_const_mut_ref(lhs_desc))->base_type);
+    owner_desc = typedesc_remove_mut(((typedesc_opt_t*)typedesc_remove_const_ref_mut(lhs_desc))->base_type);
     break;
+  }
   default:
     unreachable();
   }
@@ -669,7 +674,7 @@ ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* scope, 
   token_t* owner_id_tok = node->owner->tok;
   symbol_t* owner_sym = symtable_lookup(scope, owner_id_tok->loc->ptr, owner_id_tok->loc->len);
   ast_node_t* member = node->member;
-
+  
   if (owner_sym == NULL)
     report_error_undefined_symbol(owner_id_tok->loc);
 
@@ -726,7 +731,7 @@ void analyzer_visit_type_mut(analyzer_t* analyzer, symtable_t* scope, ast_type_m
   typedesc_t* base_type = typetable_lookup(analyzer->typetable, node->base_type);
   assert(base_type != NULL);
 
-  assert(typedesc_check_can_add_mut(base_type));
+  assert(typedesc_can_add_mut(base_type));
 
   typedesc_t* desc = typebuilder_build_mut(analyzer->builder, base_type);
 
@@ -740,7 +745,7 @@ void analyzer_visit_type_const(analyzer_t* analyzer, symtable_t* scope, ast_type
   typedesc_t* base_type = typetable_lookup(analyzer->typetable, node->base_type);
   assert(base_type != NULL);
 
-  assert(typedesc_check_can_add_const(base_type));
+  assert(typedesc_can_add_const(base_type));
 
   typedesc_t* desc = typebuilder_build_const(analyzer->builder, base_type);
 
@@ -754,7 +759,7 @@ void analyzer_visit_type_ptr(analyzer_t* analyzer, symtable_t* scope, ast_type_p
   typedesc_t* base_type = typetable_lookup(analyzer->typetable, node->base_type);
   assert(base_type != NULL);
   
-  assert(typedesc_check_can_add_ptr(base_type));
+  assert(typedesc_can_add_ptr(base_type));
 
   typedesc_t* desc = typebuilder_build_ptr(analyzer->builder, base_type);
 
@@ -785,7 +790,7 @@ void analyzer_visit_type_array(analyzer_t* analyzer, symtable_t* scope, ast_type
   }
 
   assert(size_value > 0);
-  assert(typedesc_check_can_add_array(base_type));
+  assert(typedesc_can_add_array(base_type));
 
   typedesc_t* desc = typebuilder_build_array(analyzer->builder, (size_t)size_value, base_type);
 
@@ -799,7 +804,7 @@ void analyzer_visit_type_ref(analyzer_t* analyzer, symtable_t* scope, ast_type_r
   typedesc_t* base_type = typetable_lookup(analyzer->typetable, node->base_type);
   assert(base_type != NULL);
   
-  assert(typedesc_check_can_add_ref(base_type));
+  assert(typedesc_can_add_ref(base_type));
 
   typedesc_t* desc = typebuilder_build_ref(analyzer->builder, base_type);
 
@@ -813,7 +818,7 @@ void analyzer_visit_type_opt(analyzer_t* analyzer, symtable_t* scope, ast_type_o
   typedesc_t* base_type = typetable_lookup(analyzer->typetable, node->base_type);
   assert(base_type != NULL);
 
-  assert(typedesc_check_can_add_opt(base_type));
+  assert(typedesc_can_add_opt(base_type));
 
   typedesc_t* desc = typebuilder_build_opt(analyzer->builder, base_type);
 
@@ -923,7 +928,7 @@ void analyzer_visit_stmt_if(analyzer_t* analyzer, symtable_t* scope, ast_stmt_if
   typedesc_t* cond_desc = typetable_lookup(analyzer->typetable, node->cond);
   assert(cond_desc != NULL);
 
-  if (typedesc_underlying_type(cond_desc)->kind != TYPEDESC_BOOL)
+  if (typedesc_remove_const_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);
 
   analyzer_visit_stmt(analyzer, if_table, (ast_stmt_t*)node->stmt);
@@ -943,7 +948,7 @@ void analyzer_visit_stmt_for(analyzer_t* analyzer, symtable_t* scope, ast_stmt_f
   typedesc_t* range_desc = typetable_lookup(analyzer->typetable, node->range);
   assert(range_desc != NULL);
 
-  if (typedesc_underlying_type(range_desc)->kind != TYPEDESC_GEN)
+  if (typedesc_remove_const_ref_mut(range_desc)->kind != TYPEDESC_GEN)
     report_error_expected_generator_type(node->range->tok->loc);
 
   analyzer_scope_push(analyzer, (ast_node_t*)node);
@@ -960,7 +965,7 @@ void analyzer_visit_stmt_while(analyzer_t* analyzer, symtable_t* scope, ast_stmt
   typedesc_t* cond_desc = typetable_lookup(analyzer->typetable, node->cond);
   assert(cond_desc != NULL);
 
-  if (typedesc_underlying_type(cond_desc)->kind != TYPEDESC_BOOL)
+  if (typedesc_remove_const_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);
 
   analyzer_scope_push(analyzer, (ast_node_t*)node);

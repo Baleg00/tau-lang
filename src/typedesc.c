@@ -279,11 +279,6 @@ bool typedesc_is_decl(typedesc_t* desc)
   }
 }
 
-typedesc_t* typedesc_remove_modifier(typedesc_t* desc)
-{
-  return typedesc_is_modifier(desc) ? ((typedesc_modifier_t*)desc)->base_type : desc;
-}
-
 typedesc_t* typedesc_remove_mut(typedesc_t* desc)
 {
   return desc->kind == TYPEDESC_MUT ? ((typedesc_mut_t*)desc)->base_type : desc;
@@ -319,49 +314,47 @@ typedesc_t* typedesc_remove_const_mut(typedesc_t* desc)
   return typedesc_remove_mut(typedesc_remove_const(desc));
 }
 
-typedesc_t* typedesc_remove_const_mut_ref(typedesc_t* desc)
+typedesc_t* typedesc_remove_const_ref(typedesc_t* desc)
 {
-  return typedesc_remove_ref(typedesc_remove_const_mut(desc));
+  return typedesc_remove_ref(typedesc_remove_const(desc));
 }
 
-typedesc_t* typedesc_underlying_type(typedesc_t* desc)
+typedesc_t* typedesc_remove_const_ref_mut(typedesc_t* desc)
 {
-  while (desc->kind == TYPEDESC_MUT ||
-         desc->kind == TYPEDESC_CONST ||
-         desc->kind == TYPEDESC_REF)
-    desc = ((typedesc_modifier_t*)desc)->base_type;
-
-  return desc;
+  return typedesc_remove_mut(typedesc_remove_const_ref(desc));
 }
 
-bool typedesc_check_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc)
+bool typedesc_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc)
 {
   switch (kind)
   {
-  case TYPEDESC_MUT:   return typedesc_check_can_add_mut  (desc);
-  case TYPEDESC_CONST: return typedesc_check_can_add_const(desc);
-  case TYPEDESC_PTR:   return typedesc_check_can_add_ptr  (desc);
-  case TYPEDESC_ARRAY: return typedesc_check_can_add_array(desc);
-  case TYPEDESC_REF:   return typedesc_check_can_add_ref  (desc);
-  case TYPEDESC_OPT:   return typedesc_check_can_add_opt  (desc);
+  case TYPEDESC_MUT:   return typedesc_can_add_mut  (desc);
+  case TYPEDESC_CONST: return typedesc_can_add_const(desc);
+  case TYPEDESC_PTR:   return typedesc_can_add_ptr  (desc);
+  case TYPEDESC_ARRAY: return typedesc_can_add_array(desc);
+  case TYPEDESC_REF:   return typedesc_can_add_ref  (desc);
+  case TYPEDESC_OPT:   return typedesc_can_add_opt  (desc);
   default: unreachable();
   }
 
   return false;
 }
 
-bool typedesc_check_can_add_mut(typedesc_t* desc)
+bool typedesc_can_add_mut(typedesc_t* desc)
 {
   return desc->kind != TYPEDESC_MUT &&
+         desc->kind != TYPEDESC_REF &&
+         desc->kind != TYPEDESC_FUN &&
+         desc->kind != TYPEDESC_GEN &&
          desc->kind != TYPEDESC_CONST;
 }
 
-bool typedesc_check_can_add_const(typedesc_t* desc)
+bool typedesc_can_add_const(typedesc_t* desc)
 {
   return desc->kind != TYPEDESC_CONST;
 }
 
-bool typedesc_check_can_add_ptr(typedesc_t* desc)
+bool typedesc_can_add_ptr(typedesc_t* desc)
 {
   desc = typedesc_remove_mut(desc);
 
@@ -369,12 +362,12 @@ bool typedesc_check_can_add_ptr(typedesc_t* desc)
          desc->kind != TYPEDESC_REF;
 }
 
-bool typedesc_check_can_add_array(typedesc_t* desc)
+bool typedesc_can_add_array(typedesc_t* desc)
 {
-  return typedesc_check_can_add_ptr(desc);
+  return typedesc_can_add_ptr(desc);
 }
 
-bool typedesc_check_can_add_ref(typedesc_t* desc)
+bool typedesc_can_add_ref(typedesc_t* desc)
 {
   desc = typedesc_remove_mut(desc);
   
@@ -382,7 +375,7 @@ bool typedesc_check_can_add_ref(typedesc_t* desc)
          desc->kind != TYPEDESC_REF;
 }
 
-bool typedesc_check_can_add_opt(typedesc_t* desc)
+bool typedesc_can_add_opt(typedesc_t* desc)
 {
   desc = typedesc_remove_mut(desc);
 
