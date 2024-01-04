@@ -8,7 +8,7 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/Target.h>
 
-#include "analzyer.h"
+#include "analyzer.h"
 #include "arena.h"
 #include "ast.h"
 #include "cli.h"

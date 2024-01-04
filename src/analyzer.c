@@ -5,7 +5,7 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "analzyer.h"
+#include "analyzer.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -613,11 +613,11 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
   {
   case AST_ID:
   {
-    token_t* id_tok = node->tok;
-    symbol_t* id_sym = symtable_lookup(scope, id_tok->loc->ptr, id_tok->loc->len);
+    string_view_t id_view = token_to_string_view(node->tok);
+    symbol_t* id_sym = symtable_lookup_with_str_view(scope, id_view);
     
     if (id_sym == NULL)
-      report_error_undefined_symbol(id_tok->loc);
+      report_error_undefined_symbol(node->tok->loc);
 
     switch (id_sym->node->kind)
     {
@@ -639,7 +639,7 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
       return (ast_node_t*)decl;
     }
     default:
-      report_error_symbol_is_not_an_expression(id_tok->loc);
+      report_error_symbol_is_not_an_expression(node->tok->loc);
     }
   }
   case AST_EXPR_LIT_INT:
@@ -671,46 +671,22 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
 
 ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* scope, ast_type_member_t* node)
 {
-  token_t* owner_id_tok = node->owner->tok;
-  symbol_t* owner_sym = symtable_lookup(scope, owner_id_tok->loc->ptr, owner_id_tok->loc->len);
-  ast_node_t* member = node->member;
-  
-  if (owner_sym == NULL)
-    report_error_undefined_symbol(owner_id_tok->loc);
-
-  if (owner_sym->node->kind != AST_DECL_MOD)
-    report_error_expected_module(owner_id_tok->loc);
-
-  if (member->kind == AST_ID)
-  {
-    token_t* member_id_tok = member->tok;
-    symbol_t* member_sym = symtable_lookup(owner_sym->scope, member_id_tok->loc->ptr, member_id_tok->loc->len);
-
-    if (member_sym == NULL)
-      report_error_no_member_with_name(member_id_tok->loc);
-
-    return member_sym->node;
-  }
-  else if (member->kind == AST_TYPE_MEMBER)
-    return analyzer_visit_type_member(analyzer, owner_sym->scope, (ast_type_member_t*)member);
-
-  unreachable();
-  
+  unreachable(); // Not implemented
   return NULL;
 }
 
 ast_node_t* analyzer_visit_type_id(analyzer_t* analyzer, symtable_t* scope, ast_id_t* node)
 {
-  token_t* id_tok = node->tok;
-  symbol_t* id_sym = symtable_lookup(scope, id_tok->loc->ptr, id_tok->loc->len);
+  string_view_t id_view = token_to_string_view(node->tok);
+  symbol_t* id_sym = symtable_lookup_with_str_view(scope, id_view);
   
   if (id_sym == NULL)
-    report_error_undefined_typename(id_tok->loc);
+    report_error_undefined_typename(node->tok->loc);
 
   if (id_sym->node->kind != AST_DECL_STRUCT &&
       id_sym->node->kind != AST_DECL_UNION &&
       id_sym->node->kind != AST_DECL_ENUM)
-    report_error_symbol_is_not_a_typename(id_tok->loc);
+    report_error_symbol_is_not_a_typename(node->tok->loc);
 
   ast_type_decl_t* type_node = (ast_type_decl_t*)ast_node_init(AST_TYPE_DECL);
   type_node->tok = node->tok;
@@ -1097,16 +1073,16 @@ void analyzer_visit_decl_var(analyzer_t* analyzer, symtable_t* scope, ast_decl_v
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, var_desc);
 
-  token_t* id_tok = node->id->tok;
-  symbol_t* var_sym = symbol_init(id_tok->loc->ptr, id_tok->loc->len, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup(scope, id_tok->loc->ptr, id_tok->loc->len);
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* var_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup_with_str_view(scope, id_view);
   symbol_t* collision = symtable_insert(scope, var_sym);
 
   if (collision != NULL && collision->node->kind == AST_DECL_VAR)
-    report_error_variable_redeclaration(id_tok->loc, collision->node->tok->loc);
+    report_error_variable_redeclaration(node->id->tok->loc, collision->node->tok->loc);
 
   if (lookup != NULL && lookup->node->kind == AST_DECL_VAR)
-    report_warning_shadowed_variable(id_tok->loc);
+    report_warning_shadowed_variable(node->id->tok->loc);
 
   if (node->expr != NULL)
   {
@@ -1122,12 +1098,12 @@ void analyzer_visit_decl_var(analyzer_t* analyzer, symtable_t* scope, ast_decl_v
 
 void analyzer_visit_decl_param(analyzer_t* analyzer, symtable_t* scope, ast_decl_param_t* node)
 {
-  token_t* id_tok = node->id->tok;
-  symbol_t* param_sym = symbol_init(id_tok->loc->ptr, id_tok->loc->len, (ast_node_t*)node);
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* param_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
   symbol_t* collision = symtable_insert(scope, param_sym);
 
   if (collision != NULL && collision->node->kind == AST_DECL_PARAM)
-    report_error_parameter_redefinition(id_tok->loc, collision->node->tok->loc);
+    report_error_parameter_redefinition(node->id->tok->loc, collision->node->tok->loc);
 
   node->type = analyzer_visit_type(analyzer, scope, (ast_type_t*)node->type);
 
@@ -1150,6 +1126,17 @@ void analyzer_visit_decl_param(analyzer_t* analyzer, symtable_t* scope, ast_decl
 
 void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* scope, ast_decl_fun_t* node)
 {
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* fun_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup_with_str_view(scope, id_view);
+  symbol_t* collision = symtable_insert(scope, fun_sym);
+
+  if (collision != NULL)
+    report_error_symbol_redeclaration(node->tok->loc);
+
+  if (lookup != NULL)
+    report_warning_shadowed_symbol(node->tok->loc);
+
   symtable_t* fun_table = symtable_init(scope);
 
   size_t param_count = list_size(node->params);
@@ -1183,14 +1170,6 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* scope, ast_decl_f
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, fun_desc);
 
-  token_t* id_tok = node->id->tok;
-  symbol_t* fun_sym = symbol_init(id_tok->loc->ptr, id_tok->loc->len, (ast_node_t*)node);
-
-  symbol_t* collision = symtable_insert(scope, fun_sym);
-
-  if (collision != NULL)
-    report_error_symbol_redeclaration(node->tok->loc);
-
   if (!node->is_extern)
   {
     analyzer_scope_push(analyzer, (ast_node_t*)node);
@@ -1201,6 +1180,17 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* scope, ast_decl_f
 
 void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* scope, ast_decl_gen_t* node)
 {
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* gen_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup_with_str_view(scope, id_view);
+  symbol_t* collision = symtable_insert(scope, gen_sym);
+
+  if (collision != NULL)
+    report_error_symbol_redeclaration(node->tok->loc);
+
+  if (lookup != NULL)
+    report_warning_shadowed_symbol(node->tok->loc);
+
   symtable_t* gen_table = symtable_init(scope);
 
   size_t param_count = list_size(node->params);
@@ -1233,14 +1223,6 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* scope, ast_decl_g
   free(param_types);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, gen_desc);
-
-  token_t* id_tok = node->id->tok;
-  symbol_t* gen_sym = symbol_init(id_tok->loc->ptr, id_tok->loc->len, (ast_node_t*)node);
-
-  symbol_t* collision = symtable_insert(scope, gen_sym);
-
-  if (collision != NULL)
-    report_error_symbol_redeclaration(node->tok->loc);
   
   analyzer_scope_push(analyzer, (ast_node_t*)node);
   analyzer_visit_stmt(analyzer, gen_table, (ast_stmt_t*)node->stmt);
@@ -1249,9 +1231,9 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* scope, ast_decl_g
 
 void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* scope, ast_decl_struct_t* node)
 {
-  token_t* id_tok = node->id->tok;
-  symbol_t* struct_sym = symbol_init(id_tok->loc->ptr, id_tok->loc->len, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup(scope, id_tok->loc->ptr, id_tok->loc->len);
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* struct_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup_with_str_view(scope, id_view);
   symbol_t* collision = symtable_insert(scope, struct_sym);
 
   if (collision != NULL)
@@ -1285,9 +1267,9 @@ void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* scope, ast_dec
 
 void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* scope, ast_decl_union_t* node)
 {
-  token_t* id_tok = node->id->tok;
-  symbol_t* union_sym = symbol_init(id_tok->loc->ptr, id_tok->loc->len, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup(scope, id_tok->loc->ptr, id_tok->loc->len);
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* union_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup_with_str_view(scope, id_view);
   symbol_t* collision = symtable_insert(scope, union_sym);
 
   if (collision != NULL)
@@ -1321,9 +1303,9 @@ void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* scope, ast_decl
 
 void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* scope, ast_decl_enum_t* node)
 {
-  token_t* id_tok = node->id->tok;
-  symbol_t* enum_sym = symbol_init(id_tok->loc->ptr, id_tok->loc->len, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup(scope, id_tok->loc->ptr, id_tok->loc->len);
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* enum_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
+  symbol_t* lookup = symtable_lookup_with_str_view(scope, id_view);
   symbol_t* collision = symtable_insert(scope, enum_sym);
 
   if (collision != NULL)
@@ -1346,12 +1328,12 @@ void analyzer_visit_decl_enum_constant(analyzer_t* analyzer, symtable_t* scope, 
 {
   unused(analyzer);
 
-  token_t* id_tok = node->id->tok;
-  symbol_t* enum_constant_sym = symbol_init(id_tok->loc->ptr, id_tok->loc->len, (ast_node_t*)node);
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* enum_constant_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
   symbol_t* collision = symtable_insert(scope, enum_constant_sym);
 
   if (collision != NULL)
-    report_error_enumerator_redeclaration(id_tok->loc, collision->node->tok->loc);
+    report_error_enumerator_redeclaration(node->id->tok->loc, collision->node->tok->loc);
 
   typedesc_t* enum_desc = typetable_lookup(analyzer->typetable, enum_sym->node);
   assert(enum_desc != NULL);
@@ -1361,22 +1343,16 @@ void analyzer_visit_decl_enum_constant(analyzer_t* analyzer, symtable_t* scope, 
 
 void analyzer_visit_decl_mod(analyzer_t* analyzer, symtable_t* scope, ast_decl_mod_t* node)
 {
-  token_t* id_tok = node->id->tok;
-  symbol_t* mod_sym = symbol_init(id_tok->loc->ptr, id_tok->loc->len, (ast_node_t*)node);
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* mod_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
   symbol_t* collision = symtable_insert(scope, mod_sym);
 
-  symtable_t* mod_table = NULL;
-  
   if (collision != NULL)
-  {
-    mod_table = collision->scope;
-    symbol_free(mod_sym);
-  }
-  else
-    mod_table = symtable_init(scope);
+    report_error_enumerator_redeclaration(node->id->tok->loc, collision->node->tok->loc);
+
+  symtable_t* mod_table = symtable_init(scope);
 
   typedesc_mod_t* mod_desc = (typedesc_mod_t*)typedesc_init(TYPEDESC_MOD);
-  
   mod_desc->node = (ast_node_t*)node;
   mod_desc->member_types = list_init();
 

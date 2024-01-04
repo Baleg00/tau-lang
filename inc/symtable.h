@@ -23,6 +23,7 @@
 
 #include "ast.h"
 #include "list.h"
+#include "str_view.h"
 
 /**
  * \brief Represents a symbol in a symbol table.
@@ -44,7 +45,7 @@ typedef struct symtable_t symtable_t;
 
 struct symbol_t
 {
-  symtable_t* scope; // The symbol's lexical scope (parent symbol table).
+  symtable_t* parent; // The symbol's parent symbol table.
   const char* id; // The symbol's identifier.
   size_t len; // The length of the identifier.
   ast_node_t* node; // The AST node associated with the symbol.
@@ -64,12 +65,22 @@ struct symtable_t
  * \brief Initializes a new symbol with the given identifier and associated AST
  * node.
  *
- * \param[in] id The identifier string.
+ * \param[in] id Pointer to the beginning of the identifier.
  * \param[in] len The length of the identifier.
  * \param[in] node Pointer to the AST node associated with the symbol.
  * \returns A pointer to the newly initialized symbol.
  */
 symbol_t* symbol_init(const char* id, size_t len, ast_node_t* node);
+
+/**
+ * \brief Initializes a new symbol with the given identifier and associated AST
+ * node.
+ *
+ * \param[in] id String view of the identifier.
+ * \param[in] node Pointer to the AST node associated with the symbol.
+ * \returns A pointer to the newly initialized symbol.
+ */
+symbol_t* symbol_init_with_str_view(string_view_t id, ast_node_t* node);
 
 /**
  * \brief Frees the resources associated with a symbol.
@@ -98,19 +109,50 @@ void symtable_free(symtable_t* table);
  *
  * \param[in] table Pointer to the symbol table.
  * \param[in] new_sym Pointer to the symbol to be inserted.
- * \returns A pointer to the inserted symbol or NULL if insertion fails.
+ * \returns NULL if insertion was successful, otherwise a pointer to the
+ * colliding symbol.
  */
 symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym);
 
 /**
- * \brief Looks up a symbol by its identifier in the symbol table.
+ * \brief Retrieves a symbol from a symbol table without traversing the symbol
+ * table hierarchy.
  *
  * \param[in] table Pointer to the symbol table.
- * \param[in] id The identifier string to look up.
+ * \param[in] id Pointer to the beginning of the identifier.
  * \param[in] len The length of the identifier.
- * \returns A pointer to the found symbol or NULL if not found.
+ * \returns A pointer to the symbol or NULL if it was not found.
+ */
+symbol_t* symtable_get(symtable_t* table, const char* id, size_t len);
+
+/**
+ * \brief Retrieves a symbol from a symbol table without traversing the symbol
+ * table hierarchy.
+ *
+ * \param[in] table Pointer to the symbol table.
+ * \param[in] id String view of the identifier.
+ * \returns A pointer to the symbol or NULL if it was not found.
+ */
+symbol_t* symtable_get_with_str_view(symtable_t* table, string_view_t id);
+
+/**
+ * \brief Retrieves a symbol from a symbol table hierarchy.
+ *
+ * \param[in] table Pointer to the symbol table.
+ * \param[in] id Pointer to the beginning of the identifier.
+ * \param[in] len The length of the identifier.
+ * \returns A pointer to the symbol or NULL if it was not found.
  */
 symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len);
+
+/**
+ * \brief Retrieves a symbol from a symbol table hierarchy.
+ *
+ * \param[in] table Pointer to the symbol table.
+ * \param[in] id String view of the identifier.
+ * \returns A pointer to the symbol or NULL if it was not found.
+ */
+symbol_t* symtable_lookup_with_str_view(symtable_t* table, string_view_t id);
 
 /**
  * \brief Expands the capacity of the symbol table to accommodate more symbols.

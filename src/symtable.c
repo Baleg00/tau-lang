@@ -42,11 +42,16 @@ symbol_t* symbol_init(const char* id, size_t len, ast_node_t* node)
 {
   symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
   assert(sym != NULL);
-  sym->scope = NULL;
+  sym->parent = NULL;
   sym->id = id;
   sym->len = len;
   sym->node = node;
   return sym;
+}
+
+symbol_t* symbol_init_with_str_view(string_view_t id, ast_node_t* node)
+{
+  return symbol_init(id.buf, id.len, node);
 }
 
 void symbol_free(symbol_t* sym)
@@ -100,6 +105,7 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
     ++table->size;
     table->buckets[idx] = new_sym;
     new_sym->next = NULL;
+    new_sym->parent = table;
     return NULL;
   }
 
@@ -112,10 +118,11 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
   ++table->size;
   last->next = new_sym;
   new_sym->next = NULL;
+  new_sym->parent = table;
   return NULL;
 }
 
-symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len)
+symbol_t* symtable_get(symtable_t* table, const char* id, size_t len)
 {
   size_t h = hash_digest(id, len);
   size_t idx = h % table->capacity;
@@ -124,10 +131,32 @@ symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len)
     if (sym->len == len && strncmp(sym->id, id, sym->len) == 0)
       return sym;
 
-  if (table->parent == NULL)
-    return NULL;
+  return NULL;
+}
 
-  return symtable_lookup(table->parent, id, len);
+symbol_t* symtable_get_with_str_view(symtable_t* table, string_view_t id)
+{
+  return symtable_get(table, id.buf, id.len);
+}
+
+symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len)
+{
+  while (table != NULL)
+  {
+    symbol_t* sym = symtable_get(table, id, len);
+    
+    if (sym != NULL)
+      return sym;
+
+    table = table->parent;
+  }
+
+  return NULL;
+}
+
+symbol_t* symtable_lookup_with_str_view(symtable_t* table, string_view_t id)
+{
+  return symtable_lookup(table, id.buf, id.len);
 }
 
 void symtable_expand(symtable_t* table)

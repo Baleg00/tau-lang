@@ -373,21 +373,20 @@ ast_node_t* parser_parse_type_gen(parser_t* par)
 
 ast_node_t* parser_parse_type_member(parser_t* par)
 {
-  ast_id_t* node = (ast_id_t*)ast_node_init(AST_ID);
-  node->tok = parser_next(par);
+  ast_node_t* node = parser_parse_id(par);
 
-  if (parser_consume(par, TOK_PUNCT_DOT))
+  while (parser_consume(par, TOK_PUNCT_DOT))
   {
-    ast_type_member_t* type = (ast_type_member_t*)ast_node_init(AST_TYPE_MEMBER);
-    type->tok = parser_current(par);
+    ast_type_member_t* member_node = (ast_type_member_t*)ast_node_init(AST_TYPE_MEMBER);
+    member_node->tok = parser_current(par);
 
-    type->owner = (ast_node_t*)node;
-    type->member = parser_parse_type_member(par);
+    member_node->owner = node;
+    member_node->member = parser_parse_id(par);
 
-    return (ast_node_t*)type;
+    node = (ast_node_t*)member_node;
   }
 
-  return (ast_node_t*)node;
+  return node;
 }
 
 ast_node_t* parser_parse_type(parser_t* par)
@@ -396,7 +395,7 @@ ast_node_t* parser_parse_type(parser_t* par)
 
   switch (parser_current(par)->kind)
   {
-  case TOK_ID:                 return parser_parse_type_member  (par);                      
+  case TOK_ID:                 return parser_parse_type_member  (par);
   case TOK_KW_MUT:             return parser_parse_type_mut     (par);
   case TOK_KW_CONST:           return parser_parse_type_const   (par);
   case TOK_PUNCT_ASTERISK:     return parser_parse_type_ptr     (par);

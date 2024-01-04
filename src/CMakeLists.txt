@@ -6,7 +6,7 @@ endif()
 
 set(TAU_SOURCES
   ${TAU_SOURCE_DIR}/allocator.c
-  ${TAU_SOURCE_DIR}/analzyer.c
+  ${TAU_SOURCE_DIR}/analyzer.c
   ${TAU_SOURCE_DIR}/arena.c
   ${TAU_SOURCE_DIR}/ast.c
   ${TAU_SOURCE_DIR}/cli.c
