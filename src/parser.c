@@ -977,7 +977,7 @@ ast_node_t* parser_parse_decl_mod(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
   
-  node->decls = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_in_mod);
+  node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_in_mod);
   
   return (ast_node_t*)node;
 }

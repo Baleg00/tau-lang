@@ -46,7 +46,6 @@ typedesc_t* typedesc_init(typedesc_kind_t kind)
   case TYPEDESC_STRUCT: desc_size = sizeof(typedesc_struct_t); break;
   case TYPEDESC_UNION:  desc_size = sizeof(typedesc_union_t ); break;
   case TYPEDESC_ENUM:   desc_size = sizeof(typedesc_enum_t  ); break;
-  case TYPEDESC_MOD:    desc_size = sizeof(typedesc_mod_t   ); break;
   default: unreachable();
   }
 
@@ -100,9 +99,6 @@ void typedesc_free(typedesc_t* desc)
     list_free(((typedesc_union_t*)desc)->field_types);
     break;
   case TYPEDESC_ENUM:
-    break;
-  case TYPEDESC_MOD:
-    list_free(((typedesc_mod_t*)desc)->member_types);
     break;
   default:
     unreachable();
@@ -256,7 +252,6 @@ bool typedesc_is_composite(typedesc_t* desc)
   case TYPEDESC_STRUCT:
   case TYPEDESC_UNION:
   case TYPEDESC_ENUM:
-  case TYPEDESC_MOD:
     return true;
   default:
     return false;
@@ -272,7 +267,6 @@ bool typedesc_is_decl(typedesc_t* desc)
   case TYPEDESC_STRUCT:
   case TYPEDESC_UNION:
   case TYPEDESC_ENUM:
-  case TYPEDESC_MOD:
     return true;
   default:
     return false;

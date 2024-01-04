@@ -107,6 +107,7 @@
   struct\
   {\
     list_t* members; /** Members. */\
+    symtable_t* scope; /** Scope. */\
   }
 
 /**
@@ -195,6 +196,13 @@ typedef enum abi_kind_t
   ABI_VECTORCALL, // Calling convention for SIMD (Single Instruction, Multiple Data) operations.
   ABI_THISCALL, // Windows C++ method calling convention.
 } abi_kind_t;
+
+/**
+ * \brief Forward declaration of symbol table to avoid circular includes.
+ * 
+ * \see symtable.h
+ */
+typedef struct symtable_t symtable_t;
 
 /**
  * \brief AST node.
@@ -532,6 +540,16 @@ typedef struct ast_decl_t
 } ast_decl_t;
 
 /**
+ * \brief AST composite declaration node.
+ */
+typedef struct ast_decl_composite_t
+{
+  AST_NODE_HEADER;
+  AST_DECL_HEADER;
+  AST_COMPOSITE_HEADER;
+} ast_decl_composite_t;
+
+/**
  * \brief AST variable declaration node.
  */
 typedef struct ast_decl_var_t
@@ -628,7 +646,7 @@ typedef struct ast_decl_mod_t
 {
   AST_NODE_HEADER;
   AST_DECL_HEADER;
-  list_t* decls; // List of declarations.
+  AST_COMPOSITE_HEADER;
   bool is_pub; // Is public.
 } ast_decl_mod_t;
 

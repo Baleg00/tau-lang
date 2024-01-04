@@ -451,9 +451,10 @@ void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* scope, ast_decl_
  *
  * \param[in] analyzer Pointer to the semantic analyzer.
  * \param[in] scope Pointer to the current symbol table scope.
+ * \param[in] enum_desc Pointer to the type descriptor of the enumerator.
  * \param[in] node Pointer to the enumeration constant declaration node.
  */
-void analyzer_visit_decl_enum_constant(analyzer_t* analyzer, symtable_t* scope, symbol_t* enum_sym, ast_decl_enum_constant_t* node);
+void analyzer_visit_decl_enum_constant(analyzer_t* analyzer, symtable_t* scope, typedesc_enum_t* enum_desc, ast_decl_enum_constant_t* node);
 
 /**
  * \brief Visits and analyzes a module declaration.

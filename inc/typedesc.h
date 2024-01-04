@@ -83,7 +83,6 @@ typedef enum typedesc_kind_e
   TYPEDESC_STRUCT, // Struct type
   TYPEDESC_UNION, // Union type
   TYPEDESC_ENUM, // Enum type
-  TYPEDESC_MOD, // Module type
 } typedesc_kind_t;
 
 /**
@@ -217,16 +216,6 @@ typedef struct typedesc_enum_t
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
 } typedesc_enum_t;
-
-/**
- * \brief Type descriptor for modules.
- */
-typedef struct typedesc_mod_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-  list_t* member_types; // List of member types.
-} typedesc_mod_t;
 
 #undef TYPEDESC_DECL_HEADER
 #undef TYPEDESC_HEADER
