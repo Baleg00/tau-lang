@@ -74,6 +74,14 @@ void generator_visit_type_array(generator_t* gen, ast_type_array_t* node);
 void generator_visit_type_fun(generator_t* gen, ast_type_fun_t* node);
 
 /**
+ * \brief Visits and generates code for a declaration type in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] node Pointer to the AST node representing the declaration type.
+ */
+void generator_visit_type_decl(generator_t* gen, ast_type_decl_t* node);
+
+/**
  * \brief Visits and generates code for a type in the AST.
  *
  * \param[in] gen Pointer to the generator.
@@ -130,7 +138,7 @@ void generator_visit_expr_lit_bool(generator_t* gen, ast_decl_fun_t* fun_node, a
  * \param[in] node Pointer to the AST node representing the unary operation
  * expression.
  */
-void generator_visit_expr_op_unary(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
+void generator_visit_expr_op_un(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 
 /**
  * \brief Visits and generates code for a unary arithmetic pre-increment operation
@@ -141,7 +149,7 @@ void generator_visit_expr_op_unary(generator_t* gen, ast_decl_fun_t* fun_node, a
  * \param[in] node Pointer to the AST node representing the unary arithmetic
  * pre-increment operation expression.
  */
-void generator_visit_expr_op_unary_arit_inc_pre(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
+void generator_visit_expr_op_un_arit_inc_pre(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 
 /**
  * \brief Visits and generates code for a unary arithmetic post-increment operation
@@ -152,7 +160,7 @@ void generator_visit_expr_op_unary_arit_inc_pre(generator_t* gen, ast_decl_fun_t
  * \param[in] node Pointer to the AST node representing the unary arithmetic
  * post-increment operation expression.
  */
-void generator_visit_expr_op_unary_arit_inc_post(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
+void generator_visit_expr_op_un_arit_inc_post(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 
 /**
  * \brief Visits and generates code for a unary arithmetic pre-decrement operation
@@ -163,7 +171,7 @@ void generator_visit_expr_op_unary_arit_inc_post(generator_t* gen, ast_decl_fun_
  * \param[in] node Pointer to the AST node representing the unary arithmetic
  * pre-decrement operation expression.
  */
-void generator_visit_expr_op_unary_arit_dec_pre(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
+void generator_visit_expr_op_un_arit_dec_pre(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 
 /**
  * \brief Visits and generates code for a unary arithmetic post-decrement operation
@@ -174,7 +182,7 @@ void generator_visit_expr_op_unary_arit_dec_pre(generator_t* gen, ast_decl_fun_t
  * \param[in] node Pointer to the AST node representing the unary arithmetic
  * post-decrement operation expression.
  */
-void generator_visit_expr_op_unary_arit_dec_post(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
+void generator_visit_expr_op_un_arit_dec_post(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 
 /**
  * \brief Visits and generates code for a unary arithmetic positive operation
@@ -185,7 +193,7 @@ void generator_visit_expr_op_unary_arit_dec_post(generator_t* gen, ast_decl_fun_
  * \param[in] node Pointer to the AST node representing the unary arithmetic
  * positive operation expression.
  */
-void generator_visit_expr_op_unary_arit_pos(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
+void generator_visit_expr_op_un_arit_pos(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 
 /**
  * \brief Visits and generates code for a unary arithmetic negative operation
@@ -196,7 +204,7 @@ void generator_visit_expr_op_unary_arit_pos(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the unary arithmetic
  * negative operation expression.
  */
-void generator_visit_expr_op_unary_arit_neg(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
+void generator_visit_expr_op_un_arit_neg(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 
 /**
  * \brief Visits and generates code for a unary logical not operation
@@ -207,18 +215,18 @@ void generator_visit_expr_op_unary_arit_neg(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the unary logical not
  * operation expression.
  */
-void generator_visit_expr_op_unary_logic_not(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
+void generator_visit_expr_op_un_logic_not(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 
 /**
- * \brief Visits and generates code for a unary bitwise not operation
+ * \brief Visits and generates code for a unary bitwise NOT operation
  * expression in the AST.
  *
  * \param[in] gen Pointer to the generator.
  * \param[in] fun_node Pointer to the AST node representing the parent function.
- * \param[in] node Pointer to the AST node representing the unary bitwise not
+ * \param[in] node Pointer to the AST node representing the unary bitwise NOT
  * operation expression.
  */
-void generator_visit_expr_op_unary_bit_not(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
+void generator_visit_expr_op_un_bit_not(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node);
 
 /**
  * \brief Visits and generates code for a binary operation expression in the AST.
@@ -228,7 +236,7 @@ void generator_visit_expr_op_unary_bit_not(generator_t* gen, ast_decl_fun_t* fun
  * \param[in] node Pointer to the AST node representing the binary operation
  * expression.
  */
-void generator_visit_expr_op_binary(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary arithmetic addition operation
@@ -239,7 +247,7 @@ void generator_visit_expr_op_binary(generator_t* gen, ast_decl_fun_t* fun_node, 
  * \param[in] node Pointer to the AST node representing the binary arithmetic
  * addition operation expression.
  */
-void generator_visit_expr_op_binary_arit_add(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_arit_add(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary arithmetic subtraction operation
@@ -250,7 +258,7 @@ void generator_visit_expr_op_binary_arit_add(generator_t* gen, ast_decl_fun_t* f
  * \param[in] node Pointer to the AST node representing the binary arithmetic
  * subtraction operation expression.
  */
-void generator_visit_expr_op_binary_arit_sub(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_arit_sub(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary arithmetic multiplication operation
@@ -261,7 +269,7 @@ void generator_visit_expr_op_binary_arit_sub(generator_t* gen, ast_decl_fun_t* f
  * \param[in] node Pointer to the AST node representing the binary arithmetic
  * multiplication operation expression.
  */
-void generator_visit_expr_op_binary_arit_mul(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_arit_mul(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary arithmetic division operation
@@ -272,7 +280,7 @@ void generator_visit_expr_op_binary_arit_mul(generator_t* gen, ast_decl_fun_t* f
  * \param[in] node Pointer to the AST node representing the binary arithmetic
  * division operation expression.
  */
-void generator_visit_expr_op_binary_arit_div(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_arit_div(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary arithmetic modulo operation
@@ -283,40 +291,40 @@ void generator_visit_expr_op_binary_arit_div(generator_t* gen, ast_decl_fun_t* f
  * \param[in] node Pointer to the AST node representing the binary arithmetic
  * modulo operation expression.
  */
-void generator_visit_expr_op_binary_arit_mod(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_arit_mod(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
- * \brief Visits and generates code for a binary bitwise and operation expression
+ * \brief Visits and generates code for a binary bitwise AND operation expression
  * in the AST.
  *
  * \param[in] gen Pointer to the generator.
  * \param[in] fun_node Pointer to the AST node representing the parent function.
- * \param[in] node Pointer to the AST node representing the binary bitwise and
+ * \param[in] node Pointer to the AST node representing the binary bitwise AND
  * operation expression.
  */
-void generator_visit_expr_op_binary_bit_and(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_bit_and(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
- * \brief Visits and generates code for a binary bitwise or operation expression
+ * \brief Visits and generates code for a binary bitwise OR operation expression
  * in the AST.
  *
  * \param[in] gen Pointer to the generator.
  * \param[in] fun_node Pointer to the AST node representing the parent function.
- * \param[in] node Pointer to the AST node representing the binary bitwise or
+ * \param[in] node Pointer to the AST node representing the binary bitwise OR
  * operation expression.
  */
-void generator_visit_expr_op_binary_bit_or(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_bit_or(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
- * \brief Visits and generates code for a binary bitwise xor operation expression
+ * \brief Visits and generates code for a binary bitwise XOR operation expression
  * in the AST.
  *
  * \param[in] gen Pointer to the generator.
  * \param[in] fun_node Pointer to the AST node representing the parent function.
- * \param[in] node Pointer to the AST node representing the binary bitwise xor
+ * \param[in] node Pointer to the AST node representing the binary bitwise XOR
  * operation expression.
  */
-void generator_visit_expr_op_binary_bit_xor(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_bit_xor(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary bitwise left shift operation
@@ -327,7 +335,7 @@ void generator_visit_expr_op_binary_bit_xor(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the binary bitwise left
  * shift operation expression.
  */
-void generator_visit_expr_op_binary_bit_lsh(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_bit_lsh(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary bitwise right shift operation
@@ -338,7 +346,7 @@ void generator_visit_expr_op_binary_bit_lsh(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the binary bitwise right
  * shift operation expression.
  */
-void generator_visit_expr_op_binary_bit_rsh(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_bit_rsh(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary logical and operation expression
@@ -349,7 +357,7 @@ void generator_visit_expr_op_binary_bit_rsh(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the binary logical and
  * operation expression.
  */
-void generator_visit_expr_op_binary_logic_and(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_logic_and(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary logical or operation expression
@@ -360,7 +368,7 @@ void generator_visit_expr_op_binary_logic_and(generator_t* gen, ast_decl_fun_t* 
  * \param[in] node Pointer to the AST node representing the binary logical or
  * operation expression.
  */
-void generator_visit_expr_op_binary_logic_or(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_logic_or(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary equality comparison operation
@@ -371,7 +379,7 @@ void generator_visit_expr_op_binary_logic_or(generator_t* gen, ast_decl_fun_t* f
  * \param[in] node Pointer to the AST node representing the binary equality
  * comparison operation expression.
  */
-void generator_visit_expr_op_binary_comp_eq(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_comp_eq(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary non-equality comparison operation
@@ -382,7 +390,7 @@ void generator_visit_expr_op_binary_comp_eq(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the binary non-equality
  * comparison operation expression.
  */
-void generator_visit_expr_op_binary_comp_ne(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_comp_ne(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary less than comparison operation
@@ -393,7 +401,7 @@ void generator_visit_expr_op_binary_comp_ne(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the binary less than
  * comparison operation expression.
  */
-void generator_visit_expr_op_binary_comp_lt(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_comp_lt(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary less than or equal to comparison
@@ -404,7 +412,7 @@ void generator_visit_expr_op_binary_comp_lt(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the binary less than or
  * equal to comparison operation expression.
  */
-void generator_visit_expr_op_binary_comp_le(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_comp_le(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary greater than comparison operation
@@ -415,7 +423,7 @@ void generator_visit_expr_op_binary_comp_le(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the binary greater than
  * comparison operation expression.
  */
-void generator_visit_expr_op_binary_comp_gt(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_comp_gt(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary greater than or equal to comparison
@@ -426,7 +434,7 @@ void generator_visit_expr_op_binary_comp_gt(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the binary greater than
  * or equal to comparison operation expression.
  */
-void generator_visit_expr_op_binary_comp_ge(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_comp_ge(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a binary assignment operation expression
@@ -437,7 +445,117 @@ void generator_visit_expr_op_binary_comp_ge(generator_t* gen, ast_decl_fun_t* fu
  * \param[in] node Pointer to the AST node representing the binary assignment
  * operation expression.
  */
-void generator_visit_expr_op_binary_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+void generator_visit_expr_op_bin_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary addition assignment operation
+ * expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary addition
+ * assignment operation expression.
+ */
+void generator_visit_expr_op_bin_arit_add_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary subtraction assignment operation
+ * expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary subtraction
+ * assignment operation expression.
+ */
+void generator_visit_expr_op_bin_arit_sub_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary multiplication assignment
+ * operation expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary multiplication
+ * assignment operation expression.
+ */
+void generator_visit_expr_op_bin_arit_mul_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary division assignment operation
+ * expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary division
+ * assignment operation expression.
+ */
+void generator_visit_expr_op_bin_arit_div_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary modulo assignment operation
+ * expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary modulo
+ * assignment operation expression.
+ */
+void generator_visit_expr_op_bin_arit_mod_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary bitwise AND assignment operation
+ * expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary bitwise AND
+ * assignment operation expression.
+ */
+void generator_visit_expr_op_bin_bit_and_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary bitwise OR assignment operation
+ * expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary bitwise OR
+ * assignment operation expression.
+ */
+void generator_visit_expr_op_bin_bit_or_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary bitwise XOR assignment operation
+ * expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary bitwise XOR
+ * assignment operation expression.
+ */
+void generator_visit_expr_op_bin_bit_xor_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary bitwise left shift assignment
+ * operation expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary bitwise left
+ * shift assignment operation expression.
+ */
+void generator_visit_expr_op_bin_bit_lsh_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Visits and generates code for a binary bitwise right shift assignment
+ * operation expression in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] fun_node Pointer to the AST node representing the parent function.
+ * \param[in] node Pointer to the AST node representing the binary bitwise right
+ * shift assignment operation expression.
+ */
+void generator_visit_expr_op_bin_bit_rsh_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node);
 
 /**
  * \brief Visits and generates code for a call expression in the AST.
@@ -573,14 +691,6 @@ void generator_visit_stmt(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_t
 void generator_visit_decl_var(generator_t* gen, ast_decl_fun_t* fun_node, ast_decl_var_t* node);
 
 /**
- * \brief Visits and generates code for a function declaration in the AST.
- *
- * \param[in] gen Pointer to the generator.
- * \param[in] node Pointer to the AST node representing the function declaration.
- */
-void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node);
-
-/**
  * \brief Visits and generates code for a parameter declaration in the AST.
  *
  * \param[in] gen Pointer to the generator.
@@ -589,6 +699,46 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node);
  * \param[in] idx The index of the parameter in the function's parameter list.
  */
 void generator_visit_decl_param(generator_t* gen, ast_decl_fun_t* fun_node, ast_decl_param_t* node, size_t idx);
+
+/**
+ * \brief Visits and generates code for a function declaration in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] node Pointer to the AST node representing the function declaration.
+ */
+void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node);
+
+/**
+ * \brief Visits and generates code for a struct declaration in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] node Pointer to the AST node representing the struct declaration.
+ */
+void generator_visit_decl_struct(generator_t* gen, ast_decl_struct_t* node);
+
+/**
+ * \brief Visits and generates code for a union declaration in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] node Pointer to the AST node representing the union declaration.
+ */
+void generator_visit_decl_union(generator_t* gen, ast_decl_union_t* node);
+
+/**
+ * \brief Visits and generates code for an enum declaration in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] node Pointer to the AST node representing the enum declaration.
+ */
+void generator_visit_decl_enum(generator_t* gen, ast_decl_enum_t* node);
+
+/**
+ * \brief Visits and generates code for a module declaration in the AST.
+ *
+ * \param[in] gen Pointer to the generator.
+ * \param[in] node Pointer to the AST node representing the module declaration.
+ */
+void generator_visit_decl_mod(generator_t* gen, ast_decl_mod_t* node);
 
 /**
  * \brief Visits and generates code for a declaration in the AST.

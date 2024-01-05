@@ -637,6 +637,8 @@ typedef struct ast_decl_enum_t
   AST_DECL_HEADER;
   AST_COMPOSITE_HEADER;
   bool is_pub; // Is public.
+
+  LLVMTypeRef llvm_type;
 } ast_decl_enum_t;
 
 /**
@@ -673,6 +675,9 @@ typedef struct ast_decl_enum_constant_t
   AST_NODE_HEADER;
   AST_DECL_HEADER;
   AST_TYPED_HEADER;
+
+  LLVMTypeRef llvm_type;
+  LLVMValueRef llvm_value;
 } ast_decl_enum_constant_t;
 
 /**

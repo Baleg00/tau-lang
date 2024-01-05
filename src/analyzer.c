@@ -505,31 +505,22 @@ void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* scope, ast_
     unreachable();
   }
 
-  token_t* tok_rhs = node->rhs->tok;
-
   if (owner_desc->kind != TYPEDESC_STRUCT &&
       owner_desc->kind != TYPEDESC_UNION &&
       owner_desc->kind != TYPEDESC_ENUM)
-    report_error_expected_owner(tok_rhs->loc);
-  
-  LIST_FOR_LOOP(it, ((ast_decl_composite_t*)((typedesc_decl_t*)owner_desc)->node)->members)
-  {
-    ast_decl_t* member = (ast_decl_t*)list_node_get(it);
-    location_t* id_loc = member->id->tok->loc;
+    report_error_expected_owner(node->rhs->tok->loc);
 
-    if (strncmp(id_loc->ptr, tok_rhs->loc->ptr, id_loc->len) == 0)
-    {
-      node->rhs = (ast_node_t*)member;
+  ast_decl_composite_t* owner_node = (ast_decl_composite_t*)((typedesc_decl_t*)owner_desc)->node;
+  string_view_t id_view = token_to_string_view(node->rhs->tok);
+  symbol_t* member_sym = symtable_get_with_str_view(owner_node->scope, id_view);
 
-      typedesc_t* member_desc = typetable_lookup(analyzer->typetable, (ast_node_t*)member);
-      assert(member_desc != NULL);
+  if (member_sym == NULL)
+    report_error_no_member_with_name(node->rhs->tok->loc);
 
-      typetable_insert(analyzer->typetable, (ast_node_t*)node, member_desc);
-      return;
-    }
-  }
+  typedesc_t* member_desc = typetable_lookup(analyzer->typetable, member_sym->node);
+  assert(member_desc != NULL);
 
-  report_error_no_member_with_name(tok_rhs->loc);
+  typetable_insert(analyzer->typetable, (ast_node_t*)node, member_desc);
 }
 
 void analyzer_visit_expr_op(analyzer_t* analyzer, symtable_t* scope, ast_expr_op_t* node)
@@ -644,6 +635,20 @@ ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* scope, 
 
   if (member_sym == NULL)
     report_error_no_member_with_name(node->member->tok->loc);
+
+  if (member_sym->node->kind != AST_DECL_MOD)
+  {
+    ast_type_decl_t* type_node = (ast_type_decl_t*)ast_node_init(AST_TYPE_DECL);
+    type_node->tok = node->tok;
+    type_node->decl = member_sym->node;
+
+    typedesc_t* decl_desc = typetable_lookup(analyzer->typetable, type_node->decl);
+    assert(decl_desc != NULL);
+
+    typetable_insert(analyzer->typetable, (ast_node_t*)type_node, decl_desc);
+
+    return (ast_node_t*)type_node;
+  }
 
   return member_sym->node;
 }

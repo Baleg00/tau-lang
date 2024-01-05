@@ -28,6 +28,8 @@ struct generator_t
   LLVMContextRef context; // The LLVM context for code generation.
   LLVMModuleRef module;   // The LLVM module for the current translation unit.
   LLVMBuilderRef builder; // The LLVM IR builder for generating code.
+  LLVMTargetMachineRef machine; // The LLVM target machine.
+  LLVMTargetDataRef layout; // The LLVM target data layout.
 };
 
 static LLVMValueRef generator_build_load_if_ref(generator_t* gen, ast_expr_t* node)
@@ -106,6 +108,15 @@ void generator_visit_type_fun(generator_t* gen, ast_type_fun_t* node)
     free(param_types);
 }
 
+void generator_visit_type_decl(generator_t* gen, ast_type_decl_t* node)
+{
+  switch (node->decl->kind)
+  {
+  case AST_DECL_STRUCT: node->llvm_type = ((ast_decl_struct_t*)node->decl)->llvm_type; break;
+  default: unreachable();
+  }
+}
+
 void generator_visit_type(generator_t* gen, ast_type_t* node)
 {
   switch (node->kind)
@@ -114,6 +125,7 @@ void generator_visit_type(generator_t* gen, ast_type_t* node)
   case AST_TYPE_PTR:   generator_visit_type_ptr  (gen, (ast_type_ptr_t*  )node); break;
   case AST_TYPE_ARRAY: generator_visit_type_array(gen, (ast_type_array_t*)node); break;
   case AST_TYPE_FUN:   generator_visit_type_fun  (gen, (ast_type_fun_t*  )node); break;
+  case AST_TYPE_DECL:  generator_visit_type_decl (gen, (ast_type_decl_t* )node); break;
   case AST_TYPE_I8:    node->llvm_type = LLVMInt8TypeInContext  (gen->context); break;
   case AST_TYPE_I16:   node->llvm_type = LLVMInt16TypeInContext (gen->context); break;
   case AST_TYPE_I32:   node->llvm_type = LLVMInt32TypeInContext (gen->context); break;
@@ -208,23 +220,23 @@ void generator_visit_expr_lit_bool(generator_t* gen, ast_decl_fun_t* fun_node, a
   node->llvm_value = LLVMConstInt(node->llvm_type, (uint32_t)lit_value, false);
 }
 
-void generator_visit_expr_op_unary(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
+void generator_visit_expr_op_un(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
 {
   switch (node->op_kind)
   {
-  case OP_ARIT_INC_PRE:  generator_visit_expr_op_unary_arit_inc_pre (gen, fun_node, node); break;
-  case OP_ARIT_INC_POST: generator_visit_expr_op_unary_arit_inc_post(gen, fun_node, node); break;
-  case OP_ARIT_DEC_PRE:  generator_visit_expr_op_unary_arit_dec_pre (gen, fun_node, node); break;
-  case OP_ARIT_DEC_POST: generator_visit_expr_op_unary_arit_dec_post(gen, fun_node, node); break;
-  case OP_ARIT_POS:      generator_visit_expr_op_unary_arit_pos     (gen, fun_node, node); break;
-  case OP_ARIT_NEG:      generator_visit_expr_op_unary_arit_neg     (gen, fun_node, node); break;
-  case OP_LOGIC_NOT:     generator_visit_expr_op_unary_logic_not    (gen, fun_node, node); break;
-  case OP_BIT_NOT:       generator_visit_expr_op_unary_bit_not      (gen, fun_node, node); break;
+  case OP_ARIT_INC_PRE:  generator_visit_expr_op_un_arit_inc_pre (gen, fun_node, node); break;
+  case OP_ARIT_INC_POST: generator_visit_expr_op_un_arit_inc_post(gen, fun_node, node); break;
+  case OP_ARIT_DEC_PRE:  generator_visit_expr_op_un_arit_dec_pre (gen, fun_node, node); break;
+  case OP_ARIT_DEC_POST: generator_visit_expr_op_un_arit_dec_post(gen, fun_node, node); break;
+  case OP_ARIT_POS:      generator_visit_expr_op_un_arit_pos     (gen, fun_node, node); break;
+  case OP_ARIT_NEG:      generator_visit_expr_op_un_arit_neg     (gen, fun_node, node); break;
+  case OP_LOGIC_NOT:     generator_visit_expr_op_un_logic_not    (gen, fun_node, node); break;
+  case OP_BIT_NOT:       generator_visit_expr_op_un_bit_not      (gen, fun_node, node); break;
   default: unreachable();
   }
 }
 
-void generator_visit_expr_op_unary_arit_inc_pre(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
+void generator_visit_expr_op_un_arit_inc_pre(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
@@ -239,7 +251,7 @@ void generator_visit_expr_op_unary_arit_inc_pre(generator_t* gen, ast_decl_fun_t
   node->llvm_value = expr->llvm_value;
 }
 
-void generator_visit_expr_op_unary_arit_inc_post(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
+void generator_visit_expr_op_un_arit_inc_post(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
@@ -254,7 +266,7 @@ void generator_visit_expr_op_unary_arit_inc_post(generator_t* gen, ast_decl_fun_
   node->llvm_value = value;
 }
 
-void generator_visit_expr_op_unary_arit_dec_pre(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
+void generator_visit_expr_op_un_arit_dec_pre(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
@@ -269,7 +281,7 @@ void generator_visit_expr_op_unary_arit_dec_pre(generator_t* gen, ast_decl_fun_t
   node->llvm_value = expr->llvm_value;
 }
 
-void generator_visit_expr_op_unary_arit_dec_post(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
+void generator_visit_expr_op_un_arit_dec_post(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
@@ -284,7 +296,7 @@ void generator_visit_expr_op_unary_arit_dec_post(generator_t* gen, ast_decl_fun_
   node->llvm_value = value;
 }
 
-void generator_visit_expr_op_unary_arit_pos(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
+void generator_visit_expr_op_un_arit_pos(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
@@ -292,7 +304,7 @@ void generator_visit_expr_op_unary_arit_pos(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->expr);
 }
 
-void generator_visit_expr_op_unary_arit_neg(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
+void generator_visit_expr_op_un_arit_neg(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
@@ -301,7 +313,7 @@ void generator_visit_expr_op_unary_arit_neg(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_value = LLVMBuildNeg(gen->builder, value, "neg_tmp");
 }
 
-void generator_visit_expr_op_unary_logic_not(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
+void generator_visit_expr_op_un_logic_not(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
@@ -310,7 +322,7 @@ void generator_visit_expr_op_unary_logic_not(generator_t* gen, ast_decl_fun_t* f
   node->llvm_value = LLVMBuildNot(gen->builder, value, "not_tmp");
 }
 
-void generator_visit_expr_op_unary_bit_not(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
+void generator_visit_expr_op_un_bit_not(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_un_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
@@ -319,34 +331,44 @@ void generator_visit_expr_op_unary_bit_not(generator_t* gen, ast_decl_fun_t* fun
   node->llvm_value = LLVMBuildNot(gen->builder, value, "not_tmp");
 }
 
-void generator_visit_expr_op_binary(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   switch (node->op_kind)
   {
-  case OP_ARIT_ADD:  generator_visit_expr_op_binary_arit_add (gen, fun_node, node); break;
-  case OP_ARIT_SUB:  generator_visit_expr_op_binary_arit_sub (gen, fun_node, node); break;
-  case OP_ARIT_MUL:  generator_visit_expr_op_binary_arit_mul (gen, fun_node, node); break;
-  case OP_ARIT_DIV:  generator_visit_expr_op_binary_arit_div (gen, fun_node, node); break;
-  case OP_ARIT_MOD:  generator_visit_expr_op_binary_arit_mod (gen, fun_node, node); break;
-  case OP_BIT_AND:   generator_visit_expr_op_binary_bit_and  (gen, fun_node, node); break;
-  case OP_BIT_OR:    generator_visit_expr_op_binary_bit_or   (gen, fun_node, node); break;
-  case OP_BIT_XOR:   generator_visit_expr_op_binary_bit_xor  (gen, fun_node, node); break;
-  case OP_BIT_LSH:   generator_visit_expr_op_binary_bit_lsh  (gen, fun_node, node); break;
-  case OP_BIT_RSH:   generator_visit_expr_op_binary_bit_rsh  (gen, fun_node, node); break;
-  case OP_LOGIC_AND: generator_visit_expr_op_binary_logic_and(gen, fun_node, node); break;
-  case OP_LOGIC_OR:  generator_visit_expr_op_binary_logic_or (gen, fun_node, node); break;
-  case OP_COMP_EQ:   generator_visit_expr_op_binary_comp_eq  (gen, fun_node, node); break;
-  case OP_COMP_NE:   generator_visit_expr_op_binary_comp_ne  (gen, fun_node, node); break;
-  case OP_COMP_LT:   generator_visit_expr_op_binary_comp_lt  (gen, fun_node, node); break;
-  case OP_COMP_LE:   generator_visit_expr_op_binary_comp_le  (gen, fun_node, node); break;
-  case OP_COMP_GT:   generator_visit_expr_op_binary_comp_gt  (gen, fun_node, node); break;
-  case OP_COMP_GE:   generator_visit_expr_op_binary_comp_ge  (gen, fun_node, node); break;
-  case OP_ASSIGN:    generator_visit_expr_op_binary_assign   (gen, fun_node, node); break;
+  case OP_ARIT_ADD:        generator_visit_expr_op_bin_arit_add       (gen, fun_node, node); break;
+  case OP_ARIT_SUB:        generator_visit_expr_op_bin_arit_sub       (gen, fun_node, node); break;
+  case OP_ARIT_MUL:        generator_visit_expr_op_bin_arit_mul       (gen, fun_node, node); break;
+  case OP_ARIT_DIV:        generator_visit_expr_op_bin_arit_div       (gen, fun_node, node); break;
+  case OP_ARIT_MOD:        generator_visit_expr_op_bin_arit_mod       (gen, fun_node, node); break;
+  case OP_BIT_AND:         generator_visit_expr_op_bin_bit_and        (gen, fun_node, node); break;
+  case OP_BIT_OR:          generator_visit_expr_op_bin_bit_or         (gen, fun_node, node); break;
+  case OP_BIT_XOR:         generator_visit_expr_op_bin_bit_xor        (gen, fun_node, node); break;
+  case OP_BIT_LSH:         generator_visit_expr_op_bin_bit_lsh        (gen, fun_node, node); break;
+  case OP_BIT_RSH:         generator_visit_expr_op_bin_bit_rsh        (gen, fun_node, node); break;
+  case OP_LOGIC_AND:       generator_visit_expr_op_bin_logic_and      (gen, fun_node, node); break;
+  case OP_LOGIC_OR:        generator_visit_expr_op_bin_logic_or       (gen, fun_node, node); break;
+  case OP_COMP_EQ:         generator_visit_expr_op_bin_comp_eq        (gen, fun_node, node); break;
+  case OP_COMP_NE:         generator_visit_expr_op_bin_comp_ne        (gen, fun_node, node); break;
+  case OP_COMP_LT:         generator_visit_expr_op_bin_comp_lt        (gen, fun_node, node); break;
+  case OP_COMP_LE:         generator_visit_expr_op_bin_comp_le        (gen, fun_node, node); break;
+  case OP_COMP_GT:         generator_visit_expr_op_bin_comp_gt        (gen, fun_node, node); break;
+  case OP_COMP_GE:         generator_visit_expr_op_bin_comp_ge        (gen, fun_node, node); break;
+  case OP_ASSIGN:          generator_visit_expr_op_bin_assign         (gen, fun_node, node); break;
+  case OP_ARIT_ADD_ASSIGN: generator_visit_expr_op_bin_arit_add_assign(gen, fun_node, node); break;
+  case OP_ARIT_SUB_ASSIGN: generator_visit_expr_op_bin_arit_sub_assign(gen, fun_node, node); break;
+  case OP_ARIT_MUL_ASSIGN: generator_visit_expr_op_bin_arit_mul_assign(gen, fun_node, node); break;
+  case OP_ARIT_DIV_ASSIGN: generator_visit_expr_op_bin_arit_div_assign(gen, fun_node, node); break;
+  case OP_ARIT_MOD_ASSIGN: generator_visit_expr_op_bin_arit_mod_assign(gen, fun_node, node); break;
+  case OP_BIT_AND_ASSIGN:  generator_visit_expr_op_bin_bit_and_assign (gen, fun_node, node); break;
+  case OP_BIT_OR_ASSIGN:   generator_visit_expr_op_bin_bit_or_assign  (gen, fun_node, node); break;
+  case OP_BIT_XOR_ASSIGN:  generator_visit_expr_op_bin_bit_xor_assign (gen, fun_node, node); break;
+  case OP_BIT_LSH_ASSIGN:  generator_visit_expr_op_bin_bit_lsh_assign (gen, fun_node, node); break;
+  case OP_BIT_RSH_ASSIGN:  generator_visit_expr_op_bin_bit_rsh_assign (gen, fun_node, node); break;
   default: unreachable();
   }
 }
 
-void generator_visit_expr_op_binary_arit_add(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_arit_add(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -358,7 +380,7 @@ void generator_visit_expr_op_binary_arit_add(generator_t* gen, ast_decl_fun_t* f
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_arit_sub(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_arit_sub(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -370,7 +392,7 @@ void generator_visit_expr_op_binary_arit_sub(generator_t* gen, ast_decl_fun_t* f
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_arit_mul(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_arit_mul(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -382,7 +404,7 @@ void generator_visit_expr_op_binary_arit_mul(generator_t* gen, ast_decl_fun_t* f
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_arit_div(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_arit_div(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -394,7 +416,7 @@ void generator_visit_expr_op_binary_arit_div(generator_t* gen, ast_decl_fun_t* f
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_arit_mod(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_arit_mod(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -406,7 +428,7 @@ void generator_visit_expr_op_binary_arit_mod(generator_t* gen, ast_decl_fun_t* f
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_bit_and(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_bit_and(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -418,7 +440,7 @@ void generator_visit_expr_op_binary_bit_and(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_bit_or(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_bit_or(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -430,7 +452,7 @@ void generator_visit_expr_op_binary_bit_or(generator_t* gen, ast_decl_fun_t* fun
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_bit_xor(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_bit_xor(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -442,7 +464,7 @@ void generator_visit_expr_op_binary_bit_xor(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_bit_lsh(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_bit_lsh(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -454,7 +476,7 @@ void generator_visit_expr_op_binary_bit_lsh(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_bit_rsh(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_bit_rsh(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -466,7 +488,7 @@ void generator_visit_expr_op_binary_bit_rsh(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_logic_and(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_logic_and(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -478,7 +500,7 @@ void generator_visit_expr_op_binary_logic_and(generator_t* gen, ast_decl_fun_t* 
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_logic_or(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_logic_or(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -490,7 +512,7 @@ void generator_visit_expr_op_binary_logic_or(generator_t* gen, ast_decl_fun_t* f
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_comp_eq(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_comp_eq(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -502,7 +524,7 @@ void generator_visit_expr_op_binary_comp_eq(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_comp_ne(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_comp_ne(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -514,7 +536,7 @@ void generator_visit_expr_op_binary_comp_ne(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_comp_lt(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_comp_lt(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -526,7 +548,7 @@ void generator_visit_expr_op_binary_comp_lt(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_comp_le(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_comp_le(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -538,7 +560,7 @@ void generator_visit_expr_op_binary_comp_le(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_comp_gt(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_comp_gt(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -550,7 +572,7 @@ void generator_visit_expr_op_binary_comp_gt(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_comp_ge(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_comp_ge(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -562,7 +584,7 @@ void generator_visit_expr_op_binary_comp_ge(generator_t* gen, ast_decl_fun_t* fu
   node->llvm_type = LLVMTypeOf(node->llvm_value);
 }
 
-void generator_visit_expr_op_binary_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+void generator_visit_expr_op_bin_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
@@ -570,6 +592,156 @@ void generator_visit_expr_op_binary_assign(generator_t* gen, ast_decl_fun_t* fun
   LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
 
   LLVMBuildStore(gen->builder, rhs_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_arit_add_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildAdd(gen->builder, lhs_value, rhs_value, "add_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_arit_sub_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildSub(gen->builder, lhs_value, rhs_value, "sub_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_arit_mul_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildMul(gen->builder, lhs_value, rhs_value, "mul_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_arit_div_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildSDiv(gen->builder, lhs_value, rhs_value, "sdiv_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_arit_mod_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildSRem(gen->builder, lhs_value, rhs_value, "srem_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_bit_and_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildAnd(gen->builder, lhs_value, rhs_value, "and_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_bit_or_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildOr(gen->builder, lhs_value, rhs_value, "or_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_bit_xor_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildXor(gen->builder, lhs_value, rhs_value, "xor_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_bit_lsh_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildShl(gen->builder, lhs_value, rhs_value, "shl_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
+}
+
+void generator_visit_expr_op_bin_bit_rsh_assign(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_bin_t* node)
+{
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->lhs);
+  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef lhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->lhs);
+  LLVMValueRef rhs_value = generator_build_load_if_ref(gen, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef tmp_value = LLVMBuildLShr(gen->builder, lhs_value, rhs_value, "lshr_tmp");
+  LLVMBuildStore(gen->builder, tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
 
   node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
   node->llvm_type = ((ast_expr_t*)node->lhs)->llvm_type;
@@ -639,8 +811,8 @@ void generator_visit_expr(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_t
   case AST_EXPR_LIT_FLT:   generator_visit_expr_lit_flt  (gen, fun_node, (ast_expr_lit_t*    )node); break;
   case AST_EXPR_LIT_STR:   generator_visit_expr_lit_str  (gen, fun_node, (ast_expr_lit_t*    )node); break;
   case AST_EXPR_LIT_BOOL:  generator_visit_expr_lit_bool (gen, fun_node, (ast_expr_lit_t*    )node); break;
-  case AST_EXPR_OP_UNARY:  generator_visit_expr_op_unary (gen, fun_node, (ast_expr_op_un_t*  )node); break;
-  case AST_EXPR_OP_BINARY: generator_visit_expr_op_binary(gen, fun_node, (ast_expr_op_bin_t* )node); break;
+  case AST_EXPR_OP_UNARY:  generator_visit_expr_op_un    (gen, fun_node, (ast_expr_op_un_t*  )node); break;
+  case AST_EXPR_OP_BINARY: generator_visit_expr_op_bin   (gen, fun_node, (ast_expr_op_bin_t* )node); break;
   case AST_EXPR_OP_CALL:   generator_visit_expr_op_call  (gen, fun_node, (ast_expr_op_call_t*)node); break;
   case AST_EXPR_DECL:      generator_visit_expr_decl     (gen, fun_node, (ast_expr_decl_t*   )node); break;
   default: unreachable();
@@ -759,12 +931,25 @@ void generator_visit_stmt(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_t
 void generator_visit_decl_var(generator_t* gen, ast_decl_fun_t* fun_node, ast_decl_var_t* node)
 {
   generator_visit_type(gen, (ast_type_t*)node->type);
-  generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
+
+  if (node->expr != NULL)
+    generator_visit_expr(gen, fun_node, (ast_expr_t*)node->expr);
 
   node->llvm_type = ((ast_type_t*)node->type)->llvm_type;
   node->llvm_value = LLVMBuildAlloca(gen->builder, node->llvm_type, "alloca_tmp");
 
-  LLVMBuildStore(gen->builder, ((ast_expr_t*)node->expr)->llvm_value, node->llvm_value);
+  if (node->expr != NULL)
+    LLVMBuildStore(gen->builder, ((ast_expr_t*)node->expr)->llvm_value, node->llvm_value);
+}
+
+void generator_visit_decl_param(generator_t* gen, ast_decl_fun_t* fun_node, ast_decl_param_t* node, size_t idx)
+{
+  LLVMValueRef param_value = LLVMGetParam(fun_node->llvm_value, (uint32_t)idx);
+
+  node->llvm_type = LLVMTypeOf(param_value);
+  node->llvm_value = LLVMBuildAlloca(gen->builder, node->llvm_type, "alloca_tmp");
+
+  LLVMBuildStore(gen->builder, param_value, node->llvm_value);
 }
 
 void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
@@ -842,17 +1027,90 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
   }
 }
 
-void generator_visit_decl_param(generator_t* gen, ast_decl_fun_t* fun_node, ast_decl_param_t* node, size_t idx)
+void generator_visit_decl_struct(generator_t* gen, ast_decl_struct_t* node)
 {
-  node->llvm_value = LLVMGetParam(fun_node->llvm_value, (uint32_t)idx);
-  node->llvm_type = LLVMTypeOf(node->llvm_value);
+  size_t member_count = list_size(node->members);
+  LLVMTypeRef* member_types = NULL;
+
+  if (member_count > 0)
+  {
+    member_types = malloc(member_count * sizeof(LLVMTypeRef));
+
+    size_t i = 0;
+    LIST_FOR_LOOP(it, node->members)
+    {
+      ast_decl_var_t* member = (ast_decl_var_t*)list_node_get(it);
+
+      generator_visit_type(gen, (ast_type_t*)member->type);
+
+      member_types[i++] = ((ast_type_t*)member->type)->llvm_type;
+    }
+  }
+
+  node->llvm_type = LLVMStructTypeInContext(gen->context, member_types, (uint32_t)member_count, false);
+
+  if (member_types != NULL)
+    free(member_types);
+}
+
+void generator_visit_decl_union(generator_t* gen, ast_decl_union_t* node)
+{
+  LLVMTypeRef max_type = NULL;
+  size_t max_size = 0;
+
+  LIST_FOR_LOOP(it, node->members)
+  {
+    ast_decl_var_t* member = (ast_decl_var_t*)list_node_get(it);
+
+    size_t size = LLVMSizeOfTypeInBits(gen->layout, member->llvm_type);
+
+    if (size > max_size)
+    {
+      max_size = size;
+      max_type = member->llvm_type;
+    }
+  }
+
+  node->llvm_type = max_type;
+}
+
+void generator_visit_decl_enum(generator_t* gen, ast_decl_enum_t* node)
+{
+  size_t enum_count = list_size(node->members);
+
+       if (enum_count <=  UINT8_MAX) node->llvm_type = LLVMInt8TypeInContext (gen->context);
+  else if (enum_count <= UINT16_MAX) node->llvm_type = LLVMInt16TypeInContext(gen->context);
+  else if (enum_count <= UINT32_MAX) node->llvm_type = LLVMInt32TypeInContext(gen->context);
+  else if (enum_count <= UINT64_MAX) node->llvm_type = LLVMInt64TypeInContext(gen->context);
+  else unreachable();
+
+  uint64_t i = 0;
+  LIST_FOR_LOOP(it, node->members)
+  {
+    ast_decl_enum_constant_t* member = (ast_decl_enum_constant_t*)list_node_get(it);
+
+    member->llvm_type = node->llvm_type;
+    member->llvm_value = LLVMConstInt(node->llvm_type, i++, false);
+  }
+}
+
+void generator_visit_decl_mod(generator_t* gen, ast_decl_mod_t* node)
+{
+  LIST_FOR_LOOP(it, node->members)
+  {
+    ast_decl_t* decl = (ast_decl_t*)list_node_get(it);
+    generator_visit_decl(gen, decl);
+  }
 }
 
 void generator_visit_decl(generator_t* gen, ast_decl_t* node)
 {
   switch (node->kind)
   {
-  case AST_DECL_FUN: generator_visit_decl_fun(gen, (ast_decl_fun_t*)node); break;
+  case AST_DECL_FUN:    generator_visit_decl_fun   (gen, (ast_decl_fun_t*   )node); break;
+  case AST_DECL_STRUCT: generator_visit_decl_struct(gen, (ast_decl_struct_t*)node); break;
+  case AST_DECL_UNION:  generator_visit_decl_union (gen, (ast_decl_union_t* )node); break;
+  case AST_DECL_MOD:    generator_visit_decl_mod   (gen, (ast_decl_mod_t*   )node); break;
   default: unreachable();
   }
 }
@@ -875,9 +1133,58 @@ void generator_generate(generator_t* gen, LLVMContextRef context, LLVMModuleRef 
   gen->module = module;
   gen->builder = LLVMCreateBuilderInContext(gen->context);
 
-  generator_visit_prog(gen, (ast_prog_t*)node);
-
   char* error_str = NULL;
+
+  char* target_triple = LLVMGetDefaultTargetTriple();
+
+  if (target_triple == NULL)
+  {
+    log_fatal("generator", "Failed to get target triple.");
+    exit(EXIT_FAILURE);
+  }
+
+  LLVMTargetRef target = NULL;
+  
+  if (LLVMGetTargetFromTriple(target_triple, &target, &error_str))
+  {
+    log_fatal("generator", "Failed to get target from triple.");
+    fputs(error_str, stderr);
+    exit(EXIT_FAILURE);
+  }
+
+  char* cpu_name = LLVMGetHostCPUName();
+
+  if (cpu_name == NULL)
+  {
+    log_fatal("generator", "Failed to get target CPU name.");
+    exit(EXIT_FAILURE);
+  }
+
+  char* cpu_features = LLVMGetHostCPUFeatures();
+
+  if (cpu_features == NULL)
+  {
+    log_fatal("generator", "Failed to get target CPU features.");
+    exit(EXIT_FAILURE);
+  }
+
+  gen->machine = LLVMCreateTargetMachine(target, target_triple, cpu_name, cpu_features, LLVMCodeGenLevelDefault, LLVMRelocDefault, LLVMCodeModelDefault);
+
+  if (gen->machine == NULL)
+  {
+    log_fatal("generator", "Failed to create target machine.");
+    exit(EXIT_FAILURE);
+  }
+
+  gen->layout = LLVMCreateTargetDataLayout(gen->machine);
+
+  if (gen->layout == NULL)
+  {
+    log_fatal("generator", "Failed to create target data layout.");
+    exit(EXIT_FAILURE);
+  }
+
+  generator_visit_prog(gen, (ast_prog_t*)node);
 
   LLVMPassBuilderOptionsRef options = LLVMCreatePassBuilderOptions();
 
@@ -887,17 +1194,21 @@ void generator_generate(generator_t* gen, LLVMContextRef context, LLVMModuleRef 
 
   if (error_ref != NULL)
   {
+    log_fatal("generator", "Failed to run passes.");
     error_str = LLVMGetErrorMessage(error_ref);
-    puts(error_str);
+    fputs(error_str, stderr);
     LLVMDisposeMessage(error_str);
+    exit(EXIT_FAILURE);
   }
 
   LLVMDisposePassBuilderOptions(options);
-
   LLVMDisposeBuilder(gen->builder);
 
   if (LLVMVerifyModule(gen->module, LLVMReturnStatusAction, &error_str))
-    puts(error_str);
-
-  LLVMDisposeMessage(error_str);
+  {
+    log_fatal("generator", "Failed to verify module.");
+    fputs(error_str, stderr);
+    LLVMDisposeMessage(error_str);
+    exit(EXIT_FAILURE);
+  }
 }
