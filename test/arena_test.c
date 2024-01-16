@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include "arena.h"
+#include "utils/memory/arena.h"
 
 test()
   describe("arena")

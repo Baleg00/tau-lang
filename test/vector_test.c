@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include "vector.h"
+#include "utils/collections/vector.h"
 
 test()
   describe("vector")

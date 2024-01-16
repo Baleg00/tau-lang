@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include "queue.h"
+#include "utils/collections/queue.h"
 
 test()
 

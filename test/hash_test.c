@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include "hash.h"
+#include "utils/hash.h"
 
 test()
 

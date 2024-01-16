@@ -5,37 +5,38 @@ else()
 endif()
 
 set(TAU_SOURCES
-  ${TAU_SOURCE_DIR}/allocator.c
-  ${TAU_SOURCE_DIR}/analyzer.c
-  ${TAU_SOURCE_DIR}/arena.c
-  ${TAU_SOURCE_DIR}/ast.c
-  ${TAU_SOURCE_DIR}/cli.c
   ${TAU_SOURCE_DIR}/compiler.c
-  ${TAU_SOURCE_DIR}/crumb.c
-  ${TAU_SOURCE_DIR}/diagnostics.c
-  ${TAU_SOURCE_DIR}/file.c
-  ${TAU_SOURCE_DIR}/generator.c
-  ${TAU_SOURCE_DIR}/hash.c
-  ${TAU_SOURCE_DIR}/lexer.c
-  ${TAU_SOURCE_DIR}/list.c
-  ${TAU_SOURCE_DIR}/location.c
-  ${TAU_SOURCE_DIR}/log.c
-  ${TAU_SOURCE_DIR}/memtrace.c
-  ${TAU_SOURCE_DIR}/op.c
-  ${TAU_SOURCE_DIR}/parser.c
-  ${TAU_SOURCE_DIR}/queue.c
-  ${TAU_SOURCE_DIR}/set.c
-  ${TAU_SOURCE_DIR}/shyd.c
-  ${TAU_SOURCE_DIR}/stack.c
-  ${TAU_SOURCE_DIR}/str_view.c
-  ${TAU_SOURCE_DIR}/str.c
-  ${TAU_SOURCE_DIR}/symtable.c
-  ${TAU_SOURCE_DIR}/timer.c
-  ${TAU_SOURCE_DIR}/token.c
-  ${TAU_SOURCE_DIR}/typebuilder.c
-  ${TAU_SOURCE_DIR}/typedesc.c
-  ${TAU_SOURCE_DIR}/typetable.c
-  ${TAU_SOURCE_DIR}/vector.c
+  ${TAU_SOURCE_DIR}/main.c
+  ${TAU_SOURCE_DIR}/stages/analyzer/analyzer.c
+  ${TAU_SOURCE_DIR}/stages/analyzer/symtable.c
+  ${TAU_SOURCE_DIR}/stages/analyzer/typebuilder.c
+  ${TAU_SOURCE_DIR}/stages/analyzer/typedesc.c
+  ${TAU_SOURCE_DIR}/stages/analyzer/typetable.c
+  ${TAU_SOURCE_DIR}/stages/codegen/generator.c
+  ${TAU_SOURCE_DIR}/stages/lexer/lexer.c
+  ${TAU_SOURCE_DIR}/stages/lexer/location.c
+  ${TAU_SOURCE_DIR}/stages/lexer/token.c
+  ${TAU_SOURCE_DIR}/stages/parser/ast/ast.c
+  ${TAU_SOURCE_DIR}/stages/parser/op.c
+  ${TAU_SOURCE_DIR}/stages/parser/parser.c
+  ${TAU_SOURCE_DIR}/stages/parser/shyd.c
+  ${TAU_SOURCE_DIR}/utils/collections/list.c
+  ${TAU_SOURCE_DIR}/utils/collections/queue.c
+  ${TAU_SOURCE_DIR}/utils/collections/set.c
+  ${TAU_SOURCE_DIR}/utils/collections/stack.c
+  ${TAU_SOURCE_DIR}/utils/collections/vector.c
+  ${TAU_SOURCE_DIR}/utils/crumb.c
+  ${TAU_SOURCE_DIR}/utils/diagnostics.c
+  ${TAU_SOURCE_DIR}/utils/hash.c
+  ${TAU_SOURCE_DIR}/utils/io/cli.c
+  ${TAU_SOURCE_DIR}/utils/io/file.c
+  ${TAU_SOURCE_DIR}/utils/io/log.c
+  ${TAU_SOURCE_DIR}/utils/memory/allocator.c
+  ${TAU_SOURCE_DIR}/utils/memory/arena.c
+  ${TAU_SOURCE_DIR}/utils/memory/memtrace.c
+  ${TAU_SOURCE_DIR}/utils/str_view.c
+  ${TAU_SOURCE_DIR}/utils/str.c
+  ${TAU_SOURCE_DIR}/utils/timer.c
 )
 
 add_library(${TAU_LIBRARY_NAME} STATIC ${TAU_SOURCES})

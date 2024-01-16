@@ -9,7 +9,7 @@
 #include <time.h>
 #include <setjmp.h>
 
-#include "esc_seq.h"
+#include "utils/esc_seq.h"
 
 #ifndef TAU_TEST
 # error "TAU_TEST must be defined when using test.h"
