@@ -18,6 +18,7 @@
 #define TAU_GENERATOR_H
 
 #include <llvm-c/Types.h>
+#include <llvm-c/TargetMachine.h>
 
 #include "ast.h"
 #include "typetable.h"
@@ -760,11 +761,13 @@ void generator_visit_prog(generator_t* gen, ast_prog_t* node);
  * \brief Generates code for the entire program AST.
  *
  * \param[in] gen Pointer to the generator.
- * \param[in,out] context LLVM context.
- * \param[in,out] module LLVM module.
+ * \param[in,out] llvm_context The LLVM context to be used.
+ * \param[in,out] llvm_machine The LLVM target machine to be used.
+ * \param[in,out] llvm_layoyt The LLVM target data layout to be used.
+ * \param[in,out] llvm_module The LLVM module to be used.
  * \param[in] typetable Type table containing type information.
  * \param[in,out] node Pointer to the root of the program AST.
  */
-void generator_generate(generator_t* gen, LLVMContextRef context, LLVMModuleRef module, typetable_t* typetable, ast_node_t* node);
+void generator_generate(generator_t* gen, LLVMContextRef llvm_context, LLVMTargetMachineRef llvm_machine, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_module, typetable_t* typetable, ast_node_t* node);
 
 #endif

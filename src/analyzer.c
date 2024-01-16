@@ -25,7 +25,7 @@ struct analyzer_t
 {
   symtable_t* symtable; // Pointer to the root symbol table.
   typetable_t* typetable; // Pointer to the type table.
-  typebuilder_t* builder; // Pointer to the type builder.
+  typebuilder_t* typebuilder; // Pointer to the type typebuilder.
   list_t* scopes; // List of nodes representing scopes.
 };
 
@@ -176,7 +176,7 @@ void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* scope, ast_e
   case OP_SIZEOF:
   case OP_ALIGNOF:
   {
-    node_desc = typebuilder_build_const(analyzer->builder, typebuilder_build_usize(analyzer->builder));
+    node_desc = typebuilder_build_const(analyzer->typebuilder, typebuilder_build_usize(analyzer->typebuilder));
     break;
   }
   case OP_ARIT_INC_PRE:
@@ -234,7 +234,7 @@ void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* scope, ast_e
     
     typedesc_t* pointed_desc = ((typedesc_ptr_t*)typedesc_remove_const_ref_mut(expr_desc))->base_type;
 
-    node_desc = typebuilder_build_ref(analyzer->builder, pointed_desc);
+    node_desc = typebuilder_build_ref(analyzer->typebuilder, pointed_desc);
     break;
   }
   case OP_ADDR:
@@ -242,7 +242,7 @@ void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* scope, ast_e
     if (typedesc_remove_const(expr_desc)->kind != TYPEDESC_REF)
       report_error_expected_reference_type(node->expr->tok->loc);
 
-    node_desc = typebuilder_build_ptr(analyzer->builder, typedesc_remove_const_ref(expr_desc));
+    node_desc = typebuilder_build_ptr(analyzer->typebuilder, typedesc_remove_const_ref(expr_desc));
     break;
   }
   default:
@@ -250,7 +250,7 @@ void analyzer_visit_expr_op_unary(analyzer_t* analyzer, symtable_t* scope, ast_e
   }
 
   if (expr_desc->kind == TYPEDESC_CONST && node_desc->kind != TYPEDESC_CONST)
-    node_desc = typebuilder_build_const(analyzer->builder, node_desc);
+    node_desc = typebuilder_build_const(analyzer->typebuilder, node_desc);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, node_desc);
 }
@@ -312,7 +312,7 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* scope, ast_
     if (typedesc_remove_const_ref_mut(rhs_desc)->kind != TYPEDESC_BOOL)
       report_error_expected_bool_type(node->rhs->tok->loc);
 
-    node_desc = typebuilder_build_bool(analyzer->builder);
+    node_desc = typebuilder_build_bool(analyzer->typebuilder);
     break;
   }
   case OP_COMP_EQ:
@@ -328,7 +328,7 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* scope, ast_
     if (!typedesc_is_arithmetic(typedesc_remove_const_ref_mut(rhs_desc)))
       report_error_expected_arithmetic_type(node->rhs->tok->loc);
 
-    node_desc = typebuilder_build_bool(analyzer->builder);
+    node_desc = typebuilder_build_bool(analyzer->typebuilder);
     break;
   }
   case OP_ASSIGN:
@@ -350,7 +350,7 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* scope, ast_
   }
 
   if (lhs_desc->kind == TYPEDESC_CONST && rhs_desc->kind == TYPEDESC_CONST)
-    node_desc = typebuilder_build_const(analyzer->builder, node_desc);
+    node_desc = typebuilder_build_const(analyzer->typebuilder, node_desc);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, node_desc);
 }
@@ -564,7 +564,7 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
       typedesc_t* desc = typetable_lookup(analyzer->typetable, decl->decl);
       assert(desc != NULL);
 
-      desc = typebuilder_build_ref(analyzer->builder, desc);
+      desc = typebuilder_build_ref(analyzer->typebuilder, desc);
 
       typetable_insert(analyzer->typetable, (ast_node_t*)decl, desc);
 
@@ -575,19 +575,19 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
     }
   }
   case AST_EXPR_LIT_INT:
-    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i32(analyzer->builder));
+    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i32(analyzer->typebuilder));
     break;
   case AST_EXPR_LIT_FLT:
-    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_f32(analyzer->builder));
+    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_f32(analyzer->typebuilder));
     break;
   case AST_EXPR_LIT_STR:
-    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_ptr(analyzer->builder, typebuilder_build_u8(analyzer->builder)));
+    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_ptr(analyzer->typebuilder, typebuilder_build_u8(analyzer->typebuilder)));
     break;
   case AST_EXPR_LIT_CHAR:
-    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u8(analyzer->builder));
+    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u8(analyzer->typebuilder));
     break;
   case AST_EXPR_LIT_BOOL:
-    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_bool(analyzer->builder));
+    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_bool(analyzer->typebuilder));
     break;
   case AST_EXPR_OP_UNARY:
   case AST_EXPR_OP_BINARY:
@@ -687,7 +687,7 @@ void analyzer_visit_type_mut(analyzer_t* analyzer, symtable_t* scope, ast_type_m
 
   assert(typedesc_can_add_mut(base_type));
 
-  typedesc_t* desc = typebuilder_build_mut(analyzer->builder, base_type);
+  typedesc_t* desc = typebuilder_build_mut(analyzer->typebuilder, base_type);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, desc);
 }
@@ -701,7 +701,7 @@ void analyzer_visit_type_const(analyzer_t* analyzer, symtable_t* scope, ast_type
 
   assert(typedesc_can_add_const(base_type));
 
-  typedesc_t* desc = typebuilder_build_const(analyzer->builder, base_type);
+  typedesc_t* desc = typebuilder_build_const(analyzer->typebuilder, base_type);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, desc);
 }
@@ -715,7 +715,7 @@ void analyzer_visit_type_ptr(analyzer_t* analyzer, symtable_t* scope, ast_type_p
   
   assert(typedesc_can_add_ptr(base_type));
 
-  typedesc_t* desc = typebuilder_build_ptr(analyzer->builder, base_type);
+  typedesc_t* desc = typebuilder_build_ptr(analyzer->typebuilder, base_type);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, desc);
 }
@@ -746,7 +746,7 @@ void analyzer_visit_type_array(analyzer_t* analyzer, symtable_t* scope, ast_type
   assert(size_value > 0);
   assert(typedesc_can_add_array(base_type));
 
-  typedesc_t* desc = typebuilder_build_array(analyzer->builder, (size_t)size_value, base_type);
+  typedesc_t* desc = typebuilder_build_array(analyzer->typebuilder, (size_t)size_value, base_type);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, desc);
 }
@@ -760,7 +760,7 @@ void analyzer_visit_type_ref(analyzer_t* analyzer, symtable_t* scope, ast_type_r
   
   assert(typedesc_can_add_ref(base_type));
 
-  typedesc_t* desc = typebuilder_build_ref(analyzer->builder, base_type);
+  typedesc_t* desc = typebuilder_build_ref(analyzer->typebuilder, base_type);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, desc);
 }
@@ -774,7 +774,7 @@ void analyzer_visit_type_opt(analyzer_t* analyzer, symtable_t* scope, ast_type_o
 
   assert(typedesc_can_add_opt(base_type));
 
-  typedesc_t* desc = typebuilder_build_opt(analyzer->builder, base_type);
+  typedesc_t* desc = typebuilder_build_opt(analyzer->typebuilder, base_type);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, desc);
 }
@@ -802,7 +802,7 @@ void analyzer_visit_type_fun(analyzer_t* analyzer, symtable_t* scope, ast_type_f
     param_types[i++] = param_desc;
   }
 
-  typedesc_t* desc = typebuilder_build_fun(analyzer->builder, return_type, param_types, list_size(node->params), node->is_vararg, node->abi);
+  typedesc_t* desc = typebuilder_build_fun(analyzer->typebuilder, return_type, param_types, list_size(node->params), node->is_vararg, node->abi);
 
   free(param_types);
 
@@ -832,7 +832,7 @@ void analyzer_visit_type_gen(analyzer_t* analyzer, symtable_t* scope, ast_type_g
     param_types[i++] = param_desc;
   }
 
-  typedesc_t* desc = typebuilder_build_gen(analyzer->builder, yield_type, param_types, list_size(node->params));
+  typedesc_t* desc = typebuilder_build_gen(analyzer->typebuilder, yield_type, param_types, list_size(node->params));
 
   free(param_types);
 
@@ -852,20 +852,20 @@ ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* scope, ast_typ
   case AST_TYPE_OPT:    analyzer_visit_type_opt  (analyzer, scope, (ast_type_opt_t*  )node); break;
   case AST_TYPE_FUN:    analyzer_visit_type_fun  (analyzer, scope, (ast_type_fun_t*  )node); break;
   case AST_TYPE_GEN:    analyzer_visit_type_gen  (analyzer, scope, (ast_type_gen_t*  )node); break;
-  case AST_TYPE_I8:     typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i8   (analyzer->builder)); break;
-  case AST_TYPE_I16:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i16  (analyzer->builder)); break;
-  case AST_TYPE_I32:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i32  (analyzer->builder)); break;
-  case AST_TYPE_I64:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i64  (analyzer->builder)); break;
-  case AST_TYPE_ISIZE:  typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_isize(analyzer->builder)); break;
-  case AST_TYPE_U8:     typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u8   (analyzer->builder)); break;
-  case AST_TYPE_U16:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u16  (analyzer->builder)); break;
-  case AST_TYPE_U32:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u32  (analyzer->builder)); break;
-  case AST_TYPE_U64:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u64  (analyzer->builder)); break;
-  case AST_TYPE_USIZE:  typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_usize(analyzer->builder)); break;
-  case AST_TYPE_F32:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_f32  (analyzer->builder)); break;
-  case AST_TYPE_F64:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_f64  (analyzer->builder)); break;
-  case AST_TYPE_BOOL:   typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_bool (analyzer->builder)); break;
-  case AST_TYPE_UNIT:   typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_unit (analyzer->builder)); break;
+  case AST_TYPE_I8:     typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i8   (analyzer->typebuilder)); break;
+  case AST_TYPE_I16:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i16  (analyzer->typebuilder)); break;
+  case AST_TYPE_I32:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i32  (analyzer->typebuilder)); break;
+  case AST_TYPE_I64:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i64  (analyzer->typebuilder)); break;
+  case AST_TYPE_ISIZE:  typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_isize(analyzer->typebuilder)); break;
+  case AST_TYPE_U8:     typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u8   (analyzer->typebuilder)); break;
+  case AST_TYPE_U16:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u16  (analyzer->typebuilder)); break;
+  case AST_TYPE_U32:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u32  (analyzer->typebuilder)); break;
+  case AST_TYPE_U64:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_u64  (analyzer->typebuilder)); break;
+  case AST_TYPE_USIZE:  typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_usize(analyzer->typebuilder)); break;
+  case AST_TYPE_F32:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_f32  (analyzer->typebuilder)); break;
+  case AST_TYPE_F64:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_f64  (analyzer->typebuilder)); break;
+  case AST_TYPE_BOOL:   typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_bool (analyzer->typebuilder)); break;
+  case AST_TYPE_UNIT:   typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_unit (analyzer->typebuilder)); break;
   case AST_TYPE_MEMBER: return analyzer_visit_type_member(analyzer, scope, (ast_type_member_t*)node);
   default: unreachable();
   }
@@ -955,7 +955,7 @@ typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* scope, 
   if (!analyzer_scope_can_return(analyzer))
     report_error_return_inside_defer(node->tok->loc);
 
-  typedesc_t* expr_desc = typebuilder_build_unit(analyzer->builder);
+  typedesc_t* expr_desc = typebuilder_build_unit(analyzer->typebuilder);
 
   if (node->expr != NULL)
   {
@@ -1142,7 +1142,7 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* scope, ast_decl_f
   typedesc_t* return_desc = typetable_lookup(analyzer->typetable, node->return_type);
   assert(return_desc != NULL);
 
-  typedesc_t* fun_desc = typebuilder_build_fun(analyzer->builder, return_desc, param_types, param_count, node->is_vararg, node->abi);
+  typedesc_t* fun_desc = typebuilder_build_fun(analyzer->typebuilder, return_desc, param_types, param_count, node->is_vararg, node->abi);
 
   free(param_types);
 
@@ -1196,7 +1196,7 @@ void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* scope, ast_decl_g
   typedesc_t* yield_desc = typetable_lookup(analyzer->typetable, node->yield_type);
   assert(yield_desc != NULL);
 
-  typedesc_t* gen_desc = typebuilder_build_gen(analyzer->builder, yield_desc, param_types, param_count);
+  typedesc_t* gen_desc = typebuilder_build_gen(analyzer->typebuilder, yield_desc, param_types, param_count);
 
   free(param_types);
 
@@ -1236,7 +1236,7 @@ void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* scope, ast_dec
     field_types[i++] = var_desc;
   }
 
-  typedesc_t* struct_desc = typebuilder_build_struct(analyzer->builder, (ast_node_t*)node, field_types, list_size(node->members));
+  typedesc_t* struct_desc = typebuilder_build_struct(analyzer->typebuilder, (ast_node_t*)node, field_types, list_size(node->members));
 
   free(field_types);
 
@@ -1272,7 +1272,7 @@ void analyzer_visit_decl_union(analyzer_t* analyzer, symtable_t* scope, ast_decl
     field_types[i++] = var_desc;
   }
 
-  typedesc_t* union_desc = typebuilder_build_union(analyzer->builder, (ast_node_t*)node, field_types, list_size(node->members));
+  typedesc_t* union_desc = typebuilder_build_union(analyzer->typebuilder, (ast_node_t*)node, field_types, list_size(node->members));
 
   free(field_types);
 
@@ -1294,7 +1294,7 @@ void analyzer_visit_decl_enum(analyzer_t* analyzer, symtable_t* scope, ast_decl_
 
   node->scope = symtable_init(scope);
 
-  typedesc_t* enum_desc = typebuilder_build_enum(analyzer->builder, (ast_node_t*)node);
+  typedesc_t* enum_desc = typebuilder_build_enum(analyzer->typebuilder, (ast_node_t*)node);
 
   LIST_FOR_LOOP(it, node->members)
     analyzer_visit_decl_enum_constant(analyzer, node->scope, (typedesc_enum_t*)enum_desc, (ast_decl_enum_constant_t*)list_node_get(it));
@@ -1358,13 +1358,13 @@ void analyzer_visit_prog(analyzer_t* analyzer, symtable_t* scope, ast_prog_t* no
     analyzer_visit_decl(analyzer, prog_scope, (ast_decl_t*)list_node_get(it));
 }
 
-void analyzer_analyze(analyzer_t* analyzer, symtable_t* symtable, typetable_t* typetable, typebuilder_t* builder, ast_node_t* node)
+void analyzer_analyze(analyzer_t* analyzer, symtable_t* symtable, typetable_t* typetable, typebuilder_t* typebuilder, ast_node_t* node)
 {
   assert(node->kind == AST_PROG);
 
   analyzer->symtable = symtable;
   analyzer->typetable = typetable;
-  analyzer->builder = builder;
+  analyzer->typebuilder = typebuilder;
 
   analyzer_visit_prog(analyzer, analyzer->symtable, (ast_prog_t*)node);
 }

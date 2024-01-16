@@ -489,9 +489,9 @@ void analyzer_visit_prog(analyzer_t* analyzer, symtable_t* scope, ast_prog_t* no
  * \param[in] analyzer Pointer to the semantic analyzer.
  * \param[in,out] symtable Pointer to the symbol table to be used.
  * \param[in,out] typetable Pointer to the type table to be used.
- * \param[in,out] builder Pointer to the type builder to be used.
+ * \param[in,out] typebuilder Pointer to the type builder to be used.
  * \param[in,out] node Pointer to the root program node.
  */
-void analyzer_analyze(analyzer_t* analyzer, symtable_t* symtable, typetable_t* typetable, typebuilder_t* builder, ast_node_t* node);
+void analyzer_analyze(analyzer_t* analyzer, symtable_t* symtable, typetable_t* typetable, typebuilder_t* typebuilder, ast_node_t* node);
 
 #endif

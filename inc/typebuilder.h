@@ -17,6 +17,9 @@
 #ifndef TAU_TYPEBUILDER_H
 #define TAU_TYPEBUILDER_H
 
+#include <llvm-c/Types.h>
+#include <llvm-c/Target.h>
+
 #include "typedesc.h"
 #include "str.h"
 
@@ -33,9 +36,11 @@ typedef struct typebuilder_t typebuilder_t;
 /**
  * \brief Initializes a new type builder.
  *
+ * \param[in] llvm_context The LLVM context to be used.
+ * \param[in] llvm_layout The LLVM target data layout to be used.
  * \returns A pointer to the newly initialized type builder.
  */
-typebuilder_t* typebuilder_init(void);
+typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef llvm_layout);
 
 /**
  * \brief Frees the resources associated with the type builder.

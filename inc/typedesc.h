@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <llvm-c/Types.h>
+
 #include "ast.h"
 #include "list.h"
 
@@ -31,6 +33,7 @@
   struct\
   {\
     typedesc_kind_t kind; /** Type kind. */\
+    LLVMTypeRef llvm_type; /** LLVM type. */\
   }\
 
 /**

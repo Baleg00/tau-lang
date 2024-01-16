@@ -7,6 +7,7 @@
 #include <llvm-c/BitWriter.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Target.h>
+#include <llvm-c/TargetMachine.h>
 
 #include "analyzer.h"
 #include "arena.h"
@@ -30,6 +31,11 @@
 
 struct compiler_t
 {
+  LLVMContextRef llvm_context;
+  LLVMTargetRef llvm_target;
+  LLVMTargetDataRef llvm_layout;
+  LLVMTargetMachineRef llvm_machine;
+
   list_t* input_files;
 
   struct
@@ -47,6 +53,81 @@ struct compiler_t
     log_level_t log_level;
   } args;
 };
+
+static void compiler_llvm_init(compiler_t* compiler)
+{
+  if (LLVMInitializeNativeTarget())
+  {
+    log_fatal("llvm", "Failed to initialize native target.");
+    exit(EXIT_FAILURE);
+  }
+
+  char* error_str = NULL;
+
+  compiler->llvm_context = LLVMContextCreate();
+
+  char* target_triple = LLVMGetDefaultTargetTriple();
+
+  if (target_triple == NULL)
+  {
+    log_fatal("llvm", "Failed to get target triple.");
+    exit(EXIT_FAILURE);
+  }
+  
+  if (LLVMGetTargetFromTriple(target_triple, &compiler->llvm_target, &error_str))
+  {
+    log_fatal("llvm", "Failed to get target from triple.");
+    fputs(error_str, stderr);
+    exit(EXIT_FAILURE);
+  }
+
+  char* cpu_name = LLVMGetHostCPUName();
+
+  if (cpu_name == NULL)
+  {
+    log_fatal("llvm", "Failed to get target CPU name.");
+    exit(EXIT_FAILURE);
+  }
+
+  char* cpu_features = LLVMGetHostCPUFeatures();
+
+  if (cpu_features == NULL)
+  {
+    log_fatal("llvm", "Failed to get target CPU features.");
+    exit(EXIT_FAILURE);
+  }
+
+  compiler->llvm_machine = LLVMCreateTargetMachine(
+    compiler->llvm_target,
+    target_triple,
+    cpu_name,
+    cpu_features,
+    LLVMCodeGenLevelDefault,
+    LLVMRelocDefault,
+    LLVMCodeModelDefault
+  );
+
+  if (compiler->llvm_machine == NULL)
+  {
+    log_fatal("llvm", "Failed to create target machine.");
+    exit(EXIT_FAILURE);
+  }
+
+  compiler->llvm_layout = LLVMCreateTargetDataLayout(compiler->llvm_machine);
+
+  if (compiler->llvm_layout == NULL)
+  {
+    log_fatal("llvm", "Failed to create target data layout.");
+    exit(EXIT_FAILURE);
+  }
+}
+
+static void compiler_llvm_free(compiler_t* compiler)
+{
+  LLVMDisposeTargetData(compiler->llvm_layout);
+  LLVMDisposeTargetMachine(compiler->llvm_machine);
+  LLVMContextDispose(compiler->llvm_context);
+}
 
 static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_data)
 {
@@ -157,11 +238,15 @@ compiler_t* compiler_init(void)
 
   compiler->args.log_level = LOG_LEVEL_WARN;
 
+  compiler_llvm_init(compiler);
+
   return compiler;
 }
 
 void compiler_free(compiler_t* compiler)
 {
+  compiler_llvm_free(compiler);
+  
   list_free(compiler->input_files);
 
   ast_cleanup();
@@ -171,8 +256,6 @@ void compiler_free(compiler_t* compiler)
 
 int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 {
-  LLVMInitializeNativeTarget();
-
   cli_opt_t opts[] = {
     cli_opt_help(),
     cli_opt_version(TAU_VERSION),
@@ -242,10 +325,12 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     log_trace("main", "(%s) Semantic analysis.", input_file_name);
 
+    LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", compiler->llvm_context);
+
     analyzer_t* analyzer = analyzer_init();
     symtable_t* symtable = symtable_init(NULL);
     typetable_t* typetable = typetable_init();
-    typebuilder_t* builder = typebuilder_init();
+    typebuilder_t* builder = typebuilder_init(compiler->llvm_context, compiler->llvm_layout);
 
     time_it("analyzer", analyzer_analyze(analyzer, symtable, typetable, builder, root));
 
@@ -255,10 +340,8 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     log_trace("main", "(%s) LLVM IR generation.", input_file_name);
 
     generator_t* generator = generator_init();
-    LLVMContextRef llvm_ctx = LLVMContextCreate();
-    LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", llvm_ctx);
 
-    time_it("generator", generator_generate(generator, llvm_ctx, llvm_module, typetable, root));
+    time_it("generator", generator_generate(generator, compiler->llvm_context, compiler->llvm_machine, compiler->llvm_layout, llvm_module, typetable, root));
 
     if (compiler->flags.dump_ll)
       compiler_dump_ll(compiler, input_file_path, input_file_name, llvm_module);
@@ -269,7 +352,6 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     log_trace("main", "(%s) Cleanup.", input_file_name);
 
     LLVMDisposeModule(llvm_module);
-    LLVMContextDispose(llvm_ctx);
     generator_free(generator);
 
     typebuilder_free(builder);
