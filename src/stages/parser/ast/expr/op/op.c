@@ -5,11 +5,11 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "stages/parser/op.h"
+#include "stages/parser/ast/expr/op/op.h"
 
 #include "utils/common.h"
 
-const char* op_kind_to_string(op_kind_t kind)
+const char* op_kind_to_cstr(op_kind_t kind)
 {
   switch (kind)
   {

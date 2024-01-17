@@ -44,7 +44,6 @@ struct typebuilder_t
   set_t* set_ref;
   set_t* set_opt;
   set_t* set_fun;
-  set_t* set_gen;
   set_t* set_struct;
   set_t* set_union;
   set_t* set_enum;
@@ -69,7 +68,7 @@ static int typebuilder_cmp_fun(void* lhs, void* rhs)
   }
 
   lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->is_vararg, sizeof(bool));
-  lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->abi, sizeof(abi_kind_t));
+  lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->callconv, sizeof(callconv_kind_t));
 
   size_t rhs_hash = hash_digest(&rhs_desc->return_type, sizeof(typedesc_t*));
 
@@ -80,37 +79,7 @@ static int typebuilder_cmp_fun(void* lhs, void* rhs)
   }
 
   rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->is_vararg, sizeof(bool));
-  rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->abi, sizeof(abi_kind_t));
-
-  if (lhs_hash < rhs_hash)
-    return -1;
-
-  if (lhs_hash > rhs_hash)
-    return 1;
-
-  return 0;
-}
-
-static int typebuilder_cmp_gen(void* lhs, void* rhs)
-{
-  typedesc_gen_t* lhs_desc = (typedesc_gen_t*)lhs;
-  typedesc_gen_t* rhs_desc = (typedesc_gen_t*)rhs;
-
-  size_t lhs_hash = hash_digest(&lhs_desc->yield_type, sizeof(typedesc_t*));
-
-  LIST_FOR_LOOP(it, lhs_desc->param_types)
-  {
-    typedesc_t* param_desc = (typedesc_t*)list_node_get(it);
-    lhs_hash = hash_combine_with_data(lhs_hash, &param_desc, sizeof(typedesc_t*));
-  }
-
-  size_t rhs_hash = hash_digest(&rhs_desc->yield_type, sizeof(typedesc_t*));
-
-  LIST_FOR_LOOP(it, rhs_desc->param_types)
-  {
-    typedesc_t* param_desc = (typedesc_t*)list_node_get(it);
-    rhs_hash = hash_combine_with_data(rhs_hash, &param_desc, sizeof(typedesc_t*));
-  }
+  rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->callconv, sizeof(callconv_kind_t));
 
   if (lhs_hash < rhs_hash)
     return -1;
@@ -286,7 +255,6 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->set_ref    = set_init(typebuilder_cmp_modifier);
   builder->set_opt    = set_init(typebuilder_cmp_modifier);
   builder->set_fun    = set_init(typebuilder_cmp_fun);
-  builder->set_gen    = set_init(typebuilder_cmp_gen);
   builder->set_struct = set_init(typebuilder_cmp_struct);
   builder->set_union  = set_init(typebuilder_cmp_union);
   builder->set_enum   = set_init(typebuilder_cmp_enum);
@@ -318,7 +286,6 @@ void typebuilder_free(typebuilder_t* builder)
   set_for_each(builder->set_ref,    (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_opt,    (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_fun,    (set_for_each_func_t)typedesc_free);
-  set_for_each(builder->set_gen,    (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_struct, (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_union,  (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_enum,   (set_for_each_func_t)typedesc_free);
@@ -330,7 +297,6 @@ void typebuilder_free(typebuilder_t* builder)
   set_free(builder->set_ref);
   set_free(builder->set_opt);
   set_free(builder->set_fun);
-  set_free(builder->set_gen);
   set_free(builder->set_struct);
   set_free(builder->set_union);
   set_free(builder->set_enum);
@@ -438,13 +404,13 @@ typedesc_t* typebuilder_build_unit(typebuilder_t* builder)
   return builder->desc_unit;
 }
 
-typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count, bool is_vararg, abi_kind_t abi)
+typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count, bool is_vararg, callconv_kind_t callconv)
 {
   typedesc_fun_t* desc = (typedesc_fun_t*)typedesc_init(TYPEDESC_FUN);
   desc->return_type = return_type;
   desc->param_types = param_count == 0 ? NULL : list_init_from_buffer(param_types, param_count);
   desc->is_vararg = is_vararg;
-  desc->abi = abi;
+  desc->callconv = callconv;
 
   typedesc_t* result = (typedesc_t*)set_get(builder->set_fun, desc);
 
@@ -475,27 +441,6 @@ typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_typ
     free(llvm_param_types);
 
   set_add(builder->set_fun, desc);
-
-  return (typedesc_t*)desc;
-}
-
-typedesc_t* typebuilder_build_gen(typebuilder_t* builder, typedesc_t* yield_type, typedesc_t* param_types[], size_t param_count)
-{
-  typedesc_gen_t* desc = (typedesc_gen_t*)typedesc_init(TYPEDESC_GEN);
-  desc->yield_type = yield_type;
-  desc->param_types = param_count == 0 ? NULL : list_init_from_buffer(param_types, param_count);
-
-  typedesc_t* result = (typedesc_t*)set_get(builder->set_gen, desc);
-
-  if (result != NULL)
-  {
-    typedesc_free((typedesc_t*)desc);
-    return result;
-  }
-
-  desc->llvm_type = NULL;
-
-  set_add(builder->set_gen, desc);
 
   return (typedesc_t*)desc;
 }

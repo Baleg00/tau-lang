@@ -77,14 +77,6 @@ ast_node_t* analyzer_scope_innermost_loop(analyzer_t* analyzer);
 ast_node_t* analyzer_scope_innermost_fun(analyzer_t* analyzer);
 
 /**
- * \brief Retrieves the innermost generator node from the scope stack.
- * 
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns Pointer to the node or NULL if there is no matching scope.
- */
-ast_node_t* analyzer_scope_innermost_gen(analyzer_t* analyzer);
-
-/**
  * \brief Retrieves the innermost defer node from the scope stack.
  * 
  * \param[in] analyzer Pointer to the semantic analyzer.
@@ -107,14 +99,6 @@ bool analyzer_scope_can_early_exit_loop(analyzer_t* analyzer);
  * \returns `true` if a return is possible, `false` otherwise.
  */
 bool analyzer_scope_can_return(analyzer_t* analyzer);
-
-/**
- * \brief Determines if a yield is possible from the current scope.
- * 
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \returns `true` if a yield is possible, `false` otherwise.
- */
-bool analyzer_scope_can_yield(analyzer_t* analyzer);
 
 /**
  * \brief Visits and analyzes a unary expression.
@@ -197,7 +181,7 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
  * \param[in] node Pointer to the member type access node.
  * \returns A pointer to a node the original should be replaced with.
  */
-ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* scope, ast_type_member_t* node);
+ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* scope, ast_type_mbr_t* node);
 
 /**
  * \brief Visits and analyzes a mutable type.
@@ -261,15 +245,6 @@ void analyzer_visit_type_opt(analyzer_t* analyzer, symtable_t* scope, ast_type_o
  * \param[in] node Pointer to the function type node.
  */
 void analyzer_visit_type_fun(analyzer_t* analyzer, symtable_t* scope, ast_type_fun_t* node);
-
-/**
- * \brief Visits and analyzes a generator type.
- *
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \param[in] scope Pointer to the current symbol table scope.
- * \param[in] node Pointer to the generator type node.
- */
-void analyzer_visit_type_gen(analyzer_t* analyzer, symtable_t* scope, ast_type_gen_t* node);
 
 /**
  * \brief Visits and analyzes a type.
@@ -337,16 +312,6 @@ void analyzer_visit_stmt_continue(analyzer_t* analyzer, symtable_t* scope, ast_s
 typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* scope, ast_stmt_return_t* node);
 
 /**
- * \brief Visits and analyzes a yield statment.
- *
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \param[in] scope Pointer to the current symbol table scope.
- * \param[in] node Pointer to the yield statement node.
- * \returns A pointer to the type descriptor of the yielded expression.
- */
-typedesc_t* analyzer_visit_stmt_yield(analyzer_t* analyzer, symtable_t* scope, ast_stmt_yield_t* node);
-
-/**
  * \brief Visits and analyzes a defer statment.
  *
  * \param[in] analyzer Pointer to the semantic analyzer.
@@ -409,15 +374,6 @@ void analyzer_visit_decl_param(analyzer_t* analyzer, symtable_t* scope, ast_decl
  * \param[in] node Pointer to the function declaration node.
  */
 void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* scope, ast_decl_fun_t* node);
-
-/**
- * \brief Visits and analyzes a generator declaration.
- *
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \param[in] scope Pointer to the current symbol table scope.
- * \param[in] node Pointer to the generator declaration node.
- */
-void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* scope, ast_decl_gen_t* node);
 
 /**
  * \brief Visits and analyzes a structure declaration.

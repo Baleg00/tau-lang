@@ -1,30 +1,29 @@
 /**
  * \file op.h
  * 
- * \brief Operator interface.
- * 
- * \details Operators are symbols or keywords that represent specific operations
- * or actions to be performed on data, typically variables or values. These
- * operations include arithmetic calculations (e.g., addition, subtraction),
- * logical comparisons (e.g., equality, greater than), assignment of values to
- * variables, and more.
+ * \brief Abstract syntax tree operation expression node interface.
  * 
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
  */
 
-#ifndef TAU_OP_H
-#define TAU_OP_H
+#ifndef TAU_AST_EXPR_OP_H
+#define TAU_AST_EXPR_OP_H
 
-#include <stdbool.h>
+#include "stages/parser/ast/expr/expr.h"
+
+/**
+ * \brief Header for all AST operation expression nodes.
+ */
+#define AST_EXPR_OP_HEADER\
+  AST_EXPR_HEADER;\
+  op_kind_t op_kind
 
 /**
  * \brief Enumeration of operator kinds.
  */
-typedef enum op_kind_e
+typedef enum op_kind_t
 {
-  OP_UNKNOWN, // Unknown operator
-
   OP_SIZEOF, // Size-of operator `sizeof`
   OP_ALIGNOF, // Alignment-of operator `alignof`
   OP_TYPEOF, // Type-of operator `typeof`
@@ -84,12 +83,20 @@ typedef enum op_kind_e
 } op_kind_t;
 
 /**
- * \brief Returns a string representation of an operator kind.
+ * \brief AST operation expression node.
+ */
+typedef struct ast_expr_op_t
+{
+  AST_EXPR_OP_HEADER;
+} ast_expr_op_t;
+
+/**
+ * \brief Returns a C-string representation of an operator kind.
  * 
  * \param[in] kind Operator kind.
- * \returns String representation.
+ * \returns C-string representation.
 */
-const char* op_kind_to_string(op_kind_t kind);
+const char* op_kind_to_cstr(op_kind_t kind);
 
 /**
  * \brief Returns the precedence of an operator.

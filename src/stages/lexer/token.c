@@ -72,19 +72,14 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_AS:                       return "TOK_KW_AS";
   case TOK_KW_SIZEOF:                   return "TOK_KW_SIZEOF";
   case TOK_KW_ALIGNOF:                  return "TOK_KW_ALIGNOF";
-  case TOK_KW_TYPEOF:                   return "TOK_KW_TYPEOF";
   case TOK_KW_IN:                       return "TOK_KW_IN";
   case TOK_KW_PUB:                      return "TOK_KW_PUB";
   case TOK_KW_EXTERN:                   return "TOK_KW_EXTERN";
-  case TOK_KW_ASYNC:                    return "TOK_KW_ASYNC";
-  case TOK_KW_AWAIT:                    return "TOK_KW_AWAIT";
   case TOK_KW_FUN:                      return "TOK_KW_FUN";
-  case TOK_KW_GEN:                      return "TOK_KW_GEN";
   case TOK_KW_STRUCT:                   return "TOK_KW_STRUCT";
   case TOK_KW_UNION:                    return "TOK_KW_UNION";
   case TOK_KW_ENUM:                     return "TOK_KW_ENUM";
   case TOK_KW_MOD:                      return "TOK_KW_MOD";
-  case TOK_KW_USE:                      return "TOK_KW_USE";
   case TOK_KW_IF:                       return "TOK_KW_IF";
   case TOK_KW_THEN:                     return "TOK_KW_THEN";
   case TOK_KW_ELSE:                     return "TOK_KW_ELSE";
@@ -94,11 +89,9 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_BREAK:                    return "TOK_KW_BREAK";
   case TOK_KW_CONTINUE:                 return "TOK_KW_CONTINUE";
   case TOK_KW_RETURN:                   return "TOK_KW_RETURN";
-  case TOK_KW_YIELD:                    return "TOK_KW_YIELD";
   case TOK_KW_DEFER:                    return "TOK_KW_DEFER";
   case TOK_KW_MUT:                      return "TOK_KW_MUT";
   case TOK_KW_CONST:                    return "TOK_KW_CONST";
-  case TOK_KW_TYPE:                     return "TOK_KW_TYPE";
   case TOK_KW_I8:                       return "TOK_KW_I8";
   case TOK_KW_I16:                      return "TOK_KW_I16";
   case TOK_KW_I32:                      return "TOK_KW_I32";
@@ -113,7 +106,6 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_F64:                      return "TOK_KW_F64";
   case TOK_KW_BOOL:                     return "TOK_KW_BOOL";
   case TOK_KW_UNIT:                     return "TOK_KW_UNIT";
-  case TOK_KW_SELF:                     return "TOK_KW_SELF";
   case TOK_PUNCT_PLUS:                  return "TOK_PUNCT_PLUS";
   case TOK_PUNCT_PLUS_PLUS:             return "TOK_PUNCT_PLUS_PLUS";
   case TOK_PUNCT_PLUS_EQUAL:            return "TOK_PUNCT_PLUS_EQUAL";
@@ -205,19 +197,14 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_AS:
   case TOK_KW_SIZEOF:
   case TOK_KW_ALIGNOF:
-  case TOK_KW_TYPEOF:
   case TOK_KW_IN:
   case TOK_KW_PUB:
   case TOK_KW_EXTERN:
-  case TOK_KW_ASYNC:
-  case TOK_KW_AWAIT:
   case TOK_KW_FUN:
-  case TOK_KW_GEN:
   case TOK_KW_STRUCT:
   case TOK_KW_UNION:
   case TOK_KW_ENUM:
   case TOK_KW_MOD:
-  case TOK_KW_USE:
   case TOK_KW_IF:
   case TOK_KW_THEN:
   case TOK_KW_ELSE:
@@ -227,11 +214,9 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_BREAK:
   case TOK_KW_CONTINUE:
   case TOK_KW_RETURN:
-  case TOK_KW_YIELD:
   case TOK_KW_DEFER:
   case TOK_KW_MUT:
   case TOK_KW_CONST:
-  case TOK_KW_TYPE:
   case TOK_KW_I8:
   case TOK_KW_I16:
   case TOK_KW_I32:
@@ -246,7 +231,6 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_F64:
   case TOK_KW_BOOL:
   case TOK_KW_UNIT:
-  case TOK_KW_SELF:
     return true;
   default:
     return false;

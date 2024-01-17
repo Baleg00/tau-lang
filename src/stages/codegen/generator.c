@@ -975,17 +975,17 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
 
   LLVMCallConv llvm_callconv = LLVMCCallConv;
 
-  switch (node->abi)
+  switch (node->callconv)
   {
-  case ABI_TAU:
-  case ABI_CDECL:      llvm_callconv = LLVMCCallConv;             break;
-  case ABI_STDCALL:    llvm_callconv = LLVMX86StdcallCallConv;    break;
-  case ABI_WIN64:      llvm_callconv = LLVMWin64CallConv;         break;
-  case ABI_SYSV64:     llvm_callconv = LLVMX8664SysVCallConv;     break;
-  case ABI_AAPCS:      llvm_callconv = LLVMARMAAPCSCallConv;      break;
-  case ABI_FASTCALL:   llvm_callconv = LLVMFastCallConv;          break;
-  case ABI_VECTORCALL: llvm_callconv = LLVMX86VectorCallCallConv; break;
-  case ABI_THISCALL:   llvm_callconv = LLVMX86ThisCallCallConv;   break;
+  case CALLCONV_TAU:
+  case CALLCONV_CDECL:      llvm_callconv = LLVMCCallConv;             break;
+  case CALLCONV_STDCALL:    llvm_callconv = LLVMX86StdcallCallConv;    break;
+  case CALLCONV_WIN64:      llvm_callconv = LLVMWin64CallConv;         break;
+  case CALLCONV_SYSV64:     llvm_callconv = LLVMX8664SysVCallConv;     break;
+  case CALLCONV_AAPCS:      llvm_callconv = LLVMARMAAPCSCallConv;      break;
+  case CALLCONV_FASTCALL:   llvm_callconv = LLVMFastCallConv;          break;
+  case CALLCONV_VECTORCALL: llvm_callconv = LLVMX86VectorCallCallConv; break;
+  case CALLCONV_THISCALL:   llvm_callconv = LLVMX86ThisCallCallConv;   break;
   default: unreachable();
   }
 

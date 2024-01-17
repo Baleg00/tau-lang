@@ -115,13 +115,6 @@ void parser_set_ignore_newline(parser_t* par, bool ignore);
 void parser_decl_context_clear(parser_t* par);
 
 /**
- * \brief Parses an attribute list and updates the declaration context.
- * 
- * \param[in] par Parser to be used.
- */
-void parser_parse_decl_context_attrs(parser_t* par);
-
-/**
  * \brief Parses a public modifier and updates the declaration context.
  * 
  * \param[in] par Parser to be used.
@@ -134,13 +127,6 @@ void parser_parse_decl_context_pub(parser_t* par);
  * \param[in] par Parser to be used.
  */
 void parser_parse_decl_context_extern(parser_t* par);
-
-/**
- * \brief Parses an async modifier and updates the declaration context.
- * 
- * \param[in] par Parser to be used.
- */
-void parser_parse_decl_context_async(parser_t* par);
 
 /**
  * \brief Parses a list of nodes delimited by a specific token.
@@ -169,12 +155,12 @@ list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_fun
 list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func);
 
 /**
- * \brief Parses an ABI string literal and returns the corresponding ABI kind.
+ * \brief Parses a string literal and returns the corresponding calling convention kind.
  * 
  * \param[in] par Parser to be used.
- * \returns The ABI kind.
+ * \returns The calling convention kind.
  */
-abi_kind_t parser_parse_abi(parser_t* par);
+callconv_kind_t parser_parse_callconv(parser_t* par);
 
 /**
  * \brief Parses an identifier token.
@@ -183,14 +169,6 @@ abi_kind_t parser_parse_abi(parser_t* par);
  * \returns Identifier node.
  */
 ast_node_t* parser_parse_id(parser_t* par);
-
-/**
- * \brief Parses an attribute.
- * 
- * \param[in] par Parser to be used.
- * \returns Attribute node.
- */
-ast_node_t* parser_parse_attr(parser_t* par);
 
 /**
  * \brief Parses a mutable type.
@@ -266,19 +244,6 @@ ast_node_t* parser_parse_type_opt(parser_t* par);
  * \returns Function type node.
  */
 ast_node_t* parser_parse_type_fun(parser_t* par);
-
-/**
- * \brief Parses a generator type.
- * 
- * \details Generator types are introduced by the `gen` keyword followed by a
- * list of parameter types enclosed within parentheses (`()`) and delimited by
- * commas (`,`). The parameter type list is followed by a colon (`:`) and the
- * yield type.
- * 
- * \param[in] par Parser to be used.
- * \returns Generator type node.
- */
-ast_node_t* parser_parse_type_gen(parser_t* par);
 
 /**
  * \brief Parses a type that may be defined inside another one.
@@ -393,19 +358,6 @@ ast_node_t* parser_parse_stmt_continue(parser_t* par);
 ast_node_t* parser_parse_stmt_return(parser_t* par);
 
 /**
- * \brief Parses a yield-statement.
- * 
- * \details A yield-statement is introduced by the `yield` keyword and is
- * optionally followed by an expression which evaluates to a type matching the
- * containing generator's yield type. If the expression is omitted, the
- * yield type must be the `unit` type.
- * 
- * \param[in] par Parser to be used.
- * \returns Yield-statement node.
- */
-ast_node_t* parser_parse_stmt_yield(parser_t* par);
-
-/**
  * \brief Parses a defer-statement.
  * 
  * \details A defer-statement is introduced by the `defer` keyword and must be
@@ -467,18 +419,6 @@ ast_node_t* parser_parse_decl_var(parser_t* par);
  * \returns Function declaration node.
  */
 ast_node_t* parser_parse_decl_fun(parser_t* par);
-
-/**
- * \brief Parses a generator declaration.
- * 
- * \details A generator is introduced by the `gen` keyword followed by an
- * identifier, a parameter list and a yield type. The generator body may be
- * enclosed within braces (`{}`) if it consists of multiple statements.
- * 
- * \param[in] par Parser to be used.
- * \returns Generator declaration node.
- */
-ast_node_t* parser_parse_decl_gen(parser_t* par);
 
 /**
  * \brief Parses a struct declaration.

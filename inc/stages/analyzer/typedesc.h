@@ -169,7 +169,7 @@ typedef struct typedesc_fun_t
   list_t* param_types; // Parameter types.
   typedesc_t* return_type; // Return type.
   bool is_vararg; // Is variadic.
-  abi_kind_t abi; // The function ABI.
+  callconv_kind_t callconv; // The function calling convention.
 } typedesc_fun_t;
 
 /**

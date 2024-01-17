@@ -15,7 +15,6 @@
 #include "stages/lexer/location.h"
 #include "stages/lexer/token.h"
 #include "stages/parser/ast/ast.h"
-#include "stages/parser/op.h"
 #include "utils/collections/list.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -82,19 +81,6 @@ ast_node_t* analyzer_scope_innermost_fun(analyzer_t* analyzer)
   return NULL;
 }
 
-ast_node_t* analyzer_scope_innermost_gen(analyzer_t* analyzer)
-{
-  LIST_FOR_LOOP(it, analyzer->scopes)
-  {
-    ast_node_t* node = (ast_node_t*)list_node_get(it);
-
-    if (node->kind == AST_DECL_GEN)
-      return node;
-  }
-
-  return NULL;
-}
-
 ast_node_t* analyzer_scope_innermost_defer(analyzer_t* analyzer)
 {
   LIST_FOR_LOOP(it, analyzer->scopes)
@@ -135,25 +121,6 @@ bool analyzer_scope_can_return(analyzer_t* analyzer)
     switch (node->kind)
     {
     case AST_DECL_FUN:   return true;
-    case AST_DECL_GEN:
-    case AST_STMT_DEFER: return false;
-    default: noop();
-    }
-  }
-
-  return false;
-}
-
-bool analyzer_scope_can_yield(analyzer_t* analyzer)
-{
-  LIST_FOR_LOOP(it, analyzer->scopes)
-  {
-    ast_node_t* node = (ast_node_t*)list_node_get(it);
-
-    switch (node->kind)
-    {
-    case AST_DECL_GEN:   return true;
-    case AST_DECL_FUN:
     case AST_STMT_DEFER: return false;
     default: noop();
     }
@@ -392,7 +359,7 @@ void analyzer_visit_expr_op_call_fun(analyzer_t* analyzer, symtable_t* scope, as
     report_error_too_few_arguments(node->tok->loc);
 
   if (caller_param_it != NULL && callee_param_it == NULL)
-    if (fun_desc->abi != ABI_CDECL)
+    if (fun_desc->callconv != CALLCONV_CDECL)
       report_error_too_many_arguments(node->tok->loc);
 
   typetable_insert(analyzer->typetable, (ast_node_t*)node, fun_desc->return_type);
@@ -510,9 +477,20 @@ void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* scope, ast_
       owner_desc->kind != TYPEDESC_ENUM)
     report_error_expected_owner(node->rhs->tok->loc);
 
-  ast_decl_composite_t* owner_node = (ast_decl_composite_t*)((typedesc_decl_t*)owner_desc)->node;
   string_view_t id_view = token_to_string_view(node->rhs->tok);
-  symbol_t* member_sym = symtable_get_with_str_view(owner_node->scope, id_view);
+  
+  ast_decl_t* decl_node = (ast_decl_t*)((typedesc_decl_t*)owner_desc)->node;
+  symtable_t* decl_scope = NULL;
+
+  switch (decl_node->kind)
+  {
+  case AST_DECL_STRUCT: decl_scope = ((ast_decl_struct_t*)decl_node)->scope; break;
+  case AST_DECL_UNION:  decl_scope = ((ast_decl_union_t* )decl_node)->scope; break;
+  case AST_DECL_ENUM:   decl_scope = ((ast_decl_enum_t*  )decl_node)->scope; break;
+  default: unreachable();
+  }
+
+  symbol_t* member_sym = symtable_get_with_str_view(decl_scope, id_view);
 
   if (member_sym == NULL)
     report_error_no_member_with_name(node->rhs->tok->loc);
@@ -601,37 +579,37 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
   return (ast_node_t*)node;
 }
 
-ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* scope, ast_type_member_t* node)
+ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* scope, ast_type_mbr_t* node)
 {
   assert(node->member->kind == AST_ID);
 
-  switch (node->owner->kind)
+  switch (node->parent->kind)
   {
   case AST_TYPE_MEMBER:
-    node->owner = analyzer_visit_type_member(analyzer, scope, (ast_type_member_t*)node->owner);
+    node->parent = analyzer_visit_type_member(analyzer, scope, (ast_type_mbr_t*)node->parent);
     break;
   case AST_ID:
   {
-    string_view_t id_view = token_to_string_view(node->owner->tok);
+    string_view_t id_view = token_to_string_view(node->parent->tok);
     symbol_t* owner_sym = symtable_lookup_with_str_view(scope, id_view);
 
     if (owner_sym == NULL)
-      report_error_undefined_symbol(node->owner->tok->loc);
+      report_error_undefined_symbol(node->parent->tok->loc);
 
     if (owner_sym->node->kind != AST_DECL_MOD)
-      report_error_expected_module(node->owner->tok->loc);
+      report_error_expected_module(node->parent->tok->loc);
 
-    node->owner = owner_sym->node;
+    node->parent = owner_sym->node;
     break;
   }
   default:
     unreachable();
   }
 
-  assert(node->owner->kind == AST_DECL_MOD);
+  assert(node->parent->kind == AST_DECL_MOD);
 
   string_view_t id_view = token_to_string_view(node->member->tok);
-  symbol_t* member_sym = symtable_get_with_str_view(((ast_decl_mod_t*)node->owner)->scope, id_view);
+  symbol_t* member_sym = symtable_get_with_str_view(((ast_decl_mod_t*)node->parent)->scope, id_view);
 
   if (member_sym == NULL)
     report_error_no_member_with_name(node->member->tok->loc);
@@ -802,37 +780,7 @@ void analyzer_visit_type_fun(analyzer_t* analyzer, symtable_t* scope, ast_type_f
     param_types[i++] = param_desc;
   }
 
-  typedesc_t* desc = typebuilder_build_fun(analyzer->typebuilder, return_type, param_types, list_size(node->params), node->is_vararg, node->abi);
-
-  free(param_types);
-
-  typetable_insert(analyzer->typetable, (ast_node_t*)node, desc);
-}
-
-void analyzer_visit_type_gen(analyzer_t* analyzer, symtable_t* scope, ast_type_gen_t* node)
-{
-  node->yield_type = analyzer_visit_type(analyzer, scope, (ast_type_t*)node->yield_type);
-
-  LIST_FOR_LOOP(it, node->params)
-    list_node_set(it, analyzer_visit_type(analyzer, scope, (ast_type_t*)list_node_get(it)));
-
-  typedesc_t* yield_type = typetable_lookup(analyzer->typetable, node->yield_type);
-  assert(yield_type != NULL);
-
-  typedesc_t** param_types = (typedesc_t**)malloc(sizeof(typedesc_t*) * list_size(node->params));
-
-  size_t i = 0;
-  LIST_FOR_LOOP(it, node->params)
-  {
-    ast_node_t* param = (ast_node_t*)list_node_get(it);
-
-    typedesc_t* param_desc = typetable_lookup(analyzer->typetable, param);
-    assert(param_desc != NULL);
-
-    param_types[i++] = param_desc;
-  }
-
-  typedesc_t* desc = typebuilder_build_gen(analyzer->typebuilder, yield_type, param_types, list_size(node->params));
+  typedesc_t* desc = typebuilder_build_fun(analyzer->typebuilder, return_type, param_types, list_size(node->params), node->is_vararg, node->callconv);
 
   free(param_types);
 
@@ -851,7 +799,6 @@ ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* scope, ast_typ
   case AST_TYPE_REF:    analyzer_visit_type_ref  (analyzer, scope, (ast_type_ref_t*  )node); break;
   case AST_TYPE_OPT:    analyzer_visit_type_opt  (analyzer, scope, (ast_type_opt_t*  )node); break;
   case AST_TYPE_FUN:    analyzer_visit_type_fun  (analyzer, scope, (ast_type_fun_t*  )node); break;
-  case AST_TYPE_GEN:    analyzer_visit_type_gen  (analyzer, scope, (ast_type_gen_t*  )node); break;
   case AST_TYPE_I8:     typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i8   (analyzer->typebuilder)); break;
   case AST_TYPE_I16:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i16  (analyzer->typebuilder)); break;
   case AST_TYPE_I32:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_i32  (analyzer->typebuilder)); break;
@@ -866,7 +813,7 @@ ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* scope, ast_typ
   case AST_TYPE_F64:    typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_f64  (analyzer->typebuilder)); break;
   case AST_TYPE_BOOL:   typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_bool (analyzer->typebuilder)); break;
   case AST_TYPE_UNIT:   typetable_insert(analyzer->typetable, (ast_node_t*)node, typebuilder_build_unit (analyzer->typebuilder)); break;
-  case AST_TYPE_MEMBER: return analyzer_visit_type_member(analyzer, scope, (ast_type_member_t*)node);
+  case AST_TYPE_MEMBER: return analyzer_visit_type_member(analyzer, scope, (ast_type_mbr_t*)node);
   default: unreachable();
   }
 
@@ -976,30 +923,6 @@ typedesc_t* analyzer_visit_stmt_return(analyzer_t* analyzer, symtable_t* scope, 
   return expr_desc;
 }
 
-typedesc_t* analyzer_visit_stmt_yield(analyzer_t* analyzer, symtable_t* scope, ast_stmt_yield_t* node)
-{
-  if (analyzer_scope_innermost_gen(analyzer) == NULL)
-    report_error_yield_outside_generator(node->tok->loc);
-  
-  if (!analyzer_scope_can_yield(analyzer))
-    report_error_yield_inside_defer(node->tok->loc);
-
-  node->expr = analyzer_visit_expr(analyzer, scope, (ast_expr_t*)node->expr);
-
-  typedesc_t* expr_desc = typetable_lookup(analyzer->typetable, node->expr);
-  assert(expr_desc != NULL);
-
-  ast_decl_gen_t* gen_node = (ast_decl_gen_t*)analyzer_scope_innermost_gen(analyzer);
-
-  typedesc_t* expected_desc = typetable_lookup(analyzer->typetable, gen_node->yield_type);
-  assert(expected_desc != NULL);
-
-  if (!typedesc_is_implicitly_convertible(expr_desc, expected_desc))
-    report_error_incompatible_return_type(node->tok->loc);
-
-  return expr_desc;
-}
-
 void analyzer_visit_stmt_defer(analyzer_t* analyzer, symtable_t* scope, ast_stmt_defer_t* node)
 {
   analyzer_visit_stmt(analyzer, scope, (ast_stmt_t*)node->stmt);
@@ -1034,7 +957,6 @@ void analyzer_visit_stmt(analyzer_t* analyzer, symtable_t* scope, ast_stmt_t* no
   case AST_STMT_BREAK:    analyzer_visit_stmt_break   (analyzer, scope, (ast_stmt_break_t*   )node); break;
   case AST_STMT_CONTINUE: analyzer_visit_stmt_continue(analyzer, scope, (ast_stmt_continue_t*)node); break;
   case AST_STMT_RETURN:   analyzer_visit_stmt_return  (analyzer, scope, (ast_stmt_return_t*  )node); break;
-  case AST_STMT_YIELD:    analyzer_visit_stmt_yield   (analyzer, scope, (ast_stmt_yield_t*   )node); break;
   case AST_STMT_DEFER:    analyzer_visit_stmt_defer   (analyzer, scope, (ast_stmt_defer_t*   )node); break;
   case AST_STMT_BLOCK:    analyzer_visit_stmt_block   (analyzer, scope, (ast_stmt_block_t*   )node); break;
   case AST_STMT_EXPR:     analyzer_visit_stmt_expr    (analyzer, scope, (ast_stmt_expr_t*    )node); break;
@@ -1142,7 +1064,7 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* scope, ast_decl_f
   typedesc_t* return_desc = typetable_lookup(analyzer->typetable, node->return_type);
   assert(return_desc != NULL);
 
-  typedesc_t* fun_desc = typebuilder_build_fun(analyzer->typebuilder, return_desc, param_types, param_count, node->is_vararg, node->abi);
+  typedesc_t* fun_desc = typebuilder_build_fun(analyzer->typebuilder, return_desc, param_types, param_count, node->is_vararg, node->callconv);
 
   free(param_types);
 
@@ -1154,57 +1076,6 @@ void analyzer_visit_decl_fun(analyzer_t* analyzer, symtable_t* scope, ast_decl_f
     analyzer_visit_stmt(analyzer, fun_scope, (ast_stmt_t*)node->stmt);
     analyzer_scope_pop(analyzer);
   }
-}
-
-void analyzer_visit_decl_gen(analyzer_t* analyzer, symtable_t* scope, ast_decl_gen_t* node)
-{
-  string_view_t id_view = token_to_string_view(node->id->tok);
-  symbol_t* gen_sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
-  symbol_t* lookup = symtable_lookup_with_str_view(scope, id_view);
-  symbol_t* collision = symtable_insert(scope, gen_sym);
-
-  if (collision != NULL)
-    report_error_symbol_redeclaration(node->tok->loc);
-
-  if (lookup != NULL)
-    report_warning_shadowed_symbol(node->tok->loc);
-
-  symtable_t* gen_scope = symtable_init(scope);
-
-  size_t param_count = list_size(node->params);
-  typedesc_t** param_types = NULL;
-
-  if (param_count > 0)
-  {
-    param_types = (typedesc_t**)malloc(sizeof(typedesc_t*) * param_count);
-
-    size_t i = 0;
-    LIST_FOR_LOOP(it, node->params)
-    {
-      ast_decl_param_t* param = (ast_decl_param_t*)list_node_get(it);
-      analyzer_visit_decl_param(analyzer, gen_scope, param);
-
-      typedesc_t* param_desc = typetable_lookup(analyzer->typetable, (ast_node_t*)param);
-      assert(param_desc != NULL);
-
-      param_types[i++] = param_desc;
-    }
-  }
-
-  node->yield_type = analyzer_visit_type(analyzer, scope, (ast_type_t*)node->yield_type);
-
-  typedesc_t* yield_desc = typetable_lookup(analyzer->typetable, node->yield_type);
-  assert(yield_desc != NULL);
-
-  typedesc_t* gen_desc = typebuilder_build_gen(analyzer->typebuilder, yield_desc, param_types, param_count);
-
-  free(param_types);
-
-  typetable_insert(analyzer->typetable, (ast_node_t*)node, gen_desc);
-  
-  analyzer_scope_push(analyzer, (ast_node_t*)node);
-  analyzer_visit_stmt(analyzer, gen_scope, (ast_stmt_t*)node->stmt);
-  analyzer_scope_pop(analyzer);
 }
 
 void analyzer_visit_decl_struct(analyzer_t* analyzer, symtable_t* scope, ast_decl_struct_t* node)
@@ -1341,7 +1212,6 @@ void analyzer_visit_decl(analyzer_t* analyzer, symtable_t* scope, ast_decl_t* no
   case AST_DECL_VAR:    analyzer_visit_decl_var   (analyzer, scope, (ast_decl_var_t*   )node); break;
   case AST_DECL_PARAM:  analyzer_visit_decl_param (analyzer, scope, (ast_decl_param_t* )node); break;
   case AST_DECL_FUN:    analyzer_visit_decl_fun   (analyzer, scope, (ast_decl_fun_t*   )node); break;
-  case AST_DECL_GEN:    analyzer_visit_decl_gen   (analyzer, scope, (ast_decl_gen_t*   )node); break;
   case AST_DECL_STRUCT: analyzer_visit_decl_struct(analyzer, scope, (ast_decl_struct_t*)node); break;
   case AST_DECL_UNION:  analyzer_visit_decl_union (analyzer, scope, (ast_decl_union_t* )node); break;
   case AST_DECL_ENUM:   analyzer_visit_decl_enum  (analyzer, scope, (ast_decl_enum_t*  )node); break;

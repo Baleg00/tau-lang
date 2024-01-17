@@ -24,16 +24,13 @@
  * \details This structure contains context information for parsing declarations.
  * It is used to track attributes, modifiers, and other relevant information
  * associated with a declaration until the actual declaration parsing occurs.
- * This allows for proper handling of modifiers like 'pub', 'extern', 'async',
- * and attribute lists.
+ * This allows for proper handling of modifiers like 'pub' and 'extern'.
  */
 typedef struct parser_decl_context_t
 {
   bool is_pub; // Is public.
-  bool is_async; // Is asynchronous.
   bool is_extern; // Is external.
-  abi_kind_t abi; // Application Binary Interface.
-  list_t* attrs; // Attributes.
+  callconv_kind_t callconv; // Calling convention.
 } parser_decl_context_t;
 
 struct parser_t
@@ -130,20 +127,8 @@ void parser_set_ignore_newline(parser_t* par, bool ignore)
 void parser_decl_context_clear(parser_t* par)
 {
   par->decl_ctx.is_pub    = false;
-  par->decl_ctx.is_async  = false;
   par->decl_ctx.is_extern = false;
-  par->decl_ctx.abi       = ABI_TAU;
-  par->decl_ctx.attrs     = NULL;
-}
-
-void parser_parse_decl_context_attrs(parser_t* par)
-{
-  parser_expect(par, TOK_PUNCT_HASH);
-  parser_expect(par, TOK_PUNCT_BRACKET_LEFT);
-
-  par->decl_ctx.attrs = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_attr);
-
-  parser_expect(par, TOK_PUNCT_BRACKET_RIGHT);
+  par->decl_ctx.callconv  = CALLCONV_TAU;
 }
 
 void parser_parse_decl_context_pub(parser_t* par)
@@ -158,17 +143,10 @@ void parser_parse_decl_context_extern(parser_t* par)
   parser_expect(par, TOK_KW_EXTERN);
   
   par->decl_ctx.is_extern = true;
-  par->decl_ctx.abi = ABI_CDECL;
+  par->decl_ctx.callconv = CALLCONV_CDECL;
 
   if (parser_current(par)->kind == TOK_LIT_STR)
-    par->decl_ctx.abi = parser_parse_abi(par);
-}
-
-void parser_parse_decl_context_async(parser_t* par)
-{
-  parser_expect(par, TOK_KW_ASYNC);
-
-  par->decl_ctx.is_async = true;
+    par->decl_ctx.callconv = parser_parse_callconv(par);
 }
 
 list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func)
@@ -196,31 +174,31 @@ list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_f
   return list;
 }
 
-abi_kind_t parser_parse_abi(parser_t* par)
+callconv_kind_t parser_parse_callconv(parser_t* par)
 {
   static struct {
     const char* str;
-    abi_kind_t abi;
-  } str_abi_map[] = {
-    { "\"Tau\"",        ABI_TAU        },
-    { "\"cdecl\"",      ABI_CDECL      },
-    { "\"stdcall\"",    ABI_STDCALL    },
-    { "\"win64\"",      ABI_WIN64      },
-    { "\"sysv64\"",     ABI_SYSV64     },
-    { "\"aapcs\"",      ABI_AAPCS      },
-    { "\"fastcall\"",   ABI_FASTCALL   },
-    { "\"vectorcall\"", ABI_VECTORCALL },
-    { "\"thiscall\"",   ABI_THISCALL   },
+    callconv_kind_t callconv;
+  } str_callconv_map[] = {
+    { "\"Tau\"",        CALLCONV_TAU        },
+    { "\"cdecl\"",      CALLCONV_CDECL      },
+    { "\"stdcall\"",    CALLCONV_STDCALL    },
+    { "\"win64\"",      CALLCONV_WIN64      },
+    { "\"sysv64\"",     CALLCONV_SYSV64     },
+    { "\"aapcs\"",      CALLCONV_AAPCS      },
+    { "\"fastcall\"",   CALLCONV_FASTCALL   },
+    { "\"vectorcall\"", CALLCONV_VECTORCALL },
+    { "\"thiscall\"",   CALLCONV_THISCALL   },
   };
 
-  token_t* abi_tok = parser_expect(par, TOK_LIT_STR);
-  string_view_t abi_str_view = token_to_string_view(abi_tok);
+  token_t* callconv_tok = parser_expect(par, TOK_LIT_STR);
+  string_view_t callconv_str_view = token_to_string_view(callconv_tok);
 
-  for (size_t i = 0; i < countof(str_abi_map); i++)
-    if (string_view_compare_cstr(abi_str_view, str_abi_map[i].str) == 0)
-      return str_abi_map[i].abi;
+  for (size_t i = 0; i < countof(str_callconv_map); i++)
+    if (string_view_compare_cstr(callconv_str_view, str_callconv_map[i].str) == 0)
+      return str_callconv_map[i].callconv;
 
-  report_error_unknown_abi(abi_tok->loc);
+  report_error_unknown_callconv(callconv_tok->loc);
 
   return -1;
 }
@@ -230,23 +208,6 @@ ast_node_t* parser_parse_id(parser_t* par)
   ast_node_t* node = ast_node_init(AST_ID);
   node->tok = parser_expect(par, TOK_ID);
   return node;
-}
-
-ast_node_t* parser_parse_attr(parser_t* par)
-{
-  ast_attr_t* node = (ast_attr_t*)ast_node_init(AST_ATTR);
-  node->tok = parser_current(par);
-
-  node->id = parser_parse_id(par);
-
-  if (parser_consume(par, TOK_PUNCT_PAREN_LEFT))
-  {
-    node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_expr);
-
-    parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
-  }
-
-  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_mut(parser_t* par)
@@ -330,15 +291,10 @@ ast_node_t* parser_parse_type_fun(parser_t* par)
   ast_type_fun_t* node = (ast_type_fun_t*)ast_node_init(AST_TYPE_FUN);
   node->tok = parser_current(par);
   
-  node->abi = ABI_TAU;
+  node->callconv = CALLCONV_TAU;
 
   if (parser_consume(par, TOK_KW_EXTERN))
-    node->abi = parser_parse_abi(par);
-
-  node->is_async = false;
-
-  if (parser_consume(par, TOK_KW_ASYNC))
-    node->is_async = true;
+    node->callconv = parser_parse_callconv(par);
 
   parser_expect(par, TOK_KW_FUN);
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
@@ -353,34 +309,16 @@ ast_node_t* parser_parse_type_fun(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse_type_gen(parser_t* par)
-{
-  ast_type_gen_t* node = (ast_type_gen_t*)ast_node_init(AST_TYPE_GEN);
-  node->tok = parser_current(par);
-
-  parser_expect(par, TOK_KW_FUN);
-  parser_expect(par, TOK_PUNCT_PAREN_LEFT);
-  
-  node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_type);
-
-  parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
-  parser_expect(par, TOK_PUNCT_COLON);
-
-  node->yield_type = parser_parse_type(par);
-  
-  return (ast_node_t*)node;
-}
-
 ast_node_t* parser_parse_type_member(parser_t* par)
 {
   ast_node_t* node = parser_parse_id(par);
 
   while (parser_consume(par, TOK_PUNCT_DOT))
   {
-    ast_type_member_t* member_node = (ast_type_member_t*)ast_node_init(AST_TYPE_MEMBER);
+    ast_type_mbr_t* member_node = (ast_type_mbr_t*)ast_node_init(AST_TYPE_MEMBER);
     member_node->tok = parser_current(par);
 
-    member_node->owner = node;
+    member_node->parent = node;
     member_node->member = parser_parse_id(par);
 
     node = (ast_node_t*)member_node;
@@ -403,11 +341,6 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_PUNCT_AMPERSAND:    return parser_parse_type_ref     (par);
   case TOK_PUNCT_QUESTION:     return parser_parse_type_opt     (par);
   case TOK_KW_FUN:             return parser_parse_type_fun     (par);
-  case TOK_KW_GEN:             return parser_parse_type_gen     (par);
-  case TOK_KW_SELF:
-    node = ast_node_init(AST_TYPE_SELF);
-    node->tok = parser_expect(par, AST_TYPE_SELF);
-    break;
   case TOK_KW_I8:
     node = ast_node_init(AST_TYPE_I8);
     node->tok = parser_expect(par, TOK_KW_I8);
@@ -519,8 +452,6 @@ ast_node_t* parser_parse_stmt_for_var(parser_t* par)
 
   node->is_pub    = false;
   node->is_extern = false;
-  node->abi       = ABI_TAU;
-  node->attrs     = NULL;
 
   node->id = parser_parse_id(par);
   
@@ -580,18 +511,6 @@ ast_node_t* parser_parse_stmt_return(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse_stmt_yield(parser_t* par)
-{
-  ast_stmt_yield_t* node = (ast_stmt_yield_t*)ast_node_init(AST_STMT_YIELD);
-  node->tok = parser_current(par);
-
-  parser_expect(par, TOK_KW_YIELD);
-  
-  node->expr = parser_parse_expr(par);
-  
-  return (ast_node_t*)node;
-}
-
 ast_node_t* parser_parse_stmt_defer(parser_t* par)
 {
   ast_stmt_defer_t* node = (ast_stmt_defer_t*)ast_node_init(AST_STMT_DEFER);
@@ -643,7 +562,6 @@ ast_node_t* parser_parse_stmt(parser_t* par)
   case TOK_KW_BREAK:         return parser_parse_stmt_break(par);
   case TOK_KW_CONTINUE:      return parser_parse_stmt_continue(par);
   case TOK_KW_RETURN:        return parser_parse_stmt_return(par);
-  case TOK_KW_YIELD:         return parser_parse_stmt_yield(par);
   case TOK_KW_DEFER:         return parser_parse_stmt_defer(par);
   case TOK_PUNCT_BRACE_LEFT: return parser_parse_stmt_block(par);
   default: noop();
@@ -657,12 +575,8 @@ ast_node_t* parser_parse_decl_var(parser_t* par)
   ast_decl_var_t* node = (ast_decl_var_t*)ast_node_init(AST_DECL_VAR);
   node->tok = parser_current(par);
 
-  assert(!par->decl_ctx.is_async);
-
   node->is_pub    = par->decl_ctx.is_pub;
   node->is_extern = par->decl_ctx.is_extern;
-  node->abi       = par->decl_ctx.abi;
-  node->attrs     = par->decl_ctx.attrs;
 
   node->id = parser_parse_id(par);
   
@@ -680,10 +594,8 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   node->tok = parser_current(par);
   
   node->is_pub    = par->decl_ctx.is_pub;
-  node->is_async  = par->decl_ctx.is_async;
   node->is_extern = par->decl_ctx.is_extern;
-  node->abi       = par->decl_ctx.abi;
-  node->attrs     = par->decl_ctx.attrs;
+  node->callconv  = par->decl_ctx.callconv;
 
   parser_expect(par, TOK_KW_FUN);
 
@@ -709,7 +621,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
           ast_decl_param_t* variadic_param = (ast_decl_param_t*)parser_parse_decl_param(par);
           assert(variadic_param->expr == NULL);
 
-          variadic_param->is_variadic = true;
+          variadic_param->is_vararg = true;
 
           // Default parameters must be followed only by default parameters.
           if (seen_default)
@@ -724,7 +636,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
         else
         {
           // Function must be extern "cdecl".
-          assert(node->is_extern && node->abi == ABI_CDECL);
+          assert(node->is_extern && node->callconv == CALLCONV_CDECL);
           node->is_vararg = true;
         }
         
@@ -763,91 +675,14 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse_decl_gen(parser_t* par)
-{
-  ast_decl_gen_t* node = (ast_decl_gen_t*)ast_node_init(AST_DECL_GEN);
-  node->tok = parser_current(par);
-
-  assert(!par->decl_ctx.is_async);
-  assert(!par->decl_ctx.is_extern);
-  assert(par->decl_ctx.abi == ABI_TAU);
-
-  node->is_pub = par->decl_ctx.is_pub;
-  node->attrs  = par->decl_ctx.attrs;
-
-  parser_expect(par, TOK_KW_GEN);
-
-  node->id = parser_parse_id(par);
-  
-  // Parse parameters.
-  node->params = list_init();
-
-  parser_expect(par, TOK_PUNCT_PAREN_LEFT);
-
-  if (!parser_consume(par, TOK_PUNCT_PAREN_RIGHT))
-  {
-    for (bool seen_default = false;;)
-    {
-      // Parse variadic parameter.
-      // If a variadic parameter is present it must be the last one in the
-      // parameter list.
-      if (parser_consume(par, TOK_PUNCT_DOT_DOT_DOT))
-      {
-        ast_decl_param_t* variadic_param = (ast_decl_param_t*)parser_parse_decl_param(par);
-        assert(variadic_param->expr == NULL);
-
-        // Default parameters must be followed only by default parameters.
-        if (seen_default)
-          report_error_missing_default_parameter(
-            variadic_param->tok->loc,
-            ((ast_node_t*)list_back(node->params))->tok->loc
-          );
-
-        list_push_back(node->params, variadic_param);
-        break;
-      }
-
-      // Parse non-variadic parameter.
-      ast_decl_param_t* param = (ast_decl_param_t*)parser_parse_decl_param(par);
-
-      // Set flag variable if parameter is a default parameter.
-      seen_default = seen_default || param->expr != NULL;
-
-      // Default parameters must be followed only by default parameters.
-      if (seen_default && param->expr != NULL)
-        report_error_missing_default_parameter(
-          param->tok->loc,
-          ((ast_node_t*)list_back(node->params))->tok->loc
-        );
-
-      list_push_back(node->params, param);
-
-      if (!parser_consume(par, TOK_PUNCT_COMMA))
-        break;
-    }
-
-    parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
-  }
-  
-  parser_expect(par, TOK_PUNCT_COLON);
-
-  node->yield_type = parser_parse_type(par);
-  node->stmt = parser_parse_stmt(par);
-  
-  return (ast_node_t*)node;
-}
-
 ast_node_t* parser_parse_decl_struct(parser_t* par)
 {
   ast_decl_struct_t* node = (ast_decl_struct_t*)ast_node_init(AST_DECL_STRUCT);
   node->tok = parser_current(par);
 
-  assert(!par->decl_ctx.is_async);
   assert(!par->decl_ctx.is_extern);
-  assert(par->decl_ctx.abi == ABI_TAU);
 
   node->is_pub = par->decl_ctx.is_pub;
-  node->attrs  = par->decl_ctx.attrs;
 
   parser_expect(par, TOK_KW_STRUCT);
   
@@ -864,9 +699,6 @@ ast_node_t* parser_parse_decl_struct_member(parser_t* par)
 {
   parser_decl_context_clear(par);
 
-  if (parser_current(par)->kind == TOK_PUNCT_HASH)
-    parser_parse_decl_context_attrs(par);
-
   if (parser_current(par)->kind == TOK_KW_PUB)
     parser_parse_decl_context_pub(par);
 
@@ -875,8 +707,6 @@ ast_node_t* parser_parse_decl_struct_member(parser_t* par)
 
   node->is_pub    = par->decl_ctx.is_pub;
   node->is_extern = false;
-  node->abi       = ABI_TAU;
-  node->attrs     = par->decl_ctx.attrs;
 
   node->id = parser_parse_id(par);
   
@@ -893,12 +723,9 @@ ast_node_t* parser_parse_decl_union(parser_t* par)
   ast_decl_union_t* node = (ast_decl_union_t*)ast_node_init(AST_DECL_UNION);
   node->tok = parser_current(par);
 
-  assert(!par->decl_ctx.is_async);
   assert(!par->decl_ctx.is_extern);
-  assert(par->decl_ctx.abi == ABI_TAU);
 
   node->is_pub = par->decl_ctx.is_pub;
-  node->attrs  = par->decl_ctx.attrs;
 
   parser_expect(par, TOK_KW_UNION);
   
@@ -913,18 +740,11 @@ ast_node_t* parser_parse_decl_union(parser_t* par)
 
 ast_node_t* parser_parse_decl_union_member(parser_t* par)
 {
-  parser_decl_context_clear(par);
-
-  if (parser_current(par)->kind == TOK_PUNCT_HASH)
-    parser_parse_decl_context_attrs(par);
-
   ast_decl_var_t* node = (ast_decl_var_t*)ast_node_init(AST_DECL_VAR);
   node->tok = parser_current(par);
 
   node->is_pub    = true;
   node->is_extern = false;
-  node->abi       = ABI_TAU;
-  node->attrs     = par->decl_ctx.attrs;
 
   node->id = parser_parse_id(par);
   
@@ -941,12 +761,9 @@ ast_node_t* parser_parse_decl_enum(parser_t* par)
   ast_decl_enum_t* node = (ast_decl_enum_t*)ast_node_init(AST_DECL_ENUM);
   node->tok = parser_current(par);
 
-  assert(!par->decl_ctx.is_async);
   assert(!par->decl_ctx.is_extern);
-  assert(par->decl_ctx.abi == ABI_TAU);
 
   node->is_pub = par->decl_ctx.is_pub;
-  node->attrs  = par->decl_ctx.attrs;
 
   parser_expect(par, TOK_KW_ENUM);
   
@@ -964,12 +781,9 @@ ast_node_t* parser_parse_decl_mod(parser_t* par)
   ast_decl_mod_t* node = (ast_decl_mod_t*)ast_node_init(AST_DECL_MOD);
   node->tok = parser_current(par);
 
-  assert(!par->decl_ctx.is_async);
   assert(!par->decl_ctx.is_extern);
-  assert(par->decl_ctx.abi == ABI_TAU);
 
   node->is_pub = par->decl_ctx.is_pub;
-  node->attrs  = par->decl_ctx.attrs;
 
   parser_expect(par, TOK_KW_MOD);
   
@@ -988,7 +802,6 @@ ast_node_t* parser_parse_decl(parser_t* par)
   {
   case TOK_ID:         return parser_parse_decl_var       (par);
   case TOK_KW_FUN:     return parser_parse_decl_fun       (par);
-  case TOK_KW_GEN:     return parser_parse_decl_gen       (par);
   case TOK_KW_STRUCT:  return parser_parse_decl_struct    (par);
   case TOK_KW_UNION:   return parser_parse_decl_union     (par);
   case TOK_KW_ENUM:    return parser_parse_decl_enum      (par);
@@ -1003,17 +816,11 @@ ast_node_t* parser_parse_decl_in_mod(parser_t* par)
 {
   parser_decl_context_clear(par);
 
-  if (parser_current(par)->kind == TOK_PUNCT_HASH)
-    parser_parse_decl_context_attrs(par);
-
   if (parser_current(par)->kind == TOK_KW_PUB)
     parser_parse_decl_context_pub(par);
 
   if (parser_current(par)->kind == TOK_KW_EXTERN)
     parser_parse_decl_context_extern(par);
-
-  if (parser_current(par)->kind == TOK_KW_ASYNC)
-    parser_parse_decl_context_async(par);
 
   return parser_parse_decl(par);
 }
@@ -1022,17 +829,11 @@ ast_node_t* parser_parse_decl_top_level(parser_t* par)
 {
   parser_decl_context_clear(par);
 
-  if (parser_current(par)->kind == TOK_PUNCT_HASH)
-    parser_parse_decl_context_attrs(par);
-
   if (parser_current(par)->kind == TOK_KW_PUB)
     parser_parse_decl_context_pub(par);
 
   if (parser_current(par)->kind == TOK_KW_EXTERN)
     parser_parse_decl_context_extern(par);
-
-  if (parser_current(par)->kind == TOK_KW_ASYNC)
-    parser_parse_decl_context_async(par);
 
   return parser_parse_decl(par);
 }

@@ -46,19 +46,14 @@ typedef enum token_kind_e
   TOK_KW_AS, // Keyword `as`
   TOK_KW_SIZEOF, // Keyword `sizeof`
   TOK_KW_ALIGNOF, // Keyword `alignof`
-  TOK_KW_TYPEOF, // Keyword `typeof`
   TOK_KW_IN, // Keyword `in`
   TOK_KW_PUB, // Keyword `pub`
   TOK_KW_EXTERN, // Keyword `extern`
-  TOK_KW_ASYNC, // Keyword `async`
-  TOK_KW_AWAIT, // Keyword `await`
   TOK_KW_FUN, // Keyword `fun`
-  TOK_KW_GEN, // Keyword `gen`
   TOK_KW_STRUCT, // Keyword `struct`
   TOK_KW_UNION, // Keyword `union`
   TOK_KW_ENUM, // Keyword `enum`
   TOK_KW_MOD, // Keyword `mod`
-  TOK_KW_USE, // Keyword `use`
   TOK_KW_IF, // Keyword `if`
   TOK_KW_THEN, // Keyword `then`
   TOK_KW_ELSE, // Keyword `else`
@@ -68,12 +63,9 @@ typedef enum token_kind_e
   TOK_KW_BREAK, // Keyword `break`
   TOK_KW_CONTINUE, // Keyword `continue`
   TOK_KW_RETURN, // Keyword `return`
-  TOK_KW_YIELD, // Keyword `yield`
   TOK_KW_DEFER, // Keyword `defer`
   TOK_KW_MUT, // Keyword `mut`
   TOK_KW_CONST, // Keyword `const`
-  TOK_KW_TYPE, // Keyword `type`
-  TOK_KW_SELF, // Keyword `Self`
   TOK_KW_I8, // Keyword `i8`
   TOK_KW_I16, // Keyword `i16`
   TOK_KW_I32, // Keyword `i32`
