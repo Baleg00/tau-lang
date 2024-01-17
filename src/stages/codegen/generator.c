@@ -117,20 +117,20 @@ void generator_visit_type(generator_t* gen, ast_type_t* node)
   case AST_TYPE_ARRAY: generator_visit_type_array(gen, (ast_type_array_t*)node); break;
   case AST_TYPE_FUN:   generator_visit_type_fun  (gen, (ast_type_fun_t*  )node); break;
   case AST_TYPE_DECL:  generator_visit_type_decl (gen, (ast_type_decl_t* )node); break;
-  case AST_TYPE_I8:
-  case AST_TYPE_I16:
-  case AST_TYPE_I32:
-  case AST_TYPE_I64:
-  case AST_TYPE_ISIZE:
-  case AST_TYPE_U8:
-  case AST_TYPE_U16:
-  case AST_TYPE_U32:
-  case AST_TYPE_U64:
-  case AST_TYPE_USIZE:
-  case AST_TYPE_F32:
-  case AST_TYPE_F64:
-  case AST_TYPE_BOOL:
-  case AST_TYPE_UNIT:
+  case AST_TYPE_PRIM_I8:
+  case AST_TYPE_PRIM_I16:
+  case AST_TYPE_PRIM_I32:
+  case AST_TYPE_PRIM_I64:
+  case AST_TYPE_PRIM_ISIZE:
+  case AST_TYPE_PRIM_U8:
+  case AST_TYPE_PRIM_U16:
+  case AST_TYPE_PRIM_U32:
+  case AST_TYPE_PRIM_U64:
+  case AST_TYPE_PRIM_USIZE:
+  case AST_TYPE_PRIM_F32:
+  case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_BOOL:
+  case AST_TYPE_PRIM_UNIT:
   {
     typedesc_t* desc = typetable_lookup(gen->typetable, (ast_node_t*)node);
     node->llvm_type = desc->llvm_type;

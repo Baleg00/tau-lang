@@ -42,7 +42,6 @@ struct compiler_t
     bool verbose;
     bool dump_tokens;
     bool dump_ast;
-    bool dump_ast_flat;
     bool dump_ll;
     bool dump_bc;
   } flags;
@@ -165,26 +164,10 @@ static void compiler_dump_ast(compiler_t* compiler, const char* input_file_path,
 
   FILE* ast_file = fopen(ast_file_path, "w");
   assert(ast_file != NULL);
-  ast_json_dump(ast_file, root);
+  ast_node_dump_json(ast_file, root);
   fclose(ast_file);
 
   log_trace("main", "(%s) AST dump: %s", input_file_name, ast_file_path);
-}
-
-static void compiler_dump_ast_flat(compiler_t* compiler, const char* input_file_path, const char* input_file_name, ast_node_t* root)
-{
-  unused(compiler);
-
-  char ast_file_path[COMPILER_MAX_BUFFER_SIZE];
-  strcpy(ast_file_path, input_file_path);
-  strcat(ast_file_path, ".ast.flat.json");
-
-  FILE* ast_file = fopen(ast_file_path, "w");
-  assert(ast_file != NULL);
-  ast_json_dump_flat(ast_file, root);
-  fclose(ast_file);
-
-  log_trace("main", "(%s) AST flat dump: %s", input_file_name, ast_file_path);
 }
 
 static void compiler_dump_ll(compiler_t* compiler, const char* input_file_path, const char* input_file_name, LLVMModuleRef llvm_module)
@@ -232,7 +215,6 @@ compiler_t* compiler_init(void)
   compiler->flags.verbose = false;
   compiler->flags.dump_tokens = false;
   compiler->flags.dump_ast = false;
-  compiler->flags.dump_ast_flat = false;
   compiler->flags.dump_ll = false;
 
   compiler->args.log_level = LOG_LEVEL_WARN;
@@ -248,8 +230,6 @@ void compiler_free(compiler_t* compiler)
   
   list_free(compiler->input_files);
 
-  ast_cleanup();
-
   free(compiler);
 }
 
@@ -262,7 +242,6 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     cli_opt_flag(cli_names("--dump-toks"),     1, "Dump tokens into json file.",     &compiler->flags.dump_tokens),
     cli_opt_flag(cli_names("--dump-ast"),      1, "Dump AST into json file.",        &compiler->flags.dump_ast),
-    cli_opt_flag(cli_names("--dump-ast-flat"), 1, "Dump flat AST into json file.",   &compiler->flags.dump_ast_flat),
     cli_opt_flag(cli_names("--dump-ll"),       1, "Dump LLVM IR into ll file.",      &compiler->flags.dump_ll),
     cli_opt_flag(cli_names("--dump-bc"),       1, "Dump LLVM bitcode into bc file.", &compiler->flags.dump_bc),
     
@@ -332,9 +311,6 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     typebuilder_t* builder = typebuilder_init(compiler->llvm_context, compiler->llvm_layout);
 
     time_it("analyzer", analyzer_analyze(analyzer, symtable, typetable, builder, root));
-
-    if (compiler->flags.dump_ast_flat)
-      compiler_dump_ast_flat(compiler, input_file_path, input_file_name, root);
 
     log_trace("main", "(%s) LLVM IR generation.", input_file_name);
 

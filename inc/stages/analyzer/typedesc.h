@@ -82,7 +82,6 @@ typedef enum typedesc_kind_e
   TYPEDESC_NULL, // Null type
   TYPEDESC_TYPE, // Type of type
   TYPEDESC_FUN, // Function type
-  TYPEDESC_GEN, // Generator type
   TYPEDESC_STRUCT, // Struct type
   TYPEDESC_UNION, // Union type
   TYPEDESC_ENUM, // Enum type
@@ -171,16 +170,6 @@ typedef struct typedesc_fun_t
   bool is_vararg; // Is variadic.
   callconv_kind_t callconv; // The function calling convention.
 } typedesc_fun_t;
-
-/**
- * \brief Type descriptor for generators.
- */
-typedef struct typedesc_gen_t
-{
-  TYPEDESC_HEADER;
-  list_t* param_types; // List of parameter types.
-  typedesc_t* yield_type; // Yield type.
-} typedesc_gen_t;
 
 /**
  * \brief Type descriptor for declarations.

@@ -28,4 +28,19 @@ typedef struct ast_stmt_while_t
   LLVMBasicBlockRef llvm_end; // LLVM block for the end of the loop.
 } ast_stmt_while_t;
 
+/**
+ * \brief Initializes a new AST while statement node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_stmt_while_t* ast_stmt_while_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST while statement node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_stmt_while_dump_json(FILE* stream, ast_stmt_while_t* node);
+
 #endif

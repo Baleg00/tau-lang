@@ -36,4 +36,19 @@ typedef struct ast_decl_fun_t
   LLVMBasicBlockRef llvm_end; // LLVM block for function end.
 } ast_decl_fun_t;
 
+/**
+ * \brief Initializes a new AST function declaration node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_decl_fun_t* ast_decl_fun_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST function declaration node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_decl_fun_dump_json(FILE* stream, ast_decl_fun_t* node);
+
 #endif

@@ -1,5 +1,7 @@
 #include "stages/parser/shyd.h"
 
+#include <string.h>
+
 #include "stages/parser/parser.h"
 #include "utils/collections/list.h"
 #include "utils/collections/queue.h"
@@ -179,7 +181,7 @@ bool shyd_parse_call(shyd_t* shyd)
   if (!shyd->prev_term)
     return false;
 
-  ast_expr_op_call_t* node = (ast_expr_op_call_t*)ast_node_init(AST_EXPR_OP_CALL);
+  ast_expr_op_call_t* node = ast_expr_op_call_init();
   node->tok = parser_current(shyd->par);
   node->op_kind = OP_CALL;
 
@@ -322,7 +324,7 @@ void shyd_postfix(shyd_t* shyd)
 
 void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
-  ast_expr_op_un_t* node = (ast_expr_op_un_t*)ast_node_init(AST_EXPR_OP_UNARY);
+  ast_expr_op_un_t* node = ast_expr_op_un_init();
   node->tok = elem->tok;
   node->op_kind = elem->op;
 
@@ -338,7 +340,7 @@ void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
   unused(shyd);
 
-  ast_expr_op_bin_t* node = (ast_expr_op_bin_t*)ast_node_init(AST_EXPR_OP_BINARY);
+  ast_expr_op_bin_t* node = ast_expr_op_bin_init();
   node->tok = elem->tok;
   node->op_kind = elem->op;
 
@@ -375,13 +377,50 @@ void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 
   switch (elem->tok->kind)
   {
-  case TOK_ID:       node = ast_node_init(AST_ID           ); break;
-  case TOK_LIT_INT:  node = ast_node_init(AST_EXPR_LIT_INT ); break;
-  case TOK_LIT_FLT:  node = ast_node_init(AST_EXPR_LIT_FLT ); break;
-  case TOK_LIT_STR:  node = ast_node_init(AST_EXPR_LIT_STR ); break;
-  case TOK_LIT_CHAR: node = ast_node_init(AST_EXPR_LIT_CHAR); break;
-  case TOK_LIT_BOOL: node = ast_node_init(AST_EXPR_LIT_BOOL); break;
-  case TOK_LIT_NULL: node = ast_node_init(AST_EXPR_LIT_NULL); break;
+  case TOK_ID:
+    node = (ast_node_t*)ast_id_init();
+    break;
+  case TOK_LIT_INT:
+  {
+    node = (ast_node_t*)ast_expr_lit_int_init();
+    ((ast_expr_lit_int_t*)node)->value = strtoull(elem->tok->loc->ptr, NULL, 10);
+    break;
+  }
+  case TOK_LIT_FLT:
+  {
+    node = (ast_node_t*)ast_expr_lit_flt_init();
+    ((ast_expr_lit_flt_t*)node)->value = strtold(elem->tok->loc->ptr, NULL);
+    break;
+  }
+  case TOK_LIT_STR:
+  {
+    node = (ast_node_t*)ast_expr_lit_str_init();
+    
+    string_t* str = string_init_with_cstr_and_length(elem->tok->loc->ptr, elem->tok->loc->len);
+    string_t* escaped = string_escape(str);
+    
+    ((ast_expr_lit_str_t*)node)->value = (char*)malloc(sizeof(char) * (string_length(escaped) + 1));
+    strncpy(((ast_expr_lit_str_t*)node)->value, string_begin(escaped), string_length(escaped) + 1);
+
+    string_free(escaped);
+    string_free(str);
+    break;
+  }
+  case TOK_LIT_CHAR:
+  {
+    node = (ast_node_t*)ast_expr_lit_char_init();
+    ((ast_expr_lit_char_t*)node)->value = '\0';
+    break;
+  }
+  case TOK_LIT_BOOL:
+  {
+    node = (ast_node_t*)ast_expr_lit_bool_init();
+    ((ast_expr_lit_bool_t*)node)->value = strncmp(elem->tok->loc->ptr, "true", 4) == 0;
+    break;
+  }
+  case TOK_LIT_NULL:
+    node = (ast_node_t*)ast_expr_lit_null_init();
+    break;
   default: report_error_unexpected_token(elem->tok->loc);
   }
 

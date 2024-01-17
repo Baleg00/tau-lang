@@ -104,6 +104,7 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_USIZE:                    return "TOK_KW_USIZE";
   case TOK_KW_F32:                      return "TOK_KW_F32";
   case TOK_KW_F64:                      return "TOK_KW_F64";
+  case TOK_KW_CHAR:                     return "TOK_KW_CHAR";
   case TOK_KW_BOOL:                     return "TOK_KW_BOOL";
   case TOK_KW_UNIT:                     return "TOK_KW_UNIT";
   case TOK_PUNCT_PLUS:                  return "TOK_PUNCT_PLUS";
@@ -229,6 +230,7 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_USIZE:
   case TOK_KW_F32:
   case TOK_KW_F64:
+  case TOK_KW_CHAR:
   case TOK_KW_BOOL:
   case TOK_KW_UNIT:
     return true;

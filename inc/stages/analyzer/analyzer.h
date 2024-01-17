@@ -128,15 +128,6 @@ void analyzer_visit_expr_op_binary(analyzer_t* analyzer, symtable_t* scope, ast_
 void analyzer_visit_expr_op_call_fun(analyzer_t* analyzer, symtable_t* scope, ast_expr_op_call_t* node);
 
 /**
- * \brief Visits and analyzes a call to generator expression.
- *
- * \param[in] analyzer Pointer to the semantic analyzer.
- * \param[in] scope Pointer to the current symbol table scope.
- * \param[in] node Pointer to the call to generator expression node.
- */
-void analyzer_visit_expr_op_call_gen(analyzer_t* analyzer, symtable_t* scope, ast_expr_op_call_t* node);
-
-/**
  * \brief Visits and analyzes a call expression.
  *
  * \param[in] analyzer Pointer to the semantic analyzer.

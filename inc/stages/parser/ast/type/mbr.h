@@ -22,4 +22,19 @@ typedef struct ast_type_mbr_t
   ast_node_t* member;
 } ast_type_mbr_t;
 
+/**
+ * \brief Initializes a new AST member type node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_type_mbr_t* ast_type_mbr_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST member type node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_type_mbr_dump_json(FILE* stream, ast_type_mbr_t* node);
+
 #endif

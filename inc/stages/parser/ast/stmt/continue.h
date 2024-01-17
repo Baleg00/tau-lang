@@ -21,4 +21,19 @@ typedef struct ast_stmt_continue_t
   ast_node_t* loop; // The associated loop statement.
 } ast_stmt_continue_t;
 
+/**
+ * \brief Initializes a new AST continue statement node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_stmt_continue_t* ast_stmt_continue_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST continue statement node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_stmt_continue_dump_json(FILE* stream, ast_stmt_continue_t* node);
+
 #endif

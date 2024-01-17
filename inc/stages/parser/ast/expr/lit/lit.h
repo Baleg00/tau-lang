@@ -13,11 +13,17 @@
 #include "stages/parser/ast/expr/expr.h"
 
 /**
+ * \brief Header for all AST literal expression nodes.
+ */
+#define AST_EXPR_LIT_HEADER\
+  AST_EXPR_HEADER
+
+/**
  * \brief AST literal expression node.
  */
 typedef struct ast_expr_lit_t
 {
-  AST_EXPR_HEADER;
+  AST_EXPR_LIT_HEADER;
 } ast_expr_lit_t;
 
 #endif

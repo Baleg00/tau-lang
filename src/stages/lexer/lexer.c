@@ -63,6 +63,7 @@ static const struct {
   { "usize",    TOK_KW_USIZE    },
   { "f32",      TOK_KW_F32      },
   { "f64",      TOK_KW_F64      },
+  { "char",     TOK_KW_CHAR     },
   { "bool",     TOK_KW_BOOL     },
   { "unit",     TOK_KW_UNIT     },
   { "true",     TOK_LIT_BOOL    },

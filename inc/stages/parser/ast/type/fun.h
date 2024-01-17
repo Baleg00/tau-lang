@@ -25,4 +25,19 @@ typedef struct ast_type_fun_t
   bool is_vararg; // Is function variadic (C-style, only works with specific calling conventions).
 } ast_type_fun_t;
 
+/**
+ * \brief Initializes a new AST function type node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_type_fun_t* ast_type_fun_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST function type node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_type_fun_dump_json(FILE* stream, ast_type_fun_t* node);
+
 #endif

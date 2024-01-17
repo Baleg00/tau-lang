@@ -26,4 +26,19 @@ typedef struct ast_decl_enum_constant_t
   LLVMValueRef llvm_value; // The associated LLVM value.
 } ast_decl_enum_constant_t;
 
+/**
+ * \brief Initializes a new AST enum constant declaration node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_decl_enum_constant_t* ast_decl_enum_constant_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST enum constant declaration node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_decl_enum_constant_dump_json(FILE* stream, ast_decl_enum_constant_t* node);
+
 #endif

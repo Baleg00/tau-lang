@@ -30,7 +30,13 @@
 #include "stages/parser/ast/decl/var.h"
 #include "stages/parser/ast/expr/decl.h"
 #include "stages/parser/ast/expr/expr.h"
-#include "stages/parser/ast/expr/lit.h"
+#include "stages/parser/ast/expr/lit/bool.h"
+#include "stages/parser/ast/expr/lit/char.h"
+#include "stages/parser/ast/expr/lit/flt.h"
+#include "stages/parser/ast/expr/lit/int.h"
+#include "stages/parser/ast/expr/lit/lit.h"
+#include "stages/parser/ast/expr/lit/null.h"
+#include "stages/parser/ast/expr/lit/str.h"
 #include "stages/parser/ast/expr/op/bin.h"
 #include "stages/parser/ast/expr/op/call.h"
 #include "stages/parser/ast/expr/op/op.h"
@@ -52,43 +58,13 @@
 #include "stages/parser/ast/type/const.h"
 #include "stages/parser/ast/type/decl.h"
 #include "stages/parser/ast/type/fun.h"
-#include "stages/parser/ast/type/gen.h"
 #include "stages/parser/ast/type/mbr.h"
 #include "stages/parser/ast/type/modif.h"
 #include "stages/parser/ast/type/mut.h"
 #include "stages/parser/ast/type/opt.h"
+#include "stages/parser/ast/type/prim.h"
 #include "stages/parser/ast/type/ptr.h"
 #include "stages/parser/ast/type/ref.h"
 #include "stages/parser/ast/type/type.h"
-
-/**
- * \brief Initializes a new AST node with the specified kind.
- * 
- * \param[in] kind The kind of the AST node.
- * \returns Pointer to the newly initialized AST node.
-*/
-ast_node_t* ast_node_init(ast_kind_t kind);
-
-/**
- * \brief Frees all memory allocated by AST nodes.
-*/
-void ast_cleanup(void);
-
-/**
- * \brief Writes a JSON dump of an AST into a stream.
- * 
- * \param[in] stream Stream to be written to.
- * \param[in] root Root of AST to be dumped.
-*/
-void ast_json_dump(FILE* stream, ast_node_t* root);
-
-/**
- * \brief Writes a JSON dump of an AST into a stream such that recursive
- * references are resolved.
- * 
- * \param[in] stream Stream to be written to.
- * \param[in] root Root of AST to be dumped.
-*/
-void ast_json_dump_flat(FILE* stream, ast_node_t* root);
 
 #endif

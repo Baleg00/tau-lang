@@ -29,4 +29,19 @@ typedef struct ast_stmt_if_t
   LLVMBasicBlockRef llvm_end; // LLVM block for the end of the if statement.
 } ast_stmt_if_t;
 
+/**
+ * \brief Initializes a new AST if statement node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_stmt_if_t* ast_stmt_if_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST if statement node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_stmt_if_dump_json(FILE* stream, ast_stmt_if_t* node);
+
 #endif

@@ -42,7 +42,6 @@ typedesc_t* typedesc_init(typedesc_kind_t kind)
   case TYPEDESC_UNIT:   desc_size = sizeof(typedesc_t       ); break;
   case TYPEDESC_NULL:   desc_size = sizeof(typedesc_t       ); break;
   case TYPEDESC_FUN:    desc_size = sizeof(typedesc_fun_t   ); break;
-  case TYPEDESC_GEN:    desc_size = sizeof(typedesc_gen_t   ); break;
   case TYPEDESC_STRUCT: desc_size = sizeof(typedesc_struct_t); break;
   case TYPEDESC_UNION:  desc_size = sizeof(typedesc_union_t ); break;
   case TYPEDESC_ENUM:   desc_size = sizeof(typedesc_enum_t  ); break;
@@ -88,9 +87,6 @@ void typedesc_free(typedesc_t* desc)
     break;
   case TYPEDESC_FUN:
     list_free(((typedesc_fun_t*)desc)->param_types);
-    break;
-  case TYPEDESC_GEN:
-    list_free(((typedesc_gen_t*)desc)->param_types);
     break;
   case TYPEDESC_STRUCT:
     list_free(((typedesc_struct_t*)desc)->field_types);
@@ -238,7 +234,6 @@ bool typedesc_is_invokable(typedesc_t* desc)
   switch (desc->kind)
   {
   case TYPEDESC_FUN:
-  case TYPEDESC_GEN:
     return true;
   default:
     return false;
@@ -263,7 +258,6 @@ bool typedesc_is_decl(typedesc_t* desc)
   switch (desc->kind)
   {
   case TYPEDESC_FUN:
-  case TYPEDESC_GEN:
   case TYPEDESC_STRUCT:
   case TYPEDESC_UNION:
   case TYPEDESC_ENUM:
@@ -339,7 +333,6 @@ bool typedesc_can_add_mut(typedesc_t* desc)
   return desc->kind != TYPEDESC_MUT &&
          desc->kind != TYPEDESC_REF &&
          desc->kind != TYPEDESC_FUN &&
-         desc->kind != TYPEDESC_GEN &&
          desc->kind != TYPEDESC_CONST;
 }
 
@@ -466,14 +459,14 @@ bool typedesc_is_callable(typedesc_t* desc)
   {
     desc = typedesc_remove_ptr(typedesc_remove_mut(typedesc_remove_ref(desc)));
 
-    if (desc->kind == TYPEDESC_FUN || desc->kind == TYPEDESC_GEN)
+    if (desc->kind == TYPEDESC_FUN)
       return true;
   }
   else if (desc->kind == TYPEDESC_PTR)
   {
     desc = typedesc_remove_ptr(desc);
 
-    if (desc->kind == TYPEDESC_FUN || desc->kind == TYPEDESC_GEN)
+    if (desc->kind == TYPEDESC_FUN)
       return true;
   }
 
@@ -488,14 +481,14 @@ typedesc_t* typedesc_underlying_callable(typedesc_t* desc)
   {
     desc = typedesc_remove_ptr(typedesc_remove_mut(typedesc_remove_ref(desc)));
 
-    if (desc->kind == TYPEDESC_FUN || desc->kind == TYPEDESC_GEN)
+    if (desc->kind == TYPEDESC_FUN)
       return desc;
   }
   else if (desc->kind == TYPEDESC_PTR)
   {
     desc = typedesc_remove_ptr(desc);
 
-    if (desc->kind == TYPEDESC_FUN || desc->kind == TYPEDESC_GEN)
+    if (desc->kind == TYPEDESC_FUN)
       return desc;
   }
 

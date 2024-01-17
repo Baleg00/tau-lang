@@ -235,6 +235,7 @@ string_t* string_escape(string_t* str)
     }
 
   string_t* result = string_init_with_capacity(len + 1);
+  result->len = len;
 
   for (char *ch = str->buf, *rch = result->buf; *ch != '\0'; ++ch, ++rch)
     switch (*ch)

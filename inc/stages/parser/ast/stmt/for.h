@@ -23,4 +23,19 @@ typedef struct ast_stmt_for_t
   ast_node_t* stmt; // The associated body statement.
 } ast_stmt_for_t;
 
+/**
+ * \brief Initializes a new AST for-loop statement node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_stmt_for_t* ast_stmt_for_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST for-loop statement node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_stmt_for_dump_json(FILE* stream, ast_stmt_for_t* node);
+
 #endif

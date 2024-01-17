@@ -21,4 +21,19 @@ typedef struct ast_stmt_block_t
   list_t* stmts; // The list of associated statements.
 } ast_stmt_block_t;
 
+/**
+ * \brief Initializes a new AST block statement node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_stmt_block_t* ast_stmt_block_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST block statement node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_stmt_block_dump_json(FILE* stream, ast_stmt_block_t* node);
+
 #endif

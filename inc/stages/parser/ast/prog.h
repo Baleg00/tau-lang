@@ -21,4 +21,19 @@ typedef struct ast_prog_t
   list_t* decls; // List of associated declarations.
 } ast_prog_t;
 
+/**
+ * \brief Initializes a new AST program node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_prog_t* ast_prog_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST program node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_prog_dump_json(FILE* stream, ast_prog_t* node);
+
 #endif

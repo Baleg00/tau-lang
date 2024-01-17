@@ -34,4 +34,19 @@ typedef struct ast_decl_enum_t
   LLVMTypeRef llvm_type; // The associated LLVM type.
 } ast_decl_enum_t;
 
+/**
+ * \brief Initializes a new AST enum declaration node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_decl_enum_t* ast_decl_enum_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST enum declaration node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_decl_enum_dump_json(FILE* stream, ast_decl_enum_t* node);
+
 #endif

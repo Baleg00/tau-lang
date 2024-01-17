@@ -29,7 +29,6 @@ void report_error_symbol_is_not_a_typename(location_t* loc);
 void report_warning_shadowed_variable(location_t* loc);
 void report_warning_shadowed_symbol(location_t* loc);
 void report_error_expected_reference_type(location_t* loc);
-void report_error_expected_generator_type(location_t* loc);
 void report_error_expected_arithmetic_type(location_t* loc);
 void report_error_expected_bool_type(location_t* loc);
 void report_error_expected_ptr_type(location_t* loc);
@@ -59,7 +58,6 @@ void report_error_unknown_callconv(location_t* loc);
 void report_error_break_outside_loop(location_t* loc);
 void report_error_continue_outside_loop(location_t* loc);
 void report_error_return_outside_function(location_t* loc);
-void report_error_yield_outside_generator(location_t* loc);
 void report_error_return_inside_defer(location_t* loc);
 void report_error_yield_inside_defer(location_t* loc);
 

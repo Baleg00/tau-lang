@@ -28,4 +28,19 @@ typedef struct ast_decl_param_t
   LLVMValueRef llvm_value; // The associated LLVM value.
 } ast_decl_param_t;
 
+/**
+ * \brief Initializes a new AST parameter declaration node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_decl_param_t* ast_decl_param_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST parameter declaration node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_decl_param_dump_json(FILE* stream, ast_decl_param_t* node);
+
 #endif

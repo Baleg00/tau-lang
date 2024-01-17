@@ -30,4 +30,19 @@ typedef struct ast_decl_mod_t
   bool is_pub; // Is enum public (in case it is a member).
 } ast_decl_mod_t;
 
+/**
+ * \brief Initializes a new AST module declaration node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_decl_mod_t* ast_decl_mod_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST module declaration node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_decl_mod_dump_json(FILE* stream, ast_decl_mod_t* node);
+
 #endif

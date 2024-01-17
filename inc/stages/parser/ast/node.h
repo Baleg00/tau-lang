@@ -35,20 +35,21 @@ typedef enum ast_kind_e
   AST_TYPE_REF, // Reference type.
   AST_TYPE_OPT, // Optional type.
   AST_TYPE_FUN, // Function type.
-  AST_TYPE_I8, // Built-in type `i8`.
-  AST_TYPE_I16, // Built-in type `i16`.
-  AST_TYPE_I32, // Built-in type `i32`.
-  AST_TYPE_I64, // Built-in type `i64`.
-  AST_TYPE_ISIZE, // Built-in type `isize`.
-  AST_TYPE_U8, // Built-in type `u8`.
-  AST_TYPE_U16, // Built-in type `u16`.
-  AST_TYPE_U32, // Built-in type `u32`.
-  AST_TYPE_U64, // Built-in type `u64`.
-  AST_TYPE_USIZE, // Built-in type `usize`.
-  AST_TYPE_F32, // Built-in type `f32`.
-  AST_TYPE_F64, // Built-in type `f64`.
-  AST_TYPE_BOOL, // Built-in type `bool`.
-  AST_TYPE_UNIT, // Built-in type `unit`.
+  AST_TYPE_PRIM_I8, // Primitive type `i8`.
+  AST_TYPE_PRIM_I16, // Primitive type `i16`.
+  AST_TYPE_PRIM_I32, // Primitive type `i32`.
+  AST_TYPE_PRIM_I64, // Primitive type `i64`.
+  AST_TYPE_PRIM_ISIZE, // Primitive type `isize`.
+  AST_TYPE_PRIM_U8, // Primitive type `u8`.
+  AST_TYPE_PRIM_U16, // Primitive type `u16`.
+  AST_TYPE_PRIM_U32, // Primitive type `u32`.
+  AST_TYPE_PRIM_U64, // Primitive type `u64`.
+  AST_TYPE_PRIM_USIZE, // Primitive type `usize`.
+  AST_TYPE_PRIM_F32, // Primitive type `f32`.
+  AST_TYPE_PRIM_F64, // Primitive type `f64`.
+  AST_TYPE_PRIM_CHAR, // Primitive type `char`.
+  AST_TYPE_PRIM_BOOL, // Primitive type `bool`.
+  AST_TYPE_PRIM_UNIT, // Primitive type `unit`.
   AST_TYPE_MEMBER, // Member type.
   AST_TYPE_DECL, // Declaration type.
 
@@ -92,6 +93,22 @@ typedef struct ast_node_t
 {
   AST_NODE_HEADER;
 } ast_node_t;
+
+/**
+ * \brief Writes a JSON dump of a list of AST nodes into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] list The list of the AST nodes to be dumped.
+*/
+void ast_list_dump_json(FILE* stream, list_t* list);
+
+/**
+ * \brief Writes a JSON dump of an AST node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_node_dump_json(FILE* stream, ast_node_t* node);
 
 /**
  * \brief Returns a C-string representation of a node kind.

@@ -22,4 +22,19 @@ typedef struct ast_expr_op_call_t
   list_t* params; // List of parameter expressions.
 } ast_expr_op_call_t;
 
+/**
+ * \brief Initializes a new AST call operation expression node.
+ * 
+ * \returns Pointer to the newly initialized AST node.
+ */
+ast_expr_op_call_t* ast_expr_op_call_init(void);
+
+/**
+ * \brief Writes a JSON dump of an AST call operation expression node into a stream.
+ * 
+ * \param[in] stream The stream to be written to.
+ * \param[in] node Pointer to the AST node to be dumped.
+*/
+void ast_expr_op_call_dump_json(FILE* stream, ast_expr_op_call_t* node);
+
 #endif
