@@ -784,7 +784,7 @@ vector_t* lexer_lex(lexer_t* lex, const char* path, char* src)
 
   lex->toks = vector_init();
 
-  while (vector_empty(lex->toks) || ((token_t*)vector_get(lex->toks, vector_size(lex->toks) - 1))->kind != TOK_EOF)
+  while (vector_empty(lex->toks) || ((token_t*)vector_back(lex->toks))->kind != TOK_EOF)
     vector_push(lex->toks, lexer_read_next(lex));
 
   return lex->toks;

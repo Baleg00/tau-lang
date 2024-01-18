@@ -74,6 +74,14 @@ vector_t* vector_init_from_buffer(void* buffer, size_t length);
 void vector_free(vector_t* vec);
 
 /**
+ * \brief Creates a copy of a vector.
+ *
+ * \param[in] vec Pointer to the vector to copy.
+ * \returns Pointer to the copied vector.
+ */
+vector_t* vector_copy(vector_t* vec);
+
+/**
  * \brief Retrieves the element at the specified index.
  *
  * \param[in] vec Pointer to the vector.
@@ -90,6 +98,22 @@ void* vector_get(vector_t* vec, size_t idx);
  * \param[in] data Pointer to the data to set.
  */
 void vector_set(vector_t* vec, size_t idx, void* data);
+
+/**
+ * \brief Retrieves the data stored in the front of a vector.
+ *
+ * \param[in] vec Pointer to the vector.
+ * \returns Pointer to the data at the front of the vector.
+ */
+void* vector_front(vector_t* vec);
+
+/**
+ * \brief Retrieves the data stored in the back of a vector.
+ *
+ * \param[in] vec Pointer to the vector.
+ * \returns Pointer to the data at the back of the vector.
+ */
+void* vector_back(vector_t* vec);
 
 /**
  * \brief Appends an element to the end of the vector.

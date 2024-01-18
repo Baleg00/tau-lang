@@ -69,6 +69,16 @@ void vector_free(vector_t* vec)
   free(vec);
 }
 
+vector_t* vector_copy(vector_t* vec)
+{
+  vector_t* new_vec = vector_init_with_capacity(vec->size);
+
+  new_vec->size = vec->size;
+  memcpy(new_vec->data, vec->data, sizeof(void*) * vec->size);
+
+  return new_vec;
+}
+
 void* vector_get(vector_t* vec, size_t idx)
 {
   assert(idx < vec->size);
@@ -81,9 +91,21 @@ void vector_set(vector_t* vec, size_t idx, void* data)
   vec->data[idx] = data;
 }
 
+void* vector_front(vector_t* vec)
+{
+  assert(vec->size > 0);
+  return vec->data[0];
+}
+
+void* vector_back(vector_t* vec)
+{
+  assert(vec->size > 0);
+  return vec->data[vec->size - 1];
+}
+
 void vector_push(vector_t* vec, void* data)
 {
-  if (vec->size + 1 >= vec->capacity)
+  if (vec->size == vec->capacity)
     vector_expand(vec);
 
   vec->data[vec->size++] = data;
@@ -97,7 +119,7 @@ void* vector_pop(vector_t* vec)
 
 void vector_insert(vector_t* vec, size_t idx, void* data)
 {
-  if (vec->size + 1 >= vec->capacity)
+  if (vec->size == vec->capacity)
     vector_expand(vec);
 
   memmove(vec->data + idx + 1, vec->data + idx, sizeof(void*) * (vec->size - idx));

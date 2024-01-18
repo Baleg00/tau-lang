@@ -631,7 +631,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
           if (seen_default)
             report_error_missing_default_parameter(
               variadic_param->tok->loc,
-              ((ast_node_t*)vector_get(node->params, vector_size(node->params) - 1))->tok->loc
+              ((ast_node_t*)vector_back(node->params))->tok->loc
             );
 
           vector_push(node->params, variadic_param);
@@ -657,7 +657,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
       if (seen_default && param->expr == NULL)
         report_error_missing_default_parameter(
           param->tok->loc,
-          ((ast_node_t*)vector_get(node->params, vector_size(node->params) - 1))->tok->loc
+          ((ast_node_t*)vector_back(node->params))->tok->loc
         );
 
       vector_push(node->params, param);
