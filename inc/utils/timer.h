@@ -18,10 +18,12 @@
 
 #include <stdint.h>
 
+#include "utils/esc_seq.h"
 #include "utils/io/log.h"
 
 /**
- * \brief Measures the execution time of a given statement and logs the elapsed time in milliseconds.
+ * \brief Measures the execution time of a given statement and logs the elapsed
+ * time in milliseconds.
  *
  * \param[in] NAME The name for identifying the measurement.
  * \param[in] STMT The statement to be executed and timed.
@@ -31,7 +33,7 @@
     uint64_t time_it_begin = timer_now();\
     { STMT; }\
     uint64_t time_it_end = timer_now();\
-    log_debug("timer", "(" NAME ") Elapsed time: %.5lf ms", (double)(time_it_end - time_it_begin) / (double)timer_freq() * 1000.0);\
+    log_debug("timer", "[" ESC_FG_BRIGHT_BLACK NAME ESC_RESET "] Elapsed time: %.6g ms", (double)(time_it_end - time_it_begin) / (double)timer_freq() * 1000.0);\
   } while (0)\
 
 /**

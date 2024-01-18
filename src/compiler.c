@@ -219,7 +219,7 @@ compiler_t* compiler_init(void)
 
   compiler->args.log_level = LOG_LEVEL_WARN;
 
-  compiler_llvm_init(compiler);
+  time_it("LLVM init", compiler_llvm_init(compiler));
 
   return compiler;
 }
@@ -316,7 +316,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     generator_t* generator = generator_init();
 
-    time_it("generator", generator_generate(generator, compiler->llvm_context, compiler->llvm_machine, compiler->llvm_layout, llvm_module, typetable, root));
+    time_it("codegen", generator_generate(generator, compiler->llvm_context, compiler->llvm_machine, compiler->llvm_layout, llvm_module, typetable, root));
 
     if (compiler->flags.dump_ll)
       compiler_dump_ll(compiler, input_file_path, input_file_name, llvm_module);
