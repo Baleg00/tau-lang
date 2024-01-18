@@ -21,7 +21,7 @@
 typedef struct ast_decl_fun_t
 {
   AST_DECL_HEADER;
-  list_t* params; // List of associated parameter declarations.
+  vector_t* params; // Vector of associated parameter declarations.
   ast_node_t* return_type; // The associated return type.
   ast_node_t* stmt; // The associated body statement.
   callconv_kind_t callconv; // The associated calling convention.

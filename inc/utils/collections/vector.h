@@ -20,6 +20,24 @@
 #include <stdint.h>
 
 /**
+ * \brief Macro for iterating over each element in a vector using a for loop.
+ * 
+ * \param[in] VAR The name of the index variable.
+ * \param[in] VEC The vector to iterate over.
+*/
+#define VECTOR_FOR_LOOP(VAR, VEC)\
+  for (\
+    size_t (VAR) = 0;\
+    (VAR) < ((VEC) == NULL ? 0 : vector_size(VEC));\
+    (VAR)++\
+  )
+
+/**
+ * \brief Function type to serve as parameter in `vector_for_each`.
+ */
+typedef void(*vector_for_each_func_t)(void*);
+
+/**
  * \brief Dynamic array-based vector data structure.
  */
 typedef struct vector_t vector_t;
@@ -131,6 +149,14 @@ size_t vector_size(vector_t* vec);
  * \returns `true` if the vector is empty, `false` otherwise.
  */
 bool vector_empty(vector_t* vec);
+
+/**
+ * \brief Applies a given function to each element of the vector.
+ *
+ * \param[in] vec Pointer to the vector.
+ * \param[in] func The function to be applied to each element.
+ */
+void vector_for_each(vector_t* vec, vector_for_each_func_t func);
 
 /**
  * \brief Writes every element of a vector into a memory buffer.

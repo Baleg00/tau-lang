@@ -23,7 +23,7 @@
 
 #include "ast/ast.h"
 #include "stages/lexer/token.h"
-#include "utils/collections/list.h"
+#include "utils/collections/vector.h"
 
 /**
  * \brief Represents a syntax analyzer.
@@ -31,7 +31,8 @@
 typedef struct parser_t parser_t;
 
 /**
- * \brief Function pointer type to be used when parsing lists.
+ * \brief Function pointer type to be used when parsing delimited or terminated
+ * list of nodes.
  */
 typedef ast_node_t*(*parse_func_t)(parser_t*);
 
@@ -137,9 +138,9 @@ void parser_parse_decl_context_extern(parser_t* par);
  * \param[in] par Parser to be used.
  * \param[in] delim Delimiter token kind.
  * \param[in] parse_func Function to be used for parsing a node.
- * \returns List of parsed nodes.
+ * \returns Vector of parsed nodes.
  */
-list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func);
+vector_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func);
 
 /**
  * \brief Parses a list of nodes terminated by a specific token.
@@ -150,9 +151,9 @@ list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_fun
  * \param[in] par Parser to be used.
  * \param[in] termin Terminator token kind.
  * \param[in] parse_func Function to be used for parsing a node.
- * \returns List of parsed nodes.
+ * \returns Vector of parsed nodes.
  */
-list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func);
+vector_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func);
 
 /**
  * \brief Parses a string literal and returns the corresponding calling convention kind.
@@ -528,9 +529,9 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par);
  * \brief Processes a list of tokens and produces an abstract syntax tree.
  * 
  * \param[in] par Parser to be used.
- * \param[in] toks List of tokens to be parsed.
+ * \param[in] toks Vector of tokens to be parsed.
  * \returns Pointer to the root node.
  */
-ast_node_t* parser_parse(parser_t* par, list_t* toks);
+ast_node_t* parser_parse(parser_t* par, vector_t* toks);
 
 #endif

@@ -88,9 +88,9 @@ void generator_visit_type_fun(generator_t* gen, ast_type_fun_t* node)
   typedesc_t* return_desc = typetable_lookup(gen->typetable, (ast_node_t*)node->return_type);
   ((ast_type_t*)node->return_type)->llvm_type = return_desc->llvm_type;
 
-  LIST_FOR_LOOP(it, node->params)
+  VECTOR_FOR_LOOP(i, node->params)
   {
-    ast_type_t* param_type_node = (ast_type_t*)list_node_get(it);
+    ast_type_t* param_type_node = (ast_type_t*)vector_get(node->params, i);
 
     generator_visit_type(gen, param_type_node);
 
@@ -752,15 +752,14 @@ void generator_visit_expr_op_call(generator_t* gen, ast_decl_fun_t* fun_node, as
 {
   generator_visit_expr(gen, fun_node, (ast_expr_t*)node->callee);
   
-  LLVMValueRef* param_values = malloc(list_size(node->params) * sizeof(LLVMValueRef));
+  LLVMValueRef* param_values = malloc(vector_size(node->params) * sizeof(LLVMValueRef));
 
-  size_t i = 0;
-  LIST_FOR_LOOP(it, node->params)
+  VECTOR_FOR_LOOP(i, node->params)
   {
-    ast_expr_t* param = (ast_expr_t*)list_node_get(it);
+    ast_expr_t* param = (ast_expr_t*)vector_get(node->params, i);
     generator_visit_expr(gen, fun_node, param);
 
-    param_values[i++] = param->llvm_value;
+    param_values[i] = param->llvm_value;
   }
 
   node->llvm_value = LLVMBuildCall2(
@@ -768,7 +767,7 @@ void generator_visit_expr_op_call(generator_t* gen, ast_decl_fun_t* fun_node, as
     ((ast_expr_t*)node->callee)->llvm_type,
     ((ast_expr_t*)node->callee)->llvm_value,
     param_values,
-    (uint32_t)list_size(node->params),
+    (uint32_t)vector_size(node->params),
     "call2_tmp"
   );
 
@@ -911,8 +910,8 @@ void generator_visit_stmt_return(generator_t* gen, ast_decl_fun_t* fun_node, ast
 
 void generator_visit_stmt_block(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_block_t* node)
 {
-  LIST_FOR_LOOP(it, node->stmts)
-    generator_visit_stmt(gen, fun_node, (ast_stmt_t*)list_node_get(it));
+  VECTOR_FOR_LOOP(i, node->stmts)
+    generator_visit_stmt(gen, fun_node, (ast_stmt_t*)vector_get(node->stmts, i));
 }
 
 void generator_visit_stmt(generator_t* gen, ast_decl_fun_t* fun_node, ast_stmt_t* node)
@@ -997,9 +996,8 @@ void generator_visit_decl_fun(generator_t* gen, ast_decl_fun_t* node)
 
     LLVMPositionBuilderAtEnd(gen->llvm_builder, node->llvm_entry);
 
-    size_t i = 0;
-    LIST_FOR_LOOP(it, node->params)
-      generator_visit_decl_param(gen, node, (ast_decl_param_t*)list_node_get(it), i++);
+    VECTOR_FOR_LOOP(i, node->params)
+      generator_visit_decl_param(gen, node, (ast_decl_param_t*)vector_get(node->params, i), i);
 
     generator_visit_stmt(gen, node, (ast_stmt_t*)node->stmt);
   }
@@ -1022,21 +1020,20 @@ void generator_visit_decl_enum(generator_t* gen, ast_decl_enum_t* node)
   typedesc_t* desc = typetable_lookup(gen->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  uint64_t i = 0;
-  LIST_FOR_LOOP(it, node->members)
+  VECTOR_FOR_LOOP(i, node->members)
   {
-    ast_decl_enum_constant_t* member = (ast_decl_enum_constant_t*)list_node_get(it);
+    ast_decl_enum_constant_t* member = (ast_decl_enum_constant_t*)vector_get(node->members, i);
 
     member->llvm_type = node->llvm_type;
-    member->llvm_value = LLVMConstInt(node->llvm_type, i++, false);
+    member->llvm_value = LLVMConstInt(node->llvm_type, (uint64_t)i, false);
   }
 }
 
 void generator_visit_decl_mod(generator_t* gen, ast_decl_mod_t* node)
 {
-  LIST_FOR_LOOP(it, node->members)
+  VECTOR_FOR_LOOP(i, node->members)
   {
-    ast_decl_t* decl = (ast_decl_t*)list_node_get(it);
+    ast_decl_t* decl = (ast_decl_t*)vector_get(node->members, i);
     generator_visit_decl(gen, decl);
   }
 }
@@ -1055,9 +1052,9 @@ void generator_visit_decl(generator_t* gen, ast_decl_t* node)
 
 void generator_visit_prog(generator_t* gen, ast_prog_t* node)
 {
-  LIST_FOR_LOOP(it, node->decls)
+  VECTOR_FOR_LOOP(i, node->decls)
   {
-    ast_decl_t* decl_node = (ast_decl_t*)list_node_get(it);
+    ast_decl_t* decl_node = (ast_decl_t*)vector_get(node->decls, i);
     generator_visit_decl(gen, decl_node);
   }
 }

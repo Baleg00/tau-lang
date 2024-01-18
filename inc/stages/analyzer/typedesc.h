@@ -24,7 +24,6 @@
 #include <llvm-c/Types.h>
 
 #include "ast/ast.h"
-#include "utils/collections/list.h"
 
 /**
  * \brief Utility macro which expands to fields that all types must have.
@@ -165,7 +164,7 @@ typedef struct typedesc_opt_t
 typedef struct typedesc_fun_t
 {
   TYPEDESC_HEADER;
-  list_t* param_types; // Parameter types.
+  vector_t* param_types; // Parameter types.
   typedesc_t* return_type; // Return type.
   bool is_vararg; // Is variadic.
   callconv_kind_t callconv; // The function calling convention.
@@ -187,7 +186,7 @@ typedef struct typedesc_struct_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
-  list_t* field_types; // List of field types.
+  vector_t* field_types; // Vector of field types.
 } typedesc_struct_t;
 
 /**
@@ -197,7 +196,7 @@ typedef struct typedesc_union_t
 {
   TYPEDESC_HEADER;
   TYPEDESC_DECL_HEADER;
-  list_t* field_types; // List of field types.
+  vector_t* field_types; // Vector of field types.
 } typedesc_union_t;
 
 /**

@@ -62,6 +62,9 @@ vector_t* vector_init_from_buffer(void* buffer, size_t length)
 
 void vector_free(vector_t* vec)
 {
+  if (vec == NULL)
+    return;
+
   free(vec->data);
   free(vec);
 }
@@ -133,6 +136,12 @@ size_t vector_size(vector_t* vec)
 bool vector_empty(vector_t* vec)
 {
   return vec->size == 0;
+}
+
+void vector_for_each(vector_t* vec, vector_for_each_func_t func)
+{
+  VECTOR_FOR_LOOP(i, vec)
+    func(vector_get(vec, i));
 }
 
 void vector_to_buffer(vector_t* vec, void* buffer)

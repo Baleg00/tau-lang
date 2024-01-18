@@ -19,7 +19,7 @@ typedef struct ast_expr_op_call_t
 {
   AST_EXPR_OP_HEADER;
   ast_node_t* callee; // Callee expression.
-  list_t* params; // List of parameter expressions.
+  vector_t* params; // Vector of parameter expressions.
 } ast_expr_op_call_t;
 
 /**

@@ -139,7 +139,7 @@ static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const 
   list_push_back(compiler->input_files, (void*)arg);
 }
 
-static void compiler_dump_tokens(compiler_t* compiler, const char* input_file_path, const char* input_file_name, list_t* tokens)
+static void compiler_dump_tokens(compiler_t* compiler, const char* input_file_path, const char* input_file_name, vector_t* tokens)
 {
   unused(compiler);
 
@@ -149,7 +149,7 @@ static void compiler_dump_tokens(compiler_t* compiler, const char* input_file_pa
 
   FILE* toks_file = fopen(tokens_file_path, "w");
   assert(toks_file != NULL);
-  token_json_dump_list(toks_file, tokens);
+  token_json_dump_vector(toks_file, tokens);
   fclose(toks_file);
 
   log_trace("main", "(%s) Token dump: %s", input_file_name, tokens_file_path);
@@ -287,7 +287,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     log_trace("main", "(%s) Lexical analysis.", input_file_name);
 
     lexer_t* lexer = lexer_init();
-    list_t* toks = NULL;
+    vector_t* toks = NULL;
 
     time_it("lexer", toks = lexer_lex(lexer, input_file_path, src));
 
@@ -339,8 +339,10 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     
     parser_free(parser);
 
-    list_for_each(toks, (list_for_each_func_t)token_free);
-    list_free(toks);
+    VECTOR_FOR_LOOP(i, toks)
+      token_free((token_t*)vector_get(toks, i));
+
+    vector_free(toks);
     lexer_free(lexer);
     
     free(src);

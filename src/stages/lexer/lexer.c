@@ -13,7 +13,6 @@
 
 #include "stages/lexer/location.h"
 #include "stages/lexer/token.h"
-#include "utils/collections/list.h"
 #include "utils/common.h"
 #include "utils/crumb.h"
 #include "utils/diagnostics.h"
@@ -129,7 +128,7 @@ static const struct {
 struct lexer_t
 {
   location_t* loc; // Current location in source file.
-  list_t* toks; // List of tokens.
+  vector_t* toks; // Vector of tokens.
 };
 
 lexer_t* lexer_init(void)
@@ -224,7 +223,7 @@ char lexer_next(lexer_t* lex)
     loc->len = 1;
 
     token_t* tok = token_init(TOK_NEWLINE, loc);
-    list_push_back(lex->toks, tok);
+    vector_push(lex->toks, tok);
 
     lex->loc->row += 1;
     lex->loc->col = 0;
@@ -774,7 +773,7 @@ token_t* lexer_read_next(lexer_t* lex)
   return NULL;
 }
 
-list_t* lexer_lex(lexer_t* lex, const char* path, char* src)
+vector_t* lexer_lex(lexer_t* lex, const char* path, char* src)
 {
   lex->loc->path = path;
   lex->loc->src = src;
@@ -783,10 +782,10 @@ list_t* lexer_lex(lexer_t* lex, const char* path, char* src)
   lex->loc->col = 0;
   lex->loc->len = 0;
 
-  lex->toks = list_init();
+  lex->toks = vector_init();
 
-  while (list_empty(lex->toks) || ((token_t*)list_back(lex->toks))->kind != TOK_EOF)
-    list_push_back(lex->toks, lexer_read_next(lex));
+  while (vector_empty(lex->toks) || ((token_t*)vector_get(lex->toks, vector_size(lex->toks) - 1))->kind != TOK_EOF)
+    vector_push(lex->toks, lexer_read_next(lex));
 
   return lex->toks;
 }

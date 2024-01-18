@@ -102,19 +102,19 @@ typedef struct ast_node_t
 void ast_node_free(ast_node_t* node);
 
 /**
- * \brief Writes a JSON dump of a list of AST nodes into a stream.
+ * \brief Writes a JSON dump of a vector of AST nodes into a stream.
  * 
  * \param[in] stream The stream to be written to.
- * \param[in] list The list of the AST nodes to be dumped.
-*/
-void ast_list_dump_json(FILE* stream, list_t* list);
+ * \param[in] vec The vector of the AST nodes to be dumped.
+ */
+void ast_node_dump_json_vector(FILE* stream, vector_t* vec);
 
 /**
  * \brief Writes a JSON dump of an AST node into a stream.
  * 
  * \param[in] stream The stream to be written to.
  * \param[in] node Pointer to the AST node to be dumped.
-*/
+ */
 void ast_node_dump_json(FILE* stream, ast_node_t* node);
 
 /**
@@ -122,7 +122,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node);
  * 
  * \param[in] kind Node kind.
  * \returns C-string representation.
-*/
+ */
 const char* ast_kind_to_cstr(ast_kind_t kind);
 
 /**
@@ -130,7 +130,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind);
  * 
  * \param[in] node Node to be checked.
  * \returns `true` if node is a type, `false` otherwise.
-*/
+ */
 bool ast_is_type(ast_node_t* node);
 
 /**
@@ -138,7 +138,7 @@ bool ast_is_type(ast_node_t* node);
  * 
  * \param[in] node Node to be checked.
  * \returns `true` if node is an expression, `false` otherwise.
-*/
+ */
 bool ast_is_expr(ast_node_t* node);
 
 /**
@@ -146,7 +146,7 @@ bool ast_is_expr(ast_node_t* node);
  * 
  * \param[in] node Node to be checked.
  * \returns `true` if node is a statement, `false` otherwise.
-*/
+ */
 bool ast_is_stmt(ast_node_t* node);
 
 /**
@@ -154,7 +154,7 @@ bool ast_is_stmt(ast_node_t* node);
  * 
  * \param[in] node Node to be checked.
  * \returns `true` if node is a declaration, `false` otherwise.
-*/
+ */
 bool ast_is_decl(ast_node_t* node);
 
 #endif

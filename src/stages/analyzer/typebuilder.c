@@ -61,9 +61,9 @@ static int typebuilder_cmp_fun(void* lhs, void* rhs)
 
   size_t lhs_hash = hash_digest(&lhs_desc->return_type, sizeof(typedesc_t*));
 
-  LIST_FOR_LOOP(it, lhs_desc->param_types)
+  VECTOR_FOR_LOOP(i, lhs_desc->param_types)
   {
-    typedesc_t* param_desc = (typedesc_t*)list_node_get(it);
+    typedesc_t* param_desc = (typedesc_t*)vector_get(lhs_desc->param_types, i);
     lhs_hash = hash_combine_with_data(lhs_hash, &param_desc, sizeof(typedesc_t*));
   }
 
@@ -72,9 +72,9 @@ static int typebuilder_cmp_fun(void* lhs, void* rhs)
 
   size_t rhs_hash = hash_digest(&rhs_desc->return_type, sizeof(typedesc_t*));
 
-  LIST_FOR_LOOP(it, rhs_desc->param_types)
+  VECTOR_FOR_LOOP(i, rhs_desc->param_types)
   {
-    typedesc_t* param_desc = (typedesc_t*)list_node_get(it);
+    typedesc_t* param_desc = (typedesc_t*)vector_get(rhs_desc->param_types, i);
     rhs_hash = hash_combine_with_data(rhs_hash, &param_desc, sizeof(typedesc_t*));
   }
 
@@ -97,17 +97,17 @@ static int typebuilder_cmp_struct(void* lhs, void* rhs)
 
   size_t lhs_hash = hash_digest(&lhs_desc->node, sizeof(ast_node_t*));
 
-  LIST_FOR_LOOP(it, lhs_desc->field_types)
+  VECTOR_FOR_LOOP(i, lhs_desc->field_types)
   {
-    typedesc_t* field_desc = (typedesc_t*)list_node_get(it);
+    typedesc_t* field_desc = (typedesc_t*)vector_get(lhs_desc->field_types, i);
     lhs_hash = hash_combine_with_data(lhs_hash, &field_desc, sizeof(typedesc_t*));
   }
 
   size_t rhs_hash = hash_digest(&rhs_desc->node, sizeof(ast_node_t*));
 
-  LIST_FOR_LOOP(it, rhs_desc->field_types)
+  VECTOR_FOR_LOOP(i, rhs_desc->field_types)
   {
-    typedesc_t* field_desc = (typedesc_t*)list_node_get(it);
+    typedesc_t* field_desc = (typedesc_t*)vector_get(rhs_desc->field_types, i);
     rhs_hash = hash_combine_with_data(rhs_hash, &field_desc, sizeof(typedesc_t*));
   }
 
@@ -127,17 +127,17 @@ static int typebuilder_cmp_union(void* lhs, void* rhs)
 
   size_t lhs_hash = hash_digest(&lhs_desc->node, sizeof(ast_node_t*));
 
-  LIST_FOR_LOOP(it, lhs_desc->field_types)
+  VECTOR_FOR_LOOP(i, lhs_desc->field_types)
   {
-    typedesc_t* field_desc = (typedesc_t*)list_node_get(it);
+    typedesc_t* field_desc = (typedesc_t*)vector_get(lhs_desc->field_types, i);
     lhs_hash = hash_combine_with_data(lhs_hash, &field_desc, sizeof(typedesc_t*));
   }
 
   size_t rhs_hash = hash_digest(&rhs_desc->node, sizeof(ast_node_t*));
 
-  LIST_FOR_LOOP(it, rhs_desc->field_types)
+  VECTOR_FOR_LOOP(i, rhs_desc->field_types)
   {
-    typedesc_t* field_desc = (typedesc_t*)list_node_get(it);
+    typedesc_t* field_desc = (typedesc_t*)vector_get(rhs_desc->field_types, i);
     rhs_hash = hash_combine_with_data(rhs_hash, &field_desc, sizeof(typedesc_t*));
   }
 
@@ -408,7 +408,7 @@ typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_typ
 {
   typedesc_fun_t* desc = (typedesc_fun_t*)typedesc_init(TYPEDESC_FUN);
   desc->return_type = return_type;
-  desc->param_types = param_count == 0 ? NULL : list_init_from_buffer(param_types, param_count);
+  desc->param_types = param_count == 0 ? NULL : vector_init_from_buffer(param_types, param_count);
   desc->is_vararg = is_vararg;
   desc->callconv = callconv;
 
@@ -449,7 +449,7 @@ typedesc_t* typebuilder_build_struct(typebuilder_t* builder, ast_node_t* node, t
 {
   typedesc_struct_t* desc = (typedesc_struct_t*)typedesc_init(TYPEDESC_STRUCT);
   desc->node = node;
-  desc->field_types = field_count == 0 ? NULL : list_init_from_buffer(field_types, field_count);
+  desc->field_types = field_count == 0 ? NULL : vector_init_from_buffer(field_types, field_count);
 
   typedesc_t* result = (typedesc_t*)set_get(builder->set_struct, desc);
 
@@ -488,7 +488,7 @@ typedesc_t* typebuilder_build_union(typebuilder_t* builder, ast_node_t* node, ty
 {
   typedesc_union_t* desc = (typedesc_union_t*)typedesc_init(TYPEDESC_UNION);
   desc->node = node;
-  desc->field_types = field_count == 0 ? NULL : list_init_from_buffer(field_types, field_count);
+  desc->field_types = field_count == 0 ? NULL : vector_init_from_buffer(field_types, field_count);
 
   typedesc_t* result = (typedesc_t*)set_get(builder->set_union, desc);
 
@@ -532,7 +532,7 @@ typedesc_t* typebuilder_build_enum(typebuilder_t* builder, ast_node_t* node)
     return result;
   }
 
-  size_t field_count = list_size(((ast_decl_enum_t*)node)->members);
+  size_t field_count = vector_size(((ast_decl_enum_t*)node)->members);
 
        if (field_count <=  UINT8_MAX) desc->llvm_type = builder->desc_u8->llvm_type;
   else if (field_count <= UINT16_MAX) desc->llvm_type = builder->desc_u16->llvm_type;

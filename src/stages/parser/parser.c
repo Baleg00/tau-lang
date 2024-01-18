@@ -35,8 +35,8 @@ typedef struct parser_decl_context_t
 
 struct parser_t
 {
-  list_t* toks; // List of tokens to be processed.
-  list_node_t* cur; // Current token in list.
+  vector_t* toks; // Vector of tokens to be processed.
+  size_t cur; // Current token index.
   bool ignore_newlines; // Ignore newlines.
 
   parser_decl_context_t decl_ctx; // Current declaration context.
@@ -44,12 +44,12 @@ struct parser_t
 
 static void parser_skip_newlines(parser_t* par)
 {
-  token_t* tok = (token_t*)list_node_get(par->cur);
+  token_t* tok = (token_t*)vector_get(par->toks, par->cur);
 
   while (tok->kind == TOK_NEWLINE)
   {
-    par->cur = list_node_next(par->cur);
-    tok = (token_t*)list_node_get(par->cur);
+    par->cur++;
+    tok = (token_t*)vector_get(par->toks, par->cur);
   }
 }
 
@@ -70,7 +70,7 @@ token_t* parser_current(parser_t* par)
   if (par->ignore_newlines)
     parser_skip_newlines(par);
 
-  return (token_t*)list_node_get(par->cur);
+  return (token_t*)vector_get(par->toks, par->cur);
 }
 
 token_t* parser_next(parser_t* par)
@@ -78,7 +78,7 @@ token_t* parser_next(parser_t* par)
   token_t* tok = parser_current(par);
 
   if (tok->kind != TOK_EOF)
-    par->cur = list_node_next(par->cur);
+    par->cur++;
 
   return tok;
 }
@@ -90,10 +90,10 @@ token_t* parser_peek(parser_t* par)
   if (tok->kind == TOK_EOF)
     return tok;
 
-  list_node_t* next = list_node_next(par->cur);
+  size_t next = par->cur + 1;
 
-  while (par->ignore_newlines && (tok = (token_t*)list_node_get(next))->kind == TOK_NEWLINE)
-    next = list_node_next(next);
+  while (par->ignore_newlines && (tok = (token_t*)vector_get(par->toks, next))->kind == TOK_NEWLINE)
+    next++;
 
   return tok;
 }
@@ -149,29 +149,29 @@ void parser_parse_decl_context_extern(parser_t* par)
     par->decl_ctx.callconv = parser_parse_callconv(par);
 }
 
-list_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func)
+vector_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func)
 {
-  list_t* list = list_init();
+  vector_t* vec = vector_init();
 
   for (;;)
   {
-    list_push_back(list, parse_func(par));
+    vector_push(vec, parse_func(par));
 
     if (!parser_consume(par, delim))
       break;
   }
 
-  return list;
+  return vec;
 }
 
-list_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func)
+vector_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func)
 {
-  list_t* list = list_init();
+  vector_t* vec = vector_init();
 
   while (!parser_consume(par, termin))
-    list_push_back(list, parse_func(par));
+    vector_push(vec, parse_func(par));
 
-  return list;
+  return vec;
 }
 
 callconv_kind_t parser_parse_callconv(parser_t* par)
@@ -606,7 +606,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   node->id = parser_parse_id(par);
   
   // Parse parameters.
-  node->params = list_init();
+  node->params = vector_init();
 
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
 
@@ -631,10 +631,10 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
           if (seen_default)
             report_error_missing_default_parameter(
               variadic_param->tok->loc,
-              ((ast_node_t*)list_back(node->params))->tok->loc
+              ((ast_node_t*)vector_get(node->params, vector_size(node->params) - 1))->tok->loc
             );
 
-          list_push_back(node->params, variadic_param);
+          vector_push(node->params, variadic_param);
         }
         // C-style variadic parameter.
         else
@@ -657,10 +657,10 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
       if (seen_default && param->expr == NULL)
         report_error_missing_default_parameter(
           param->tok->loc,
-          ((ast_node_t*)list_back(node->params))->tok->loc
+          ((ast_node_t*)vector_get(node->params, vector_size(node->params) - 1))->tok->loc
         );
 
-      list_push_back(node->params, param);
+      vector_push(node->params, param);
 
       if (!parser_consume(par, TOK_PUNCT_COMMA))
         break;
@@ -867,10 +867,10 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse(parser_t* par, list_t* toks)
+ast_node_t* parser_parse(parser_t* par, vector_t* toks)
 {
   par->toks = toks;
-  par->cur = list_front_node(toks);
+  par->cur = 0;
 
   parser_set_ignore_newline(par, true);
   parser_decl_context_clear(par);

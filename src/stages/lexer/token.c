@@ -39,17 +39,17 @@ void token_json_dump(FILE* stream, token_t* tok)
   fputc('}', stream);
 }
 
-void token_json_dump_list(FILE* stream, list_t* list)
+void token_json_dump_vector(FILE* stream, vector_t* vec)
 {
   fputc('[', stream);
 
-  LIST_FOR_LOOP(it, list)
+  VECTOR_FOR_LOOP(i, vec)
   {
-    token_t* tok = (token_t*)list_node_get(it);
+    token_t* tok = (token_t*)vector_get(vec, i);
 
     token_json_dump(stream, tok);
 
-    if (list_node_next(it) != NULL)
+    if (i + 1 < vector_size(vec))
       fputc(',', stream);
   }
 

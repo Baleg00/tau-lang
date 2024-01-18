@@ -25,7 +25,7 @@ ast_expr_op_call_t* ast_expr_op_call_init(void)
 
 void ast_expr_op_call_free(ast_expr_op_call_t* node)
 {
-  list_free(node->params);
+  vector_free(node->params);
   free(node);
 }
 
@@ -36,6 +36,6 @@ void ast_expr_op_call_dump_json(FILE* stream, ast_expr_op_call_t* node)
   fprintf(stream, ",\"callee\":");
   ast_node_dump_json(stream, node->callee);
   fprintf(stream, ",\"params\":");
-  ast_list_dump_json(stream, node->params);
+  ast_node_dump_json_vector(stream, node->params);
   fputc('}', stream);
 }

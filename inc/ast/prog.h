@@ -18,7 +18,7 @@
 typedef struct ast_prog_t
 {
   AST_NODE_HEADER;
-  list_t* decls; // List of associated declarations.
+  vector_t* decls; // Vector of associated declarations.
 } ast_prog_t;
 
 /**

@@ -25,7 +25,7 @@ ast_type_fun_t* ast_type_fun_init(void)
 
 void ast_type_fun_free(ast_type_fun_t* node)
 {
-  list_free(node->params);
+  vector_free(node->params);
   free(node);
 }
 
@@ -33,7 +33,7 @@ void ast_type_fun_dump_json(FILE* stream, ast_type_fun_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"params\":");
-  ast_list_dump_json(stream, node->params);
+  ast_node_dump_json_vector(stream, node->params);
   fprintf(stream, ",\"return_type\":");
   ast_node_dump_json(stream, node->return_type);
   fprintf(stream, ",\"is_vararg\":%s", node->is_vararg ? "true" : "false");

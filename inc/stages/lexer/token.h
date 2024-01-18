@@ -22,7 +22,7 @@
 #include <stdio.h>
 
 #include "stages/lexer/location.h"
-#include "utils/collections/list.h"
+#include "utils/collections/vector.h"
 #include "utils/str_view.h"
 #include "utils/str.h"
 
@@ -171,13 +171,13 @@ void token_free(token_t* tok);
 void token_json_dump(FILE* stream, token_t* tok);
 
 /**
- * \brief Dumps the JSON representation of a list of tokens to the specified
+ * \brief Dumps the JSON representation of a vector of tokens to the specified
  * stream.
  * 
  * \param[in] stream The stream to write the JSON output to.
- * \param[in] list The list of tokens to be dumped.
+ * \param[in] vec The vector of tokens to be dumped.
  */
-void token_json_dump_list(FILE* stream, list_t* list);
+void token_json_dump_vector(FILE* stream, vector_t* vec);
 
 /**
  * \brief Converts a token kind to its corresponding c-string representation.

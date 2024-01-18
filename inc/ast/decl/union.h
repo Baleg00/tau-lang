@@ -28,7 +28,7 @@ typedef struct ast_decl_union_t
 {
   AST_DECL_HEADER;
   symtable_t* scope; // The associated scope of members.
-  list_t* members; // List of associated member declarations.
+  vector_t* members; // Vector of associated member declarations.
   bool is_pub; // Is union public (in case it is a member).
 
   LLVMTypeRef llvm_type; // The associated LLVM type (same as the type of the largest member).

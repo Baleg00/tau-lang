@@ -18,7 +18,7 @@
 typedef struct ast_stmt_block_t
 {
   AST_STMT_HEADER;
-  list_t* stmts; // The list of associated statements.
+  vector_t* stmts; // The list of associated statements.
 } ast_stmt_block_t;
 
 /**

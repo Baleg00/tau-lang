@@ -19,7 +19,7 @@
 typedef struct ast_type_fun_t
 {
   AST_TYPE_HEADER;
-  list_t* params; // List of associated parameter types.
+  vector_t* params; // Vector of associated parameter types.
   ast_node_t* return_type; // The associated return type.
   callconv_kind_t callconv; // The associated calling convention.
   bool is_vararg; // Is function variadic (C-style, only works with specific calling conventions).

@@ -73,9 +73,9 @@ void ast_node_free(ast_node_t* node)
   }
 }
 
-void ast_list_dump_json(FILE* stream, list_t* list)
+void ast_node_dump_json_vector(FILE* stream, vector_t* vec)
 {
-  if (list == NULL)
+  if (vec == NULL)
   {
     fprintf(stream, "null");
     return;
@@ -83,11 +83,11 @@ void ast_list_dump_json(FILE* stream, list_t* list)
 
   fputc('[', stream);
   
-  LIST_FOR_LOOP(it, list)
+  VECTOR_FOR_LOOP(i, vec)
   {
-    ast_node_dump_json(stream, (ast_node_t*)list_node_get(it));
+    ast_node_dump_json(stream, (ast_node_t*)vector_get(vec, i));
 
-    if (list_node_next(it) != NULL)
+    if (i + 1 < vector_size(vec))
       fputc(',', stream);
   }
 

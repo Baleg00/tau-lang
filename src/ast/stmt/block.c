@@ -25,7 +25,7 @@ ast_stmt_block_t* ast_stmt_block_init(void)
 
 void ast_stmt_block_free(ast_stmt_block_t* node)
 {
-  list_free(node->stmts);
+  vector_free(node->stmts);
   free(node);
 }
 
@@ -33,6 +33,6 @@ void ast_stmt_block_dump_json(FILE* stream, ast_stmt_block_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"stmts\":");
-  ast_list_dump_json(stream, node->stmts);
+  ast_node_dump_json_vector(stream, node->stmts);
   fputc('}', stream);
 }

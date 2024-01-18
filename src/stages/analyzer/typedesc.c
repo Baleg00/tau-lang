@@ -9,7 +9,6 @@
 
 #include <string.h>
 
-#include "utils/collections/vector.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 
@@ -86,13 +85,13 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_TYPE:
     break;
   case TYPEDESC_FUN:
-    list_free(((typedesc_fun_t*)desc)->param_types);
+    vector_free(((typedesc_fun_t*)desc)->param_types);
     break;
   case TYPEDESC_STRUCT:
-    list_free(((typedesc_struct_t*)desc)->field_types);
+    vector_free(((typedesc_struct_t*)desc)->field_types);
     break;
   case TYPEDESC_UNION:
-    list_free(((typedesc_union_t*)desc)->field_types);
+    vector_free(((typedesc_union_t*)desc)->field_types);
     break;
   case TYPEDESC_ENUM:
     break;

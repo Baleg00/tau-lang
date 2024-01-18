@@ -25,7 +25,7 @@ ast_decl_mod_t* ast_decl_mod_init(void)
 
 void ast_decl_mod_free(ast_decl_mod_t* node)
 {
-  list_free(node->members);
+  vector_free(node->members);
   free(node);
 }
 
@@ -36,6 +36,6 @@ void ast_decl_mod_dump_json(FILE* stream, ast_decl_mod_t* node)
   ast_node_dump_json(stream, node->id);
   fprintf(stream, ",\"is_pub\":%s", node->is_pub ? "true" : "false");
   fprintf(stream, ",\"members\":");
-  ast_list_dump_json(stream, node->members);
+  ast_node_dump_json_vector(stream, node->members);
   fputc('}', stream);
 }
