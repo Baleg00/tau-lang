@@ -7,13 +7,16 @@
 
 #include "ast/decl/mod.h"
 
-#include "utils/memory/memtrace.h"
+#include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/memory/memtrace.h"
 
 ast_decl_mod_t* ast_decl_mod_init(void)
 {
   ast_decl_mod_t* node = (ast_decl_mod_t*)malloc(sizeof(ast_decl_mod_t));
-  assert(node != NULL);
+  clearobj(node);
+
+  ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_DECL_MOD;
 

@@ -9,13 +9,16 @@
 
 #include <string.h>
 
-#include "utils/memory/memtrace.h"
+#include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/memory/memtrace.h"
 
 ast_id_t* ast_id_init(void)
 {
   ast_id_t* node = (ast_id_t*)malloc(sizeof(ast_id_t));
-  assert(node != NULL);
+  clearobj(node);
+
+  ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_ID;
 

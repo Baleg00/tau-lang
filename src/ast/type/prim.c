@@ -7,13 +7,16 @@
 
 #include "ast/type/prim.h"
 
-#include "utils/memory/memtrace.h"
+#include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/memory/memtrace.h"
 
 static ast_type_prim_t* ast_type_prim_init(ast_kind_t kind)
 {
   ast_type_prim_t* node = (ast_type_prim_t*)malloc(sizeof(ast_type_prim_t));
-  assert(node != NULL);
+  clearobj(node);
+
+  ast_registry_register((ast_node_t*)node);
 
   node->kind = kind;
 

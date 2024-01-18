@@ -7,13 +7,16 @@
 
 #include "ast/stmt/expr.h"
 
-#include "utils/memory/memtrace.h"
+#include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/memory/memtrace.h"
 
 ast_stmt_expr_t* ast_stmt_expr_init(void)
 {
   ast_stmt_expr_t* node = (ast_stmt_expr_t*)malloc(sizeof(ast_stmt_expr_t));
-  assert(node != NULL);
+  clearobj(node);
+
+  ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_STMT_EXPR;
 

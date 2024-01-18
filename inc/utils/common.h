@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "utils/io/log.h"
 
@@ -101,6 +102,17 @@
  * \brief Creates a statement which does nothing.
  */
 #define noop() do {} while (0)
+
+#ifdef clearobj
+# undef clearobj
+#endif
+
+/**
+ * \brief Fill the memory of an object with zeros.
+ * 
+ * \param[in,out] OBJ Pointer to the object to be cleared.
+*/
+#define clearobj(OBJ) ((void)memset((OBJ), 0, sizeof(*(OBJ))))
 
 #ifdef TAU_DEBUG
 # ifdef _MSC_VER

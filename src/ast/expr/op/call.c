@@ -7,13 +7,16 @@
 
 #include "ast/expr/op/call.h"
 
-#include "utils/memory/memtrace.h"
+#include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/memory/memtrace.h"
 
 ast_expr_op_call_t* ast_expr_op_call_init(void)
 {
   ast_expr_op_call_t* node = (ast_expr_op_call_t*)malloc(sizeof(ast_expr_op_call_t));
-  assert(node != NULL);
+  clearobj(node);
+
+  ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_EXPR_OP_CALL;
 

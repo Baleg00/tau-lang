@@ -10,6 +10,7 @@
 #include <llvm-c/TargetMachine.h>
 
 #include "ast/ast.h"
+#include "ast/registry.h"
 #include "stages/analyzer/analyzer.h"
 #include "stages/analyzer/symtable.h"
 #include "stages/analyzer/typetable.h"
@@ -227,6 +228,8 @@ compiler_t* compiler_init(void)
 void compiler_free(compiler_t* compiler)
 {
   compiler_llvm_free(compiler);
+
+  ast_registry_free();
   
   list_free(compiler->input_files);
 
