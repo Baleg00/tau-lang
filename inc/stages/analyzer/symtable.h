@@ -21,7 +21,7 @@
 
 #include <stddef.h>
 
-#include "stages/parser/ast/ast.h"
+#include "ast/ast.h"
 #include "utils/collections/list.h"
 #include "utils/str_view.h"
 

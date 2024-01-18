@@ -4,8 +4,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include "ast/ast.h"
 #include "stages/lexer/token.h"
-#include "stages/parser/ast/ast.h"
 #include "stages/parser/parser.h"
 #include "utils/collections/queue.h"
 #include "utils/collections/stack.h"

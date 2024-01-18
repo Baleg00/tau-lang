@@ -20,8 +20,8 @@
 #include <llvm-c/Types.h>
 #include <llvm-c/TargetMachine.h>
 
+#include "ast/ast.h"
 #include "stages/analyzer/typetable.h"
-#include "stages/parser/ast/ast.h"
 
 /**
  * \brief Represents a generator for LLVM IR code.

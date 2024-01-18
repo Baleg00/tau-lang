@@ -9,13 +9,13 @@
 #include <llvm-c/Target.h>
 #include <llvm-c/TargetMachine.h>
 
+#include "ast/ast.h"
 #include "stages/analyzer/analyzer.h"
 #include "stages/analyzer/symtable.h"
 #include "stages/analyzer/typetable.h"
 #include "stages/codegen/generator.h"
 #include "stages/lexer/lexer.h"
 #include "stages/lexer/token.h"
-#include "stages/parser/ast/ast.h"
 #include "stages/parser/parser.h"
 #include "utils/collections/list.h"
 #include "utils/common.h"

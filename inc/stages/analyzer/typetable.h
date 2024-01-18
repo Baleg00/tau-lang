@@ -19,8 +19,8 @@
 
 #include <stdbool.h>
 
+#include "ast/ast.h"
 #include "stages/analyzer/typedesc.h"
-#include "stages/parser/ast/ast.h"
 
 /**
  * \brief Represents a type table.

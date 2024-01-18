@@ -12,7 +12,6 @@
 #include <string.h>
 
 #include "stages/analyzer/typedesc.h"
-#include "stages/parser/ast/ast.h"
 #include "utils/common.h"
 #include "utils/hash.h"
 #include "utils/memory/memtrace.h"

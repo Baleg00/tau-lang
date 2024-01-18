@@ -23,7 +23,7 @@
 
 #include <llvm-c/Types.h>
 
-#include "stages/parser/ast/ast.h"
+#include "ast/ast.h"
 #include "utils/collections/list.h"
 
 /**

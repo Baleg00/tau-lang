@@ -21,8 +21,8 @@
 
 #include <stdbool.h>
 
+#include "ast/ast.h"
 #include "stages/lexer/token.h"
-#include "stages/parser/ast/ast.h"
 #include "utils/collections/list.h"
 
 /**

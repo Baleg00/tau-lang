@@ -10,12 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stages/analyzer/symtable.h"
-#include "stages/analyzer/typedesc.h"
-#include "stages/lexer/location.h"
-#include "stages/lexer/token.h"
-#include "stages/parser/ast/ast.h"
-#include "utils/collections/list.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
