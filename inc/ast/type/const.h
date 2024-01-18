@@ -28,6 +28,13 @@ typedef struct ast_type_const_t
 ast_type_const_t* ast_type_const_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST constant type node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_type_const_free(ast_type_const_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST constant type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

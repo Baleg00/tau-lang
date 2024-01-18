@@ -20,6 +20,11 @@ ast_expr_lit_int_t* ast_expr_lit_int_init(void)
   return node;
 }
 
+void ast_expr_lit_int_free(ast_expr_lit_int_t* node)
+{
+  free(node);
+}
+
 void ast_expr_lit_int_dump_json(FILE* stream, ast_expr_lit_int_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

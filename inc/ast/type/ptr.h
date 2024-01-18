@@ -28,6 +28,13 @@ typedef struct ast_type_ptr_t
 ast_type_ptr_t* ast_type_ptr_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST pointer type node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_type_ptr_free(ast_type_ptr_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST pointer type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

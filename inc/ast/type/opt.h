@@ -28,6 +28,13 @@ typedef struct ast_type_opt_t
 ast_type_opt_t* ast_type_opt_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST optional type node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_type_opt_free(ast_type_opt_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST optional type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

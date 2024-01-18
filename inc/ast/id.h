@@ -28,6 +28,13 @@ typedef struct ast_id_t
 ast_id_t* ast_id_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST identifier node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_id_free(ast_id_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST identifier node into a stream.
  * 
  * \param[in] stream The stream to be written to.

@@ -95,6 +95,13 @@ typedef struct ast_node_t
 } ast_node_t;
 
 /**
+ * \brief Frees all memory allocated by an AST node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_node_free(ast_node_t* node);
+
+/**
  * \brief Writes a JSON dump of a list of AST nodes into a stream.
  * 
  * \param[in] stream The stream to be written to.

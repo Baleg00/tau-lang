@@ -29,6 +29,13 @@ typedef struct ast_expr_decl_t
 ast_expr_decl_t* ast_expr_decl_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST declaration expression node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_expr_decl_free(ast_expr_decl_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST declaration expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

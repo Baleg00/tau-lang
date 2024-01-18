@@ -20,6 +20,12 @@ ast_prog_t* ast_prog_init(void)
   return node;
 }
 
+void ast_prog_free(ast_prog_t* node)
+{
+  list_free(node->decls);
+  free(node);
+}
+
 void ast_prog_dump_json(FILE* stream, ast_prog_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

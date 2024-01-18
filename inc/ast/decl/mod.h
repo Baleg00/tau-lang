@@ -38,6 +38,13 @@ typedef struct ast_decl_mod_t
 ast_decl_mod_t* ast_decl_mod_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST module declaration node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_decl_mod_free(ast_decl_mod_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST module declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

@@ -141,6 +141,13 @@ ast_type_prim_t* ast_type_prim_bool_init(void);
 ast_type_prim_t* ast_type_prim_unit_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST primitive type node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_type_prim_free(ast_type_prim_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST primitive type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

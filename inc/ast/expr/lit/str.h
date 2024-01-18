@@ -29,6 +29,13 @@ typedef struct ast_expr_lit_str_t
 ast_expr_lit_str_t* ast_expr_lit_str_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST literal string expression node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_expr_lit_str_free(ast_expr_lit_str_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST literal string expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

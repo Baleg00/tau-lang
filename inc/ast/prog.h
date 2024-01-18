@@ -29,6 +29,13 @@ typedef struct ast_prog_t
 ast_prog_t* ast_prog_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST program node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_prog_free(ast_prog_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST program node into a stream.
  * 
  * \param[in] stream The stream to be written to.

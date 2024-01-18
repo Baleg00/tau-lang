@@ -20,6 +20,12 @@ ast_decl_union_t* ast_decl_union_init(void)
   return node;
 }
 
+void ast_decl_union_free(ast_decl_union_t* node)
+{
+  list_free(node->members);
+  free(node);
+}
+
 void ast_decl_union_dump_json(FILE* stream, ast_decl_union_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

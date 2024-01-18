@@ -37,6 +37,13 @@ typedef struct ast_stmt_if_t
 ast_stmt_if_t* ast_stmt_if_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST if statement node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_stmt_if_free(ast_stmt_if_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST if statement node into a stream.
  * 
  * \param[in] stream The stream to be written to.

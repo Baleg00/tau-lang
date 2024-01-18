@@ -33,6 +33,13 @@ typedef struct ast_type_fun_t
 ast_type_fun_t* ast_type_fun_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST function type node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_type_fun_free(ast_type_fun_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST function type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

@@ -29,6 +29,13 @@ typedef struct ast_stmt_break_t
 ast_stmt_break_t* ast_stmt_break_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST break statement node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_stmt_break_free(ast_stmt_break_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST break statement node into a stream.
  * 
  * \param[in] stream The stream to be written to.

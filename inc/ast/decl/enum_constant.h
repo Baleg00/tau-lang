@@ -34,6 +34,13 @@ typedef struct ast_decl_enum_constant_t
 ast_decl_enum_constant_t* ast_decl_enum_constant_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST enum constant declaration node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_decl_enum_constant_free(ast_decl_enum_constant_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST enum constant declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

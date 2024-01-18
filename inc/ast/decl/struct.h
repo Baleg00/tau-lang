@@ -42,6 +42,13 @@ typedef struct ast_decl_struct_t
 ast_decl_struct_t* ast_decl_struct_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST struct declaration node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_decl_struct_free(ast_decl_struct_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST struct declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

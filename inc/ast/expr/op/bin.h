@@ -30,6 +30,13 @@ typedef struct ast_expr_op_bin_t
 ast_expr_op_bin_t* ast_expr_op_bin_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST binary operation expression node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_expr_op_bin_free(ast_expr_op_bin_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST binary operation expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

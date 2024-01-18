@@ -29,6 +29,13 @@ typedef struct ast_stmt_continue_t
 ast_stmt_continue_t* ast_stmt_continue_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST continue statement node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_stmt_continue_free(ast_stmt_continue_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST continue statement node into a stream.
  * 
  * \param[in] stream The stream to be written to.

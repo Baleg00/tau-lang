@@ -10,6 +10,69 @@
 #include "ast/ast.h"
 #include "utils/common.h"
 
+void ast_node_free(ast_node_t* node)
+{
+  if (node == NULL)
+    return;
+
+  switch (node->kind)
+  {
+  case AST_ID:                 ast_id_free                ((ast_id_t*                )node); break;
+  case AST_TYPE_MUT:           ast_type_mut_free          ((ast_type_mut_t*          )node); break;
+  case AST_TYPE_CONST:         ast_type_const_free        ((ast_type_const_t*        )node); break;
+  case AST_TYPE_PTR:           ast_type_ptr_free          ((ast_type_ptr_t*          )node); break;
+  case AST_TYPE_ARRAY:         ast_type_array_free        ((ast_type_array_t*        )node); break;
+  case AST_TYPE_REF:           ast_type_ref_free          ((ast_type_ref_t*          )node); break;
+  case AST_TYPE_OPT:           ast_type_opt_free          ((ast_type_opt_t*          )node); break;
+  case AST_TYPE_FUN:           ast_type_fun_free          ((ast_type_fun_t*          )node); break;
+  case AST_TYPE_PRIM_I8:
+  case AST_TYPE_PRIM_I16:
+  case AST_TYPE_PRIM_I32:
+  case AST_TYPE_PRIM_I64:
+  case AST_TYPE_PRIM_ISIZE:
+  case AST_TYPE_PRIM_U8:
+  case AST_TYPE_PRIM_U16:
+  case AST_TYPE_PRIM_U32:
+  case AST_TYPE_PRIM_U64:
+  case AST_TYPE_PRIM_USIZE:
+  case AST_TYPE_PRIM_F32:
+  case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_BOOL:
+  case AST_TYPE_PRIM_UNIT:     ast_type_prim_free         ((ast_type_prim_t*         )node); break;
+  case AST_TYPE_MEMBER:        ast_type_mbr_free          ((ast_type_mbr_t*          )node); break;
+  case AST_TYPE_DECL:          ast_type_decl_free         ((ast_type_decl_t*         )node); break;
+  case AST_EXPR_LIT_INT:       ast_expr_lit_int_free      ((ast_expr_lit_int_t*      )node); break;
+  case AST_EXPR_LIT_FLT:       ast_expr_lit_flt_free      ((ast_expr_lit_flt_t*      )node); break;
+  case AST_EXPR_LIT_STR:       ast_expr_lit_str_free      ((ast_expr_lit_str_t*      )node); break;
+  case AST_EXPR_LIT_CHAR:      ast_expr_lit_char_free     ((ast_expr_lit_char_t*     )node); break;
+  case AST_EXPR_LIT_BOOL:      ast_expr_lit_bool_free     ((ast_expr_lit_bool_t*     )node); break;
+  case AST_EXPR_LIT_NULL:      ast_expr_lit_null_free     ((ast_expr_lit_null_t*     )node); break;
+  case AST_EXPR_OP_UNARY:      ast_expr_op_un_free        ((ast_expr_op_un_t*        )node); break;
+  case AST_EXPR_OP_BINARY:     ast_expr_op_bin_free       ((ast_expr_op_bin_t*       )node); break;
+  case AST_EXPR_OP_CALL:       ast_expr_op_call_free      ((ast_expr_op_call_t*      )node); break;
+  case AST_EXPR_DECL:          ast_expr_decl_free         ((ast_expr_decl_t*         )node); break;
+  case AST_STMT_IF:            ast_stmt_if_free           ((ast_stmt_if_t*           )node); break;
+  case AST_STMT_FOR:           ast_stmt_for_free          ((ast_stmt_for_t*          )node); break;
+  case AST_STMT_WHILE:         ast_stmt_while_free        ((ast_stmt_while_t*        )node); break;
+  case AST_STMT_BREAK:         ast_stmt_break_free        ((ast_stmt_break_t*        )node); break;
+  case AST_STMT_CONTINUE:      ast_stmt_continue_free     ((ast_stmt_continue_t*     )node); break;
+  case AST_STMT_RETURN:        ast_stmt_return_free       ((ast_stmt_return_t*       )node); break;
+  case AST_STMT_DEFER:         ast_stmt_defer_free        ((ast_stmt_defer_t*        )node); break;
+  case AST_STMT_BLOCK:         ast_stmt_block_free        ((ast_stmt_block_t*        )node); break;
+  case AST_STMT_EXPR:          ast_stmt_expr_free         ((ast_stmt_expr_t*         )node); break;
+  case AST_DECL_VAR:           ast_decl_var_free          ((ast_decl_var_t*          )node); break;
+  case AST_DECL_FUN:           ast_decl_fun_free          ((ast_decl_fun_t*          )node); break;
+  case AST_DECL_STRUCT:        ast_decl_struct_free       ((ast_decl_struct_t*       )node); break;
+  case AST_DECL_UNION:         ast_decl_union_free        ((ast_decl_union_t*        )node); break;
+  case AST_DECL_ENUM:          ast_decl_enum_free         ((ast_decl_enum_t*         )node); break;
+  case AST_DECL_MOD:           ast_decl_mod_free          ((ast_decl_mod_t*          )node); break;
+  case AST_DECL_PARAM:         ast_decl_param_free        ((ast_decl_param_t*        )node); break;
+  case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_free((ast_decl_enum_constant_t*)node); break;
+  case AST_PROG:               ast_prog_free              ((ast_prog_t*              )node); break;
+  default: unreachable();
+  }
+}
+
 void ast_list_dump_json(FILE* stream, list_t* list)
 {
   if (list == NULL)

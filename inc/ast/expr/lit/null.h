@@ -28,6 +28,13 @@ typedef struct ast_expr_lit_null_t
 ast_expr_lit_null_t* ast_expr_lit_null_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST literal null expression node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_expr_lit_null_free(ast_expr_lit_null_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST literal null expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

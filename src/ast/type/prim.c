@@ -95,6 +95,11 @@ ast_type_prim_t* ast_type_prim_unit_init(void)
   return ast_type_prim_init(AST_TYPE_PRIM_UNIT);
 }
 
+void ast_type_prim_free(ast_type_prim_t* node)
+{
+  free(node);
+}
+
 void ast_type_prim_dump_json(FILE* stream, ast_type_prim_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));

@@ -20,6 +20,12 @@ ast_decl_mod_t* ast_decl_mod_init(void)
   return node;
 }
 
+void ast_decl_mod_free(ast_decl_mod_t* node)
+{
+  list_free(node->members);
+  free(node);
+}
+
 void ast_decl_mod_dump_json(FILE* stream, ast_decl_mod_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

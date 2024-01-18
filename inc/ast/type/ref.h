@@ -28,6 +28,13 @@ typedef struct ast_type_ref_t
 ast_type_ref_t* ast_type_ref_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST reference type node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_type_ref_free(ast_type_ref_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST reference type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

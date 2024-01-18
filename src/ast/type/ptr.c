@@ -20,6 +20,11 @@ ast_type_ptr_t* ast_type_ptr_init(void)
   return node;
 }
 
+void ast_type_ptr_free(ast_type_ptr_t* node)
+{
+  free(node);
+}
+
 void ast_type_ptr_dump_json(FILE* stream, ast_type_ptr_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

@@ -20,6 +20,11 @@ ast_stmt_for_t* ast_stmt_for_init(void)
   return node;
 }
 
+void ast_stmt_for_free(ast_stmt_for_t* node)
+{
+  free(node);
+}
+
 void ast_stmt_for_dump_json(FILE* stream, ast_stmt_for_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

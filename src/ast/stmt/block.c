@@ -20,6 +20,12 @@ ast_stmt_block_t* ast_stmt_block_init(void)
   return node;
 }
 
+void ast_stmt_block_free(ast_stmt_block_t* node)
+{
+  list_free(node->stmts);
+  free(node);
+}
+
 void ast_stmt_block_dump_json(FILE* stream, ast_stmt_block_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

@@ -42,6 +42,13 @@ typedef struct ast_decl_enum_t
 ast_decl_enum_t* ast_decl_enum_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST enum declaration node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_decl_enum_free(ast_decl_enum_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST enum declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

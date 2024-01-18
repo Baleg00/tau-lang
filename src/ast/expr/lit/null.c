@@ -20,6 +20,11 @@ ast_expr_lit_null_t* ast_expr_lit_null_init(void)
   return node;
 }
 
+void ast_expr_lit_null_free(ast_expr_lit_null_t* node)
+{
+  free(node);
+}
+
 void ast_expr_lit_null_dump_json(FILE* stream, ast_expr_lit_null_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));

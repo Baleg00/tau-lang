@@ -30,6 +30,13 @@ typedef struct ast_type_mbr_t
 ast_type_mbr_t* ast_type_mbr_init(void);
 
 /**
+ * \brief Frees all memory allocated by an AST member type node.
+ * 
+ * \param[in] node Pointer to the AST node to be freed.
+ */
+void ast_type_mbr_free(ast_type_mbr_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST member type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

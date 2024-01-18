@@ -20,6 +20,12 @@ ast_decl_enum_t* ast_decl_enum_init(void)
   return node;
 }
 
+void ast_decl_enum_free(ast_decl_enum_t* node)
+{
+  list_free(node->members);
+  free(node);
+}
+
 void ast_decl_enum_dump_json(FILE* stream, ast_decl_enum_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

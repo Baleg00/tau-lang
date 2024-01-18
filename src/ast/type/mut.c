@@ -20,6 +20,11 @@ ast_type_mut_t* ast_type_mut_init(void)
   return node;
 }
 
+void ast_type_mut_free(ast_type_mut_t* node)
+{
+  free(node);
+}
+
 void ast_type_mut_dump_json(FILE* stream, ast_type_mut_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

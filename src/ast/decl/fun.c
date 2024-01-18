@@ -20,6 +20,12 @@ ast_decl_fun_t* ast_decl_fun_init(void)
   return node;
 }
 
+void ast_decl_fun_free(ast_decl_fun_t* node)
+{
+  list_free(node->params);
+  free(node);
+}
+
 void ast_decl_fun_dump_json(FILE* stream, ast_decl_fun_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

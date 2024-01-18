@@ -22,6 +22,11 @@ ast_id_t* ast_id_init(void)
   return node;
 }
 
+void ast_id_free(ast_id_t* node)
+{
+  free(node);
+}
+
 void ast_id_dump_json(FILE* stream, ast_id_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\",\"id\":\"%.*s\"}",
