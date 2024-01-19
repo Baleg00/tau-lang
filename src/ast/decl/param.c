@@ -28,6 +28,12 @@ void ast_decl_param_free(ast_decl_param_t* node)
   free(node);
 }
 
+void ast_decl_param_nameres(nameres_ctx_t* ctx, ast_decl_param_t* node)
+{
+  ast_node_nameres(ctx, &node->type);
+  ast_node_nameres(ctx, &node->expr);
+}
+
 void ast_decl_param_dump_json(FILE* stream, ast_decl_param_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

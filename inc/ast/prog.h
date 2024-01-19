@@ -13,11 +13,19 @@
 #include "ast/node.h"
 
 /**
+ * \brief Forward declaration of symbol table to avoid circular includes.
+ * 
+ * \see symtable.h
+ */
+typedef struct symtable_t symtable_t;
+
+/**
  * \brief AST program node.
  */
 typedef struct ast_prog_t
 {
   AST_NODE_HEADER;
+  symtable_t* scope; // The associated scope of declarations.
   vector_t* decls; // Vector of associated declarations.
 } ast_prog_t;
 
@@ -34,6 +42,14 @@ ast_prog_t* ast_prog_init(void);
  * \param[in] node Pointer to the AST node to be freed.
  */
 void ast_prog_free(ast_prog_t* node);
+
+/**
+ * \brief Performs name resolution pass on an AST program node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_prog_nameres(nameres_ctx_t* ctx, ast_prog_t* node);
 
 /**
  * \brief Writes a JSON dump of an AST program node into a stream.

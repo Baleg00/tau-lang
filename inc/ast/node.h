@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 
+#include "ast/nameres.h"
 #include "stages/lexer/token.h"
 
 /**
@@ -100,6 +101,15 @@ typedef struct ast_node_t
  * \param[in] node Pointer to the AST node to be freed.
  */
 void ast_node_free(ast_node_t* node);
+
+/**
+ * \brief Performs name resolution pass on an AST node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in,out] node Pointer to pointer to the AST node to be visited. (It is
+ * a pointer-to-pointer since it may be replaced.)
+ */
+void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t** node);
 
 /**
  * \brief Writes a JSON dump of a vector of AST nodes into a stream.

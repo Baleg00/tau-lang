@@ -49,6 +49,14 @@ ast_decl_struct_t* ast_decl_struct_init(void);
 void ast_decl_struct_free(ast_decl_struct_t* node);
 
 /**
+ * \brief Performs name resolution pass on an AST struct declaration node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_decl_struct_nameres(nameres_ctx_t* ctx, ast_decl_struct_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST struct declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

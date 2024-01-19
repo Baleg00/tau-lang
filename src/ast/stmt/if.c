@@ -28,6 +28,13 @@ void ast_stmt_if_free(ast_stmt_if_t* node)
   free(node);
 }
 
+void ast_stmt_if_nameres(nameres_ctx_t* ctx, ast_stmt_if_t* node)
+{
+  ast_node_nameres(ctx, &node->cond);
+  ast_node_nameres(ctx, &node->stmt);
+  ast_node_nameres(ctx, &node->stmt_else);
+}
+
 void ast_stmt_if_dump_json(FILE* stream, ast_stmt_if_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

@@ -43,6 +43,14 @@ ast_stmt_while_t* ast_stmt_while_init(void);
 void ast_stmt_while_free(ast_stmt_while_t* node);
 
 /**
+ * \brief Performs name resolution pass on an AST while statement node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_stmt_while_nameres(nameres_ctx_t* ctx, ast_stmt_while_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST while statement node into a stream.
  * 
  * \param[in] stream The stream to be written to.

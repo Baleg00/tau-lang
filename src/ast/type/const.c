@@ -28,6 +28,11 @@ void ast_type_const_free(ast_type_const_t* node)
   free(node);
 }
 
+void ast_type_const_nameres(nameres_ctx_t* ctx, ast_type_const_t* node)
+{
+  ast_node_nameres(ctx, &node->base_type);
+}
+
 void ast_type_const_dump_json(FILE* stream, ast_type_const_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

@@ -35,6 +35,14 @@ ast_type_ref_t* ast_type_ref_init(void);
 void ast_type_ref_free(ast_type_ref_t* node);
 
 /**
+ * \brief Performs name resolution pass on an AST reference type node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_type_ref_nameres(nameres_ctx_t* ctx, ast_type_ref_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST reference type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

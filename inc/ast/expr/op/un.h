@@ -36,6 +36,14 @@ ast_expr_op_un_t* ast_expr_op_un_init(void);
 void ast_expr_op_un_free(ast_expr_op_un_t* node);
 
 /**
+ * \brief Performs name resolution pass on an AST unary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_nameres(nameres_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST unary operation expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

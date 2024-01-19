@@ -21,9 +21,15 @@
 
 #include <stddef.h>
 
-#include "ast/ast.h"
 #include "utils/collections/list.h"
 #include "utils/str_view.h"
+
+/**
+ * \brief Forward declaration of AST node to avoid circular includes.
+ * 
+ * \see node.h
+ */
+typedef struct ast_node_t ast_node_t;
 
 /**
  * \brief Represents a symbol in a symbol table.

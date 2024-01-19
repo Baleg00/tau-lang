@@ -28,6 +28,12 @@ void ast_stmt_while_free(ast_stmt_while_t* node)
   free(node);
 }
 
+void ast_stmt_while_nameres(nameres_ctx_t* ctx, ast_stmt_while_t* node)
+{
+  ast_node_nameres(ctx, &node->cond);
+  ast_node_nameres(ctx, &node->stmt);
+}
+
 void ast_stmt_while_dump_json(FILE* stream, ast_stmt_while_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

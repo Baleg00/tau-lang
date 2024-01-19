@@ -29,6 +29,16 @@ void ast_decl_struct_free(ast_decl_struct_t* node)
   free(node);
 }
 
+void ast_decl_struct_nameres(nameres_ctx_t* ctx, ast_decl_struct_t* node)
+{
+  VECTOR_FOR_LOOP(i, node->members)
+  {
+    ast_node_t* member = (ast_node_t*)vector_get(node->members, i);
+    ast_node_nameres(ctx, &member);
+    vector_set(node->members, i, member);
+  }
+}
+
 void ast_decl_struct_dump_json(FILE* stream, ast_decl_struct_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

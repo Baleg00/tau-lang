@@ -28,6 +28,11 @@ void ast_stmt_defer_free(ast_stmt_defer_t* node)
   free(node);
 }
 
+void ast_stmt_defer_nameres(nameres_ctx_t* ctx, ast_stmt_defer_t* node)
+{
+  ast_node_nameres(ctx, &node->stmt);
+}
+
 void ast_stmt_defer_dump_json(FILE* stream, ast_stmt_defer_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

@@ -29,6 +29,16 @@ void ast_prog_free(ast_prog_t* node)
   free(node);
 }
 
+void ast_prog_nameres(nameres_ctx_t* ctx, ast_prog_t* node)
+{
+  VECTOR_FOR_LOOP(i, node->decls)
+  {
+    ast_node_t* decl = (ast_node_t*)vector_get(node->decls, i);
+    ast_node_nameres(ctx, &decl);
+    vector_set(node->decls, i, decl);
+  }
+}
+
 void ast_prog_dump_json(FILE* stream, ast_prog_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
