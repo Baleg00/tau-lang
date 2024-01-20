@@ -30,8 +30,8 @@ void ast_expr_op_bin_free(ast_expr_op_bin_t* node)
 
 void ast_expr_op_bin_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_t* node)
 {
-  ast_node_nameres(ctx, &node->lhs);
-  ast_node_nameres(ctx, &node->rhs);
+  ast_node_nameres(ctx, node->lhs);
+  ast_node_nameres(ctx, node->rhs);
 }
 
 void ast_expr_op_bin_dump_json(FILE* stream, ast_expr_op_bin_t* node)

@@ -32,13 +32,9 @@ void ast_type_fun_free(ast_type_fun_t* node)
 void ast_type_fun_nameres(nameres_ctx_t* ctx, ast_type_fun_t* node)
 {
   VECTOR_FOR_LOOP(i, node->params)
-  {
-    ast_node_t* param = (ast_node_t*)vector_get(node->params, i);
-    ast_node_nameres(ctx, &param);
-    vector_set(node->params, i, param);
-  }
+    ast_node_nameres(ctx, (ast_node_t*)vector_get(node->params, i));
 
-  ast_node_nameres(ctx, &node->return_type);
+  ast_node_nameres(ctx, node->return_type);
 }
 
 void ast_type_fun_dump_json(FILE* stream, ast_type_fun_t* node)

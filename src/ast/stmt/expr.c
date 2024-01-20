@@ -30,7 +30,7 @@ void ast_stmt_expr_free(ast_stmt_expr_t* node)
 
 void ast_stmt_expr_nameres(nameres_ctx_t* ctx, ast_stmt_expr_t* node)
 {
-  ast_node_nameres(ctx, &node->expr);
+  ast_node_nameres(ctx, node->expr);
 }
 
 void ast_stmt_expr_dump_json(FILE* stream, ast_stmt_expr_t* node)

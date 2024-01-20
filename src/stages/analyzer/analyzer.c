@@ -372,7 +372,7 @@ void analyzer_visit_expr_op_call(analyzer_t* analyzer, symtable_t* scope, ast_ex
 
 void analyzer_visit_expr_op_member(analyzer_t* analyzer, symtable_t* scope, ast_expr_op_bin_t* node)
 {
-  if (node->rhs->kind != AST_ID)
+  if (node->rhs->kind != AST_EXPR_ID)
     report_error_expected_member(node->rhs->tok->loc);
 
   node->lhs = analyzer_visit_expr(analyzer, scope, (ast_expr_t*)node->lhs);
@@ -467,7 +467,7 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
 {
   switch (node->kind)
   {
-  case AST_ID:
+  case AST_EXPR_ID:
   {
     string_view_t id_view = token_to_string_view(node->tok);
     symbol_t* id_sym = symtable_lookup_with_str_view(scope, id_view);
@@ -481,7 +481,7 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
     case AST_DECL_PARAM:
     case AST_DECL_FUN:
     {
-      ast_expr_decl_t* decl = ast_expr_decl_init();
+      ast_expr_id_t* decl = ast_expr_id_init();
       decl->tok = node->tok;
       decl->decl = id_sym->node;
 
@@ -527,14 +527,14 @@ ast_node_t* analyzer_visit_expr(analyzer_t* analyzer, symtable_t* scope, ast_exp
 
 ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* scope, ast_type_mbr_t* node)
 {
-  assert(node->member->kind == AST_ID);
+  assert(node->member->kind == AST_TYPE_ID);
 
   switch (node->parent->kind)
   {
   case AST_TYPE_MEMBER:
     node->parent = analyzer_visit_type_member(analyzer, scope, (ast_type_mbr_t*)node->parent);
     break;
-  case AST_ID:
+  case AST_TYPE_ID:
   {
     string_view_t id_view = token_to_string_view(node->parent->tok);
     symbol_t* owner_sym = symtable_lookup_with_str_view(scope, id_view);
@@ -562,7 +562,7 @@ ast_node_t* analyzer_visit_type_member(analyzer_t* analyzer, symtable_t* scope, 
 
   if (member_sym->node->kind != AST_DECL_MOD)
   {
-    ast_type_decl_t* type_node = ast_type_decl_init();
+    ast_type_id_t* type_node = ast_type_id_init();
     type_node->tok = node->tok;
     type_node->decl = member_sym->node;
 
@@ -590,7 +590,7 @@ ast_node_t* analyzer_visit_type_id(analyzer_t* analyzer, symtable_t* scope, ast_
       id_sym->node->kind != AST_DECL_ENUM)
     report_error_symbol_is_not_a_typename(node->tok->loc);
 
-  ast_type_decl_t* type_node = ast_type_decl_init();
+  ast_type_id_t* type_node = ast_type_id_init();
   type_node->tok = node->tok;
   type_node->decl = id_sym->node;
 
@@ -736,7 +736,7 @@ ast_node_t* analyzer_visit_type(analyzer_t* analyzer, symtable_t* scope, ast_typ
 {
   switch (node->kind)
   {
-  case AST_ID:              return analyzer_visit_type_id(analyzer, scope, (ast_id_t*)node);
+  case AST_TYPE_ID:         return analyzer_visit_type_id(analyzer, scope, (ast_id_t*)node);
   case AST_TYPE_MUT:        analyzer_visit_type_mut  (analyzer, scope, (ast_type_mut_t*  )node); break;
   case AST_TYPE_CONST:      analyzer_visit_type_const(analyzer, scope, (ast_type_const_t*)node); break;
   case AST_TYPE_PTR:        analyzer_visit_type_ptr  (analyzer, scope, (ast_type_ptr_t*  )node); break;

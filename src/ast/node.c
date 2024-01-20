@@ -18,6 +18,7 @@ void ast_node_free(ast_node_t* node)
   switch (node->kind)
   {
   case AST_ID:                 ast_id_free                ((ast_id_t*                )node); break;
+  case AST_TYPE_ID:            ast_type_id_free           ((ast_type_id_t*           )node); break;
   case AST_TYPE_MUT:           ast_type_mut_free          ((ast_type_mut_t*          )node); break;
   case AST_TYPE_CONST:         ast_type_const_free        ((ast_type_const_t*        )node); break;
   case AST_TYPE_PTR:           ast_type_ptr_free          ((ast_type_ptr_t*          )node); break;
@@ -40,7 +41,7 @@ void ast_node_free(ast_node_t* node)
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:     ast_type_prim_free         ((ast_type_prim_t*         )node); break;
   case AST_TYPE_MEMBER:        ast_type_mbr_free          ((ast_type_mbr_t*          )node); break;
-  case AST_TYPE_DECL:          ast_type_decl_free         ((ast_type_decl_t*         )node); break;
+  case AST_EXPR_ID:            ast_expr_id_free           ((ast_expr_id_t*           )node); break;
   case AST_EXPR_LIT_INT:       ast_expr_lit_int_free      ((ast_expr_lit_int_t*      )node); break;
   case AST_EXPR_LIT_FLT:       ast_expr_lit_flt_free      ((ast_expr_lit_flt_t*      )node); break;
   case AST_EXPR_LIT_STR:       ast_expr_lit_str_free      ((ast_expr_lit_str_t*      )node); break;
@@ -50,7 +51,6 @@ void ast_node_free(ast_node_t* node)
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_free        ((ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_free       ((ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_free      ((ast_expr_op_call_t*      )node); break;
-  case AST_EXPR_DECL:          ast_expr_decl_free         ((ast_expr_decl_t*         )node); break;
   case AST_STMT_IF:            ast_stmt_if_free           ((ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_free          ((ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_free        ((ast_stmt_while_t*        )node); break;
@@ -73,38 +73,40 @@ void ast_node_free(ast_node_t* node)
   }
 }
 
-void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t** node)
+void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
 {
-  if (*node == NULL)
+  if (node == NULL)
     return;
 
-  switch ((*node)->kind)
+  switch (node->kind)
   {
-  case AST_TYPE_MUT:           ast_type_mut_nameres    (ctx, *(ast_type_mut_t**          )node); break;
-  case AST_TYPE_CONST:         ast_type_const_nameres  (ctx, *(ast_type_const_t**        )node); break;
-  case AST_TYPE_PTR:           ast_type_ptr_nameres    (ctx, *(ast_type_ptr_t**          )node); break;
-  case AST_TYPE_ARRAY:         ast_type_array_nameres  (ctx, *(ast_type_array_t**        )node); break;
-  case AST_TYPE_REF:           ast_type_ref_nameres    (ctx, *(ast_type_ref_t**          )node); break;
-  case AST_TYPE_OPT:           ast_type_opt_nameres    (ctx, *(ast_type_opt_t**          )node); break;
-  case AST_TYPE_FUN:           ast_type_fun_nameres    (ctx, *(ast_type_fun_t**          )node); break;
-  case AST_TYPE_MEMBER:        ast_type_mbr_nameres    (ctx, *(ast_type_mbr_t**          )node); break;
-  case AST_EXPR_OP_UNARY:      ast_expr_op_un_nameres  (ctx, *(ast_expr_op_un_t**        )node); break;
-  case AST_EXPR_OP_BINARY:     ast_expr_op_bin_nameres (ctx, *(ast_expr_op_bin_t**       )node); break;
-  case AST_EXPR_OP_CALL:       ast_expr_op_call_nameres(ctx, *(ast_expr_op_call_t**      )node); break;
-  case AST_STMT_IF:            ast_stmt_if_nameres     (ctx, *(ast_stmt_if_t**           )node); break;
-  case AST_STMT_FOR:           ast_stmt_for_nameres    (ctx, *(ast_stmt_for_t**          )node); break;
-  case AST_STMT_WHILE:         ast_stmt_while_nameres  (ctx, *(ast_stmt_while_t**        )node); break;
-  case AST_STMT_RETURN:        ast_stmt_return_nameres (ctx, *(ast_stmt_return_t**       )node); break;
-  case AST_STMT_DEFER:         ast_stmt_defer_nameres  (ctx, *(ast_stmt_defer_t**        )node); break;
-  case AST_STMT_BLOCK:         ast_stmt_block_nameres  (ctx, *(ast_stmt_block_t**        )node); break;
-  case AST_STMT_EXPR:          ast_stmt_expr_nameres   (ctx, *(ast_stmt_expr_t**         )node); break;
-  case AST_DECL_VAR:           ast_decl_var_nameres    (ctx, *(ast_decl_var_t**          )node); break;
-  case AST_DECL_FUN:           ast_decl_fun_nameres    (ctx, *(ast_decl_fun_t**          )node); break;
-  case AST_DECL_STRUCT:        ast_decl_struct_nameres (ctx, *(ast_decl_struct_t**       )node); break;
-  case AST_DECL_UNION:         ast_decl_union_nameres  (ctx, *(ast_decl_union_t**        )node); break;
-  case AST_DECL_MOD:           ast_decl_mod_nameres    (ctx, *(ast_decl_mod_t**          )node); break;
-  case AST_DECL_PARAM:         ast_decl_param_nameres  (ctx, *(ast_decl_param_t**        )node); break;
-  case AST_PROG:               ast_prog_nameres        (ctx, *(ast_prog_t**              )node); break;
+  case AST_TYPE_ID:            ast_type_id_nameres     (ctx, (ast_type_id_t*     )node); break;
+  case AST_TYPE_MUT:           ast_type_mut_nameres    (ctx, (ast_type_mut_t*    )node); break;
+  case AST_TYPE_CONST:         ast_type_const_nameres  (ctx, (ast_type_const_t*  )node); break;
+  case AST_TYPE_PTR:           ast_type_ptr_nameres    (ctx, (ast_type_ptr_t*    )node); break;
+  case AST_TYPE_ARRAY:         ast_type_array_nameres  (ctx, (ast_type_array_t*  )node); break;
+  case AST_TYPE_REF:           ast_type_ref_nameres    (ctx, (ast_type_ref_t*    )node); break;
+  case AST_TYPE_OPT:           ast_type_opt_nameres    (ctx, (ast_type_opt_t*    )node); break;
+  case AST_TYPE_FUN:           ast_type_fun_nameres    (ctx, (ast_type_fun_t*    )node); break;
+  case AST_TYPE_MEMBER:        ast_type_mbr_nameres    (ctx, (ast_type_mbr_t*    )node); break;
+  case AST_EXPR_ID:            ast_expr_id_nameres     (ctx, (ast_expr_id_t*     )node); break;
+  case AST_EXPR_OP_UNARY:      ast_expr_op_un_nameres  (ctx, (ast_expr_op_un_t*  )node); break;
+  case AST_EXPR_OP_BINARY:     ast_expr_op_bin_nameres (ctx, (ast_expr_op_bin_t* )node); break;
+  case AST_EXPR_OP_CALL:       ast_expr_op_call_nameres(ctx, (ast_expr_op_call_t*)node); break;
+  case AST_STMT_IF:            ast_stmt_if_nameres     (ctx, (ast_stmt_if_t*     )node); break;
+  case AST_STMT_FOR:           ast_stmt_for_nameres    (ctx, (ast_stmt_for_t*    )node); break;
+  case AST_STMT_WHILE:         ast_stmt_while_nameres  (ctx, (ast_stmt_while_t*  )node); break;
+  case AST_STMT_RETURN:        ast_stmt_return_nameres (ctx, (ast_stmt_return_t* )node); break;
+  case AST_STMT_DEFER:         ast_stmt_defer_nameres  (ctx, (ast_stmt_defer_t*  )node); break;
+  case AST_STMT_BLOCK:         ast_stmt_block_nameres  (ctx, (ast_stmt_block_t*  )node); break;
+  case AST_STMT_EXPR:          ast_stmt_expr_nameres   (ctx, (ast_stmt_expr_t*   )node); break;
+  case AST_DECL_VAR:           ast_decl_var_nameres    (ctx, (ast_decl_var_t*    )node); break;
+  case AST_DECL_FUN:           ast_decl_fun_nameres    (ctx, (ast_decl_fun_t*    )node); break;
+  case AST_DECL_STRUCT:        ast_decl_struct_nameres (ctx, (ast_decl_struct_t* )node); break;
+  case AST_DECL_UNION:         ast_decl_union_nameres  (ctx, (ast_decl_union_t*  )node); break;
+  case AST_DECL_MOD:           ast_decl_mod_nameres    (ctx, (ast_decl_mod_t*    )node); break;
+  case AST_DECL_PARAM:         ast_decl_param_nameres  (ctx, (ast_decl_param_t*  )node); break;
+  case AST_PROG:               ast_prog_nameres        (ctx, (ast_prog_t*        )node); break;
   case AST_ID:
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
@@ -120,14 +122,12 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t** node)
   case AST_TYPE_PRIM_F64:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:
-  case AST_TYPE_DECL:
   case AST_EXPR_LIT_INT:
   case AST_EXPR_LIT_FLT:
   case AST_EXPR_LIT_STR:
   case AST_EXPR_LIT_CHAR:
   case AST_EXPR_LIT_BOOL:
   case AST_EXPR_LIT_NULL:
-  case AST_EXPR_DECL:
   case AST_STMT_BREAK:
   case AST_STMT_CONTINUE:
   case AST_DECL_ENUM:
@@ -168,6 +168,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   switch (node->kind)
   {
   case AST_ID:                 ast_id_dump_json                (stream, (ast_id_t*                )node); break;
+  case AST_TYPE_ID:            ast_type_id_dump_json           (stream, (ast_type_id_t*           )node); break;
   case AST_TYPE_MUT:           ast_type_mut_dump_json          (stream, (ast_type_mut_t*          )node); break;
   case AST_TYPE_CONST:         ast_type_const_dump_json        (stream, (ast_type_const_t*        )node); break;
   case AST_TYPE_PTR:           ast_type_ptr_dump_json          (stream, (ast_type_ptr_t*          )node); break;
@@ -190,7 +191,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:     ast_type_prim_dump_json         (stream, (ast_type_prim_t*         )node); break;
   case AST_TYPE_MEMBER:        ast_type_mbr_dump_json          (stream, (ast_type_mbr_t*          )node); break;
-  case AST_TYPE_DECL:          ast_type_decl_dump_json         (stream, (ast_type_decl_t*         )node); break;
+  case AST_EXPR_ID:            ast_expr_id_dump_json           (stream, (ast_expr_id_t*           )node); break;
   case AST_EXPR_LIT_INT:       ast_expr_lit_int_dump_json      (stream, (ast_expr_lit_int_t*      )node); break;
   case AST_EXPR_LIT_FLT:       ast_expr_lit_flt_dump_json      (stream, (ast_expr_lit_flt_t*      )node); break;
   case AST_EXPR_LIT_STR:       ast_expr_lit_str_dump_json      (stream, (ast_expr_lit_str_t*      )node); break;
@@ -200,7 +201,6 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_dump_json        (stream, (ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_dump_json       (stream, (ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_dump_json      (stream, (ast_expr_op_call_t*      )node); break;
-  case AST_EXPR_DECL:          ast_expr_decl_dump_json         (stream, (ast_expr_decl_t*         )node); break;
   case AST_STMT_IF:            ast_stmt_if_dump_json           (stream, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_dump_json          (stream, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_dump_json        (stream, (ast_stmt_while_t*        )node); break;
@@ -228,6 +228,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   switch (kind)
   {
   case AST_ID:                 return "AST_ID";
+  case AST_TYPE_ID:            return "AST_TYPE_ID";
   case AST_TYPE_MUT:           return "AST_TYPE_MUT";
   case AST_TYPE_CONST:         return "AST_TYPE_CONST";
   case AST_TYPE_PTR:           return "AST_TYPE_PTR";
@@ -251,7 +252,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_TYPE_PRIM_BOOL:     return "AST_TYPE_PRIM_BOOL";
   case AST_TYPE_PRIM_UNIT:     return "AST_TYPE_PRIM_UNIT";
   case AST_TYPE_MEMBER:        return "AST_TYPE_MEMBER";
-  case AST_TYPE_DECL:          return "AST_TYPE_DECL";
+  case AST_EXPR_ID:            return "AST_EXPR_ID";
   case AST_EXPR_LIT_INT:       return "AST_EXPR_LIT_INT";
   case AST_EXPR_LIT_FLT:       return "AST_EXPR_LIT_FLT";
   case AST_EXPR_LIT_STR:       return "AST_EXPR_LIT_STR";
@@ -261,7 +262,6 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_EXPR_OP_UNARY:      return "AST_EXPR_OP_UNARY";
   case AST_EXPR_OP_BINARY:     return "AST_EXPR_OP_BINARY";
   case AST_EXPR_OP_CALL:       return "AST_EXPR_OP_CALL";
-  case AST_EXPR_DECL:          return "AST_EXPR_DECL";
   case AST_STMT_IF:            return "AST_STMT_IF";
   case AST_STMT_FOR:           return "AST_STMT_FOR";
   case AST_STMT_WHILE:         return "AST_STMT_WHILE";
@@ -290,6 +290,7 @@ bool ast_is_type(ast_node_t* node)
 {
   switch (node->kind)
   {
+  case AST_TYPE_ID:
   case AST_TYPE_MUT:
   case AST_TYPE_CONST:
   case AST_TYPE_PTR:
@@ -313,7 +314,6 @@ bool ast_is_type(ast_node_t* node)
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:
   case AST_TYPE_MEMBER:
-  case AST_TYPE_DECL:
     return true;
   default:
     return false;
@@ -324,6 +324,7 @@ bool ast_is_expr(ast_node_t* node)
 {
   switch (node->kind)
   {
+  case AST_EXPR_ID:
   case AST_EXPR_LIT_INT:
   case AST_EXPR_LIT_FLT:
   case AST_EXPR_LIT_STR:
@@ -333,7 +334,6 @@ bool ast_is_expr(ast_node_t* node)
   case AST_EXPR_OP_UNARY:
   case AST_EXPR_OP_BINARY:
   case AST_EXPR_OP_CALL:
-  case AST_EXPR_DECL:
     return true;
   default:
     return false;

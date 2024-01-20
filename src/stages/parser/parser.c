@@ -210,6 +210,13 @@ ast_node_t* parser_parse_id(parser_t* par)
   return (ast_node_t*)node;
 }
 
+ast_node_t* parser_parse_type_id(parser_t* par)
+{
+  ast_type_id_t* node = ast_type_id_init();
+  node->tok = parser_expect(par, TOK_ID);
+  return (ast_node_t*)node;
+}
+
 ast_node_t* parser_parse_type_mut(parser_t* par)
 {
   ast_type_mut_t* node = ast_type_mut_init();
@@ -311,7 +318,7 @@ ast_node_t* parser_parse_type_fun(parser_t* par)
 
 ast_node_t* parser_parse_type_member(parser_t* par)
 {
-  ast_node_t* node = parser_parse_id(par);
+  ast_node_t* node = parser_parse_type_id(par);
 
   while (parser_consume(par, TOK_PUNCT_DOT))
   {
@@ -319,7 +326,7 @@ ast_node_t* parser_parse_type_member(parser_t* par)
     member_node->tok = parser_current(par);
 
     member_node->parent = node;
-    member_node->member = parser_parse_id(par);
+    member_node->member = parser_parse_type_id(par);
 
     node = (ast_node_t*)member_node;
   }

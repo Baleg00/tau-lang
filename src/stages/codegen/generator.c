@@ -99,7 +99,7 @@ void generator_visit_type_fun(generator_t* gen, ast_type_fun_t* node)
   }
 }
 
-void generator_visit_type_decl(generator_t* gen, ast_type_decl_t* node)
+void generator_visit_type_id(generator_t* gen, ast_type_id_t* node)
 {
   switch (node->decl->kind)
   {
@@ -112,11 +112,11 @@ void generator_visit_type(generator_t* gen, ast_type_t* node)
 {
   switch (node->kind)
   {
+  case AST_TYPE_ID:    generator_visit_type_id   (gen, (ast_type_id_t*   )node); break;
   case AST_TYPE_MUT:   generator_visit_type_mut  (gen, (ast_type_mut_t*  )node); break;
   case AST_TYPE_PTR:   generator_visit_type_ptr  (gen, (ast_type_ptr_t*  )node); break;
   case AST_TYPE_ARRAY: generator_visit_type_array(gen, (ast_type_array_t*)node); break;
   case AST_TYPE_FUN:   generator_visit_type_fun  (gen, (ast_type_fun_t*  )node); break;
-  case AST_TYPE_DECL:  generator_visit_type_decl (gen, (ast_type_decl_t* )node); break;
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
   case AST_TYPE_PRIM_I32:
@@ -776,31 +776,31 @@ void generator_visit_expr_op_call(generator_t* gen, ast_decl_fun_t* fun_node, as
   node->llvm_type = LLVMGetReturnType(((ast_expr_t*)node->callee)->llvm_type);
 }
 
-void generator_visit_expr_decl_var(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
+void generator_visit_expr_id_var(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_id_t* node)
 {
   node->llvm_type = ((ast_decl_var_t*)node->decl)->llvm_type;
   node->llvm_value = ((ast_decl_var_t*)node->decl)->llvm_value;
 }
 
-void generator_visit_expr_decl_param(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
+void generator_visit_expr_id_param(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_id_t* node)
 {
   node->llvm_type = ((ast_decl_param_t*)node->decl)->llvm_type;
   node->llvm_value = ((ast_decl_param_t*)node->decl)->llvm_value;
 }
 
-void generator_visit_expr_decl_fun(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
+void generator_visit_expr_id_fun(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_id_t* node)
 {
   node->llvm_type = ((ast_decl_fun_t*)node->decl)->llvm_type;
   node->llvm_value = ((ast_decl_fun_t*)node->decl)->llvm_value;
 }
 
-void generator_visit_expr_decl(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node)
+void generator_visit_expr_id(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_id_t* node)
 {
   switch (node->decl->kind)
   {
-  case AST_DECL_VAR:   generator_visit_expr_decl_var  (gen, fun_node, node); break;
-  case AST_DECL_PARAM: generator_visit_expr_decl_param(gen, fun_node, node); break;
-  case AST_DECL_FUN:   generator_visit_expr_decl_fun  (gen, fun_node, node); break;
+  case AST_DECL_VAR:   generator_visit_expr_id_var  (gen, fun_node, node); break;
+  case AST_DECL_PARAM: generator_visit_expr_id_param(gen, fun_node, node); break;
+  case AST_DECL_FUN:   generator_visit_expr_id_fun  (gen, fun_node, node); break;
   default: unreachable();
   }
 }
@@ -809,6 +809,7 @@ void generator_visit_expr(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_t
 {
   switch (node->kind)
   {
+  case AST_EXPR_ID:        generator_visit_expr_id       (gen, fun_node, (ast_expr_id_t*     )node); break;
   case AST_EXPR_LIT_INT:   generator_visit_expr_lit_int  (gen, fun_node, (ast_expr_lit_t*    )node); break;
   case AST_EXPR_LIT_FLT:   generator_visit_expr_lit_flt  (gen, fun_node, (ast_expr_lit_t*    )node); break;
   case AST_EXPR_LIT_STR:   generator_visit_expr_lit_str  (gen, fun_node, (ast_expr_lit_t*    )node); break;
@@ -816,7 +817,6 @@ void generator_visit_expr(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_t
   case AST_EXPR_OP_UNARY:  generator_visit_expr_op_un    (gen, fun_node, (ast_expr_op_un_t*  )node); break;
   case AST_EXPR_OP_BINARY: generator_visit_expr_op_bin   (gen, fun_node, (ast_expr_op_bin_t* )node); break;
   case AST_EXPR_OP_CALL:   generator_visit_expr_op_call  (gen, fun_node, (ast_expr_op_call_t*)node); break;
-  case AST_EXPR_DECL:      generator_visit_expr_decl     (gen, fun_node, (ast_expr_decl_t*   )node); break;
   default: unreachable();
   }
 }

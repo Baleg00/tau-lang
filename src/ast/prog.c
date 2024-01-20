@@ -32,11 +32,7 @@ void ast_prog_free(ast_prog_t* node)
 void ast_prog_nameres(nameres_ctx_t* ctx, ast_prog_t* node)
 {
   VECTOR_FOR_LOOP(i, node->decls)
-  {
-    ast_node_t* decl = (ast_node_t*)vector_get(node->decls, i);
-    ast_node_nameres(ctx, &decl);
-    vector_set(node->decls, i, decl);
-  }
+    ast_node_nameres(ctx, (ast_node_t*)vector_get(node->decls, i));
 }
 
 void ast_prog_dump_json(FILE* stream, ast_prog_t* node)

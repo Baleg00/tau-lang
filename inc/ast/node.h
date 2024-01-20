@@ -29,6 +29,7 @@ typedef enum ast_kind_e
 {
   AST_ID, // Identifier.
 
+  AST_TYPE_ID, // Type identifier.
   AST_TYPE_MUT, // Mutable type.
   AST_TYPE_CONST, // Compile-time type.
   AST_TYPE_PTR, // Pointer type.
@@ -52,8 +53,8 @@ typedef enum ast_kind_e
   AST_TYPE_PRIM_BOOL, // Primitive type `bool`.
   AST_TYPE_PRIM_UNIT, // Primitive type `unit`.
   AST_TYPE_MEMBER, // Member type.
-  AST_TYPE_DECL, // Declaration type.
 
+  AST_EXPR_ID, // Identifier expression.
   AST_EXPR_LIT_INT, // Literal integer expression.
   AST_EXPR_LIT_FLT, // Literal float expression.
   AST_EXPR_LIT_STR, // Literal string expression.
@@ -63,7 +64,6 @@ typedef enum ast_kind_e
   AST_EXPR_OP_UNARY, // Unary operation expression.
   AST_EXPR_OP_BINARY, // Binary operation expression.
   AST_EXPR_OP_CALL, // Call operation expression.
-  AST_EXPR_DECL, // Declaration expression.
   
   AST_STMT_IF, // If statement.
   AST_STMT_FOR, // For statement.
@@ -106,10 +106,9 @@ void ast_node_free(ast_node_t* node);
  * \brief Performs name resolution pass on an AST node.
  * 
  * \param[in] ctx Pointer to the name resolution context.
- * \param[in,out] node Pointer to pointer to the AST node to be visited. (It is
- * a pointer-to-pointer since it may be replaced.)
+ * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t** node);
+void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node);
 
 /**
  * \brief Writes a JSON dump of a vector of AST nodes into a stream.

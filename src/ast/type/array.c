@@ -30,8 +30,8 @@ void ast_type_array_free(ast_type_array_t* node)
 
 void ast_type_array_nameres(nameres_ctx_t* ctx, ast_type_array_t* node)
 {
-  ast_node_nameres(ctx, &node->base_type);
-  ast_node_nameres(ctx, &node->size);
+  ast_node_nameres(ctx, node->base_type);
+  ast_node_nameres(ctx, node->size);
 }
 
 void ast_type_array_dump_json(FILE* stream, ast_type_array_t* node)

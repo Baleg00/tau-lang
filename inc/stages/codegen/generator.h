@@ -75,12 +75,12 @@ void generator_visit_type_array(generator_t* gen, ast_type_array_t* node);
 void generator_visit_type_fun(generator_t* gen, ast_type_fun_t* node);
 
 /**
- * \brief Visits and generates code for a declaration type in the AST.
+ * \brief Visits and generates code for a type identifier in the AST.
  *
  * \param[in] gen Pointer to the generator.
- * \param[in] node Pointer to the AST node representing the declaration type.
+ * \param[in] node Pointer to the AST node representing the type identifier.
  */
-void generator_visit_type_decl(generator_t* gen, ast_type_decl_t* node);
+void generator_visit_type_id(generator_t* gen, ast_type_id_t* node);
 
 /**
  * \brief Visits and generates code for a type in the AST.
@@ -568,47 +568,47 @@ void generator_visit_expr_op_bin_bit_rsh_assign(generator_t* gen, ast_decl_fun_t
 void generator_visit_expr_op_call(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_op_call_t* node);
 
 /**
- * \brief Visits and generates code for a variable declaration expression in the
+ * \brief Visits and generates code for a variable identifier expression in the
  * AST.
  *
  * \param[in] gen Pointer to the generator.
  * \param[in] fun_node Pointer to the AST node representing the parent function.
- * \param[in] node Pointer to the AST node representing the variable declaration
+ * \param[in] node Pointer to the AST node representing the variable identifier
  * expression.
  */
-void generator_visit_expr_decl_var(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node);
+void generator_visit_expr_id_var(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_id_t* node);
 
 /**
- * \brief Visits and generates code for a parameter declaration expression in the
+ * \brief Visits and generates code for a parameter identifier expression in the
  * AST.
  *
  * \param[in] gen Pointer to the generator.
  * \param[in] fun_node Pointer to the AST node representing the parent function.
- * \param[in] node Pointer to the AST node representing the parameter declaration
+ * \param[in] node Pointer to the AST node representing the parameter identifier
  * expression.
  */
-void generator_visit_expr_decl_param(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node);
+void generator_visit_expr_id_param(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_id_t* node);
 
 /**
- * \brief Visits and generates code for a function declaration expression in the
+ * \brief Visits and generates code for a function identifier expression in the
  * AST.
  *
  * \param[in] gen Pointer to the generator.
  * \param[in] fun_node Pointer to the AST node representing the parent function.
- * \param[in] node Pointer to the AST node representing the function declaration
+ * \param[in] node Pointer to the AST node representing the function identifier
  * expression.
  */
-void generator_visit_expr_decl_fun(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node);
+void generator_visit_expr_id_fun(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_id_t* node);
 
 /**
- * \brief Visits and generates code for a declaration expression in the
+ * \brief Visits and generates code for an identifier expression in the
  * AST.
  *
  * \param[in] gen Pointer to the generator.
  * \param[in] fun_node Pointer to the AST node representing the parent function.
- * \param[in] node Pointer to the AST node representing the declaration expression.
+ * \param[in] node Pointer to the AST node representing the identifier expression.
  */
-void generator_visit_expr_decl(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_decl_t* node);
+void generator_visit_expr_id(generator_t* gen, ast_decl_fun_t* fun_node, ast_expr_id_t* node);
 
 /**
  * \brief Visits and generates code for an expression in the AST.

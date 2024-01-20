@@ -172,6 +172,14 @@ callconv_kind_t parser_parse_callconv(parser_t* par);
 ast_node_t* parser_parse_id(parser_t* par);
 
 /**
+ * \brief Parses a type identifier.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Type identifier node.
+ */
+ast_node_t* parser_parse_type_id(parser_t* par);
+
+/**
  * \brief Parses a mutable type.
  * 
  * \details Mutable types are prefixed with the `mut` keyword.

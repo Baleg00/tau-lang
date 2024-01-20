@@ -32,11 +32,7 @@ void ast_stmt_block_free(ast_stmt_block_t* node)
 void ast_stmt_block_nameres(nameres_ctx_t* ctx, ast_stmt_block_t* node)
 {
   VECTOR_FOR_LOOP(i, node->stmts)
-  {
-    ast_node_t* stmt = (ast_node_t*)vector_get(node->stmts, i);
-    ast_node_nameres(ctx, &stmt);
-    vector_set(node->stmts, i, stmt);
-  }
+    ast_node_nameres(ctx, (ast_node_t*)vector_get(node->stmts, i));
 }
 
 void ast_stmt_block_dump_json(FILE* stream, ast_stmt_block_t* node)

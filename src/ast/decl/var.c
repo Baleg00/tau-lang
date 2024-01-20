@@ -30,8 +30,8 @@ void ast_decl_var_free(ast_decl_var_t* node)
 
 void ast_decl_var_nameres(nameres_ctx_t* ctx, ast_decl_var_t* node)
 {
-  ast_node_nameres(ctx, &node->type);
-  ast_node_nameres(ctx, &node->expr);
+  ast_node_nameres(ctx, node->type);
+  ast_node_nameres(ctx, node->expr);
 }
 
 void ast_decl_var_dump_json(FILE* stream, ast_decl_var_t* node)

@@ -31,14 +31,10 @@ void ast_expr_op_call_free(ast_expr_op_call_t* node)
 
 void ast_expr_op_call_nameres(nameres_ctx_t* ctx, ast_expr_op_call_t* node)
 {
-  ast_node_nameres(ctx, &node->callee);
+  ast_node_nameres(ctx, node->callee);
 
   VECTOR_FOR_LOOP(i, node->params)
-  {
-    ast_node_t* param = (ast_node_t*)vector_get(node->params, i);
-    ast_node_nameres(ctx, &param);
-    vector_set(node->params, i, param);
-  }
+    ast_node_nameres(ctx, (ast_node_t*)vector_get(node->params, i));
 }
 
 void ast_expr_op_call_dump_json(FILE* stream, ast_expr_op_call_t* node)

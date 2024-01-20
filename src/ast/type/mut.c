@@ -30,7 +30,7 @@ void ast_type_mut_free(ast_type_mut_t* node)
 
 void ast_type_mut_nameres(nameres_ctx_t* ctx, ast_type_mut_t* node)
 {
-  ast_node_nameres(ctx, &node->base_type);
+  ast_node_nameres(ctx, node->base_type);
 }
 
 void ast_type_mut_dump_json(FILE* stream, ast_type_mut_t* node)

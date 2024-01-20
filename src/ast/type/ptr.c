@@ -30,7 +30,7 @@ void ast_type_ptr_free(ast_type_ptr_t* node)
 
 void ast_type_ptr_nameres(nameres_ctx_t* ctx, ast_type_ptr_t* node)
 {
-  ast_node_nameres(ctx, &node->base_type);
+  ast_node_nameres(ctx, node->base_type);
 }
 
 void ast_type_ptr_dump_json(FILE* stream, ast_type_ptr_t* node)

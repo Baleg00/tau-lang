@@ -378,7 +378,7 @@ void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   switch (elem->tok->kind)
   {
   case TOK_ID:
-    node = (ast_node_t*)ast_id_init();
+    node = (ast_node_t*)ast_expr_id_init();
     break;
   case TOK_LIT_INT:
   {

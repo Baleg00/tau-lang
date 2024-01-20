@@ -30,9 +30,9 @@ void ast_stmt_for_free(ast_stmt_for_t* node)
 
 void ast_stmt_for_nameres(nameres_ctx_t* ctx, ast_stmt_for_t* node)
 {
-  ast_node_nameres(ctx, &node->var);
-  ast_node_nameres(ctx, &node->range);
-  ast_node_nameres(ctx, &node->stmt);
+  ast_node_nameres(ctx, node->var);
+  ast_node_nameres(ctx, node->range);
+  ast_node_nameres(ctx, node->stmt);
 }
 
 void ast_stmt_for_dump_json(FILE* stream, ast_stmt_for_t* node)
