@@ -41,6 +41,14 @@ ast_decl_enum_constant_t* ast_decl_enum_constant_init(void);
 void ast_decl_enum_constant_free(ast_decl_enum_constant_t* node);
 
 /**
+ * \brief Performs name resolution pass on an AST enum constant declaration node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_decl_enum_constant_nameres(nameres_ctx_t* ctx, ast_decl_enum_constant_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST enum constant declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

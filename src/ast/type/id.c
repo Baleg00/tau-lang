@@ -9,6 +9,7 @@
 
 #include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
 
 ast_type_id_t* ast_type_id_init(void)
@@ -30,7 +31,20 @@ void ast_type_id_free(ast_type_id_t* node)
 
 void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
 {
+  symtable_t* scope = nameres_ctx_scope_cur(ctx);
+
+  string_view_t id_view = token_to_string_view(node->tok);
+  symbol_t* sym = symtable_lookup_with_str_view(scope, id_view);
+
+  if (sym == NULL)
+    report_error_undefined_typename(node->tok->loc);
+
+  if (sym->node->kind != AST_DECL_STRUCT &&
+      sym->node->kind != AST_DECL_UNION &&
+      sym->node->kind != AST_DECL_ENUM)
+    report_error_symbol_is_not_a_typename(node->tok->loc);
   
+  node->decl = sym->node;
 }
 
 void ast_type_id_dump_json(FILE* stream, ast_type_id_t* node)

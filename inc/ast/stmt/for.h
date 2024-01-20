@@ -18,6 +18,7 @@
 typedef struct ast_stmt_for_t
 {
   AST_STMT_HEADER;
+  symtable_t* scope; // The associated scope of loop variable and loop body.
   ast_node_t* var; // The associated loop variable declaration.
   ast_node_t* range; // The associated range expression.
   ast_node_t* stmt; // The associated body statement.

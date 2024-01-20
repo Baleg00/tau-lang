@@ -13,13 +13,6 @@
 #include "ast/node.h"
 
 /**
- * \brief Forward declaration of symbol table to avoid circular includes.
- * 
- * \see symtable.h
- */
-typedef struct symtable_t symtable_t;
-
-/**
  * \brief AST program node.
  */
 typedef struct ast_prog_t

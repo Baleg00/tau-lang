@@ -19,13 +19,14 @@
 #define TAU_NAMERES_H
 
 #include "stages/analyzer/symtable.h"
+#include "utils/collections/stack.h"
 
 /**
  * \brief Name resolution context type.
  */
 typedef struct nameres_ctx_t
 {
-  symtable_t* scope; // The parent scope of the node being visited.
+  stack_t* scopes; // Current scope stack.
 } nameres_ctx_t;
 
 /**
@@ -41,5 +42,28 @@ nameres_ctx_t* nameres_ctx_init(void);
  * \param[in] ctx Pointer to the name resolution context to be freed.
  */
 void nameres_ctx_free(nameres_ctx_t* ctx);
+
+/**
+ * \brief Begins a new scope and returns it.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \returns Pointer to the new scope.
+ */
+symtable_t* nameres_ctx_scope_begin(nameres_ctx_t* ctx);
+
+/**
+ * \brief Ends the current scope.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ */
+void nameres_ctx_scope_end(nameres_ctx_t* ctx);
+
+/**
+ * \brief Returns the current scope.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \returns Pointer to the current scope.
+ */
+symtable_t* nameres_ctx_scope_cur(nameres_ctx_t* ctx);
 
 #endif

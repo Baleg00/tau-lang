@@ -20,6 +20,7 @@
 typedef struct ast_stmt_while_t
 {
   AST_STMT_HEADER;
+  symtable_t* scope; // The associated scope.
   ast_node_t* cond; // The associated condition expression.
   ast_node_t* stmt; // The associated body statement.
 

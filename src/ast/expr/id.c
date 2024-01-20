@@ -9,6 +9,7 @@
 
 #include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
 
 ast_expr_id_t* ast_expr_id_init(void)
@@ -30,7 +31,20 @@ void ast_expr_id_free(ast_expr_id_t* node)
 
 void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
 {
+  symtable_t* scope = nameres_ctx_scope_cur(ctx);
+
+  string_view_t id_view = token_to_string_view(node->tok);
+  symbol_t* sym = symtable_lookup_with_str_view(scope, id_view);
   
+  if (sym == NULL)
+    report_error_undefined_symbol(node->tok->loc);
+
+  if (sym->node->kind != AST_DECL_VAR &&
+      sym->node->kind != AST_DECL_PARAM &&
+      sym->node->kind != AST_DECL_FUN)
+    report_error_symbol_is_not_an_expression(node->tok->loc);
+  
+  node->decl = sym->node;
 }
 
 void ast_expr_id_dump_json(FILE* stream, ast_expr_id_t* node)

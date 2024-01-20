@@ -15,13 +15,6 @@
 #include "ast/decl/decl.h"
 
 /**
- * \brief Forward declaration of symbol table to avoid circular includes.
- * 
- * \see symtable.h
- */
-typedef struct symtable_t symtable_t;
-
-/**
  * \brief AST union declaration node.
  */
 typedef struct ast_decl_union_t

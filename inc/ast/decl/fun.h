@@ -21,6 +21,7 @@
 typedef struct ast_decl_fun_t
 {
   AST_DECL_HEADER;
+  symtable_t* scope; // The associated scope of parameters and funciton body.
   vector_t* params; // Vector of associated parameter declarations.
   ast_node_t* return_type; // The associated return type.
   ast_node_t* stmt; // The associated body statement.

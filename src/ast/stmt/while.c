@@ -30,8 +30,12 @@ void ast_stmt_while_free(ast_stmt_while_t* node)
 
 void ast_stmt_while_nameres(nameres_ctx_t* ctx, ast_stmt_while_t* node)
 {
+  node->scope = nameres_ctx_scope_begin(ctx);
+
   ast_node_nameres(ctx, node->cond);
   ast_node_nameres(ctx, node->stmt);
+
+  nameres_ctx_scope_end(ctx);
 }
 
 void ast_stmt_while_dump_json(FILE* stream, ast_stmt_while_t* node)
