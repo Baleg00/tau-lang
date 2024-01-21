@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include "stages/analyzer/typedesc.h"
+#include "stages/analysis/typedesc.h"
 
 test()
 

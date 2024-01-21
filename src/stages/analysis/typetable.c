@@ -5,11 +5,12 @@
  * \license This project is released under the Apache 2.0 license.
 */
 
-#include "stages/analyzer/typetable.h"
+#include "stages/analysis/typetable.h"
 
 #include <stddef.h>
 #include <string.h>
 
+#include "ast/ast.h"
 #include "utils/common.h"
 #include "utils/hash.h"
 #include "utils/memory/memtrace.h"

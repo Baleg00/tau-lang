@@ -21,9 +21,10 @@
 #ifndef TAU_ANALYZER_H
 #define TAU_ANALYZER_H
 
-#include "stages/analyzer/symtable.h"
-#include "stages/analyzer/typebuilder.h"
-#include "stages/analyzer/typetable.h"
+#include "ast/ast.h"
+#include "stages/analysis/symtable.h"
+#include "stages/analysis/typebuilder.h"
+#include "stages/analysis/typetable.h"
 
 /**
  * \brief Represents a semantic analyzer.

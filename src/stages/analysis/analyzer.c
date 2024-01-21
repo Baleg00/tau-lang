@@ -5,7 +5,7 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "stages/analyzer/analyzer.h"
+#include "stages/analysis/analyzer.h"
 
 #include <stdlib.h>
 #include <string.h>

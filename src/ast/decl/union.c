@@ -8,6 +8,7 @@
 #include "ast/decl/union.h"
 
 #include "ast/registry.h"
+#include "stages/analysis/symtable.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"

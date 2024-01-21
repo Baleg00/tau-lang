@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 
-#include "ast/nameres.h"
+#include "stages/analysis/nameres.h"
 #include "stages/lexer/token.h"
 
 /**

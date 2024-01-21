@@ -20,7 +20,7 @@
 #include <llvm-c/Types.h>
 #include <llvm-c/Target.h>
 
-#include "stages/analyzer/typedesc.h"
+#include "stages/analysis/typedesc.h"
 #include "utils/str.h"
 
 /**

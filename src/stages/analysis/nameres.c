@@ -5,8 +5,9 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "ast/nameres.h"
+#include "stages/analysis/nameres.h"
 
+#include "stages/analysis/symtable.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 

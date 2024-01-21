@@ -11,9 +11,9 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "stages/analyzer/analyzer.h"
-#include "stages/analyzer/symtable.h"
-#include "stages/analyzer/typetable.h"
+#include "stages/analysis/analyzer.h"
+#include "stages/analysis/symtable.h"
+#include "stages/analysis/typetable.h"
 #include "stages/codegen/generator.h"
 #include "stages/lexer/lexer.h"
 #include "stages/lexer/token.h"

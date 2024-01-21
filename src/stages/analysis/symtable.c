@@ -5,13 +5,13 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "stages/analyzer/symtable.h"
+#include "stages/analysis/symtable.h"
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "stages/analyzer/typedesc.h"
+#include "stages/analysis/typedesc.h"
 #include "utils/common.h"
 #include "utils/hash.h"
 #include "utils/memory/memtrace.h"

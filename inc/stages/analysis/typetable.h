@@ -19,8 +19,12 @@
 
 #include <stdbool.h>
 
-#include "ast/ast.h"
-#include "stages/analyzer/typedesc.h"
+#include "stages/analysis/typedesc.h"
+
+/**
+ * \see node.h 
+ */
+typedef struct ast_node_t ast_node_t;
 
 /**
  * \brief Represents a type table.

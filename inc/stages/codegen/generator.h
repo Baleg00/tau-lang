@@ -21,7 +21,7 @@
 #include <llvm-c/TargetMachine.h>
 
 #include "ast/ast.h"
-#include "stages/analyzer/typetable.h"
+#include "stages/analysis/typetable.h"
 
 /**
  * \brief Represents a generator for LLVM IR code.

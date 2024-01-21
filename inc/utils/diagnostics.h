@@ -1,7 +1,7 @@
 #ifndef TAU_DIAGNOSTICS_H
 #define TAU_DIAGNOSTICS_H
 
-#include "stages/analyzer/typedesc.h"
+#include "stages/analysis/typedesc.h"
 #include "stages/lexer/location.h"
 
 void report_error_unexpected_character(location_t* loc);

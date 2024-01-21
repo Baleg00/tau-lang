@@ -23,7 +23,8 @@
 
 #include <llvm-c/Types.h>
 
-#include "ast/ast.h"
+#include "ast/callconv.h"
+#include "utils/collections/vector.h"
 
 /**
  * \brief Utility macro which expands to fields that all types must have.
@@ -52,6 +53,11 @@
   {\
     ast_node_t* node; /** Declaration node. */\
   }\
+
+/**
+ * \see node.h 
+ */
+typedef struct ast_node_t ast_node_t;
 
 /**
  * \brief Enumeration of type descriptor kinds.

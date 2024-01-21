@@ -5,13 +5,14 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "stages/analyzer/typebuilder.h"
+#include "stages/analysis/typebuilder.h"
 
 #include <stdint.h>
 #include <string.h>
 
 #include <llvm-c/Core.h>
 
+#include "ast/ast.h"
 #include "utils/collections/set.h"
 #include "utils/common.h"
 #include "utils/hash.h"
