@@ -8,7 +8,6 @@
 #include "ast/decl/param.h"
 
 #include "ast/registry.h"
-#include "stages/analysis/symtable.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -44,6 +43,12 @@ void ast_decl_param_nameres(nameres_ctx_t* ctx, ast_decl_param_t* node)
 
   if (collision != NULL && collision->node->kind == AST_DECL_PARAM)
     report_error_parameter_redefinition(node->id->tok->loc, collision->node->tok->loc);
+}
+
+void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node)
+{
+  ast_node_typecheck(ctx, node->type);
+  ast_node_typecheck(ctx, node->expr);
 }
 
 void ast_decl_param_dump_json(FILE* stream, ast_decl_param_t* node)

@@ -43,6 +43,14 @@ void ast_type_const_free(ast_type_const_t* node);
 void ast_type_const_nameres(nameres_ctx_t* ctx, ast_type_const_t* node);
 
 /**
+ * \brief Performs type check pass on an AST constant type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_const_typecheck(typecheck_ctx_t* ctx, ast_type_const_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST constant type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

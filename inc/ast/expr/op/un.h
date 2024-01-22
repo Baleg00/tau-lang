@@ -44,6 +44,14 @@ void ast_expr_op_un_free(ast_expr_op_un_t* node);
 void ast_expr_op_un_nameres(nameres_ctx_t* ctx, ast_expr_op_un_t* node);
 
 /**
+ * \brief Performs type check pass on an AST unary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST unary operation expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

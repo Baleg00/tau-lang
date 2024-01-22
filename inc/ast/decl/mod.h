@@ -46,6 +46,14 @@ void ast_decl_mod_free(ast_decl_mod_t* node);
 void ast_decl_mod_nameres(nameres_ctx_t* ctx, ast_decl_mod_t* node);
 
 /**
+ * \brief Performs type check pass on an AST module declaration node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_decl_mod_typecheck(typecheck_ctx_t* ctx, ast_decl_mod_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST module declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

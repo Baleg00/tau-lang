@@ -8,7 +8,6 @@
 #include "ast/decl/enum_constant.h"
 
 #include "ast/registry.h"
-#include "stages/analysis/symtable.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -40,6 +39,11 @@ void ast_decl_enum_constant_nameres(nameres_ctx_t* ctx, ast_decl_enum_constant_t
 
   if (collision != NULL)
     report_error_enumerator_redeclaration(node->id->tok->loc, collision->node->tok->loc);
+}
+
+void ast_decl_enum_constant_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_constant_t* node)
+{
+  
 }
 
 void ast_decl_enum_constant_dump_json(FILE* stream, ast_decl_enum_constant_t* node)

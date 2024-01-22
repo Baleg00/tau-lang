@@ -8,7 +8,6 @@
 #include "ast/type/id.h"
 
 #include "ast/registry.h"
-#include "stages/analysis/symtable.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -46,6 +45,11 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
     report_error_symbol_is_not_a_typename(node->tok->loc);
   
   node->decl = sym->node;
+}
+
+void ast_type_id_typecheck(typecheck_ctx_t* ctx, ast_type_id_t* node)
+{
+  
 }
 
 void ast_type_id_dump_json(FILE* stream, ast_type_id_t* node)

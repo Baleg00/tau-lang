@@ -103,6 +103,11 @@ void ast_type_prim_free(ast_type_prim_t* node)
   free(node);
 }
 
+void ast_type_prim_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  
+}
+
 void ast_type_prim_dump_json(FILE* stream, ast_type_prim_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));

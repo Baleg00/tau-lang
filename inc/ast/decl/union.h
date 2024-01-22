@@ -50,6 +50,14 @@ void ast_decl_union_free(ast_decl_union_t* node);
 void ast_decl_union_nameres(nameres_ctx_t* ctx, ast_decl_union_t* node);
 
 /**
+ * \brief Performs type check pass on an AST union declaration node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_decl_union_typecheck(typecheck_ctx_t* ctx, ast_decl_union_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST union declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

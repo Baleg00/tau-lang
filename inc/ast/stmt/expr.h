@@ -44,6 +44,14 @@ void ast_stmt_expr_free(ast_stmt_expr_t* node);
 void ast_stmt_expr_nameres(nameres_ctx_t* ctx, ast_stmt_expr_t* node);
 
 /**
+ * \brief Performs type check pass on an AST expression statement node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_stmt_expr_typecheck(typecheck_ctx_t* ctx, ast_stmt_expr_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST expression statement node into a stream.
  * 
  * \param[in] stream The stream to be written to.

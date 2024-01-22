@@ -44,6 +44,14 @@ void ast_stmt_defer_free(ast_stmt_defer_t* node);
 void ast_stmt_defer_nameres(nameres_ctx_t* ctx, ast_stmt_defer_t* node);
 
 /**
+ * \brief Performs type check pass on an AST defer statement node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_stmt_defer_typecheck(typecheck_ctx_t* ctx, ast_stmt_defer_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST defer statement node into a stream.
  * 
  * \param[in] stream The stream to be written to.

@@ -18,15 +18,11 @@
 #ifndef TAU_NAMERES_H
 #define TAU_NAMERES_H
 
+#include "stages/analysis/symtable.h"
 #include "utils/collections/stack.h"
 
 /**
- * \see symtable.h
- */
-typedef struct symtable_t symtable_t;
-
-/**
- * \brief Name resolution context type.
+ * \brief Name resolution context.
  */
 typedef struct nameres_ctx_t
 {

@@ -34,6 +34,12 @@ void ast_type_array_nameres(nameres_ctx_t* ctx, ast_type_array_t* node)
   ast_node_nameres(ctx, node->size);
 }
 
+void ast_type_array_typecheck(typecheck_ctx_t* ctx, ast_type_array_t* node)
+{
+  ast_node_typecheck(ctx, node->base_type);
+  ast_node_typecheck(ctx, node->size);
+}
+
 void ast_type_array_dump_json(FILE* stream, ast_type_array_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

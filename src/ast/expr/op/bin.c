@@ -34,6 +34,12 @@ void ast_expr_op_bin_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_t* node)
   ast_node_nameres(ctx, node->rhs);
 }
 
+void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_typecheck(ctx, node->lhs);
+  ast_node_typecheck(ctx, node->rhs);
+}
+
 void ast_expr_op_bin_dump_json(FILE* stream, ast_expr_op_bin_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

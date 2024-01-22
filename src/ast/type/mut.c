@@ -33,6 +33,11 @@ void ast_type_mut_nameres(nameres_ctx_t* ctx, ast_type_mut_t* node)
   ast_node_nameres(ctx, node->base_type);
 }
 
+void ast_type_mut_typecheck(typecheck_ctx_t* ctx, ast_type_mut_t* node)
+{
+  ast_node_typecheck(ctx, node->base_type);
+}
+
 void ast_type_mut_dump_json(FILE* stream, ast_type_mut_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

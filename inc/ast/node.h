@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include "stages/analysis/nameres.h"
+#include "stages/analysis/typecheck.h"
 #include "stages/lexer/token.h"
 
 /**
@@ -109,6 +110,14 @@ void ast_node_free(ast_node_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node);
+
+/**
+ * \brief Performs type check pass on an AST node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node);
 
 /**
  * \brief Writes a JSON dump of a vector of AST nodes into a stream.

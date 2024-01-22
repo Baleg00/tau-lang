@@ -51,6 +51,14 @@ void ast_decl_param_free(ast_decl_param_t* node);
 void ast_decl_param_nameres(nameres_ctx_t* ctx, ast_decl_param_t* node);
 
 /**
+ * \brief Performs type check pass on an AST parameter declaration node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST parameter declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

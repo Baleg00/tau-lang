@@ -60,6 +60,14 @@ void ast_decl_fun_free(ast_decl_fun_t* node);
 void ast_decl_fun_nameres(nameres_ctx_t* ctx, ast_decl_fun_t* node);
 
 /**
+ * \brief Performs type check pass on an AST function declaration node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST function declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

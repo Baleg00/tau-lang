@@ -37,6 +37,14 @@ void ast_type_fun_nameres(nameres_ctx_t* ctx, ast_type_fun_t* node)
   ast_node_nameres(ctx, node->return_type);
 }
 
+void ast_type_fun_typecheck(typecheck_ctx_t* ctx, ast_type_fun_t* node)
+{
+  VECTOR_FOR_LOOP(i, node->params)
+    ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->params, i));
+
+  ast_node_typecheck(ctx, node->return_type);
+}
+
 void ast_type_fun_dump_json(FILE* stream, ast_type_fun_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

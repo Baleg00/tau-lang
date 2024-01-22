@@ -8,7 +8,6 @@
 #include "ast/decl/enum.h"
 
 #include "ast/registry.h"
-#include "stages/analysis/symtable.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -53,6 +52,12 @@ void ast_decl_enum_nameres(nameres_ctx_t* ctx, ast_decl_enum_t* node)
     ast_node_nameres(ctx, (ast_node_t*)vector_get(node->members, i));
 
   nameres_ctx_scope_end(ctx);
+}
+
+void ast_decl_enum_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_t* node)
+{
+  VECTOR_FOR_LOOP(i, node->members)
+    ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->members, i));
 }
 
 void ast_decl_enum_dump_json(FILE* stream, ast_decl_enum_t* node)

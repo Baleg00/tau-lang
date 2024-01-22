@@ -148,6 +148,14 @@ ast_type_prim_t* ast_type_prim_unit_init(void);
 void ast_type_prim_free(ast_type_prim_t* node);
 
 /**
+ * \brief Performs type check pass on an AST primitive type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST primitive type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

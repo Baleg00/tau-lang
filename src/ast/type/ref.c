@@ -33,6 +33,11 @@ void ast_type_ref_nameres(nameres_ctx_t* ctx, ast_type_ref_t* node)
   ast_node_nameres(ctx, node->base_type);
 }
 
+void ast_type_ref_typecheck(typecheck_ctx_t* ctx, ast_type_ref_t* node)
+{
+  ast_node_typecheck(ctx, node->base_type);
+}
+
 void ast_type_ref_dump_json(FILE* stream, ast_type_ref_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

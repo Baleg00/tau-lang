@@ -8,7 +8,6 @@
 #include "ast/decl/var.h"
 
 #include "ast/registry.h"
-#include "stages/analysis/symtable.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -49,6 +48,12 @@ void ast_decl_var_nameres(nameres_ctx_t* ctx, ast_decl_var_t* node)
 
   if (collision != NULL && collision->node->kind == AST_DECL_VAR)
     report_error_variable_redeclaration(node->id->tok->loc, collision->node->tok->loc);
+}
+
+void ast_decl_var_typecheck(typecheck_ctx_t* ctx, ast_decl_var_t* node)
+{
+  ast_node_typecheck(ctx, node->type);
+  ast_node_typecheck(ctx, node->expr);
 }
 
 void ast_decl_var_dump_json(FILE* stream, ast_decl_var_t* node)

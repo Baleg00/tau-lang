@@ -39,6 +39,13 @@ void ast_stmt_for_nameres(nameres_ctx_t* ctx, ast_stmt_for_t* node)
   nameres_ctx_scope_end(ctx);
 }
 
+void ast_stmt_for_typecheck(typecheck_ctx_t* ctx, ast_stmt_for_t* node)
+{
+  ast_node_typecheck(ctx, node->var);
+  ast_node_typecheck(ctx, node->range);
+  ast_node_typecheck(ctx, node->stmt);
+}
+
 void ast_stmt_for_dump_json(FILE* stream, ast_stmt_for_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

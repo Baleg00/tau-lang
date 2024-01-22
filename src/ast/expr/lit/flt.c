@@ -28,6 +28,11 @@ void ast_expr_lit_flt_free(ast_expr_lit_flt_t* node)
   free(node);
 }
 
+void ast_expr_lit_flt_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_flt_t* node)
+{
+  
+}
+
 void ast_expr_lit_flt_dump_json(FILE* stream, ast_expr_lit_flt_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

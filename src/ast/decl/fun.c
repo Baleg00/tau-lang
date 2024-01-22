@@ -8,7 +8,6 @@
 #include "ast/decl/fun.h"
 
 #include "ast/registry.h"
-#include "stages/analysis/symtable.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -56,6 +55,15 @@ void ast_decl_fun_nameres(nameres_ctx_t* ctx, ast_decl_fun_t* node)
   ast_node_nameres(ctx, node->stmt);
 
   nameres_ctx_scope_end(ctx);
+}
+
+void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
+{
+  VECTOR_FOR_LOOP(i, node->params)
+    ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->params, i));
+
+  ast_node_typecheck(ctx, node->return_type);
+  ast_node_typecheck(ctx, node->stmt);
 }
 
 void ast_decl_fun_dump_json(FILE* stream, ast_decl_fun_t* node)

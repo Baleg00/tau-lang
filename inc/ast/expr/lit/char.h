@@ -36,6 +36,14 @@ ast_expr_lit_char_t* ast_expr_lit_char_init(void);
 void ast_expr_lit_char_free(ast_expr_lit_char_t* node);
 
 /**
+ * \brief Performs type check pass on an AST literal character expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_lit_char_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_char_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST literal character expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

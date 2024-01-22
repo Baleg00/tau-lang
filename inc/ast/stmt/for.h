@@ -47,6 +47,14 @@ void ast_stmt_for_free(ast_stmt_for_t* node);
 void ast_stmt_for_nameres(nameres_ctx_t* ctx, ast_stmt_for_t* node);
 
 /**
+ * \brief Performs type check pass on an AST for-loop statement node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_stmt_for_typecheck(typecheck_ctx_t* ctx, ast_stmt_for_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST for-loop statement node into a stream.
  * 
  * \param[in] stream The stream to be written to.
