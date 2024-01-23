@@ -103,9 +103,109 @@ void ast_type_prim_free(ast_type_prim_t* node)
   free(node);
 }
 
-void ast_type_prim_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+void ast_type_prim_i8_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
 {
+  typedesc_t* desc = typebuilder_build_i8(ctx->typebuilder);
   
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_i16_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_i16(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_i32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_i32(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_i64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_i64(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_isize_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_isize(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_u8_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_u8(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_u16_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_u16(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_u32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_u32(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_u64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_u64(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_usize_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_usize(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_f32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_f32(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_f64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_f64(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_char_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_char(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_bool_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
+}
+
+void ast_type_prim_unit_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typebuilder_build_unit(ctx->typebuilder);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
 }
 
 void ast_type_prim_dump_json(FILE* stream, ast_type_prim_t* node)

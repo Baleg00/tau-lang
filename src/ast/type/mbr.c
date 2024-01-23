@@ -7,6 +7,7 @@
 
 #include "ast/type/mbr.h"
 
+#include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
@@ -30,14 +31,14 @@ void ast_type_mbr_free(ast_type_mbr_t* node)
 
 void ast_type_mbr_nameres(nameres_ctx_t* ctx, ast_type_mbr_t* node)
 {
-  ast_node_nameres(ctx, node->parent);
-  ast_node_nameres(ctx, node->member);
+  unreachable();
+  // TODO
 }
 
 void ast_type_mbr_typecheck(typecheck_ctx_t* ctx, ast_type_mbr_t* node)
 {
-  ast_node_typecheck(ctx, node->parent);
-  ast_node_typecheck(ctx, node->member);
+  unreachable();
+  // TODO
 }
 
 void ast_type_mbr_dump_json(FILE* stream, ast_type_mbr_t* node)

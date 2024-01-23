@@ -7,6 +7,7 @@
 
 #include "ast/type/array.h"
 
+#include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
@@ -38,6 +39,16 @@ void ast_type_array_typecheck(typecheck_ctx_t* ctx, ast_type_array_t* node)
 {
   ast_node_typecheck(ctx, node->base_type);
   ast_node_typecheck(ctx, node->size);
+
+  typedesc_t* base_desc = typetable_lookup(ctx->typetable, node->base_type);
+  assert(base_desc != NULL);
+  assert(typedesc_can_add_array(base_desc));
+
+  assert(node->size->kind == AST_EXPR_LIT_INT);
+
+  typedesc_t* desc = typebuilder_build_array(ctx->typebuilder, (size_t)((ast_expr_lit_int_t*)node->size)->value, base_desc);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
 void ast_type_array_dump_json(FILE* stream, ast_type_array_t* node)

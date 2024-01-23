@@ -43,7 +43,7 @@ void ast_decl_enum_constant_nameres(nameres_ctx_t* ctx, ast_decl_enum_constant_t
 
 void ast_decl_enum_constant_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_constant_t* node)
 {
-  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, (typedesc_t*)ctx->enum_desc);
 }
 
 void ast_decl_enum_constant_dump_json(FILE* stream, ast_decl_enum_constant_t* node)

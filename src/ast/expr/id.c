@@ -49,7 +49,10 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
 
 void ast_expr_id_typecheck(typecheck_ctx_t* ctx, ast_expr_id_t* node)
 {
-  
+  typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
+  assert(desc != NULL);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
 void ast_expr_id_dump_json(FILE* stream, ast_expr_id_t* node)

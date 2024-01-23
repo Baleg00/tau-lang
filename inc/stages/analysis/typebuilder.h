@@ -201,6 +201,14 @@ typedesc_t* typebuilder_build_f32(typebuilder_t* builder);
 typedesc_t* typebuilder_build_f64(typebuilder_t* builder);
 
 /**
+ * \brief Builds a character type.
+ *
+ * \param[in] builder Pointer to the type builder.
+ * \returns A pointer to the newly created character type descriptor.
+ */
+typedesc_t* typebuilder_build_char(typebuilder_t* builder);
+
+/**
  * \brief Builds a boolean type.
  *
  * \param[in] builder Pointer to the type builder.

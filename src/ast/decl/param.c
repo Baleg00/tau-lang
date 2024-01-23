@@ -49,6 +49,20 @@ void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node)
 {
   ast_node_typecheck(ctx, node->type);
   ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, node->type);
+  assert(desc != NULL);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+
+  if (node->expr != NULL)
+  {
+    typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+    assert(expr_desc != NULL);
+
+    if (!typedesc_is_implicitly_convertible(expr_desc, desc))
+      report_error_type_mismatch(node->tok->loc, desc, expr_desc);
+  }
 }
 
 void ast_decl_param_dump_json(FILE* stream, ast_decl_param_t* node)

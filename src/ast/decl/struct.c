@@ -58,6 +58,27 @@ void ast_decl_struct_typecheck(typecheck_ctx_t* ctx, ast_decl_struct_t* node)
 {
   VECTOR_FOR_LOOP(i, node->members)
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->members, i));
+
+  size_t field_count = vector_size(node->members);
+  typedesc_t** field_types = NULL;
+
+  if (field_count > 0)
+    field_types = (typedesc_t**)malloc(sizeof(typedesc_t*) * field_count);
+
+  VECTOR_FOR_LOOP(i, node->members)
+  {
+    typedesc_t* field_desc = typetable_lookup(ctx->typetable, (ast_node_t*)vector_get(node->members, i));
+    assert(field_desc != NULL);
+
+    field_types[i] = field_desc;
+  }
+
+  typedesc_t* desc = typebuilder_build_struct(ctx->typebuilder, (ast_node_t*)node, field_types, field_count);
+
+  if (field_types != NULL)
+    free(field_types);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
 void ast_decl_struct_dump_json(FILE* stream, ast_decl_struct_t* node)

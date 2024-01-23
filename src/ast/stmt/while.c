@@ -9,6 +9,7 @@
 
 #include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
 
 ast_stmt_while_t* ast_stmt_while_init(void)
@@ -42,6 +43,12 @@ void ast_stmt_while_typecheck(typecheck_ctx_t* ctx, ast_stmt_while_t* node)
 {
   ast_node_typecheck(ctx, node->cond);
   ast_node_typecheck(ctx, node->stmt);
+
+  typedesc_t* cond_desc = typetable_lookup(ctx->typetable, node->cond);
+  assert(cond_desc != NULL);
+
+  if (typedesc_remove_const_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
+    report_error_expected_bool_type(node->cond->tok->loc);
 }
 
 void ast_stmt_while_dump_json(FILE* stream, ast_stmt_while_t* node)

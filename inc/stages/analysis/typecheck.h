@@ -30,6 +30,9 @@ typedef struct typecheck_ctx_t
 {
   typebuilder_t* typebuilder;
   typetable_t* typetable;
+
+  typedesc_fun_t* fun_desc; // Type descriptor of the containing function declaration.
+  typedesc_enum_t* enum_desc; // Type descriptor of the containing enum declaration.
 } typecheck_ctx_t;
 
 /**

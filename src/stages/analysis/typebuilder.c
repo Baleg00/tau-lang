@@ -35,6 +35,7 @@ struct typebuilder_t
   typedesc_t* desc_usize;
   typedesc_t* desc_f32;
   typedesc_t* desc_f64;
+  typedesc_t* desc_char;
   typedesc_t* desc_bool;
   typedesc_t* desc_unit;
 
@@ -231,6 +232,7 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->desc_usize = typedesc_init(TYPEDESC_USIZE);
   builder->desc_f32   = typedesc_init(TYPEDESC_F32);
   builder->desc_f64   = typedesc_init(TYPEDESC_F64);
+  builder->desc_char  = typedesc_init(TYPEDESC_CHAR);
   builder->desc_bool  = typedesc_init(TYPEDESC_BOOL);
   builder->desc_unit  = typedesc_init(TYPEDESC_UNIT);
 
@@ -246,6 +248,7 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->desc_usize->llvm_type = LLVMIntPtrTypeInContext(builder->llvm_context, builder->llvm_layout);
   builder->desc_f32->llvm_type   = LLVMFloatTypeInContext(builder->llvm_context);
   builder->desc_f64->llvm_type   = LLVMDoubleTypeInContext(builder->llvm_context);
+  builder->desc_char->llvm_type  = LLVMInt32TypeInContext(builder->llvm_context);
   builder->desc_bool->llvm_type  = LLVMInt1TypeInContext(builder->llvm_context);
   builder->desc_unit->llvm_type  = LLVMVoidTypeInContext(builder->llvm_context);
 
@@ -277,6 +280,7 @@ void typebuilder_free(typebuilder_t* builder)
   typedesc_free(builder->desc_usize);
   typedesc_free(builder->desc_f32);
   typedesc_free(builder->desc_f64);
+  typedesc_free(builder->desc_char);
   typedesc_free(builder->desc_bool);
   typedesc_free(builder->desc_unit);
 
@@ -393,6 +397,11 @@ typedesc_t* typebuilder_build_f32(typebuilder_t* builder)
 typedesc_t* typebuilder_build_f64(typebuilder_t* builder)
 {
   return builder->desc_f64;
+}
+
+typedesc_t* typebuilder_build_char(typebuilder_t* builder)
+{
+  return builder->desc_char;
 }
 
 typedesc_t* typebuilder_build_bool(typebuilder_t* builder)

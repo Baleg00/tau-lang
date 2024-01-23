@@ -30,7 +30,9 @@ void ast_expr_lit_char_free(ast_expr_lit_char_t* node)
 
 void ast_expr_lit_char_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_char_t* node)
 {
-  
+  typedesc_t* desc = typebuilder_build_char(ctx->typebuilder);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
 void ast_expr_lit_char_dump_json(FILE* stream, ast_expr_lit_char_t* node)

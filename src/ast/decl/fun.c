@@ -64,6 +64,30 @@ void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
 
   ast_node_typecheck(ctx, node->return_type);
   ast_node_typecheck(ctx, node->stmt);
+
+  size_t param_count = vector_size(node->params);
+  typedesc_t** param_types = NULL;
+
+  if (param_count > 0)
+    param_types = (typedesc_t**)malloc(sizeof(typedesc_t*) * param_count);
+  
+  VECTOR_FOR_LOOP(i, node->params)
+  {
+    typedesc_t* param_desc = typetable_lookup(ctx->typetable, (ast_node_t*)vector_get(node->params, i));
+    assert(param_desc != NULL);
+
+    param_types[i] = param_desc;
+  }
+
+  typedesc_t* return_desc = typetable_lookup(ctx->typetable, node->return_type);
+  assert(return_desc != NULL);
+
+  typedesc_t* desc = typebuilder_build_fun(ctx->typebuilder, return_desc, param_types, param_count, node->is_vararg, node->callconv);
+
+  if (param_types != NULL)
+    free(param_types);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
 void ast_decl_fun_dump_json(FILE* stream, ast_decl_fun_t* node)

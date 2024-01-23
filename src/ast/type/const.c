@@ -36,6 +36,14 @@ void ast_type_const_nameres(nameres_ctx_t* ctx, ast_type_const_t* node)
 void ast_type_const_typecheck(typecheck_ctx_t* ctx, ast_type_const_t* node)
 {
   ast_node_typecheck(ctx, node->base_type);
+
+  typedesc_t* base_desc = typetable_lookup(ctx->typetable, node->base_type);
+  assert(base_desc != NULL);
+  assert(typedesc_can_add_const(base_desc));
+
+  typedesc_t* desc = typebuilder_build_const(ctx->typebuilder, base_desc);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
 void ast_type_const_dump_json(FILE* stream, ast_type_const_t* node)

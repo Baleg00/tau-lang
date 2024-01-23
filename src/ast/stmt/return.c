@@ -9,6 +9,7 @@
 
 #include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
 
 ast_stmt_return_t* ast_stmt_return_init(void)
@@ -36,6 +37,22 @@ void ast_stmt_return_nameres(nameres_ctx_t* ctx, ast_stmt_return_t* node)
 void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
 {
   ast_node_typecheck(ctx, node->expr);
+
+  if (ctx->fun_desc == NULL)
+    report_error_return_outside_function(node->tok->loc);
+
+  // TODO: check if return is inside defer statement
+
+  typedesc_t* expr_desc = typebuilder_build_unit(ctx->typebuilder);
+
+  if (node->expr != NULL)
+  {
+    expr_desc = typetable_lookup(ctx->typetable, node->expr);
+    assert(expr_desc != NULL);
+  }
+
+  if (!typedesc_is_implicitly_convertible(expr_desc, ctx->fun_desc->return_type))
+    report_error_incompatible_return_type(node->tok->loc);
 }
 
 void ast_stmt_return_dump_json(FILE* stream, ast_stmt_return_t* node)

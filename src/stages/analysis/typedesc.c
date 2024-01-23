@@ -38,6 +38,7 @@ typedesc_t* typedesc_init(typedesc_kind_t kind)
   case TYPEDESC_USIZE:  desc_size = sizeof(typedesc_t       ); break;
   case TYPEDESC_F32:    desc_size = sizeof(typedesc_t       ); break;
   case TYPEDESC_F64:    desc_size = sizeof(typedesc_t       ); break;
+  case TYPEDESC_CHAR:   desc_size = sizeof(typedesc_t       ); break;
   case TYPEDESC_BOOL:   desc_size = sizeof(typedesc_t       ); break;
   case TYPEDESC_UNIT:   desc_size = sizeof(typedesc_t       ); break;
   case TYPEDESC_NULL:   desc_size = sizeof(typedesc_t       ); break;
@@ -80,6 +81,7 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_USIZE:
   case TYPEDESC_F32:
   case TYPEDESC_F64:
+  case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
   case TYPEDESC_UNIT:
   case TYPEDESC_NULL:
@@ -135,6 +137,7 @@ bool typedesc_is_builtin(typedesc_t* desc)
   case TYPEDESC_USIZE:
   case TYPEDESC_F32:
   case TYPEDESC_F64:
+  case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
   case TYPEDESC_UNIT:
     return true;

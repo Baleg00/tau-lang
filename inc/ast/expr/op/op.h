@@ -26,8 +26,6 @@ typedef enum op_kind_t
 {
   OP_SIZEOF, // Size-of operator `sizeof`
   OP_ALIGNOF, // Alignment-of operator `alignof`
-  OP_TYPEOF, // Type-of operator `typeof`
-  OP_IN, // In-range operator `in`
   
   OP_ARIT_INC_PRE, // Arithmetic pre-increment operator `++`
   OP_ARIT_INC_POST, // Arithmetic post-increment operator `++`
@@ -79,7 +77,6 @@ typedef enum op_kind_t
   OP_NULL_SAFE_ACCESS, // Null-safe-access operator `?.`
   OP_RANGE, // Range operator `..`
   OP_CALL, // Call operator `()`
-  OP_AWAIT, // Await operator `await`
 } op_kind_t;
 
 /**

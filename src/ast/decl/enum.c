@@ -56,8 +56,17 @@ void ast_decl_enum_nameres(nameres_ctx_t* ctx, ast_decl_enum_t* node)
 
 void ast_decl_enum_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_t* node)
 {
+  typedesc_t* desc = typebuilder_build_enum(ctx->typebuilder, (ast_node_t*)node);
+  
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+
+  typedesc_enum_t* prev_enum_desc = ctx->enum_desc;
+  ctx->enum_desc = (typedesc_enum_t*)desc;
+
   VECTOR_FOR_LOOP(i, node->members)
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->members, i));
+
+  ctx->enum_desc = prev_enum_desc;
 }
 
 void ast_decl_enum_dump_json(FILE* stream, ast_decl_enum_t* node)

@@ -30,20 +30,14 @@ void ast_stmt_for_free(ast_stmt_for_t* node)
 
 void ast_stmt_for_nameres(nameres_ctx_t* ctx, ast_stmt_for_t* node)
 {
-  node->scope = nameres_ctx_scope_begin(ctx);
-
-  ast_node_nameres(ctx, node->var);
-  ast_node_nameres(ctx, node->range);
-  ast_node_nameres(ctx, node->stmt);
-
-  nameres_ctx_scope_end(ctx);
+  unreachable();
+  // TODO
 }
 
 void ast_stmt_for_typecheck(typecheck_ctx_t* ctx, ast_stmt_for_t* node)
 {
-  ast_node_typecheck(ctx, node->var);
-  ast_node_typecheck(ctx, node->range);
-  ast_node_typecheck(ctx, node->stmt);
+  unreachable();
+  // TODO
 }
 
 void ast_stmt_for_dump_json(FILE* stream, ast_stmt_for_t* node)

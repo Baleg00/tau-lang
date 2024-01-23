@@ -30,7 +30,9 @@ void ast_expr_lit_bool_free(ast_expr_lit_bool_t* node)
 
 void ast_expr_lit_bool_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_bool_t* node)
 {
-  
+  typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
 void ast_expr_lit_bool_dump_json(FILE* stream, ast_expr_lit_bool_t* node)

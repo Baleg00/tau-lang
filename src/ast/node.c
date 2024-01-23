@@ -38,6 +38,7 @@ void ast_node_free(ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:     ast_type_prim_free         ((ast_type_prim_t*         )node); break;
   case AST_TYPE_MEMBER:        ast_type_mbr_free          ((ast_type_mbr_t*          )node); break;
@@ -61,13 +62,13 @@ void ast_node_free(ast_node_t* node)
   case AST_STMT_BLOCK:         ast_stmt_block_free        ((ast_stmt_block_t*        )node); break;
   case AST_STMT_EXPR:          ast_stmt_expr_free         ((ast_stmt_expr_t*         )node); break;
   case AST_DECL_VAR:           ast_decl_var_free          ((ast_decl_var_t*          )node); break;
+  case AST_DECL_PARAM:         ast_decl_param_free        ((ast_decl_param_t*        )node); break;
   case AST_DECL_FUN:           ast_decl_fun_free          ((ast_decl_fun_t*          )node); break;
   case AST_DECL_STRUCT:        ast_decl_struct_free       ((ast_decl_struct_t*       )node); break;
   case AST_DECL_UNION:         ast_decl_union_free        ((ast_decl_union_t*        )node); break;
   case AST_DECL_ENUM:          ast_decl_enum_free         ((ast_decl_enum_t*         )node); break;
-  case AST_DECL_MOD:           ast_decl_mod_free          ((ast_decl_mod_t*          )node); break;
-  case AST_DECL_PARAM:         ast_decl_param_free        ((ast_decl_param_t*        )node); break;
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_free((ast_decl_enum_constant_t*)node); break;
+  case AST_DECL_MOD:           ast_decl_mod_free          ((ast_decl_mod_t*          )node); break;
   case AST_PROG:               ast_prog_free              ((ast_prog_t*              )node); break;
   default: unreachable();
   }
@@ -122,6 +123,7 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:
   case AST_EXPR_LIT_INT:
@@ -151,20 +153,21 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_typecheck          (ctx, (ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_typecheck          (ctx, (ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_typecheck          (ctx, (ast_type_fun_t*          )node); break;
-  case AST_TYPE_PRIM_I8:
-  case AST_TYPE_PRIM_I16:
-  case AST_TYPE_PRIM_I32:
-  case AST_TYPE_PRIM_I64:
-  case AST_TYPE_PRIM_ISIZE:
-  case AST_TYPE_PRIM_U8:
-  case AST_TYPE_PRIM_U16:
-  case AST_TYPE_PRIM_U32:
-  case AST_TYPE_PRIM_U64:
-  case AST_TYPE_PRIM_USIZE:
-  case AST_TYPE_PRIM_F32:
-  case AST_TYPE_PRIM_F64:
-  case AST_TYPE_PRIM_BOOL:
-  case AST_TYPE_PRIM_UNIT:     ast_type_prim_typecheck         (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I8:       ast_type_prim_i8_typecheck      (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I16:      ast_type_prim_i16_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I32:      ast_type_prim_i32_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I64:      ast_type_prim_i64_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_ISIZE:    ast_type_prim_isize_typecheck   (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_U8:       ast_type_prim_u8_typecheck      (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_U16:      ast_type_prim_u16_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_U32:      ast_type_prim_u32_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_U64:      ast_type_prim_u64_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_USIZE:    ast_type_prim_usize_typecheck   (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_F32:      ast_type_prim_f32_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_F64:      ast_type_prim_f64_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_CHAR:     ast_type_prim_char_typecheck    (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_BOOL:     ast_type_prim_bool_typecheck    (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_UNIT:     ast_type_prim_unit_typecheck    (ctx, (ast_type_prim_t*         )node); break;
   case AST_TYPE_MEMBER:        ast_type_mbr_typecheck          (ctx, (ast_type_mbr_t*          )node); break;
   case AST_EXPR_ID:            ast_expr_id_typecheck           (ctx, (ast_expr_id_t*           )node); break;
   case AST_EXPR_LIT_INT:       ast_expr_lit_int_typecheck      (ctx, (ast_expr_lit_int_t*      )node); break;
@@ -184,13 +187,13 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_STMT_BLOCK:         ast_stmt_block_typecheck        (ctx, (ast_stmt_block_t*        )node); break;
   case AST_STMT_EXPR:          ast_stmt_expr_typecheck         (ctx, (ast_stmt_expr_t*         )node); break;
   case AST_DECL_VAR:           ast_decl_var_typecheck          (ctx, (ast_decl_var_t*          )node); break;
+  case AST_DECL_PARAM:         ast_decl_param_typecheck        (ctx, (ast_decl_param_t*        )node); break;
   case AST_DECL_FUN:           ast_decl_fun_typecheck          (ctx, (ast_decl_fun_t*          )node); break;
   case AST_DECL_STRUCT:        ast_decl_struct_typecheck       (ctx, (ast_decl_struct_t*       )node); break;
   case AST_DECL_UNION:         ast_decl_union_typecheck        (ctx, (ast_decl_union_t*        )node); break;
   case AST_DECL_ENUM:          ast_decl_enum_typecheck         (ctx, (ast_decl_enum_t*         )node); break;
-  case AST_DECL_MOD:           ast_decl_mod_typecheck          (ctx, (ast_decl_mod_t*          )node); break;
-  case AST_DECL_PARAM:         ast_decl_param_typecheck        (ctx, (ast_decl_param_t*        )node); break;
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_typecheck(ctx, (ast_decl_enum_constant_t*)node); break;
+  case AST_DECL_MOD:           ast_decl_mod_typecheck          (ctx, (ast_decl_mod_t*          )node); break;
   case AST_PROG:               ast_prog_typecheck              (ctx, (ast_prog_t*              )node); break;
   case AST_ID:
   case AST_STMT_BREAK:
@@ -251,6 +254,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:     ast_type_prim_dump_json         (stream, (ast_type_prim_t*         )node); break;
   case AST_TYPE_MEMBER:        ast_type_mbr_dump_json          (stream, (ast_type_mbr_t*          )node); break;
@@ -274,13 +278,13 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_STMT_BLOCK:         ast_stmt_block_dump_json        (stream, (ast_stmt_block_t*        )node); break;
   case AST_STMT_EXPR:          ast_stmt_expr_dump_json         (stream, (ast_stmt_expr_t*         )node); break;
   case AST_DECL_VAR:           ast_decl_var_dump_json          (stream, (ast_decl_var_t*          )node); break;
+  case AST_DECL_PARAM:         ast_decl_param_dump_json        (stream, (ast_decl_param_t*        )node); break;
   case AST_DECL_FUN:           ast_decl_fun_dump_json          (stream, (ast_decl_fun_t*          )node); break;
   case AST_DECL_STRUCT:        ast_decl_struct_dump_json       (stream, (ast_decl_struct_t*       )node); break;
   case AST_DECL_UNION:         ast_decl_union_dump_json        (stream, (ast_decl_union_t*        )node); break;
   case AST_DECL_ENUM:          ast_decl_enum_dump_json         (stream, (ast_decl_enum_t*         )node); break;
-  case AST_DECL_MOD:           ast_decl_mod_dump_json          (stream, (ast_decl_mod_t*          )node); break;
-  case AST_DECL_PARAM:         ast_decl_param_dump_json        (stream, (ast_decl_param_t*        )node); break;
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_dump_json(stream, (ast_decl_enum_constant_t*)node); break;
+  case AST_DECL_MOD:           ast_decl_mod_dump_json          (stream, (ast_decl_mod_t*          )node); break;
   case AST_PROG:               ast_prog_dump_json              (stream, (ast_prog_t*              )node); break;
   default: unreachable();
   }
@@ -335,13 +339,13 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_STMT_BLOCK:         return "AST_STMT_BLOCK";
   case AST_STMT_EXPR:          return "AST_STMT_EXPR";
   case AST_DECL_VAR:           return "AST_DECL_VAR";
+  case AST_DECL_PARAM:         return "AST_DECL_PARAM";
   case AST_DECL_FUN:           return "AST_DECL_FUN";
   case AST_DECL_STRUCT:        return "AST_DECL_STRUCT";
   case AST_DECL_UNION:         return "AST_DECL_UNION";
   case AST_DECL_ENUM:          return "AST_DECL_ENUM";
-  case AST_DECL_MOD:           return "AST_DECL_MOD";
-  case AST_DECL_PARAM:         return "AST_DECL_PARAM";
   case AST_DECL_ENUM_CONSTANT: return "AST_DECL_ENUM_CONSTANT";
+  case AST_DECL_MOD:           return "AST_DECL_MOD";
   case AST_PROG:               return "AST_PROG";
   default: unreachable();
   }

@@ -15,8 +15,6 @@ const char* op_kind_to_cstr(op_kind_t kind)
   {
   case OP_SIZEOF:           return "OP_SIZEOF";
   case OP_ALIGNOF:          return "OP_ALIGNOF";
-  case OP_TYPEOF:           return "OP_TYPEOF";
-  case OP_IN:               return "OP_IN";
   case OP_ARIT_INC_PRE:     return "OP_ARIT_INC_PRE";
   case OP_ARIT_INC_POST:    return "OP_ARIT_INC_POST";
   case OP_ARIT_DEC_PRE:     return "OP_ARIT_DEC_PRE";
@@ -62,7 +60,6 @@ const char* op_kind_to_cstr(op_kind_t kind)
   case OP_NULL_SAFE_ACCESS: return "OP_NULL_SAFE_ACCESS";
   case OP_RANGE:            return "OP_RANGE";
   case OP_CALL:             return "OP_CALL";
-  case OP_AWAIT:            return "OP_AWAIT";
   default: unreachable();
   }
 
@@ -84,7 +81,6 @@ int op_precedence(op_kind_t kind)
   
   case OP_SIZEOF:
   case OP_ALIGNOF:
-  case OP_TYPEOF:
   case OP_ARIT_INC_PRE:
   case OP_ARIT_DEC_PRE:
   case OP_ARIT_POS:
@@ -93,7 +89,6 @@ int op_precedence(op_kind_t kind)
   case OP_LOGIC_NOT:
   case OP_IND:
   case OP_ADDR:
-  case OP_AWAIT:
     return 1;
   
   case OP_ARIT_MUL:
@@ -112,33 +107,30 @@ int op_precedence(op_kind_t kind)
   case OP_BIT_RSH:
     return 5;
 
-  case OP_IN:
-    return 6;
-
   case OP_COMP_LT:
   case OP_COMP_LE:
   case OP_COMP_GT:
   case OP_COMP_GE:
-    return 7;
+    return 6;
 
   case OP_COMP_EQ:
   case OP_COMP_NE:
-    return 8;
+    return 7;
 
   case OP_BIT_AND:
-    return 9;
+    return 8;
 
   case OP_BIT_XOR:
-    return 10;
+    return 9;
 
   case OP_BIT_OR:
-    return 11;
+    return 10;
 
   case OP_LOGIC_AND:
-    return 12;
+    return 11;
 
   case OP_LOGIC_OR:
-    return 13;
+    return 12;
 
   case OP_ASSIGN:
   case OP_ARIT_ADD_ASSIGN:
@@ -151,7 +143,7 @@ int op_precedence(op_kind_t kind)
   case OP_BIT_XOR_ASSIGN:
   case OP_BIT_LSH_ASSIGN:
   case OP_BIT_RSH_ASSIGN:
-    return 14;
+    return 13;
 
   default:
     unreachable();
@@ -164,7 +156,6 @@ bool op_is_binary(op_kind_t kind)
 {
   switch (kind)
   {
-  case OP_IN:
   case OP_ARIT_ADD:
   case OP_ARIT_SUB:
   case OP_ARIT_MUL:
@@ -211,7 +202,6 @@ bool op_is_unary(op_kind_t kind)
   {
   case OP_SIZEOF:
   case OP_ALIGNOF:
-  case OP_TYPEOF:
   case OP_ARIT_INC_PRE:
   case OP_ARIT_INC_POST:
   case OP_ARIT_DEC_PRE:
@@ -222,7 +212,6 @@ bool op_is_unary(op_kind_t kind)
   case OP_BIT_NOT:
   case OP_IND:
   case OP_ADDR:
-  case OP_AWAIT:
     return true;
   default:
     return false;
@@ -233,7 +222,6 @@ bool op_is_left_assoc(op_kind_t kind)
 {
   switch (kind)
   {
-  case OP_IN:
   case OP_ARIT_INC_POST:
   case OP_ARIT_DEC_POST:
   case OP_ARIT_ADD:
@@ -272,7 +260,6 @@ bool op_is_right_assoc(op_kind_t kind)
   {
   case OP_SIZEOF:
   case OP_ALIGNOF:
-  case OP_TYPEOF:
   case OP_ARIT_INC_PRE:
   case OP_ARIT_DEC_PRE:
   case OP_ARIT_POS:
@@ -292,7 +279,6 @@ bool op_is_right_assoc(op_kind_t kind)
   case OP_BIT_RSH_ASSIGN:
   case OP_IND:
   case OP_ADDR:
-  case OP_AWAIT:
     return true;
   default:
     return false;
