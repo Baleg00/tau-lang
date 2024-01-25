@@ -20,6 +20,7 @@ typedef struct ast_type_mbr_t
   AST_TYPE_HEADER;
   ast_node_t* parent;
   ast_node_t* member;
+  ast_node_t* decl;
 } ast_type_mbr_t;
 
 /**
