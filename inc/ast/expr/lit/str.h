@@ -44,6 +44,14 @@ void ast_expr_lit_str_free(ast_expr_lit_str_t* node);
 void ast_expr_lit_str_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_str_t* node);
 
 /**
+ * \brief Performs code generation pass on an AST literal string expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_lit_str_codegen(codegen_ctx_t* ctx, ast_expr_lit_str_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST literal string expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

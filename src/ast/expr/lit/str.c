@@ -7,6 +7,8 @@
 
 #include "ast/expr/lit/str.h"
 
+#include <llvm-c/Core.h>
+
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
@@ -36,9 +38,25 @@ void ast_expr_lit_str_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_str_t* node)
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
+void ast_expr_lit_str_codegen(codegen_ctx_t* ctx, ast_expr_lit_str_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  node->llvm_value = LLVMConstStringInContext(ctx->llvm_ctx, node->value, (uint32_t)strlen(node->value), false);
+}
+
 void ast_expr_lit_str_dump_json(FILE* stream, ast_expr_lit_str_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
-  fprintf(stream, ",\"value\":\"%s\"", node->value);
+
+  string_t* str = string_init_with_cstr(node->value);
+  string_t* escaped = string_escape(str);
+  
+  fprintf(stream, ",\"value\":\"%s\"", string_begin(escaped));
+
+  string_free(escaped);
+  string_free(str);
+
   fputc('}', stream);
 }

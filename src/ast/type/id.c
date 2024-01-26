@@ -55,6 +55,14 @@ void ast_type_id_typecheck(typecheck_ctx_t* ctx, ast_type_id_t* node)
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
+void ast_type_id_codegen(codegen_ctx_t* ctx, ast_type_id_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
 void ast_type_id_dump_json(FILE* stream, ast_type_id_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));

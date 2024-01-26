@@ -7,6 +7,9 @@
 
 #include "ast/stmt/while.h"
 
+#include <llvm-c/Core.h>
+
+#include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -49,6 +52,29 @@ void ast_stmt_while_typecheck(typecheck_ctx_t* ctx, ast_stmt_while_t* node)
 
   if (typedesc_remove_const_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);
+}
+
+void ast_stmt_while_codegen(codegen_ctx_t* ctx, ast_stmt_while_t* node)
+{
+  node->llvm_cond = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "while_cond");
+  node->llvm_loop = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "while_loop");
+  node->llvm_end = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "while_end");
+
+  LLVMBuildBr(ctx->llvm_builder, node->llvm_cond);
+  LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_cond);
+  LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_cond);
+
+  ast_node_codegen(ctx, node->cond);
+
+  LLVMBuildCondBr(ctx->llvm_builder, ((ast_expr_t*)node->cond)->llvm_value, node->llvm_loop, node->llvm_end);
+  LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_loop);
+  LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_loop);
+
+  ast_node_codegen(ctx, node->stmt);
+
+  LLVMBuildBr(ctx->llvm_builder, node->llvm_cond);
+  LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_end);
+  LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_end);
 }
 
 void ast_stmt_while_dump_json(FILE* stream, ast_stmt_while_t* node)

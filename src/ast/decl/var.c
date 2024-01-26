@@ -7,6 +7,9 @@
 
 #include "ast/decl/var.h"
 
+#include <llvm-c/Core.h>
+
+#include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -68,6 +71,22 @@ void ast_decl_var_typecheck(typecheck_ctx_t* ctx, ast_decl_var_t* node)
     if (!typedesc_is_implicitly_convertible(expr_desc, desc))
       report_error_type_mismatch(node->tok->loc, desc, expr_desc);
   }
+}
+
+void ast_decl_var_codegen(codegen_ctx_t* ctx, ast_decl_var_t* node)
+{
+  ast_node_codegen(ctx, node->type);
+
+  if (node->expr != NULL)
+    ast_node_codegen(ctx, node->expr);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  node->llvm_value = LLVMBuildAlloca(ctx->llvm_builder, node->llvm_type, "alloca_tmp");
+
+  if (node->expr != NULL)
+    LLVMBuildStore(ctx->llvm_builder, ((ast_expr_t*)node->expr)->llvm_value, node->llvm_value);
 }
 
 void ast_decl_var_dump_json(FILE* stream, ast_decl_var_t* node)

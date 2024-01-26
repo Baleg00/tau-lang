@@ -59,6 +59,14 @@ void ast_decl_param_nameres(nameres_ctx_t* ctx, ast_decl_param_t* node);
 void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node);
 
 /**
+ * \brief Performs code generation pass on an AST parameter declaration node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_decl_param_codegen(codegen_ctx_t* ctx, ast_decl_param_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST parameter declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

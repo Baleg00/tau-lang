@@ -7,6 +7,9 @@
 
 #include "ast/stmt/if.h"
 
+#include <llvm-c/Core.h>
+
+#include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -51,6 +54,41 @@ void ast_stmt_if_typecheck(typecheck_ctx_t* ctx, ast_stmt_if_t* node)
 
   if (typedesc_remove_const_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);
+}
+
+void ast_stmt_if_codegen(codegen_ctx_t* ctx, ast_stmt_if_t* node)
+{
+  node->llvm_then = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "if_then");
+
+  if (node->stmt_else != NULL)
+    node->llvm_else = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "if_else");
+  
+  node->llvm_end = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "if_end");
+
+  ast_node_codegen(ctx, node->cond);
+
+  LLVMBuildCondBr(ctx->llvm_builder, ((ast_expr_t*)node->cond)->llvm_value, node->llvm_then, node->stmt_else != NULL ? node->llvm_else : node->llvm_end);
+  LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_then);
+  LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_then);
+
+  ast_node_codegen(ctx, node->stmt);
+
+  if (LLVMGetBasicBlockTerminator(node->llvm_then) == NULL)
+    LLVMBuildBr(ctx->llvm_builder, node->llvm_end);
+
+  if (node->stmt_else != NULL)
+  {
+    LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_else);
+    LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_else);
+
+    ast_node_codegen(ctx, node->stmt_else);
+
+    if (LLVMGetBasicBlockTerminator(node->llvm_else) == NULL)
+      LLVMBuildBr(ctx->llvm_builder, node->llvm_end);
+  }
+
+  LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_end);
+  LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_end);
 }
 
 void ast_stmt_if_dump_json(FILE* stream, ast_stmt_if_t* node)

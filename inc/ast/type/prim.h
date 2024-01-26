@@ -154,6 +154,7 @@ void ast_type_prim_free(ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_i8_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `i16` type node.
  * 
@@ -161,6 +162,7 @@ void ast_type_prim_i8_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_i16_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `i32` type node.
  * 
@@ -168,6 +170,7 @@ void ast_type_prim_i16_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_i32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `i64` type node.
  * 
@@ -175,6 +178,7 @@ void ast_type_prim_i32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_i64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `isize` type node.
  * 
@@ -182,6 +186,7 @@ void ast_type_prim_i64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_isize_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `u8` type node.
  * 
@@ -189,6 +194,7 @@ void ast_type_prim_isize_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_u8_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `u16` type node.
  * 
@@ -196,6 +202,7 @@ void ast_type_prim_u8_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_u16_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `u32` type node.
  * 
@@ -203,6 +210,7 @@ void ast_type_prim_u16_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_u32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `u64` type node.
  * 
@@ -210,6 +218,7 @@ void ast_type_prim_u32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_u64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `usize` type node.
  * 
@@ -217,6 +226,7 @@ void ast_type_prim_u64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_usize_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `f32` type node.
  * 
@@ -224,6 +234,7 @@ void ast_type_prim_usize_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_f32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `f64` type node.
  * 
@@ -231,6 +242,7 @@ void ast_type_prim_f32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_f64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `char` type node.
  * 
@@ -238,6 +250,7 @@ void ast_type_prim_f64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_char_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `bool` type node.
  * 
@@ -245,6 +258,7 @@ void ast_type_prim_char_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_bool_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
 /**
  * \brief Performs type check pass on an AST primitive `unit` type node.
  * 
@@ -252,6 +266,126 @@ void ast_type_prim_bool_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_type_prim_unit_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `i8` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_i8_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `i16` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_i16_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `i32` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_i32_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `i64` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_i64_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `isize` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_isize_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `u8` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_u8_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `u16` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_u16_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `u32` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_u32_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `u64` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_u64_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `usize` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_usize_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `f32` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_f32_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `f64` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_f64_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `char` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_char_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `bool` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_bool_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
+
+/**
+ * \brief Performs type check pass on an AST primitive `unit` type node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_type_prim_unit_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node);
 
 /**
  * \brief Writes a JSON dump of an AST primitive type node into a stream.

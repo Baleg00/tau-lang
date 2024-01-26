@@ -52,6 +52,14 @@ void ast_stmt_defer_nameres(nameres_ctx_t* ctx, ast_stmt_defer_t* node);
 void ast_stmt_defer_typecheck(typecheck_ctx_t* ctx, ast_stmt_defer_t* node);
 
 /**
+ * \brief Performs code generation pass on an AST defer statement node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_stmt_defer_codegen(codegen_ctx_t* ctx, ast_stmt_defer_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST defer statement node into a stream.
  * 
  * \param[in] stream The stream to be written to.

@@ -51,6 +51,14 @@ void ast_type_opt_nameres(nameres_ctx_t* ctx, ast_type_opt_t* node);
 void ast_type_opt_typecheck(typecheck_ctx_t* ctx, ast_type_opt_t* node);
 
 /**
+ * \brief Performs code generation pass on an AST optional type node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_type_opt_codegen(codegen_ctx_t* ctx, ast_type_opt_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST optional type node into a stream.
  * 
  * \param[in] stream The stream to be written to.

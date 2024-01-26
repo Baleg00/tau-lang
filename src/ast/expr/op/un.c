@@ -7,10 +7,22 @@
 
 #include "ast/expr/op/un.h"
 
+#include <llvm-c/Core.h>
+
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
+
+static LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+
+  if (typedesc_remove_const(desc)->kind == TYPEDESC_REF)
+    return LLVMBuildLoad2(ctx->llvm_builder, node->llvm_type, node->llvm_value, "load_tmp");
+
+  return node->llvm_value;
+}
 
 ast_expr_op_un_t* ast_expr_op_un_init(void)
 {
@@ -125,6 +137,72 @@ void ast_expr_op_un_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
     desc = typebuilder_build_const(ctx->typebuilder, desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_codegen(ctx, node->expr);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  ast_expr_t* expr = (ast_expr_t*)node->expr;
+
+  switch (node->op_kind)
+  {
+  case OP_ARIT_INC_PRE:
+  {
+    LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");
+    LLVMValueRef llvm_inc_value = LLVMBuildAdd(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "pre_inc_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
+    node->llvm_value = expr->llvm_value;
+    break;
+  }
+  case OP_ARIT_INC_POST:
+  {
+    LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");
+    LLVMValueRef llvm_inc_value = LLVMBuildAdd(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "post_inc_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
+    node->llvm_value = llvm_value;
+    break;
+  }
+  case OP_ARIT_DEC_PRE:
+  {
+    LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");
+    LLVMValueRef llvm_inc_value = LLVMBuildSub(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "pre_dec_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
+    node->llvm_value = expr->llvm_value;
+    break;
+  }
+  case OP_ARIT_DEC_POST:
+  {
+    LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");
+    LLVMValueRef llvm_inc_value = LLVMBuildSub(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "post_dec_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
+    node->llvm_value = llvm_value;
+    break;
+  }
+  case OP_ARIT_POS:
+  {
+    node->llvm_value = codegen_build_load_if_ref(ctx, expr);
+    break;
+  }
+  case OP_ARIT_NEG:
+  {
+    LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, expr);
+    node->llvm_value = LLVMBuildNeg(ctx->llvm_builder, llvm_value, "neg_tmp");
+    break;
+  }
+  case OP_BIT_NOT:
+  case OP_LOGIC_NOT:
+  {
+    LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, expr);
+    node->llvm_value = LLVMBuildNot(ctx->llvm_builder, llvm_value, "not_tmp");
+    break;
+  }
+  default:
+    unreachable();
+  }
 }
 
 void ast_expr_op_un_dump_json(FILE* stream, ast_expr_op_un_t* node)

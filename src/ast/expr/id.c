@@ -7,6 +7,7 @@
 
 #include "ast/expr/id.h"
 
+#include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -53,6 +54,33 @@ void ast_expr_id_typecheck(typecheck_ctx_t* ctx, ast_expr_id_t* node)
   assert(desc != NULL);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_id_codegen(codegen_ctx_t* ctx, ast_expr_id_t* node)
+{
+  switch (node->decl->kind)
+  {
+  case AST_DECL_VAR:
+  {
+    node->llvm_type = ((ast_decl_var_t*)node->decl)->llvm_type;
+    node->llvm_value = ((ast_decl_var_t*)node->decl)->llvm_value;
+    break;
+  }
+  case AST_DECL_PARAM:
+  {
+    node->llvm_type = ((ast_decl_param_t*)node->decl)->llvm_type;
+    node->llvm_value = ((ast_decl_param_t*)node->decl)->llvm_value;
+    break;
+  }
+  case AST_DECL_FUN:
+  {
+    node->llvm_type = ((ast_decl_fun_t*)node->decl)->llvm_type;
+    node->llvm_value = ((ast_decl_fun_t*)node->decl)->llvm_value;
+    break;
+  }
+  default:
+    unreachable();
+  }
 }
 
 void ast_expr_id_dump_json(FILE* stream, ast_expr_id_t* node)

@@ -40,6 +40,12 @@ void ast_stmt_for_typecheck(typecheck_ctx_t* ctx, ast_stmt_for_t* node)
   // TODO
 }
 
+void ast_stmt_for_codegen(codegen_ctx_t* ctx, ast_stmt_for_t* node)
+{
+  unreachable();
+  // TODO
+}
+
 void ast_stmt_for_dump_json(FILE* stream, ast_stmt_for_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

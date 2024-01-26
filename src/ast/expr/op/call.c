@@ -7,6 +7,8 @@
 
 #include "ast/expr/op/call.h"
 
+#include <llvm-c/Core.h>
+
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -73,6 +75,39 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
       report_error_too_many_arguments(node->tok->loc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, fun_desc->return_type);
+}
+
+void ast_expr_op_call_codegen(codegen_ctx_t* ctx, ast_expr_op_call_t* node)
+{
+  ast_node_codegen(ctx, node->callee);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+  
+  LLVMValueRef* llvm_param_values = NULL;
+
+  if (vector_size(node->params) > 0)
+    llvm_param_values = (LLVMValueRef*)malloc(sizeof(LLVMValueRef) * vector_size(node->params));
+
+  VECTOR_FOR_LOOP(i, node->params)
+  {
+    ast_expr_t* param = (ast_expr_t*)vector_get(node->params, i);
+    ast_node_codegen(ctx, (ast_node_t*)param);
+
+    llvm_param_values[i] = param->llvm_value;
+  }
+
+  node->llvm_value = LLVMBuildCall2(
+    ctx->llvm_builder,
+    ((ast_expr_t*)node->callee)->llvm_type,
+    ((ast_expr_t*)node->callee)->llvm_value,
+    llvm_param_values,
+    (uint32_t)vector_size(node->params),
+    "call2_tmp"
+  );
+
+  if (llvm_param_values != NULL)
+    free(llvm_param_values);
 }
 
 void ast_expr_op_call_dump_json(FILE* stream, ast_expr_op_call_t* node)

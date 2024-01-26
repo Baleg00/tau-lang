@@ -208,6 +208,126 @@ void ast_type_prim_unit_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);  
 }
 
+void ast_type_prim_i8_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_i16_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_i32_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_i64_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_isize_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_u8_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_u16_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_u32_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_u64_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_usize_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_f32_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_f64_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_char_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_bool_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
+void ast_type_prim_unit_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+
+  node->llvm_type = desc->llvm_type;
+}
+
 void ast_type_prim_dump_json(FILE* stream, ast_type_prim_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));

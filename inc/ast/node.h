@@ -14,6 +14,7 @@
 
 #include "stages/analysis/nameres.h"
 #include "stages/analysis/typecheck.h"
+#include "stages/codegen/codegen.h"
 #include "stages/lexer/token.h"
 
 /**
@@ -118,6 +119,14 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node);
 
 /**
  * \brief Writes a JSON dump of a vector of AST nodes into a stream.

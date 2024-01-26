@@ -7,6 +7,8 @@
 
 #include "ast/decl/fun.h"
 
+#include <llvm-c/Core.h>
+
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -88,6 +90,57 @@ void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
     free(param_types);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)
+{
+  ast_node_codegen(ctx, node->return_type);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  string_t* id_str = token_to_string(node->id->tok);
+
+  node->llvm_value = LLVMAddFunction(ctx->llvm_mod, string_begin(id_str), node->llvm_type);
+
+  string_free(id_str);
+
+  LLVMCallConv llvm_callconv = LLVMCCallConv;
+
+  switch (node->callconv)
+  {
+  case CALLCONV_TAU:
+  case CALLCONV_CDECL:      llvm_callconv = LLVMCCallConv;             break;
+  case CALLCONV_STDCALL:    llvm_callconv = LLVMX86StdcallCallConv;    break;
+  case CALLCONV_WIN64:      llvm_callconv = LLVMWin64CallConv;         break;
+  case CALLCONV_SYSV64:     llvm_callconv = LLVMX8664SysVCallConv;     break;
+  case CALLCONV_AAPCS:      llvm_callconv = LLVMARMAAPCSCallConv;      break;
+  case CALLCONV_FASTCALL:   llvm_callconv = LLVMFastCallConv;          break;
+  case CALLCONV_VECTORCALL: llvm_callconv = LLVMX86VectorCallCallConv; break;
+  case CALLCONV_THISCALL:   llvm_callconv = LLVMX86ThisCallCallConv;   break;
+  default: unreachable();
+  }
+
+  LLVMSetFunctionCallConv(node->llvm_value, llvm_callconv);
+
+  if (!node->is_extern)
+  {
+    node->llvm_entry = LLVMAppendBasicBlockInContext(ctx->llvm_ctx, node->llvm_value, "entry");
+
+    LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_entry);
+
+    ctx->fun_node = node;
+
+    VECTOR_FOR_LOOP(i, node->params)
+    {
+      ctx->param_idx = i;
+      ast_node_codegen(ctx, (ast_node_t*)vector_get(node->params, i));
+    }
+
+    ctx->fun_node = NULL;
+
+    ast_node_codegen(ctx, node->stmt);
+  }
 }
 
 void ast_decl_fun_dump_json(FILE* stream, ast_decl_fun_t* node)

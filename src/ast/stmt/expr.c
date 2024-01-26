@@ -38,6 +38,11 @@ void ast_stmt_expr_typecheck(typecheck_ctx_t* ctx, ast_stmt_expr_t* node)
   ast_node_typecheck(ctx, node->expr);
 }
 
+void ast_stmt_expr_codegen(codegen_ctx_t* ctx, ast_stmt_expr_t* node)
+{
+  ast_node_codegen(ctx, node->expr);
+}
+
 void ast_stmt_expr_dump_json(FILE* stream, ast_stmt_expr_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

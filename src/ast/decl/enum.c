@@ -69,6 +69,18 @@ void ast_decl_enum_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_t* node)
   ctx->enum_desc = prev_enum_desc;
 }
 
+void ast_decl_enum_codegen(codegen_ctx_t* ctx, ast_decl_enum_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  VECTOR_FOR_LOOP(i, node->members)
+  {
+    ctx->enum_idx = i;
+    ast_node_codegen(ctx, (ast_node_t*)vector_get(node->members, i));
+  }
+}
+
 void ast_decl_enum_dump_json(FILE* stream, ast_decl_enum_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

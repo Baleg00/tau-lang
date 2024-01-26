@@ -44,6 +44,14 @@ void ast_expr_lit_flt_free(ast_expr_lit_flt_t* node);
 void ast_expr_lit_flt_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_flt_t* node);
 
 /**
+ * \brief Performs code generation pass on an AST literal float expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_lit_flt_codegen(codegen_ctx_t* ctx, ast_expr_lit_flt_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST literal float expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

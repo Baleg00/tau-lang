@@ -53,6 +53,14 @@ void ast_expr_op_bin_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_t* node);
 void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
 
 /**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST binary operation expression node into a stream.
  * 
  * \param[in] stream The stream to be written to.

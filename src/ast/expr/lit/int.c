@@ -7,6 +7,8 @@
 
 #include "ast/expr/lit/int.h"
 
+#include <llvm-c/Core.h>
+
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
@@ -33,6 +35,14 @@ void ast_expr_lit_int_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_int_t* node)
   typedesc_t* desc = typebuilder_build_i32(ctx->typebuilder);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_lit_int_codegen(codegen_ctx_t* ctx, ast_expr_lit_int_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  node->llvm_value = LLVMConstInt(node->llvm_type, node->value, false);
 }
 
 void ast_expr_lit_int_dump_json(FILE* stream, ast_expr_lit_int_t* node)

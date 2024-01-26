@@ -68,6 +68,20 @@ void ast_type_mbr_typecheck(typecheck_ctx_t* ctx, ast_type_mbr_t* node)
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
+void ast_type_mbr_codegen(codegen_ctx_t* ctx, ast_type_mbr_t* node)
+{
+  ast_node_codegen(ctx, node->parent);
+  ast_node_codegen(ctx, node->member);
+
+  if (node->decl->kind != AST_DECL_MOD)
+  {
+    typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
+    assert(desc != NULL);
+
+    node->llvm_type = desc->llvm_type;
+  }
+}
+
 void ast_type_mbr_dump_json(FILE* stream, ast_type_mbr_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

@@ -46,6 +46,16 @@ void ast_type_opt_typecheck(typecheck_ctx_t* ctx, ast_type_opt_t* node)
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
+void ast_type_opt_codegen(codegen_ctx_t* ctx, ast_type_opt_t* node)
+{
+  ast_node_codegen(ctx, node->base_type);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+  
+  node->llvm_type = desc->llvm_type;
+}
+
 void ast_type_opt_dump_json(FILE* stream, ast_type_opt_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

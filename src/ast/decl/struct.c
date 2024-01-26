@@ -81,6 +81,12 @@ void ast_decl_struct_typecheck(typecheck_ctx_t* ctx, ast_decl_struct_t* node)
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
+void ast_decl_struct_codegen(codegen_ctx_t* ctx, ast_decl_struct_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+}
+
 void ast_decl_struct_dump_json(FILE* stream, ast_decl_struct_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

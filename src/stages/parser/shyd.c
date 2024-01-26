@@ -396,14 +396,8 @@ void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   {
     node = (ast_node_t*)ast_expr_lit_str_init();
     
-    string_t* str = string_init_with_cstr_and_length(elem->tok->loc->ptr, elem->tok->loc->len);
-    string_t* escaped = string_escape(str);
-    
-    ((ast_expr_lit_str_t*)node)->value = (char*)malloc(sizeof(char) * (string_length(escaped) + 1));
-    strncpy(((ast_expr_lit_str_t*)node)->value, string_begin(escaped), string_length(escaped) + 1);
-
-    string_free(escaped);
-    string_free(str);
+    ((ast_expr_lit_str_t*)node)->value = (char*)malloc(sizeof(char) * (elem->tok->loc->len + 1));
+    strncpy(((ast_expr_lit_str_t*)node)->value, elem->tok->loc->ptr, elem->tok->loc->len + 1);
     break;
   }
   case TOK_LIT_CHAR:

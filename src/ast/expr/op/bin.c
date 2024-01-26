@@ -7,10 +7,22 @@
 
 #include "ast/expr/op/bin.h"
 
+#include <llvm-c/Core.h>
+
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
+
+static LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+
+  if (typedesc_remove_const(desc)->kind == TYPEDESC_REF)
+    return LLVMBuildLoad2(ctx->llvm_builder, node->llvm_type, node->llvm_value, "load_tmp");
+
+  return node->llvm_value;
+}
 
 ast_expr_op_bin_t* ast_expr_op_bin_init(void)
 {
@@ -133,6 +145,182 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
     desc = typebuilder_build_const(ctx->typebuilder, desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  switch (node->op_kind)
+  {
+  case OP_ARIT_ADD:
+  {
+    node->llvm_value = LLVMBuildAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "add_tmp");
+    break;
+  }
+  case OP_ARIT_SUB:
+  {
+    node->llvm_value = LLVMBuildSub(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sub_tmp");
+    break;
+  }
+  case OP_ARIT_MUL:
+  {
+    node->llvm_value = LLVMBuildMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "mul_tmp");
+    break;
+  }
+  case OP_ARIT_DIV:
+  {
+    node->llvm_value = LLVMBuildSDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sdiv_tmp");
+    break;
+  }
+  case OP_ARIT_MOD:
+  {
+    node->llvm_value = LLVMBuildSRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "srem_tmp");
+    break;
+  }
+  case OP_BIT_AND:
+  case OP_LOGIC_AND:
+  {
+    node->llvm_value = LLVMBuildAnd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "and_tmp");
+    break;
+  }
+  case OP_BIT_OR:
+  case OP_LOGIC_OR:
+  {
+    node->llvm_value = LLVMBuildOr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "or_tmp");
+    break;
+  }
+  case OP_BIT_XOR:
+  {
+    node->llvm_value = LLVMBuildXor(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "xor_tmp");
+    break;
+  }
+  case OP_BIT_LSH:
+  {
+    node->llvm_value = LLVMBuildShl(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "shl_tmp");
+    break;
+  }
+  case OP_BIT_RSH:
+  {
+    node->llvm_value = LLVMBuildLShr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "lshr_tmp");
+    break;
+  }
+  case OP_COMP_EQ:
+  {
+    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntEQ, llvm_lhs_value, llvm_rhs_value, "icmp_eq_tmp");
+    break;
+  }
+  case OP_COMP_NE:
+  {
+    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntNE, llvm_lhs_value, llvm_rhs_value, "icmp_ne_tmp");
+    break;
+  }
+  case OP_COMP_LT:
+  {
+    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSLT, llvm_lhs_value, llvm_rhs_value, "icmp_slt_tmp");
+    break;
+  }
+  case OP_COMP_LE:
+  {
+    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSLE, llvm_lhs_value, llvm_rhs_value, "icmp_sle_tmp");
+    break;
+  }
+  case OP_COMP_GT:
+  {
+    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSGT, llvm_lhs_value, llvm_rhs_value, "icmp_sgt_tmp");
+    break;
+  }
+  case OP_COMP_GE:
+  {
+    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSGE, llvm_lhs_value, llvm_rhs_value, "icmp_sge_tmp");
+    break;
+  }
+  case OP_ASSIGN:
+  {
+    LLVMBuildStore(ctx->llvm_builder, llvm_rhs_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_ARIT_ADD_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "add_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_ARIT_SUB_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildSub(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sub_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_ARIT_MUL_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "mul_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_ARIT_DIV_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildSDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sdiv_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_ARIT_MOD_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildSRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "srem_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_BIT_AND_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildAnd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "and_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_BIT_OR_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildOr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "or_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_BIT_XOR_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildXor(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "xor_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_BIT_LSH_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildShl(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "shl_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_BIT_RSH_ASSIGN:
+  {
+    LLVMValueRef llvm_tmp_value = LLVMBuildLShr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "lshr_tmp");
+    LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
+    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  default:
+    unreachable();
+  }
 }
 
 void ast_expr_op_bin_dump_json(FILE* stream, ast_expr_op_bin_t* node)

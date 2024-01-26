@@ -60,6 +60,12 @@ void ast_decl_mod_typecheck(typecheck_ctx_t* ctx, ast_decl_mod_t* node)
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->members, i));
 }
 
+void ast_decl_mod_codegen(codegen_ctx_t* ctx, ast_decl_mod_t* node)
+{
+  VECTOR_FOR_LOOP(i, node->members)
+    ast_node_codegen(ctx, (ast_node_t*)vector_get(node->members, i));
+}
+
 void ast_decl_mod_dump_json(FILE* stream, ast_decl_mod_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

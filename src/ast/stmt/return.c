@@ -7,6 +7,9 @@
 
 #include "ast/stmt/return.h"
 
+#include <llvm-c/Core.h>
+
+#include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -53,6 +56,17 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
 
   if (!typedesc_is_implicitly_convertible(expr_desc, ctx->fun_desc->return_type))
     report_error_incompatible_return_type(node->tok->loc);
+}
+
+void ast_stmt_return_codegen(codegen_ctx_t* ctx, ast_stmt_return_t* node)
+{
+  if (node->expr == NULL)
+    LLVMBuildRetVoid(ctx->llvm_builder);
+  else
+  {
+    ast_node_codegen(ctx, node->expr);
+    LLVMBuildRet(ctx->llvm_builder, ((ast_expr_t*)node->expr)->llvm_value);
+  }
 }
 
 void ast_stmt_return_dump_json(FILE* stream, ast_stmt_return_t* node)

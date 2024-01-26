@@ -7,6 +7,8 @@
 
 #include "ast/decl/enum_constant.h"
 
+#include <llvm-c/Core.h>
+
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -44,6 +46,14 @@ void ast_decl_enum_constant_nameres(nameres_ctx_t* ctx, ast_decl_enum_constant_t
 void ast_decl_enum_constant_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_constant_t* node)
 {
   typetable_insert(ctx->typetable, (ast_node_t*)node, (typedesc_t*)ctx->enum_desc);
+}
+
+void ast_decl_enum_constant_codegen(codegen_ctx_t* ctx, ast_decl_enum_constant_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  node->llvm_value = LLVMConstInt(node->llvm_type, ctx->enum_idx, false);
 }
 
 void ast_decl_enum_constant_dump_json(FILE* stream, ast_decl_enum_constant_t* node)

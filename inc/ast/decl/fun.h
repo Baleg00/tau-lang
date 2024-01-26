@@ -68,6 +68,14 @@ void ast_decl_fun_nameres(nameres_ctx_t* ctx, ast_decl_fun_t* node);
 void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node);
 
 /**
+ * \brief Performs code generation pass on an AST function declaration node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node);
+
+/**
  * \brief Writes a JSON dump of an AST function declaration node into a stream.
  * 
  * \param[in] stream The stream to be written to.

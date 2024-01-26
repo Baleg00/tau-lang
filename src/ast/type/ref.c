@@ -46,6 +46,12 @@ void ast_type_ref_typecheck(typecheck_ctx_t* ctx, ast_type_ref_t* node)
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
+void ast_type_ref_codegen(codegen_ctx_t* ctx, ast_type_ref_t* node)
+{
+  unreachable();
+  // TODO
+}
+
 void ast_type_ref_dump_json(FILE* stream, ast_type_ref_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

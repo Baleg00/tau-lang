@@ -7,6 +7,9 @@
 
 #include "ast/stmt/continue.h"
 
+#include <llvm-c/Core.h>
+
+#include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
@@ -26,6 +29,20 @@ ast_stmt_continue_t* ast_stmt_continue_init(void)
 void ast_stmt_continue_free(ast_stmt_continue_t* node)
 {
   free(node);
+}
+
+void ast_stmt_continue_codegen(codegen_ctx_t* ctx, ast_stmt_continue_t* node)
+{
+  switch (node->loop->kind)
+  {
+  case AST_STMT_WHILE:
+  {
+    LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_while_t*)node->loop)->llvm_cond);
+    break;
+  }
+  default:
+    unreachable();
+  }
 }
 
 void ast_stmt_continue_dump_json(FILE* stream, ast_stmt_continue_t* node)
