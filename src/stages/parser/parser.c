@@ -181,6 +181,7 @@ callconv_kind_t parser_parse_callconv(parser_t* par)
     callconv_kind_t callconv;
   } str_callconv_map[] = {
     { "\"Tau\"",        CALLCONV_TAU        },
+    { "\"C\"",          CALLCONV_CDECL      },
     { "\"cdecl\"",      CALLCONV_CDECL      },
     { "\"stdcall\"",    CALLCONV_STDCALL    },
     { "\"win64\"",      CALLCONV_WIN64      },
