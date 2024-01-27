@@ -26,6 +26,7 @@
  */
 typedef struct nameres_ctx_t
 {
+  symtable_t* global_scope; // The symbol table of the global scope.
   stack_t* scopes; // Current scope stack.
 } nameres_ctx_t;
 

@@ -11,10 +11,8 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "stages/analysis/analyzer.h"
 #include "stages/analysis/symtable.h"
 #include "stages/analysis/typetable.h"
-#include "stages/codegen/generator.h"
 #include "stages/lexer/lexer.h"
 #include "stages/lexer/token.h"
 #include "stages/parser/parser.h"
@@ -220,7 +218,7 @@ compiler_t* compiler_init(void)
 
   compiler->args.log_level = LOG_LEVEL_WARN;
 
-  time_it("LLVM init", compiler_llvm_init(compiler));
+  time_it("LLVM:init", compiler_llvm_init(compiler));
 
   return compiler;
 }
@@ -297,29 +295,30 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     log_trace("main", "(%s) Syntax analysis.", input_file_name);
 
     parser_t* parser = parser_init();
-    ast_node_t* root = NULL;
+    ast_node_t* root_node = NULL;
 
-    time_it("parser", root = parser_parse(parser, toks));
+    time_it("parser", root_node = parser_parse(parser, toks));
 
     if (compiler->flags.dump_ast)
-      compiler_dump_ast(compiler, input_file_path, input_file_name, root);
+      compiler_dump_ast(compiler, input_file_path, input_file_name, root_node);
 
     log_trace("main", "(%s) Semantic analysis.", input_file_name);
 
-    LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", compiler->llvm_context);
+    nameres_ctx_t* nameres_ctx = nameres_ctx_init();
+    
+    time_it("analysis:nameres", ast_node_nameres(nameres_ctx, root_node));
 
-    analyzer_t* analyzer = analyzer_init();
-    symtable_t* symtable = symtable_init(NULL);
-    typetable_t* typetable = typetable_init();
-    typebuilder_t* builder = typebuilder_init(compiler->llvm_context, compiler->llvm_layout);
-
-    time_it("analyzer", analyzer_analyze(analyzer, symtable, typetable, builder, root));
+    typecheck_ctx_t* typecheck_ctx = typecheck_ctx_init(compiler->llvm_context, compiler->llvm_layout);
+    
+    time_it("analysis:typecheck", ast_node_typecheck(typecheck_ctx, root_node));
 
     log_trace("main", "(%s) LLVM IR generation.", input_file_name);
 
-    generator_t* generator = generator_init();
+    LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", compiler->llvm_context);
+    
+    codegen_ctx_t* codegen_ctx = codegen_ctx_init(typecheck_ctx->typetable, compiler->llvm_context, llvm_module);
 
-    time_it("codegen", generator_generate(generator, compiler->llvm_context, compiler->llvm_machine, compiler->llvm_layout, llvm_module, typetable, root));
+    time_it("codegen", ast_node_codegen(codegen_ctx, root_node));
 
     if (compiler->flags.dump_ll)
       compiler_dump_ll(compiler, input_file_path, input_file_name, llvm_module);
@@ -330,13 +329,10 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     log_trace("main", "(%s) Cleanup.", input_file_name);
 
     LLVMDisposeModule(llvm_module);
-    generator_free(generator);
 
-    typebuilder_free(builder);
-    typetable_free(typetable);
-    symtable_free(symtable);
-    analyzer_free(analyzer);
-    
+    codegen_ctx_free(codegen_ctx);
+    typecheck_ctx_free(typecheck_ctx);
+    nameres_ctx_free(nameres_ctx);
     parser_free(parser);
 
     VECTOR_FOR_LOOP(i, toks)

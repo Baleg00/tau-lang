@@ -43,7 +43,7 @@ void ast_expr_lit_str_codegen(codegen_ctx_t* ctx, ast_expr_lit_str_t* node)
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  node->llvm_value = LLVMConstStringInContext(ctx->llvm_ctx, node->value, (uint32_t)strlen(node->value), false);
+  node->llvm_value = LLVMBuildGlobalStringPtr(ctx->llvm_builder, node->value, "global_str");
 }
 
 void ast_expr_lit_str_dump_json(FILE* stream, ast_expr_lit_str_t* node)

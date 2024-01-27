@@ -395,9 +395,10 @@ void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   case TOK_LIT_STR:
   {
     node = (ast_node_t*)ast_expr_lit_str_init();
-    
-    ((ast_expr_lit_str_t*)node)->value = (char*)malloc(sizeof(char) * (elem->tok->loc->len + 1));
-    strncpy(((ast_expr_lit_str_t*)node)->value, elem->tok->loc->ptr, elem->tok->loc->len + 1);
+
+    ((ast_expr_lit_str_t*)node)->value = (char*)malloc(sizeof(char) * (elem->tok->loc->len - 1));
+    memset(((ast_expr_lit_str_t*)node)->value, 0, sizeof(char) * (elem->tok->loc->len - 1));
+    strncpy(((ast_expr_lit_str_t*)node)->value, elem->tok->loc->ptr + 1, elem->tok->loc->len - 2);
     break;
   }
   case TOK_LIT_CHAR:

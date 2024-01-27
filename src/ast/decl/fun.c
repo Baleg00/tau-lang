@@ -65,7 +65,6 @@ void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->params, i));
 
   ast_node_typecheck(ctx, node->return_type);
-  ast_node_typecheck(ctx, node->stmt);
 
   size_t param_count = vector_size(node->params);
   typedesc_t** param_types = NULL;
@@ -90,6 +89,12 @@ void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
     free(param_types);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+
+  ctx->fun_desc = (typedesc_fun_t*)desc;
+
+  ast_node_typecheck(ctx, node->stmt);
+
+  ctx->fun_desc = NULL;
 }
 
 void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)

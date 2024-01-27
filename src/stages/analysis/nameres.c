@@ -15,20 +15,24 @@ nameres_ctx_t* nameres_ctx_init(void)
   nameres_ctx_t* ctx = (nameres_ctx_t*)malloc(sizeof(nameres_ctx_t));
   clearobj(ctx);
 
+  ctx->global_scope = symtable_init(NULL);
   ctx->scopes = stack_init();
+
+  stack_push(ctx->scopes, ctx->global_scope);
 
   return ctx;
 }
 
 void nameres_ctx_free(nameres_ctx_t* ctx)
 {
+  symtable_free(ctx->global_scope);
   stack_free(ctx->scopes);
   free(ctx);
 }
 
 symtable_t* nameres_ctx_scope_begin(nameres_ctx_t* ctx)
 {
-  symtable_t* scope = symtable_init(stack_empty(ctx->scopes) ? NULL : (symtable_t*)stack_peek(ctx->scopes));
+  symtable_t* scope = symtable_init((symtable_t*)stack_peek(ctx->scopes));
   stack_push(ctx->scopes, scope);
   return scope;
 }
