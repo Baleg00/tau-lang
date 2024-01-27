@@ -64,7 +64,7 @@ test()
       end()
     end()
 
-    describe("stack_peek")
+    describe("stack_top")
       before_each()
         stack = stack_init();
       end()
@@ -73,7 +73,7 @@ test()
         int data = 1;
         
         stack_push(stack, &data);
-        void* top_data = stack_peek(stack);
+        void* top_data = stack_top(stack);
         
         assert_equal(top_data, &data);
         assert_false(stack_empty(stack));

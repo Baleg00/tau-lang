@@ -32,7 +32,7 @@ void nameres_ctx_free(nameres_ctx_t* ctx)
 
 symtable_t* nameres_ctx_scope_begin(nameres_ctx_t* ctx)
 {
-  symtable_t* scope = symtable_init((symtable_t*)stack_peek(ctx->scopes));
+  symtable_t* scope = symtable_init((symtable_t*)stack_top(ctx->scopes));
   stack_push(ctx->scopes, scope);
   return scope;
 }
@@ -44,5 +44,5 @@ void nameres_ctx_scope_end(nameres_ctx_t* ctx)
 
 symtable_t* nameres_ctx_scope_cur(nameres_ctx_t* ctx)
 {
-  return (symtable_t*)stack_peek(ctx->scopes);
+  return (symtable_t*)stack_top(ctx->scopes);
 }

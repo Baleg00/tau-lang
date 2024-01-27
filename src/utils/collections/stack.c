@@ -7,34 +7,34 @@
 
 #include "utils/collections/stack.h"
 
-#include "utils/collections/list.h"
+#include "utils/collections/vector.h"
 
 stack_t* stack_init(void)
 {
-  return (stack_t*)list_init();
+  return (stack_t*)vector_init();
 }
 
 void stack_free(stack_t* stack)
 {
-  list_free((list_t*)stack);
+  vector_free((vector_t*)stack);
 }
 
 void stack_push(stack_t* stack, void* data)
 {
-  list_push_back((list_t*)stack, data);
+  vector_push((vector_t*)stack, data);
 }
 
 void* stack_pop(stack_t* stack)
 {
-  return list_pop_back((list_t*)stack);
+  return vector_pop((vector_t*)stack);
 }
 
-void* stack_peek(stack_t* stack)
+void* stack_top(stack_t* stack)
 {
-  return list_back((list_t*)stack);
+  return vector_back((vector_t*)stack);
 }
 
 bool stack_empty(stack_t* stack)
 {
-  return list_empty((list_t*)stack);
+  return vector_empty((vector_t*)stack);
 }

@@ -60,7 +60,7 @@ void* stack_pop(stack_t* stack);
  * \param[in] stack Pointer to the stack.
  * \returns Pointer to the data at the top of the stack.
  */
-void* stack_peek(stack_t* stack);
+void* stack_top(stack_t* stack);
 
 /**
  * \brief Checks if a stack is empty.
