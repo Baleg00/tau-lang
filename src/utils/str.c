@@ -140,6 +140,29 @@ int string_printf(FILE* stream, string_t* fmt, ...)
   return result;
 }
 
+int string_print_escaped(FILE* stream, string_t* str)
+{
+  int result = 0;
+
+  for (size_t i = 0; i < str->len; i++)
+    switch (str->buf[i])
+    {
+    case '\'': result += fprintf(stream, "\\'" ); break;
+    case '"':  result += fprintf(stream, "\\\""); break;
+    case '\\': result += fprintf(stream, "\\\\"); break;
+    case '\a': result += fprintf(stream, "\\a" ); break;
+    case '\b': result += fprintf(stream, "\\b" ); break;
+    case '\f': result += fprintf(stream, "\\f" ); break;
+    case '\n': result += fprintf(stream, "\\n" ); break;
+    case '\r': result += fprintf(stream, "\\r" ); break;
+    case '\t': result += fprintf(stream, "\\t" ); break;
+    case '\v': result += fprintf(stream, "\\v" ); break;
+    default: result++; fputc(str->buf[i], stream);
+    }
+
+  return result;
+}
+
 void string_append(string_t* str, string_t* other)
 {
   string_append_cstr(str, other->buf);

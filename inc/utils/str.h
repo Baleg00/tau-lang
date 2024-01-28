@@ -138,6 +138,15 @@ void string_fit(string_t* str);
 int string_printf(FILE* stream, string_t* fmt, ...);
 
 /**
+ * \brief Writes the escaped version of a string to a stream.
+ * 
+ * \param stream Pointer to the stream.
+ * \param str Pointer to the string to be printed.
+ * \returns The number of characters written.
+ */
+int string_print_escaped(FILE* stream, string_t* str);
+
+/**
  * \brief Appends a string to the end of another.
  * 
  * \param[in,out] str Pointer to the string to append to.

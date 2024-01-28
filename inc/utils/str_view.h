@@ -16,8 +16,9 @@
 #ifndef TAU_STR_VIEW_H
 #define TAU_STR_VIEW_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 
 /**
  * \brief Represents a lightweight, readonly, non-owning string.
@@ -178,5 +179,24 @@ size_t string_view_find(string_view_t str, string_view_t sub);
  * \returns The position of the first occurrence of the c-string.
  */
 size_t string_view_find_cstr(string_view_t str, const char* sub);
+
+/**
+ * \brief Uses a string view as a format specifier and writes to a stream.
+ * 
+ * \param stream Pointer to the stream.
+ * \param fmt The format string view.
+ * \param ... Arguments according to the format string view.
+ * \returns The number of characters written.
+ */
+int string_view_printf(FILE* stream, string_view_t fmt, ...);
+
+/**
+ * \brief Writes the escaped version of a string view to a stream.
+ * 
+ * \param stream Pointer to the stream.
+ * \param str The string view to be printed.
+ * \returns The number of characters written.
+ */
+int string_view_print_escaped(FILE* stream, string_view_t str);
 
 #endif

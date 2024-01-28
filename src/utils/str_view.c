@@ -7,9 +7,11 @@
 
 #include "utils/str_view.h"
 
+#include <stdarg.h>
 #include <string.h>
 
 #include "utils/common.h"
+#include "utils/memory/memtrace.h"
 #include "utils/str.h"
 
 string_view_t string_view_init(const char* buf)
@@ -188,4 +190,45 @@ size_t string_view_find_cstr(string_view_t str, const char* sub)
   }
 
   return str.len;
+}
+
+int string_view_printf(FILE* stream, string_view_t fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+
+  char* fmt_buf = (char*)malloc(fmt.len + 1);
+  memcpy(fmt_buf, fmt.buf, fmt.len);
+  fmt_buf[fmt.len] = '\0';
+
+  int result = vfprintf(stream, fmt_buf, args);
+
+  free(fmt_buf);
+
+  va_end(args);
+
+  return result;
+}
+
+int string_view_print_escaped(FILE* stream, string_view_t str)
+{
+  int result = 0;
+
+  for (size_t i = 0; i < str.len; i++)
+    switch (str.buf[i])
+    {
+    case '\'': result += fprintf(stream, "\\'" ); break;
+    case '"':  result += fprintf(stream, "\\\""); break;
+    case '\\': result += fprintf(stream, "\\\\"); break;
+    case '\a': result += fprintf(stream, "\\a" ); break;
+    case '\b': result += fprintf(stream, "\\b" ); break;
+    case '\f': result += fprintf(stream, "\\f" ); break;
+    case '\n': result += fprintf(stream, "\\n" ); break;
+    case '\r': result += fprintf(stream, "\\r" ); break;
+    case '\t': result += fprintf(stream, "\\t" ); break;
+    case '\v': result += fprintf(stream, "\\v" ); break;
+    default: result++; fputc(str.buf[i], stream);
+    }
+
+  return result;
 }
