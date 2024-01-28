@@ -477,7 +477,7 @@ token_t* lexer_read_string(lexer_t* lex)
 
   char ch = lexer_next(lex);
 
-  size_t len = 0;
+  size_t len = 1;
 
   while ((ch = lexer_next(lex)) != '"' && ch != '\0')
   {
@@ -486,7 +486,6 @@ token_t* lexer_read_string(lexer_t* lex)
     if (ch == '\\')
     {
       ch = lexer_next(lex);
-      ++len;
 
       switch (ch)
       {
@@ -523,13 +522,15 @@ token_t* lexer_read_string(lexer_t* lex)
     }
   }
 
+  ++len;
+
   if (ch != '"')
   {
     tok->loc->len = 1;
     report_error_missing_terminating_double_quotes(tok->loc);
   }
 
-  tok->loc->len = len + 2;
+  tok->loc->len = len;
 
   return tok;
 }

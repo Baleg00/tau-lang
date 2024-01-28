@@ -34,7 +34,13 @@ void token_json_dump(FILE* stream, token_t* tok)
   location_json_dump(tok->loc, stream);
 
   if (token_is_literal(tok) || tok->kind == TOK_ID)
-    fprintf(stream, ",\"value\":\"%.*s\"", (int)tok->loc->len, tok->loc->ptr);
+  {
+    fprintf(stream, ",\"value\":\"");
+
+    string_view_t view = token_to_string_view(tok);
+    string_view_print_escaped(stream, view);
+    fputc('"', stream);
+  }
 
   fputc('}', stream);
 }
