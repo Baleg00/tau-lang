@@ -151,7 +151,7 @@ void parser_parse_decl_context_extern(parser_t* par)
 
 vector_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func)
 {
-  vector_t* vec = vector_init();
+  vector_t* vec = vector_init_with_capacity(1);
 
   for (;;)
   {
@@ -166,7 +166,7 @@ vector_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_f
 
 vector_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func)
 {
-  vector_t* vec = vector_init();
+  vector_t* vec = vector_init_with_capacity(1);
 
   while (!parser_consume(par, termin))
     vector_push(vec, parse_func(par));
@@ -614,7 +614,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   node->id = parser_parse_id(par);
   
   // Parse parameters.
-  node->params = vector_init();
+  node->params = vector_init_with_capacity(1);
 
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
 
