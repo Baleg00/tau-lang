@@ -142,9 +142,9 @@ void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)
       ast_node_codegen(ctx, (ast_node_t*)vector_get(node->params, i));
     }
 
-    ctx->fun_node = NULL;
-
     ast_node_codegen(ctx, node->stmt);
+
+    ctx->fun_node = NULL;
   }
 }
 

@@ -31,7 +31,7 @@ ast_expr_op_un_t* ast_expr_op_un_init(void)
 
   ast_registry_register((ast_node_t*)node);
 
-  node->kind = AST_EXPR_OP_BINARY;
+  node->kind = AST_EXPR_OP_UNARY;
 
   return node;
 }
@@ -150,6 +150,18 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
 
   switch (node->op_kind)
   {
+  case OP_SIZEOF:
+  {
+    uint64_t value = LLVMABISizeOfType(ctx->llvm_layout, expr->llvm_type);
+    node->llvm_value = LLVMConstInt(node->llvm_type, value, false);
+    break;
+  }
+  case OP_ALIGNOF:
+  {
+    uint64_t value = LLVMABIAlignmentOfType(ctx->llvm_layout, expr->llvm_type);
+    node->llvm_value = LLVMConstInt(node->llvm_type, value, false);
+    break;
+  }
   case OP_ARIT_INC_PRE:
   {
     LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");

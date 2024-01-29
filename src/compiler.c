@@ -316,7 +316,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
     LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", compiler->llvm_context);
     
-    codegen_ctx_t* codegen_ctx = codegen_ctx_init(typecheck_ctx->typetable, compiler->llvm_context, llvm_module);
+    codegen_ctx_t* codegen_ctx = codegen_ctx_init(typecheck_ctx->typetable, compiler->llvm_context, compiler->llvm_layout, llvm_module);
 
     time_it("codegen", ast_node_codegen(codegen_ctx, root_node));
 

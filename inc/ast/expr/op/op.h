@@ -50,31 +50,31 @@ typedef enum op_kind_t
   OP_LOGIC_OR, // Logical or operator `||`
   OP_LOGIC_NOT, // Logical not operator `!`
 
-  OP_COMP_EQ, // Comparison equal operator `==`
-  OP_COMP_NE, // Comparison not-equal operator `!=`
-  OP_COMP_LT, // Comparison less-than operator `<`
-  OP_COMP_LE, // Comparison less-equal operator `<=`
-  OP_COMP_GT, // Comparison greater-than operator `>`
-  OP_COMP_GE, // Comparison greater-equal operator `>=`
+  OP_CMP_EQ, // Comparison equal operator `==`
+  OP_CMP_NE, // Comparison not-equal operator `!=`
+  OP_CMP_LT, // Comparison less-than operator `<`
+  OP_CMP_LE, // Comparison less-equal operator `<=`
+  OP_CMP_GT, // Comparison greater-than operator `>`
+  OP_CMP_GE, // Comparison greater-equal operator `>=`
 
   OP_ASSIGN, // Assignment operator `=`
-  OP_ARIT_ADD_ASSIGN, // Arithmetic add-assign operator `+=`
-  OP_ARIT_SUB_ASSIGN, // Arithmetic subtract-assign operator `-=`
-  OP_ARIT_MUL_ASSIGN, // Arithmetic multiply-assign operator `*=`
-  OP_ARIT_DIV_ASSIGN, // Arithmetic divide-assign operator `/=`
-  OP_ARIT_MOD_ASSIGN, // Arithmetic modulo-assign operator `%=`
-  OP_BIT_AND_ASSIGN, // Bitwise and-assign operator `&=`
-  OP_BIT_OR_ASSIGN, // Bitwise or-assign operator `|=`
-  OP_BIT_XOR_ASSIGN, // Bitwise xor-assign operator `^=`
-  OP_BIT_LSH_ASSIGN, // Bitwise left-shift-assign operator `<<=`
-  OP_BIT_RSH_ASSIGN, // Bitwise right-shift-assign operator `>>=`
+  OP_ASSIGN_ARIT_ADD, // Arithmetic add-assign operator `+=`
+  OP_ASSIGN_ARIT_SUB, // Arithmetic subtract-assign operator `-=`
+  OP_ASSIGN_ARIT_MUL, // Arithmetic multiply-assign operator `*=`
+  OP_ASSIGN_ARIT_DIV, // Arithmetic divide-assign operator `/=`
+  OP_ASSIGN_ARIT_MOD, // Arithmetic modulo-assign operator `%=`
+  OP_ASSIGN_BIT_AND, // Bitwise and-assign operator `&=`
+  OP_ASSIGN_BIT_OR, // Bitwise or-assign operator `|=`
+  OP_ASSIGN_BIT_XOR, // Bitwise xor-assign operator `^=`
+  OP_ASSIGN_BIT_LSH, // Bitwise left-shift-assign operator `<<=`
+  OP_ASSIGN_BIT_RSH, // Bitwise right-shift-assign operator `>>=`
 
   OP_SUBS, // Subscript operator `[]`
   OP_IND, // Indirection operator `*`
   OP_ADDR, // Address-of operator `&`
   OP_ACCESS, // Access operator `.`
-  OP_IND_ACCESS, // Indirect-access operator `*.`
-  OP_NULL_SAFE_ACCESS, // Null-safe-access operator `?.`
+  OP_ACCESS_IND, // Indirect-access operator `*.`
+  OP_ACCESS_OPT, // Optional-access operator `?.`
   OP_RANGE, // Range operator `..`
   OP_CALL, // Call operator `()`
 } op_kind_t;

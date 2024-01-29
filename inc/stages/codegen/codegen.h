@@ -13,6 +13,7 @@
 #define TAU_CODEGEN_H
 
 #include <llvm-c/Types.h>
+#include <llvm-c/Target.h>
 
 #include "stages/analysis/typetable.h"
 
@@ -32,6 +33,7 @@ typedef struct codegen_ctx_t
   size_t enum_idx;
 
   LLVMContextRef llvm_ctx;
+  LLVMTargetDataRef llvm_layout;
   LLVMModuleRef llvm_mod;
   LLVMBuilderRef llvm_builder;
 } codegen_ctx_t;
@@ -39,9 +41,12 @@ typedef struct codegen_ctx_t
 /**
  * \brief Initializes a new code generation context.
  * 
+ * \param[in] llvm_ctx The LLVM context to be used.
+ * \param[in] llvm_layout The LLVM target data layout to be used.
+ * \param[in] llvm_mod The LLVM module to be used.
  * \returns Pointer to the newly initialized code generation context.
  */
-codegen_ctx_t* codegen_ctx_init(typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMModuleRef llvm_mod);
+codegen_ctx_t* codegen_ctx_init(typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_mod);
 
 /**
  * \brief Frees all memory allocated by a code generation context.
