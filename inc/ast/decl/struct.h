@@ -10,9 +10,8 @@
 #ifndef TAU_AST_DECL_STRUCT_H
 #define TAU_AST_DECL_STRUCT_H
 
-#include <llvm-c/Types.h>
-
 #include "ast/decl/decl.h"
+#include "llvm.h"
 
 /**
  * \brief AST struct declaration node.

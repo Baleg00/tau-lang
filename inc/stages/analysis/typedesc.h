@@ -21,9 +21,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <llvm-c/Types.h>
-
 #include "ast/callconv.h"
+#include "llvm.h"
 #include "utils/collections/vector.h"
 
 /**

@@ -10,8 +10,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <llvm-c/Core.h>
-
 #include "ast/ast.h"
 #include "utils/collections/set.h"
 #include "utils/common.h"

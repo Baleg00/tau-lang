@@ -7,8 +7,6 @@
 
 #include "ast/stmt/continue.h"
 
-#include <llvm-c/Core.h>
-
 #include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"

@@ -7,8 +7,6 @@
 
 #include "ast/decl/enum_constant.h"
 
-#include <llvm-c/Core.h>
-
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"

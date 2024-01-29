@@ -10,9 +10,8 @@
 #ifndef TAU_AST_TYPE_H
 #define TAU_AST_TYPE_H
 
-#include <llvm-c/Types.h>
-
 #include "ast/node.h"
+#include "llvm.h"
 
 /**
  * \brief Header for all AST type nodes.

@@ -10,9 +10,8 @@
 #ifndef TAU_AST_STMT_WHILE_H
 #define TAU_AST_STMT_WHILE_H
 
-#include <llvm-c/Types.h>
-
 #include "ast/stmt/stmt.h"
+#include "llvm.h"
 
 /**
  * \brief AST while-loop statement node.

@@ -17,9 +17,7 @@
 #ifndef TAU_TYPECHECK_H
 #define TAU_TYPECHECK_H
 
-#include <llvm-c/Types.h>
-#include <llvm-c/Target.h>
-
+#include "llvm.h"
 #include "stages/analysis/typebuilder.h"
 #include "stages/analysis/typetable.h"
 

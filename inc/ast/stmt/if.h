@@ -10,9 +10,8 @@
 #ifndef TAU_AST_STMT_IF_H
 #define TAU_AST_STMT_IF_H
 
-#include <llvm-c/Types.h>
-
 #include "ast/stmt/stmt.h"
+#include "llvm.h"
 
 /**
  * \brief AST if statement node.

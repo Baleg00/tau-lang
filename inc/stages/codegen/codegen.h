@@ -12,9 +12,7 @@
 #ifndef TAU_CODEGEN_H
 #define TAU_CODEGEN_H
 
-#include <llvm-c/Types.h>
-#include <llvm-c/Target.h>
-
+#include "llvm.h"
 #include "stages/analysis/typetable.h"
 
 /**

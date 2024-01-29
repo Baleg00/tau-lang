@@ -17,9 +17,7 @@
 #ifndef TAU_TYPEBUILDER_H
 #define TAU_TYPEBUILDER_H
 
-#include <llvm-c/Types.h>
-#include <llvm-c/Target.h>
-
+#include "llvm.h"
 #include "stages/analysis/typedesc.h"
 #include "utils/str.h"
 

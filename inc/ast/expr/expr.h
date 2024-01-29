@@ -10,9 +10,8 @@
 #ifndef TAU_AST_EXPR_H
 #define TAU_AST_EXPR_H
 
-#include <llvm-c/Types.h>
-
 #include "ast/node.h"
+#include "llvm.h"
 
 /**
  * \brief Header for all AST expression nodes.

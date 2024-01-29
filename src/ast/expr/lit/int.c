@@ -7,8 +7,6 @@
 
 #include "ast/expr/lit/int.h"
 
-#include <llvm-c/Core.h>
-
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"

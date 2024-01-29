@@ -10,10 +10,9 @@
 #ifndef TAU_AST_DECL_FUN_H
 #define TAU_AST_DECL_FUN_H
 
-#include <llvm-c/Types.h>
-
 #include "ast/callconv.h"
 #include "ast/decl/decl.h"
+#include "llvm.h"
 
 /**
  * \brief AST function declaration node.

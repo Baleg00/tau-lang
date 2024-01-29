@@ -7,8 +7,6 @@
 
 #include "stages/codegen/codegen.h"
 
-#include <llvm-c/Core.h>
-
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 

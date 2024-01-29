@@ -7,8 +7,6 @@
 
 #include "ast/stmt/break.h"
 
-#include <llvm-c/Core.h>
-
 #include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
