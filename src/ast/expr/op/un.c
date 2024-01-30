@@ -112,7 +112,7 @@ void ast_expr_op_un_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
   case OP_IND:
   {
     if (typedesc_remove_const_ref_mut(expr_desc)->kind != TYPEDESC_PTR)
-      report_error_expected_ptr_type(node->expr->tok->loc);
+      report_error_expected_pointer_type(node->expr->tok->loc);
     
     typedesc_t* pointed_desc = ((typedesc_ptr_t*)typedesc_remove_const_ref_mut(expr_desc))->base_type;
 
@@ -208,6 +208,18 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
   {
     LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, expr);
     node->llvm_value = LLVMBuildNot(ctx->llvm_builder, llvm_value, "not_tmp");
+    break;
+  }
+  case OP_IND:
+  {
+    typedesc_t* expr_desc = typetable_lookup(ctx->typetable, (ast_node_t*)expr);
+    typedesc_ptr_t* ptr_desc = (typedesc_ptr_t*)typedesc_remove_const_ref_mut(expr_desc);
+    node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, ptr_desc->base_type->llvm_type, expr->llvm_value, "load2_tmp");
+    break;
+  }
+  case OP_ADDR:
+  {
+    node->llvm_value = expr->llvm_value;
     break;
   }
   default:

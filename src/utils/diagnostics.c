@@ -212,7 +212,7 @@ void report_error_expected_bool_type(location_t* loc)
   exit(EXIT_FAILURE);
 }
 
-void report_error_expected_ptr_type(location_t* loc)
+void report_error_expected_pointer_type(location_t* loc)
 {
   crumb_error(1, crumb_snippet(loc, "Expected pointer type.", NULL, "", NULL));
   debugbreak();

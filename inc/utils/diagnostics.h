@@ -31,7 +31,7 @@ void report_warning_shadowed_symbol(location_t* loc);
 void report_error_expected_reference_type(location_t* loc);
 void report_error_expected_arithmetic_type(location_t* loc);
 void report_error_expected_bool_type(location_t* loc);
-void report_error_expected_ptr_type(location_t* loc);
+void report_error_expected_pointer_type(location_t* loc);
 void report_error_expected_optional_type(location_t* loc);
 void report_error_expected_mutable_type(location_t* loc);
 void report_error_expected_constant_type(location_t* loc);

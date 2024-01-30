@@ -135,6 +135,18 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
     desc = lhs_desc;
     break;
   }
+  case OP_SUBS:
+  {
+    if (typedesc_remove_const_ref_mut(lhs_desc)->kind != TYPEDESC_PTR)
+      report_error_expected_pointer_type(node->lhs->tok->loc);
+
+    if (!typedesc_is_integer(typedesc_remove_const_ref_mut(rhs_desc)))
+      report_error_expected_integer_type(node->rhs->tok->loc);
+
+    typedesc_ptr_t* ptr_desc = (typedesc_ptr_t*)typedesc_remove_const_ref_mut(lhs_desc);
+    desc = typebuilder_build_ref(ctx->typebuilder, ptr_desc->base_type);
+    break;
+  }
   default:
     unreachable();
   }
@@ -314,6 +326,11 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     LLVMValueRef llvm_tmp_value = LLVMBuildLShr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "lshr_tmp");
     LLVMBuildStore(ctx->llvm_builder, llvm_tmp_value, ((ast_expr_t*)node->lhs)->llvm_value);
     node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+    break;
+  }
+  case OP_SUBS:
+  {
+    node->llvm_value = LLVMBuildGEP2(ctx->llvm_builder, ((ast_expr_t*)node->lhs)->llvm_type, llvm_lhs_value, &llvm_rhs_value, 1, "gep2_tmp");
     break;
   }
   default:
