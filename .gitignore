@@ -6,4 +6,5 @@ bin/**
 *.ll
 *.bc
 *.obj
+*.asm
 *.exe

@@ -1,8 +1,14 @@
+/**
+ * \file compiler.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "compiler.h"
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "ast/ast.h"
 #include "ast/registry.h"
@@ -21,8 +27,6 @@
 #include "utils/memory/memtrace.h"
 #include "utils/timer.h"
 
-#define COMPILER_MAX_BUFFER_SIZE 256
-
 struct compiler_t
 {
   list_t* input_files;
@@ -32,8 +36,10 @@ struct compiler_t
     bool verbose;
     bool dump_tokens;
     bool dump_ast;
-    bool dump_ll;
-    bool dump_bc;
+    bool emit_ll;
+    bool emit_bc;
+    bool emit_obj;
+    bool emit_asm;
   } flags;
 
   struct
@@ -53,69 +59,159 @@ static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const 
   list_push_back(compiler->input_files, (void*)arg);
 }
 
-static void compiler_dump_tokens(compiler_t* compiler, const char* input_file_path, const char* input_file_name, vector_t* tokens)
+static void compiler_dump_tokens(const char* path, vector_t* tokens)
 {
-  unused(compiler);
+  string_t* tokens_path = string_init_with_cstr(path);
+  string_append_cstr(tokens_path, ".tokens.json");
 
-  char tokens_file_path[COMPILER_MAX_BUFFER_SIZE];
-  strcpy(tokens_file_path, input_file_path);
-  strcat(tokens_file_path, ".tokens.json");
+  FILE* tokens_file = fopen(string_begin(tokens_path), "w");
+  assert(tokens_file != NULL);
 
-  FILE* toks_file = fopen(tokens_file_path, "w");
-  assert(toks_file != NULL);
-  token_json_dump_vector(toks_file, tokens);
-  fclose(toks_file);
+  token_json_dump_vector(tokens_file, tokens);
 
-  log_trace("main", "(%s) Token dump: %s", input_file_name, tokens_file_path);
+  fclose(tokens_file);
+
+  string_free(tokens_path);
 }
 
-static void compiler_dump_ast(compiler_t* compiler, const char* input_file_path, const char* input_file_name, ast_node_t* root)
+static void compiler_dump_ast(const char* path, ast_node_t* root)
 {
-  unused(compiler);
+  string_t* ast_path = string_init_with_cstr(path);
+  string_append_cstr(ast_path, ".ast.json");
 
-  char ast_file_path[COMPILER_MAX_BUFFER_SIZE];
-  strcpy(ast_file_path, input_file_path);
-  strcat(ast_file_path, ".ast.json");
-
-  FILE* ast_file = fopen(ast_file_path, "w");
+  FILE* ast_file = fopen(string_begin(ast_path), "w");
   assert(ast_file != NULL);
+
   ast_node_dump_json(ast_file, root);
-  fclose(ast_file);
-
-  log_trace("main", "(%s) AST dump: %s", input_file_name, ast_file_path);
-}
-
-static void compiler_dump_ll(compiler_t* compiler, const char* input_file_path, const char* input_file_name, LLVMModuleRef llvm_module)
-{
-  unused(compiler);
-
-  char ll_file_path[COMPILER_MAX_BUFFER_SIZE];
-  strcpy(ll_file_path, input_file_path);
-  strcat(ll_file_path, ".ll");
-
-  FILE* ll_file = fopen(ll_file_path, "w");
-  assert(ll_file != NULL);
-
-  char* ll_str = LLVMPrintModuleToString(llvm_module);
-  fputs(ll_str, ll_file);
-  LLVMDisposeMessage(ll_str);
-
-  fclose(ll_file);
-
-  log_trace("main", "(%s) LLVM IR dump: %s", input_file_name, ll_file_path);
-}
-
-static void compiler_dump_bc(compiler_t* compiler, const char* input_file_path, const char* input_file_name, LLVMModuleRef llvm_module)
-{
-  unused(compiler);
-
-  char bc_file_path[COMPILER_MAX_BUFFER_SIZE];
-  strcpy(bc_file_path, input_file_path);
-  strcat(bc_file_path, ".bc");
-
-  LLVMWriteBitcodeToFile(llvm_module, bc_file_path);
   
-  log_trace("main", "(%s) LLVM bitcode dump: %s", input_file_name, bc_file_path);
+  fclose(ast_file);
+}
+
+static void compiler_emit_ll(const char* path, LLVMModuleRef llvm_module)
+{
+  string_t* ll_path = string_init_with_cstr(path);
+  string_append_cstr(ll_path, ".ll");
+
+  char* error_str = NULL;
+  
+  if (LLVMPrintModuleToFile(llvm_module, string_begin(ll_path), &error_str))
+  {
+    log_error("LLVM:LLVMPrintModuleToFile", error_str);
+    LLVMDisposeMessage(error_str);
+    string_free(ll_path);
+    return;
+  }
+
+  string_free(ll_path);
+}
+
+static void compiler_emit_bc(const char* path, LLVMModuleRef llvm_module)
+{
+  string_t* bc_path = string_init_with_cstr(path);
+  string_append_cstr(bc_path, ".bc");
+
+  if (LLVMWriteBitcodeToFile(llvm_module, string_begin(bc_path)))
+  {
+    log_error("LLVM:LLVMWriteBitcodeToFile", "Failed to write bitcode to file.");
+    string_free(bc_path);
+    return;
+  }
+
+  string_free(bc_path);
+}
+
+static void compiler_emit_obj(const char* path, LLVMModuleRef llvm_module)
+{
+  string_t* obj_path = string_init_with_cstr(path);
+  string_append_cstr(obj_path, ".obj");
+
+  char* error_str = NULL;
+
+  if (LLVMTargetMachineEmitToFile(llvm_get_machine(), llvm_module, string_begin(obj_path), LLVMObjectFile, &error_str))
+  {
+    log_error("LLVM:LLVMTargetMachineEmitToFile", error_str);
+    LLVMDisposeMessage(error_str);
+    string_free(obj_path);
+    return;
+  }
+
+  string_free(obj_path);
+}
+
+static void compiler_emit_asm(const char* path, LLVMModuleRef llvm_module)
+{
+  string_t* asm_path = string_init_with_cstr(path);
+  string_append_cstr(asm_path, ".asm");
+
+  char* error_str = NULL;
+
+  if (LLVMTargetMachineEmitToFile(llvm_get_machine(), llvm_module, string_begin(asm_path), LLVMAssemblyFile, &error_str))
+  {
+    log_error("LLVM:LLVMTargetMachineEmitToFile", error_str);
+    LLVMDisposeMessage(error_str);
+    string_free(asm_path);
+    return;
+  }
+
+  string_free(asm_path);
+}
+
+static void compiler_process_file(compiler_t* compiler, const char* path)
+{
+  size_t src_len = file_read(path, NULL, 0);
+  char* src = (char*)malloc((src_len + 1) * sizeof(char));
+  file_read(path, src, src_len + 1);
+
+  lexer_t* lexer = lexer_init();
+  vector_t* toks = NULL;
+  time_it("lexer", toks = lexer_lex(lexer, path, src));
+
+  if (compiler->flags.dump_tokens)
+    compiler_dump_tokens(path, toks);
+
+  parser_t* parser = parser_init();
+  ast_node_t* root_node = NULL;
+  time_it("parser", root_node = parser_parse(parser, toks));
+
+  if (compiler->flags.dump_ast)
+    compiler_dump_ast(path, root_node);
+
+  nameres_ctx_t* nameres_ctx = nameres_ctx_init();
+  time_it("analysis:nameres", ast_node_nameres(nameres_ctx, root_node));
+
+  typecheck_ctx_t* typecheck_ctx = typecheck_ctx_init(llvm_get_context(), llvm_get_data());
+  time_it("analysis:typecheck", ast_node_typecheck(typecheck_ctx, root_node));
+
+  LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", llvm_get_context());
+  codegen_ctx_t* codegen_ctx = codegen_ctx_init(typecheck_ctx->typetable, llvm_get_context(), llvm_get_data(), llvm_module);
+  time_it("codegen", ast_node_codegen(codegen_ctx, root_node));
+
+  if (compiler->flags.emit_ll)
+    compiler_emit_ll(path, llvm_module);
+
+  if (compiler->flags.emit_bc)
+    compiler_emit_bc(path, llvm_module);
+
+  if (compiler->flags.emit_obj)
+    compiler_emit_obj(path, llvm_module);
+
+  if (compiler->flags.emit_asm)
+    compiler_emit_asm(path, llvm_module);
+
+  LLVMDisposeModule(llvm_module);
+
+  codegen_ctx_free(codegen_ctx);
+  typecheck_ctx_free(typecheck_ctx);
+  nameres_ctx_free(nameres_ctx);
+  parser_free(parser);
+
+  VECTOR_FOR_LOOP(i, toks)
+    token_free((token_t*)vector_get(toks, i));
+
+  vector_free(toks);
+  lexer_free(lexer);
+  
+  free(src);
 }
 
 compiler_t* compiler_init(void)
@@ -130,7 +226,10 @@ compiler_t* compiler_init(void)
   compiler->flags.verbose = false;
   compiler->flags.dump_tokens = false;
   compiler->flags.dump_ast = false;
-  compiler->flags.dump_ll = false;
+  compiler->flags.emit_ll = false;
+  compiler->flags.emit_bc = false;
+  compiler->flags.emit_obj = false;
+  compiler->flags.emit_asm = false;
 
   compiler->args.log_level = LOG_LEVEL_WARN;
 
@@ -154,10 +253,12 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     cli_opt_version(TAU_VERSION),
     cli_opt_verbose(&compiler->flags.verbose),
 
-    cli_opt_flag(cli_names("--dump-toks"),     1, "Dump tokens into json file.",     &compiler->flags.dump_tokens),
-    cli_opt_flag(cli_names("--dump-ast"),      1, "Dump AST into json file.",        &compiler->flags.dump_ast),
-    cli_opt_flag(cli_names("--dump-ll"),       1, "Dump LLVM IR into ll file.",      &compiler->flags.dump_ll),
-    cli_opt_flag(cli_names("--dump-bc"),       1, "Dump LLVM bitcode into bc file.", &compiler->flags.dump_bc),
+    cli_opt_flag(cli_names("--dump-tokens"), 1, "Dump tokens into json file.", &compiler->flags.dump_tokens),
+    cli_opt_flag(cli_names("--dump-ast"),    1, "Dump AST into json file.",    &compiler->flags.dump_ast   ),
+    cli_opt_flag(cli_names("--emit-ll"),     1, "Emit LLVM IR into file.",     &compiler->flags.emit_ll    ),
+    cli_opt_flag(cli_names("--emit-bc"),     1, "Emit LLVM bitcode file.",     &compiler->flags.emit_bc    ),
+    cli_opt_flag(cli_names("--emit-obj"),    1, "Emit object file.",           &compiler->flags.emit_obj   ),
+    cli_opt_flag(cli_names("--emit-asm"),    1, "Emit assembly file.",         &compiler->flags.emit_asm   ),
     
     cli_opt_int(cli_names("--log-level"), 1, 'N', 1, &compiler->args.log_level, NULL, NULL, "Set log level.", NULL, NULL),
     
@@ -179,83 +280,8 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
     return EXIT_FAILURE;
   }
 
-  char cwd[COMPILER_MAX_BUFFER_SIZE];
-  file_dir(argv[0], cwd, sizeof(cwd));
-
   LIST_FOR_LOOP(it, compiler->input_files)
-  {
-    const char* input_file_path = (const char*)list_node_get(it);
-
-    char input_file_name[COMPILER_MAX_BUFFER_SIZE];
-    file_name(input_file_path, input_file_name, sizeof(input_file_name));
-
-    log_trace("main", "(%s) File read.", input_file_name);
-
-    size_t src_len = file_read(input_file_path, NULL, 0);
-    char* src = (char*)malloc((src_len + 1) * sizeof(char));
-    file_read(input_file_path, src, src_len + 1);
-
-    log_trace("main", "(%s) Lexical analysis.", input_file_name);
-
-    lexer_t* lexer = lexer_init();
-    vector_t* toks = NULL;
-
-    time_it("lexer", toks = lexer_lex(lexer, input_file_path, src));
-
-    if (compiler->flags.dump_tokens)
-      compiler_dump_tokens(compiler, input_file_path, input_file_name, toks);
-
-    log_trace("main", "(%s) Syntax analysis.", input_file_name);
-
-    parser_t* parser = parser_init();
-    ast_node_t* root_node = NULL;
-
-    time_it("parser", root_node = parser_parse(parser, toks));
-
-    if (compiler->flags.dump_ast)
-      compiler_dump_ast(compiler, input_file_path, input_file_name, root_node);
-
-    log_trace("main", "(%s) Semantic analysis.", input_file_name);
-
-    nameres_ctx_t* nameres_ctx = nameres_ctx_init();
-    
-    time_it("analysis:nameres", ast_node_nameres(nameres_ctx, root_node));
-
-    typecheck_ctx_t* typecheck_ctx = typecheck_ctx_init(llvm_get_context(), llvm_get_data());
-    
-    time_it("analysis:typecheck", ast_node_typecheck(typecheck_ctx, root_node));
-
-    log_trace("main", "(%s) LLVM IR generation.", input_file_name);
-
-    LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", llvm_get_context());
-    
-    codegen_ctx_t* codegen_ctx = codegen_ctx_init(typecheck_ctx->typetable, llvm_get_context(), llvm_get_data(), llvm_module);
-
-    time_it("codegen", ast_node_codegen(codegen_ctx, root_node));
-
-    if (compiler->flags.dump_ll)
-      compiler_dump_ll(compiler, input_file_path, input_file_name, llvm_module);
-
-    if (compiler->flags.dump_bc)
-      compiler_dump_bc(compiler, input_file_path, input_file_name, llvm_module);
-
-    log_trace("main", "(%s) Cleanup.", input_file_name);
-
-    LLVMDisposeModule(llvm_module);
-
-    codegen_ctx_free(codegen_ctx);
-    typecheck_ctx_free(typecheck_ctx);
-    nameres_ctx_free(nameres_ctx);
-    parser_free(parser);
-
-    VECTOR_FOR_LOOP(i, toks)
-      token_free((token_t*)vector_get(toks, i));
-
-    vector_free(toks);
-    lexer_free(lexer);
-    
-    free(src);
-  }
+    compiler_process_file(compiler, (const char*)list_node_get(it));
 
   return EXIT_SUCCESS;
 }

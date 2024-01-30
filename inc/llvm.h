@@ -3,7 +3,12 @@
  * 
  * \brief LLVM context.
  * 
- * \details 
+ * \details LLVM is an open-source compiler infrastructure project designed for
+ * the development and optimization of programming languages. It provides a
+ * collection of modular and reusable compiler and toolchain components,
+ * enabling the creation of efficient and portable compilers.
+ * 
+ * \see https://llvm.org
  * 
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.

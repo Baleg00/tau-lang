@@ -20,7 +20,7 @@ static char* g_llvm_cpu_features = NULL;
 
 static void llvm_fatal_error_handler(const char* reason)
 {
-  log_fatal("llvm", reason);
+  log_fatal("LLVM", reason);
   exit(EXIT_FAILURE);
 }
 
@@ -30,31 +30,31 @@ bool llvm_init(void)
 
   if (LLVMLoadLibraryPermanently(NULL))
   {
-    log_error("llvm", "Failed to load known libraries.");
+    log_error("LLVM", "Failed to load known libraries.");
     return true;
   }
 
   if (LLVMInitializeNativeTarget())
   {
-    log_error("llvm", "Failed to initialize native target.");
+    log_error("LLVM", "Failed to initialize native target.");
     return true;
   }
 
   if (LLVMInitializeNativeAsmParser())
   {
-    log_error("llvm", "Failed to initialize native ASM parser.");
+    log_error("LLVM", "Failed to initialize native ASM parser.");
     return true;
   }
 
   if (LLVMInitializeNativeAsmPrinter())
   {
-    log_error("llvm", "Failed to initialize native ASM printer.");
+    log_error("LLVM", "Failed to initialize native ASM printer.");
     return true;
   }
 
   if (LLVMInitializeNativeDisassembler())
   {
-    log_error("llvm", "Failed to initialize native disassembler.");
+    log_error("LLVM", "Failed to initialize native disassembler.");
     return true;
   }
 
@@ -63,10 +63,10 @@ bool llvm_init(void)
   g_llvm_context = LLVMContextCreate();
   g_llvm_target_triple = LLVMGetDefaultTargetTriple();
 
-  if (LLVMGetTargetFromTriple(g_llvm_target_triple, &g_llvm_target, &error_str) != 0)
+  if (LLVMGetTargetFromTriple(g_llvm_target_triple, &g_llvm_target, &error_str))
   {
-    log_error("llvm", "Failed to get target from triple.");
-    log_error("llvm", error_str);
+    log_error("LLVM", "Failed to get target from triple.");
+    log_error("LLVM", error_str);
     return true;
   }
 
@@ -85,7 +85,7 @@ bool llvm_init(void)
 
   if (g_llvm_machine == NULL)
   {
-    log_error("llvm", "Failed to create target machine.");
+    log_error("LLVM", "Failed to create target machine.");
     return true;
   }
 
@@ -93,7 +93,7 @@ bool llvm_init(void)
 
   if (g_llvm_data == NULL)
   {
-    log_error("llvm", "Failed to create target data layout.");
+    log_error("LLVM", "Failed to create target data layout.");
     return true;
   }
 
