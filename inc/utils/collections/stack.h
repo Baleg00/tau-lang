@@ -55,6 +55,13 @@ void stack_push(stack_t* stack, void* data);
 void* stack_pop(stack_t* stack);
 
 /**
+ * \brief Removes all data from a stack.
+ *
+ * \param[in,out] stack Pointer to the stack to be cleared.
+ */
+void stack_clear(stack_t* stack);
+
+/**
  * \brief Retrieves the data stored at the top of a stack.
  *
  * \param[in] stack Pointer to the stack.

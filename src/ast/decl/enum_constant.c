@@ -54,12 +54,26 @@ void ast_decl_enum_constant_codegen(codegen_ctx_t* ctx, ast_decl_enum_constant_t
   node->llvm_value = LLVMConstInt(node->llvm_type, ctx->enum_idx, false);
 }
 
+size_t ast_decl_enum_constant_mangle(ast_decl_enum_constant_t* node, char* buf, size_t len)
+{
+  if (buf == NULL || len == 0)
+  {
+    buf = NULL;
+    len = 0;
+  }
+
+  size_t written = ast_node_mangle_nested_name((ast_node_t*)node, buf, len);
+  written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, "@");
+  written += ast_node_mangle(node->parent, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, "@");
+
+  return written;
+}
+
 void ast_decl_enum_constant_dump_json(FILE* stream, ast_decl_enum_constant_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"id\":");
   ast_node_dump_json(stream, node->id);
-  fprintf(stream, ",\"type\":");
-  ast_node_dump_json(stream, node->type);
   fputc('}', stream);
 }

@@ -82,6 +82,11 @@ void ast_type_mbr_codegen(codegen_ctx_t* ctx, ast_type_mbr_t* node)
   }
 }
 
+size_t ast_type_mbr_mangle(ast_type_mbr_t* node, char* buf, size_t len)
+{
+  return ast_node_mangle(node->decl, buf, len);
+}
+
 void ast_type_mbr_dump_json(FILE* stream, ast_type_mbr_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

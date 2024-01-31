@@ -79,6 +79,29 @@ void ast_type_fun_codegen(codegen_ctx_t* ctx, ast_type_fun_t* node)
   node->llvm_type = desc->llvm_type;
 }
 
+size_t ast_type_fun_mangle(ast_type_fun_t* node, char* buf, size_t len)
+{
+  if (buf == NULL || len == 0)
+  {
+    buf = NULL;
+    len = 0;
+  }
+
+  size_t written = snprintf(buf, len, "F");
+  written += callconv_mangle(node->callconv, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  written += ast_node_mangle(node->return_type, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+
+  VECTOR_FOR_LOOP(i, node->params)
+    written += ast_node_mangle((ast_node_t*)vector_get(node->params, i), buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  
+  if (node->is_vararg)
+    written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, "V");
+
+  written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, "@");
+
+  return written;
+}
+
 void ast_type_fun_dump_json(FILE* stream, ast_type_fun_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

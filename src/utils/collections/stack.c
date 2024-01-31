@@ -29,6 +29,11 @@ void* stack_pop(stack_t* stack)
   return vector_pop((vector_t*)stack);
 }
 
+void stack_clear(stack_t* stack)
+{
+  vector_clear((vector_t*)stack);
+}
+
 void* stack_top(stack_t* stack)
 {
   return vector_back((vector_t*)stack);

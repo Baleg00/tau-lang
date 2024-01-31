@@ -19,7 +19,7 @@
 typedef struct ast_decl_enum_constant_t
 {
   AST_DECL_HEADER;
-  ast_node_t* type; // The associated enum type.
+  ast_node_t* parent; // The associated parent enum declaration.
 
   LLVMTypeRef llvm_type; // The associated LLVM type.
   LLVMValueRef llvm_value; // The associated LLVM value.
@@ -62,6 +62,21 @@ void ast_decl_enum_constant_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_consta
  * \param[in] node Pointer to the AST node to be visited.
  */
 void ast_decl_enum_constant_codegen(codegen_ctx_t* ctx, ast_decl_enum_constant_t* node);
+
+/**
+ * \brief Writes at most `len` characters (including the null-terminator) of the
+ * mangled name of an AST enum constant declaration node into `buf`.
+ * 
+ * \details If `buf` is NULL or `len` is zero, both `buf` and `len` are ignored
+ * and nothing is written, however the return value is still calculated.
+ * 
+ * \param[in] node Pointer to the AST enum constant declaration node.
+ * \param[in,out] buf Pointer to the buffer where the mangled name is to be stored.
+ * \param[in] len The length of the buffer.
+ * \returns The number of characters (excluding the null-terminator) that would
+ * have been written to the buffer if `len` was ignored.
+ */
+size_t ast_decl_enum_constant_mangle(ast_decl_enum_constant_t* node, char* buf, size_t len);
 
 /**
  * \brief Writes a JSON dump of an AST enum constant declaration node into a stream.

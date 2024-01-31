@@ -7,6 +7,7 @@
 
 #include "ast/decl/fun.h"
 
+#include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
@@ -144,6 +145,33 @@ void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)
 
     ctx->fun_node = NULL;
   }
+}
+
+size_t ast_decl_fun_mangle(ast_decl_fun_t* node, char* buf, size_t len)
+{
+  if (buf == NULL || len == 0)
+  {
+    buf = NULL;
+    len = 0;
+  }
+
+  size_t written = ast_node_mangle_nested_name((ast_node_t*)node, buf, len);
+  written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, "@F");
+  written += callconv_mangle(node->callconv, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  written += ast_node_mangle(node->return_type, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+
+  VECTOR_FOR_LOOP(i, node->params)
+  {
+    ast_decl_param_t* param = (ast_decl_param_t*)vector_get(node->params, i);
+    written += ast_node_mangle(param->type, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  }
+  
+  if (node->is_vararg)
+    written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, "V");
+
+  written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, "@@");
+
+  return written;
 }
 
 void ast_decl_fun_dump_json(FILE* stream, ast_decl_fun_t* node)

@@ -1,0 +1,62 @@
+mangled name = universal prefix , qualified name ;
+
+universal prefix = "_T" ;
+
+qualified name = ( basic name | nested name ) , '@' , type , '@' ;
+
+basic name = ? identifier ? ;
+
+nested name = basic name , { '.' , basic name } ;
+
+type = primitive type | modified type | function type | struct type | union type | enum type ;
+
+primitive type = "sb" (* signed byte *)
+               | "ss" (* signed short *)
+               | "si" (* signed int *)
+               | "sl" (* signed long *)
+               | "sz" (* signed size *)
+               | "ub" (*  unsigned byte *)
+               | "us" (* unsigned short *)
+               | "ui" (* unsigned int *)
+               | "ul" (* unsigned long *)
+               | "uz" (* unsigned size *)
+               | "f"  (* float *)
+               | "d"  (* double *)
+               | "b"  (* bool *)
+               | "c"  (* char *)
+               | "v"  (* void *) ;
+
+modified type = type modifier , type ;
+
+type modifier = constant modifier | mutable modifier | pointer modifier | array modifier | optional modifier | reference modifier ;
+
+constant modifier = 't' ;
+
+mutable modifier = 'm' ;
+
+pointer modifier = 'p' ;
+
+array modifier = 'a' , ? integer ? ;
+
+optional modifier = 'o' ;
+
+reference modifier = 'r' ;
+
+function type = 'F' , calling convention , type , { type } , [ ellipsis ] , '@' ;
+
+calling convention = 'C' (* CDECL *)
+                   | 'S' (* STDCALL *)
+                   | 'W' (* WIN64 *)
+                   | 'Y' (* SYSV64 *)
+                   | 'A' (* AAPCS *)
+                   | 'F' (* FASTCALL *)
+                   | 'V' (* VECTORCALL *)
+                   | 'T' (* THISCALL *) ;
+
+ellipsis = 'V' ;
+
+struct type = 'S' , nested name , '@' ;
+
+union type = 'U' , nested name , '@' ;
+
+enum type = 'E' , nested name , '@' ;

@@ -38,6 +38,7 @@ struct parser_t
   vector_t* toks; // Vector of tokens to be processed.
   size_t cur; // Current token index.
   bool ignore_newlines; // Ignore newlines.
+  stack_t* parents; // Stack of parent declarations.
 
   parser_decl_context_t decl_ctx; // Current declaration context.
 };
@@ -56,12 +57,16 @@ static void parser_skip_newlines(parser_t* par)
 parser_t* parser_init(void)
 {
   parser_t* par = (parser_t*)malloc(sizeof(parser_t));
-  memset(par, 0, sizeof(parser_t));
+  clearobj(par);
+
+  par->parents = stack_init();
+
   return par;
 }
 
 void parser_free(parser_t* par)
 {
+  stack_free(par->parents);
   free(par);
 }
 
@@ -604,6 +609,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 {
   ast_decl_fun_t* node = ast_decl_fun_init();
   node->tok = parser_current(par);
+  node->parent = stack_top(par->parents);
   
   node->is_pub    = par->decl_ctx.is_pub;
   node->is_extern = par->decl_ctx.is_extern;
@@ -690,6 +696,7 @@ ast_node_t* parser_parse_decl_struct(parser_t* par)
 {
   ast_decl_struct_t* node = ast_decl_struct_init();
   node->tok = parser_current(par);
+  node->parent = stack_top(par->parents);
 
   assert(!par->decl_ctx.is_extern);
 
@@ -733,6 +740,7 @@ ast_node_t* parser_parse_decl_union(parser_t* par)
 {
   ast_decl_union_t* node = ast_decl_union_init();
   node->tok = parser_current(par);
+  node->parent = stack_top(par->parents);
 
   assert(!par->decl_ctx.is_extern);
 
@@ -771,6 +779,7 @@ ast_node_t* parser_parse_decl_enum(parser_t* par)
 {
   ast_decl_enum_t* node = ast_decl_enum_init();
   node->tok = parser_current(par);
+  node->parent = stack_top(par->parents);
 
   assert(!par->decl_ctx.is_extern);
 
@@ -782,8 +791,12 @@ ast_node_t* parser_parse_decl_enum(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
   
+  stack_push(par->parents, node);
+
   node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_enum_constant);
-  
+
+  stack_pop(par->parents);
+
   return (ast_node_t*)node;
 }
 
@@ -791,6 +804,7 @@ ast_node_t* parser_parse_decl_mod(parser_t* par)
 {
   ast_decl_mod_t* node = ast_decl_mod_init();
   node->tok = parser_current(par);
+  node->parent = stack_top(par->parents);
 
   assert(!par->decl_ctx.is_extern);
 
@@ -802,8 +816,12 @@ ast_node_t* parser_parse_decl_mod(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
   
+  stack_push(par->parents, node);
+
   node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_in_mod);
   
+  stack_pop(par->parents);
+
   return (ast_node_t*)node;
 }
 
@@ -869,6 +887,7 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par)
 {
   ast_decl_enum_constant_t* node = ast_decl_enum_constant_init();
   node->tok = parser_current(par);
+  node->parent = stack_top(par->parents);
 
   node->id = parser_parse_id(par);
   
@@ -879,6 +898,9 @@ ast_node_t* parser_parse(parser_t* par, vector_t* toks)
 {
   par->toks = toks;
   par->cur = 0;
+
+  stack_clear(par->parents);
+  stack_push(par->parents, NULL);
 
   parser_set_ignore_newline(par, true);
   parser_decl_context_clear(par);

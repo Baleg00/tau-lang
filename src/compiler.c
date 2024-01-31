@@ -85,6 +85,8 @@ static void compiler_dump_ast(const char* path, ast_node_t* root)
   ast_node_dump_json(ast_file, root);
   
   fclose(ast_file);
+
+  string_free(ast_path);
 }
 
 static void compiler_emit_ll(const char* path, LLVMModuleRef llvm_module)

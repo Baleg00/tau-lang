@@ -52,6 +52,20 @@ void ast_type_ref_codegen(codegen_ctx_t* ctx, ast_type_ref_t* node)
   // TODO
 }
 
+size_t ast_type_ref_mangle(ast_type_ref_t* node, char* buf, size_t len)
+{
+  if (buf == NULL || len == 0)
+  {
+    buf = NULL;
+    len = 0;
+  }
+  
+  size_t written = snprintf(buf, len, "r");
+  written += ast_node_mangle(node->base_type, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  
+  return written;
+}
+
 void ast_type_ref_dump_json(FILE* stream, ast_type_ref_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

@@ -77,6 +77,22 @@ void ast_decl_param_codegen(codegen_ctx_t* ctx, ast_decl_param_t* node)
   LLVMBuildStore(ctx->llvm_builder, param_value, node->llvm_value);
 }
 
+size_t ast_decl_param_mangle(ast_decl_param_t* node, char* buf, size_t len)
+{
+  if (buf == NULL || len == 0)
+  {
+    buf = NULL;
+    len = 0;
+  }
+
+  size_t written = ast_node_mangle_nested_name((ast_node_t*)node, buf, len);
+  written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, "@");
+  written += ast_node_mangle(node->type, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, "@");
+
+  return written;
+}
+
 void ast_decl_param_dump_json(FILE* stream, ast_decl_param_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

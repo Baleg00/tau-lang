@@ -61,6 +61,22 @@ void ast_type_array_codegen(codegen_ctx_t* ctx, ast_type_array_t* node)
   node->llvm_type = desc->llvm_type;
 }
 
+size_t ast_type_array_mangle(ast_type_array_t* node, char* buf, size_t len)
+{
+  if (buf == NULL || len == 0)
+  {
+    buf = NULL;
+    len = 0;
+  }
+
+  assert(node->size->kind == AST_EXPR_LIT_INT);
+
+  size_t written = snprintf(buf, len, "a%llu", ((ast_expr_lit_int_t*)node->size)->value);
+  written += ast_node_mangle(node->base_type, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  
+  return written;
+}
+
 void ast_type_array_dump_json(FILE* stream, ast_type_array_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

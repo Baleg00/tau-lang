@@ -328,6 +328,35 @@ void ast_type_prim_unit_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
   node->llvm_type = desc->llvm_type;
 }
 
+size_t ast_type_prim_mangle(ast_type_prim_t* node, char* buf, size_t len)
+{
+  if (buf == NULL || len == 0)
+  {
+    buf = NULL;
+    len = 0;
+  }
+
+  switch (node->kind)
+  {
+  case AST_TYPE_PRIM_I8:    return snprintf(buf, len, "sb");
+  case AST_TYPE_PRIM_I16:   return snprintf(buf, len, "ss");
+  case AST_TYPE_PRIM_I32:   return snprintf(buf, len, "si");
+  case AST_TYPE_PRIM_I64:   return snprintf(buf, len, "sl");
+  case AST_TYPE_PRIM_ISIZE: return snprintf(buf, len, "sz");
+  case AST_TYPE_PRIM_U8:    return snprintf(buf, len, "ub");
+  case AST_TYPE_PRIM_U16:   return snprintf(buf, len, "us");
+  case AST_TYPE_PRIM_U32:   return snprintf(buf, len, "ui");
+  case AST_TYPE_PRIM_U64:   return snprintf(buf, len, "ul");
+  case AST_TYPE_PRIM_USIZE: return snprintf(buf, len, "uz");
+  case AST_TYPE_PRIM_F32:   return snprintf(buf, len, "f" );
+  case AST_TYPE_PRIM_F64:   return snprintf(buf, len, "d" );
+  case AST_TYPE_PRIM_CHAR:  return snprintf(buf, len, "c" );
+  case AST_TYPE_PRIM_BOOL:  return snprintf(buf, len, "b" );
+  case AST_TYPE_PRIM_UNIT:  return snprintf(buf, len, "v" );
+  default: unreachable();
+  }
+}
+
 void ast_type_prim_dump_json(FILE* stream, ast_type_prim_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));

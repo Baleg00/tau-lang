@@ -10,6 +10,8 @@
 #ifndef TAU_CALLCONV_H
 #define TAU_CALLCONV_H
 
+#include <stddef.h>
+
 /**
  * \brief Enumeration of calling convention kinds.
  */
@@ -33,5 +35,20 @@ typedef enum callconv_kind_t
  * \returns C-string representation.
 */
 const char* callconv_kind_to_cstr(callconv_kind_t kind);
+
+/**
+ * \brief Writes at most `len` characters (including the null-terminator) of the
+ * mangled name of a calling convention into `buf`.
+ * 
+ * \details If `buf` is NULL or `len` is zero, both `buf` and `len` are ignored
+ * and nothing is written, however the return value is still calculated.
+ * 
+ * \param[in] kind The calling convention kind.
+ * \param[in,out] buf Pointer to the buffer where the mangled name is to be stored.
+ * \param[in] len The length of the buffer.
+ * \returns The number of characters (excluding the null-terminator) that would
+ * have been written to the buffer if `len` was ignored.
+ */
+size_t callconv_mangle(callconv_kind_t kind, char* buf, size_t len);
 
 #endif

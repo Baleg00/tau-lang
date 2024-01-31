@@ -63,6 +63,29 @@ void ast_type_id_codegen(codegen_ctx_t* ctx, ast_type_id_t* node)
   node->llvm_type = desc->llvm_type;
 }
 
+size_t ast_type_id_mangle(ast_type_id_t* node, char* buf, size_t len)
+{
+  if (buf == NULL || len == 0)
+  {
+    buf = NULL;
+    len = 0;
+  }
+
+  size_t written = 0;
+
+  switch (node->decl->kind)
+  {
+  case AST_DECL_STRUCT: written += snprintf(buf, len, "S"); break;
+  case AST_DECL_UNION:  written += snprintf(buf, len, "U"); break;
+  case AST_DECL_ENUM:   written += snprintf(buf, len, "E"); break;
+  default: unreachable();
+  }
+
+  written += ast_node_mangle(node->decl, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+
+  return written;
+}
+
 void ast_type_id_dump_json(FILE* stream, ast_type_id_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));

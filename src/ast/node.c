@@ -266,6 +266,79 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   }
 }
 
+size_t ast_node_mangle(ast_node_t* node, char* buf, size_t len)
+{
+  switch (node->kind)
+  {
+  case AST_TYPE_ID:            return ast_type_id_mangle           ((ast_type_id_t*           )node, buf, len);
+  case AST_TYPE_MUT:           return ast_type_mut_mangle          ((ast_type_mut_t*          )node, buf, len);
+  case AST_TYPE_CONST:         return ast_type_const_mangle        ((ast_type_const_t*        )node, buf, len);
+  case AST_TYPE_PTR:           return ast_type_ptr_mangle          ((ast_type_ptr_t*          )node, buf, len);
+  case AST_TYPE_ARRAY:         return ast_type_array_mangle        ((ast_type_array_t*        )node, buf, len);
+  case AST_TYPE_REF:           return ast_type_ref_mangle          ((ast_type_ref_t*          )node, buf, len);
+  case AST_TYPE_OPT:           return ast_type_opt_mangle          ((ast_type_opt_t*          )node, buf, len);
+  case AST_TYPE_FUN:           return ast_type_fun_mangle          ((ast_type_fun_t*          )node, buf, len);
+  case AST_TYPE_PRIM_I8:
+  case AST_TYPE_PRIM_I16:
+  case AST_TYPE_PRIM_I32:
+  case AST_TYPE_PRIM_I64:
+  case AST_TYPE_PRIM_ISIZE:
+  case AST_TYPE_PRIM_U8:
+  case AST_TYPE_PRIM_U16:
+  case AST_TYPE_PRIM_U32:
+  case AST_TYPE_PRIM_U64:
+  case AST_TYPE_PRIM_USIZE:
+  case AST_TYPE_PRIM_F32:
+  case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_CHAR:
+  case AST_TYPE_PRIM_BOOL:
+  case AST_TYPE_PRIM_UNIT:     return ast_type_prim_mangle         ((ast_type_prim_t*         )node, buf, len);
+  case AST_TYPE_MEMBER:        return ast_type_mbr_mangle          ((ast_type_mbr_t*          )node, buf, len);
+  case AST_DECL_VAR:           return ast_decl_var_mangle          ((ast_decl_var_t*          )node, buf, len);
+  case AST_DECL_PARAM:         return ast_decl_param_mangle        ((ast_decl_param_t*        )node, buf, len);
+  case AST_DECL_FUN:           return ast_decl_fun_mangle          ((ast_decl_fun_t*          )node, buf, len);
+  case AST_DECL_STRUCT:        return ast_decl_struct_mangle       ((ast_decl_struct_t*       )node, buf, len);
+  case AST_DECL_UNION:         return ast_decl_union_mangle        ((ast_decl_union_t*        )node, buf, len);
+  case AST_DECL_ENUM:          return ast_decl_enum_mangle         ((ast_decl_enum_t*         )node, buf, len);
+  case AST_DECL_ENUM_CONSTANT: return ast_decl_enum_constant_mangle((ast_decl_enum_constant_t*)node, buf, len);
+  default: unreachable();
+  }
+
+  return 0;
+}
+
+size_t ast_node_mangle_nested_name(ast_node_t* node, char* buf, size_t len)
+{
+  ast_node_t* id_node = NULL;
+  ast_node_t* parent_node = NULL;
+
+  switch (node->kind)
+  {
+  case AST_DECL_VAR:           id_node = ((ast_decl_var_t*          )node)->id;                                                          break;
+  case AST_DECL_PARAM:         id_node = ((ast_decl_param_t*        )node)->id;                                                          break;
+  case AST_DECL_FUN:           id_node = ((ast_decl_fun_t*          )node)->id; parent_node = ((ast_decl_fun_t*          )node)->parent; break;
+  case AST_DECL_STRUCT:        id_node = ((ast_decl_struct_t*       )node)->id; parent_node = ((ast_decl_struct_t*       )node)->parent; break;
+  case AST_DECL_UNION:         id_node = ((ast_decl_union_t*        )node)->id; parent_node = ((ast_decl_union_t*        )node)->parent; break;
+  case AST_DECL_ENUM:          id_node = ((ast_decl_enum_t*         )node)->id; parent_node = ((ast_decl_enum_t*         )node)->parent; break;
+  case AST_DECL_ENUM_CONSTANT: id_node = ((ast_decl_enum_constant_t*)node)->id; parent_node = ((ast_decl_enum_constant_t*)node)->parent; break;
+  case AST_DECL_MOD:           id_node = ((ast_decl_mod_t*          )node)->id; parent_node = ((ast_decl_mod_t*          )node)->parent; break;
+  default: unreachable();
+  }
+
+  const char* id_ptr = id_node->tok->loc->ptr;
+  size_t id_len = id_node->tok->loc->len;
+
+  size_t written = snprintf(buf, len, "%.*s", (int)id_len, id_ptr);
+
+  if (parent_node != NULL)
+  {
+    written += snprintf(buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written, ".");
+    written += ast_node_mangle_nested_name(parent_node, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  }
+
+  return written;
+}
+
 void ast_node_dump_json_vector(FILE* stream, vector_t* vec)
 {
   if (vec == NULL)
