@@ -36,6 +36,14 @@ ast_expr_lit_int_t* ast_expr_lit_int_init(void);
 void ast_expr_lit_int_free(ast_expr_lit_int_t* node);
 
 /**
+ * \brief Performs name resolution pass on an AST literal integer expression node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_lit_int_nameres(nameres_ctx_t* ctx, ast_expr_lit_int_t* node);
+
+/**
  * \brief Performs type check pass on an AST literal integer expression node.
  * 
  * \param[in] ctx Pointer to the type check context.

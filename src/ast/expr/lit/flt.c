@@ -28,6 +28,10 @@ void ast_expr_lit_flt_free(ast_expr_lit_flt_t* node)
   free(node);
 }
 
+void ast_expr_lit_flt_nameres(nameres_ctx_t* ctx, ast_expr_lit_flt_t* node)
+{
+}
+
 void ast_expr_lit_flt_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_flt_t* node)
 {
   typedesc_t* desc = typebuilder_build_f32(ctx->typebuilder);

@@ -36,6 +36,22 @@ ast_stmt_break_t* ast_stmt_break_init(void);
 void ast_stmt_break_free(ast_stmt_break_t* node);
 
 /**
+ * \brief Performs name resolution pass on an AST break statement node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_stmt_break_nameres(nameres_ctx_t* ctx, ast_stmt_break_t* node);
+
+/**
+ * \brief Performs type check pass on an AST break statement node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_stmt_break_typecheck(typecheck_ctx_t* ctx, ast_stmt_break_t* node);
+
+/**
  * \brief Performs code generation pass on an AST break statement node.
  * 
  * \param[in] ctx Pointer to the code generation context.

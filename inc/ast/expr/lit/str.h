@@ -36,6 +36,14 @@ ast_expr_lit_str_t* ast_expr_lit_str_init(void);
 void ast_expr_lit_str_free(ast_expr_lit_str_t* node);
 
 /**
+ * \brief Performs name resolution pass on an AST literal string expression node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_lit_str_nameres(nameres_ctx_t* ctx, ast_expr_lit_str_t* node);
+
+/**
  * \brief Performs type check pass on an AST literal string expression node.
  * 
  * \param[in] ctx Pointer to the type check context.

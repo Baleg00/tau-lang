@@ -35,6 +35,14 @@ ast_expr_lit_null_t* ast_expr_lit_null_init(void);
 void ast_expr_lit_null_free(ast_expr_lit_null_t* node);
 
 /**
+ * \brief Performs name resolution pass on an AST literal null expression node.
+ * 
+ * \param[in] ctx Pointer to the name resolution context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_lit_null_nameres(nameres_ctx_t* ctx, ast_expr_lit_null_t* node);
+
+/**
  * \brief Performs type check pass on an AST literal null expression node.
  * 
  * \param[in] ctx Pointer to the type check context.

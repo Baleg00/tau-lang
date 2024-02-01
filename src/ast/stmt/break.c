@@ -29,6 +29,14 @@ void ast_stmt_break_free(ast_stmt_break_t* node)
   free(node);
 }
 
+void ast_stmt_break_nameres(nameres_ctx_t* ctx, ast_stmt_break_t* node)
+{
+}
+
+void ast_stmt_break_typecheck(typecheck_ctx_t* ctx, ast_stmt_break_t* node)
+{
+}
+
 void ast_stmt_break_codegen(codegen_ctx_t* ctx, ast_stmt_break_t* node)
 {
   switch (node->loop->kind)

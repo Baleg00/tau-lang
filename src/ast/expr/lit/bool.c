@@ -28,6 +28,10 @@ void ast_expr_lit_bool_free(ast_expr_lit_bool_t* node)
   free(node);
 }
 
+void ast_expr_lit_bool_nameres(nameres_ctx_t* ctx, ast_expr_lit_bool_t* node)
+{
+}
+
 void ast_expr_lit_bool_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_bool_t* node)
 {
   typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);

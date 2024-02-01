@@ -28,6 +28,10 @@ void ast_expr_lit_int_free(ast_expr_lit_int_t* node)
   free(node);
 }
 
+void ast_expr_lit_int_nameres(nameres_ctx_t* ctx, ast_expr_lit_int_t* node)
+{
+}
+
 void ast_expr_lit_int_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_int_t* node)
 {
   typedesc_t* desc = typebuilder_build_i32(ctx->typebuilder);

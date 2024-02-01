@@ -89,28 +89,6 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_nameres          (ctx, (ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_nameres          (ctx, (ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_nameres          (ctx, (ast_type_fun_t*          )node); break;
-  case AST_TYPE_MEMBER:        ast_type_mbr_nameres          (ctx, (ast_type_mbr_t*          )node); break;
-  case AST_EXPR_ID:            ast_expr_id_nameres           (ctx, (ast_expr_id_t*           )node); break;
-  case AST_EXPR_OP_UNARY:      ast_expr_op_un_nameres        (ctx, (ast_expr_op_un_t*        )node); break;
-  case AST_EXPR_OP_BINARY:     ast_expr_op_bin_nameres       (ctx, (ast_expr_op_bin_t*       )node); break;
-  case AST_EXPR_OP_CALL:       ast_expr_op_call_nameres      (ctx, (ast_expr_op_call_t*      )node); break;
-  case AST_STMT_IF:            ast_stmt_if_nameres           (ctx, (ast_stmt_if_t*           )node); break;
-  case AST_STMT_FOR:           ast_stmt_for_nameres          (ctx, (ast_stmt_for_t*          )node); break;
-  case AST_STMT_WHILE:         ast_stmt_while_nameres        (ctx, (ast_stmt_while_t*        )node); break;
-  case AST_STMT_RETURN:        ast_stmt_return_nameres       (ctx, (ast_stmt_return_t*       )node); break;
-  case AST_STMT_DEFER:         ast_stmt_defer_nameres        (ctx, (ast_stmt_defer_t*        )node); break;
-  case AST_STMT_BLOCK:         ast_stmt_block_nameres        (ctx, (ast_stmt_block_t*        )node); break;
-  case AST_STMT_EXPR:          ast_stmt_expr_nameres         (ctx, (ast_stmt_expr_t*         )node); break;
-  case AST_DECL_VAR:           ast_decl_var_nameres          (ctx, (ast_decl_var_t*          )node); break;
-  case AST_DECL_PARAM:         ast_decl_param_nameres        (ctx, (ast_decl_param_t*        )node); break;
-  case AST_DECL_FUN:           ast_decl_fun_nameres          (ctx, (ast_decl_fun_t*          )node); break;
-  case AST_DECL_STRUCT:        ast_decl_struct_nameres       (ctx, (ast_decl_struct_t*       )node); break;
-  case AST_DECL_UNION:         ast_decl_union_nameres        (ctx, (ast_decl_union_t*        )node); break;
-  case AST_DECL_ENUM:          ast_decl_enum_nameres         (ctx, (ast_decl_enum_t*         )node); break;
-  case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_nameres(ctx, (ast_decl_enum_constant_t*)node); break;
-  case AST_DECL_MOD:           ast_decl_mod_nameres          (ctx, (ast_decl_mod_t*          )node); break;
-  case AST_PROG:               ast_prog_nameres              (ctx, (ast_prog_t*              )node); break;
-  case AST_ID:
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
   case AST_TYPE_PRIM_I32:
@@ -125,15 +103,36 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_PRIM_F64:
   case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
-  case AST_TYPE_PRIM_UNIT:
-  case AST_EXPR_LIT_INT:
-  case AST_EXPR_LIT_FLT:
-  case AST_EXPR_LIT_STR:
-  case AST_EXPR_LIT_CHAR:
-  case AST_EXPR_LIT_BOOL:
-  case AST_EXPR_LIT_NULL:
-  case AST_STMT_BREAK:
-  case AST_STMT_CONTINUE: break;
+  case AST_TYPE_PRIM_UNIT:     ast_type_prim_nameres         (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_MEMBER:        ast_type_mbr_nameres          (ctx, (ast_type_mbr_t*          )node); break;
+  case AST_EXPR_ID:            ast_expr_id_nameres           (ctx, (ast_expr_id_t*           )node); break;
+  case AST_EXPR_LIT_INT:       ast_expr_lit_int_nameres      (ctx, (ast_expr_lit_int_t*      )node); break;
+  case AST_EXPR_LIT_FLT:       ast_expr_lit_flt_nameres      (ctx, (ast_expr_lit_flt_t*      )node); break;
+  case AST_EXPR_LIT_STR:       ast_expr_lit_str_nameres      (ctx, (ast_expr_lit_str_t*      )node); break;
+  case AST_EXPR_LIT_CHAR:      ast_expr_lit_char_nameres     (ctx, (ast_expr_lit_char_t*     )node); break;
+  case AST_EXPR_LIT_BOOL:      ast_expr_lit_bool_nameres     (ctx, (ast_expr_lit_bool_t*     )node); break;
+  case AST_EXPR_LIT_NULL:      ast_expr_lit_null_nameres     (ctx, (ast_expr_lit_null_t*     )node); break;
+  case AST_EXPR_OP_UNARY:      ast_expr_op_un_nameres        (ctx, (ast_expr_op_un_t*        )node); break;
+  case AST_EXPR_OP_BINARY:     ast_expr_op_bin_nameres       (ctx, (ast_expr_op_bin_t*       )node); break;
+  case AST_EXPR_OP_CALL:       ast_expr_op_call_nameres      (ctx, (ast_expr_op_call_t*      )node); break;
+  case AST_STMT_IF:            ast_stmt_if_nameres           (ctx, (ast_stmt_if_t*           )node); break;
+  case AST_STMT_FOR:           ast_stmt_for_nameres          (ctx, (ast_stmt_for_t*          )node); break;
+  case AST_STMT_WHILE:         ast_stmt_while_nameres        (ctx, (ast_stmt_while_t*        )node); break;
+  case AST_STMT_BREAK:         ast_stmt_break_nameres        (ctx, (ast_stmt_break_t*        )node); break;
+  case AST_STMT_CONTINUE:      ast_stmt_continue_nameres     (ctx, (ast_stmt_continue_t*     )node); break;
+  case AST_STMT_RETURN:        ast_stmt_return_nameres       (ctx, (ast_stmt_return_t*       )node); break;
+  case AST_STMT_DEFER:         ast_stmt_defer_nameres        (ctx, (ast_stmt_defer_t*        )node); break;
+  case AST_STMT_BLOCK:         ast_stmt_block_nameres        (ctx, (ast_stmt_block_t*        )node); break;
+  case AST_STMT_EXPR:          ast_stmt_expr_nameres         (ctx, (ast_stmt_expr_t*         )node); break;
+  case AST_DECL_VAR:           ast_decl_var_nameres          (ctx, (ast_decl_var_t*          )node); break;
+  case AST_DECL_PARAM:         ast_decl_param_nameres        (ctx, (ast_decl_param_t*        )node); break;
+  case AST_DECL_FUN:           ast_decl_fun_nameres          (ctx, (ast_decl_fun_t*          )node); break;
+  case AST_DECL_STRUCT:        ast_decl_struct_nameres       (ctx, (ast_decl_struct_t*       )node); break;
+  case AST_DECL_UNION:         ast_decl_union_nameres        (ctx, (ast_decl_union_t*        )node); break;
+  case AST_DECL_ENUM:          ast_decl_enum_nameres         (ctx, (ast_decl_enum_t*         )node); break;
+  case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_nameres(ctx, (ast_decl_enum_constant_t*)node); break;
+  case AST_DECL_MOD:           ast_decl_mod_nameres          (ctx, (ast_decl_mod_t*          )node); break;
+  case AST_PROG:               ast_prog_nameres              (ctx, (ast_prog_t*              )node); break;
   default: unreachable();
   }
 }
@@ -153,21 +152,21 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_typecheck          (ctx, (ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_typecheck          (ctx, (ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_typecheck          (ctx, (ast_type_fun_t*          )node); break;
-  case AST_TYPE_PRIM_I8:       ast_type_prim_i8_typecheck      (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_I16:      ast_type_prim_i16_typecheck     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_I32:      ast_type_prim_i32_typecheck     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_I64:      ast_type_prim_i64_typecheck     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_ISIZE:    ast_type_prim_isize_typecheck   (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_U8:       ast_type_prim_u8_typecheck      (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_U16:      ast_type_prim_u16_typecheck     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_U32:      ast_type_prim_u32_typecheck     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_U64:      ast_type_prim_u64_typecheck     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_USIZE:    ast_type_prim_usize_typecheck   (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_F32:      ast_type_prim_f32_typecheck     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_F64:      ast_type_prim_f64_typecheck     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_CHAR:     ast_type_prim_char_typecheck    (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_BOOL:     ast_type_prim_bool_typecheck    (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_UNIT:     ast_type_prim_unit_typecheck    (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I8:
+  case AST_TYPE_PRIM_I16:
+  case AST_TYPE_PRIM_I32:
+  case AST_TYPE_PRIM_I64:
+  case AST_TYPE_PRIM_ISIZE:
+  case AST_TYPE_PRIM_U8:
+  case AST_TYPE_PRIM_U16:
+  case AST_TYPE_PRIM_U32:
+  case AST_TYPE_PRIM_U64:
+  case AST_TYPE_PRIM_USIZE:
+  case AST_TYPE_PRIM_F32:
+  case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_CHAR:
+  case AST_TYPE_PRIM_BOOL:
+  case AST_TYPE_PRIM_UNIT:     ast_type_prim_typecheck         (ctx, (ast_type_prim_t*         )node); break;
   case AST_TYPE_MEMBER:        ast_type_mbr_typecheck          (ctx, (ast_type_mbr_t*          )node); break;
   case AST_EXPR_ID:            ast_expr_id_typecheck           (ctx, (ast_expr_id_t*           )node); break;
   case AST_EXPR_LIT_INT:       ast_expr_lit_int_typecheck      (ctx, (ast_expr_lit_int_t*      )node); break;
@@ -182,6 +181,8 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_STMT_IF:            ast_stmt_if_typecheck           (ctx, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_typecheck          (ctx, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_typecheck        (ctx, (ast_stmt_while_t*        )node); break;
+  case AST_STMT_BREAK:         ast_stmt_break_typecheck        (ctx, (ast_stmt_break_t*        )node); break;
+  case AST_STMT_CONTINUE:      ast_stmt_continue_typecheck     (ctx, (ast_stmt_continue_t*     )node); break;
   case AST_STMT_RETURN:        ast_stmt_return_typecheck       (ctx, (ast_stmt_return_t*       )node); break;
   case AST_STMT_DEFER:         ast_stmt_defer_typecheck        (ctx, (ast_stmt_defer_t*        )node); break;
   case AST_STMT_BLOCK:         ast_stmt_block_typecheck        (ctx, (ast_stmt_block_t*        )node); break;
@@ -195,9 +196,6 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_typecheck(ctx, (ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_typecheck          (ctx, (ast_decl_mod_t*          )node); break;
   case AST_PROG:               ast_prog_typecheck              (ctx, (ast_prog_t*              )node); break;
-  case AST_ID:
-  case AST_STMT_BREAK:
-  case AST_STMT_CONTINUE: break;
   default: unreachable();
   }
 }
@@ -217,21 +215,21 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_codegen          (ctx, (ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_codegen          (ctx, (ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_codegen          (ctx, (ast_type_fun_t*          )node); break;
-  case AST_TYPE_PRIM_I8:       ast_type_prim_i8_codegen      (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_I16:      ast_type_prim_i16_codegen     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_I32:      ast_type_prim_i32_codegen     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_I64:      ast_type_prim_i64_codegen     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_ISIZE:    ast_type_prim_isize_codegen   (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_U8:       ast_type_prim_u8_codegen      (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_U16:      ast_type_prim_u16_codegen     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_U32:      ast_type_prim_u32_codegen     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_U64:      ast_type_prim_u64_codegen     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_USIZE:    ast_type_prim_usize_codegen   (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_F32:      ast_type_prim_f32_codegen     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_F64:      ast_type_prim_f64_codegen     (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_CHAR:     ast_type_prim_char_codegen    (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_BOOL:     ast_type_prim_bool_codegen    (ctx, (ast_type_prim_t*         )node); break;
-  case AST_TYPE_PRIM_UNIT:     ast_type_prim_unit_codegen    (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I8:
+  case AST_TYPE_PRIM_I16:
+  case AST_TYPE_PRIM_I32:
+  case AST_TYPE_PRIM_I64:
+  case AST_TYPE_PRIM_ISIZE:
+  case AST_TYPE_PRIM_U8:
+  case AST_TYPE_PRIM_U16:
+  case AST_TYPE_PRIM_U32:
+  case AST_TYPE_PRIM_U64:
+  case AST_TYPE_PRIM_USIZE:
+  case AST_TYPE_PRIM_F32:
+  case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_CHAR:
+  case AST_TYPE_PRIM_BOOL:
+  case AST_TYPE_PRIM_UNIT:     ast_type_prim_codegen         (ctx, (ast_type_prim_t*         )node); break;
   case AST_TYPE_MEMBER:        ast_type_mbr_codegen          (ctx, (ast_type_mbr_t*          )node); break;
   case AST_EXPR_ID:            ast_expr_id_codegen           (ctx, (ast_expr_id_t*           )node); break;
   case AST_EXPR_LIT_INT:       ast_expr_lit_int_codegen      (ctx, (ast_expr_lit_int_t*      )node); break;
@@ -261,7 +259,6 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_codegen(ctx, (ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_codegen          (ctx, (ast_decl_mod_t*          )node); break;
   case AST_PROG:               ast_prog_codegen              (ctx, (ast_prog_t*              )node); break;
-  case AST_ID: break;
   default: unreachable();
   }
 }
