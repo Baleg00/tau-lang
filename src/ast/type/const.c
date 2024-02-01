@@ -58,14 +58,8 @@ void ast_type_const_codegen(codegen_ctx_t* ctx, ast_type_const_t* node)
 
 size_t ast_type_const_mangle(ast_type_const_t* node, char* buf, size_t len)
 {
-  if (buf == NULL || len == 0)
-  {
-    buf = NULL;
-    len = 0;
-  }
-
   size_t written = snprintf(buf, len, "t");
-  written += ast_node_mangle(node->base_type, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  written += ast_node_mangle(node->base_type, buf + written, len <= written ? 0 : len - written);
   
   return written;
 }

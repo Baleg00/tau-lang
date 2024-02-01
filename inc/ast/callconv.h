@@ -40,8 +40,8 @@ const char* callconv_kind_to_cstr(callconv_kind_t kind);
  * \brief Writes at most `len` characters (including the null-terminator) of the
  * mangled name of a calling convention into `buf`.
  * 
- * \details If `buf` is NULL or `len` is zero, both `buf` and `len` are ignored
- * and nothing is written, however the return value is still calculated.
+ * \details If `len` is zero, `buf` and `len` are ignored and nothing is written,
+ * however the return value is still calculated.
  * 
  * \param[in] kind The calling convention kind.
  * \param[in,out] buf Pointer to the buffer where the mangled name is to be stored.

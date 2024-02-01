@@ -30,12 +30,6 @@ const char* callconv_kind_to_cstr(callconv_kind_t kind)
 
 size_t callconv_mangle(callconv_kind_t kind, char* buf, size_t len)
 {
-  if (buf == NULL || len == 0)
-  {
-    buf = NULL;
-    len = 0;
-  }
-
   switch (kind)
   {
   case CALLCONV_TAU:        return snprintf(buf, len, "C");

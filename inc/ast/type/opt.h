@@ -62,8 +62,8 @@ void ast_type_opt_codegen(codegen_ctx_t* ctx, ast_type_opt_t* node);
  * \brief Writes at most `len` characters (including the null-terminator) of the
  * mangled name of an AST optional type node into `buf`.
  * 
- * \details If `buf` is NULL or `len` is zero, both `buf` and `len` are ignored
- * and nothing is written, however the return value is still calculated.
+ * \details If `len` is zero, `buf` and `len` are ignored and nothing is written,
+ * however the return value is still calculated.
  * 
  * \param[in] node Pointer to the AST optional type node.
  * \param[in,out] buf Pointer to the buffer where the mangled name is to be stored.

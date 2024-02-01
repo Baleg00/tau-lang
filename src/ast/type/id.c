@@ -65,12 +65,6 @@ void ast_type_id_codegen(codegen_ctx_t* ctx, ast_type_id_t* node)
 
 size_t ast_type_id_mangle(ast_type_id_t* node, char* buf, size_t len)
 {
-  if (buf == NULL || len == 0)
-  {
-    buf = NULL;
-    len = 0;
-  }
-
   size_t written = 0;
 
   switch (node->decl->kind)
@@ -81,7 +75,7 @@ size_t ast_type_id_mangle(ast_type_id_t* node, char* buf, size_t len)
   default: unreachable();
   }
 
-  written += ast_node_mangle(node->decl, buf == NULL ? NULL : buf + written, len <= written ? 0 : len - written);
+  written += ast_node_mangle(node->decl, buf + written, len <= written ? 0 : len - written);
 
   return written;
 }

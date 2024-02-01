@@ -124,12 +124,6 @@ void ast_type_prim_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
 
 size_t ast_type_prim_mangle(ast_type_prim_t* node, char* buf, size_t len)
 {
-  if (buf == NULL || len == 0)
-  {
-    buf = NULL;
-    len = 0;
-  }
-
   switch (node->kind)
   {
   case AST_TYPE_PRIM_I8:    return snprintf(buf, len, "sb");
@@ -149,6 +143,8 @@ size_t ast_type_prim_mangle(ast_type_prim_t* node, char* buf, size_t len)
   case AST_TYPE_PRIM_UNIT:  return snprintf(buf, len, "v" );
   default: unreachable();
   }
+
+  return 0;
 }
 
 void ast_type_prim_dump_json(FILE* stream, ast_type_prim_t* node)
