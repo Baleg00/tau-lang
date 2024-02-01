@@ -2,11 +2,17 @@ mangled name = universal prefix , qualified name ;
 
 universal prefix = "_T" ;
 
-qualified name = ( basic name | nested name ) , '@' , type , '@' ;
+qualified name = unqualified name , type information ;
 
-basic name = ? identifier ? ;
+unqualified name = nested name ;
 
-nested name = basic name , { '.' , basic name } ;
+nested name = basic name , { basic name } ;
+
+basic name = name length , ? identifier ? ;
+
+name length = ? positive integer ? ;
+
+type information = type ;
 
 type = primitive type | modified type | function type | struct type | union type | enum type ;
 
@@ -36,13 +42,15 @@ mutable modifier = 'm' ;
 
 pointer modifier = 'p' ;
 
-array modifier = 'a' , ? integer ? ;
+array modifier = 'a' , array length ;
+
+array length = ? positive integer ? ;
 
 optional modifier = 'o' ;
 
 reference modifier = 'r' ;
 
-function type = 'F' , calling convention , type , { type } , [ ellipsis ] , '@' ;
+function type = 'F' , calling convention , type , parameter count , { type } , [ ellipsis ] ;
 
 calling convention = 'C' (* CDECL *)
                    | 'S' (* STDCALL *)
@@ -53,10 +61,12 @@ calling convention = 'C' (* CDECL *)
                    | 'V' (* VECTORCALL *)
                    | 'T' (* THISCALL *) ;
 
+parameter count = ? non-negative integer ? ;
+
 ellipsis = 'V' ;
 
-struct type = 'S' , nested name , '@' ;
+struct type = 'S' , unqualified name ;
 
-union type = 'U' , nested name , '@' ;
+union type = 'U' , unqualified name ;
 
-enum type = 'E' , nested name , '@' ;
+enum type = 'E' , unqualified name ;
