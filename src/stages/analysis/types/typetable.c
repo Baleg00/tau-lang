@@ -5,7 +5,7 @@
  * \license This project is released under the Apache 2.0 license.
 */
 
-#include "stages/analysis/typetable.h"
+#include "stages/analysis/types/typetable.h"
 
 #include <stddef.h>
 #include <string.h>

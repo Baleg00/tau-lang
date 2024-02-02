@@ -1,57 +1,26 @@
 /**
- * \file typedesc.h
+ * \file base.h
  * 
- * \brief Type descriptor library interface.
- * 
- * \details Type descriptors store information about the characteristics and
- * properties of data types. They provide essential details about a type, such
- * as its size, alignment, modifiers (like const and mut), and its relationship
- * to other types (e.g., pointers, arrays, functions). Type descriptors
- * facilitate type checking, memory allocation, code generation, and other
- * compiler tasks by enabling the compiler to understand and manage the
- * semantics of different data types.
+ * \brief Base type descriptor interface.
  * 
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
  */
 
-#ifndef TAU_TYPEDESC_H
-#define TAU_TYPEDESC_H
+#ifndef TAU_TYPEDESC_BASE_H
+#define TAU_TYPEDESC_BASE_H
 
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "ast/callconv.h"
 #include "llvm.h"
-#include "utils/collections/vector.h"
 
 /**
- * \brief Utility macro which expands to fields that all types must have.
+ * \brief Header for all type descriptors.
  */
 #define TYPEDESC_HEADER\
-  struct\
-  {\
-    typedesc_kind_t kind; /** Type kind. */\
-    LLVMTypeRef llvm_type; /** LLVM type. */\
-  }\
-
-/**
- * \brief Utility macro which expands to fields that all type modifiers must have.
- */
-#define TYPEDESC_MODIFIER_HEADER\
-  struct\
-  {\
-    typedesc_t* base_type; /** Underlying type. */\
-  }\
-
-/**
- * \brief Utility macro which expands to fields that all declared types must have.
- */
-#define TYPEDESC_DECL_HEADER\
-  struct\
-  {\
-    ast_node_t* node; /** Declaration node. */\
-  }\
+  typedesc_kind_t kind; /** Type kind. */\
+  LLVMTypeRef llvm_type /** LLVM type. */\
 
 /**
  * \see node.h 
@@ -85,7 +54,6 @@ typedef enum typedesc_kind_e
   TYPEDESC_BOOL, // Built-in type bool
   TYPEDESC_UNIT, // Built-in type unit
   TYPEDESC_NULL, // Null type
-  TYPEDESC_TYPE, // Type of type
   TYPEDESC_FUN, // Function type
   TYPEDESC_STRUCT, // Struct type
   TYPEDESC_UNION, // Union type
@@ -99,131 +67,6 @@ typedef struct typedesc_t
 {
   TYPEDESC_HEADER;
 } typedesc_t;
-
-/**
- * \brief Type descriptor for type modifiers.
- */
-typedef struct typedesc_modifier_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_MODIFIER_HEADER;
-} typedesc_modifier_t;
-
-/**
- * \brief Type descriptor for mutable types.
- */
-typedef struct typedesc_mut_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_MODIFIER_HEADER;
-} typedesc_mut_t;
-
-/**
- * \brief Type descriptor for constant types.
- */
-typedef struct typedesc_const_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_MODIFIER_HEADER;
-} typedesc_const_t;
-
-/**
- * \brief Type descriptor for pointer types.
- */
-typedef struct typedesc_ptr_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_MODIFIER_HEADER;
-} typedesc_ptr_t;
-
-/**
- * \brief Type descriptor for array types.
- */
-typedef struct typedesc_array_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_MODIFIER_HEADER;
-  size_t length; // Number of elements in the array.
-} typedesc_array_t;
-
-/**
- * \brief Type descriptor for reference types.
- */
-typedef struct typedesc_ref_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_MODIFIER_HEADER;
-} typedesc_ref_t;
-
-/**
- * \brief Type descriptor for optional types.
- */
-typedef struct typedesc_opt_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_MODIFIER_HEADER;
-} typedesc_opt_t;
-
-/**
- * \brief Type descriptor for functions.
- */
-typedef struct typedesc_fun_t
-{
-  TYPEDESC_HEADER;
-  vector_t* param_types; // Parameter types.
-  typedesc_t* return_type; // Return type.
-  bool is_vararg; // Is variadic.
-  callconv_kind_t callconv; // The function calling convention.
-} typedesc_fun_t;
-
-/**
- * \brief Type descriptor for declarations.
- */
-typedef struct typedesc_decl_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-} typedesc_decl_t;
-
-/**
- * \brief Type descriptor for structures.
- */
-typedef struct typedesc_struct_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-  vector_t* field_types; // Vector of field types.
-} typedesc_struct_t;
-
-/**
- * \brief Type descriptor for unions.
- */
-typedef struct typedesc_union_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-  vector_t* field_types; // Vector of field types.
-} typedesc_union_t;
-
-/**
- * \brief Type descriptor for enumerations.
- */
-typedef struct typedesc_enum_t
-{
-  TYPEDESC_HEADER;
-  TYPEDESC_DECL_HEADER;
-} typedesc_enum_t;
-
-#undef TYPEDESC_DECL_HEADER
-#undef TYPEDESC_HEADER
-
-/**
- * \brief Initializes a new type descriptor with the specified kind.
- * 
- * \param[in] kind The kind of the type descriptor.
- * \returns Pointer to the newly initialized type descriptor.
-*/
-typedesc_t* typedesc_init(typedesc_kind_t kind);
 
 /**
  * \brief Frees all resources associated with a type descriptor.

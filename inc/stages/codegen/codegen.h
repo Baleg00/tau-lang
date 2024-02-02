@@ -13,7 +13,7 @@
 #define TAU_CODEGEN_H
 
 #include "llvm.h"
-#include "stages/analysis/typetable.h"
+#include "stages/analysis/types/typetable.h"
 
 /**
  * \see fun.h

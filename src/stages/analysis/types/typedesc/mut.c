@@ -1,0 +1,26 @@
+/**
+ * \file mut.c
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
+#include "stages/analysis/types/typedesc/mut.h"
+
+#include "utils/common.h"
+#include "utils/memory/memtrace.h"
+
+typedesc_mut_t* typedesc_mut_init(void)
+{
+  typedesc_mut_t* desc = (typedesc_mut_t*)malloc(sizeof(typedesc_mut_t));
+  clearobj(desc);
+
+  desc->kind = TYPEDESC_MUT;
+
+  return desc;
+}
+
+void typedesc_mut_free(typedesc_mut_t* desc)
+{
+  free(desc);
+}

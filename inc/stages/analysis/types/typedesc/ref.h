@@ -1,0 +1,37 @@
+/**
+ * \file ref.h
+ * 
+ * \brief Reference type descriptor interface.
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
+#ifndef TAU_TYPEDESC_REF_H
+#define TAU_TYPEDESC_REF_H
+
+#include "stages/analysis/types/typedesc/modif.h"
+
+/**
+ * \brief Type descriptor for reference types.
+ */
+typedef struct typedesc_ref_t
+{
+  TYPEDESC_MODIF_HEADER;
+} typedesc_ref_t;
+
+/**
+ * \brief Initializes a new reference type descriptor.
+ * 
+ * \returns Pointer to the newly initialized type descriptor.
+*/
+typedesc_ref_t* typedesc_ref_init(void);
+
+/**
+ * \brief Frees all memory allocated by an reference type descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor to be freed.
+ */
+void typedesc_ref_free(typedesc_ref_t* desc);
+
+#endif

@@ -14,7 +14,7 @@
 #include "ast/registry.h"
 #include "llvm.h"
 #include "stages/analysis/symtable.h"
-#include "stages/analysis/typetable.h"
+#include "stages/analysis/types/typetable.h"
 #include "stages/lexer/lexer.h"
 #include "stages/lexer/token.h"
 #include "stages/parser/parser.h"

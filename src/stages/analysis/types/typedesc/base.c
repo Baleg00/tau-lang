@@ -5,7 +5,7 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "stages/analysis/typedesc.h"
+#include "stages/analysis/types/typedesc/base.h"
 
 #include <string.h>
 
@@ -13,62 +13,16 @@
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 
-typedesc_t* typedesc_init(typedesc_kind_t kind)
-{
-  size_t desc_size = sizeof(typedesc_t);
-
-  switch (kind)
-  {
-  case TYPEDESC_TYPE:   desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_MUT:    desc_size = sizeof(typedesc_mut_t   ); break;
-  case TYPEDESC_CONST:  desc_size = sizeof(typedesc_const_t ); break;
-  case TYPEDESC_PTR:    desc_size = sizeof(typedesc_ptr_t   ); break;
-  case TYPEDESC_ARRAY:  desc_size = sizeof(typedesc_array_t ); break;
-  case TYPEDESC_REF:    desc_size = sizeof(typedesc_ref_t   ); break;
-  case TYPEDESC_OPT:    desc_size = sizeof(typedesc_opt_t   ); break;
-  case TYPEDESC_I8:     desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_I16:    desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_I32:    desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_I64:    desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_ISIZE:  desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_U8:     desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_U16:    desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_U32:    desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_U64:    desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_USIZE:  desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_F32:    desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_F64:    desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_CHAR:   desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_BOOL:   desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_UNIT:   desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_NULL:   desc_size = sizeof(typedesc_t       ); break;
-  case TYPEDESC_FUN:    desc_size = sizeof(typedesc_fun_t   ); break;
-  case TYPEDESC_STRUCT: desc_size = sizeof(typedesc_struct_t); break;
-  case TYPEDESC_UNION:  desc_size = sizeof(typedesc_union_t ); break;
-  case TYPEDESC_ENUM:   desc_size = sizeof(typedesc_enum_t  ); break;
-  default: unreachable();
-  }
-
-  typedesc_t* desc = (typedesc_t*)malloc(desc_size);
-  assert(desc != NULL);
-
-  memset(desc, 0, desc_size);
-
-  desc->kind = kind;
-
-  return desc;
-}
-
 void typedesc_free(typedesc_t* desc)
 {
   switch (desc->kind)
   {
-  case TYPEDESC_MUT:
-  case TYPEDESC_CONST:
-  case TYPEDESC_PTR:
-  case TYPEDESC_ARRAY:
-  case TYPEDESC_REF:
-  case TYPEDESC_OPT:
+  case TYPEDESC_MUT:    typedesc_mut_free   ((typedesc_mut_t*   )desc); break;
+  case TYPEDESC_CONST:  typedesc_const_free ((typedesc_const_t* )desc); break;
+  case TYPEDESC_PTR:    typedesc_ptr_free   ((typedesc_ptr_t*   )desc); break;
+  case TYPEDESC_ARRAY:  typedesc_array_free ((typedesc_array_t* )desc); break;
+  case TYPEDESC_REF:    typedesc_ref_free   ((typedesc_ref_t*   )desc); break;
+  case TYPEDESC_OPT:    typedesc_opt_free   ((typedesc_opt_t*   )desc); break;
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -83,26 +37,14 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_F64:
   case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
-  case TYPEDESC_UNIT:
-  case TYPEDESC_NULL:
-  case TYPEDESC_TYPE:
-    break;
-  case TYPEDESC_FUN:
-    vector_free(((typedesc_fun_t*)desc)->param_types);
-    break;
-  case TYPEDESC_STRUCT:
-    vector_free(((typedesc_struct_t*)desc)->field_types);
-    break;
-  case TYPEDESC_UNION:
-    vector_free(((typedesc_union_t*)desc)->field_types);
-    break;
-  case TYPEDESC_ENUM:
-    break;
-  default:
-    unreachable();
+  case TYPEDESC_UNIT:   typedesc_prim_free  ((typedesc_prim_t*  )desc); break;
+  case TYPEDESC_NULL:   typedesc_null_free  ((typedesc_null_t*  )desc); break;
+  case TYPEDESC_FUN:    typedesc_fun_free   ((typedesc_fun_t*   )desc); break;
+  case TYPEDESC_STRUCT: typedesc_struct_free((typedesc_struct_t*)desc); break;
+  case TYPEDESC_UNION:  typedesc_union_free ((typedesc_union_t* )desc); break;
+  case TYPEDESC_ENUM:   typedesc_enum_free  ((typedesc_enum_t*  )desc); break;
+  default: unreachable();
   }
-
-  free(desc);
 }
 
 bool typedesc_is_modifier(typedesc_t* desc)

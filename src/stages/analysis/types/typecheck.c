@@ -5,7 +5,7 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "stages/analysis/typecheck.h"
+#include "stages/analysis/types/typecheck.h"
 
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"

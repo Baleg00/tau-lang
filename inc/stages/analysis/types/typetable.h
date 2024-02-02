@@ -19,7 +19,7 @@
 
 #include <stdbool.h>
 
-#include "stages/analysis/typedesc.h"
+#include "stages/analysis/types/typedesc/typedesc.h"
 
 /**
  * \see node.h 

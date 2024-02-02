@@ -18,8 +18,8 @@
 #define TAU_TYPECHECK_H
 
 #include "llvm.h"
-#include "stages/analysis/typebuilder.h"
-#include "stages/analysis/typetable.h"
+#include "stages/analysis/types/typebuilder.h"
+#include "stages/analysis/types/typetable.h"
 
 /**
  * \brief Type check context.

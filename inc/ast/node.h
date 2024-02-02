@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 #include "stages/analysis/nameres.h"
-#include "stages/analysis/typecheck.h"
+#include "stages/analysis/types/typecheck.h"
 #include "stages/codegen/codegen.h"
 #include "stages/lexer/token.h"
 

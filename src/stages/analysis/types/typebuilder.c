@@ -5,7 +5,7 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "stages/analysis/typebuilder.h"
+#include "stages/analysis/types/typebuilder.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -49,9 +49,44 @@ struct typebuilder_t
   set_t* set_enum;
 };
 
-static int typebuilder_cmp_modifier(void* lhs, void* rhs)
+static int typebuilder_cmp_mut(void* lhs, void* rhs)
 {
-  return (int)(((typedesc_modifier_t*)lhs)->base_type - ((typedesc_modifier_t*)rhs)->base_type);
+  return (int)(((typedesc_mut_t*)lhs)->base_type - ((typedesc_mut_t*)rhs)->base_type);
+}
+
+static int typebuilder_cmp_const(void* lhs, void* rhs)
+{
+  return (int)(((typedesc_const_t*)lhs)->base_type - ((typedesc_const_t*)rhs)->base_type);
+}
+
+static int typebuilder_cmp_ptr(void* lhs, void* rhs)
+{
+  return (int)(((typedesc_ptr_t*)lhs)->base_type - ((typedesc_ptr_t*)rhs)->base_type);
+}
+
+static int typebuilder_cmp_array(void* lhs, void* rhs)
+{
+  typedesc_array_t* lhs_desc = (typedesc_array_t*)lhs;
+  typedesc_array_t* rhs_desc = (typedesc_array_t*)rhs;
+
+  // TODO: fix integer overflow
+  int cmp1 = (int)(lhs_desc->base_type - rhs_desc->base_type);
+  int cmp2 = (int)lhs_desc->length - (int)rhs_desc->length;
+
+  if (cmp1 != 0)
+    return cmp1;
+
+  return cmp2;
+}
+
+static int typebuilder_cmp_ref(void* lhs, void* rhs)
+{
+  return (int)(((typedesc_ref_t*)lhs)->base_type - ((typedesc_ref_t*)rhs)->base_type);
+}
+
+static int typebuilder_cmp_opt(void* lhs, void* rhs)
+{
+  return (int)(((typedesc_opt_t*)lhs)->base_type - ((typedesc_opt_t*)rhs)->base_type);
 }
 
 static int typebuilder_cmp_fun(void* lhs, void* rhs)
@@ -167,50 +202,6 @@ static int typebuilder_cmp_enum(void* lhs, void* rhs)
   return 0;
 }
 
-static typedesc_t* typebuilder_build_modifier(typebuilder_t* builder, typedesc_kind_t kind, typedesc_t* base_type)
-{
-  assert(typedesc_can_add_modifier(kind, base_type));
-
-  typedesc_modifier_t* desc = (typedesc_modifier_t*)typedesc_init(kind);
-  desc->base_type = base_type;
-
-  set_t* set_modifier = NULL;
-
-  switch (kind)
-  {
-  case TYPEDESC_MUT:   set_modifier = builder->set_mut;   break;
-  case TYPEDESC_CONST: set_modifier = builder->set_const; break;
-  case TYPEDESC_PTR:   set_modifier = builder->set_ptr;   break;
-  case TYPEDESC_ARRAY: set_modifier = builder->set_array; break;
-  case TYPEDESC_REF:   set_modifier = builder->set_ref;   break;
-  case TYPEDESC_OPT:   set_modifier = builder->set_opt;   break;
-  default: unreachable();
-  }
-
-  typedesc_t* result = (typedesc_t*)set_get(set_modifier, desc);
-
-  if (result != NULL)
-  {
-    typedesc_free((typedesc_t*)desc);
-    return result;
-  }
-
-  switch (kind)
-  {
-  case TYPEDESC_MUT:   desc->llvm_type = base_type->llvm_type; break;
-  case TYPEDESC_CONST: desc->llvm_type = base_type->llvm_type; break;
-  case TYPEDESC_PTR:   desc->llvm_type = LLVMPointerType(base_type->llvm_type, 0); break;
-  case TYPEDESC_ARRAY: desc->llvm_type = LLVMArrayType2(base_type->llvm_type, 0); break;
-  case TYPEDESC_REF:   desc->llvm_type = LLVMPointerType(base_type->llvm_type, 0); break;
-  case TYPEDESC_OPT:   desc->llvm_type = LLVMStructTypeInContext(builder->llvm_context, (LLVMTypeRef[]){ builder->desc_bool->llvm_type, base_type->llvm_type }, 2, false); break;
-  default: unreachable();
-  }
-
-  set_add(set_modifier, desc);
-
-  return (typedesc_t*)desc;
-}
-
 typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef llvm_layout)
 {
   typebuilder_t* builder = (typebuilder_t*)malloc(sizeof(typebuilder_t));
@@ -218,48 +209,48 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->llvm_context = llvm_context;
   builder->llvm_layout = llvm_layout;
   
-  builder->desc_i8    = typedesc_init(TYPEDESC_I8);
-  builder->desc_i16   = typedesc_init(TYPEDESC_I16);
-  builder->desc_i32   = typedesc_init(TYPEDESC_I32);
-  builder->desc_i64   = typedesc_init(TYPEDESC_I64);
-  builder->desc_isize = typedesc_init(TYPEDESC_ISIZE);
-  builder->desc_u8    = typedesc_init(TYPEDESC_U8);
-  builder->desc_u16   = typedesc_init(TYPEDESC_U16);
-  builder->desc_u32   = typedesc_init(TYPEDESC_U32);
-  builder->desc_u64   = typedesc_init(TYPEDESC_U64);
-  builder->desc_usize = typedesc_init(TYPEDESC_USIZE);
-  builder->desc_f32   = typedesc_init(TYPEDESC_F32);
-  builder->desc_f64   = typedesc_init(TYPEDESC_F64);
-  builder->desc_char  = typedesc_init(TYPEDESC_CHAR);
-  builder->desc_bool  = typedesc_init(TYPEDESC_BOOL);
-  builder->desc_unit  = typedesc_init(TYPEDESC_UNIT);
+  builder->desc_i8    = (typedesc_t*)typedesc_prim_i8_init   ();
+  builder->desc_i16   = (typedesc_t*)typedesc_prim_i16_init  ();
+  builder->desc_i32   = (typedesc_t*)typedesc_prim_i32_init  ();
+  builder->desc_i64   = (typedesc_t*)typedesc_prim_i64_init  ();
+  builder->desc_isize = (typedesc_t*)typedesc_prim_isize_init();
+  builder->desc_u8    = (typedesc_t*)typedesc_prim_u8_init   ();
+  builder->desc_u16   = (typedesc_t*)typedesc_prim_u16_init  ();
+  builder->desc_u32   = (typedesc_t*)typedesc_prim_u32_init  ();
+  builder->desc_u64   = (typedesc_t*)typedesc_prim_u64_init  ();
+  builder->desc_usize = (typedesc_t*)typedesc_prim_usize_init();
+  builder->desc_f32   = (typedesc_t*)typedesc_prim_f32_init  ();
+  builder->desc_f64   = (typedesc_t*)typedesc_prim_f64_init  ();
+  builder->desc_char  = (typedesc_t*)typedesc_prim_char_init ();
+  builder->desc_bool  = (typedesc_t*)typedesc_prim_bool_init ();
+  builder->desc_unit  = (typedesc_t*)typedesc_prim_unit_init ();
 
-  builder->desc_i8->llvm_type    = LLVMInt8TypeInContext(builder->llvm_context);
-  builder->desc_i16->llvm_type   = LLVMInt16TypeInContext(builder->llvm_context);
-  builder->desc_i32->llvm_type   = LLVMInt32TypeInContext(builder->llvm_context);
-  builder->desc_i64->llvm_type   = LLVMInt64TypeInContext(builder->llvm_context);
+  builder->desc_i8->llvm_type    = LLVMInt8TypeInContext  (builder->llvm_context                      );
+  builder->desc_i16->llvm_type   = LLVMInt16TypeInContext (builder->llvm_context                      );
+  builder->desc_i32->llvm_type   = LLVMInt32TypeInContext (builder->llvm_context                      );
+  builder->desc_i64->llvm_type   = LLVMInt64TypeInContext (builder->llvm_context                      );
   builder->desc_isize->llvm_type = LLVMIntPtrTypeInContext(builder->llvm_context, builder->llvm_layout);
-  builder->desc_u8->llvm_type    = LLVMInt8TypeInContext(builder->llvm_context);
-  builder->desc_u16->llvm_type   = LLVMInt16TypeInContext(builder->llvm_context);
-  builder->desc_u32->llvm_type   = LLVMInt32TypeInContext(builder->llvm_context);
-  builder->desc_u64->llvm_type   = LLVMInt64TypeInContext(builder->llvm_context);
+  builder->desc_u8->llvm_type    = LLVMInt8TypeInContext  (builder->llvm_context                      );
+  builder->desc_u16->llvm_type   = LLVMInt16TypeInContext (builder->llvm_context                      );
+  builder->desc_u32->llvm_type   = LLVMInt32TypeInContext (builder->llvm_context                      );
+  builder->desc_u64->llvm_type   = LLVMInt64TypeInContext (builder->llvm_context                      );
   builder->desc_usize->llvm_type = LLVMIntPtrTypeInContext(builder->llvm_context, builder->llvm_layout);
-  builder->desc_f32->llvm_type   = LLVMFloatTypeInContext(builder->llvm_context);
-  builder->desc_f64->llvm_type   = LLVMDoubleTypeInContext(builder->llvm_context);
-  builder->desc_char->llvm_type  = LLVMInt32TypeInContext(builder->llvm_context);
-  builder->desc_bool->llvm_type  = LLVMInt1TypeInContext(builder->llvm_context);
-  builder->desc_unit->llvm_type  = LLVMVoidTypeInContext(builder->llvm_context);
+  builder->desc_f32->llvm_type   = LLVMFloatTypeInContext (builder->llvm_context                      );
+  builder->desc_f64->llvm_type   = LLVMDoubleTypeInContext(builder->llvm_context                      );
+  builder->desc_char->llvm_type  = LLVMInt32TypeInContext (builder->llvm_context                      );
+  builder->desc_bool->llvm_type  = LLVMInt1TypeInContext  (builder->llvm_context                      );
+  builder->desc_unit->llvm_type  = LLVMVoidTypeInContext  (builder->llvm_context                      );
 
-  builder->set_mut    = set_init(typebuilder_cmp_modifier);
-  builder->set_const  = set_init(typebuilder_cmp_modifier);
-  builder->set_ptr    = set_init(typebuilder_cmp_modifier);
-  builder->set_array  = set_init(typebuilder_cmp_modifier);
-  builder->set_ref    = set_init(typebuilder_cmp_modifier);
-  builder->set_opt    = set_init(typebuilder_cmp_modifier);
-  builder->set_fun    = set_init(typebuilder_cmp_fun);
+  builder->set_mut    = set_init(typebuilder_cmp_mut   );
+  builder->set_const  = set_init(typebuilder_cmp_const );
+  builder->set_ptr    = set_init(typebuilder_cmp_ptr   );
+  builder->set_array  = set_init(typebuilder_cmp_array );
+  builder->set_ref    = set_init(typebuilder_cmp_ref   );
+  builder->set_opt    = set_init(typebuilder_cmp_opt   );
+  builder->set_fun    = set_init(typebuilder_cmp_fun   );
   builder->set_struct = set_init(typebuilder_cmp_struct);
-  builder->set_union  = set_init(typebuilder_cmp_union);
-  builder->set_enum   = set_init(typebuilder_cmp_enum);
+  builder->set_union  = set_init(typebuilder_cmp_union );
+  builder->set_enum   = set_init(typebuilder_cmp_enum  );
 
   return builder;
 }
@@ -309,32 +300,135 @@ void typebuilder_free(typebuilder_t* builder)
 
 typedesc_t* typebuilder_build_mut(typebuilder_t* builder, typedesc_t* base_type)
 {
-  return typebuilder_build_modifier(builder, TYPEDESC_MUT, base_type);
+  assert(typedesc_can_add_mut(base_type));
+
+  typedesc_mut_t* desc = (typedesc_mut_t*)typedesc_mut_init();
+  desc->base_type = base_type;
+
+  typedesc_t* result = (typedesc_t*)set_get(builder->set_mut, desc);
+
+  if (result != NULL)
+  {
+    typedesc_free((typedesc_t*)desc);
+    return result;
+  }
+
+  desc->llvm_type = base_type->llvm_type;
+
+  set_add(builder->set_mut, desc);
+
+  return (typedesc_t*)desc;
 }
 
 typedesc_t* typebuilder_build_const(typebuilder_t* builder, typedesc_t* base_type)
 {
-  return typebuilder_build_modifier(builder, TYPEDESC_CONST, base_type);
+  assert(typedesc_can_add_const(base_type));
+
+  typedesc_const_t* desc = (typedesc_const_t*)typedesc_const_init();
+  desc->base_type = base_type;
+
+  typedesc_t* result = (typedesc_t*)set_get(builder->set_const, desc);
+
+  if (result != NULL)
+  {
+    typedesc_free((typedesc_t*)desc);
+    return result;
+  }
+
+  desc->llvm_type = base_type->llvm_type;
+
+  set_add(builder->set_const, desc);
+
+  return (typedesc_t*)desc;
 }
 
 typedesc_t* typebuilder_build_ptr(typebuilder_t* builder, typedesc_t* base_type)
 {
-  return typebuilder_build_modifier(builder, TYPEDESC_PTR, base_type);
+  assert(typedesc_can_add_ptr(base_type));
+
+  typedesc_ptr_t* desc = (typedesc_ptr_t*)typedesc_ptr_init();
+  desc->base_type = base_type;
+
+  typedesc_t* result = (typedesc_t*)set_get(builder->set_ptr, desc);
+
+  if (result != NULL)
+  {
+    typedesc_free((typedesc_t*)desc);
+    return result;
+  }
+
+  desc->llvm_type = LLVMPointerType(base_type->llvm_type, 0);
+
+  set_add(builder->set_ptr, desc);
+
+  return (typedesc_t*)desc;
 }
 
 typedesc_t* typebuilder_build_array(typebuilder_t* builder, size_t length, typedesc_t* base_type)
 {
-  return typebuilder_build_modifier(builder, TYPEDESC_ARRAY, base_type);
+  assert(typedesc_can_add_array(base_type));
+
+  typedesc_array_t* desc = (typedesc_array_t*)typedesc_array_init();
+  desc->base_type = base_type;
+  desc->length = length;
+
+  typedesc_t* result = (typedesc_t*)set_get(builder->set_array, desc);
+
+  if (result != NULL)
+  {
+    typedesc_free((typedesc_t*)desc);
+    return result;
+  }
+
+  desc->llvm_type = LLVMArrayType2(base_type->llvm_type, length);
+
+  set_add(builder->set_array, desc);
+
+  return (typedesc_t*)desc;
 }
 
 typedesc_t* typebuilder_build_ref(typebuilder_t* builder, typedesc_t* base_type)
 {
-  return typebuilder_build_modifier(builder, TYPEDESC_REF, base_type);
+  assert(typedesc_can_add_ref(base_type));
+
+  typedesc_ref_t* desc = (typedesc_ref_t*)typedesc_ref_init();
+  desc->base_type = base_type;
+
+  typedesc_t* result = (typedesc_t*)set_get(builder->set_ref, desc);
+
+  if (result != NULL)
+  {
+    typedesc_free((typedesc_t*)desc);
+    return result;
+  }
+
+  desc->llvm_type = LLVMPointerType(base_type->llvm_type, 0);
+
+  set_add(builder->set_ref, desc);
+
+  return (typedesc_t*)desc;
 }
 
 typedesc_t* typebuilder_build_opt(typebuilder_t* builder, typedesc_t* base_type)
 {
-  return typebuilder_build_modifier(builder, TYPEDESC_OPT, base_type);
+  assert(typedesc_can_add_opt(base_type));
+
+  typedesc_ref_t* desc = (typedesc_ref_t*)typedesc_opt_init();
+  desc->base_type = base_type;
+
+  typedesc_t* result = (typedesc_t*)set_get(builder->set_opt, desc);
+
+  if (result != NULL)
+  {
+    typedesc_free((typedesc_t*)desc);
+    return result;
+  }
+
+  desc->llvm_type = LLVMStructTypeInContext(builder->llvm_context, (LLVMTypeRef[]){ builder->desc_bool->llvm_type, base_type->llvm_type }, 2, false);
+
+  set_add(builder->set_opt, desc);
+
+  return (typedesc_t*)desc;
 }
 
 typedesc_t* typebuilder_build_i8(typebuilder_t* builder)
@@ -414,7 +508,7 @@ typedesc_t* typebuilder_build_unit(typebuilder_t* builder)
 
 typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count, bool is_vararg, callconv_kind_t callconv)
 {
-  typedesc_fun_t* desc = (typedesc_fun_t*)typedesc_init(TYPEDESC_FUN);
+  typedesc_fun_t* desc = typedesc_fun_init();
   desc->return_type = return_type;
   desc->param_types = param_count == 0 ? NULL : vector_init_from_buffer(param_types, param_count);
   desc->is_vararg = is_vararg;
@@ -455,7 +549,7 @@ typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_typ
 
 typedesc_t* typebuilder_build_struct(typebuilder_t* builder, ast_node_t* node, typedesc_t* field_types[], size_t field_count)
 {
-  typedesc_struct_t* desc = (typedesc_struct_t*)typedesc_init(TYPEDESC_STRUCT);
+  typedesc_struct_t* desc = typedesc_struct_init();
   desc->node = node;
   desc->field_types = field_count == 0 ? NULL : vector_init_from_buffer(field_types, field_count);
 
@@ -494,7 +588,7 @@ typedesc_t* typebuilder_build_struct(typebuilder_t* builder, ast_node_t* node, t
 
 typedesc_t* typebuilder_build_union(typebuilder_t* builder, ast_node_t* node, typedesc_t* field_types[], size_t field_count)
 {
-  typedesc_union_t* desc = (typedesc_union_t*)typedesc_init(TYPEDESC_UNION);
+  typedesc_union_t* desc = typedesc_union_init();
   desc->node = node;
   desc->field_types = field_count == 0 ? NULL : vector_init_from_buffer(field_types, field_count);
 
@@ -529,7 +623,7 @@ typedesc_t* typebuilder_build_union(typebuilder_t* builder, ast_node_t* node, ty
 
 typedesc_t* typebuilder_build_enum(typebuilder_t* builder, ast_node_t* node)
 {
-  typedesc_enum_t* desc = (typedesc_enum_t*)typedesc_init(TYPEDESC_ENUM);
+  typedesc_enum_t* desc = typedesc_enum_init();
   desc->node = node;
 
   typedesc_t* result = (typedesc_t*)set_get(builder->set_enum, desc);

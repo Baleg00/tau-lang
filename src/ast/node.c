@@ -152,21 +152,21 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_typecheck          (ctx, (ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_typecheck          (ctx, (ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_typecheck          (ctx, (ast_type_fun_t*          )node); break;
-  case AST_TYPE_PRIM_I8:
-  case AST_TYPE_PRIM_I16:
-  case AST_TYPE_PRIM_I32:
-  case AST_TYPE_PRIM_I64:
-  case AST_TYPE_PRIM_ISIZE:
-  case AST_TYPE_PRIM_U8:
-  case AST_TYPE_PRIM_U16:
-  case AST_TYPE_PRIM_U32:
-  case AST_TYPE_PRIM_U64:
-  case AST_TYPE_PRIM_USIZE:
-  case AST_TYPE_PRIM_F32:
-  case AST_TYPE_PRIM_F64:
-  case AST_TYPE_PRIM_CHAR:
-  case AST_TYPE_PRIM_BOOL:
-  case AST_TYPE_PRIM_UNIT:     ast_type_prim_typecheck         (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I8:       ast_type_prim_i8_typecheck      (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I16:      ast_type_prim_i16_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I32:      ast_type_prim_i32_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_I64:      ast_type_prim_i64_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_ISIZE:    ast_type_prim_isize_typecheck   (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_U8:       ast_type_prim_u8_typecheck      (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_U16:      ast_type_prim_u16_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_U32:      ast_type_prim_u32_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_U64:      ast_type_prim_u64_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_USIZE:    ast_type_prim_usize_typecheck   (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_F32:      ast_type_prim_f32_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_F64:      ast_type_prim_f64_typecheck     (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_CHAR:     ast_type_prim_char_typecheck    (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_BOOL:     ast_type_prim_bool_typecheck    (ctx, (ast_type_prim_t*         )node); break;
+  case AST_TYPE_PRIM_UNIT:     ast_type_prim_unit_typecheck    (ctx, (ast_type_prim_t*         )node); break;
   case AST_TYPE_MEMBER:        ast_type_mbr_typecheck          (ctx, (ast_type_mbr_t*          )node); break;
   case AST_EXPR_ID:            ast_expr_id_typecheck           (ctx, (ast_expr_id_t*           )node); break;
   case AST_EXPR_LIT_INT:       ast_expr_lit_int_typecheck      (ctx, (ast_expr_lit_int_t*      )node); break;

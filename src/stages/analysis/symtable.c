@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stages/analysis/typedesc.h"
+#include "stages/analysis/types/typedesc/typedesc.h"
 #include "utils/common.h"
 #include "utils/hash.h"
 #include "utils/memory/memtrace.h"
