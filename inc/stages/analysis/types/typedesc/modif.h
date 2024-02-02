@@ -1,5 +1,5 @@
 /**
- * \file modif.h
+ * \file
  * 
  * \brief Modifier type descriptor interface.
  * 

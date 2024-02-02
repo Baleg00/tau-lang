@@ -1,5 +1,5 @@
 /**
- * \file decl.h
+ * \file
  * 
  * \brief Declaration type descriptor interface.
  * 

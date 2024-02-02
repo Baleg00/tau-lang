@@ -1,5 +1,5 @@
 /**
- * \file str.h
+ * \file
  * 
  * \brief String utility library interface.
  * 

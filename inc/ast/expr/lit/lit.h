@@ -1,5 +1,5 @@
 /**
- * \file lit.h
+ * \file
  * 
  * \brief Abstract syntax tree literal expression node interface.
  * 

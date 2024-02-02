@@ -1,5 +1,5 @@
 /**
- * \file stmt.h
+ * \file
  * 
  * \brief Abstract syntax tree statement node interface.
  * 

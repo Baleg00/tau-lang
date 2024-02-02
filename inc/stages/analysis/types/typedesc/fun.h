@@ -1,5 +1,5 @@
 /**
- * \file fun.h
+ * \file
  * 
  * \brief Function type descriptor interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file vector.h
+ * \file
  * 
  * \brief Vector data structure interface.
  * 

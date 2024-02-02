@@ -1,5 +1,5 @@
 /**
- * \file var.h
+ * \file
  * 
  * \brief Abstract syntax tree variable declaration node interface.
  * 

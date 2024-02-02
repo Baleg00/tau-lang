@@ -1,5 +1,5 @@
 /**
- * \file enum.h
+ * \file
  * 
  * \brief Enum type descriptor interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file common.h
+ * \file
  * 
  * \brief Common utility macros.
  * 

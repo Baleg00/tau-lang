@@ -1,5 +1,5 @@
 /**
- * \file decl.h
+ * \file
  * 
  * \brief Abstract syntax tree declaration node interface.
  * 

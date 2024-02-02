@@ -1,5 +1,5 @@
 /**
- * \file null.h
+ * \file
  * 
  * \brief Null type descriptor interface.
  * 

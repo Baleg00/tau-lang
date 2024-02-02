@@ -1,5 +1,5 @@
 /**
- * \file cli.h
+ * \file
  * 
  * \brief Command-line interface.
  * 

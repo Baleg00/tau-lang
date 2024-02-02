@@ -1,5 +1,5 @@
 /**
- * \file struct.h
+ * \file
  * 
  * \brief Struct type descriptor interface.
  * 

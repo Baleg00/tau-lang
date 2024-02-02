@@ -1,5 +1,5 @@
 /**
- * \file arena.h
+ * \file
  * 
  * \brief Arena allocator interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file types.h
+ * \file
  * 
  * \brief Type system library interface.
  * 

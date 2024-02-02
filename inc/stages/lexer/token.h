@@ -1,5 +1,5 @@
 /**
- * \file token.h
+ * \file
  * 
  * \brief Token interface.
  * 

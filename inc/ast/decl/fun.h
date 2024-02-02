@@ -1,5 +1,5 @@
 /**
- * \file fun.h
+ * \file
  * 
  * \brief Abstract syntax tree function declaration node interface.
  * 

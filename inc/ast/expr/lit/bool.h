@@ -1,5 +1,5 @@
 /**
- * \file bool.h
+ * \file
  * 
  * \brief Abstract syntax tree literal boolean expression node interface.
  * 

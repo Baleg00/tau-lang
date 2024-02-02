@@ -1,5 +1,5 @@
 /**
- * \file while.h
+ * \file
  * 
  * \brief Abstract syntax tree while-loop statement node interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file mut.h
+ * \file
  * 
  * \brief Abstract syntax tree mutable type node interface.
  * 

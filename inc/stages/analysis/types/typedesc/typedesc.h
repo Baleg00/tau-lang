@@ -1,5 +1,5 @@
 /**
- * \file typedesc.h
+ * \file
  * 
  * \brief Type descriptor library interface.
  * 

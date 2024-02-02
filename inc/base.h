@@ -1,5 +1,5 @@
 /**
- * \file base.h
+ * \file
  * 
  * \brief Project base header.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file enum_constant.h
+ * \file
  * 
  * \brief Abstract syntax tree enum constant declaration node interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file base.h
+ * \file
  * 
  * \brief Base type descriptor interface.
  * 
@@ -23,7 +23,7 @@
   LLVMTypeRef llvm_type /** LLVM type. */\
 
 /**
- * \see node.h 
+ * \see ast/node.h 
  */
 typedef struct ast_node_t ast_node_t;
 

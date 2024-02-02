@@ -1,5 +1,5 @@
 /**
- * \file null.h
+ * \file
  * 
  * \brief Abstract syntax tree literal null expression node interface.
  * 

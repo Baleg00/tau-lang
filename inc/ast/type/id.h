@@ -1,5 +1,5 @@
 /**
- * \file id.h
+ * \file
  * 
  * \brief Abstract syntax tree type identifier node interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file const.h
+ * \file
  * 
  * \brief Abstract syntax tree constant type node interface.
  * 

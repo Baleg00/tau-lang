@@ -1,5 +1,5 @@
 /**
- * \file allocator.h
+ * \file
  * 
  * \brief Abstract allocator library interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file const.h
+ * \file
  * 
  * \brief Constant type descriptor interface.
  * 

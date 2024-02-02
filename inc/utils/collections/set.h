@@ -1,5 +1,5 @@
 /**
- * \file set.h
+ * \file
  * 
  * \brief Set data structure interface.
  * 

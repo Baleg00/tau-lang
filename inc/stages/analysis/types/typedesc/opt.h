@@ -1,5 +1,5 @@
 /**
- * \file opt.h
+ * \file
  * 
  * \brief Optional type descriptor interface.
  * 

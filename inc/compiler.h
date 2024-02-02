@@ -1,5 +1,5 @@
 /**
- * \file compiler.h
+ * \file
  * 
  * \brief Compiler context.
  * 

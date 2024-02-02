@@ -1,5 +1,5 @@
 /**
- * \file timer.h
+ * \file
  * 
  * \brief Timer library interface.
  * 

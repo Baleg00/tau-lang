@@ -1,5 +1,5 @@
 /**
- * \file queue.h
+ * \file
  * 
  * \brief Stack data structure interface.
  * 

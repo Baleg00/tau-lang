@@ -1,5 +1,5 @@
 /**
- * \file codegen.h
+ * \file
  * 
  * \brief Code generation pass.
  * 
@@ -16,7 +16,7 @@
 #include "stages/analysis/types/typetable.h"
 
 /**
- * \see fun.h
+ * \see ast/decl/fun.h
  */
 typedef struct ast_decl_fun_t ast_decl_fun_t;
 

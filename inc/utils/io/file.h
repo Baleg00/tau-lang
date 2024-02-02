@@ -1,5 +1,5 @@
 /**
- * \file file.h
+ * \file
  * 
  * \brief File system utility interface.
  * 

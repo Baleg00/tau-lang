@@ -1,5 +1,5 @@
 /**
- * \file node.h
+ * \file
  * 
  * \brief Abstract syntax tree base node interface.
  * 

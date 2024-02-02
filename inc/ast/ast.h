@@ -1,5 +1,5 @@
 /**
- * \file ast.h
+ * \file
  * 
  * \brief Abstract syntax tree library interface.
  * 

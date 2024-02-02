@@ -1,5 +1,5 @@
 /**
- * \file ref.h
+ * \file
  * 
  * \brief Reference type descriptor interface.
  * 

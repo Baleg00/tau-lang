@@ -1,5 +1,5 @@
 /**
- * \file continue.h
+ * \file
  * 
  * \brief Abstract syntax tree continue statement node interface.
  * 

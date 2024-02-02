@@ -1,5 +1,5 @@
 /**
- * \file struct.h
+ * \file
  * 
  * \brief Abstract syntax tree struct declaration node interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file typetable.h
+ * \file
  * 
  * \brief Typetable library interface.
  * 
@@ -22,7 +22,7 @@
 #include "stages/analysis/types/typedesc/typedesc.h"
 
 /**
- * \see node.h 
+ * \see ast/node.h 
  */
 typedef struct ast_node_t ast_node_t;
 

@@ -1,5 +1,5 @@
 /**
- * \file opt.h
+ * \file
  * 
  * \brief Abstract syntax tree optional type node interface.
  * 

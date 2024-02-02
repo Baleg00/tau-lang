@@ -1,5 +1,5 @@
 /**
- * \file bin.h
+ * \file
  * 
  * \brief Abstract syntax tree binary operation expression node interface.
  * 

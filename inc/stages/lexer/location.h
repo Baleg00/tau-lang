@@ -1,5 +1,5 @@
 /**
- * \file location.h
+ * \file
  * 
  * \brief Source code location interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file symtable.h
+ * \file
  * 
  * \brief Symbol table interface.
  * 
@@ -25,7 +25,7 @@
 #include "utils/str_view.h"
 
 /**
- * \see node.h
+ * \see ast/node.h
  */
 typedef struct ast_node_t ast_node_t;
 

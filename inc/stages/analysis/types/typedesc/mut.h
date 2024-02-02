@@ -1,5 +1,5 @@
 /**
- * \file mut.h
+ * \file
  * 
  * \brief Mutable type descriptor interface.
  * 

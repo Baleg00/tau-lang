@@ -1,5 +1,5 @@
 /**
- * \file parser.h
+ * \file
  * 
  * \brief Syntax analyzer interface.
  * 

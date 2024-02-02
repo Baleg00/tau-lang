@@ -1,5 +1,5 @@
 /**
- * \file typebuilder.h
+ * \file
  * 
  * \brief Type builder interface.
  * 

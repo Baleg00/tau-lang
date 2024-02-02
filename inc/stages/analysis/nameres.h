@@ -1,5 +1,5 @@
 /**
- * \file nameres.h
+ * \file
  * 
  * \brief Name resolution pass.
  * 

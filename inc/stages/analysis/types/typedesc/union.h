@@ -1,5 +1,5 @@
 /**
- * \file union.h
+ * \file
  * 
  * \brief Union type descriptor interface.
  * 

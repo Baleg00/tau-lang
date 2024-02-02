@@ -1,5 +1,5 @@
 /**
- * \file enum.h
+ * \file
  * 
  * \brief Abstract syntax tree enum declaration node interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file registry.h
+ * \file
  * 
  * \brief Abstract syntax tree node registry.
  * 

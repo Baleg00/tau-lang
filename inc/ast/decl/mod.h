@@ -1,5 +1,5 @@
 /**
- * \file mod.h
+ * \file
  * 
  * \brief Abstract syntax tree module declaration node interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file esc_seq.h
+ * \file
  * 
  * \brief ANSI escape sequences.
  * 

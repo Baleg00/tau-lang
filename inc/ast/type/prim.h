@@ -1,5 +1,5 @@
 /**
- * \file prim.h
+ * \file
  * 
  * \brief Abstract syntax tree primitive type node interface.
  * 

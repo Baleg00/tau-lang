@@ -1,5 +1,5 @@
 /**
- * \file ptr.h
+ * \file
  * 
  * \brief Abstract syntax tree pointer type node interface.
  * 

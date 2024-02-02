@@ -1,5 +1,5 @@
 /**
- * \file typecheck.h
+ * \file
  * 
  * \brief Type check pass.
  * 

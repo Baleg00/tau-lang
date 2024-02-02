@@ -1,5 +1,5 @@
 /**
- * \file modif.h
+ * \file
  * 
  * \brief Abstract syntax tree type modifier node interface.
  * 

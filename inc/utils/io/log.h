@@ -1,5 +1,5 @@
 /**
- * \file log.h
+ * \file
  * 
  * \brief Logging library interface.
  * 

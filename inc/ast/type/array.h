@@ -1,5 +1,5 @@
 /**
- * \file array.h
+ * \file
  * 
  * \brief Abstract syntax tree array type node interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file hash.h
+ * \file
  * 
  * \brief Hash function library interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file ptr.h
+ * \file
  * 
  * \brief Pointer type descriptor interface.
  * 

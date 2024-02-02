@@ -1,5 +1,5 @@
 /**
- * \file prim.h
+ * \file
  * 
  * \brief Primitive type descriptor interface.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file ref.h
+ * \file
  * 
  * \brief Abstract syntax tree reference type node interface.
  * 

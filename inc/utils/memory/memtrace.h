@@ -1,5 +1,5 @@
 /**
- * \file memtrace.h
+ * \file
  * 
  * \brief Memory tracing library interface.
  * 

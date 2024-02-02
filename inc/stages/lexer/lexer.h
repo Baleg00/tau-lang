@@ -1,5 +1,5 @@
 /**
- * \file lexer.h
+ * \file
  * 
  * \brief Lexical analyzer interface.
  * 

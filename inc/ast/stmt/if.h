@@ -1,5 +1,5 @@
 /**
- * \file if.h
+ * \file
  * 
  * \brief Abstract syntax tree if statement node interface.
  * 

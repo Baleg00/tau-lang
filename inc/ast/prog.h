@@ -1,5 +1,5 @@
 /**
- * \file prog.h
+ * \file
  * 
  * \brief Abstract syntax tree program node interface.
  * 

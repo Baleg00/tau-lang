@@ -1,5 +1,5 @@
 /**
- * \file union.h
+ * \file
  * 
  * \brief Abstract syntax tree union declaration node interface.
  * 

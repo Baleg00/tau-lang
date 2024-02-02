@@ -1,5 +1,5 @@
 /**
- * \file stack.h
+ * \file
  * 
  * \brief Stack data structure interface.
  * 

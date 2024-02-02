@@ -1,5 +1,5 @@
 /**
- * \file array.h
+ * \file
  * 
  * \brief Array type descriptor interface.
  * 

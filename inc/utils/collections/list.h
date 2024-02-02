@@ -1,5 +1,5 @@
 /**
- * \file list.h
+ * \file
  * 
  * \brief Linked list data structure interface.
  * 

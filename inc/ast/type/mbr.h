@@ -1,5 +1,5 @@
 /**
- * \file mbr.h
+ * \file
  * 
  * \brief Abstract syntax tree member type node interface.
  * 

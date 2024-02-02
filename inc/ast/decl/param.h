@@ -1,5 +1,5 @@
 /**
- * \file param.h
+ * \file
  * 
  * \brief Abstract syntax tree parameter declaration node interface.
  * 
