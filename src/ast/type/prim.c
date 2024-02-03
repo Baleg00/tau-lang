@@ -109,97 +109,28 @@ void ast_type_prim_nameres(nameres_ctx_t* ctx, ast_type_prim_t* node)
 
 void ast_type_prim_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
 {
-  typedesc_t* desc = typebuilder_build_unit(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
+  typedesc_t* desc = NULL;
 
-void ast_type_prim_i8_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_i8(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
+  switch (node->kind)
+  {
+  case AST_TYPE_PRIM_I8:    desc = typebuilder_build_i8   (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_I16:   desc = typebuilder_build_i16  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_I32:   desc = typebuilder_build_i32  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_I64:   desc = typebuilder_build_i64  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_ISIZE: desc = typebuilder_build_isize(ctx->typebuilder); break;
+  case AST_TYPE_PRIM_U8:    desc = typebuilder_build_u8   (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_U16:   desc = typebuilder_build_u16  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_U32:   desc = typebuilder_build_u32  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_U64:   desc = typebuilder_build_u64  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_USIZE: desc = typebuilder_build_usize(ctx->typebuilder); break;
+  case AST_TYPE_PRIM_F32:   desc = typebuilder_build_f32  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_F64:   desc = typebuilder_build_f64  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_CHAR:  desc = typebuilder_build_char (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_BOOL:  desc = typebuilder_build_bool (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_UNIT:  desc = typebuilder_build_unit (ctx->typebuilder); break;
+  default: unreachable();
+  }
 
-void ast_type_prim_i16_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_i16(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_i32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_i32(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_i64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_i64(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_isize_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_isize(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_u8_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_u8(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_u16_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_u16(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_u32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_u32(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_u64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_u64(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_usize_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_usize(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_f32_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_f32(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_f64_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_f64(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_char_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_char(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_bool_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
-}
-
-void ast_type_prim_unit_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
-{
-  typedesc_t* desc = typebuilder_build_unit(ctx->typebuilder);
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 

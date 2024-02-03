@@ -10,7 +10,7 @@
 #ifndef TAU_AST_TYPE_MUT_H
 #define TAU_AST_TYPE_MUT_H
 
-#include "ast/type/modif.h"
+#include "ast/type/modif/modif.h"
 
 /**
  * \brief AST mutable type node.

@@ -5,7 +5,7 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "ast/type/array.h"
+#include "ast/type/modif/array.h"
 
 #include "ast/ast.h"
 #include "ast/registry.h"
