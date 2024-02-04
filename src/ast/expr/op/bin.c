@@ -137,14 +137,14 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
   }
   case OP_SUBS:
   {
-    if (typedesc_remove_const_ref_mut(lhs_desc)->kind != TYPEDESC_PTR)
+    if (typedesc_remove_const_ref_mut(lhs_desc)->kind != TYPEDESC_ARRAY)
       report_error_expected_pointer_type(node->lhs->tok->loc);
 
     if (!typedesc_is_integer(typedesc_remove_const_ref_mut(rhs_desc)))
       report_error_expected_integer_type(node->rhs->tok->loc);
 
-    typedesc_ptr_t* ptr_desc = (typedesc_ptr_t*)typedesc_remove_const_ref_mut(lhs_desc);
-    desc = typebuilder_build_ref(ctx->typebuilder, ptr_desc->base_type);
+    typedesc_array_t* array_desc = (typedesc_array_t*)typedesc_remove_const_ref_mut(lhs_desc);
+    desc = typebuilder_build_ref(ctx->typebuilder, array_desc->base_type);
     break;
   }
   default:
