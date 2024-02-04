@@ -84,7 +84,19 @@ void ast_type_mbr_codegen(codegen_ctx_t* ctx, ast_type_mbr_t* node)
 
 size_t ast_type_mbr_mangle(ast_type_mbr_t* node, char* buf, size_t len)
 {
-  return ast_node_mangle(node->decl, buf, len);
+  size_t written = 0;
+
+  switch (node->decl->kind)
+  {
+  case AST_DECL_STRUCT: written += snprintf(buf, len, "S"); break;
+  case AST_DECL_UNION:  written += snprintf(buf, len, "U"); break;
+  case AST_DECL_ENUM:   written += snprintf(buf, len, "E"); break;
+  default: unreachable();
+  }
+
+  written += ast_node_mangle_nested_name(node->decl, buf + written, len <= written ? 0 : len - written);
+
+  return written;
 }
 
 void ast_type_mbr_dump_json(FILE* stream, ast_type_mbr_t* node)

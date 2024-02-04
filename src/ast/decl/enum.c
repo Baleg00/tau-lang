@@ -83,8 +83,8 @@ void ast_decl_enum_codegen(codegen_ctx_t* ctx, ast_decl_enum_t* node)
 
 size_t ast_decl_enum_mangle(ast_decl_enum_t* node, char* buf, size_t len)
 {
-  size_t written = ast_node_mangle_nested_name((ast_node_t*)node, buf, len);
-  written += snprintf(buf + written, len <= written ? 0 : len - written, "@@");
+  size_t written = snprintf(buf, len, "_T");
+  written += ast_node_mangle_nested_name((ast_node_t*)node, buf + written, len <= written ? 0 : len - written);
 
   return written;
 }

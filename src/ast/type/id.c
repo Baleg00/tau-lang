@@ -75,7 +75,7 @@ size_t ast_type_id_mangle(ast_type_id_t* node, char* buf, size_t len)
   default: unreachable();
   }
 
-  written += ast_node_mangle(node->decl, buf + written, len <= written ? 0 : len - written);
+  written += ast_node_mangle_nested_name(node->decl, buf + written, len <= written ? 0 : len - written);
 
   return written;
 }

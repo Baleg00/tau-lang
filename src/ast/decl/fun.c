@@ -149,10 +149,12 @@ void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)
 
 size_t ast_decl_fun_mangle(ast_decl_fun_t* node, char* buf, size_t len)
 {
-  size_t written = ast_node_mangle_nested_name((ast_node_t*)node, buf, len);
-  written += snprintf(buf + written, len <= written ? 0 : len - written, "@F");
+  size_t written = snprintf(buf, len, "_T");
+  written += ast_node_mangle_nested_name((ast_node_t*)node, buf + written, len <= written ? 0 : len - written);
+  written += snprintf(buf + written, len <= written ? 0 : len - written, "F");
   written += callconv_mangle(node->callconv, buf + written, len <= written ? 0 : len - written);
   written += ast_node_mangle(node->return_type, buf + written, len <= written ? 0 : len - written);
+  written += snprintf(buf + written, len <= written ? 0 : len - written, "%zu", vector_size(node->params));
 
   VECTOR_FOR_LOOP(i, node->params)
   {
@@ -162,8 +164,6 @@ size_t ast_decl_fun_mangle(ast_decl_fun_t* node, char* buf, size_t len)
   
   if (node->is_vararg)
     written += snprintf(buf + written, len <= written ? 0 : len - written, "V");
-
-  written += snprintf(buf + written, len <= written ? 0 : len - written, "@@");
 
   return written;
 }

@@ -30,19 +30,21 @@ const char* callconv_kind_to_cstr(callconv_kind_t kind)
 
 size_t callconv_mangle(callconv_kind_t kind, char* buf, size_t len)
 {
+  const char* mangled_callconv = NULL;
+
   switch (kind)
   {
-  case CALLCONV_TAU:        return snprintf(buf, len, "C");
-  case CALLCONV_CDECL:      return snprintf(buf, len, "C");
-  case CALLCONV_STDCALL:    return snprintf(buf, len, "S");
-  case CALLCONV_WIN64:      return snprintf(buf, len, "W");
-  case CALLCONV_SYSV64:     return snprintf(buf, len, "Y");
-  case CALLCONV_AAPCS:      return snprintf(buf, len, "A");
-  case CALLCONV_FASTCALL:   return snprintf(buf, len, "F");
-  case CALLCONV_VECTORCALL: return snprintf(buf, len, "V");
-  case CALLCONV_THISCALL:   return snprintf(buf, len, "T");
+  case CALLCONV_TAU:        mangled_callconv = "C"; break;
+  case CALLCONV_CDECL:      mangled_callconv = "C"; break;
+  case CALLCONV_STDCALL:    mangled_callconv = "S"; break;
+  case CALLCONV_WIN64:      mangled_callconv = "W"; break;
+  case CALLCONV_SYSV64:     mangled_callconv = "Y"; break;
+  case CALLCONV_AAPCS:      mangled_callconv = "A"; break;
+  case CALLCONV_FASTCALL:   mangled_callconv = "F"; break;
+  case CALLCONV_VECTORCALL: mangled_callconv = "V"; break;
+  case CALLCONV_THISCALL:   mangled_callconv = "T"; break;
   default: unreachable();
   }
 
-  return 0;
+  return snprintf(buf, len, "%s", mangled_callconv);
 }
