@@ -26,7 +26,6 @@
 #include "stages/analysis/types/typedesc/fun.h"
 #include "stages/analysis/types/typedesc/modif.h"
 #include "stages/analysis/types/typedesc/mut.h"
-#include "stages/analysis/types/typedesc/null.h"
 #include "stages/analysis/types/typedesc/opt.h"
 #include "stages/analysis/types/typedesc/prim.h"
 #include "stages/analysis/types/typedesc/ptr.h"

@@ -53,7 +53,6 @@ typedef enum typedesc_kind_e
   TYPEDESC_CHAR, // Built-in type char
   TYPEDESC_BOOL, // Built-in type bool
   TYPEDESC_UNIT, // Built-in type unit
-  TYPEDESC_NULL, // Null type
   TYPEDESC_FUN, // Function type
   TYPEDESC_STRUCT, // Struct type
   TYPEDESC_UNION, // Union type

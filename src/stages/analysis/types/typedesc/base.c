@@ -38,7 +38,6 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
   case TYPEDESC_UNIT:   typedesc_prim_free  ((typedesc_prim_t*  )desc); break;
-  case TYPEDESC_NULL:   typedesc_null_free  ((typedesc_null_t*  )desc); break;
   case TYPEDESC_FUN:    typedesc_fun_free   ((typedesc_fun_t*   )desc); break;
   case TYPEDESC_STRUCT: typedesc_struct_free((typedesc_struct_t*)desc); break;
   case TYPEDESC_UNION:  typedesc_union_free ((typedesc_union_t* )desc); break;
