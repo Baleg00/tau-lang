@@ -25,15 +25,15 @@ typedef struct ast_decl_fun_t ast_decl_fun_t;
  */
 typedef struct codegen_ctx_t
 {
-  typetable_t* typetable;
-  ast_decl_fun_t* fun_node;
-  size_t param_idx;
-  size_t enum_idx;
+  typetable_t* typetable;        // Pointer to the associated type table.
+  ast_decl_fun_t* fun_node;      // Pointer to the current AST function declaration being visited.
+  size_t param_idx;              // Parameter index in the current function being visited.
+  size_t enum_idx;               // Enum constant index in the current enum being visited.
 
-  LLVMContextRef llvm_ctx;
-  LLVMTargetDataRef llvm_layout;
-  LLVMModuleRef llvm_mod;
-  LLVMBuilderRef llvm_builder;
+  LLVMContextRef llvm_ctx;       // Reference to the associated LLVM context.
+  LLVMTargetDataRef llvm_layout; // Reference to the associated LLVM target data layout.
+  LLVMModuleRef llvm_mod;        // Reference to the associated LLVM module.
+  LLVMBuilderRef llvm_builder;   // Reference to the associated LLVM IR builder.
 } codegen_ctx_t;
 
 /**

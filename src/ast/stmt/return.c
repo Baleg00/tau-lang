@@ -63,7 +63,19 @@ void ast_stmt_return_codegen(codegen_ctx_t* ctx, ast_stmt_return_t* node)
   else
   {
     ast_node_codegen(ctx, node->expr);
-    LLVMBuildRet(ctx->llvm_builder, ((ast_expr_t*)node->expr)->llvm_value);
+
+    ast_expr_t* expr_node = (ast_expr_t*)node->expr;
+    
+    LLVMValueRef llvm_return_value = expr_node->llvm_value;
+
+    typedesc_t* expected_return_desc = typetable_lookup(ctx->typetable, ctx->fun_node->return_type);
+    typedesc_t* actual_return_desc = typetable_lookup(ctx->typetable, node->expr);
+
+    if (typedesc_remove_const(expected_return_desc)->kind != TYPEDESC_REF &&
+        typedesc_remove_const(actual_return_desc)->kind == TYPEDESC_REF)
+      llvm_return_value = LLVMBuildLoad2(ctx->llvm_builder, expr_node->llvm_type, expr_node->llvm_value, "load_tmp");
+
+    LLVMBuildRet(ctx->llvm_builder, llvm_return_value);
   }
 }
 

@@ -82,6 +82,8 @@ void ast_expr_op_call_codegen(codegen_ctx_t* ctx, ast_expr_op_call_t* node)
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
   
+  typedesc_fun_t* fun_desc = (typedesc_fun_t*)typedesc_remove_const_ref(typetable_lookup(ctx->typetable, (ast_node_t*)node->callee));
+
   LLVMValueRef* llvm_param_values = NULL;
 
   if (vector_size(node->params) > 0)
@@ -92,7 +94,19 @@ void ast_expr_op_call_codegen(codegen_ctx_t* ctx, ast_expr_op_call_t* node)
     ast_expr_t* param = (ast_expr_t*)vector_get(node->params, i);
     ast_node_codegen(ctx, (ast_node_t*)param);
 
-    llvm_param_values[i] = param->llvm_value;
+    LLVMValueRef llvm_param_value = param->llvm_value;
+
+    if (i < vector_size(fun_desc->param_types))
+    {
+      typedesc_t* expected_param_desc = (typedesc_t*)vector_get(fun_desc->param_types, i);
+      typedesc_t* actual_param_desc = typetable_lookup(ctx->typetable, (ast_node_t*)param);
+
+      if (typedesc_remove_const(expected_param_desc)->kind != TYPEDESC_REF &&
+          typedesc_remove_const(actual_param_desc)->kind == TYPEDESC_REF)
+        llvm_param_value = LLVMBuildLoad2(ctx->llvm_builder, param->llvm_type, param->llvm_value, "load_tmp");
+    }
+
+    llvm_param_values[i] = llvm_param_value;
   }
 
   node->llvm_value = LLVMBuildCall2(
