@@ -218,6 +218,98 @@ bool op_is_unary(op_kind_t kind)
   }
 }
 
+bool op_is_arithmetic(op_kind_t kind)
+{
+  switch (kind)
+  {
+  case OP_ARIT_INC_PRE:
+  case OP_ARIT_INC_POST:
+  case OP_ARIT_DEC_PRE:
+  case OP_ARIT_DEC_POST:
+  case OP_ARIT_POS:
+  case OP_ARIT_NEG:
+  case OP_ARIT_ADD:
+  case OP_ARIT_SUB:
+  case OP_ARIT_MUL:
+  case OP_ARIT_DIV:
+  case OP_ARIT_MOD:
+  case OP_ASSIGN_ARIT_ADD:
+  case OP_ASSIGN_ARIT_SUB:
+  case OP_ASSIGN_ARIT_MUL:
+  case OP_ASSIGN_ARIT_DIV:
+  case OP_ASSIGN_ARIT_MOD:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool op_is_bitwise(op_kind_t kind)
+{
+  switch (kind)
+  {
+  case OP_BIT_AND:
+  case OP_BIT_OR:
+  case OP_BIT_XOR:
+  case OP_BIT_NOT:
+  case OP_BIT_LSH:
+  case OP_BIT_RSH:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool op_is_logical(op_kind_t kind)
+{
+  switch (kind)
+  {
+  case OP_LOGIC_AND:
+  case OP_LOGIC_OR:
+  case OP_LOGIC_NOT:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool op_is_comparison(op_kind_t kind)
+{
+  switch (kind)
+  {
+  case OP_CMP_EQ:
+  case OP_CMP_NE:
+  case OP_CMP_LT:
+  case OP_CMP_LE:
+  case OP_CMP_GT:
+  case OP_CMP_GE:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool op_is_assignment(op_kind_t kind)
+{
+  switch (kind)
+  {
+  case OP_ASSIGN:
+  case OP_ASSIGN_ARIT_ADD:
+  case OP_ASSIGN_ARIT_SUB:
+  case OP_ASSIGN_ARIT_MUL:
+  case OP_ASSIGN_ARIT_DIV:
+  case OP_ASSIGN_ARIT_MOD:
+  case OP_ASSIGN_BIT_AND:
+  case OP_ASSIGN_BIT_OR:
+  case OP_ASSIGN_BIT_XOR:
+  case OP_ASSIGN_BIT_LSH:
+  case OP_ASSIGN_BIT_RSH:
+    return true;
+  default:
+    return false;
+  }
+}
+
 bool op_is_left_assoc(op_kind_t kind)
 {
   switch (kind)

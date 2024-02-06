@@ -321,8 +321,8 @@ bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_de
       from_desc->kind != TYPEDESC_CONST)
     return false;
 
-  to_desc = typedesc_remove_const_mut(to_desc);
-  from_desc = typedesc_remove_const_mut(from_desc);
+  to_desc = typedesc_remove_const(to_desc);
+  from_desc = typedesc_remove_const(from_desc);
 
   if (to_desc->kind == TYPEDESC_REF)
   {
@@ -337,7 +337,10 @@ bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_de
       return false;
   }
   else
-    from_desc = typedesc_remove_ref(from_desc);
+  {
+    to_desc = typedesc_remove_const_ref_mut(from_desc);
+    from_desc = typedesc_remove_const_ref_mut(from_desc);
+  }
 
   return to_desc == from_desc;
 }

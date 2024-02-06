@@ -146,6 +146,8 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
 
   ast_expr_t* expr = (ast_expr_t*)node->expr;
 
+  typedesc_t* expr_desc = typedesc_remove_const_ref_mut(typetable_lookup(ctx->typetable, node->expr));
+
   switch (node->op_kind)
   {
   case OP_SIZEOF:
@@ -163,15 +165,31 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
   case OP_ARIT_INC_PRE:
   {
     LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");
-    LLVMValueRef llvm_inc_value = LLVMBuildAdd(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "pre_inc_tmp");
-    LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
+    LLVMValueRef llvm_inc_value = NULL;
+
+    if (typedesc_is_integer(expr_desc))
+      llvm_inc_value = LLVMBuildAdd(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "pre_inc_tmp");
+    else if (typedesc_is_float(expr_desc))
+      llvm_inc_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "pre_inc_tmp");
+    else
+      unreachable();
+
+    LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);    
     node->llvm_value = expr->llvm_value;
     break;
   }
   case OP_ARIT_INC_POST:
   {
     LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");
-    LLVMValueRef llvm_inc_value = LLVMBuildAdd(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "post_inc_tmp");
+    LLVMValueRef llvm_inc_value = NULL;
+
+    if (typedesc_is_integer(expr_desc))
+      llvm_inc_value = LLVMBuildAdd(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "post_inc_tmp");
+    else if (typedesc_is_float(expr_desc))
+      llvm_inc_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "post_inc_tmp");
+    else
+      unreachable();
+    
     LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
     node->llvm_value = llvm_value;
     break;
@@ -179,16 +197,32 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
   case OP_ARIT_DEC_PRE:
   {
     LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");
-    LLVMValueRef llvm_inc_value = LLVMBuildSub(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "pre_dec_tmp");
-    LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
+    LLVMValueRef llvm_dec_value = NULL;
+
+    if (typedesc_is_integer(expr_desc))
+      llvm_dec_value = LLVMBuildSub(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "pre_dec_tmp");
+    else if (typedesc_is_float(expr_desc))
+      llvm_dec_value = LLVMBuildFSub(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "pre_dec_tmp");
+    else
+      unreachable();
+
+    LLVMBuildStore(ctx->llvm_builder, llvm_dec_value, expr->llvm_value);
     node->llvm_value = expr->llvm_value;
     break;
   }
   case OP_ARIT_DEC_POST:
   {
     LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");
-    LLVMValueRef llvm_inc_value = LLVMBuildSub(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "post_dec_tmp");
-    LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
+    LLVMValueRef llvm_dec_value = NULL;
+
+    if (typedesc_is_integer(expr_desc))
+      llvm_dec_value = LLVMBuildSub(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "post_dec_tmp");
+    else if (typedesc_is_float(expr_desc))
+      llvm_dec_value = LLVMBuildFSub(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "post_dec_tmp");
+    else
+      unreachable();
+
+    LLVMBuildStore(ctx->llvm_builder, llvm_dec_value, expr->llvm_value);
     node->llvm_value = llvm_value;
     break;
   }
@@ -200,7 +234,14 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
   case OP_ARIT_NEG:
   {
     LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, expr);
-    node->llvm_value = LLVMBuildNeg(ctx->llvm_builder, llvm_value, "neg_tmp");
+
+    if (typedesc_is_integer(expr_desc))
+      node->llvm_value = LLVMBuildNeg(ctx->llvm_builder, llvm_value, "neg_tmp");
+    else if (typedesc_is_float(expr_desc))
+      node->llvm_value = LLVMBuildFNeg(ctx->llvm_builder, llvm_value, "fneg_tmp");
+    else
+      unreachable();
+
     break;
   }
   case OP_BIT_NOT:
@@ -212,9 +253,7 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
   }
   case OP_IND:
   {
-    typedesc_t* expr_desc = typetable_lookup(ctx->typetable, (ast_node_t*)expr);
-    typedesc_ptr_t* ptr_desc = (typedesc_ptr_t*)typedesc_remove_const_ref_mut(expr_desc);
-    node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, ptr_desc->base_type->llvm_type, expr->llvm_value, "load2_tmp");
+    node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_ptr_t*)expr_desc)->base_type->llvm_type, expr->llvm_value, "load2_tmp");
     break;
   }
   case OP_ADDR:

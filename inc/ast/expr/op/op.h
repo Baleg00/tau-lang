@@ -120,6 +120,46 @@ bool op_is_binary(op_kind_t kind);
 bool op_is_unary(op_kind_t kind);
 
 /**
+ * \brief Checks if an operator is arithmetic.
+ * 
+ * \param kind Operator kind.
+ * \returns `true` if the operator is arithmetic, `false` otherwise.
+ */
+bool op_is_arithmetic(op_kind_t kind);
+
+/**
+ * \brief Checks if an operator is bitwise.
+ * 
+ * \param kind Operator kind.
+ * \returns `true` if the operator is bitwise, `false` otherwise.
+ */
+bool op_is_bitwise(op_kind_t kind);
+
+/**
+ * \brief Checks if an operator is logical.
+ * 
+ * \param kind Operator kind.
+ * \returns `true` if the operator is logical, `false` otherwise.
+ */
+bool op_is_logical(op_kind_t kind);
+
+/**
+ * \brief Checks if an operator is a comparison.
+ * 
+ * \param kind Operator kind.
+ * \returns `true` if the operator is a comparison, `false` otherwise.
+ */
+bool op_is_comparison(op_kind_t kind);
+
+/**
+ * \brief Checks if an operator is an assignment.
+ * 
+ * \param kind Operator kind.
+ * \returns `true` if the operator is an assignment, `false` otherwise.
+ */
+bool op_is_assignment(op_kind_t kind);
+
+/**
  * \brief Checks if an operator is left associative.
  * 
  * \param kind Operator kind.
