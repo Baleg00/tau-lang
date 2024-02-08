@@ -8,34 +8,10 @@
 #include "ast/expr/op/bin.h"
 
 #include "ast/registry.h"
+#include "stages/codegen/utils.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
-
-static LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
-{
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
-
-  if (typedesc_remove_const(desc)->kind == TYPEDESC_REF)
-    return LLVMBuildLoad2(ctx->llvm_builder, node->llvm_type, node->llvm_value, "load_tmp");
-
-  return node->llvm_value;
-}
-
-static LLVMValueRef codegen_build_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
-{
-  if (from_desc == to_desc)
-    return llvm_value;
-
-  if (typedesc_is_integer(from_desc) && typedesc_is_float(to_desc))
-    if (typedesc_is_signed(from_desc))
-      return LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "sitofp_tmp");
-    else
-      return LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "uitofp_tmp");
-
-  unreachable();
-  return NULL;
-}
 
 ast_expr_op_bin_t* ast_expr_op_bin_init(void)
 {
@@ -192,8 +168,8 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
   {
     promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
 
-    llvm_lhs_value = codegen_build_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
-    llvm_rhs_value = codegen_build_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+    llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+    llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
   }
 
   switch (node->op_kind)

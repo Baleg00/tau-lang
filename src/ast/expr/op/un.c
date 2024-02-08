@@ -8,19 +8,10 @@
 #include "ast/expr/op/un.h"
 
 #include "ast/registry.h"
+#include "stages/codegen/utils.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
-
-static LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
-{
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
-
-  if (typedesc_remove_const(desc)->kind == TYPEDESC_REF)
-    return LLVMBuildLoad2(ctx->llvm_builder, node->llvm_type, node->llvm_value, "load_tmp");
-
-  return node->llvm_value;
-}
 
 ast_expr_op_un_t* ast_expr_op_un_init(void)
 {
