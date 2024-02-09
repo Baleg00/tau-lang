@@ -55,6 +55,14 @@ void ast_decl_mod_nameres(nameres_ctx_t* ctx, ast_decl_mod_t* node);
 void ast_decl_mod_typecheck(typecheck_ctx_t* ctx, ast_decl_mod_t* node);
 
 /**
+ * \brief Performs control flow analysis pass on an AST module declaration node.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_decl_mod_ctrlflow(ctrlflow_ctx_t* ctx, ast_decl_mod_t* node);
+
+/**
  * \brief Performs code generation pass on an AST module declaration node.
  * 
  * \param[in] ctx Pointer to the code generation context.

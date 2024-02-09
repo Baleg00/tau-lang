@@ -68,6 +68,14 @@ void ast_decl_fun_nameres(nameres_ctx_t* ctx, ast_decl_fun_t* node);
 void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node);
 
 /**
+ * \brief Performs control flow analysis pass on an AST function declaration node.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_decl_fun_ctrlflow(ctrlflow_ctx_t* ctx, ast_decl_fun_t* node);
+
+/**
  * \brief Performs code generation pass on an AST function declaration node.
  * 
  * \param[in] ctx Pointer to the code generation context.

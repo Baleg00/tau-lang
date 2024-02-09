@@ -200,6 +200,69 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   }
 }
 
+void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
+{
+  if (node == NULL)
+    return;
+
+  switch (node->kind)
+  {
+  case AST_TYPE_ID:
+  case AST_TYPE_MUT:
+  case AST_TYPE_CONST:
+  case AST_TYPE_PTR:
+  case AST_TYPE_ARRAY:
+  case AST_TYPE_REF:
+  case AST_TYPE_OPT:
+  case AST_TYPE_FUN:
+  case AST_TYPE_PRIM_I8:
+  case AST_TYPE_PRIM_I16:
+  case AST_TYPE_PRIM_I32:
+  case AST_TYPE_PRIM_I64:
+  case AST_TYPE_PRIM_ISIZE:
+  case AST_TYPE_PRIM_U8:
+  case AST_TYPE_PRIM_U16:
+  case AST_TYPE_PRIM_U32:
+  case AST_TYPE_PRIM_U64:
+  case AST_TYPE_PRIM_USIZE:
+  case AST_TYPE_PRIM_F32:
+  case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_CHAR:
+  case AST_TYPE_PRIM_BOOL:
+  case AST_TYPE_PRIM_UNIT:
+  case AST_TYPE_MEMBER:
+  case AST_EXPR_ID:
+  case AST_EXPR_LIT_INT:
+  case AST_EXPR_LIT_FLT:
+  case AST_EXPR_LIT_STR:
+  case AST_EXPR_LIT_CHAR:
+  case AST_EXPR_LIT_BOOL:
+  case AST_EXPR_LIT_NULL:
+  case AST_EXPR_OP_UNARY:
+  case AST_EXPR_OP_BINARY:
+  case AST_EXPR_OP_CALL:
+  case AST_STMT_EXPR:
+  case AST_DECL_VAR:
+  case AST_DECL_PARAM:
+  case AST_DECL_STRUCT:
+  case AST_DECL_UNION:
+  case AST_DECL_ENUM:
+  case AST_DECL_ENUM_CONSTANT: break;
+  case AST_STMT_IF:            ast_stmt_if_ctrlflow           (ctx, (ast_stmt_if_t*           )node); break;
+  case AST_STMT_FOR:           ast_stmt_for_ctrlflow          (ctx, (ast_stmt_for_t*          )node); break;
+  case AST_STMT_WHILE:         ast_stmt_while_ctrlflow        (ctx, (ast_stmt_while_t*        )node); break;
+  case AST_STMT_BREAK:         ast_stmt_break_ctrlflow        (ctx, (ast_stmt_break_t*        )node); break;
+  case AST_STMT_CONTINUE:      ast_stmt_continue_ctrlflow     (ctx, (ast_stmt_continue_t*     )node); break;
+  case AST_STMT_RETURN:        ast_stmt_return_ctrlflow       (ctx, (ast_stmt_return_t*       )node); break;
+  case AST_STMT_DEFER:         ast_stmt_defer_ctrlflow        (ctx, (ast_stmt_defer_t*        )node); break;
+  case AST_STMT_BLOCK:         ast_stmt_block_ctrlflow        (ctx, (ast_stmt_block_t*        )node); break;
+  case AST_DECL_FUN:           ast_decl_fun_ctrlflow          (ctx, (ast_decl_fun_t*          )node); break;
+  case AST_DECL_MOD:           ast_decl_mod_ctrlflow          (ctx, (ast_decl_mod_t*          )node); break;
+  case AST_PROG:               ast_prog_ctrlflow              (ctx, (ast_prog_t*              )node); break;
+  default: unreachable();
+  }
+}
+
 void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
 {
   if (node == NULL)

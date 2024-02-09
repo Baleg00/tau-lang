@@ -52,6 +52,11 @@ void ast_stmt_while_typecheck(typecheck_ctx_t* ctx, ast_stmt_while_t* node)
     report_error_expected_bool_type(node->cond->tok->loc);
 }
 
+void ast_stmt_while_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_while_t* node)
+{
+  ast_node_ctrlflow(ctx, node->stmt);
+}
+
 void ast_stmt_while_codegen(codegen_ctx_t* ctx, ast_stmt_while_t* node)
 {
   node->llvm_cond = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "while_cond");

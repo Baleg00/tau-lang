@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 
+#include "stages/analysis/ctrlflow.h"
 #include "stages/analysis/nameres.h"
 #include "stages/analysis/types/typecheck.h"
 #include "stages/codegen/codegen.h"
@@ -119,6 +120,14 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node);
  * \param[in,out] node Pointer to the AST node to be visited.
  */
 void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node);
+
+/**
+ * \brief Performs control flow analysis pass on an AST node.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node);
 
 /**
  * \brief Performs code generation pass on an AST node.

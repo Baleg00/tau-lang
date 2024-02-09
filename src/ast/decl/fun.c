@@ -96,6 +96,11 @@ void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
   ctx->fun_desc = NULL;
 }
 
+void ast_decl_fun_ctrlflow(ctrlflow_ctx_t* ctx, ast_decl_fun_t* node)
+{
+  ast_node_ctrlflow(ctx, node->stmt);
+}
+
 void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)
 {
   ast_node_codegen(ctx, node->return_type);

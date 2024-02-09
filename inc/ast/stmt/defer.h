@@ -52,6 +52,14 @@ void ast_stmt_defer_nameres(nameres_ctx_t* ctx, ast_stmt_defer_t* node);
 void ast_stmt_defer_typecheck(typecheck_ctx_t* ctx, ast_stmt_defer_t* node);
 
 /**
+ * \brief Performs control flow analysis pass on an AST defer statement node.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_stmt_defer_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_defer_t* node);
+
+/**
  * \brief Performs code generation pass on an AST defer statement node.
  * 
  * \param[in] ctx Pointer to the code generation context.

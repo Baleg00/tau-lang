@@ -38,6 +38,12 @@ void ast_stmt_defer_typecheck(typecheck_ctx_t* ctx, ast_stmt_defer_t* node)
   ast_node_typecheck(ctx, node->stmt);
 }
 
+void ast_stmt_defer_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_defer_t* node)
+{
+  unreachable();
+  // TODO
+}
+
 void ast_stmt_defer_codegen(codegen_ctx_t* ctx, ast_stmt_defer_t* node)
 {
   unreachable();

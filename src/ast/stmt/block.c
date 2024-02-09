@@ -45,6 +45,16 @@ void ast_stmt_block_typecheck(typecheck_ctx_t* ctx, ast_stmt_block_t* node)
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->stmts, i));
 }
 
+void ast_stmt_block_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_block_t* node)
+{
+  ctrlflow_ctx_block_begin(ctx, node);
+
+  VECTOR_FOR_LOOP(i, node->stmts)
+    ast_node_ctrlflow(ctx, (ast_node_t*)vector_get(node->stmts, i));
+
+  ctrlflow_ctx_block_end(ctx);
+}
+
 void ast_stmt_block_codegen(codegen_ctx_t* ctx, ast_stmt_block_t* node)
 {
   VECTOR_FOR_LOOP(i, node->stmts)
