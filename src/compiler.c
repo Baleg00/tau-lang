@@ -13,6 +13,7 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 #include "llvm.h"
+#include "stages/analysis/ctrlflow.h"
 #include "stages/analysis/symtable.h"
 #include "stages/analysis/types/typetable.h"
 #include "stages/lexer/lexer.h"
@@ -184,12 +185,28 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
   typecheck_ctx_t* typecheck_ctx = typecheck_ctx_init(llvm_get_context(), llvm_get_data());
   time_it("analysis:typecheck", ast_node_typecheck(typecheck_ctx, root_node));
 
+  ctrlflow_ctx_t* ctrlflow_ctx = ctrlflow_ctx_init();
+  time_it("analysis:ctrlflow", ast_node_ctrlflow(ctrlflow_ctx, root_node));
+
   LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", llvm_get_context());
   codegen_ctx_t* codegen_ctx = codegen_ctx_init(typecheck_ctx->typetable, llvm_get_context(), llvm_get_data(), llvm_module);
   time_it("codegen", ast_node_codegen(codegen_ctx, root_node));
 
   if (compiler->flags.emit_ll)
     compiler_emit_ll(path, llvm_module);
+
+  LLVMVerifyModule(llvm_module, LLVMAbortProcessAction, NULL);
+
+  LLVMPassBuilderOptionsRef llvm_pass_builder_options = LLVMCreatePassBuilderOptions();
+  LLVMPassBuilderOptionsSetVerifyEach(llvm_pass_builder_options, true);
+
+#ifdef TAU_DEBUG
+  LLVMPassBuilderOptionsSetDebugLogging(llvm_pass_builder_options, true);
+#endif
+
+  LLVMRunPasses(llvm_module, "default<O0>", llvm_get_machine(), llvm_pass_builder_options);
+
+  LLVMDisposePassBuilderOptions(llvm_pass_builder_options);
 
   if (compiler->flags.emit_bc)
     compiler_emit_bc(path, llvm_module);
@@ -203,6 +220,7 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
   LLVMDisposeModule(llvm_module);
 
   codegen_ctx_free(codegen_ctx);
+  ctrlflow_ctx_free(ctrlflow_ctx);
   typecheck_ctx_free(typecheck_ctx);
   nameres_ctx_free(nameres_ctx);
   parser_free(parser);

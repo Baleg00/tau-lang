@@ -58,8 +58,6 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
 
 void ast_stmt_return_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_return_t* node)
 {
-  unreachable();
-  // TODO
 }
 
 void ast_stmt_return_codegen(codegen_ctx_t* ctx, ast_stmt_return_t* node)
