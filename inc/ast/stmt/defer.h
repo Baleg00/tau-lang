@@ -18,7 +18,7 @@
 typedef struct ast_stmt_defer_t
 {
   AST_STMT_HEADER;
-  ast_node_t* stmt; // The associated statement.
+  ast_node_t* stmt; // Pointer to the associated deferred statement.
 } ast_stmt_defer_t;
 
 /**

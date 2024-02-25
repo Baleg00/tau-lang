@@ -18,7 +18,7 @@
 typedef struct ast_stmt_return_t
 {
   AST_STMT_HEADER;
-  ast_node_t* expr; // The associated optional expression.
+  ast_node_t* expr; // Pointer to the returned expression, or `NULL` in case of `unit`.
 } ast_stmt_return_t;
 
 /**

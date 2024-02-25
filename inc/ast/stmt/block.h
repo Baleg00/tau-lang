@@ -19,7 +19,7 @@ typedef struct ast_stmt_block_t
 {
   AST_STMT_HEADER;
   symtable_t* scope; // The associated scope.
-  vector_t* stmts; // The list of associated statements.
+  vector_t* stmts;   // Collection of statements within the block.
 } ast_stmt_block_t;
 
 /**
