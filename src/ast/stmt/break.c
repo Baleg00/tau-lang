@@ -10,6 +10,7 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
 
 ast_stmt_break_t* ast_stmt_break_init(void)
@@ -39,6 +40,20 @@ void ast_stmt_break_typecheck(typecheck_ctx_t* ctx, ast_stmt_break_t* node)
 
 void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)
 {
+  if (vector_empty(ctx->stmts))
+    report_error_break_outside_loop(node->tok->loc);
+  
+  for (int i = (int)vector_size(ctx->stmts) - 1; i >= 0; i--)
+  {
+    ast_node_t* stmt_node = (ast_node_t*)vector_get(ctx->stmts, (size_t)i);
+
+    switch (stmt_node->kind)
+    {
+    case AST_STMT_FOR:
+    case AST_STMT_WHILE: node->loop = stmt_node; return;
+    default: report_error_break_outside_loop(node->tok->loc);
+    }
+  }
 }
 
 void ast_stmt_break_codegen(codegen_ctx_t* ctx, ast_stmt_break_t* node)

@@ -11,6 +11,22 @@
 #define TAU_CTRLFLOW_H
 
 #include "utils/collections/stack.h"
+#include "utils/collections/vector.h"
+
+/**
+ * \see ast/stmt/while.h
+ */
+typedef struct ast_stmt_while_t ast_stmt_while_t;
+
+/**
+ * \see ast/stmt/for.h
+ */
+typedef struct ast_stmt_for_t ast_stmt_for_t;
+
+/**
+ * \see ast/stmt/defer.h
+ */
+typedef struct ast_stmt_defer_t ast_stmt_defer_t;
 
 /**
  * \see ast/stmt/block.h
@@ -23,6 +39,7 @@ typedef struct ast_stmt_block_t ast_stmt_block_t;
 typedef struct ctrlflow_ctx_t
 {
   stack_t* blocks; // Stack of AST block statements currently being visited.
+  vector_t* stmts; // Stack of AST statements (for, while, defer) currently being visited.
 } ctrlflow_ctx_t;
 
 /**
@@ -61,5 +78,50 @@ void ctrlflow_ctx_block_end(ctrlflow_ctx_t* ctx);
  * \returns Pointer to the current block statement, or `NULL` if there isn't one.
  */
 ast_stmt_block_t* ctrlflow_ctx_block_cur(ctrlflow_ctx_t* ctx);
+
+/**
+ * \brief Marks the beginning of a new while statement.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ * \param[in] node Pointer to the AST while statement node.
+ */
+void ctrlflow_ctx_while_begin(ctrlflow_ctx_t* ctx, ast_stmt_while_t* node);
+
+/**
+ * \brief Marks the end of the current while statement.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ */
+void ctrlflow_ctx_while_end(ctrlflow_ctx_t* ctx);
+
+/**
+ * \brief Marks the beginning of a new for statement.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ * \param[in] node Pointer to the AST for statement node.
+ */
+void ctrlflow_ctx_for_begin(ctrlflow_ctx_t* ctx, ast_stmt_for_t* node);
+
+/**
+ * \brief Marks the end of the current for statement.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ */
+void ctrlflow_ctx_for_end(ctrlflow_ctx_t* ctx);
+
+/**
+ * \brief Marks the beginning of a new defer statement.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ * \param[in] node Pointer to the AST defer statement node.
+ */
+void ctrlflow_ctx_defer_begin(ctrlflow_ctx_t* ctx, ast_stmt_defer_t* node);
+
+/**
+ * \brief Marks the end of the current defer statement.
+ * 
+ * \param[in] ctx Pointer to the control flow analysis context.
+ */
+void ctrlflow_ctx_defer_end(ctrlflow_ctx_t* ctx);
 
 #endif

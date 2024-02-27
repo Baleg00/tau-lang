@@ -42,8 +42,12 @@ void ast_stmt_for_typecheck(typecheck_ctx_t* ctx, ast_stmt_for_t* node)
 
 void ast_stmt_for_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_for_t* node)
 {
+  ctrlflow_ctx_for_begin(ctx, node);
+
   unreachable();
   // TODO
+
+  ctrlflow_ctx_for_end(ctx);
 }
 
 void ast_stmt_for_codegen(codegen_ctx_t* ctx, ast_stmt_for_t* node)

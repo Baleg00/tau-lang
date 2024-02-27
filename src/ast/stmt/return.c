@@ -42,8 +42,6 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
   if (ctx->fun_desc == NULL)
     report_error_return_outside_function(node->tok->loc);
 
-  // TODO: check if return is inside defer statement
-
   typedesc_t* expr_desc = typebuilder_build_unit(ctx->typebuilder);
 
   if (node->expr != NULL)
@@ -58,6 +56,13 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
 
 void ast_stmt_return_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_return_t* node)
 {
+  for (int i = (int)vector_size(ctx->stmts) - 1; i >= 0; i--)
+  {
+    ast_node_t* stmt_node = (ast_node_t*)vector_get(ctx->stmts, (size_t)i);
+
+    if (stmt_node->kind == AST_STMT_DEFER)
+      report_error_return_inside_defer(node->tok->loc);
+  }
 }
 
 void ast_stmt_return_codegen(codegen_ctx_t* ctx, ast_stmt_return_t* node)

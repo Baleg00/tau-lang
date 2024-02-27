@@ -54,7 +54,11 @@ void ast_stmt_while_typecheck(typecheck_ctx_t* ctx, ast_stmt_while_t* node)
 
 void ast_stmt_while_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_while_t* node)
 {
+  ctrlflow_ctx_while_begin(ctx, node);
+
   ast_node_ctrlflow(ctx, node->stmt);
+  
+  ctrlflow_ctx_while_end(ctx);
 }
 
 void ast_stmt_while_codegen(codegen_ctx_t* ctx, ast_stmt_while_t* node)
