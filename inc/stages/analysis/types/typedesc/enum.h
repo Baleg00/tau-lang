@@ -35,4 +35,13 @@ typedesc_enum_t* typedesc_enum_init(void);
  */
 void typedesc_enum_free(typedesc_enum_t* desc);
 
+/**
+ * \brief Checks if a enum type is implicitly convertible to another type.
+ * 
+ * \param[in] desc Pointer to the enum type descriptor.
+ * \param[in] target_desc Pointer to the type descriptor to check conversion into.
+ * \returns `true` if the implicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_enum_is_implicitly_convertible(typedesc_enum_t* desc, typedesc_t* target_desc);
+
 #endif

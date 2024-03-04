@@ -274,10 +274,16 @@ bool typedesc_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc)
 
 bool typedesc_can_add_mut(typedesc_t* desc)
 {
-  return desc->kind != TYPEDESC_MUT &&
-         desc->kind != TYPEDESC_REF &&
-         desc->kind != TYPEDESC_FUN &&
-         desc->kind != TYPEDESC_CONST;
+  switch (desc->kind)
+  {
+  case TYPEDESC_MUT:
+  case TYPEDESC_CONST:
+  case TYPEDESC_REF:
+  case TYPEDESC_FUN:
+    return false;
+  default:
+    return true;
+  }
 }
 
 bool typedesc_can_add_const(typedesc_t* desc)
@@ -287,62 +293,89 @@ bool typedesc_can_add_const(typedesc_t* desc)
 
 bool typedesc_can_add_ptr(typedesc_t* desc)
 {
-  desc = typedesc_remove_mut(desc);
-
-  return desc->kind != TYPEDESC_CONST &&
-         desc->kind != TYPEDESC_REF;
+  switch (desc->kind)
+  {
+  case TYPEDESC_CONST:
+  case TYPEDESC_REF:
+    return false;
+  default:
+    return true;
+  }
 }
 
 bool typedesc_can_add_array(typedesc_t* desc)
 {
-  return typedesc_can_add_ptr(desc);
+  switch (desc->kind)
+  {
+  case TYPEDESC_CONST:
+  case TYPEDESC_REF:
+  case TYPEDESC_FUN:
+    return false;
+  default:
+    return true;
+  }
 }
 
 bool typedesc_can_add_ref(typedesc_t* desc)
 {
-  desc = typedesc_remove_mut(desc);
-  
-  return desc->kind != TYPEDESC_CONST &&
-         desc->kind != TYPEDESC_REF;
+  switch (desc->kind)
+  {
+  case TYPEDESC_CONST:
+  case TYPEDESC_REF:
+    return false;
+  default:
+    return true;
+  }
 }
 
 bool typedesc_can_add_opt(typedesc_t* desc)
 {
-  desc = typedesc_remove_mut(desc);
-
-  return desc->kind != TYPEDESC_OPT &&
-         desc->kind != TYPEDESC_CONST &&
-         desc->kind != TYPEDESC_REF;
+  switch (desc->kind)
+  {
+  case TYPEDESC_MUT:
+  case TYPEDESC_CONST:
+  case TYPEDESC_REF:
+  case TYPEDESC_OPT:
+  case TYPEDESC_FUN:
+    return false;
+  default:
+    return true;
+  }
 }
 
-bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc)
+bool typedesc_is_implicitly_convertible(typedesc_t* desc, typedesc_t* target_desc)
 {
-  if (to_desc->kind == TYPEDESC_CONST &&
-      from_desc->kind != TYPEDESC_CONST)
-    return false;
-
-  to_desc = typedesc_remove_const(to_desc);
-  from_desc = typedesc_remove_const(from_desc);
-
-  if (to_desc->kind == TYPEDESC_REF)
+  switch (desc->kind)
   {
-    if (from_desc->kind != TYPEDESC_REF)
-      return false;
-
-    to_desc = typedesc_remove_ref(to_desc);
-    from_desc = typedesc_remove_ref(from_desc);
-
-    if (to_desc->kind == TYPEDESC_MUT &&
-        from_desc->kind != TYPEDESC_MUT)
-      return false;
+  case TYPEDESC_MUT:    return typedesc_mut_is_implicitly_convertible   ((typedesc_mut_t*   )desc, target_desc);
+  case TYPEDESC_CONST:  return typedesc_const_is_implicitly_convertible ((typedesc_const_t* )desc, target_desc);
+  case TYPEDESC_PTR:    return typedesc_ptr_is_implicitly_convertible   ((typedesc_ptr_t*   )desc, target_desc);
+  case TYPEDESC_ARRAY:  return typedesc_array_is_implicitly_convertible ((typedesc_array_t* )desc, target_desc);
+  case TYPEDESC_REF:    return typedesc_ref_is_implicitly_convertible   ((typedesc_ref_t*   )desc, target_desc);
+  case TYPEDESC_OPT:    return typedesc_opt_is_implicitly_convertible   ((typedesc_opt_t*   )desc, target_desc);
+  case TYPEDESC_I8:
+  case TYPEDESC_I16:
+  case TYPEDESC_I32:
+  case TYPEDESC_I64:
+  case TYPEDESC_ISIZE:
+  case TYPEDESC_U8:
+  case TYPEDESC_U16:
+  case TYPEDESC_U32:
+  case TYPEDESC_U64:
+  case TYPEDESC_USIZE:
+  case TYPEDESC_F32:
+  case TYPEDESC_F64:
+  case TYPEDESC_CHAR:
+  case TYPEDESC_BOOL:
+  case TYPEDESC_UNIT:   return typedesc_prim_is_implicitly_convertible  ((typedesc_prim_t*  )desc, target_desc);
+  case TYPEDESC_FUN:    return typedesc_fun_is_implicitly_convertible   ((typedesc_fun_t*   )desc, target_desc);
+  case TYPEDESC_STRUCT: return typedesc_struct_is_implicitly_convertible((typedesc_struct_t*)desc, target_desc);
+  case TYPEDESC_UNION:  return typedesc_union_is_implicitly_convertible ((typedesc_union_t* )desc, target_desc);
+  case TYPEDESC_ENUM:   return typedesc_enum_is_implicitly_convertible  ((typedesc_enum_t*  )desc, target_desc);
+  default: unreachable();
   }
-  else
-  {
-    to_desc = typedesc_remove_const_ref_mut(from_desc);
-    from_desc = typedesc_remove_const_ref_mut(from_desc);
-  }
 
-  return to_desc == from_desc;
+  return false;
 }
 
 size_t typedesc_integer_bits(typedesc_t* desc)

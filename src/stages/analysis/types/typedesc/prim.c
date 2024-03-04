@@ -99,3 +99,8 @@ void typedesc_prim_free(typedesc_prim_t* desc)
 {
   free(desc);
 }
+
+bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* desc, typedesc_t* target_desc)
+{
+  return (typedesc_t*)desc == typedesc_remove_mut(target_desc);
+}

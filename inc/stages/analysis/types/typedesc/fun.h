@@ -40,4 +40,13 @@ typedesc_fun_t* typedesc_fun_init(void);
  */
 void typedesc_fun_free(typedesc_fun_t* desc);
 
+/**
+ * \brief Checks if a function type is implicitly convertible to another type.
+ * 
+ * \param[in] desc Pointer to the function type descriptor.
+ * \param[in] target_desc Pointer to the type descriptor to check conversion into.
+ * \returns `true` if the implicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_fun_is_implicitly_convertible(typedesc_fun_t* desc, typedesc_t* target_desc);
+
 #endif

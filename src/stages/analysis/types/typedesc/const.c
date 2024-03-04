@@ -24,3 +24,8 @@ void typedesc_const_free(typedesc_const_t* desc)
 {
   free(desc);
 }
+
+bool typedesc_const_is_implicitly_convertible(typedesc_const_t* desc, typedesc_t* target_desc)
+{
+  return typedesc_is_implicitly_convertible(desc->base_type, typedesc_remove_const(target_desc));
+}

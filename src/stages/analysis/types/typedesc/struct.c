@@ -25,3 +25,8 @@ void typedesc_struct_free(typedesc_struct_t* desc)
   vector_free(desc->field_types);
   free(desc);
 }
+
+bool typedesc_struct_is_implicitly_convertible(typedesc_struct_t* desc, typedesc_t* target_desc)
+{
+  return (typedesc_t*)desc == typedesc_remove_mut(target_desc);
+}

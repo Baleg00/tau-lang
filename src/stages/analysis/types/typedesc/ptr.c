@@ -24,3 +24,16 @@ void typedesc_ptr_free(typedesc_ptr_t* desc)
 {
   free(desc);
 }
+
+bool typedesc_ptr_is_implicitly_convertible(typedesc_ptr_t* desc, typedesc_t* target_desc)
+{
+  if (target_desc->kind != TYPEDESC_PTR)
+    return false;
+
+  typedesc_ptr_t* target_ptr_desc = (typedesc_ptr_t*)target_desc;
+
+  if (desc->base_type->kind != TYPEDESC_MUT && target_ptr_desc->base_type->kind == TYPEDESC_MUT)
+    return false;
+
+  return typedesc_is_implicitly_convertible(desc->base_type, typedesc_remove_ptr(target_desc));
+}

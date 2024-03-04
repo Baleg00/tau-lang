@@ -25,3 +25,8 @@ void typedesc_union_free(typedesc_union_t* desc)
   vector_free(desc->field_types);
   free(desc);
 }
+
+bool typedesc_union_is_implicitly_convertible(typedesc_union_t* desc, typedesc_t* target_desc)
+{
+  return (typedesc_t*)desc == typedesc_remove_mut(target_desc);
+}

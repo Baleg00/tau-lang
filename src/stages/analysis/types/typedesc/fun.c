@@ -25,3 +25,8 @@ void typedesc_fun_free(typedesc_fun_t* desc)
   vector_free(desc->param_types);
   free(desc);
 }
+
+bool typedesc_fun_is_implicitly_convertible(typedesc_fun_t* desc, typedesc_t* target_desc)
+{
+  return (typedesc_t*)desc == target_desc;
+}

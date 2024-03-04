@@ -48,8 +48,12 @@ void ast_type_ref_typecheck(typecheck_ctx_t* ctx, ast_type_ref_t* node)
 
 void ast_type_ref_codegen(codegen_ctx_t* ctx, ast_type_ref_t* node)
 {
-  unreachable();
-  // TODO
+  ast_node_codegen(ctx, node->base_type);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  assert(desc != NULL);
+  
+  node->llvm_type = desc->llvm_type;
 }
 
 size_t ast_type_ref_mangle(ast_type_ref_t* node, char* buf, size_t len)

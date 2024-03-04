@@ -132,4 +132,13 @@ typedesc_prim_t* typedesc_prim_unit_init(void);
  */
 void typedesc_prim_free(typedesc_prim_t* desc);
 
+/**
+ * \brief Checks if a primitive type is implicitly convertible to another type.
+ * 
+ * \param[in] desc Pointer to the primitive type descriptor.
+ * \param[in] target_desc Pointer to the type descriptor to check conversion into.
+ * \returns `true` if the implicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* desc, typedesc_t* target_desc);
+
 #endif

@@ -34,4 +34,13 @@ typedesc_const_t* typedesc_const_init(void);
  */
 void typedesc_const_free(typedesc_const_t* desc);
 
+/**
+ * \brief Checks if a constant type is implicitly convertible to another type.
+ * 
+ * \param[in] desc Pointer to the constant type descriptor.
+ * \param[in] target_desc Pointer to the type descriptor to check conversion into.
+ * \returns `true` if the implicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_const_is_implicitly_convertible(typedesc_const_t* desc, typedesc_t* target_desc);
+
 #endif
