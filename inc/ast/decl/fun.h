@@ -26,7 +26,6 @@ typedef struct ast_decl_fun_t
   ast_node_t* return_type;      // The associated return type.
   ast_node_t* stmt;             // The associated body statement.
   callconv_kind_t callconv;     // The associated calling convention.
-  bool is_pub;                  // Is function public (in case it is a member).
   bool is_vararg;               // Is function variadic (C-style, only works with specific calling conventions).
   bool is_extern;               // Is function external.
 

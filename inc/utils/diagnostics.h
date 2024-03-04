@@ -46,6 +46,7 @@ void report_error_expected_subscriptable(location_t* loc);
 void report_error_expected_owner(location_t* loc);
 void report_error_expected_member(location_t* loc);
 void report_error_no_member_with_name(location_t* loc);
+void report_error_private_member(location_t* loc);
 void report_error_expected_ptr_to_owner(location_t* loc);
 void report_error_type_mismatch(location_t* loc, typedesc_t* expected, typedesc_t* actual);
 void report_error_missing_closing_parenthesis(location_t* loc);

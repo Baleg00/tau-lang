@@ -22,7 +22,6 @@ typedef struct ast_decl_struct_t
   symtable_t* scope; // The associated scope of members.
   ast_node_t* parent; // The associated parent module declaration.
   vector_t* members; // Vector of associated member declarations.
-  bool is_pub; // Is struct public (in case it is a member).
 
   LLVMTypeRef llvm_type; // The associated LLVM type.
 } ast_decl_struct_t;

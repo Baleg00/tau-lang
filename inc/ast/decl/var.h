@@ -21,7 +21,6 @@ typedef struct ast_decl_var_t
   AST_DECL_HEADER;
   ast_node_t* type; // The associated type.
   ast_node_t* expr; // The associated initializer expression.
-  bool is_pub; // Is variable public (in case it is a member).
   bool is_extern; // Is variable external.
 
   LLVMTypeRef llvm_type; // The associated LLVM type.

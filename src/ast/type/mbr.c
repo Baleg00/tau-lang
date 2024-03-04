@@ -34,26 +34,30 @@ void ast_type_mbr_nameres(nameres_ctx_t* ctx, ast_type_mbr_t* node)
 {
   ast_node_nameres(ctx, node->parent);
 
-  ast_node_t* parent_decl = NULL;
+  ast_node_t* parent_node = NULL;
   
   switch (node->parent->kind)
   {
-  case AST_TYPE_ID:     parent_decl = ((ast_type_id_t*)node->parent)->decl; break;
-  case AST_TYPE_MEMBER: parent_decl = ((ast_type_mbr_t*)node->parent)->decl; break;
+  case AST_TYPE_ID:     parent_node = ((ast_type_id_t* )node->parent)->decl; break;
+  case AST_TYPE_MEMBER: parent_node = ((ast_type_mbr_t*)node->parent)->decl; break;
   default: unreachable();
   }
 
-  assert(parent_decl->kind == AST_DECL_MOD);
-  ast_decl_mod_t* mod_decl = (ast_decl_mod_t*)parent_decl;
+  assert(parent_node->kind == AST_DECL_MOD); // Only modules have member types.
+  ast_decl_mod_t* mod_node = (ast_decl_mod_t*)parent_node;
 
-  assert(node->member->kind == AST_TYPE_ID);
-  string_view_t id_view = token_to_string_view(node->member->tok);
-  symbol_t* mbr_sym = symtable_get_with_str_view(mod_decl->scope, id_view);
+  ast_type_id_t* member_node = (ast_type_id_t*)node->member;
+
+  string_view_t id_view = token_to_string_view(member_node->tok);
+  symbol_t* mbr_sym = symtable_get_with_str_view(mod_node->scope, id_view);
 
   if (mbr_sym == NULL)
-    report_error_no_member_with_name(node->member->tok->loc);
+    report_error_no_member_with_name(member_node->tok->loc);
 
-  ((ast_type_id_t*)node->member)->decl = mbr_sym->node;
+  if (!((ast_decl_t*)mbr_sym->node)->is_pub)
+    report_error_private_member(member_node->tok->loc);
+
+  member_node->decl = mbr_sym->node;
   node->decl = mbr_sym->node;
 }
 
@@ -61,6 +65,9 @@ void ast_type_mbr_typecheck(typecheck_ctx_t* ctx, ast_type_mbr_t* node)
 {
   ast_node_typecheck(ctx, node->parent);
   ast_node_typecheck(ctx, node->member);
+
+  if (node->decl->kind == AST_DECL_MOD)
+    return;
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
   assert(desc != NULL);

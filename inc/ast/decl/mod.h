@@ -21,7 +21,6 @@ typedef struct ast_decl_mod_t
   symtable_t* scope; // The associated scope of members.
   ast_node_t* parent; // The associated parent module declaration.
   vector_t* members; // Vector of associated member declarations.
-  bool is_pub; // Is enum public (in case it is a member).
 } ast_decl_mod_t;
 
 /**

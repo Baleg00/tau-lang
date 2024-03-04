@@ -17,7 +17,8 @@
  */
 #define AST_DECL_HEADER\
   AST_NODE_HEADER;\
-  ast_node_t* id /** The associated identifier. */
+  ast_node_t* id; /** The associated identifier. */\
+  bool is_pub /** Is declaration public (in case it is a member). */
 
 /**
  * \brief AST declaration node.

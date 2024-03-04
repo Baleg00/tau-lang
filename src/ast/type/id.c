@@ -39,16 +39,23 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
   if (sym == NULL)
     report_error_undefined_typename(node->tok->loc);
 
-  if (sym->node->kind != AST_DECL_STRUCT &&
-      sym->node->kind != AST_DECL_UNION &&
-      sym->node->kind != AST_DECL_ENUM)
-    report_error_symbol_is_not_a_typename(node->tok->loc);
-  
+  switch (sym->node->kind)
+  {
+  case AST_DECL_STRUCT:
+  case AST_DECL_UNION:
+  case AST_DECL_ENUM:
+  case AST_DECL_MOD: break;
+  default: report_error_symbol_is_not_a_typename(node->tok->loc);
+  }
+
   node->decl = sym->node;
 }
 
 void ast_type_id_typecheck(typecheck_ctx_t* ctx, ast_type_id_t* node)
 {
+  if (node->decl->kind == AST_DECL_MOD)
+    return;
+
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
   assert(desc != NULL);
 
@@ -57,6 +64,9 @@ void ast_type_id_typecheck(typecheck_ctx_t* ctx, ast_type_id_t* node)
 
 void ast_type_id_codegen(codegen_ctx_t* ctx, ast_type_id_t* node)
 {
+  if (node->decl->kind == AST_DECL_MOD)
+    return;
+
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
   assert(desc != NULL);
 

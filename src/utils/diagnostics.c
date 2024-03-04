@@ -316,6 +316,13 @@ void report_error_no_member_with_name(location_t* loc)
   exit(EXIT_FAILURE);
 }
 
+void report_error_private_member(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Trying to access private member.", NULL, "", NULL));
+  debugbreak();
+  exit(EXIT_FAILURE);
+}
+
 void report_error_expected_ptr_to_owner(location_t* loc)
 {
   crumb_error(1, crumb_snippet(loc, "Expected pointer to structure or union.", NULL, "", NULL));
