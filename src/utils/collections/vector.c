@@ -150,6 +150,17 @@ void vector_clear(vector_t* vec)
   assert(vec->data != NULL);
 }
 
+size_t vector_find(vector_t* vec, void* data)
+{
+  size_t i = 0;
+
+  for (; i < vector_size(vec); i++)
+    if (vec->data[i] == data)
+      return i;
+
+  return i;
+}
+
 size_t vector_size(vector_t* vec)
 {
   return vec->size;

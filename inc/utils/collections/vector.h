@@ -159,6 +159,15 @@ void* vector_remove(vector_t* vec, size_t idx);
 void vector_clear(vector_t* vec);
 
 /**
+ * \brief Finds the index of the first occurrence of a specified element.
+ * 
+ * \param[in] vec Pointer to the vector.
+ * \param[in] data Pointer to the data to be found.
+ * \returns The index of the element if it is present, `vector_size(vec)` otherwise.
+ */
+size_t vector_find(vector_t* vec, void* data);
+
+/**
  * \brief Returns the number of elements in the vector.
  *
  * \param[in] vec Pointer to the vector.
