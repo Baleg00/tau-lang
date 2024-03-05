@@ -5,7 +5,7 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "ast/expr/op/bin.h"
+#include "ast/expr/op/bin/bin.h"
 
 #include "ast/registry.h"
 #include "stages/codegen/utils.h"
@@ -32,12 +32,24 @@ void ast_expr_op_bin_free(ast_expr_op_bin_t* node)
 
 void ast_expr_op_bin_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_t* node)
 {
+  if (node->op_kind == OP_ACCESS)
+  {
+    ast_expr_op_bin_access_nameres(ctx, (ast_expr_op_bin_access_t*)node);
+    return;
+  }
+
   ast_node_nameres(ctx, node->lhs);
   ast_node_nameres(ctx, node->rhs);
 }
 
 void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
 {
+  if (node->op_kind == OP_ACCESS)
+  {
+    ast_expr_op_bin_access_typecheck(ctx, (ast_expr_op_bin_access_t*)node);
+    return;
+  }
+
   ast_node_typecheck(ctx, node->lhs);
   ast_node_typecheck(ctx, node->rhs);
 
@@ -150,6 +162,12 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
 
 void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
 {
+  if (node->op_kind == OP_ACCESS)
+  {
+    ast_expr_op_bin_access_codegen(ctx, (ast_expr_op_bin_access_t*)node);
+    return;
+  }
+
   ast_node_codegen(ctx, node->lhs);
   ast_node_codegen(ctx, node->rhs);
 

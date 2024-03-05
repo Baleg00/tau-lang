@@ -13,13 +13,19 @@
 #include "ast/expr/op/op.h"
 
 /**
+ * \brief Header for all AST binary operation expression nodes.
+ */
+#define AST_EXPR_OP_BIN_HEADER\
+  AST_EXPR_OP_HEADER;\
+  ast_node_t* lhs; /** The associated left-hand side expression node. */\
+  ast_node_t* rhs /** The associated right-hand side expression node. */
+
+/**
  * \brief AST binary operation expression node.
  */
 typedef struct ast_expr_op_bin_t
 {
-  AST_EXPR_OP_HEADER;
-  ast_node_t* lhs; // The associated left-hand side expression node.
-  ast_node_t* rhs; // The associated right-hand side expression node.
+  AST_EXPR_OP_BIN_HEADER;
 } ast_expr_op_bin_t;
 
 /**

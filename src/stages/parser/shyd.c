@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "ast/ast.h"
 #include "stages/parser/parser.h"
 #include "utils/collections/list.h"
 #include "utils/collections/queue.h"
@@ -340,7 +341,14 @@ void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
   unused(shyd);
 
-  ast_expr_op_bin_t* node = ast_expr_op_bin_init();
+  ast_expr_op_bin_t* node = NULL;
+
+  switch (elem->op)
+  {
+  case OP_ACCESS: node = (ast_expr_op_bin_t*)ast_expr_op_bin_access_init(); break;
+  default: node = ast_expr_op_bin_init(); break;
+  }
+
   node->tok = elem->tok;
   node->op_kind = elem->op;
 

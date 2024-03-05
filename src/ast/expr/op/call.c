@@ -8,6 +8,7 @@
 #include "ast/expr/op/call.h"
 
 #include "ast/registry.h"
+#include "stages/codegen/utils.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -99,12 +100,12 @@ void ast_expr_op_call_codegen(codegen_ctx_t* ctx, ast_expr_op_call_t* node)
     if (i < vector_size(fun_desc->param_types))
     {
       typedesc_t* expected_param_desc = (typedesc_t*)vector_get(fun_desc->param_types, i);
-      typedesc_t* actual_param_desc = typetable_lookup(ctx->typetable, (ast_node_t*)param);
 
-      if (typedesc_remove_const(expected_param_desc)->kind != TYPEDESC_REF &&
-          typedesc_remove_const(actual_param_desc)->kind == TYPEDESC_REF)
-        llvm_param_value = LLVMBuildLoad2(ctx->llvm_builder, param->llvm_type, param->llvm_value, "load_tmp");
+      if (typedesc_remove_const(expected_param_desc)->kind != TYPEDESC_REF)
+        llvm_param_value = codegen_build_load_if_ref(ctx, param);
     }
+    else
+      llvm_param_value = codegen_build_load_if_ref(ctx, param);
 
     llvm_param_values[i] = llvm_param_value;
   }
