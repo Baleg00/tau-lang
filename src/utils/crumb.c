@@ -30,7 +30,7 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
     char filename_buf[255];
     file_name(loc->path, filename_buf, sizeof(filename_buf));
 
-    fprintf(g_crumb_stream, "\n[" ESC_FG_BRIGHT_BLACK "%s:%zu:%zu" ESC_RESET "]> %s", 
+    fprintf(g_crumb_stream, "[" ESC_FG_BRIGHT_BLACK "%s:%zu:%zu" ESC_RESET "]> %s", 
       filename_buf, loc->row + 1, loc->col + 1,
       crumb_kind_to_color(kind));
 
@@ -52,7 +52,7 @@ void crumb_log_snippet(crumb_kind_t kind, crumb_item_snippet_t* item)
       ++line_end;
 
     // Print the referenced line: <row> | <text>
-    fprintf(g_crumb_stream, "    %s%zu" ESC_RESET " | %.*s%s%.*s" ESC_RESET "%.*s\n",
+    fprintf(g_crumb_stream, "%s%6zu" ESC_RESET " | %.*s%s%.*s" ESC_RESET "%.*s\n",
       crumb_kind_to_color(kind), // Row number color
       loc->row + 1, // Row number
       (int)(loc->ptr - line_begin), line_begin, // From line begin to referenced part

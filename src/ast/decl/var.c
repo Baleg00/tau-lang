@@ -41,14 +41,13 @@ void ast_decl_var_nameres(nameres_ctx_t* ctx, ast_decl_var_t* node)
   symbol_t* sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
 
   symbol_t* lookup = symtable_lookup_with_str_view(scope, id_view);
-
-  if (lookup != NULL && (lookup->node->kind == AST_DECL_VAR || lookup->node->kind == AST_DECL_PARAM))
-    report_warning_shadowed_variable(node->id->tok->loc);
-
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL && collision->node->kind == AST_DECL_VAR)
-    report_error_variable_redeclaration(node->id->tok->loc, collision->node->tok->loc);
+    report_error_variable_redefinition((ast_decl_var_t*)collision->node, node);
+  
+  if (lookup != NULL && (lookup->node->kind == AST_DECL_VAR || lookup->node->kind == AST_DECL_PARAM))
+    report_warning_shadowed_variable((ast_decl_var_t*)lookup->node, node);
 }
 
 void ast_decl_var_typecheck(typecheck_ctx_t* ctx, ast_decl_var_t* node)

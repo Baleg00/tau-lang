@@ -10,6 +10,7 @@
 #ifndef TAU_DIAGNOSTICS_H
 #define TAU_DIAGNOSTICS_H
 
+#include "ast/ast.h"
 #include "stages/analysis/types/typedesc/typedesc.h"
 #include "stages/lexer/location.h"
 
@@ -110,35 +111,66 @@ void report_error_failed_to_open_file(const char* path);
  * \brief Reports an error for declaring a non-default parameter after a default
  * parameter.
  * 
- * \param[in] param_loc Pointer to the location of the non-default parameter.
- * \param[in] last_param_loc Pointer to the location of the last default
- * parameter.
+ * \param[in] param_node Pointer to the non-default AST parameter declaration node.
+ * \param[in] first_default_node Pointer to the first default AST parameter declaration node.
  */
-void report_error_non_default_after_default_parameter(location_t* param_loc, location_t* last_param_loc);
+void report_error_non_default_after_default_parameter(ast_decl_param_t* param_node, ast_decl_param_t* first_default_node);
 
 /**
  * \brief Reports an error for redefining a parameter.
  * 
- * \param[in] param_loc Pointer to the location of the duplicate parameter.
- * \param[in] redecl_loc Pointer to the location of the redeclared parameter.
+ * \param[in] param_node Pointer to the redefined AST parameter declaration node.
+ * \param[in] redef_node Pointer to the redefining AST parameter declaration node.
  */
-void report_error_parameter_redeclaration(location_t* param_loc, location_t* redecl_loc);
+void report_error_parameter_redefinition(ast_decl_param_t* param_node, ast_decl_param_t* redef_node);
 
 /**
- * \brief Reports an error for redeclaring a variable.
+ * \brief Reports an error for redefining a variable.
  * 
- * \param[in] var_loc Pointer to the location of the duplicate variable.
- * \param[in] redecl_loc Pointer to the location of the redeclared variable.
+ * \param[in] var_node Pointer to the redefined AST variable declaration node.
+ * \param[in] redef_node Pointer to the redefining AST variable declaration node.
  */
-void report_error_variable_redeclaration(location_t* var_loc, location_t* redecl_loc);
+void report_error_variable_redefinition(ast_decl_var_t* var_node, ast_decl_var_t* redef_node);
 
 /**
- * \brief Reports an error for redeclaring an enumerator.
+ * \brief Reports an error for redefining a struct.
  * 
- * \param[in] enum_loc Pointer to the location of the duplicate enumerator.
- * \param[in] redecl_loc Pointer to the location of the redeclared enumerator.
+ * \param[in] struct_node Pointer to the redefined AST struct declaration node.
+ * \param[in] redef_node Pointer to the redefining AST declaration node.
  */
-void report_error_enumerator_redeclaration(location_t* enum_loc, location_t* redecl_loc);
+void report_error_struct_redefinition(ast_decl_struct_t* struct_node, ast_decl_t* redef_node);
+
+/**
+ * \brief Reports an error for redefining a union.
+ * 
+ * \param[in] union_node Pointer to the redefined AST union declaration node.
+ * \param[in] redef_node Pointer to the redefining AST declaration node.
+ */
+void report_error_union_redefinition(ast_decl_union_t* union_node, ast_decl_t* redef_node);
+
+/**
+ * \brief Reports an error for redefining an enum.
+ * 
+ * \param[in] enum_node Pointer to the redefined AST enum declaration node.
+ * \param[in] redef_node Pointer to the redefining AST declaration node.
+ */
+void report_error_enum_redefinition(ast_decl_enum_t* enum_node, ast_decl_t* redef_node);
+
+/**
+ * \brief Reports an error for redefining a type.
+ * 
+ * \param[in] node Pointer to the redefined AST declaration node.
+ * \param[in] redef_node Pointer to the redefining AST declaration node.
+ */
+void report_error_type_redefinition(ast_decl_t* node, ast_decl_t* redef_node);
+
+/**
+ * \brief Reports an error for redefining an enum constant.
+ * 
+ * \param[in] enum_node Pointer to the redefined AST enum constant node.
+ * \param[in] redef_node Pointer to the redefining AST enum constant node.
+ */
+void report_error_enum_constant_redefinition(ast_decl_enum_constant_t* enum_node, ast_decl_enum_constant_t* redef_node);
 
 /**
  * \brief Reports an error for redeclaring a symbol.
@@ -178,9 +210,10 @@ void report_error_symbol_is_not_a_typename(location_t* loc);
 /**
  * \brief Reports a warning for a shadowed variable.
  * 
- * \param[in] loc Pointer to the location of the shadowing variable.
+ * \param[in] var_node Pointer to the shadowed AST variable declaration node.
+ * \param[in] shadowing_node Pointer to the shadowing AST variable declaration node.
  */
-void report_warning_shadowed_variable(location_t* loc);
+void report_warning_shadowed_variable(ast_decl_var_t* var_node, ast_decl_var_t* shadowing_node);
 
 /**
  * \brief Reports a warning for a shadowed symbol.

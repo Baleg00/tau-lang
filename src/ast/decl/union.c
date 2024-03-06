@@ -41,7 +41,7 @@ void ast_decl_union_nameres(nameres_ctx_t* ctx, ast_decl_union_t* node)
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL)
-    report_error_symbol_redeclaration(node->tok->loc);
+    report_error_type_redefinition((ast_decl_t*)collision->node, (ast_decl_t*)node);
 
   if (lookup != NULL)
     report_warning_shadowed_symbol(node->tok->loc);

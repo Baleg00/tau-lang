@@ -38,7 +38,7 @@ void ast_decl_enum_constant_nameres(nameres_ctx_t* ctx, ast_decl_enum_constant_t
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL)
-    report_error_enumerator_redeclaration(node->id->tok->loc, collision->node->tok->loc);
+    report_error_enum_constant_redefinition((ast_decl_enum_constant_t*)collision->node, node);
 }
 
 void ast_decl_enum_constant_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_constant_t* node)
