@@ -1,3 +1,10 @@
+/**
+ * \file
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "utils/diagnostics.h"
 
 #include <stdlib.h>
@@ -99,45 +106,45 @@ void report_error_failed_to_open_file(const char* path)
   exit(EXIT_FAILURE);
 }
 
-void report_error_missing_default_parameter(location_t* param_loc, location_t* first_param_loc)
+void report_error_non_default_after_default_parameter(location_t* param_loc, location_t* last_param_loc)
 {
   crumb_item_t items[] = {
     crumb_snippet(param_loc, "Parameter missing default value.", NULL, "", NULL),
     crumb_message("A default parameter must only be followed by default parameters.", NULL),
-    crumb_snippet(first_param_loc, "", NULL, "Last default parameter appears here.", NULL)
+    crumb_snippet(last_param_loc, "", NULL, "Last default parameter appears here.", NULL)
   };
   crumb_error(countof(items), items[0], items[1], items[2]);
   debugbreak();
   exit(EXIT_FAILURE);
 }
 
-void report_error_parameter_redefinition(location_t* param_loc, location_t* redefined_loc)
+void report_error_parameter_redeclaration(location_t* param_loc, location_t* redecl_loc)
 {
   crumb_item_t items[] = {
-    crumb_snippet(param_loc, "Parameter redefinition.", NULL, "A parameter with this name already exists.", NULL),
-    crumb_snippet(redefined_loc, "", NULL, "First parameter with this name appears here.", NULL)
+    crumb_snippet(param_loc, "Parameter redeclaration.", NULL, "A parameter with this name already exists.", NULL),
+    crumb_snippet(redecl_loc, "", NULL, "First parameter with this name appears here.", NULL)
   };
   crumb_error(countof(items), items[0], items[1]);
   debugbreak();
   exit(EXIT_FAILURE);
 }
 
-void report_error_variable_redeclaration(location_t* var_loc, location_t* redeclared_loc)
+void report_error_variable_redeclaration(location_t* var_loc, location_t* redecl_loc)
 {
   crumb_item_t items[] = {
     crumb_snippet(var_loc, "Variable redeclaration.", NULL, "A variable with this name already exists.", NULL),
-    crumb_snippet(redeclared_loc, "", NULL, "First variable with this name appears here.", NULL)
+    crumb_snippet(redecl_loc, "", NULL, "First variable with this name appears here.", NULL)
   };
   crumb_error(countof(items), items[0], items[1]);
   debugbreak();
   exit(EXIT_FAILURE);
 }
 
-void report_error_enumerator_redeclaration(location_t* enum_loc, location_t* redeclared_loc)
+void report_error_enumerator_redeclaration(location_t* enum_loc, location_t* redecl_loc)
 {
   crumb_item_t items[] = {
     crumb_snippet(enum_loc, "Enumerator redeclaration.", NULL, "An enumerator with this name already exists.", NULL),
-    crumb_snippet(redeclared_loc, "", NULL, "First enumerator with this name appears here.", NULL)
+    crumb_snippet(redecl_loc, "", NULL, "First enumerator with this name appears here.", NULL)
   };
   crumb_error(countof(items), items[0], items[1]);
   debugbreak();
@@ -413,13 +420,6 @@ void report_error_return_outside_function(location_t* loc)
 void report_error_return_inside_defer(location_t* loc)
 {
   crumb_error(1, crumb_snippet(loc, "Return statement is within a defer.", NULL, "", NULL));
-  debugbreak();
-  exit(EXIT_FAILURE);
-}
-
-void report_error_yield_inside_defer(location_t* loc)
-{
-  crumb_error(1, crumb_snippet(loc, "Yield statement is within a defer.", NULL, "", NULL));
   debugbreak();
   exit(EXIT_FAILURE);
 }

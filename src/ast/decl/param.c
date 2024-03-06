@@ -43,7 +43,7 @@ void ast_decl_param_nameres(nameres_ctx_t* ctx, ast_decl_param_t* node)
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL && collision->node->kind == AST_DECL_PARAM)
-    report_error_parameter_redefinition(node->id->tok->loc, collision->node->tok->loc);
+    report_error_parameter_redeclaration(node->id->tok->loc, collision->node->tok->loc);
 }
 
 void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node)
