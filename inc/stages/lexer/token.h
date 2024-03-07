@@ -46,6 +46,7 @@ typedef enum token_kind_e
   TOK_KW_AS, // Keyword `as`
   TOK_KW_SIZEOF, // Keyword `sizeof`
   TOK_KW_ALIGNOF, // Keyword `alignof`
+  TOK_KW_USE, // Keyword `use`
   TOK_KW_IN, // Keyword `in`
   TOK_KW_PUB, // Keyword `pub`
   TOK_KW_EXTERN, // Keyword `extern`

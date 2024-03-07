@@ -44,6 +44,10 @@
 #include "ast/expr/op/un.h"
 #include "ast/id.h"
 #include "ast/node.h"
+#include "ast/path/access.h"
+#include "ast/path/list.h"
+#include "ast/path/segment.h"
+#include "ast/path/wildcard.h"
 #include "ast/prog.h"
 #include "ast/stmt/block.h"
 #include "ast/stmt/break.h"
@@ -67,5 +71,6 @@
 #include "ast/type/modif/ref.h"
 #include "ast/type/prim.h"
 #include "ast/type/type.h"
+#include "ast/use.h"
 
 #endif

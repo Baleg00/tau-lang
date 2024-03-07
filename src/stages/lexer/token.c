@@ -78,6 +78,7 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_AS:                       return "TOK_KW_AS";
   case TOK_KW_SIZEOF:                   return "TOK_KW_SIZEOF";
   case TOK_KW_ALIGNOF:                  return "TOK_KW_ALIGNOF";
+  case TOK_KW_USE:                      return "TOK_KW_USE";
   case TOK_KW_IN:                       return "TOK_KW_IN";
   case TOK_KW_PUB:                      return "TOK_KW_PUB";
   case TOK_KW_EXTERN:                   return "TOK_KW_EXTERN";
@@ -204,6 +205,7 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_AS:
   case TOK_KW_SIZEOF:
   case TOK_KW_ALIGNOF:
+  case TOK_KW_USE:
   case TOK_KW_IN:
   case TOK_KW_PUB:
   case TOK_KW_EXTERN:

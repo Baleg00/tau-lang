@@ -87,6 +87,13 @@ typedef enum ast_kind_e
   AST_DECL_ENUM_CONSTANT, // Enum constant declaration.
   AST_DECL_MOD, // Module declaration.
 
+  AST_PATH_SEGMENT, // Path segment.
+  AST_PATH_ACCESS, // Path member access.
+  AST_PATH_LIST, // Path list.
+  AST_PATH_WILDCARD, // Path wildcard.
+
+  AST_USE, // Use directive.
+  
   AST_PROG, // Program.
 } ast_kind_t;
 
