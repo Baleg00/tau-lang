@@ -216,13 +216,6 @@ void report_error_symbol_is_not_a_typename(location_t* loc);
 void report_warning_shadowed_variable(ast_decl_var_t* var_node, ast_decl_var_t* shadowing_node);
 
 /**
- * \brief Reports a warning for a shadowed symbol.
- * 
- * \param[in] loc Pointer to the location of the shadowing symbol.
- */
-void report_warning_shadowed_symbol(location_t* loc);
-
-/**
  * \brief Reports an error for an expected reference type.
  * 
  * \param[in] loc Pointer to the location where the error occurred.

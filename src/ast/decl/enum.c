@@ -37,14 +37,10 @@ void ast_decl_enum_nameres(nameres_ctx_t* ctx, ast_decl_enum_t* node)
   string_view_t id_view = token_to_string_view(node->id->tok);
   symbol_t* sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
 
-  symbol_t* lookup = symtable_lookup_with_str_view(scope, id_view);
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL)
     report_error_type_redefinition((ast_decl_t*)collision->node, (ast_decl_t*)node);
-
-  if (lookup != NULL)
-    report_warning_shadowed_symbol(node->tok->loc);
 
   node->scope = nameres_ctx_scope_begin(ctx);
 

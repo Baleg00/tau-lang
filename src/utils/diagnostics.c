@@ -239,12 +239,6 @@ void report_warning_shadowed_variable(ast_decl_var_t* var_node, ast_decl_var_t* 
   debugbreak();
 }
 
-void report_warning_shadowed_symbol(location_t* loc)
-{
-  crumb_warn(1, crumb_snippet(loc, "Symbol shadows another.", NULL, "", NULL));
-  debugbreak();
-}
-
 void report_error_expected_reference_type(location_t* loc)
 {
   crumb_error(1, crumb_snippet(loc, "Expected reference type.", NULL, "", NULL));
