@@ -91,6 +91,7 @@ typedef enum ast_kind_e
   AST_PATH_ACCESS, // Path member access.
   AST_PATH_LIST, // Path list.
   AST_PATH_WILDCARD, // Path wildcard.
+  AST_PATH_ALIAS, // Path alias.
 
   AST_USE, // Use directive.
   

@@ -45,6 +45,7 @@
 #include "ast/id.h"
 #include "ast/node.h"
 #include "ast/path/access.h"
+#include "ast/path/alias.h"
 #include "ast/path/list.h"
 #include "ast/path/segment.h"
 #include "ast/path/wildcard.h"

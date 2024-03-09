@@ -73,6 +73,7 @@ void ast_node_free(ast_node_t* node)
   case AST_PATH_ACCESS:        ast_path_access_free       ((ast_path_access_t*       )node); break;
   case AST_PATH_LIST:          ast_path_list_free         ((ast_path_list_t*         )node); break;
   case AST_PATH_WILDCARD:      ast_path_wildcard_free     ((ast_path_wildcard_t*     )node); break;
+  case AST_PATH_ALIAS:         ast_path_alias_free        ((ast_path_alias_t*        )node); break;
   case AST_USE:                ast_use_free               ((ast_use_t*               )node); break;
   case AST_PROG:               ast_prog_free              ((ast_prog_t*              )node); break;
   default: unreachable();
@@ -491,6 +492,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_PATH_ACCESS:        ast_path_access_dump_json       (stream, (ast_path_access_t*       )node); break;
   case AST_PATH_LIST:          ast_path_list_dump_json         (stream, (ast_path_list_t*         )node); break;
   case AST_PATH_WILDCARD:      ast_path_wildcard_dump_json     (stream, (ast_path_wildcard_t*     )node); break;
+  case AST_PATH_ALIAS:         ast_path_alias_dump_json        (stream, (ast_path_alias_t*        )node); break;
   case AST_USE:                ast_use_dump_json               (stream, (ast_use_t*               )node); break;
   case AST_PROG:               ast_prog_dump_json              (stream, (ast_prog_t*              )node); break;
   default: unreachable();
@@ -557,6 +559,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_PATH_ACCESS:        return "AST_PATH_ACCESS";
   case AST_PATH_LIST:          return "AST_PATH_LIST";
   case AST_PATH_WILDCARD:      return "AST_PATH_WILDCARD";
+  case AST_PATH_ALIAS:         return "AST_PATH_ALIAS";
   case AST_USE:                return "AST_USE";
   case AST_PROG:               return "AST_PROG";
   default: unreachable();
