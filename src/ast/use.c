@@ -31,5 +31,7 @@ void ast_use_free(ast_use_t* node)
 void ast_use_dump_json(FILE* stream, ast_use_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  fprintf(stream, ",\"path\":");
+  ast_node_dump_json(stream, node->path);
   fputc('}', stream);
 }

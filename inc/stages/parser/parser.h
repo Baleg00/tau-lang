@@ -534,6 +534,46 @@ ast_node_t* parser_parse_decl_param(parser_t* par);
 ast_node_t* parser_parse_decl_enum_constant(parser_t* par);
 
 /**
+ * \brief Parses a path segment.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Path segment node.
+ */
+ast_node_t* parser_parse_path_segment(parser_t* par);
+
+/**
+ * \brief Parses a path wildcard.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Path wildcard node.
+ */
+ast_node_t* parser_parse_path_wildcard(parser_t* par);
+
+/**
+ * \brief Parses a path list.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Path list node.
+ */
+ast_node_t* parser_parse_path_list(parser_t* par);
+
+/**
+ * \brief Parses a path.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Path node.
+ */
+ast_node_t* parser_parse_path(parser_t* par);
+
+/**
+ * \brief Parses a use directive.
+ * 
+ * \param[in] par Parser to be used.
+ * \returns Use directive node.
+ */
+ast_node_t* parser_parse_use_directive(parser_t* par);
+
+/**
  * \brief Processes a list of tokens and produces an abstract syntax tree.
  * 
  * \param[in] par Parser to be used.

@@ -30,6 +30,7 @@ static const struct {
   { "as",       TOK_KW_AS       },
   { "sizeof",   TOK_KW_SIZEOF   },
   { "alignof",  TOK_KW_ALIGNOF  },
+  { "use",      TOK_KW_USE      },
   { "in",       TOK_KW_IN       },
   { "pub",      TOK_KW_PUB      },
   { "extern",   TOK_KW_EXTERN   },

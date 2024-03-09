@@ -850,6 +850,9 @@ ast_node_t* parser_parse_decl_in_mod(parser_t* par)
 
 ast_node_t* parser_parse_decl_top_level(parser_t* par)
 {
+  if (parser_current(par)->kind == TOK_KW_USE)
+    return parser_parse_use_directive(par);
+
   parser_decl_context_clear(par);
 
   if (parser_current(par)->kind == TOK_KW_PUB)
@@ -884,6 +887,83 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par)
   node->parent = stack_top(par->parents);
 
   node->id = parser_parse_id(par);
+  
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_path_segment(parser_t* par)
+{
+  ast_path_segment_t* node = ast_path_segment_init();
+  node->tok = parser_current(par);
+
+  node->id = parser_parse_id(par);
+
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_path_wildcard(parser_t* par)
+{
+  ast_path_wildcard_t* node = ast_path_wildcard_init();
+  node->tok = parser_expect(par, TOK_PUNCT_ASTERISK);
+
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_path_list(parser_t* par)
+{
+  ast_path_list_t* node = ast_path_list_init();
+  node->tok = parser_current(par);
+
+  parser_expect(par, TOK_PUNCT_BRACKET_LEFT);
+
+  node->paths = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_path);
+
+  parser_expect(par, TOK_PUNCT_BRACKET_RIGHT);
+
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_path(parser_t* par)
+{
+  ast_node_t* node = parser_parse_path_segment(par);
+
+  while (parser_consume(par, TOK_PUNCT_DOT))
+  {
+    ast_path_access_t* access_node = ast_path_access_init();
+    access_node->tok = parser_current(par);
+
+    access_node->lhs = node;
+    node = (ast_node_t*)access_node;
+
+    switch (parser_current(par)->kind)
+    {
+    case TOK_ID:                 access_node->rhs = parser_parse_path_segment (par); break;
+    case TOK_PUNCT_ASTERISK:     access_node->rhs = parser_parse_path_wildcard(par); return node;
+    case TOK_PUNCT_BRACKET_LEFT: access_node->rhs = parser_parse_path_list    (par); return node;
+    default: report_error_unexpected_token(parser_current(par)->loc);
+    }
+  }
+
+  if (parser_consume(par, TOK_KW_AS))
+  {
+    ast_path_alias_t* alias_node = ast_path_alias_init();
+    alias_node->tok = parser_current(par);
+
+    alias_node->path = node;
+    alias_node->id = parser_parse_id(par);
+
+    return (ast_node_t*)alias_node;
+  }
+
+  return node;
+}
+
+ast_node_t* parser_parse_use_directive(parser_t* par)
+{
+  ast_use_t* node = ast_use_init();
+  node->tok = parser_expect(par, TOK_KW_USE);
+
+  node->path = parser_parse_path(par);
   
   return (ast_node_t*)node;
 }

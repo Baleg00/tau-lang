@@ -18,6 +18,7 @@
 typedef struct ast_use_t
 {
   AST_NODE_HEADER;
+  ast_node_t* path; // Pointer to the associated AST path node.
 } ast_use_t;
 
 /**

@@ -34,6 +34,6 @@ void ast_path_access_dump_json(FILE* stream, ast_path_access_t* node)
   fprintf(stream, ",\"lhs\":");
   ast_node_dump_json(stream, node->lhs);
   fprintf(stream, ",\"rhs\":");
-  ast_node_dump_json(stream, node->lhs);
+  ast_node_dump_json(stream, node->rhs);
   fputc('}', stream);
 }
