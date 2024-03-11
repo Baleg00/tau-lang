@@ -40,10 +40,14 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
   if (sym == NULL)
     report_error_undefined_symbol(node->tok->loc);
 
-  if (sym->node->kind != AST_DECL_VAR &&
-      sym->node->kind != AST_DECL_PARAM &&
-      sym->node->kind != AST_DECL_FUN)
-    report_error_symbol_is_not_an_expression(node->tok->loc);
+  switch (sym->node->kind)
+  {
+  case AST_DECL_VAR:
+  case AST_DECL_PARAM:
+  case AST_DECL_FUN:
+  case AST_DECL_ENUM: break;
+  default: report_error_symbol_is_not_an_expression(node->tok->loc);
+  }
   
   node->decl = sym->node;
 }
@@ -53,7 +57,7 @@ void ast_expr_id_typecheck(typecheck_ctx_t* ctx, ast_expr_id_t* node)
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
   assert(desc != NULL);
 
-  if (desc->kind != TYPEDESC_REF)
+  if (node->decl->kind != AST_DECL_ENUM && desc->kind != TYPEDESC_REF)
     desc = typebuilder_build_ref(ctx->typebuilder, desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
@@ -79,6 +83,12 @@ void ast_expr_id_codegen(codegen_ctx_t* ctx, ast_expr_id_t* node)
   {
     node->llvm_type = ((ast_decl_fun_t*)node->decl)->llvm_type;
     node->llvm_value = ((ast_decl_fun_t*)node->decl)->llvm_value;
+    break;
+  }
+  case AST_DECL_ENUM:
+  {
+    node->llvm_type = ((ast_decl_enum_t*)node->decl)->llvm_type;
+    node->llvm_value = NULL;
     break;
   }
   default:
