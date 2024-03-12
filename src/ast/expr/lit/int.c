@@ -30,6 +30,8 @@ void ast_expr_lit_int_free(ast_expr_lit_int_t* node)
 
 void ast_expr_lit_int_nameres(nameres_ctx_t* ctx, ast_expr_lit_int_t* node)
 {
+  unused(ctx);
+  unused(node);
 }
 
 void ast_expr_lit_int_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_int_t* node)

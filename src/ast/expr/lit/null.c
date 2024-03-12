@@ -30,16 +30,24 @@ void ast_expr_lit_null_free(ast_expr_lit_null_t* node)
 
 void ast_expr_lit_null_nameres(nameres_ctx_t* ctx, ast_expr_lit_null_t* node)
 {
+  unused(ctx);
+  unused(node);
 }
 
 void ast_expr_lit_null_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_null_t* node)
 {
+  unused(ctx);
+  unused(node);
+
   unreachable();
   // TODO
 }
 
 void ast_expr_lit_null_codegen(codegen_ctx_t* ctx, ast_expr_lit_null_t* node)
 {
+  unused(ctx);
+  unused(node);
+  
   unreachable();
   // TODO
 }
