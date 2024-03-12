@@ -103,6 +103,18 @@
  */
 #define noop() do {} while (0)
 
+#ifdef noreturn
+# undef noreturn
+#endif
+
+#ifdef _MSC_VER
+# define noreturn __declspec(noreturn)
+#elif defined(__GNUC__)
+# define noreturn __attribute__((noreturn))
+#else
+# define noreturn
+#endif
+
 #ifdef clearobj
 # undef clearobj
 #endif
