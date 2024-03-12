@@ -15,7 +15,7 @@ static FILE* g_crumb_stream = NULL;
 
 void crumb_log_message(crumb_kind_t kind, crumb_item_message_t* item)
 {
-  unused(kind);
+  UNUSED(kind);
 
   fprintf(g_crumb_stream, "\n    ");
   vfprintf(g_crumb_stream, item->msg, item->msg_args);
@@ -98,7 +98,7 @@ void crumb_log(crumb_kind_t kind, size_t count, ...)
     {
     case CRUMB_ITEM_MESSAGE: crumb_log_message(kind, &item.msg); break;
     case CRUMB_ITEM_SNIPPET: crumb_log_snippet(kind, &item.snip); break;
-    default: unreachable();
+    default: UNREACHABLE();
     }
   }
 
@@ -121,7 +121,7 @@ const char* crumb_kind_to_color(crumb_kind_t kind)
   {
   case CRUMB_WARN:  return ESC_FG_YELLOW;
   case CRUMB_ERROR: return ESC_FG_RED;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return NULL;
@@ -133,7 +133,7 @@ const char* crumb_kind_to_string(crumb_kind_t kind)
   {
   case CRUMB_WARN:  return "WARNING";
   case CRUMB_ERROR: return "ERROR";
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return NULL;

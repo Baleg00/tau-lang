@@ -13,7 +13,7 @@
 codegen_ctx_t* codegen_ctx_init(typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_mod)
 {
   codegen_ctx_t* ctx = (codegen_ctx_t*)malloc(sizeof(codegen_ctx_t));
-  clearobj(ctx);
+  CLEAROBJ(ctx);
 
   ctx->typetable = typetable;
   ctx->llvm_ctx = llvm_ctx;

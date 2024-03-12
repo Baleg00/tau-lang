@@ -14,7 +14,7 @@
 static ast_type_prim_t* ast_type_prim_init(ast_kind_t kind)
 {
   ast_type_prim_t* node = (ast_type_prim_t*)malloc(sizeof(ast_type_prim_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -105,8 +105,8 @@ void ast_type_prim_free(ast_type_prim_t* node)
 
 void ast_type_prim_nameres(nameres_ctx_t* ctx, ast_type_prim_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
 }
 
 void ast_type_prim_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
@@ -130,7 +130,7 @@ void ast_type_prim_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
   case AST_TYPE_PRIM_CHAR:  desc = typebuilder_build_char (ctx->typebuilder); break;
   case AST_TYPE_PRIM_BOOL:  desc = typebuilder_build_bool (ctx->typebuilder); break;
   case AST_TYPE_PRIM_UNIT:  desc = typebuilder_build_unit (ctx->typebuilder); break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
@@ -139,7 +139,7 @@ void ast_type_prim_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
 void ast_type_prim_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
 {
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
-  assert(desc != NULL);
+  ASSERT(desc != NULL);
 
   node->llvm_type = desc->llvm_type;
 }
@@ -165,7 +165,7 @@ size_t ast_type_prim_mangle(ast_type_prim_t* node, char* buf, size_t len)
   case AST_TYPE_PRIM_CHAR:  mangled_prim =  "c"; break;
   case AST_TYPE_PRIM_BOOL:  mangled_prim =  "b"; break;
   case AST_TYPE_PRIM_UNIT:  mangled_prim =  "v"; break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return snprintf(buf, len, "%s", mangled_prim);

@@ -27,7 +27,7 @@ static allocator_t* g_allocator = NULL;
 allocator_t* allocator_init(void* ctx, allocator_allocate_func_t alloc_func, allocator_deallocate_func_t dealloc_func, allocator_reallocate_func_t realloc_func, allocator_cleanup_func_t cleanup_func)
 {
   allocator_t* alloc = (allocator_t*)malloc(sizeof(allocator_t));
-  assert(alloc != NULL);
+  ASSERT(alloc != NULL);
 
   alloc->ctx = ctx;
   alloc->alloc_func = alloc_func;
@@ -40,7 +40,7 @@ allocator_t* allocator_init(void* ctx, allocator_allocate_func_t alloc_func, all
 
 void allocator_free(allocator_t* alloc)
 {
-  assert(alloc != g_allocator);
+  ASSERT(alloc != g_allocator);
 
   alloc->cleanup_func(alloc->ctx);
   free(alloc);
@@ -55,7 +55,7 @@ void allocator_free(allocator_t* alloc)
  */
 static void* allocator_global_allocate(void* ctx, size_t size)
 {
-  unused(ctx);
+  UNUSED(ctx);
   return malloc(size);
 }
 
@@ -67,7 +67,7 @@ static void* allocator_global_allocate(void* ctx, size_t size)
  */
 static void allocator_global_deallocate(void* ctx, void* ptr)
 {
-  unused(ctx);
+  UNUSED(ctx);
   free(ptr);
 }
 
@@ -81,7 +81,7 @@ static void allocator_global_deallocate(void* ctx, void* ptr)
  */
 static void* allocator_global_reallocate(void* ctx, void* ptr, size_t new_size)
 {
-  unused(ctx);
+  UNUSED(ctx);
   return realloc(ptr, new_size);
 }
 
@@ -92,7 +92,7 @@ static void* allocator_global_reallocate(void* ctx, void* ptr, size_t new_size)
  */
 static void allocator_global_cleanup(void* ctx)
 {
-  unused(ctx);
+  UNUSED(ctx);
 }
 
 /**

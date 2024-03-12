@@ -14,7 +14,7 @@
 ast_type_opt_t* ast_type_opt_init(void)
 {
   ast_type_opt_t* node = (ast_type_opt_t*)malloc(sizeof(ast_type_opt_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -38,8 +38,8 @@ void ast_type_opt_typecheck(typecheck_ctx_t* ctx, ast_type_opt_t* node)
   ast_node_typecheck(ctx, node->base_type);
 
   typedesc_t* base_desc = typetable_lookup(ctx->typetable, node->base_type);
-  assert(base_desc != NULL);
-  assert(typedesc_can_add_opt(base_desc));
+  ASSERT(base_desc != NULL);
+  ASSERT(typedesc_can_add_opt(base_desc));
 
   typedesc_t* desc = typebuilder_build_opt(ctx->typebuilder, base_desc);
 
@@ -51,7 +51,7 @@ void ast_type_opt_codegen(codegen_ctx_t* ctx, ast_type_opt_t* node)
   ast_node_codegen(ctx, node->base_type);
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
-  assert(desc != NULL);
+  ASSERT(desc != NULL);
   
   node->llvm_type = desc->llvm_type;
 }

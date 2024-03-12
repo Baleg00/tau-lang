@@ -15,7 +15,7 @@
 ast_decl_mod_t* ast_decl_mod_init(void)
 {
   ast_decl_mod_t* node = (ast_decl_mod_t*)malloc(sizeof(ast_decl_mod_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 

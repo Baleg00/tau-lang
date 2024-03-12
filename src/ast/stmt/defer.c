@@ -14,7 +14,7 @@
 ast_stmt_defer_t* ast_stmt_defer_init(void)
 {
   ast_stmt_defer_t* node = (ast_stmt_defer_t*)malloc(sizeof(ast_stmt_defer_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -49,10 +49,10 @@ void ast_stmt_defer_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_defer_t* node)
 
 void ast_stmt_defer_codegen(codegen_ctx_t* ctx, ast_stmt_defer_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
   
-  unreachable();
+  UNREACHABLE();
   // TODO
 }
 

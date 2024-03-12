@@ -15,7 +15,7 @@
 ast_type_array_t* ast_type_array_init(void)
 {
   ast_type_array_t* node = (ast_type_array_t*)malloc(sizeof(ast_type_array_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -41,10 +41,10 @@ void ast_type_array_typecheck(typecheck_ctx_t* ctx, ast_type_array_t* node)
   ast_node_typecheck(ctx, node->size);
 
   typedesc_t* base_desc = typetable_lookup(ctx->typetable, node->base_type);
-  assert(base_desc != NULL);
-  assert(typedesc_can_add_array(base_desc));
+  ASSERT(base_desc != NULL);
+  ASSERT(typedesc_can_add_array(base_desc));
 
-  assert(node->size->kind == AST_EXPR_LIT_INT);
+  ASSERT(node->size->kind == AST_EXPR_LIT_INT);
 
   typedesc_t* desc = typebuilder_build_array(ctx->typebuilder, (size_t)((ast_expr_lit_int_t*)node->size)->value, base_desc);
 
@@ -56,14 +56,14 @@ void ast_type_array_codegen(codegen_ctx_t* ctx, ast_type_array_t* node)
   ast_node_codegen(ctx, node->base_type);
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
-  assert(desc != NULL);
+  ASSERT(desc != NULL);
   
   node->llvm_type = desc->llvm_type;
 }
 
 size_t ast_type_array_mangle(ast_type_array_t* node, char* buf, size_t len)
 {
-  assert(node->size->kind == AST_EXPR_LIT_INT);
+  ASSERT(node->size->kind == AST_EXPR_LIT_INT);
 
   size_t written = snprintf(buf, len, "a%llu", ((ast_expr_lit_int_t*)node->size)->value);
   written += ast_node_mangle(node->base_type, buf + written, len <= written ? 0 : len - written);

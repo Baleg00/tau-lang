@@ -14,7 +14,7 @@
 ast_path_access_t* ast_path_access_init(void)
 {
   ast_path_access_t* node = (ast_path_access_t*)malloc(sizeof(ast_path_access_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 

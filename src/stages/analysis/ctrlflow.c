@@ -13,7 +13,7 @@
 ctrlflow_ctx_t* ctrlflow_ctx_init(void)
 {
   ctrlflow_ctx_t* ctx = (ctrlflow_ctx_t*)malloc(sizeof(ctrlflow_ctx_t));
-  clearobj(ctx);
+  CLEAROBJ(ctx);
 
   ctx->blocks = stack_init();
   ctx->stmts = vector_init_with_capacity(1);

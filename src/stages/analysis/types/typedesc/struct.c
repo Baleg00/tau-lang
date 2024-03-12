@@ -13,7 +13,7 @@
 typedesc_struct_t* typedesc_struct_init(void)
 {
   typedesc_struct_t* desc = (typedesc_struct_t*)malloc(sizeof(typedesc_struct_t));
-  clearobj(desc);
+  CLEAROBJ(desc);
 
   desc->kind = TYPEDESC_STRUCT;
 

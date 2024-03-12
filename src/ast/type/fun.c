@@ -14,7 +14,7 @@
 ast_type_fun_t* ast_type_fun_init(void)
 {
   ast_type_fun_t* node = (ast_type_fun_t*)malloc(sizeof(ast_type_fun_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -45,7 +45,7 @@ void ast_type_fun_typecheck(typecheck_ctx_t* ctx, ast_type_fun_t* node)
   ast_node_typecheck(ctx, node->return_type);
 
   typedesc_t* return_desc = typetable_lookup(ctx->typetable, node->return_type);
-  assert(return_desc != NULL);
+  ASSERT(return_desc != NULL);
 
   typedesc_t** param_types = (typedesc_t**)malloc(sizeof(typedesc_t*) * vector_size(node->params));
 
@@ -54,7 +54,7 @@ void ast_type_fun_typecheck(typecheck_ctx_t* ctx, ast_type_fun_t* node)
     ast_node_t* param = (ast_node_t*)vector_get(node->params, i);
 
     typedesc_t* param_desc = typetable_lookup(ctx->typetable, param);
-    assert(param_desc != NULL);
+    ASSERT(param_desc != NULL);
 
     param_types[i] = param_desc;
   }
@@ -74,7 +74,7 @@ void ast_type_fun_codegen(codegen_ctx_t* ctx, ast_type_fun_t* node)
     ast_node_codegen(ctx, (ast_node_t*)vector_get(node->params, i));
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
-  assert(desc != NULL);
+  ASSERT(desc != NULL);
   
   node->llvm_type = desc->llvm_type;
 }

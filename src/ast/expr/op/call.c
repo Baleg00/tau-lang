@@ -16,7 +16,7 @@
 ast_expr_op_call_t* ast_expr_op_call_init(void)
 {
   ast_expr_op_call_t* node = (ast_expr_op_call_t*)malloc(sizeof(ast_expr_op_call_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -47,10 +47,10 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->params, i));
 
   typedesc_t* callee_desc = typetable_lookup(ctx->typetable, node->callee);
-  assert(callee_desc != NULL);
+  ASSERT(callee_desc != NULL);
 
   typedesc_fun_t* fun_desc = (typedesc_fun_t*)typedesc_underlying_callable(callee_desc);
-  assert(fun_desc->kind == TYPEDESC_FUN);
+  ASSERT(fun_desc->kind == TYPEDESC_FUN);
 
   size_t i = 0;
   for (; i < vector_size(node->params) && i < vector_size(fun_desc->param_types); i++)
@@ -58,7 +58,7 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
     ast_node_t* caller_param = (ast_node_t*)vector_get(node->params, i);
 
     typedesc_t* caller_param_desc = typetable_lookup(ctx->typetable, caller_param);
-    assert(caller_param_desc != NULL);
+    ASSERT(caller_param_desc != NULL);
 
     typedesc_t* callee_param_desc = (typedesc_t*)vector_get(fun_desc->param_types, i);
 

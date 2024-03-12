@@ -33,7 +33,7 @@ struct set_t
 set_t* set_init(set_cmp_func_t cmp)
 {
   set_t* set = (set_t*)malloc(sizeof(set_t));
-  assert(set != NULL);
+  ASSERT(set != NULL);
 
   set->cmp = cmp;
   set->size = 0;
@@ -45,7 +45,7 @@ set_t* set_init(set_cmp_func_t cmp)
 static set_node_t* set_node_init(void* data)
 {
   set_node_t* node = (set_node_t*)malloc(sizeof(set_node_t));
-  assert(node != NULL);
+  ASSERT(node != NULL);
 
   node->data = data;
   node->parent = NULL;
@@ -116,7 +116,7 @@ bool set_add(set_t* set, void* data)
       return false;
   }
 
-  unreachable();
+  UNREACHABLE();
 
   return false;
 }

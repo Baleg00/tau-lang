@@ -16,7 +16,7 @@
 ast_stmt_break_t* ast_stmt_break_init(void)
 {
   ast_stmt_break_t* node = (ast_stmt_break_t*)malloc(sizeof(ast_stmt_break_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -32,14 +32,14 @@ void ast_stmt_break_free(ast_stmt_break_t* node)
 
 void ast_stmt_break_nameres(nameres_ctx_t* ctx, ast_stmt_break_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
 }
 
 void ast_stmt_break_typecheck(typecheck_ctx_t* ctx, ast_stmt_break_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
 }
 
 void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)
@@ -70,7 +70,7 @@ void ast_stmt_break_codegen(codegen_ctx_t* ctx, ast_stmt_break_t* node)
     break;
   }
   default:
-    unreachable();
+    UNREACHABLE();
   }
 }
 

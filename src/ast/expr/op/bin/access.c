@@ -16,7 +16,7 @@
 ast_expr_op_bin_access_t* ast_expr_op_bin_access_init(void)
 {
   ast_expr_op_bin_access_t* node = (ast_expr_op_bin_access_t*)malloc(sizeof(ast_expr_op_bin_access_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -34,10 +34,10 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
 {
   ast_node_typecheck(ctx, node->lhs);
 
-  assert(node->rhs->kind == AST_EXPR_ID); // RHS must be an identifier.
+  ASSERT(node->rhs->kind == AST_EXPR_ID); // RHS must be an identifier.
 
   typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
-  assert(lhs_desc != NULL);
+  ASSERT(lhs_desc != NULL);
 
   if (node->lhs->kind == AST_EXPR_ID && ((ast_expr_id_t*)node->lhs)->decl->kind == AST_DECL_ENUM)
   {
@@ -58,7 +58,7 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
   }
   else
   {
-    assert(typedesc_remove_const(lhs_desc)->kind == TYPEDESC_REF);
+    ASSERT(typedesc_remove_const(lhs_desc)->kind == TYPEDESC_REF);
 
     bool is_mut = typedesc_remove_const_ref(lhs_desc)->kind == TYPEDESC_MUT;
 
@@ -90,7 +90,7 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
       break;
     }
     default:
-      unreachable();
+      UNREACHABLE();
     }
 
     string_view_t id_view = token_to_string_view(node->rhs->tok);
@@ -105,7 +105,7 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
     node->idx = vector_find(members, mbr_sym->node);
 
     typedesc_t* mbr_desc = typetable_lookup(ctx->typetable, mbr_sym->node);
-    assert(lhs_desc != NULL);
+    ASSERT(lhs_desc != NULL);
 
     if (is_mut && typedesc_can_add_mut(mbr_desc))
       mbr_desc = typebuilder_build_mut(ctx->typebuilder, mbr_desc);
@@ -122,12 +122,12 @@ void ast_expr_op_bin_access_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_access_t
   ast_node_codegen(ctx, node->lhs);
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
-  assert(desc != NULL);
+  ASSERT(desc != NULL);
 
   node->llvm_type = desc->llvm_type;
 
   typedesc_t* decl_desc = typetable_lookup(ctx->typetable, node->decl);
-  assert(decl_desc != NULL);
+  ASSERT(decl_desc != NULL);
 
   LLVMValueRef llvm_lhs_value = ((ast_expr_t*)node->lhs)->llvm_value;
 
@@ -149,6 +149,6 @@ void ast_expr_op_bin_access_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_access_t
     break;
   }
   default:
-    unreachable();
+    UNREACHABLE();
   }
 }

@@ -16,7 +16,7 @@
 ast_expr_op_un_t* ast_expr_op_un_init(void)
 {
   ast_expr_op_un_t* node = (ast_expr_op_un_t*)malloc(sizeof(ast_expr_op_un_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -40,7 +40,7 @@ void ast_expr_op_un_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
   ast_node_typecheck(ctx, node->expr);
 
   typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
-  assert(expr_desc != NULL);
+  ASSERT(expr_desc != NULL);
 
   typedesc_t* desc = NULL;
 
@@ -119,7 +119,7 @@ void ast_expr_op_un_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
     break;
   }
   default:
-    unreachable();
+    UNREACHABLE();
   }
 
   if (expr_desc->kind == TYPEDESC_CONST && desc->kind != TYPEDESC_CONST)
@@ -163,7 +163,7 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
     else if (typedesc_is_float(expr_desc))
       llvm_inc_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "pre_inc_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);    
     node->llvm_value = expr->llvm_value;
@@ -179,7 +179,7 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
     else if (typedesc_is_float(expr_desc))
       llvm_inc_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "post_inc_tmp");
     else
-      unreachable();
+      UNREACHABLE();
     
     LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
     node->llvm_value = llvm_value;
@@ -195,7 +195,7 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
     else if (typedesc_is_float(expr_desc))
       llvm_dec_value = LLVMBuildFSub(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "pre_dec_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     LLVMBuildStore(ctx->llvm_builder, llvm_dec_value, expr->llvm_value);
     node->llvm_value = expr->llvm_value;
@@ -211,7 +211,7 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
     else if (typedesc_is_float(expr_desc))
       llvm_dec_value = LLVMBuildFSub(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "post_dec_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     LLVMBuildStore(ctx->llvm_builder, llvm_dec_value, expr->llvm_value);
     node->llvm_value = llvm_value;
@@ -231,7 +231,7 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
     else if (typedesc_is_float(expr_desc))
       node->llvm_value = LLVMBuildFNeg(ctx->llvm_builder, llvm_value, "fneg_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     break;
   }
@@ -253,7 +253,7 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
     break;
   }
   default:
-    unreachable();
+    UNREACHABLE();
   }
 }
 

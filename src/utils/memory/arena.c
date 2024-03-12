@@ -21,7 +21,7 @@
 /**
  * \brief Maximum possible alignment of any object.
  */
-#define ARENA_MAX_ALIGN (alignof(union { uintmax_t imax; void* ptr; long double ld; }))
+#define ARENA_MAX_ALIGN (ALIGNOF(union { uintmax_t imax; void* ptr; long double ld; }))
 
 /**
  * \brief Aligns a pointer to `ARENA_MAX_ALIGN`.
@@ -65,7 +65,7 @@ static arena_chunk_t* arena_chunk_init_with_capacity(size_t cap)
   size_t aligned_size = arena_round(sizeof(arena_chunk_t) + cap);
 
   arena_chunk_t* chunk = (arena_chunk_t*)malloc(aligned_size);
-  assert(chunk != NULL);
+  ASSERT(chunk != NULL);
 
   void* unaligned_ptr = (void*)((uintptr_t)chunk + sizeof(arena_chunk_t));
 
@@ -123,8 +123,8 @@ static void* arena_allocate(arena_chunk_t* chunk, size_t size)
  */
 static void arena_deallocate(arena_chunk_t* chunk, void* ptr)
 {
-  unused(chunk);
-  unused(ptr);
+  UNUSED(chunk);
+  UNUSED(ptr);
 }
 
 /**
@@ -137,9 +137,9 @@ static void arena_deallocate(arena_chunk_t* chunk, void* ptr)
  */
 static void* arena_reallocate(arena_chunk_t* chunk, void* ptr, size_t new_size)
 {
-  unused(chunk);
-  unused(ptr);
-  unused(new_size);
+  UNUSED(chunk);
+  UNUSED(ptr);
+  UNUSED(new_size);
   return NULL;
 }
 

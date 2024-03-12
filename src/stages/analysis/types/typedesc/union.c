@@ -13,7 +13,7 @@
 typedesc_union_t* typedesc_union_init(void)
 {
   typedesc_union_t* desc = (typedesc_union_t*)malloc(sizeof(typedesc_union_t));
-  clearobj(desc);
+  CLEAROBJ(desc);
 
   desc->kind = TYPEDESC_UNION;
 

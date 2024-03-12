@@ -15,7 +15,7 @@
 ast_decl_enum_constant_t* ast_decl_enum_constant_init(void)
 {
   ast_decl_enum_constant_t* node = (ast_decl_enum_constant_t*)malloc(sizeof(ast_decl_enum_constant_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 

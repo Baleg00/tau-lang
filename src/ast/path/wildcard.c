@@ -14,7 +14,7 @@
 ast_path_wildcard_t* ast_path_wildcard_init(void)
 {
   ast_path_wildcard_t* node = (ast_path_wildcard_t*)malloc(sizeof(ast_path_wildcard_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 

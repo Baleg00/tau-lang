@@ -13,7 +13,7 @@
 typedesc_ref_t* typedesc_ref_init(void)
 {
   typedesc_ref_t* desc = (typedesc_ref_t*)malloc(sizeof(typedesc_ref_t));
-  clearobj(desc);
+  CLEAROBJ(desc);
 
   desc->kind = TYPEDESC_REF;
 

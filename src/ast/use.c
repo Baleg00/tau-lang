@@ -14,7 +14,7 @@
 ast_use_t* ast_use_init(void)
 {
   ast_use_t* node = (ast_use_t*)malloc(sizeof(ast_use_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 

@@ -13,7 +13,7 @@
 typedesc_const_t* typedesc_const_init(void)
 {
   typedesc_const_t* desc = (typedesc_const_t*)malloc(sizeof(typedesc_const_t));
-  clearobj(desc);
+  CLEAROBJ(desc);
 
   desc->kind = TYPEDESC_CONST;
 

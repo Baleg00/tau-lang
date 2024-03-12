@@ -16,7 +16,7 @@
 ast_decl_fun_t* ast_decl_fun_init(void)
 {
   ast_decl_fun_t* node = (ast_decl_fun_t*)malloc(sizeof(ast_decl_fun_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -70,13 +70,13 @@ void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
   VECTOR_FOR_LOOP(i, node->params)
   {
     typedesc_t* param_desc = typetable_lookup(ctx->typetable, (ast_node_t*)vector_get(node->params, i));
-    assert(param_desc != NULL);
+    ASSERT(param_desc != NULL);
 
     param_types[i] = param_desc;
   }
 
   typedesc_t* return_desc = typetable_lookup(ctx->typetable, node->return_type);
-  assert(return_desc != NULL);
+  ASSERT(return_desc != NULL);
 
   typedesc_t* desc = typebuilder_build_fun(ctx->typebuilder, return_desc, param_types, param_count, node->is_vararg, node->callconv);
 
@@ -123,7 +123,7 @@ void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)
   case CALLCONV_FASTCALL:   llvm_callconv = LLVMFastCallConv;          break;
   case CALLCONV_VECTORCALL: llvm_callconv = LLVMX86VectorCallCallConv; break;
   case CALLCONV_THISCALL:   llvm_callconv = LLVMX86ThisCallCallConv;   break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   LLVMSetFunctionCallConv(node->llvm_value, llvm_callconv);

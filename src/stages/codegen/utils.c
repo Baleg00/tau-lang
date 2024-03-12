@@ -21,7 +21,7 @@ LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
 
 LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
 {
-  assert(typedesc_is_arithmetic(from_desc) && typedesc_is_arithmetic(to_desc));
+  ASSERT(typedesc_is_arithmetic(from_desc) && typedesc_is_arithmetic(to_desc));
 
   if (typedesc_is_integer(from_desc) && typedesc_is_integer(to_desc))
   {

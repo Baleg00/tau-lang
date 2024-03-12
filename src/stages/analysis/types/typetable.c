@@ -59,7 +59,7 @@ struct typetable_t
 static typetable_entry_t* typetable_entry_init(ast_node_t* node, typedesc_t* desc)
 {
   typetable_entry_t* entry = (typetable_entry_t*)malloc(sizeof(typetable_entry_t));
-  assert(entry != NULL);
+  ASSERT(entry != NULL);
 
   entry->node = node;
   entry->desc = desc;
@@ -106,7 +106,7 @@ static void typetable_expand(typetable_t* table)
   table->capacity <<= 1;
 
   table->buckets = (typetable_entry_t**)realloc(table->buckets, table->capacity * sizeof(typetable_entry_t*));
-  assert(table->buckets != NULL);
+  ASSERT(table->buckets != NULL);
   
   memset(table->buckets, 0, table->capacity * sizeof(typetable_entry_t*));
 
@@ -119,13 +119,13 @@ static void typetable_expand(typetable_t* table)
 typetable_t* typetable_init(void)
 {
   typetable_t* table = (typetable_t*)malloc(sizeof(typetable_t));
-  assert(table != NULL);
+  ASSERT(table != NULL);
 
   table->size = 0;
   table->capacity = TYPETABLE_INITIAL_CAPACITY;
 
   table->buckets = (typetable_entry_t**)calloc(table->capacity, sizeof(typetable_entry_t*));
-  assert(table->buckets != NULL);
+  ASSERT(table->buckets != NULL);
 
   return table;
 }

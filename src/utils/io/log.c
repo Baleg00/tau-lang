@@ -21,7 +21,7 @@ static bool g_log_verbose = false;
 
 void log_log(log_level_t lvl, const char* file, int line, const char* func, const char* name, const char* fmt, ...)
 {
-  unused(func);
+  UNUSED(func);
 
   if (lvl < g_log_level || g_log_stream == NULL)
     return;

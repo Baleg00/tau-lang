@@ -13,7 +13,7 @@
 static typedesc_prim_t* typedesc_prim_init(typedesc_kind_t kind)
 {
   typedesc_prim_t* desc = (typedesc_prim_t*)malloc(sizeof(typedesc_prim_t));
-  clearobj(desc);
+  CLEAROBJ(desc);
 
   desc->kind = kind;
 

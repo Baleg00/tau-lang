@@ -16,7 +16,7 @@
 ast_expr_id_t* ast_expr_id_init(void)
 {
   ast_expr_id_t* node = (ast_expr_id_t*)malloc(sizeof(ast_expr_id_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -55,7 +55,7 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
 void ast_expr_id_typecheck(typecheck_ctx_t* ctx, ast_expr_id_t* node)
 {
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
-  assert(desc != NULL);
+  ASSERT(desc != NULL);
 
   if (node->decl->kind != AST_DECL_ENUM && desc->kind != TYPEDESC_REF)
     desc = typebuilder_build_ref(ctx->typebuilder, desc);
@@ -65,7 +65,7 @@ void ast_expr_id_typecheck(typecheck_ctx_t* ctx, ast_expr_id_t* node)
 
 void ast_expr_id_codegen(codegen_ctx_t* ctx, ast_expr_id_t* node)
 {
-  unused(ctx);
+  UNUSED(ctx);
   
   switch (node->decl->kind)
   {
@@ -94,7 +94,7 @@ void ast_expr_id_codegen(codegen_ctx_t* ctx, ast_expr_id_t* node)
     break;
   }
   default:
-    unreachable();
+    UNREACHABLE();
   }
 }
 

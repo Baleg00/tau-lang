@@ -16,7 +16,7 @@
 ast_stmt_continue_t* ast_stmt_continue_init(void)
 {
   ast_stmt_continue_t* node = (ast_stmt_continue_t*)malloc(sizeof(ast_stmt_continue_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -32,14 +32,14 @@ void ast_stmt_continue_free(ast_stmt_continue_t* node)
 
 void ast_stmt_continue_nameres(nameres_ctx_t* ctx, ast_stmt_continue_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
 }
 
 void ast_stmt_continue_typecheck(typecheck_ctx_t* ctx, ast_stmt_continue_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
 }
 
 void ast_stmt_continue_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_continue_t* node)
@@ -70,7 +70,7 @@ void ast_stmt_continue_codegen(codegen_ctx_t* ctx, ast_stmt_continue_t* node)
     break;
   }
   default:
-    unreachable();
+    UNREACHABLE();
   }
 }
 

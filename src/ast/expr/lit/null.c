@@ -14,7 +14,7 @@
 ast_expr_lit_null_t* ast_expr_lit_null_init(void)
 {
   ast_expr_lit_null_t* node = (ast_expr_lit_null_t*)malloc(sizeof(ast_expr_lit_null_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -30,25 +30,25 @@ void ast_expr_lit_null_free(ast_expr_lit_null_t* node)
 
 void ast_expr_lit_null_nameres(nameres_ctx_t* ctx, ast_expr_lit_null_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
 }
 
 void ast_expr_lit_null_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_null_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
 
-  unreachable();
+  UNREACHABLE();
   // TODO
 }
 
 void ast_expr_lit_null_codegen(codegen_ctx_t* ctx, ast_expr_lit_null_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
   
-  unreachable();
+  UNREACHABLE();
   // TODO
 }
 

@@ -300,7 +300,7 @@ void typebuilder_free(typebuilder_t* builder)
 
 typedesc_t* typebuilder_build_mut(typebuilder_t* builder, typedesc_t* base_type)
 {
-  assert(typedesc_can_add_mut(base_type));
+  ASSERT(typedesc_can_add_mut(base_type));
 
   typedesc_mut_t* desc = (typedesc_mut_t*)typedesc_mut_init();
   desc->base_type = base_type;
@@ -322,7 +322,7 @@ typedesc_t* typebuilder_build_mut(typebuilder_t* builder, typedesc_t* base_type)
 
 typedesc_t* typebuilder_build_const(typebuilder_t* builder, typedesc_t* base_type)
 {
-  assert(typedesc_can_add_const(base_type));
+  ASSERT(typedesc_can_add_const(base_type));
 
   typedesc_const_t* desc = (typedesc_const_t*)typedesc_const_init();
   desc->base_type = base_type;
@@ -344,7 +344,7 @@ typedesc_t* typebuilder_build_const(typebuilder_t* builder, typedesc_t* base_typ
 
 typedesc_t* typebuilder_build_ptr(typebuilder_t* builder, typedesc_t* base_type)
 {
-  assert(typedesc_can_add_ptr(base_type));
+  ASSERT(typedesc_can_add_ptr(base_type));
 
   typedesc_ptr_t* desc = (typedesc_ptr_t*)typedesc_ptr_init();
   desc->base_type = base_type;
@@ -366,7 +366,7 @@ typedesc_t* typebuilder_build_ptr(typebuilder_t* builder, typedesc_t* base_type)
 
 typedesc_t* typebuilder_build_array(typebuilder_t* builder, size_t length, typedesc_t* base_type)
 {
-  assert(typedesc_can_add_array(base_type));
+  ASSERT(typedesc_can_add_array(base_type));
 
   typedesc_array_t* desc = (typedesc_array_t*)typedesc_array_init();
   desc->base_type = base_type;
@@ -389,7 +389,7 @@ typedesc_t* typebuilder_build_array(typebuilder_t* builder, size_t length, typed
 
 typedesc_t* typebuilder_build_ref(typebuilder_t* builder, typedesc_t* base_type)
 {
-  assert(typedesc_can_add_ref(base_type));
+  ASSERT(typedesc_can_add_ref(base_type));
 
   typedesc_ref_t* desc = (typedesc_ref_t*)typedesc_ref_init();
   desc->base_type = base_type;
@@ -411,7 +411,7 @@ typedesc_t* typebuilder_build_ref(typebuilder_t* builder, typedesc_t* base_type)
 
 typedesc_t* typebuilder_build_opt(typebuilder_t* builder, typedesc_t* base_type)
 {
-  assert(typedesc_can_add_opt(base_type));
+  ASSERT(typedesc_can_add_opt(base_type));
 
   typedesc_ref_t* desc = (typedesc_ref_t*)typedesc_opt_init();
   desc->base_type = base_type;
@@ -640,7 +640,7 @@ typedesc_t* typebuilder_build_enum(typebuilder_t* builder, ast_node_t* node)
   else if (field_count <= UINT16_MAX) desc->llvm_type = builder->desc_u16->llvm_type;
   else if (field_count <= UINT32_MAX) desc->llvm_type = builder->desc_u32->llvm_type;
   else if (field_count <= UINT64_MAX) desc->llvm_type = builder->desc_u64->llvm_type;
-  else unreachable();
+  else UNREACHABLE();
 
   set_add(builder->set_enum, desc);
 

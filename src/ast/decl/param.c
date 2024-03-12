@@ -16,7 +16,7 @@
 ast_decl_param_t* ast_decl_param_init(void)
 {
   ast_decl_param_t* node = (ast_decl_param_t*)malloc(sizeof(ast_decl_param_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -52,14 +52,14 @@ void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node)
   ast_node_typecheck(ctx, node->expr);
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->type);
-  assert(desc != NULL);
+  ASSERT(desc != NULL);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 
   if (node->expr != NULL)
   {
     typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
-    assert(expr_desc != NULL);
+    ASSERT(expr_desc != NULL);
 
     if (!typedesc_is_implicitly_convertible(expr_desc, desc))
       report_error_type_mismatch(node->tok->loc, desc, expr_desc);

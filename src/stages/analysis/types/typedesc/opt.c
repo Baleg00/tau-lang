@@ -13,7 +13,7 @@
 typedesc_opt_t* typedesc_opt_init(void)
 {
   typedesc_opt_t* desc = (typedesc_opt_t*)malloc(sizeof(typedesc_opt_t));
-  clearobj(desc);
+  CLEAROBJ(desc);
 
   desc->kind = TYPEDESC_OPT;
 

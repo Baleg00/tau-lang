@@ -16,7 +16,7 @@
 ast_expr_op_bin_t* ast_expr_op_bin_init(void)
 {
   ast_expr_op_bin_t* node = (ast_expr_op_bin_t*)malloc(sizeof(ast_expr_op_bin_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -54,10 +54,10 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
   ast_node_typecheck(ctx, node->rhs);
 
   typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
-  assert(lhs_desc != NULL);
+  ASSERT(lhs_desc != NULL);
 
   typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
-  assert(rhs_desc != NULL);
+  ASSERT(rhs_desc != NULL);
 
   typedesc_t* desc = NULL;
 
@@ -151,7 +151,7 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
     break;
   }
   default:
-    unreachable();
+    UNREACHABLE();
   }
 
   if (lhs_desc->kind == TYPEDESC_CONST && rhs_desc->kind == TYPEDESC_CONST)
@@ -200,7 +200,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(desc))
       node->llvm_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fadd_tmp");
     else
-      unreachable();
+      UNREACHABLE();
     
     break;
   }
@@ -212,7 +212,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(desc))
       node->llvm_value = LLVMBuildFSub(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fsub_tmp");
     else
-      unreachable();
+      UNREACHABLE();
     
     break;
   }
@@ -224,7 +224,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(desc))
       node->llvm_value = LLVMBuildFMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fmul_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     break;
   }
@@ -239,7 +239,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(desc))
       node->llvm_value = LLVMBuildFDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fdiv_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     break;
   }
@@ -254,7 +254,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(desc))
       node->llvm_value = LLVMBuildFRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "frem_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     break;
   }
@@ -297,7 +297,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(promoted_desc))
       node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOEQ, llvm_lhs_value, llvm_rhs_value, "fcmp_oeq_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     break;
   }
@@ -308,7 +308,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(promoted_desc))
       node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealONE, llvm_lhs_value, llvm_rhs_value, "fcmp_one_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     break;
   }
@@ -322,7 +322,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(promoted_desc))
       node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOLT, llvm_lhs_value, llvm_rhs_value, "fcmp_olt_tmp");
     else
-      unreachable();
+      UNREACHABLE();
     
     break;
   }
@@ -336,7 +336,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(promoted_desc))
       node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOLE, llvm_lhs_value, llvm_rhs_value, "fcmp_ole_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     break;
   }
@@ -350,7 +350,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(promoted_desc))
       node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOGT, llvm_lhs_value, llvm_rhs_value, "fcmp_ogt_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     break;
   }
@@ -364,7 +364,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     else if (typedesc_is_float(promoted_desc))
       node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOGE, llvm_lhs_value, llvm_rhs_value, "fcmp_oge_tmp");
     else
-      unreachable();
+      UNREACHABLE();
 
     break;
   }
@@ -382,7 +382,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     break;
   }
   default:
-    unreachable();
+    UNREACHABLE();
   }
 
   switch (node->op_kind)
@@ -403,7 +403,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
     break;
   }
   default:
-    noop();
+    NOOP();
   }
 }
 

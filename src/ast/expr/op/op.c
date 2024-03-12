@@ -60,7 +60,7 @@ const char* op_kind_to_cstr(op_kind_t kind)
   case OP_ACCESS_OPT:       return "OP_ACCESS_OPT";
   case OP_RANGE:            return "OP_RANGE";
   case OP_CALL:             return "OP_CALL";
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return NULL;
@@ -146,7 +146,7 @@ int op_precedence(op_kind_t kind)
     return 13;
 
   default:
-    unreachable();
+    UNREACHABLE();
   }
 
   return -1;

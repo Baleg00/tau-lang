@@ -13,7 +13,7 @@
 typedesc_ptr_t* typedesc_ptr_init(void)
 {
   typedesc_ptr_t* desc = (typedesc_ptr_t*)malloc(sizeof(typedesc_ptr_t));
-  clearobj(desc);
+  CLEAROBJ(desc);
 
   desc->kind = TYPEDESC_PTR;
 

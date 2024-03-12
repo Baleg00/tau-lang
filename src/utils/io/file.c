@@ -30,7 +30,7 @@ size_t file_read(const char* path, char* buf, size_t len)
 
   if (buf != NULL)
   {
-    flen = fread(buf, sizeof(char), min(len, flen), file);
+    flen = fread(buf, sizeof(char), MIN(len, flen), file);
     memset(buf + flen, '\0', (len - flen) * sizeof(char));
   }
   
@@ -86,11 +86,11 @@ size_t file_dir(const char* path, char* buf, size_t len)
   if (sep == NULL)
     return 0;
 
-  size_t dir_len = max(sep - path, 1);
+  size_t dir_len = MAX(sep - path, 1);
 
   if (buf != NULL)
   {
-    strncpy(buf, path, min(len, dir_len));
+    strncpy(buf, path, MIN(len, dir_len));
 
     if (dir_len < len)
       buf[dir_len] = '\0';
@@ -120,7 +120,7 @@ size_t file_stem(const char* path, char* buf, size_t len)
 
   if (buf != NULL)
   {
-    strncpy(buf, sep + 1, min(len, stem_len));
+    strncpy(buf, sep + 1, MIN(len, stem_len));
 
     if (stem_len < len)
       buf[stem_len] = '\0';
@@ -152,9 +152,9 @@ size_t file_join(char* buf, size_t len, size_t count, ...)
 
     if (buf != NULL)
     {
-      strncpy(buf, path, min(len, path_len));
+      strncpy(buf, path, MIN(len, path_len));
       buf += path_len;
-      len -= min(len, path_len);
+      len -= MIN(len, path_len);
 
       if (i + 1 < count)
       {

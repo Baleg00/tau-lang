@@ -340,7 +340,7 @@ token_t* lexer_read_word(lexer_t* lex)
   strncpy(buf, begin, len);
   buf[len] = '\0';
 
-  for (size_t i = 0; i < countof(KEYWORD_LOOKUP_TABLE); ++i)
+  for (size_t i = 0; i < COUNTOF(KEYWORD_LOOKUP_TABLE); ++i)
     if (strcmp(KEYWORD_LOOKUP_TABLE[i].keyword, buf) == 0)
     {
       tok->kind = KEYWORD_LOOKUP_TABLE[i].kind;
@@ -743,7 +743,7 @@ token_t* lexer_read_punctuation(lexer_t* lex)
   token_t* tok = lexer_token_init(lex, kind);
   tok->loc->len = 0;
 
-  for (size_t i = 0; i < countof(PUNCT_LOOKUP_TABLE); ++i)
+  for (size_t i = 0; i < COUNTOF(PUNCT_LOOKUP_TABLE); ++i)
     if (PUNCT_LOOKUP_TABLE[i].kind == kind)
     {
       tok->loc->len = PUNCT_LOOKUP_TABLE[i].len;

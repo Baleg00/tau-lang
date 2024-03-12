@@ -15,7 +15,7 @@
 ast_decl_union_t* ast_decl_union_init(void)
 {
   ast_decl_union_t* node = (ast_decl_union_t*)malloc(sizeof(ast_decl_union_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -64,7 +64,7 @@ void ast_decl_union_typecheck(typecheck_ctx_t* ctx, ast_decl_union_t* node)
   VECTOR_FOR_LOOP(i, node->members)
   {
     typedesc_t* field_desc = typetable_lookup(ctx->typetable, (ast_node_t*)vector_get(node->members, i));
-    assert(field_desc != NULL);
+    ASSERT(field_desc != NULL);
 
     field_types[i] = field_desc;
   }

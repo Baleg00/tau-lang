@@ -27,7 +27,7 @@ struct cli_t
 cli_t* cli_init(cli_opt_t* opts, size_t opt_count, const char* usages[], size_t usage_count)
 {
   cli_t* cli = (cli_t*)malloc(sizeof(cli_t));
-  assert(cli != NULL);
+  ASSERT(cli != NULL);
 
   cli->opts = opts;
   cli->opt_count = opt_count;
@@ -67,7 +67,7 @@ void cli_parse(cli_t* cli, int argc, const char* argv[])
       case '?': cli_parse_optional(opt, que); break;
       case '+': cli_parse_one_or_many(opt, que); break;
       case '*': cli_parse_any(opt, que); break;
-      default: unreachable();
+      default: UNREACHABLE();
       }
 
       if (opt->callback != NULL)
@@ -145,7 +145,7 @@ void cli_parse_N(cli_opt_t* opt, queue_t* que)
         case CLI_TYPE_FLOAT:   *((float*)      opt->data + i) = *(float*)      opt->default_data; break;
         case CLI_TYPE_BOOLEAN: *((bool*)       opt->data + i) = *(bool*)       opt->default_data; break;
         case CLI_TYPE_STRING:  *((const char**)opt->data + i) = *(const char**)opt->default_data; break;
-        default: unreachable();
+        default: UNREACHABLE();
         }
 
       return;
@@ -157,7 +157,7 @@ void cli_parse_N(cli_opt_t* opt, queue_t* que)
     case CLI_TYPE_FLOAT:   *((float*)      opt->data + i) = (float)atof(arg); break;
     case CLI_TYPE_BOOLEAN: *((bool*)       opt->data + i) = strcmp(arg, "true") == 0 || strcmp(arg, "on") == 0; break;
     case CLI_TYPE_STRING:  *((const char**)opt->data + i) = arg; break;
-    default: unreachable();
+    default: UNREACHABLE();
     }
   }
 }
@@ -183,7 +183,7 @@ void cli_parse_optional(cli_opt_t* opt, queue_t* que)
     case CLI_TYPE_FLOAT:   *(float*)      opt->data = (float)atof(arg); break;
     case CLI_TYPE_BOOLEAN: *(bool*)       opt->data = strcmp(arg, "true") == 0 || strcmp(arg, "on") == 0; break;
     case CLI_TYPE_STRING:  *(const char**)opt->data = arg; break;
-    default: unreachable();
+    default: UNREACHABLE();
     }
 
     return;
@@ -201,7 +201,7 @@ void cli_parse_optional(cli_opt_t* opt, queue_t* que)
     case CLI_TYPE_FLOAT:   *(float*)      opt->data = *(float*)      opt->default_data; break;
     case CLI_TYPE_BOOLEAN: *(bool*)       opt->data = *(bool*)       opt->default_data; break;
     case CLI_TYPE_STRING:  *(const char**)opt->data = *(const char**)opt->default_data; break;
-    default: unreachable();
+    default: UNREACHABLE();
     }
   }
   // There is no argument and no default value was provided
@@ -240,7 +240,7 @@ void cli_parse_one_or_many(cli_opt_t* opt, queue_t* que)
     case CLI_TYPE_FLOAT:   *((float*)      opt->data + count) = (float)atof(arg); break;
     case CLI_TYPE_BOOLEAN: *((bool*)       opt->data + count) = strcmp(arg, "true") == 0 || strcmp(arg, "on") == 0; break;
     case CLI_TYPE_STRING:  *((const char**)opt->data + count) = arg; break;
-    default: unreachable();
+    default: UNREACHABLE();
     }
   }
 }
@@ -270,17 +270,17 @@ void cli_parse_any(cli_opt_t* opt, queue_t* que)
     case CLI_TYPE_FLOAT:   *((float*)      opt->data + count) = (float)atof(arg); break;
     case CLI_TYPE_BOOLEAN: *((bool*)       opt->data + count) = strcmp(arg, "true") == 0 || strcmp(arg, "on") == 0; break;
     case CLI_TYPE_STRING:  *((const char**)opt->data + count) = arg; break;
-    default: unreachable();
+    default: UNREACHABLE();
     }
   }
 }
 
 void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
-  unused(que);
-  unused(opt);
-  unused(arg);
-  unused(user_ptr);
+  UNUSED(que);
+  UNUSED(opt);
+  UNUSED(arg);
+  UNUSED(user_ptr);
 
   puts("Usage:");
 
@@ -312,30 +312,30 @@ void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg
 
 void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
-  unused(cli);
-  unused(que);
-  unused(opt);
-  unused(arg);
+  UNUSED(cli);
+  UNUSED(que);
+  UNUSED(opt);
+  UNUSED(arg);
 
   printf("Version: %s\n", (const char*)user_ptr);
 }
 
 void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
-  unused(cli);
-  unused(que);
-  unused(opt);
-  unused(arg);
+  UNUSED(cli);
+  UNUSED(que);
+  UNUSED(opt);
+  UNUSED(arg);
 
   *(bool*)user_ptr = true;
 }
 
 void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
 {
-  unused(cli);
-  unused(que);
-  unused(opt);
-  unused(arg);
+  UNUSED(cli);
+  UNUSED(que);
+  UNUSED(opt);
+  UNUSED(arg);
 
   *(bool*)user_ptr = true;
 }

@@ -30,7 +30,7 @@ struct list_t
 list_node_t* list_node_init(void* data)
 {
   list_node_t* node = (list_node_t*)malloc(sizeof(list_node_t));
-  assert(node != NULL);
+  ASSERT(node != NULL);
 
   node->data = data;
   node->owner = NULL;
@@ -47,38 +47,38 @@ void list_node_free(list_node_t* node)
 
 list_node_t* list_node_copy(list_node_t* node)
 {
-  assert(node != NULL);
+  ASSERT(node != NULL);
   return list_node_init(node->data);
 }
 
 list_node_t* list_node_prev(list_node_t* node)
 {
-  assert(node != NULL);
+  ASSERT(node != NULL);
   return node->prev;
 }
 
 list_node_t* list_node_next(list_node_t* node)
 {
-  assert(node != NULL);
+  ASSERT(node != NULL);
   return node->next;
 }
 
 void* list_node_get(list_node_t* node)
 {
-  assert(node != NULL);
+  ASSERT(node != NULL);
   return node->data;
 }
 
 void list_node_set(list_node_t* node, void* data)
 {
-  assert(node != NULL);
+  ASSERT(node != NULL);
   node->data = data;
 }
 
 list_t* list_init(void)
 {
   list_t* list = (list_t*)malloc(sizeof(list_t));
-  assert(list != NULL);
+  ASSERT(list != NULL);
 
   list->len = 0;
   list->head = NULL;
@@ -123,31 +123,31 @@ list_t* list_copy(list_t* list)
 
 void* list_front(list_t* list)
 {
-  assert(!list_empty(list));
+  ASSERT(!list_empty(list));
   return list_node_get(list_front_node(list));
 }
 
 void* list_back(list_t* list)
 {
-  assert(!list_empty(list));
+  ASSERT(!list_empty(list));
   return list_node_get(list_back_node(list));
 }
 
 list_node_t* list_front_node(list_t* list)
 {
-  assert(list != NULL);
+  ASSERT(list != NULL);
   return list_empty(list) ? NULL : list->head;
 }
 
 list_node_t* list_back_node(list_t* list)
 {
-  assert(list != NULL);
+  ASSERT(list != NULL);
   return list_empty(list) ? NULL : list->tail;
 }
 
 list_node_t* list_push_front(list_t* list, void* data)
 {
-  assert(list != NULL);
+  ASSERT(list != NULL);
 
   list_node_t* new_node = list_node_init(data);
 
@@ -169,7 +169,7 @@ list_node_t* list_push_front(list_t* list, void* data)
 
 list_node_t* list_push_back(list_t* list, void* data)
 {
-  assert(list != NULL);
+  ASSERT(list != NULL);
 
   list_node_t* new_node = list_node_init(data);
 
@@ -191,7 +191,7 @@ list_node_t* list_push_back(list_t* list, void* data)
 
 void* list_pop_front(list_t* list)
 {
-  assert(!list_empty(list));
+  ASSERT(!list_empty(list));
 
   list_node_t* node = list->head;
   
@@ -214,7 +214,7 @@ void* list_pop_front(list_t* list)
 
 void* list_pop_back(list_t* list)
 {
-  assert(!list_empty(list));
+  ASSERT(!list_empty(list));
 
   list_node_t* node = list->tail;
   
@@ -237,7 +237,7 @@ void* list_pop_back(list_t* list)
 
 list_node_t* list_insert_before(list_node_t* node, void* data)
 {
-  assert(node != NULL);
+  ASSERT(node != NULL);
 
   if (node->owner->head == node)
     return list_push_front(node->owner, data);
@@ -258,7 +258,7 @@ list_node_t* list_insert_before(list_node_t* node, void* data)
 
 list_node_t* list_insert_after(list_node_t* node, void* data)
 {
-  assert(node != NULL);
+  ASSERT(node != NULL);
 
   if (node->owner->tail == node)
     return list_push_back(node->owner, data);
@@ -279,7 +279,7 @@ list_node_t* list_insert_after(list_node_t* node, void* data)
 
 void* list_remove(list_node_t* node)
 {
-  assert(node != NULL);
+  ASSERT(node != NULL);
 
   if (node->owner->head == node)
     return list_pop_front(node->owner);
@@ -300,27 +300,27 @@ void* list_remove(list_node_t* node)
 
 void* list_remove_before(list_node_t* node)
 {
-  assert(node != NULL);
-  assert(list_node_prev(node) != NULL);
+  ASSERT(node != NULL);
+  ASSERT(list_node_prev(node) != NULL);
   return list_remove(node->prev);
 }
 
 void* list_remove_after(list_node_t* node)
 {
-  assert(node != NULL);
-  assert(list_node_next(node) != NULL);
+  ASSERT(node != NULL);
+  ASSERT(list_node_next(node) != NULL);
   return list_remove(node->next);
 }
 
 bool list_empty(list_t* list)
 {
-  assert(list != NULL);
+  ASSERT(list != NULL);
   return list->len == 0;
 }
 
 size_t list_size(list_t* list)
 {
-  assert(list != NULL);
+  ASSERT(list != NULL);
   return list->len;
 }
 

@@ -41,14 +41,14 @@ size_t string_view_length(string_view_t str)
 
 string_view_t string_view_substr(string_view_t str, size_t pos, size_t len)
 {
-  assert(pos + len <= str.len);
+  ASSERT(pos + len <= str.len);
 
   return (string_view_t){ .buf = str.buf + pos, .len = len };
 }
 
 int string_view_compare(string_view_t lhs, string_view_t rhs)
 {
-  return strncmp(lhs.buf, rhs.buf, min(lhs.len, rhs.len));
+  return strncmp(lhs.buf, rhs.buf, MIN(lhs.len, rhs.len));
 }
 
 int string_view_compare_cstr(string_view_t lhs, const char* rhs)

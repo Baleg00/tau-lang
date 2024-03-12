@@ -57,7 +57,7 @@ static void parser_skip_newlines(parser_t* par)
 parser_t* parser_init(void)
 {
   parser_t* par = (parser_t*)malloc(sizeof(parser_t));
-  clearobj(par);
+  CLEAROBJ(par);
 
   par->parents = stack_init();
 
@@ -200,7 +200,7 @@ callconv_kind_t parser_parse_callconv(parser_t* par)
   token_t* callconv_tok = parser_expect(par, TOK_LIT_STR);
   string_view_t callconv_str_view = token_to_string_view(callconv_tok);
 
-  for (size_t i = 0; i < countof(str_callconv_map); i++)
+  for (size_t i = 0; i < COUNTOF(str_callconv_map); i++)
     if (string_view_compare_cstr(callconv_str_view, str_callconv_map[i].str) == 0)
       return str_callconv_map[i].callconv;
 
@@ -581,7 +581,7 @@ ast_node_t* parser_parse_stmt(parser_t* par)
   case TOK_KW_RETURN:        return parser_parse_stmt_return(par);
   case TOK_KW_DEFER:         return parser_parse_stmt_defer(par);
   case TOK_PUNCT_BRACE_LEFT: return parser_parse_stmt_block(par);
-  default: noop();
+  default: NOOP();
   }
 
   return parser_parse_stmt_expr(par);
@@ -637,7 +637,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
         if (parser_current(par)->kind == TOK_ID)
         {
           ast_decl_param_t* variadic_param = (ast_decl_param_t*)parser_parse_decl_param(par);
-          assert(variadic_param->expr == NULL);
+          ASSERT(variadic_param->expr == NULL);
 
           variadic_param->is_vararg = true;
 
@@ -651,7 +651,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
         else
         {
           // Function must be extern "cdecl".
-          assert(node->is_extern && node->callconv == CALLCONV_CDECL);
+          ASSERT(node->is_extern && node->callconv == CALLCONV_CDECL);
           node->is_vararg = true;
         }
         
@@ -692,7 +692,7 @@ ast_node_t* parser_parse_decl_struct(parser_t* par)
   node->tok = parser_current(par);
   node->parent = stack_top(par->parents);
 
-  assert(!par->decl_ctx.is_extern);
+  ASSERT(!par->decl_ctx.is_extern);
 
   node->is_pub = par->decl_ctx.is_pub;
 
@@ -736,7 +736,7 @@ ast_node_t* parser_parse_decl_union(parser_t* par)
   node->tok = parser_current(par);
   node->parent = stack_top(par->parents);
 
-  assert(!par->decl_ctx.is_extern);
+  ASSERT(!par->decl_ctx.is_extern);
 
   node->is_pub = par->decl_ctx.is_pub;
 
@@ -775,7 +775,7 @@ ast_node_t* parser_parse_decl_enum(parser_t* par)
   node->tok = parser_current(par);
   node->parent = stack_top(par->parents);
 
-  assert(!par->decl_ctx.is_extern);
+  ASSERT(!par->decl_ctx.is_extern);
 
   node->is_pub = par->decl_ctx.is_pub;
 
@@ -800,7 +800,7 @@ ast_node_t* parser_parse_decl_mod(parser_t* par)
   node->tok = parser_current(par);
   node->parent = stack_top(par->parents);
 
-  assert(!par->decl_ctx.is_extern);
+  ASSERT(!par->decl_ctx.is_extern);
 
   node->is_pub = par->decl_ctx.is_pub;
 

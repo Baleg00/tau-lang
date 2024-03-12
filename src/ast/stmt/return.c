@@ -16,7 +16,7 @@
 ast_stmt_return_t* ast_stmt_return_init(void)
 {
   ast_stmt_return_t* node = (ast_stmt_return_t*)malloc(sizeof(ast_stmt_return_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -47,7 +47,7 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
   if (node->expr != NULL)
   {
     expr_desc = typetable_lookup(ctx->typetable, node->expr);
-    assert(expr_desc != NULL);
+    ASSERT(expr_desc != NULL);
   }
 
   if (!typedesc_is_implicitly_convertible(expr_desc, ctx->fun_desc->return_type))

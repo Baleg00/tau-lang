@@ -51,9 +51,9 @@ struct compiler_t
 
 static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_data)
 {
-  unused(cli);
-  unused(que);
-  unused(opt);
+  UNUSED(cli);
+  UNUSED(que);
+  UNUSED(opt);
 
   compiler_t* compiler = (compiler_t*)user_data;
 
@@ -66,7 +66,7 @@ static void compiler_dump_tokens(const char* path, vector_t* tokens)
   string_append_cstr(tokens_path, ".tokens.json");
 
   FILE* tokens_file = fopen(string_begin(tokens_path), "w");
-  assert(tokens_file != NULL);
+  ASSERT(tokens_file != NULL);
 
   token_json_dump_vector(tokens_file, tokens);
 
@@ -81,7 +81,7 @@ static void compiler_dump_ast(const char* path, ast_node_t* root)
   string_append_cstr(ast_path, ".ast.json");
 
   FILE* ast_file = fopen(string_begin(ast_path), "w");
-  assert(ast_file != NULL);
+  ASSERT(ast_file != NULL);
 
   ast_node_dump_json(ast_file, root);
   
@@ -287,7 +287,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
   const char* usages[] = { "tau [option...] file..." };
 
-  cli_t* cli = cli_init(opts, countof(opts), usages, countof(usages));
+  cli_t* cli = cli_init(opts, COUNTOF(opts), usages, COUNTOF(usages));
   cli_parse(cli, argc, argv);
   cli_free(cli);
 

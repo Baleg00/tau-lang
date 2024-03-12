@@ -16,7 +16,7 @@
 ast_stmt_if_t* ast_stmt_if_init(void)
 {
   ast_stmt_if_t* node = (ast_stmt_if_t*)malloc(sizeof(ast_stmt_if_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -48,7 +48,7 @@ void ast_stmt_if_typecheck(typecheck_ctx_t* ctx, ast_stmt_if_t* node)
   ast_node_typecheck(ctx, node->stmt_else);
 
   typedesc_t* cond_desc = typetable_lookup(ctx->typetable, node->cond);
-  assert(cond_desc != NULL);
+  ASSERT(cond_desc != NULL);
 
   if (typedesc_remove_const_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);

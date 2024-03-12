@@ -13,7 +13,7 @@
 nameres_ctx_t* nameres_ctx_init(void)
 {
   nameres_ctx_t* ctx = (nameres_ctx_t*)malloc(sizeof(nameres_ctx_t));
-  clearobj(ctx);
+  CLEAROBJ(ctx);
 
   ctx->global_scope = symtable_init(NULL);
   ctx->scopes = stack_init();

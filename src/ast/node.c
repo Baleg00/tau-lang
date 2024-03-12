@@ -76,7 +76,7 @@ void ast_node_free(ast_node_t* node)
   case AST_PATH_ALIAS:         ast_path_alias_free        ((ast_path_alias_t*        )node); break;
   case AST_USE:                ast_use_free               ((ast_use_t*               )node); break;
   case AST_PROG:               ast_prog_free              ((ast_prog_t*              )node); break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 }
 
@@ -139,7 +139,7 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_nameres(ctx, (ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_nameres          (ctx, (ast_decl_mod_t*          )node); break;
   case AST_PROG:               ast_prog_nameres              (ctx, (ast_prog_t*              )node); break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 }
 
@@ -202,7 +202,7 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_typecheck(ctx, (ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_typecheck          (ctx, (ast_decl_mod_t*          )node); break;
   case AST_PROG:               ast_prog_typecheck              (ctx, (ast_prog_t*              )node); break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 }
 
@@ -265,7 +265,7 @@ void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_FUN:           ast_decl_fun_ctrlflow          (ctx, (ast_decl_fun_t*          )node); break;
   case AST_DECL_MOD:           ast_decl_mod_ctrlflow          (ctx, (ast_decl_mod_t*          )node); break;
   case AST_PROG:               ast_prog_ctrlflow              (ctx, (ast_prog_t*              )node); break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 }
 
@@ -328,7 +328,7 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_codegen(ctx, (ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_codegen          (ctx, (ast_decl_mod_t*          )node); break;
   case AST_PROG:               ast_prog_codegen              (ctx, (ast_prog_t*              )node); break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 }
 
@@ -367,7 +367,7 @@ size_t ast_node_mangle(ast_node_t* node, char* buf, size_t len)
   case AST_DECL_UNION:         return ast_decl_union_mangle        ((ast_decl_union_t*        )node, buf, len);
   case AST_DECL_ENUM:          return ast_decl_enum_mangle         ((ast_decl_enum_t*         )node, buf, len);
   case AST_DECL_ENUM_CONSTANT: return ast_decl_enum_constant_mangle((ast_decl_enum_constant_t*)node, buf, len);
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return 0;
@@ -388,7 +388,7 @@ size_t ast_node_mangle_nested_name(ast_node_t* node, char* buf, size_t len)
   case AST_DECL_ENUM:          id_node = ((ast_decl_enum_t*         )node)->id; parent_node = ((ast_decl_enum_t*         )node)->parent; break;
   case AST_DECL_ENUM_CONSTANT: id_node = ((ast_decl_enum_constant_t*)node)->id; parent_node = ((ast_decl_enum_constant_t*)node)->parent; break;
   case AST_DECL_MOD:           id_node = ((ast_decl_mod_t*          )node)->id; parent_node = ((ast_decl_mod_t*          )node)->parent; break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   const char* id_ptr = id_node->tok->loc->ptr;
@@ -495,7 +495,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_PATH_ALIAS:         ast_path_alias_dump_json        (stream, (ast_path_alias_t*        )node); break;
   case AST_USE:                ast_use_dump_json               (stream, (ast_use_t*               )node); break;
   case AST_PROG:               ast_prog_dump_json              (stream, (ast_prog_t*              )node); break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 }
 
@@ -562,7 +562,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_PATH_ALIAS:         return "AST_PATH_ALIAS";
   case AST_USE:                return "AST_USE";
   case AST_PROG:               return "AST_PROG";
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return NULL;

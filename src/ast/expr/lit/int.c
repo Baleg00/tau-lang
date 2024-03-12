@@ -14,7 +14,7 @@
 ast_expr_lit_int_t* ast_expr_lit_int_init(void)
 {
   ast_expr_lit_int_t* node = (ast_expr_lit_int_t*)malloc(sizeof(ast_expr_lit_int_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -30,8 +30,8 @@ void ast_expr_lit_int_free(ast_expr_lit_int_t* node)
 
 void ast_expr_lit_int_nameres(nameres_ctx_t* ctx, ast_expr_lit_int_t* node)
 {
-  unused(ctx);
-  unused(node);
+  UNUSED(ctx);
+  UNUSED(node);
 }
 
 void ast_expr_lit_int_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_int_t* node)

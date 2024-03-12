@@ -14,7 +14,7 @@
 shyd_t* shyd_init(parser_t* par)
 {
   shyd_t* shyd = (shyd_t*)malloc(sizeof(shyd_t));
-  assert(shyd != NULL);
+  ASSERT(shyd != NULL);
 
   shyd->par = par;
   shyd->out_queue = queue_init();
@@ -86,7 +86,7 @@ bool shyd_parse_typed_expr(shyd_t* shyd)
     if (shyd->prev_term)
       return false;
   default:
-    noop();
+    NOOP();
   }
 
   shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
@@ -95,7 +95,7 @@ bool shyd_parse_typed_expr(shyd_t* shyd)
   {
   case TOK_KW_SIZEOF:  elem->op = OP_SIZEOF; break;
   case TOK_KW_ALIGNOF: elem->op = OP_ALIGNOF; break;
-  default: noop();
+  default: NOOP();
   }
 
   stack_push(shyd->op_stack, elem);
@@ -294,7 +294,7 @@ bool shyd_postfix_step(shyd_t* shyd)
   case TOK_PUNCT_PAREN_RIGHT: return shyd_parse_paren_close(shyd);
   case TOK_PUNCT_BRACKET_LEFT: return shyd_parse_bracket_open(shyd);
   case TOK_PUNCT_BRACKET_RIGHT: return shyd_parse_bracket_close(shyd);
-  default: noop();
+  default: NOOP();
   }
 
   if (parser_current(shyd->par)->kind == TOK_ID || token_is_literal(parser_current(shyd->par)))
@@ -339,7 +339,7 @@ void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 
 void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
-  unused(shyd);
+  UNUSED(shyd);
 
   ast_expr_op_bin_t* node = NULL;
 
@@ -367,7 +367,7 @@ void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 
 void shyd_ast_op_call(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
-  unused(shyd);
+  UNUSED(shyd);
 
   if (stack_empty(node_stack))
     report_error_missing_callee(elem->node->tok->loc);
@@ -379,7 +379,7 @@ void shyd_ast_op_call(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 
 void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
 {
-  unused(shyd);
+  UNUSED(shyd);
 
   ast_node_t* node = NULL;
 
@@ -441,7 +441,7 @@ void shyd_ast_op(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   else if (elem->op == OP_CALL)
     shyd_ast_op_call(shyd, elem, node_stack);
   else
-    unreachable();
+    UNREACHABLE();
 }
 
 ast_node_t* shyd_ast(parser_t* par)
@@ -463,7 +463,7 @@ ast_node_t* shyd_ast(parser_t* par)
     case SHYD_TERM: shyd_ast_term(shyd, elem, node_stack); break;
     case SHYD_TYPE: stack_push(node_stack, elem->node); break;
     case SHYD_OP:   shyd_ast_op(shyd, elem, node_stack); break;
-    default: unreachable();
+    default: UNREACHABLE();
     }
 
     shyd_elem_free(elem);
@@ -471,7 +471,7 @@ ast_node_t* shyd_ast(parser_t* par)
 
   ast_node_t* root = stack_empty(node_stack) ? NULL : (ast_node_t*)stack_pop(node_stack);
 
-  assert(stack_empty(node_stack));
+  ASSERT(stack_empty(node_stack));
 
   stack_free(node_stack);
 

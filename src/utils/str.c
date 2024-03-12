@@ -47,10 +47,10 @@ string_t* string_init_with_cstr_and_length(const char* cstr, size_t len)
 string_t* string_init_with_capacity(size_t cap)
 {
   string_t* str = (string_t*)malloc(sizeof(string_t));
-  assert(str != NULL);
+  ASSERT(str != NULL);
 
   str->buf = (char*)calloc(cap, sizeof(char));
-  assert(str->buf != NULL);
+  ASSERT(str->buf != NULL);
 
   str->cap = cap;
   str->len = 0;
@@ -61,10 +61,10 @@ string_t* string_init_with_capacity(size_t cap)
 
 string_t* string_init_with_buffer(char* buf, size_t cap)
 {
-  assert(buf != NULL);
+  ASSERT(buf != NULL);
   
   string_t* str = (string_t*)malloc(sizeof(string_t));
-  assert(str != NULL);
+  ASSERT(str != NULL);
 
   str->buf = buf;
   str->cap = cap;
@@ -107,10 +107,10 @@ void string_reserve(string_t* str, size_t cap)
   if (str->cap >= cap)
     return;
 
-  assert(str->owning);
+  ASSERT(str->owning);
 
   char* new_buf = (char*)realloc(str->buf, cap * sizeof(char));
-  assert(new_buf != NULL);
+  ASSERT(new_buf != NULL);
 
   str->cap = cap;
   str->buf = new_buf;
@@ -122,7 +122,7 @@ void string_fit(string_t* str)
     return;
 
   char* new_buf = (char*)realloc(str->buf, str->len + 1);
-  assert(new_buf != NULL);
+  ASSERT(new_buf != NULL);
 
   str->cap = str->len + 1;
   str->buf = new_buf;
@@ -186,7 +186,7 @@ void string_insert(string_t* str, size_t pos, string_t* other)
 
 void string_insert_cstr(string_t* str, size_t pos, const char* other)
 {
-  assert(pos <= str->len);
+  ASSERT(pos <= str->len);
 
   size_t other_len = strlen(other);
   size_t new_len = str->len + other_len;
@@ -201,7 +201,7 @@ void string_insert_cstr(string_t* str, size_t pos, const char* other)
 
 void string_erase(string_t* str, size_t pos, size_t len)
 {
-  assert(pos + len <= str->len);
+  ASSERT(pos + len <= str->len);
 
   memmove(str->buf + pos, str->buf + pos + len, str->len - pos - len + 1);
 }
@@ -286,7 +286,7 @@ bool string_starts_with(string_t* str, string_t* prefix)
 
 bool string_starts_with_cstr(string_t* str, const char* prefix)
 {
-  return strncmp(str->buf, prefix, min(str->len, strlen(prefix))) == 0;
+  return strncmp(str->buf, prefix, MIN(str->len, strlen(prefix))) == 0;
 }
 
 bool string_ends_with(string_t* str, string_t* suffix)
@@ -349,12 +349,12 @@ void string_replace_with_csubstr(string_t* str, size_t pos, size_t len, const ch
 {
   size_t rep_len = strlen(rep);
 
-  assert(pos < str->len);
+  ASSERT(pos < str->len);
 
   if (rep_len > 0)
-    assert(rep_pos < rep_len);
+    ASSERT(rep_pos < rep_len);
   else
-    assert(rep_pos == 0);
+    ASSERT(rep_pos == 0);
 
   size_t new_len = str->len - len + rep_len - rep_pos;
 

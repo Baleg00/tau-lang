@@ -13,7 +13,7 @@
 typedesc_fun_t* typedesc_fun_init(void)
 {
   typedesc_fun_t* desc = (typedesc_fun_t*)malloc(sizeof(typedesc_fun_t));
-  clearobj(desc);
+  CLEAROBJ(desc);
 
   desc->kind = TYPEDESC_FUN;
 

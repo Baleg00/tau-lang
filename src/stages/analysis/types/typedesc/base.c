@@ -42,7 +42,7 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_STRUCT: typedesc_struct_free((typedesc_struct_t*)desc); break;
   case TYPEDESC_UNION:  typedesc_union_free ((typedesc_union_t* )desc); break;
   case TYPEDESC_ENUM:   typedesc_enum_free  ((typedesc_enum_t*  )desc); break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 }
 
@@ -266,7 +266,7 @@ bool typedesc_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc)
   case TYPEDESC_ARRAY: return typedesc_can_add_array(desc);
   case TYPEDESC_REF:   return typedesc_can_add_ref  (desc);
   case TYPEDESC_OPT:   return typedesc_can_add_opt  (desc);
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return false;
@@ -372,7 +372,7 @@ bool typedesc_is_implicitly_convertible(typedesc_t* desc, typedesc_t* target_des
   case TYPEDESC_STRUCT: return typedesc_struct_is_implicitly_convertible((typedesc_struct_t*)desc, target_desc);
   case TYPEDESC_UNION:  return typedesc_union_is_implicitly_convertible ((typedesc_union_t* )desc, target_desc);
   case TYPEDESC_ENUM:   return typedesc_enum_is_implicitly_convertible  ((typedesc_enum_t*  )desc, target_desc);
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return false;
@@ -380,7 +380,7 @@ bool typedesc_is_implicitly_convertible(typedesc_t* desc, typedesc_t* target_des
 
 size_t typedesc_integer_bits(typedesc_t* desc)
 {
-  assert(typedesc_is_integer(desc));
+  ASSERT(typedesc_is_integer(desc));
 
   switch (desc->kind)
   {
@@ -400,7 +400,7 @@ size_t typedesc_integer_bits(typedesc_t* desc)
   case TYPEDESC_USIZE:
     return sizeof(void*) * 8;
   default:
-    unreachable();
+    UNREACHABLE();
   }
 
   return 0;
@@ -408,7 +408,7 @@ size_t typedesc_integer_bits(typedesc_t* desc)
 
 typedesc_t* typedesc_arithmetic_promote(typedesc_t* lhs_desc, typedesc_t* rhs_desc)
 {
-  assert(typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc));
+  ASSERT(typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc));
 
   if (lhs_desc->kind == rhs_desc->kind)
     return lhs_desc;
@@ -472,7 +472,7 @@ typedesc_t* typedesc_underlying_callable(typedesc_t* desc)
       return desc;
   }
 
-  unreachable();
+  UNREACHABLE();
 
   return NULL;
 }

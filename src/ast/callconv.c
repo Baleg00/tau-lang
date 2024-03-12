@@ -22,7 +22,7 @@ const char* callconv_kind_to_cstr(callconv_kind_t kind)
   case CALLCONV_FASTCALL:   return "fastcall";
   case CALLCONV_VECTORCALL: return "vectorcall";
   case CALLCONV_THISCALL:   return "thiscall";
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return NULL;
@@ -43,7 +43,7 @@ size_t callconv_mangle(callconv_kind_t kind, char* buf, size_t len)
   case CALLCONV_FASTCALL:   mangled_callconv = "F"; break;
   case CALLCONV_VECTORCALL: mangled_callconv = "V"; break;
   case CALLCONV_THISCALL:   mangled_callconv = "T"; break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   return snprintf(buf, len, "%s", mangled_callconv);

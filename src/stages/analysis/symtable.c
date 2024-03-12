@@ -40,7 +40,7 @@
 symbol_t* symbol_init(const char* id, size_t len, ast_node_t* node)
 {
   symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
-  assert(sym != NULL);
+  ASSERT(sym != NULL);
   sym->parent = NULL;
   sym->id = id;
   sym->len = len;
@@ -61,7 +61,7 @@ void symbol_free(symbol_t* sym)
 symtable_t* symtable_init(symtable_t* parent)
 {
   symtable_t* table = (symtable_t*)malloc(sizeof(symtable_t));
-  assert(table != NULL);
+  ASSERT(table != NULL);
 
   if (parent != NULL)
     list_push_back(parent->children, table);
@@ -71,7 +71,7 @@ symtable_t* symtable_init(symtable_t* parent)
   table->size = 0;
   table->capacity = SYMTABLE_INITIAL_CAPACITY;
   table->buckets = (symbol_t**)calloc(table->capacity, sizeof(symbol_t*));
-  assert(table->buckets != NULL);
+  ASSERT(table->buckets != NULL);
   return table;
 }
 

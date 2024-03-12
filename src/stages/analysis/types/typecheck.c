@@ -13,7 +13,7 @@
 typecheck_ctx_t* typecheck_ctx_init(LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout)
 {
   typecheck_ctx_t* ctx = (typecheck_ctx_t*)malloc(sizeof(typecheck_ctx_t));
-  clearobj(ctx);
+  CLEAROBJ(ctx);
 
   ctx->typebuilder = typebuilder_init(llvm_ctx, llvm_layout);
   ctx->typetable = typetable_init();

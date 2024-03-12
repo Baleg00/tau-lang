@@ -20,8 +20,8 @@
 
 #include "utils/io/log.h"
 
-#ifdef max
-# undef max
+#ifdef MAX
+# undef MAX
 #endif
 
 /**
@@ -31,10 +31,10 @@
  * \param[in] B The second number.
  * \returns The maximum value.
  */
-#define max(A, B) ((A) > (B) ? (A) : (B))
+#define MAX(A, B) ((A) > (B) ? (A) : (B))
 
-#ifdef min
-# undef min
+#ifdef MIN
+# undef MIN
 #endif
 
 /**
@@ -44,10 +44,10 @@
  * \param[in] B The second number.
  * \returns The minimum value.
  */
-#define min(A, B) ((A) < (B) ? (A) : (B))
+#define MIN(A, B) ((A) < (B) ? (A) : (B))
 
-#ifdef countof
-# undef countof
+#ifdef COUNTOF
+# undef COUNTOF
 #endif
 
 /**
@@ -56,10 +56,10 @@
  * \param[in] ARRAY The array.
  * \returns The number of elements in the array.
  */
-#define countof(ARRAY) (sizeof((ARRAY)) / sizeof((ARRAY)[0]))
+#define COUNTOF(ARRAY) (sizeof((ARRAY)) / sizeof((ARRAY)[0]))
 
-#ifdef offsetof
-# undef offsetof
+#ifdef OFFSETOF
+# undef OFFSETOF
 #endif
 
 /**
@@ -69,10 +69,10 @@
  * \param[in] MEMBER The member within the structure.
  * \returns The offset of the member.
  */
-#define offsetof(TYPE, MEMBER) ((size_t)(&((TYPE*)NULL)->MEMBER))
+#define OFFSETOF(TYPE, MEMBER) ((size_t)(&((TYPE*)NULL)->MEMBER))
 
-#ifdef alignof
-# undef alignof
+#ifdef ALIGNOF
+# undef ALIGNOF
 #endif
 
 /**
@@ -81,10 +81,10 @@
  * \param[in] TYPE The type.
  * \returns The alignment requirement of the type.
  */
-#define alignof(TYPE) (offsetof(struct { char c; TYPE t; }, t))
+#define ALIGNOF(TYPE) (OFFSETOF(struct { char c; TYPE t; }, t))
 
-#ifdef unused
-# undef unused
+#ifdef UNUSED
+# undef UNUSED
 #endif
 
 /**
@@ -92,31 +92,31 @@
  * 
  * \param[in] X The variable.
  */
-#define unused(X) ((void)(1 ? 0 : ((void)(X), 0)))
+#define UNUSED(X) ((void)(1 ? 0 : ((void)(X), 0)))
 
-#ifdef noop
-# undef noop
+#ifdef NOOP
+# undef NOOP
 #endif
 
 /**
  * \brief Creates a statement which does nothing.
  */
-#define noop() do {} while (0)
+#define NOOP() do {} while (0)
 
-#ifdef noreturn
-# undef noreturn
+#ifdef NORETURN
+# undef NORETURN
 #endif
 
 #ifdef _MSC_VER
-# define noreturn __declspec(noreturn)
+# define NORETURN __declspec(noreturn)
 #elif defined(__GNUC__)
-# define noreturn __attribute__((noreturn))
+# define NORETURN __attribute__((noreturn))
 #else
-# define noreturn
+# define NORETURN
 #endif
 
-#ifdef clearobj
-# undef clearobj
+#ifdef CLEAROBJ
+# undef CLEAROBJ
 #endif
 
 /**
@@ -124,28 +124,28 @@
  * 
  * \param[in,out] OBJ Pointer to the object to be cleared.
 */
-#define clearobj(OBJ) ((void)memset((OBJ), 0, sizeof(*(OBJ))))
+#define CLEAROBJ(OBJ) ((void)memset((OBJ), 0, sizeof(*(OBJ))))
 
 #ifdef TAU_DEBUG
 # ifdef _MSC_VER
 /**
  * \brief Breaks into a debugger for debugging purposes.
  */
-#   define debugbreak() __debugbreak()
+#   define DEBUGBREAK() __debugbreak()
 #else
 /**
  * \brief Breaks into a debugger for debugging purposes.
  */
-#   define debugbreak() ((void)0)
+#   define DEBUGBREAK() ((void)0)
 # endif
 
 /**
  * \brief Marks a code path as unreachable and triggers a fatal error.
  */
-# define unreachable()\
+# define UNREACHABLE()\
   do {\
     log_fatal("unreachable", "%s:%d", __FILE__, __LINE__);\
-    debugbreak();\
+    DEBUGBREAK();\
     exit(EXIT_FAILURE);\
   } while (0)
 
@@ -155,11 +155,11 @@
  * 
  * \param[in] COND The condition to check.
  */
-# define assert(COND)\
+# define ASSERT(COND)\
   do {\
     if (!(COND)) {\
       log_fatal("assert", "%s:%d Assertion failed: %s", __FILE__, __LINE__, #COND);\
-      debugbreak();\
+      DEBUGBREAK();\
       exit(EXIT_FAILURE);\
     }\
   } while (0)
@@ -167,12 +167,12 @@
 /**
  * \brief Breaks into a debugger for debugging purposes.
  */
-# define debugbreak() ((void)0)
+# define DEBUGBREAK() ((void)0)
 
 /**
  * \brief Marks a code path as unreachable and triggers a fatal error.
  */
-# define unreachable() ((void)0)
+# define UNREACHABLE() ((void)0)
 
 /**
  * \brief Asserts a condition and triggers a fatal error if the condition is
@@ -180,7 +180,7 @@
  * 
  * \param[in] COND The condition to check.
  */
-# define assert(COND) ((void)(COND))
+# define ASSERT(COND) ((void)(COND))
 #endif
 
 #endif

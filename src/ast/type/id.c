@@ -15,7 +15,7 @@
 ast_type_id_t* ast_type_id_init(void)
 {
   ast_type_id_t* node = (ast_type_id_t*)malloc(sizeof(ast_type_id_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
@@ -57,7 +57,7 @@ void ast_type_id_typecheck(typecheck_ctx_t* ctx, ast_type_id_t* node)
     return;
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
-  assert(desc != NULL);
+  ASSERT(desc != NULL);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
@@ -68,7 +68,7 @@ void ast_type_id_codegen(codegen_ctx_t* ctx, ast_type_id_t* node)
     return;
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
-  assert(desc != NULL);
+  ASSERT(desc != NULL);
 
   node->llvm_type = desc->llvm_type;
 }
@@ -82,7 +82,7 @@ size_t ast_type_id_mangle(ast_type_id_t* node, char* buf, size_t len)
   case AST_DECL_STRUCT: written += snprintf(buf, len, "S"); break;
   case AST_DECL_UNION:  written += snprintf(buf, len, "U"); break;
   case AST_DECL_ENUM:   written += snprintf(buf, len, "E"); break;
-  default: unreachable();
+  default: UNREACHABLE();
   }
 
   written += ast_node_mangle_nested_name(node->decl, buf + written, len <= written ? 0 : len - written);

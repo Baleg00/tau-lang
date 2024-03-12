@@ -14,7 +14,7 @@
 ast_path_alias_t* ast_path_alias_init(void)
 {
   ast_path_alias_t* node = (ast_path_alias_t*)malloc(sizeof(ast_path_alias_t));
-  clearobj(node);
+  CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 

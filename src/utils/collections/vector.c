@@ -25,7 +25,7 @@ static void vector_expand(vector_t* vec)
 {
   vec->capacity <<= 1;
   vec->data = (void**)realloc(vec->data, sizeof(void*) * vec->capacity);
-  assert(vec->data != NULL);
+  ASSERT(vec->data != NULL);
 }
 
 vector_t* vector_init(void)
@@ -35,10 +35,10 @@ vector_t* vector_init(void)
 
 vector_t* vector_init_with_capacity(size_t capacity)
 {
-  assert(capacity > 0);
+  ASSERT(capacity > 0);
 
   vector_t* vec = (vector_t*)malloc(sizeof(vector_t));
-  assert(vec != NULL);
+  ASSERT(vec != NULL);
 
   vec->size = 0;
   vec->capacity = capacity;
@@ -81,25 +81,25 @@ vector_t* vector_copy(vector_t* vec)
 
 void* vector_get(vector_t* vec, size_t idx)
 {
-  assert(idx < vec->size);
+  ASSERT(idx < vec->size);
   return vec->data[idx];
 }
 
 void vector_set(vector_t* vec, size_t idx, void* data)
 {
-  assert(idx < vec->size);
+  ASSERT(idx < vec->size);
   vec->data[idx] = data;
 }
 
 void* vector_front(vector_t* vec)
 {
-  assert(vec->size > 0);
+  ASSERT(vec->size > 0);
   return vec->data[0];
 }
 
 void* vector_back(vector_t* vec)
 {
-  assert(vec->size > 0);
+  ASSERT(vec->size > 0);
   return vec->data[vec->size - 1];
 }
 
@@ -113,7 +113,7 @@ void vector_push(vector_t* vec, void* data)
 
 void* vector_pop(vector_t* vec)
 {
-  assert(vec->size > 0);
+  ASSERT(vec->size > 0);
   return vec->data[--vec->size];
 }
 
@@ -130,7 +130,7 @@ void vector_insert(vector_t* vec, size_t idx, void* data)
 
 void* vector_remove(vector_t* vec, size_t idx)
 {
-  assert(idx < vec->size);
+  ASSERT(idx < vec->size);
 
   void* temp = vec->data[idx];
 
@@ -147,7 +147,7 @@ void vector_clear(vector_t* vec)
   vec->capacity = VECTOR_INITIAL_CAPACITY;
 
   vec->data = (void**)realloc(vec->data, sizeof(void*) * VECTOR_INITIAL_CAPACITY);
-  assert(vec->data != NULL);
+  ASSERT(vec->data != NULL);
 }
 
 size_t vector_find(vector_t* vec, void* data)

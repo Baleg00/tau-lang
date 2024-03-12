@@ -13,7 +13,7 @@
 typedesc_array_t* typedesc_array_init(void)
 {
   typedesc_array_t* desc = (typedesc_array_t*)malloc(sizeof(typedesc_array_t));
-  clearobj(desc);
+  CLEAROBJ(desc);
 
   desc->kind = TYPEDESC_ARRAY;
 
