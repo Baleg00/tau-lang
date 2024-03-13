@@ -24,26 +24,25 @@
  * \param[in] size The size of the data in bytes.
  * \returns The generated hash value.
  */
-size_t hash_digest(const void* data, size_t size);
+uint64_t hash_digest(const void* data, size_t size);
 
 /**
  * \brief Combines a seed with the hash value of a given data.
  * 
- * \param seed The seed.
- * \param data Pointer to the data.
- * \param size Size of the data in bytes.
+ * \param[in] seed The seed.
+ * \param[in] data Pointer to the data.
+ * \param[in] size Size of the data in bytes.
  * \returns The combined hash value.
  */
-size_t hash_combine_with_data(size_t seed, const void* data, size_t size);
+uint64_t hash_combine_with_data(uint64_t seed, const void* data, size_t size);
 
 /**
  * \brief Combines a seed with a hash value.
  * 
- * \param seed The seed.
- * \param data Pointer to the data.
- * \param size Size of the data in bytes.
+ * \param[in] seed The seed.
+ * \param[in] hash The hash to combine with the seed.
  * \returns The combined hash value.
  */
-size_t hash_combine_with_hash(size_t seed, size_t hash);
+uint64_t hash_combine_with_hash(uint64_t seed, uint64_t hash);
 
 #endif

@@ -96,7 +96,7 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
   if (((double)table->size + 1) / (double)table->capacity >= SYMTABLE_LOAD_FACTOR)
     symtable_expand(table);
 
-  size_t h = hash_digest(new_sym->id, new_sym->len);
+  size_t h = (size_t)hash_digest(new_sym->id, new_sym->len);
   size_t idx = h % table->capacity;
 
   if (table->buckets[idx] == NULL)
@@ -123,7 +123,7 @@ symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
 
 symbol_t* symtable_get(symtable_t* table, const char* id, size_t len)
 {
-  size_t h = hash_digest(id, len);
+  size_t h = (size_t)hash_digest(id, len);
   size_t idx = h % table->capacity;
 
   for (symbol_t* sym = table->buckets[idx]; sym != NULL; sym = sym->next)
