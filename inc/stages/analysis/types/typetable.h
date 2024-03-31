@@ -59,9 +59,10 @@ void typetable_free(typetable_t* table);
  * \param[in] node Pointer to the AST node.
  * \param[in] desc Pointer to the type descriptor to insert.
  *
- * \returns `true` if the insertion was successful, `false` otherwise.
+ * \returns Pointer to the old type descriptor if an overwrite occurred, `NULL`
+ * otherwise.
  */
-bool typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc);
+typedesc_t* typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc);
 
 /**
  * \brief Looks up and retrieves the type descriptor associated with an AST node

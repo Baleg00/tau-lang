@@ -143,7 +143,7 @@ void typetable_free(typetable_t* table)
   free(table);
 }
 
-bool typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc)
+typedesc_t* typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc)
 {
   if (((double)table->size + 1) / (double)table->capacity >= TYPETABLE_LOAD_FACTOR)
     typetable_expand(table);
@@ -156,19 +156,24 @@ bool typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc)
     table->size++;
     table->buckets[idx] = typetable_entry_init(node, desc);
 
-    return true;
+    return NULL;
   }
 
   typetable_entry_t* last = NULL;
 
   for (typetable_entry_t* it = table->buckets[idx]; it != NULL; last = it, it = it->next)
     if (it->node == node)
-      return false;
+    {
+      typedesc_t* old_desc = it->desc;
+      it->desc = desc;
+      
+      return old_desc;
+    }
 
   table->size++;
   last->next = typetable_entry_init(node, desc);
 
-  return true;
+  return NULL;
 }
 
 typedesc_t* typetable_lookup(typetable_t* table, ast_node_t* node)
