@@ -47,6 +47,7 @@ struct typebuilder_t
   set_t* set_struct;
   set_t* set_union;
   set_t* set_enum;
+  set_t* set_var;
 };
 
 static int typebuilder_cmp_mut(void* lhs, void* rhs)
@@ -202,6 +203,20 @@ static int typebuilder_cmp_enum(void* lhs, void* rhs)
   return 0;
 }
 
+static int typebuilder_cmp_var(void* lhs, void* rhs)
+{
+  typedesc_var_t* lhs_desc = (typedesc_var_t*)lhs;
+  typedesc_var_t* rhs_desc = (typedesc_var_t*)rhs;
+
+  if (lhs_desc->id < rhs_desc->id)
+    return -1;
+  
+  if (lhs_desc->id > rhs_desc->id)
+    return 1;
+  
+  return 0;
+}
+
 typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef llvm_layout)
 {
   typebuilder_t* builder = (typebuilder_t*)malloc(sizeof(typebuilder_t));
@@ -251,6 +266,7 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->set_struct = set_init(typebuilder_cmp_struct);
   builder->set_union  = set_init(typebuilder_cmp_union );
   builder->set_enum   = set_init(typebuilder_cmp_enum  );
+  builder->set_var    = set_init(typebuilder_cmp_var   );
 
   return builder;
 }
@@ -283,6 +299,7 @@ void typebuilder_free(typebuilder_t* builder)
   set_for_each(builder->set_struct, (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_union,  (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_enum,   (set_for_each_func_t)typedesc_free);
+  set_for_each(builder->set_var,    (set_for_each_func_t)typedesc_free);
 
   set_free(builder->set_mut);
   set_free(builder->set_const);
@@ -294,6 +311,7 @@ void typebuilder_free(typebuilder_t* builder)
   set_free(builder->set_struct);
   set_free(builder->set_union);
   set_free(builder->set_enum);
+  set_free(builder->set_var);
 
   free(builder);
 }
@@ -643,6 +661,24 @@ typedesc_t* typebuilder_build_enum(typebuilder_t* builder, ast_node_t* node)
   else UNREACHABLE();
 
   set_add(builder->set_enum, desc);
+
+  return (typedesc_t*)desc;
+}
+
+typedesc_t* typebuilder_build_var(typebuilder_t* builder, uint64_t id)
+{
+  typedesc_var_t* desc = typedesc_var_init();
+  desc->id = id;
+
+  typedesc_t* result = (typedesc_t*)set_get(builder->set_var, desc);
+
+  if (result != NULL)
+  {
+    typedesc_free((typedesc_t*)desc);
+    return result;
+  }
+
+  set_add(builder->set_var, desc);
 
   return (typedesc_t*)desc;
 }

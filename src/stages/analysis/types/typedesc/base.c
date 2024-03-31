@@ -42,6 +42,7 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_STRUCT: typedesc_struct_free((typedesc_struct_t*)desc); break;
   case TYPEDESC_UNION:  typedesc_union_free ((typedesc_union_t* )desc); break;
   case TYPEDESC_ENUM:   typedesc_enum_free  ((typedesc_enum_t*  )desc); break;
+  case TYPEDESC_VAR:    typedesc_var_free   ((typedesc_var_t*   )desc); break;
   default: UNREACHABLE();
   }
 }

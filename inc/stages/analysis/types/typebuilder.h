@@ -266,4 +266,13 @@ typedesc_t* typebuilder_build_union(typebuilder_t* builder, ast_node_t* node, ty
  */
 typedesc_t* typebuilder_build_enum(typebuilder_t* builder, ast_node_t* node);
 
+/**
+ * \brief Builds a type variable with the provided identifier.
+ *
+ * \param[in] builder Pointer to the type builder.
+ * \param[in] id The type variable's identifier.
+ * \returns A pointer to the newly created type variable.
+ */
+typedesc_t* typebuilder_build_var(typebuilder_t* builder, uint64_t id);
+
 #endif

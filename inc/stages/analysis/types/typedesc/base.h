@@ -57,6 +57,7 @@ typedef enum typedesc_kind_e
   TYPEDESC_STRUCT, // Struct type
   TYPEDESC_UNION, // Union type
   TYPEDESC_ENUM, // Enum type
+  TYPEDESC_VAR, // Type variable
 } typedesc_kind_t;
 
 /**
