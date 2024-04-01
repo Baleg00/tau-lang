@@ -27,29 +27,26 @@ LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm
   {
     if (typedesc_integer_bits(from_desc) < typedesc_integer_bits(to_desc))
     {
-      if (typedesc_is_signed(to_desc))
-        return LLVMBuildSExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "sextorbitcast_tmp");
-      else
-        return LLVMBuildZExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "zextorbitcast_tmp");
+      return typedesc_is_signed(to_desc) ?
+        LLVMBuildSExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "sextorbitcast_tmp") :
+        LLVMBuildZExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "zextorbitcast_tmp");
     }
-    else if (typedesc_integer_bits(from_desc) > typedesc_integer_bits(to_desc))
-      return LLVMBuildTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "trunc_tmp");
-    else
-      return LLVMBuildBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "bitcast_tmp");
+
+    return typedesc_integer_bits(from_desc) > typedesc_integer_bits(to_desc) ?
+      LLVMBuildTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "trunc_tmp") :
+      LLVMBuildBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "bitcast_tmp");
   }
   else if (typedesc_is_integer(from_desc) && typedesc_is_float(to_desc))
   {
-    if (typedesc_is_signed(from_desc))
-      return LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "sitofp_tmp");
-    else
-      return LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "uitofp_tmp");
+    return typedesc_is_signed(from_desc) ?
+      LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "sitofp_tmp") :
+      LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "uitofp_tmp");
   }
   else if (typedesc_is_float(from_desc) && typedesc_is_integer(to_desc))
   {
-    if (typedesc_is_signed(to_desc))
-      return LLVMBuildFPToSI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "fptosi_tmp");
-    else
-      return LLVMBuildFPToUI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "fptoui_tmp");
+    return typedesc_is_signed(to_desc) ?
+      LLVMBuildFPToSI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "fptosi_tmp") :
+      LLVMBuildFPToUI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "fptoui_tmp");
   }
   else if (typedesc_is_float(from_desc) && typedesc_is_float(to_desc))
   {
