@@ -9,6 +9,7 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
+#include "stages/codegen/utils.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -83,6 +84,9 @@ void ast_stmt_return_codegen(codegen_ctx_t* ctx, ast_stmt_return_t* node)
     if (typedesc_remove_const(expected_return_desc)->kind != TYPEDESC_REF &&
         typedesc_remove_const(actual_return_desc)->kind == TYPEDESC_REF)
       llvm_return_value = LLVMBuildLoad2(ctx->llvm_builder, expr_node->llvm_type, expr_node->llvm_value, "load_tmp");
+
+    if (typedesc_is_arithmetic(expected_return_desc) && typedesc_is_arithmetic(actual_return_desc))
+      llvm_return_value = codegen_build_arithmetic_cast(ctx, llvm_return_value, actual_return_desc, expected_return_desc);
 
     LLVMBuildRet(ctx->llvm_builder, llvm_return_value);
   }
