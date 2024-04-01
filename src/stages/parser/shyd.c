@@ -1,5 +1,6 @@
 #include "stages/parser/shyd.h"
 
+#include <errno.h>
 #include <string.h>
 
 #include "ast/ast.h"
@@ -391,7 +392,21 @@ void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   case TOK_LIT_INT:
   {
     node = (ast_node_t*)ast_expr_lit_int_init();
-    ((ast_expr_lit_int_t*)node)->value = strtoull(elem->tok->loc->ptr, NULL, 10);
+
+    string_view_t view = token_to_string_view(elem->tok);
+
+    uint64_t value = 0;
+
+    errno = 0;
+
+         if (string_view_starts_with_cstr(view, "0x")) value = strtoull(string_view_begin(view) + 2, NULL, 16);
+    else if (string_view_starts_with_cstr(view, "0o")) value = strtoull(string_view_begin(view) + 2, NULL, 8 );
+    else if (string_view_starts_with_cstr(view, "0b")) value = strtoull(string_view_begin(view) + 2, NULL, 2 );
+    else value = strtoull(string_view_begin(view), NULL, 10);
+
+    ASSERT(errno == 0);
+
+    ((ast_expr_lit_int_t*)node)->value = value;
     break;
   }
   case TOK_LIT_FLT:
