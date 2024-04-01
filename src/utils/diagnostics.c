@@ -464,3 +464,10 @@ void report_error_return_inside_defer(location_t* loc)
   DEBUGBREAK();
   exit(EXIT_FAILURE);
 }
+
+NORETURN void report_error_literal_out_of_range(location_t* loc)
+{
+  crumb_error(1, crumb_snippet(loc, "Literal out of range.", NULL, "", NULL));
+  DEBUGBREAK();
+  exit(EXIT_FAILURE);
+}

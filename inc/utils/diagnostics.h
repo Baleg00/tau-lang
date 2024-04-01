@@ -442,4 +442,11 @@ NORETURN void report_error_return_outside_function(location_t* loc);
  */
 NORETURN void report_error_return_inside_defer(location_t* loc);
 
+/**
+ * \brief Reports an error for encountering an integer literal that is out of range.
+ * 
+ * \param[in] loc Pointer to the location where the error occurred.
+ */
+NORETURN void report_error_literal_out_of_range(location_t* loc);
+
 #endif
