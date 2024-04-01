@@ -102,5 +102,26 @@ void typedesc_prim_free(typedesc_prim_t* desc)
 
 bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* desc, typedesc_t* target_desc)
 {
-  return (typedesc_t*)desc == typedesc_remove_mut(target_desc);
+  target_desc = typedesc_remove_mut(target_desc);
+
+  if ((typedesc_t*)desc == target_desc)
+    return true;
+
+  if (typedesc_is_arithmetic((typedesc_t*)desc) && typedesc_is_arithmetic(target_desc))
+  {
+    if (typedesc_is_integer((typedesc_t*)desc) && typedesc_is_integer(target_desc))
+    {
+      if (typedesc_is_signed((typedesc_t*)desc) == typedesc_is_signed(target_desc))
+        return typedesc_integer_bits((typedesc_t*)desc) <= typedesc_integer_bits(target_desc);
+
+      return false;
+    }
+    
+    if (typedesc_is_float((typedesc_t*)desc) && typedesc_is_float(target_desc))
+      return !(desc->kind == TYPEDESC_F64 && target_desc->kind == TYPEDESC_F32);
+    
+    return false;
+  }
+
+  return false;
 }
