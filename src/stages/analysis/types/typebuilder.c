@@ -38,7 +38,6 @@ struct typebuilder_t
   typedesc_t* desc_unit;
 
   set_t* set_mut;
-  set_t* set_const;
   set_t* set_ptr;
   set_t* set_array;
   set_t* set_ref;
@@ -53,11 +52,6 @@ struct typebuilder_t
 static int typebuilder_cmp_mut(void* lhs, void* rhs)
 {
   return (int)(((typedesc_mut_t*)lhs)->base_type - ((typedesc_mut_t*)rhs)->base_type);
-}
-
-static int typebuilder_cmp_const(void* lhs, void* rhs)
-{
-  return (int)(((typedesc_const_t*)lhs)->base_type - ((typedesc_const_t*)rhs)->base_type);
 }
 
 static int typebuilder_cmp_ptr(void* lhs, void* rhs)
@@ -257,7 +251,6 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->desc_unit->llvm_type  = LLVMVoidTypeInContext  (builder->llvm_context                      );
 
   builder->set_mut    = set_init(typebuilder_cmp_mut   );
-  builder->set_const  = set_init(typebuilder_cmp_const );
   builder->set_ptr    = set_init(typebuilder_cmp_ptr   );
   builder->set_array  = set_init(typebuilder_cmp_array );
   builder->set_ref    = set_init(typebuilder_cmp_ref   );
@@ -290,7 +283,6 @@ void typebuilder_free(typebuilder_t* builder)
   typedesc_free(builder->desc_unit);
 
   set_for_each(builder->set_mut,    (set_for_each_func_t)typedesc_free);
-  set_for_each(builder->set_const,  (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_ptr,    (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_array,  (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_ref,    (set_for_each_func_t)typedesc_free);
@@ -302,7 +294,6 @@ void typebuilder_free(typebuilder_t* builder)
   set_for_each(builder->set_var,    (set_for_each_func_t)typedesc_free);
 
   set_free(builder->set_mut);
-  set_free(builder->set_const);
   set_free(builder->set_ptr);
   set_free(builder->set_array);
   set_free(builder->set_ref);
@@ -334,28 +325,6 @@ typedesc_t* typebuilder_build_mut(typebuilder_t* builder, typedesc_t* base_type)
   desc->llvm_type = base_type->llvm_type;
 
   set_add(builder->set_mut, desc);
-
-  return (typedesc_t*)desc;
-}
-
-typedesc_t* typebuilder_build_const(typebuilder_t* builder, typedesc_t* base_type)
-{
-  ASSERT(typedesc_can_add_const(base_type));
-
-  typedesc_const_t* desc = (typedesc_const_t*)typedesc_const_init();
-  desc->base_type = base_type;
-
-  typedesc_t* result = (typedesc_t*)set_get(builder->set_const, desc);
-
-  if (result != NULL)
-  {
-    typedesc_free((typedesc_t*)desc);
-    return result;
-  }
-
-  desc->llvm_type = base_type->llvm_type;
-
-  set_add(builder->set_const, desc);
 
   return (typedesc_t*)desc;
 }

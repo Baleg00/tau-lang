@@ -20,7 +20,6 @@ void ast_node_free(ast_node_t* node)
   case AST_ID:                 ast_id_free                ((ast_id_t*                )node); break;
   case AST_TYPE_ID:            ast_type_id_free           ((ast_type_id_t*           )node); break;
   case AST_TYPE_MUT:           ast_type_mut_free          ((ast_type_mut_t*          )node); break;
-  case AST_TYPE_CONST:         ast_type_const_free        ((ast_type_const_t*        )node); break;
   case AST_TYPE_PTR:           ast_type_ptr_free          ((ast_type_ptr_t*          )node); break;
   case AST_TYPE_ARRAY:         ast_type_array_free        ((ast_type_array_t*        )node); break;
   case AST_TYPE_REF:           ast_type_ref_free          ((ast_type_ref_t*          )node); break;
@@ -89,7 +88,6 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   {
   case AST_TYPE_ID:            ast_type_id_nameres           (ctx, (ast_type_id_t*           )node); break;
   case AST_TYPE_MUT:           ast_type_mut_nameres          (ctx, (ast_type_mut_t*          )node); break;
-  case AST_TYPE_CONST:         ast_type_const_nameres        (ctx, (ast_type_const_t*        )node); break;
   case AST_TYPE_PTR:           ast_type_ptr_nameres          (ctx, (ast_type_ptr_t*          )node); break;
   case AST_TYPE_ARRAY:         ast_type_array_nameres        (ctx, (ast_type_array_t*        )node); break;
   case AST_TYPE_REF:           ast_type_ref_nameres          (ctx, (ast_type_ref_t*          )node); break;
@@ -152,7 +150,6 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   {
   case AST_TYPE_ID:            ast_type_id_typecheck           (ctx, (ast_type_id_t*           )node); break;
   case AST_TYPE_MUT:           ast_type_mut_typecheck          (ctx, (ast_type_mut_t*          )node); break;
-  case AST_TYPE_CONST:         ast_type_const_typecheck        (ctx, (ast_type_const_t*        )node); break;
   case AST_TYPE_PTR:           ast_type_ptr_typecheck          (ctx, (ast_type_ptr_t*          )node); break;
   case AST_TYPE_ARRAY:         ast_type_array_typecheck        (ctx, (ast_type_array_t*        )node); break;
   case AST_TYPE_REF:           ast_type_ref_typecheck          (ctx, (ast_type_ref_t*          )node); break;
@@ -278,7 +275,6 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   {
   case AST_TYPE_ID:            ast_type_id_codegen           (ctx, (ast_type_id_t*           )node); break;
   case AST_TYPE_MUT:           ast_type_mut_codegen          (ctx, (ast_type_mut_t*          )node); break;
-  case AST_TYPE_CONST:         ast_type_const_codegen        (ctx, (ast_type_const_t*        )node); break;
   case AST_TYPE_PTR:           ast_type_ptr_codegen          (ctx, (ast_type_ptr_t*          )node); break;
   case AST_TYPE_ARRAY:         ast_type_array_codegen        (ctx, (ast_type_array_t*        )node); break;
   case AST_TYPE_REF:           ast_type_ref_codegen          (ctx, (ast_type_ref_t*          )node); break;
@@ -338,7 +334,6 @@ size_t ast_node_mangle(ast_node_t* node, char* buf, size_t len)
   {
   case AST_TYPE_ID:            return ast_type_id_mangle           ((ast_type_id_t*           )node, buf, len);
   case AST_TYPE_MUT:           return ast_type_mut_mangle          ((ast_type_mut_t*          )node, buf, len);
-  case AST_TYPE_CONST:         return ast_type_const_mangle        ((ast_type_const_t*        )node, buf, len);
   case AST_TYPE_PTR:           return ast_type_ptr_mangle          ((ast_type_ptr_t*          )node, buf, len);
   case AST_TYPE_ARRAY:         return ast_type_array_mangle        ((ast_type_array_t*        )node, buf, len);
   case AST_TYPE_REF:           return ast_type_ref_mangle          ((ast_type_ref_t*          )node, buf, len);
@@ -439,7 +434,6 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_ID:                 ast_id_dump_json                (stream, (ast_id_t*                )node); break;
   case AST_TYPE_ID:            ast_type_id_dump_json           (stream, (ast_type_id_t*           )node); break;
   case AST_TYPE_MUT:           ast_type_mut_dump_json          (stream, (ast_type_mut_t*          )node); break;
-  case AST_TYPE_CONST:         ast_type_const_dump_json        (stream, (ast_type_const_t*        )node); break;
   case AST_TYPE_PTR:           ast_type_ptr_dump_json          (stream, (ast_type_ptr_t*          )node); break;
   case AST_TYPE_ARRAY:         ast_type_array_dump_json        (stream, (ast_type_array_t*        )node); break;
   case AST_TYPE_REF:           ast_type_ref_dump_json          (stream, (ast_type_ref_t*          )node); break;

@@ -18,7 +18,6 @@ void typedesc_free(typedesc_t* desc)
   switch (desc->kind)
   {
   case TYPEDESC_MUT:    typedesc_mut_free   ((typedesc_mut_t*   )desc); break;
-  case TYPEDESC_CONST:  typedesc_const_free ((typedesc_const_t* )desc); break;
   case TYPEDESC_PTR:    typedesc_ptr_free   ((typedesc_ptr_t*   )desc); break;
   case TYPEDESC_ARRAY:  typedesc_array_free ((typedesc_array_t* )desc); break;
   case TYPEDESC_REF:    typedesc_ref_free   ((typedesc_ref_t*   )desc); break;
@@ -52,7 +51,6 @@ bool typedesc_is_modifier(typedesc_t* desc)
   switch (desc->kind)
   {
   case TYPEDESC_MUT:
-  case TYPEDESC_CONST:
   case TYPEDESC_PTR:
   case TYPEDESC_ARRAY:
   case TYPEDESC_REF:
@@ -217,11 +215,6 @@ typedesc_t* typedesc_remove_mut(typedesc_t* desc)
   return desc->kind == TYPEDESC_MUT ? ((typedesc_mut_t*)desc)->base_type : desc;
 }
 
-typedesc_t* typedesc_remove_const(typedesc_t* desc)
-{
-  return desc->kind == TYPEDESC_CONST ? ((typedesc_const_t*)desc)->base_type : desc;
-}
-
 typedesc_t* typedesc_remove_ptr(typedesc_t* desc)
 {
   return desc->kind == TYPEDESC_PTR ? ((typedesc_ptr_t*)desc)->base_type : desc;
@@ -237,24 +230,14 @@ typedesc_t* typedesc_remove_ref(typedesc_t* desc)
   return desc->kind == TYPEDESC_REF ? ((typedesc_ref_t*)desc)->base_type : desc;
 }
 
+typedesc_t* typedesc_remove_ref_mut(typedesc_t* desc)
+{
+  return typedesc_remove_mut(typedesc_remove_ref(desc));
+}
+
 typedesc_t* typedesc_remove_opt(typedesc_t* desc)
 {
   return desc->kind == TYPEDESC_OPT ? ((typedesc_opt_t*)desc)->base_type : desc;
-}
-
-typedesc_t* typedesc_remove_const_mut(typedesc_t* desc)
-{
-  return typedesc_remove_mut(typedesc_remove_const(desc));
-}
-
-typedesc_t* typedesc_remove_const_ref(typedesc_t* desc)
-{
-  return typedesc_remove_ref(typedesc_remove_const(desc));
-}
-
-typedesc_t* typedesc_remove_const_ref_mut(typedesc_t* desc)
-{
-  return typedesc_remove_mut(typedesc_remove_const_ref(desc));
 }
 
 bool typedesc_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc)
@@ -262,7 +245,6 @@ bool typedesc_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc)
   switch (kind)
   {
   case TYPEDESC_MUT:   return typedesc_can_add_mut  (desc);
-  case TYPEDESC_CONST: return typedesc_can_add_const(desc);
   case TYPEDESC_PTR:   return typedesc_can_add_ptr  (desc);
   case TYPEDESC_ARRAY: return typedesc_can_add_array(desc);
   case TYPEDESC_REF:   return typedesc_can_add_ref  (desc);
@@ -278,7 +260,6 @@ bool typedesc_can_add_mut(typedesc_t* desc)
   switch (desc->kind)
   {
   case TYPEDESC_MUT:
-  case TYPEDESC_CONST:
   case TYPEDESC_REF:
   case TYPEDESC_FUN:
     return false;
@@ -287,16 +268,10 @@ bool typedesc_can_add_mut(typedesc_t* desc)
   }
 }
 
-bool typedesc_can_add_const(typedesc_t* desc)
-{
-  return desc->kind != TYPEDESC_CONST;
-}
-
 bool typedesc_can_add_ptr(typedesc_t* desc)
 {
   switch (desc->kind)
   {
-  case TYPEDESC_CONST:
   case TYPEDESC_REF:
     return false;
   default:
@@ -308,7 +283,6 @@ bool typedesc_can_add_array(typedesc_t* desc)
 {
   switch (desc->kind)
   {
-  case TYPEDESC_CONST:
   case TYPEDESC_REF:
   case TYPEDESC_FUN:
     return false;
@@ -321,7 +295,6 @@ bool typedesc_can_add_ref(typedesc_t* desc)
 {
   switch (desc->kind)
   {
-  case TYPEDESC_CONST:
   case TYPEDESC_REF:
     return false;
   default:
@@ -334,7 +307,6 @@ bool typedesc_can_add_opt(typedesc_t* desc)
   switch (desc->kind)
   {
   case TYPEDESC_MUT:
-  case TYPEDESC_CONST:
   case TYPEDESC_REF:
   case TYPEDESC_OPT:
   case TYPEDESC_FUN:
@@ -349,7 +321,6 @@ bool typedesc_is_implicitly_convertible(typedesc_t* desc, typedesc_t* target_des
   switch (desc->kind)
   {
   case TYPEDESC_MUT:    return typedesc_mut_is_implicitly_convertible   ((typedesc_mut_t*   )desc, target_desc);
-  case TYPEDESC_CONST:  return typedesc_const_is_implicitly_convertible ((typedesc_const_t* )desc, target_desc);
   case TYPEDESC_PTR:    return typedesc_ptr_is_implicitly_convertible   ((typedesc_ptr_t*   )desc, target_desc);
   case TYPEDESC_ARRAY:  return typedesc_array_is_implicitly_convertible ((typedesc_array_t* )desc, target_desc);
   case TYPEDESC_REF:    return typedesc_ref_is_implicitly_convertible   ((typedesc_ref_t*   )desc, target_desc);
@@ -434,7 +405,7 @@ typedesc_t* typedesc_arithmetic_promote(typedesc_t* lhs_desc, typedesc_t* rhs_de
 
 bool typedesc_is_callable(typedesc_t* desc)
 {
-  desc = typedesc_remove_const_mut(desc);
+  desc = typedesc_remove_mut(desc);
 
   if (desc->kind == TYPEDESC_REF)
   {
@@ -456,7 +427,7 @@ bool typedesc_is_callable(typedesc_t* desc)
 
 typedesc_t* typedesc_underlying_callable(typedesc_t* desc)
 {
-  desc = typedesc_remove_const_mut(desc);
+  desc = typedesc_remove_mut(desc);
 
   if (desc->kind == TYPEDESC_REF)
   {

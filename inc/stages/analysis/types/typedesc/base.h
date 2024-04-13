@@ -33,7 +33,6 @@ typedef struct ast_node_t ast_node_t;
 typedef enum typedesc_kind_e
 {
   TYPEDESC_MUT, // Mutable type
-  TYPEDESC_CONST, // Compile-time type
   TYPEDESC_PTR, // Pointer type
   TYPEDESC_ARRAY, // Array type
   TYPEDESC_REF, // Reference type
@@ -167,14 +166,6 @@ bool typedesc_is_decl(typedesc_t* desc);
 typedesc_t* typedesc_remove_mut(typedesc_t* desc);
 
 /**
- * \brief Removes the topmost constant modifier from a type descriptor.
- * 
- * \param[in] desc Pointer to the type descriptor.
- * \returns Pointer to the type descriptor without the constant modifier.
- */
-typedesc_t* typedesc_remove_const(typedesc_t* desc);
-
-/**
  * \brief Removes the topmost pointer modifier from a type descriptor.
  * 
  * \param[in] desc Pointer to the type descriptor.
@@ -199,42 +190,22 @@ typedesc_t* typedesc_remove_array(typedesc_t* desc);
 typedesc_t* typedesc_remove_ref(typedesc_t* desc);
 
 /**
+ * \brief Removes the topmost reference and mutable modifiers from a type
+ * descriptor.
+ * 
+ * \param[in] desc Pointer to the type descriptor.
+ * \returns Pointer to the type descriptor without the reference and mutable
+ * modifier.
+ */
+typedesc_t* typedesc_remove_ref_mut(typedesc_t* desc);
+
+/**
  * \brief Removes the topmost optional modifier from a type descriptor.
  * 
  * \param[in] desc Pointer to the type descriptor.
  * \returns Pointer to the type descriptor without the optional modifier.
  */
 typedesc_t* typedesc_remove_opt(typedesc_t* desc);
-
-/**
- * \brief Removes the topmost constant and mutable modifiers from a type
- * descriptor.
- * 
- * \param[in] desc Pointer to the type descriptor.
- * \returns Pointer to the type descriptor without the constant and mutable
- * modifiers.
- */
-typedesc_t* typedesc_remove_const_mut(typedesc_t* desc);
-
-/**
- * \brief Removes the topmost constant and reference modifiers from a type
- * descriptor.
- * 
- * \param[in] desc Pointer to the type descriptor.
- * \returns Pointer to the type descriptor without the constant and reference
- * modifiers.
- */
-typedesc_t* typedesc_remove_const_ref(typedesc_t* desc);
-
-/**
- * \brief Removes the topmost constant, reference and mutable modifiers from a
- * type descriptor.
- * 
- * \param[in] desc Pointer to the type descriptor.
- * \returns Pointer to the type descriptor without the constant, reference and
- * mutable modifiers.
- */
-typedesc_t* typedesc_remove_const_ref_mut(typedesc_t* desc);
 
 /**
  * \brief Checks if a modifier can be added to a type descriptor.
@@ -252,14 +223,6 @@ bool typedesc_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc);
  * \returns `true` if a mutable modifier can be added, `false` otherwise.
  */
 bool typedesc_can_add_mut(typedesc_t* desc);
-
-/**
- * \brief Checks if a constant modifier can be added to a type descriptor.
- * 
- * \param[in] desc Pointer to the type descriptor.
- * \returns `true` if a constant modifier can be added, `false` otherwise.
- */
-bool typedesc_can_add_const(typedesc_t* desc);
 
 /**
  * \brief Checks if a pointer modifier can be added to a type descriptor.

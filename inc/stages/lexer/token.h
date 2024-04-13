@@ -66,7 +66,6 @@ typedef enum token_kind_e
   TOK_KW_RETURN, // Keyword `return`
   TOK_KW_DEFER, // Keyword `defer`
   TOK_KW_MUT, // Keyword `mut`
-  TOK_KW_CONST, // Keyword `const`
   TOK_KW_I8, // Keyword `i8`
   TOK_KW_I16, // Keyword `i16`
   TOK_KW_I32, // Keyword `i32`

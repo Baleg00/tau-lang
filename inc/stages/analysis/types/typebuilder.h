@@ -57,15 +57,6 @@ void typebuilder_free(typebuilder_t* builder);
 typedesc_t* typebuilder_build_mut(typebuilder_t* builder, typedesc_t* base_type);
 
 /**
- * \brief Builds a constant version of the provided base type.
- *
- * \param[in] builder Pointer to the type builder.
- * \param[in] base_type The base type to be modified.
- * \returns A pointer to the newly created constant type descriptor.
- */
-typedesc_t* typebuilder_build_const(typebuilder_t* builder, typedesc_t* base_type);
-
-/**
  * \brief Builds a pointer type with the provided base type.
  *
  * \param[in] builder Pointer to the type builder.

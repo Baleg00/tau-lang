@@ -58,11 +58,11 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
   }
   else
   {
-    ASSERT(typedesc_remove_const(lhs_desc)->kind == TYPEDESC_REF);
+    ASSERT(lhs_desc->kind == TYPEDESC_REF);
 
-    bool is_mut = typedesc_remove_const_ref(lhs_desc)->kind == TYPEDESC_MUT;
+    bool is_mut = typedesc_remove_ref(lhs_desc)->kind == TYPEDESC_MUT;
 
-    typedesc_t* base_desc = typedesc_remove_const_ref_mut(lhs_desc);
+    typedesc_t* base_desc = typedesc_remove_ref_mut(lhs_desc);
 
     symtable_t* decl_scope = NULL;
     vector_t* members = NULL;

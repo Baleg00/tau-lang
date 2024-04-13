@@ -13,7 +13,7 @@ LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
 {
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
 
-  if (typedesc_remove_const(desc)->kind == TYPEDESC_REF)
+  if (desc->kind == TYPEDESC_REF)
     return LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_ref_t*)desc)->base_type->llvm_type, node->llvm_value, "load_tmp");
 
   return node->llvm_value;

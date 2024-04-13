@@ -48,7 +48,7 @@ void ast_stmt_while_typecheck(typecheck_ctx_t* ctx, ast_stmt_while_t* node)
   typedesc_t* cond_desc = typetable_lookup(ctx->typetable, node->cond);
   ASSERT(cond_desc != NULL);
 
-  if (typedesc_remove_const_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
+  if (typedesc_remove_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
     report_error_expected_bool_type(node->cond->tok->loc);
 }
 

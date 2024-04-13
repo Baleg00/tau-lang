@@ -64,7 +64,6 @@
 #include "ast/type/id.h"
 #include "ast/type/mbr.h"
 #include "ast/type/modif/array.h"
-#include "ast/type/modif/const.h"
 #include "ast/type/modif/modif.h"
 #include "ast/type/modif/mut.h"
 #include "ast/type/modif/opt.h"

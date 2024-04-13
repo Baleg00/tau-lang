@@ -25,8 +25,7 @@
 LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node);
 
 /**
- * \brief Builds an LLVM cast instruction to perform arithmetic cast depending
- * on `from_desc` and `to_desc`.
+ * \brief Builds an LLVM cast instruction to perform an arithmetic cast.
  * 
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] llvm_value The LLVM value reference.

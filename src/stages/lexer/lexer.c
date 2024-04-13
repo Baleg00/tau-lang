@@ -50,7 +50,6 @@ static const struct {
   { "return",   TOK_KW_RETURN   },
   { "defer",    TOK_KW_DEFER    },
   { "mut",      TOK_KW_MUT      },
-  { "const",    TOK_KW_CONST    },
   { "i8",       TOK_KW_I8       },
   { "i16",      TOK_KW_I16      },
   { "i32",      TOK_KW_I32      },

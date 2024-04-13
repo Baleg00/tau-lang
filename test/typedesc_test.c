@@ -22,22 +22,6 @@ test()
         typedesc_free((typedesc_t*)desc);
       end()
 
-      it("should remove constant modifier")
-        typedesc_const_t* desc = typedesc_const_init();
-        typedesc_prim_t* base_desc = typedesc_prim_unit_init();
-
-        desc->base_type = (typedesc_t*)base_desc;
-
-        typedesc_t* removed = typedesc_remove_const((typedesc_t*)desc);
-        assert_ptr_equal(removed, base_desc);
-
-        removed = typedesc_remove_const((typedesc_t*)base_desc);
-        assert_ptr_equal(removed, base_desc);
-
-        typedesc_free((typedesc_t*)base_desc);
-        typedesc_free((typedesc_t*)desc);
-      end()
-
       it("should remove pointer modifier")
         typedesc_ptr_t* desc = typedesc_ptr_init();
         typedesc_prim_t* base_desc = typedesc_prim_unit_init();
@@ -102,76 +86,26 @@ test()
         typedesc_free((typedesc_t*)desc);
       end()
 
-      it("should remove constant and mutable modifier")
-        typedesc_const_t* const_desc = typedesc_const_init();
-        typedesc_mut_t* mut_desc = typedesc_mut_init();
-        typedesc_prim_t* base_desc = typedesc_prim_unit_init();
-
-        const_desc->base_type = (typedesc_t*)mut_desc;
-        mut_desc->base_type = (typedesc_t*)base_desc;
-
-        typedesc_t* removed = typedesc_remove_const_mut((typedesc_t*)const_desc);
-        assert_ptr_equal(removed, base_desc);
-
-        removed = typedesc_remove_const_mut((typedesc_t*)mut_desc);
-        assert_ptr_equal(removed, base_desc);
-
-        removed = typedesc_remove_const_mut((typedesc_t*)base_desc);
-        assert_ptr_equal(removed, base_desc);
-
-        typedesc_free((typedesc_t*)base_desc);
-        typedesc_free((typedesc_t*)mut_desc);
-        typedesc_free((typedesc_t*)const_desc);
-      end()
-
-      it("should remove constant and reference modifier")
-        typedesc_const_t* const_desc = typedesc_const_init();
-        typedesc_ref_t* ref_desc = typedesc_ref_init();
-        typedesc_prim_t* base_desc = typedesc_prim_unit_init();
-
-        const_desc->base_type = (typedesc_t*)ref_desc;
-        ref_desc->base_type = (typedesc_t*)base_desc;
-
-        typedesc_t* removed = typedesc_remove_const_ref((typedesc_t*)const_desc);
-        assert_ptr_equal(removed, base_desc);
-
-        removed = typedesc_remove_const_ref((typedesc_t*)ref_desc);
-        assert_ptr_equal(removed, base_desc);
-
-        removed = typedesc_remove_const_ref((typedesc_t*)base_desc);
-        assert_ptr_equal(removed, base_desc);
-
-        typedesc_free((typedesc_t*)base_desc);
-        typedesc_free((typedesc_t*)ref_desc);
-        typedesc_free((typedesc_t*)const_desc);
-      end()
-
-      it("should remove constant, reference and mutable modifier")
-        typedesc_const_t* const_desc = typedesc_const_init();
+      it("should remove reference and mutable modifier")
         typedesc_ref_t* ref_desc = typedesc_ref_init();
         typedesc_mut_t* mut_desc = typedesc_mut_init();
         typedesc_prim_t* base_desc = typedesc_prim_unit_init();
 
-        const_desc->base_type = (typedesc_t*)ref_desc;
         ref_desc->base_type = (typedesc_t*)mut_desc;
         mut_desc->base_type = (typedesc_t*)base_desc;
 
-        typedesc_t* removed = typedesc_remove_const_ref_mut((typedesc_t*)const_desc);
+        typedesc_t* removed = typedesc_remove_ref_mut((typedesc_t*)ref_desc);
         assert_ptr_equal(removed, base_desc);
 
-        removed = typedesc_remove_const_ref_mut((typedesc_t*)ref_desc);
+        removed = typedesc_remove_ref_mut((typedesc_t*)mut_desc);
         assert_ptr_equal(removed, base_desc);
 
-        removed = typedesc_remove_const_ref_mut((typedesc_t*)mut_desc);
-        assert_ptr_equal(removed, base_desc);
-
-        removed = typedesc_remove_const_ref_mut((typedesc_t*)base_desc);
+        removed = typedesc_remove_ref_mut((typedesc_t*)base_desc);
         assert_ptr_equal(removed, base_desc);
 
         typedesc_free((typedesc_t*)base_desc);
         typedesc_free((typedesc_t*)mut_desc);
         typedesc_free((typedesc_t*)ref_desc);
-        typedesc_free((typedesc_t*)const_desc);
       end()
     end()
 
@@ -193,45 +127,14 @@ test()
       it("should not be able to add mutable modifier")
         typedesc_mut_t* mut_desc = typedesc_mut_init();
         typedesc_ref_t* ref_desc = typedesc_ref_init();
-        typedesc_const_t* const_desc = typedesc_const_init();
 
         assert_false(typedesc_can_add_mut((typedesc_t*)mut_desc));
         assert_false(typedesc_can_add_mut((typedesc_t*)ref_desc));
-        assert_false(typedesc_can_add_mut((typedesc_t*)const_desc));
 
         typedesc_free((typedesc_t*)mut_desc);
         typedesc_free((typedesc_t*)ref_desc);
-        typedesc_free((typedesc_t*)const_desc);
-      end()
-
-      it("should be able to add constant modifier")
-        typedesc_mut_t* mut_desc = typedesc_mut_init();
-        typedesc_ref_t* ref_desc = typedesc_ref_init();
-        typedesc_ptr_t* ptr_desc = typedesc_ptr_init();
-        typedesc_opt_t* opt_desc = typedesc_opt_init();
-        typedesc_prim_t* unit_desc = typedesc_prim_unit_init();
-
-        assert_true(typedesc_can_add_const((typedesc_t*)mut_desc));
-        assert_true(typedesc_can_add_const((typedesc_t*)ref_desc));
-        assert_true(typedesc_can_add_const((typedesc_t*)ptr_desc));
-        assert_true(typedesc_can_add_const((typedesc_t*)opt_desc));
-        assert_true(typedesc_can_add_const((typedesc_t*)unit_desc));
-
-        typedesc_free((typedesc_t*)unit_desc);
-        typedesc_free((typedesc_t*)opt_desc);
-        typedesc_free((typedesc_t*)ptr_desc);
-        typedesc_free((typedesc_t*)ref_desc);
-        typedesc_free((typedesc_t*)mut_desc);
       end()
       
-      it("should not be able to add constant modifier")
-        typedesc_const_t* const_desc = typedesc_const_init();
-
-        assert_false(typedesc_can_add_const((typedesc_t*)const_desc));
-
-        typedesc_free((typedesc_t*)const_desc);
-      end()
-
       it("should be able to add pointer modifier")
         typedesc_mut_t* mut_desc = typedesc_mut_init();
         typedesc_ptr_t* ptr_desc = typedesc_ptr_init();
@@ -252,14 +155,11 @@ test()
       end()
       
       it("should not be able to add pointer modifier")
-        typedesc_const_t* const_desc = typedesc_const_init();
         typedesc_ref_t* ref_desc = typedesc_ref_init();
 
-        assert_false(typedesc_can_add_ptr((typedesc_t*)const_desc));
         assert_false(typedesc_can_add_ptr((typedesc_t*)ref_desc));
 
         typedesc_free((typedesc_t*)ref_desc);
-        typedesc_free((typedesc_t*)const_desc);
       end()
 
       it("should be able to add array modifier")
@@ -282,14 +182,11 @@ test()
       end()
       
       it("should not be able to add array modifier")
-        typedesc_const_t* const_desc = typedesc_const_init();
         typedesc_ref_t* ref_desc = typedesc_ref_init();
 
-        assert_false(typedesc_can_add_array((typedesc_t*)const_desc));
         assert_false(typedesc_can_add_array((typedesc_t*)ref_desc));
 
         typedesc_free((typedesc_t*)ref_desc);
-        typedesc_free((typedesc_t*)const_desc);
       end()
 
       it("should be able to add optional modifier")
@@ -304,7 +201,6 @@ test()
       end()
       
       it("should not be able to add optional modifier")
-        typedesc_const_t* const_desc = typedesc_const_init();
         typedesc_mut_t* mut_desc = typedesc_mut_init();
         typedesc_ref_t* ref_desc = typedesc_ref_init();
         typedesc_opt_t* opt_desc = typedesc_opt_init();
@@ -315,13 +211,11 @@ test()
         mut_desc->base_type = (typedesc_t*)opt_desc;
         assert_false(typedesc_can_add_opt((typedesc_t*)mut_desc));
 
-        assert_false(typedesc_can_add_opt((typedesc_t*)const_desc));
         assert_false(typedesc_can_add_opt((typedesc_t*)ref_desc));
 
         typedesc_free((typedesc_t*)opt_desc);
         typedesc_free((typedesc_t*)ref_desc);
         typedesc_free((typedesc_t*)mut_desc);
-        typedesc_free((typedesc_t*)const_desc);
       end()
     end()
 

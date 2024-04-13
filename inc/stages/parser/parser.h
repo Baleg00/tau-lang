@@ -190,16 +190,6 @@ ast_node_t* parser_parse_type_id(parser_t* par);
 ast_node_t* parser_parse_type_mut(parser_t* par);
 
 /**
- * \brief Parses a compile-time type.
- * 
- * \details Compile-time types are prefixed with the `const` keyword.
- * 
- * \param[in] par Parser to be used.
- * \returns Compile-time type node.
- */
-ast_node_t* parser_parse_type_const(parser_t* par);
-
-/**
  * \brief Parses a pointer type.
  * 
  * \details Pointer types are prefixed with an asterisk (`*`).

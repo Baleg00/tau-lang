@@ -20,7 +20,6 @@
 
 #include "stages/analysis/types/typedesc/array.h"
 #include "stages/analysis/types/typedesc/base.h"
-#include "stages/analysis/types/typedesc/const.h"
 #include "stages/analysis/types/typedesc/decl.h"
 #include "stages/analysis/types/typedesc/enum.h"
 #include "stages/analysis/types/typedesc/fun.h"
