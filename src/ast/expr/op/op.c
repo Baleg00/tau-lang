@@ -13,6 +13,7 @@ const char* op_kind_to_cstr(op_kind_t kind)
 {
   switch (kind)
   {
+  case OP_AS:               return "OP_AS";
   case OP_SIZEOF:           return "OP_SIZEOF";
   case OP_ALIGNOF:          return "OP_ALIGNOF";
   case OP_ARIT_INC_PRE:     return "OP_ARIT_INC_PRE";
@@ -79,6 +80,7 @@ int op_precedence(op_kind_t kind)
   case OP_CALL:
     return 0;
   
+  case OP_AS:
   case OP_SIZEOF:
   case OP_ALIGNOF:
   case OP_ARIT_INC_PRE:
@@ -156,6 +158,7 @@ bool op_is_binary(op_kind_t kind)
 {
   switch (kind)
   {
+  case OP_AS:
   case OP_ARIT_ADD:
   case OP_ARIT_SUB:
   case OP_ARIT_MUL:
@@ -314,6 +317,7 @@ bool op_is_left_assoc(op_kind_t kind)
 {
   switch (kind)
   {
+  case OP_AS:
   case OP_ARIT_INC_POST:
   case OP_ARIT_DEC_POST:
   case OP_ARIT_ADD:

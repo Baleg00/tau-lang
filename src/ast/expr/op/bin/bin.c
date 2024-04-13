@@ -63,6 +63,14 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
 
   switch (node->op_kind)
   {
+  case OP_AS:
+  {
+    ASSERT(typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)) &&
+           typedesc_is_arithmetic(typedesc_remove_mut(rhs_desc)));
+    
+    desc = rhs_desc;
+    break;
+  }
   case OP_ARIT_ADD:
   case OP_ARIT_SUB:
   case OP_ARIT_MUL:
@@ -175,6 +183,16 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
   typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
 
   LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+
+  if (node->op_kind == OP_AS)
+  {
+    ASSERT(typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc));
+    // TODO: Add explicit cast for non-arithmetic types.
+
+    node->llvm_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, rhs_desc);
+    return;
+  }
+
   LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
 
   typedesc_t* promoted_desc = NULL;

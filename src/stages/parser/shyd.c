@@ -94,7 +94,8 @@ bool shyd_parse_typed_expr(shyd_t* shyd)
   
   switch (parser_current(shyd->par)->kind)
   {
-  case TOK_KW_SIZEOF:  elem->op = OP_SIZEOF; break;
+  case TOK_KW_AS:      elem->op = OP_AS;      break;
+  case TOK_KW_SIZEOF:  elem->op = OP_SIZEOF;  break;
   case TOK_KW_ALIGNOF: elem->op = OP_ALIGNOF; break;
   default: NOOP();
   }

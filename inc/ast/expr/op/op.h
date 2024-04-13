@@ -24,6 +24,7 @@
  */
 typedef enum op_kind_t
 {
+  OP_AS, // Type conversion operator `as`
   OP_SIZEOF, // Size-of operator `sizeof`
   OP_ALIGNOF, // Alignment-of operator `alignof`
   
