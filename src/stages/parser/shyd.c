@@ -1,3 +1,10 @@
+/**
+ * \file
+ * 
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #include "stages/parser/shyd.h"
 
 #include <errno.h>
@@ -12,31 +19,34 @@
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
 
-shyd_t* shyd_init(parser_t* par)
+shyd_ctx_t* shyd_init(parser_t* par)
 {
-  shyd_t* shyd = (shyd_t*)malloc(sizeof(shyd_t));
-  ASSERT(shyd != NULL);
+  shyd_ctx_t* ctx = (shyd_ctx_t*)malloc(sizeof(shyd_ctx_t));
+  ASSERT(ctx != NULL);
 
-  shyd->par = par;
-  shyd->out_queue = queue_init();
-  shyd->op_stack = stack_init();
-  shyd->prev_term = false;
+  ctx->par = par;
+  ctx->out_queue = queue_init();
+  ctx->op_stack = stack_init();
+  ctx->prev_term = false;
 
-  return shyd;
+  return ctx;
 }
 
-void shyd_free(shyd_t* shyd)
+void shyd_free(shyd_ctx_t* ctx)
 {
-  queue_free(shyd->out_queue);
-  stack_free(shyd->op_stack);
-  free(shyd);
+  queue_free(ctx->out_queue);
+  stack_free(ctx->op_stack);
+  free(ctx);
 }
 
-shyd_elem_t* shyd_elem_init(parser_t* par, shyd_kind_t kind)
+shyd_elem_t* shyd_elem_init(shyd_ctx_t* ctx, shyd_elem_kind_t kind)
 {
   shyd_elem_t* elem = (shyd_elem_t*)malloc(sizeof(shyd_elem_t));
+  CLEAROBJ(elem);
+
   elem->kind = kind;
-  elem->tok = parser_current(par);
+  elem->tok = parser_current(ctx->par);
+
   return elem;
 }
 
@@ -45,198 +55,198 @@ void shyd_elem_free(shyd_elem_t* elem)
   free(elem);
 }
 
-bool shyd_flush_until_kind(shyd_t* shyd, shyd_kind_t kind)
+bool shyd_op_flush_until_elem(shyd_ctx_t* ctx, shyd_elem_kind_t kind)
 {
-  while (!stack_empty(shyd->op_stack) && ((shyd_elem_t*)stack_top(shyd->op_stack))->kind != kind)
-    queue_offer(shyd->out_queue, stack_pop(shyd->op_stack));
+  while (!stack_empty(ctx->op_stack) && ((shyd_elem_t*)stack_top(ctx->op_stack))->kind != kind)
+    queue_offer(ctx->out_queue, stack_pop(ctx->op_stack));
 
-  if (stack_empty(shyd->op_stack))
+  if (stack_empty(ctx->op_stack))
     return false;
 
-  shyd_elem_free((shyd_elem_t*)stack_pop(shyd->op_stack));
+  shyd_elem_free((shyd_elem_t*)stack_pop(ctx->op_stack));
 
   return true;
 }
 
-void shyd_flush_for_op(shyd_t* shyd, op_kind_t op)
+void shyd_op_flush_for_op(shyd_ctx_t* ctx, op_kind_t op)
 {
-  while (!stack_empty(shyd->op_stack))
+  while (!stack_empty(ctx->op_stack))
   {
-    shyd_elem_t* elem = (shyd_elem_t*)stack_top(shyd->op_stack);
+    shyd_elem_t* elem = (shyd_elem_t*)stack_top(ctx->op_stack);
 
     if (elem->kind != SHYD_PAREN_OPEN && elem->kind != SHYD_BRACKET_OPEN &&
       (op_precedence(elem->op) < op_precedence(op) ||
       (op_precedence(elem->op) == op_precedence(op) && op_is_left_assoc(op))))
-      queue_offer(shyd->out_queue, stack_pop(shyd->op_stack));
+      queue_offer(ctx->out_queue, stack_pop(ctx->op_stack));
     else
       break;
   }
 }
 
-bool shyd_parse_typed_expr(shyd_t* shyd)
+bool shyd_parse_typed_expr(shyd_ctx_t* ctx)
 {
-  switch (parser_current(shyd->par)->kind)
+  switch (parser_current(ctx->par)->kind)
   {
   case TOK_KW_IS:
   case TOK_KW_AS:
-    if (!shyd->prev_term)
+    if (!ctx->prev_term)
       return false;
     break;
   case TOK_KW_SIZEOF:
   case TOK_KW_ALIGNOF:
-    if (shyd->prev_term)
+    if (ctx->prev_term)
       return false;
   default:
     NOOP();
   }
 
-  shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
+  shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_OP);
   
-  switch (parser_current(shyd->par)->kind)
+  switch (parser_current(ctx->par)->kind)
   {
   case TOK_KW_AS:      elem->op = OP_AS;      break;
   case TOK_KW_SIZEOF:  elem->op = OP_SIZEOF;  break;
   case TOK_KW_ALIGNOF: elem->op = OP_ALIGNOF; break;
-  default: NOOP();
+  default: UNREACHABLE();
   }
 
-  stack_push(shyd->op_stack, elem);
+  stack_push(ctx->op_stack, elem);
 
-  parser_next(shyd->par);
+  parser_next(ctx->par);
 
-  shyd_elem_t* type = shyd_elem_init(shyd->par, SHYD_TYPE);
-  type->node = parser_parse_type(shyd->par);
-  queue_offer(shyd->out_queue, type);
+  shyd_elem_t* type = shyd_elem_init(ctx, SHYD_TYPE);
+  type->node = parser_parse_type(ctx->par);
+  queue_offer(ctx->out_queue, type);
 
-  shyd->prev_term = true;
+  ctx->prev_term = true;
   
   return true;
 }
 
-bool shyd_parse_paren_open(shyd_t* shyd)
+bool shyd_parse_paren_left(shyd_ctx_t* ctx)
 {
-  if (shyd->prev_term)
+  if (ctx->prev_term)
     return false;
 
-  shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_PAREN_OPEN);
-  stack_push(shyd->op_stack, elem);
+  shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_PAREN_OPEN);
+  stack_push(ctx->op_stack, elem);
 
-  parser_next(shyd->par);
+  parser_next(ctx->par);
 
-  shyd->prev_term = false;
+  ctx->prev_term = false;
   
   return true;
 }
 
-bool shyd_parse_paren_close(shyd_t* shyd)
+bool shyd_parse_paren_right(shyd_ctx_t* ctx)
 {
-  if (!shyd->prev_term)
+  if (!ctx->prev_term)
     return false;
 
-  if (!shyd_flush_until_kind(shyd, SHYD_PAREN_OPEN))
+  if (!shyd_op_flush_until_elem(ctx, SHYD_PAREN_OPEN))
     return false;
   
-  parser_next(shyd->par);
+  parser_next(ctx->par);
   
-  shyd->prev_term = true;
+  ctx->prev_term = true;
 
   return true;
 }
 
-bool shyd_parse_bracket_open(shyd_t* shyd)
+bool shyd_parse_bracket_left(shyd_ctx_t* ctx)
 {
-  if (!shyd->prev_term)
+  if (!ctx->prev_term)
     return false;
 
-  shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_BRACKET_OPEN);
-  stack_push(shyd->op_stack, elem);
+  shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_BRACKET_OPEN);
+  stack_push(ctx->op_stack, elem);
   
-  parser_next(shyd->par);
+  parser_next(ctx->par);
   
-  shyd->prev_term = false;
+  ctx->prev_term = false;
   
   return true;
 }
 
-bool shyd_parse_bracket_close(shyd_t* shyd)
+bool shyd_parse_bracket_right(shyd_ctx_t* ctx)
 {
-  if (!shyd->prev_term)
+  if (!ctx->prev_term)
     return false;
 
-  if (!shyd_flush_until_kind(shyd, SHYD_BRACKET_OPEN))
+  if (!shyd_op_flush_until_elem(ctx, SHYD_BRACKET_OPEN))
     return false;
 
-  shyd_flush_for_op(shyd, OP_SUBS);
+  shyd_op_flush_for_op(ctx, OP_SUBS);
   
-  shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
+  shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_OP);
   elem->op = OP_SUBS;
-  stack_push(shyd->op_stack, elem);
+  stack_push(ctx->op_stack, elem);
   
-  parser_next(shyd->par);
+  parser_next(ctx->par);
   
-  shyd->prev_term = true;
+  ctx->prev_term = true;
   
   return true;
 }
 
-bool shyd_parse_call(shyd_t* shyd)
+bool shyd_parse_call(shyd_ctx_t* ctx)
 {
-  if (!shyd->prev_term)
+  if (!ctx->prev_term)
     return false;
 
   ast_expr_op_call_t* node = ast_expr_op_call_init();
-  node->tok = parser_current(shyd->par);
+  node->tok = parser_current(ctx->par);
   node->op_kind = OP_CALL;
 
-  parser_expect(shyd->par, TOK_PUNCT_PAREN_LEFT);
+  parser_expect(ctx->par, TOK_PUNCT_PAREN_LEFT);
 
   node->params = NULL;
 
-  if (!parser_consume(shyd->par, TOK_PUNCT_PAREN_RIGHT))
+  if (!parser_consume(ctx->par, TOK_PUNCT_PAREN_RIGHT))
   {
-    node->params = parser_parse_delimited_list(shyd->par, TOK_PUNCT_COMMA, parser_parse_expr);
+    node->params = parser_parse_delimited_list(ctx->par, TOK_PUNCT_COMMA, parser_parse_expr);
 
-    parser_expect(shyd->par, TOK_PUNCT_PAREN_RIGHT);
+    parser_expect(ctx->par, TOK_PUNCT_PAREN_RIGHT);
   }
   
-  shyd_flush_for_op(shyd, OP_CALL);
+  shyd_op_flush_for_op(ctx, OP_CALL);
 
-  shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
+  shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_OP);
   elem->op = OP_CALL;
   elem->node = (ast_node_t*)node;
 
-  stack_push(shyd->op_stack, elem);
+  stack_push(ctx->op_stack, elem);
   
   return true;
 }
 
-bool shyd_parse_term(shyd_t* shyd)
+bool shyd_parse_term(shyd_ctx_t* ctx)
 {
-  if (shyd->prev_term)
+  if (ctx->prev_term)
     return false;
 
-  shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_TERM);
-  queue_offer(shyd->out_queue, elem);
+  shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_TERM);
+  queue_offer(ctx->out_queue, elem);
 
-  parser_next(shyd->par);
+  parser_next(ctx->par);
 
-  shyd->prev_term = true;
+  ctx->prev_term = true;
 
   return true;
 }
 
-bool shyd_parse_operator(shyd_t* shyd)
+bool shyd_parse_op(shyd_ctx_t* ctx)
 {
   op_kind_t op;
 
-  switch (parser_current(shyd->par)->kind)
+  switch (parser_current(ctx->par)->kind)
   {
-  case TOK_PUNCT_PLUS:                  op = shyd->prev_term ? OP_ARIT_ADD      : OP_ARIT_POS;     break;
-  case TOK_PUNCT_PLUS_PLUS:             op = shyd->prev_term ? OP_ARIT_INC_POST : OP_ARIT_INC_PRE; break;
-  case TOK_PUNCT_MINUS:                 op = shyd->prev_term ? OP_ARIT_SUB      : OP_ARIT_NEG;     break;
-  case TOK_PUNCT_MINUS_MINUS:           op = shyd->prev_term ? OP_ARIT_DEC_POST : OP_ARIT_DEC_PRE; break;
-  case TOK_PUNCT_ASTERISK:              op = shyd->prev_term ? OP_ARIT_MUL      : OP_IND;          break;
-  case TOK_PUNCT_AMPERSAND:             op = shyd->prev_term ? OP_BIT_AND       : OP_ADDR;         break;
+  case TOK_PUNCT_PLUS:                  op = ctx->prev_term ? OP_ARIT_ADD      : OP_ARIT_POS;     break;
+  case TOK_PUNCT_PLUS_PLUS:             op = ctx->prev_term ? OP_ARIT_INC_POST : OP_ARIT_INC_PRE; break;
+  case TOK_PUNCT_MINUS:                 op = ctx->prev_term ? OP_ARIT_SUB      : OP_ARIT_NEG;     break;
+  case TOK_PUNCT_MINUS_MINUS:           op = ctx->prev_term ? OP_ARIT_DEC_POST : OP_ARIT_DEC_PRE; break;
+  case TOK_PUNCT_ASTERISK:              op = ctx->prev_term ? OP_ARIT_MUL      : OP_IND;          break;
+  case TOK_PUNCT_AMPERSAND:             op = ctx->prev_term ? OP_BIT_AND       : OP_ADDR;         break;
   case TOK_PUNCT_PLUS_EQUAL:            op = OP_ASSIGN_ARIT_ADD;  break;
   case TOK_PUNCT_MINUS_EQUAL:           op = OP_ASSIGN_ARIT_SUB;  break;
   case TOK_PUNCT_ASTERISK_EQUAL:        op = OP_ASSIGN_ARIT_MUL;  break;
@@ -271,49 +281,49 @@ bool shyd_parse_operator(shyd_t* shyd)
   default: return false;
   }
 
-  shyd_flush_for_op(shyd, op);
+  shyd_op_flush_for_op(ctx, op);
 
-  shyd_elem_t* elem = shyd_elem_init(shyd->par, SHYD_OP);
+  shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_OP);
   elem->op = op;
-  stack_push(shyd->op_stack, elem);
+  stack_push(ctx->op_stack, elem);
   
-  parser_next(shyd->par);
+  parser_next(ctx->par);
 
-  shyd->prev_term = false;
+  ctx->prev_term = false;
 
   return true;
 }
 
-bool shyd_postfix_step(shyd_t* shyd)
+bool shyd_parse_postfix_next(shyd_ctx_t* ctx)
 {
-  switch (parser_current(shyd->par)->kind)
+  switch (parser_current(ctx->par)->kind)
   {
   case TOK_KW_IS:
   case TOK_KW_AS:
   case TOK_KW_SIZEOF:
-  case TOK_KW_ALIGNOF: return shyd_parse_typed_expr(shyd);
-  case TOK_PUNCT_PAREN_LEFT: return shyd->prev_term ? shyd_parse_call(shyd) : shyd_parse_paren_open(shyd);
-  case TOK_PUNCT_PAREN_RIGHT: return shyd_parse_paren_close(shyd);
-  case TOK_PUNCT_BRACKET_LEFT: return shyd_parse_bracket_open(shyd);
-  case TOK_PUNCT_BRACKET_RIGHT: return shyd_parse_bracket_close(shyd);
+  case TOK_KW_ALIGNOF:          return shyd_parse_typed_expr(ctx);
+  case TOK_PUNCT_PAREN_LEFT:    return ctx->prev_term ? shyd_parse_call(ctx) : shyd_parse_paren_left(ctx);
+  case TOK_PUNCT_PAREN_RIGHT:   return shyd_parse_paren_right(ctx);
+  case TOK_PUNCT_BRACKET_LEFT:  return shyd_parse_bracket_left(ctx);
+  case TOK_PUNCT_BRACKET_RIGHT: return shyd_parse_bracket_right(ctx);
   default: NOOP();
   }
 
-  if (parser_current(shyd->par)->kind == TOK_ID || token_is_literal(parser_current(shyd->par)))
-    return shyd_parse_term(shyd);
-  else if (token_is_punctuation(parser_current(shyd->par)))
-    return shyd_parse_operator(shyd);
+  if (parser_current(ctx->par)->kind == TOK_ID || token_is_literal(parser_current(ctx->par)))
+    return shyd_parse_term(ctx);
+  else if (token_is_punctuation(parser_current(ctx->par)))
+    return shyd_parse_op(ctx);
 
   return false;
 }
 
-void shyd_postfix(shyd_t* shyd)
+void shyd_parse_postfix(shyd_ctx_t* ctx)
 {
-  while (shyd_postfix_step(shyd));
+  while (shyd_parse_postfix_next(ctx));
 
-  while (!stack_empty(shyd->op_stack))
+  while (!stack_empty(ctx->op_stack))
   {
-    shyd_elem_t* elem = (shyd_elem_t*)stack_pop(shyd->op_stack);
+    shyd_elem_t* elem = (shyd_elem_t*)stack_pop(ctx->op_stack);
     
     if (elem->kind == SHYD_PAREN_OPEN)
       report_error_missing_closing_parenthesis(elem->tok->loc);
@@ -321,12 +331,14 @@ void shyd_postfix(shyd_t* shyd)
     if (elem->kind == SHYD_BRACKET_OPEN)
       report_error_missing_closing_bracket(elem->tok->loc);
 
-    queue_offer(shyd->out_queue, elem);
+    queue_offer(ctx->out_queue, elem);
   }
 }
 
-void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op_un(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
 {
+  UNUSED(ctx);
+
   ast_expr_op_un_t* node = ast_expr_op_un_init();
   node->tok = elem->tok;
   node->op_kind = elem->op;
@@ -339,9 +351,9 @@ void shyd_ast_op_unary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, node);
 }
 
-void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
 {
-  UNUSED(shyd);
+  UNUSED(ctx);
 
   ast_expr_op_bin_t* node = NULL;
 
@@ -367,9 +379,9 @@ void shyd_ast_op_binary(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, node);
 }
 
-void shyd_ast_op_call(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
 {
-  UNUSED(shyd);
+  UNUSED(ctx);
 
   if (stack_empty(node_stack))
     report_error_missing_callee(elem->node->tok->loc);
@@ -379,9 +391,9 @@ void shyd_ast_op_call(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, elem->node);
 }
 
-void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_term(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
 {
-  UNUSED(shyd);
+  UNUSED(ctx);
 
   ast_node_t* node = NULL;
 
@@ -448,37 +460,37 @@ void shyd_ast_term(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, node);
 }
 
-void shyd_ast_op(shyd_t* shyd, shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
 {
   if (op_is_unary(elem->op))
-    shyd_ast_op_unary(shyd, elem, node_stack);
+    shyd_ast_op_un(ctx, elem, node_stack);
   else if (op_is_binary(elem->op))
-    shyd_ast_op_binary(shyd, elem, node_stack);
+    shyd_ast_op_bin(ctx, elem, node_stack);
   else if (elem->op == OP_CALL)
-    shyd_ast_op_call(shyd, elem, node_stack);
+    shyd_ast_op_call(ctx, elem, node_stack);
   else
     UNREACHABLE();
 }
 
-ast_node_t* shyd_ast(parser_t* par)
+ast_node_t* shyd_parse_expr(parser_t* par)
 {
   parser_set_ignore_newline(par, false);
 
-  shyd_t* shyd = shyd_init(par);
+  shyd_ctx_t* ctx = shyd_init(par);
 
-  shyd_postfix(shyd);
+  shyd_parse_postfix(ctx);
 
   stack_t* node_stack = stack_init();
 
-  while (!queue_empty(shyd->out_queue))
+  while (!queue_empty(ctx->out_queue))
   {
-    shyd_elem_t* elem = (shyd_elem_t*)queue_poll(shyd->out_queue);
+    shyd_elem_t* elem = (shyd_elem_t*)queue_poll(ctx->out_queue);
 
     switch (elem->kind)
     {
-    case SHYD_TERM: shyd_ast_term(shyd, elem, node_stack); break;
+    case SHYD_TERM: shyd_ast_term(ctx, elem, node_stack); break;
     case SHYD_TYPE: stack_push(node_stack, elem->node); break;
-    case SHYD_OP:   shyd_ast_op(shyd, elem, node_stack); break;
+    case SHYD_OP:   shyd_ast_op(ctx, elem, node_stack); break;
     default: UNREACHABLE();
     }
 
@@ -491,7 +503,7 @@ ast_node_t* shyd_ast(parser_t* par)
 
   stack_free(node_stack);
 
-  shyd_free(shyd);
+  shyd_free(ctx);
 
   parser_set_ignore_newline(par, true);
 
