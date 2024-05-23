@@ -9,6 +9,7 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
+#include "stages/codegen/utils.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -83,7 +84,14 @@ void ast_decl_var_codegen(codegen_ctx_t* ctx, ast_decl_var_t* node)
   node->llvm_value = LLVMBuildAlloca(ctx->llvm_builder, node->llvm_type, "alloca_tmp");
 
   if (node->expr != NULL)
-    LLVMBuildStore(ctx->llvm_builder, ((ast_expr_t*)node->expr)->llvm_value, node->llvm_value);
+  {
+    typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+
+    LLVMValueRef llvm_value = ((ast_expr_t*)node->expr)->llvm_value;
+    llvm_value = codegen_build_implicit_cast(ctx, llvm_value, expr_desc, desc);
+
+    LLVMBuildStore(ctx->llvm_builder, llvm_value, node->llvm_value);
+  }
 }
 
 size_t ast_decl_var_mangle(ast_decl_var_t* node, char* buf, size_t len)

@@ -65,8 +65,7 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
   {
   case OP_AS:
   {
-    ASSERT(typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)) &&
-           typedesc_is_arithmetic(typedesc_remove_mut(rhs_desc)));
+    ASSERT(typedesc_is_explicitly_convertible(lhs_desc, rhs_desc));
     
     desc = rhs_desc;
     break;

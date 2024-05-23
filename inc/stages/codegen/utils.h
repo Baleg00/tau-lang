@@ -36,4 +36,16 @@ LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node);
  */
 LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
 
+/**
+ * \brief Builds an LLVM cast instruction to perform an implicit cast.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] llvm_value The LLVM value reference.
+ * \param[in] from_desc Pointer to the source type descriptor.
+ * \param[in] to_desc Pointer to the target type descriptor.
+ * \returns The result of the cast instruction if it is required, otherwise
+ * `llvm_value`.
+ */
+LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
+
 #endif

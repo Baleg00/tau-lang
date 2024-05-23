@@ -58,3 +58,14 @@ LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm
 
   return llvm_value;
 }
+
+LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+{
+  ASSERT(typedesc_is_implicitly_convertible(from_desc, to_desc));
+
+  if (typedesc_is_arithmetic(typedesc_remove_mut(from_desc)) &&
+      typedesc_is_arithmetic(typedesc_remove_mut(to_desc)))
+    return codegen_build_arithmetic_cast(ctx, llvm_value, typedesc_remove_mut(from_desc), typedesc_remove_mut(to_desc));
+  
+  return llvm_value;
+}
