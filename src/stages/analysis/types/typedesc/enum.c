@@ -25,7 +25,7 @@ void typedesc_enum_free(typedesc_enum_t* desc)
   free(desc);
 }
 
-bool typedesc_enum_is_implicitly_convertible(typedesc_enum_t* desc, typedesc_t* target_desc)
+bool typedesc_enum_is_implicitly_convertible(typedesc_enum_t* from_desc, typedesc_t* to_desc)
 {
-  return (typedesc_t*)desc == typedesc_remove_mut(target_desc);
+  return (typedesc_t*)from_desc == typedesc_remove_mut(to_desc);
 }

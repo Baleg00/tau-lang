@@ -37,10 +37,10 @@ void typedesc_opt_free(typedesc_opt_t* desc);
 /**
  * \brief Checks if an optional type is implicitly convertible to another type.
  * 
- * \param[in] desc Pointer to the optional type descriptor.
- * \param[in] target_desc Pointer to the type descriptor to check conversion into.
+ * \param[in] from_desc Pointer to the optional type descriptor.
+ * \param[in] to_desc Pointer to the type descriptor to check conversion into.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_opt_is_implicitly_convertible(typedesc_opt_t* desc, typedesc_t* target_desc);
+bool typedesc_opt_is_implicitly_convertible(typedesc_opt_t* from_desc, typedesc_t* to_desc);
 
 #endif

@@ -25,15 +25,15 @@ void typedesc_ref_free(typedesc_ref_t* desc)
   free(desc);
 }
 
-bool typedesc_ref_is_implicitly_convertible(typedesc_ref_t* desc, typedesc_t* target_desc)
+bool typedesc_ref_is_implicitly_convertible(typedesc_ref_t* from_desc, typedesc_t* to_desc)
 {
-  if (target_desc->kind != TYPEDESC_REF)
-    return typedesc_is_implicitly_convertible(desc->base_type, target_desc);
+  if (to_desc->kind != TYPEDESC_REF)
+    return typedesc_is_implicitly_convertible(from_desc->base_type, to_desc);
 
-  typedesc_ref_t* target_ref_desc = (typedesc_ref_t*)target_desc;
+  typedesc_ref_t* target_ref_desc = (typedesc_ref_t*)to_desc;
 
-  if (desc->base_type->kind != TYPEDESC_MUT && target_ref_desc->base_type->kind == TYPEDESC_MUT)
+  if (from_desc->base_type->kind != TYPEDESC_MUT && target_ref_desc->base_type->kind == TYPEDESC_MUT)
     return false;
 
-  return typedesc_is_implicitly_convertible(desc->base_type, typedesc_remove_ref(target_desc));
+  return typedesc_is_implicitly_convertible(from_desc->base_type, typedesc_remove_ref(to_desc));
 }

@@ -38,10 +38,10 @@ void typedesc_array_free(typedesc_array_t* desc);
 /**
  * \brief Checks if an array type is implicitly convertible to another type.
  * 
- * \param[in] desc Pointer to the array type descriptor.
- * \param[in] target_desc Pointer to the type descriptor to check conversion into.
+ * \param[in] from_desc Pointer to the array type descriptor.
+ * \param[in] to_desc Pointer to the type descriptor to check conversion into.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_array_is_implicitly_convertible(typedesc_array_t* desc, typedesc_t* target_desc);
+bool typedesc_array_is_implicitly_convertible(typedesc_array_t* from_desc, typedesc_t* to_desc);
 
 #endif

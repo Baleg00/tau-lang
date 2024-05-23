@@ -26,7 +26,7 @@ void typedesc_union_free(typedesc_union_t* desc)
   free(desc);
 }
 
-bool typedesc_union_is_implicitly_convertible(typedesc_union_t* desc, typedesc_t* target_desc)
+bool typedesc_union_is_implicitly_convertible(typedesc_union_t* from_desc, typedesc_t* to_desc)
 {
-  return (typedesc_t*)desc == typedesc_remove_mut(target_desc);
+  return (typedesc_t*)from_desc == typedesc_remove_mut(to_desc);
 }

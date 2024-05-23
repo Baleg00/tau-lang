@@ -39,10 +39,10 @@ void typedesc_struct_free(typedesc_struct_t* desc);
 /**
  * \brief Checks if a struct type is implicitly convertible to another type.
  * 
- * \param[in] desc Pointer to the struct type descriptor.
- * \param[in] target_desc Pointer to the type descriptor to check conversion into.
+ * \param[in] from_desc Pointer to the struct type descriptor.
+ * \param[in] to_desc Pointer to the type descriptor to check conversion into.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_struct_is_implicitly_convertible(typedesc_struct_t* desc, typedesc_t* target_desc);
+bool typedesc_struct_is_implicitly_convertible(typedesc_struct_t* from_desc, typedesc_t* to_desc);
 
 #endif

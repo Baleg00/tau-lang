@@ -100,25 +100,25 @@ void typedesc_prim_free(typedesc_prim_t* desc)
   free(desc);
 }
 
-bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* desc, typedesc_t* target_desc)
+bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedesc_t* to_desc)
 {
-  target_desc = typedesc_remove_mut(target_desc);
+  to_desc = typedesc_remove_mut(to_desc);
 
-  if ((typedesc_t*)desc == target_desc)
+  if ((typedesc_t*)from_desc == to_desc)
     return true;
 
-  if (typedesc_is_arithmetic((typedesc_t*)desc) && typedesc_is_arithmetic(target_desc))
+  if (typedesc_is_arithmetic((typedesc_t*)from_desc) && typedesc_is_arithmetic(to_desc))
   {
-    if (typedesc_is_integer((typedesc_t*)desc) && typedesc_is_integer(target_desc))
+    if (typedesc_is_integer((typedesc_t*)from_desc) && typedesc_is_integer(to_desc))
     {
-      if (typedesc_is_signed((typedesc_t*)desc) == typedesc_is_signed(target_desc))
-        return typedesc_integer_bits((typedesc_t*)desc) <= typedesc_integer_bits(target_desc);
+      if (typedesc_is_signed((typedesc_t*)from_desc) == typedesc_is_signed(to_desc))
+        return typedesc_integer_bits((typedesc_t*)from_desc) <= typedesc_integer_bits(to_desc);
 
       return false;
     }
     
-    if (typedesc_is_float((typedesc_t*)desc) && typedesc_is_float(target_desc))
-      return !(desc->kind == TYPEDESC_F64 && target_desc->kind == TYPEDESC_F32);
+    if (typedesc_is_float((typedesc_t*)from_desc) && typedesc_is_float(to_desc))
+      return !(from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32);
     
     return false;
   }
