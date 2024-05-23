@@ -192,9 +192,6 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
   codegen_ctx_t* codegen_ctx = codegen_ctx_init(typecheck_ctx->typetable, llvm_get_context(), llvm_get_data(), llvm_module);
   time_it("codegen", ast_node_codegen(codegen_ctx, root_node));
 
-  if (compiler->flags.emit_ll)
-    compiler_emit_ll(path, llvm_module);
-
   LLVMVerifyModule(llvm_module, LLVMAbortProcessAction, NULL);
 
   LLVMPassBuilderOptionsRef llvm_pass_builder_options = LLVMCreatePassBuilderOptions();
@@ -204,10 +201,13 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
   LLVMPassBuilderOptionsSetDebugLogging(llvm_pass_builder_options, true);
 #endif
 
-  LLVMRunPasses(llvm_module, "default<O0>", llvm_get_machine(), llvm_pass_builder_options);
+  // LLVMRunPasses(llvm_module, "default<O3>", llvm_get_machine(), llvm_pass_builder_options);
 
   LLVMDisposePassBuilderOptions(llvm_pass_builder_options);
 
+  if (compiler->flags.emit_ll)
+    compiler_emit_ll(path, llvm_module);
+  
   if (compiler->flags.emit_bc)
     compiler_emit_bc(path, llvm_module);
 
