@@ -30,3 +30,8 @@ bool typedesc_union_is_implicitly_convertible(typedesc_union_t* from_desc, typed
 {
   return (typedesc_t*)from_desc == typedesc_remove_mut(to_desc);
 }
+
+bool typedesc_union_is_explicitly_convertible(typedesc_union_t* from_desc, typedesc_t* to_desc)
+{
+  return (typedesc_t*)from_desc == typedesc_remove_mut(to_desc);
+}

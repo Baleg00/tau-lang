@@ -29,3 +29,8 @@ bool typedesc_enum_is_implicitly_convertible(typedesc_enum_t* from_desc, typedes
 {
   return (typedesc_t*)from_desc == typedesc_remove_mut(to_desc);
 }
+
+bool typedesc_enum_is_explicitly_convertible(typedesc_enum_t* from_desc, typedesc_t* to_desc)
+{
+  return (typedesc_t*)from_desc == typedesc_remove_mut(to_desc);
+}

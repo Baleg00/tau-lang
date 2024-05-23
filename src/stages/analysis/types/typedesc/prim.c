@@ -125,3 +125,13 @@ bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedes
 
   return false;
 }
+
+bool typedesc_prim_is_explicitly_convertible(typedesc_prim_t* from_desc, typedesc_t* to_desc)
+{
+  to_desc = typedesc_remove_mut(to_desc);
+
+  if (typedesc_is_arithmetic((typedesc_t*)from_desc) && typedesc_is_arithmetic(to_desc))
+    return true;
+
+  return false;
+}

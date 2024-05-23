@@ -43,4 +43,13 @@ void typedesc_mut_free(typedesc_mut_t* desc);
  */
 bool typedesc_mut_is_implicitly_convertible(typedesc_mut_t* from_desc, typedesc_t* to_desc);
 
+/**
+ * \brief Checks if a mutable type is explicitly convertible to another type.
+ * 
+ * \param[in] from_desc Pointer to the mutable type descriptor.
+ * \param[in] to_desc Pointer to the type descriptor to check conversion into.
+ * \returns `true` if the explicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_mut_is_explicitly_convertible(typedesc_mut_t* from_desc, typedesc_t* to_desc);
+
 #endif

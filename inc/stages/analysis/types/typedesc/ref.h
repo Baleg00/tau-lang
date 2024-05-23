@@ -43,4 +43,13 @@ void typedesc_ref_free(typedesc_ref_t* desc);
  */
 bool typedesc_ref_is_implicitly_convertible(typedesc_ref_t* from_desc, typedesc_t* to_desc);
 
+/**
+ * \brief Checks if a reference type is explicitly convertible to another type.
+ * 
+ * \param[in] from_desc Pointer to the reference type descriptor.
+ * \param[in] to_desc Pointer to the type descriptor to check conversion into.
+ * \returns `true` if the explicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_ref_is_explicitly_convertible(typedesc_ref_t* from_desc, typedesc_t* to_desc);
+
 #endif

@@ -43,4 +43,13 @@ void typedesc_ptr_free(typedesc_ptr_t* desc);
  */
 bool typedesc_ptr_is_implicitly_convertible(typedesc_ptr_t* from_desc, typedesc_t* to_desc);
 
+/**
+ * \brief Checks if a pointer type is explicitly convertible to another type.
+ * 
+ * \param[in] from_desc Pointer to the pointer type descriptor.
+ * \param[in] to_desc Pointer to the type descriptor to check conversion into.
+ * \returns `true` if the explicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_ptr_is_explicitly_convertible(typedesc_ptr_t* from_desc, typedesc_t* to_desc);
+
 #endif

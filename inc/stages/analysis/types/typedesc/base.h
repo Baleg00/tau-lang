@@ -266,6 +266,15 @@ bool typedesc_can_add_opt(typedesc_t* desc);
 bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc);
 
 /**
+ * \brief Checks if a type is explicitly convertible to another type.
+ * 
+ * \param[in] from_desc Pointer to the source type descriptor.
+ * \param[in] to_desc Pointer to the type descriptor to check conversion into.
+ * \returns `true` if the explicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_is_explicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc);
+
+/**
  * \brief Retrieves the bit-width of an integer type descriptor.
  * 
  * \param desc Pointer to the type descriptor.
