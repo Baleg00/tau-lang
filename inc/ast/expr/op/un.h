@@ -44,6 +44,132 @@ void ast_expr_op_un_free(ast_expr_op_un_t* node);
 void ast_expr_op_un_nameres(nameres_ctx_t* ctx, ast_expr_op_un_t* node);
 
 /**
+ * \brief Performs type check pass on an AST unary `sizeof` operation expression
+ * node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_sizeof_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary `alignof` operation expression
+ * node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_alignof_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary arithmetic pre-increment
+ * operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_arit_inc_pre_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary arithmetic pre-decrement
+ * operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_arit_dec_pre_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary arithmetic post-increment
+ * operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_arit_inc_post_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary arithmetic post-decrement
+ * operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_arit_dec_post_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary arithmetic positive operation
+ * expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_arit_pos_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary arithmetic negative operation
+ * expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_arit_neg_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary bitwise NOT operation
+ * expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_bit_not_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary logical NOT operation
+ * expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_logic_not_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary indirection operation
+ * expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_ind_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary address-of operation
+ * expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_addr_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary safe optional unwrap
+ * operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_unwrap_safe_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
+ * \brief Performs type check pass on an AST unary unsafe optional unwrap
+ * operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_un_unwrap_unsafe_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node);
+
+/**
  * \brief Performs type check pass on an AST unary operation expression node.
  * 
  * \param[in] ctx Pointer to the type check context.

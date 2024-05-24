@@ -35,105 +35,247 @@ void ast_expr_op_un_nameres(nameres_ctx_t* ctx, ast_expr_op_un_t* node)
   ast_node_nameres(ctx, node->expr);
 }
 
-void ast_expr_op_un_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+void ast_expr_op_un_sizeof_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* desc = typebuilder_build_usize(ctx->typebuilder);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_alignof_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* desc = typebuilder_build_usize(ctx->typebuilder);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_arit_inc_pre_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
 {
   ast_node_typecheck(ctx, node->expr);
 
   typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
   ASSERT(expr_desc != NULL);
 
-  typedesc_t* desc = NULL;
+  if (expr_desc->kind != TYPEDESC_REF)
+    report_error_expected_reference_type(node->expr->tok->loc);
 
-  switch (node->op_kind)
-  {
-  case OP_SIZEOF:
-  case OP_ALIGNOF:
-  {
-    desc = typebuilder_build_usize(ctx->typebuilder);
-    break;
-  }
-  case OP_ARIT_INC_PRE:
-  case OP_ARIT_DEC_PRE:
-  {
-    if (expr_desc->kind != TYPEDESC_REF)
-      report_error_expected_reference_type(node->expr->tok->loc);
+  if (typedesc_remove_ref(expr_desc)->kind != TYPEDESC_MUT)
+    report_error_expected_mutable_type(node->expr->tok->loc);
 
-    if (typedesc_remove_ref(expr_desc)->kind != TYPEDESC_MUT)
-      report_error_expected_mutable_type(node->expr->tok->loc);
+  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
+    report_error_expected_arithmetic_type(node->expr->tok->loc);
 
-    if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
-      report_error_expected_arithmetic_type(node->expr->tok->loc);
+  typetable_insert(ctx->typetable, (ast_node_t*)node, expr_desc);
+}
 
-    desc = expr_desc;
-    break;
-  }
-  case OP_ARIT_INC_POST:
-  case OP_ARIT_DEC_POST:
-  {
-    if (expr_desc->kind != TYPEDESC_REF)
-      report_error_expected_reference_type(node->expr->tok->loc);
+void ast_expr_op_un_arit_dec_pre_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
 
-    if (typedesc_remove_ref(expr_desc)->kind != TYPEDESC_MUT)
-      report_error_expected_mutable_type(node->expr->tok->loc);
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
 
-    if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
-      report_error_expected_arithmetic_type(node->expr->tok->loc);
+  if (expr_desc->kind != TYPEDESC_REF)
+    report_error_expected_reference_type(node->expr->tok->loc);
 
-    desc = typedesc_remove_ref_mut(expr_desc);
-    break;
-  }
-  case OP_ARIT_POS:
-  case OP_ARIT_NEG:
-  case OP_BIT_NOT:
-  {
-    if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
-      report_error_expected_arithmetic_type(node->expr->tok->loc);
+  if (typedesc_remove_ref(expr_desc)->kind != TYPEDESC_MUT)
+    report_error_expected_mutable_type(node->expr->tok->loc);
 
-    desc = typedesc_remove_ref_mut(expr_desc);
-    break;
-  }
-  case OP_LOGIC_NOT:
-  {
-    if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_BOOL)
-      report_error_expected_bool_type(node->expr->tok->loc);
+  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
+    report_error_expected_arithmetic_type(node->expr->tok->loc);
 
-    desc = typedesc_remove_ref_mut(expr_desc);
-    break;
-  }
-  case OP_IND:
-  {
-    if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_PTR)
-      report_error_expected_pointer_type(node->expr->tok->loc);
-    
-    typedesc_t* pointed_desc = ((typedesc_ptr_t*)typedesc_remove_ref_mut(expr_desc))->base_type;
+  typetable_insert(ctx->typetable, (ast_node_t*)node, expr_desc);
+}
 
-    desc = typebuilder_build_ref(ctx->typebuilder, pointed_desc);
-    break;
-  }
-  case OP_ADDR:
-  {
-    if (expr_desc->kind != TYPEDESC_REF)
-      report_error_expected_reference_type(node->expr->tok->loc);
+void ast_expr_op_un_arit_inc_post_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
 
-    desc = typebuilder_build_ptr(ctx->typebuilder, typedesc_remove_ref(expr_desc));
-    break;
-  }
-  case OP_UNWRAP_SAFE:
-  case OP_UNWRAP_UNSAFE:
-  {
-    if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_OPT)
-      report_error_expected_optional_type(node->expr->tok->loc);
-    
-    typedesc_opt_t* opt_desc = (typedesc_opt_t*)typedesc_remove_ref_mut(expr_desc);
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
 
-    desc = opt_desc->base_type;
-    break;
-  }
-  default:
-    UNREACHABLE();
-  }
+  if (expr_desc->kind != TYPEDESC_REF)
+    report_error_expected_reference_type(node->expr->tok->loc);
+
+  if (typedesc_remove_ref(expr_desc)->kind != TYPEDESC_MUT)
+    report_error_expected_mutable_type(node->expr->tok->loc);
+
+  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
+    report_error_expected_arithmetic_type(node->expr->tok->loc);
+
+  typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_arit_dec_post_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
+
+  if (expr_desc->kind != TYPEDESC_REF)
+    report_error_expected_reference_type(node->expr->tok->loc);
+
+  if (typedesc_remove_ref(expr_desc)->kind != TYPEDESC_MUT)
+    report_error_expected_mutable_type(node->expr->tok->loc);
+
+  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
+    report_error_expected_arithmetic_type(node->expr->tok->loc);
+
+  typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_arit_pos_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
+
+  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
+      report_error_expected_arithmetic_type(node->expr->tok->loc);
+
+  typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_arit_neg_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
+
+  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
+      report_error_expected_arithmetic_type(node->expr->tok->loc);
+
+  typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_bit_not_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
+
+  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
+      report_error_expected_arithmetic_type(node->expr->tok->loc);
+
+  typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_logic_not_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
+
+  if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_BOOL)
+    report_error_expected_bool_type(node->expr->tok->loc);
+
+  typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_ind_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
+
+  if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_PTR)
+    report_error_expected_pointer_type(node->expr->tok->loc);
+  
+  typedesc_t* pointed_desc = ((typedesc_ptr_t*)typedesc_remove_ref_mut(expr_desc))->base_type;
+  typedesc_t* desc = typebuilder_build_ref(ctx->typebuilder, pointed_desc);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_addr_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
+
+  if (expr_desc->kind != TYPEDESC_REF)
+    report_error_expected_reference_type(node->expr->tok->loc);
+
+  typedesc_t* desc = typebuilder_build_ptr(ctx->typebuilder, typedesc_remove_ref(expr_desc));
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_unwrap_safe_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
+
+  if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_OPT)
+    report_error_expected_optional_type(node->expr->tok->loc);
+    
+  typedesc_opt_t* opt_desc = (typedesc_opt_t*)typedesc_remove_ref_mut(expr_desc);
+  typedesc_t* desc = opt_desc->base_type;
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_unwrap_unsafe_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  ast_node_typecheck(ctx, node->expr);
+
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+  ASSERT(expr_desc != NULL);
+
+  if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_OPT)
+    report_error_expected_optional_type(node->expr->tok->loc);
+    
+  typedesc_opt_t* opt_desc = (typedesc_opt_t*)typedesc_remove_ref_mut(expr_desc);
+  typedesc_t* desc = opt_desc->base_type;
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+}
+
+void ast_expr_op_un_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
+{
+  switch (node->op_kind)
+  {
+  case OP_SIZEOF:        ast_expr_op_un_sizeof_typecheck       (ctx, node); break;
+  case OP_ALIGNOF:       ast_expr_op_un_alignof_typecheck      (ctx, node); break;
+  case OP_ARIT_INC_PRE:  ast_expr_op_un_arit_inc_pre_typecheck (ctx, node); break;
+  case OP_ARIT_DEC_PRE:  ast_expr_op_un_arit_dec_pre_typecheck (ctx, node); break;
+  case OP_ARIT_INC_POST: ast_expr_op_un_arit_inc_post_typecheck(ctx, node); break;
+  case OP_ARIT_DEC_POST: ast_expr_op_un_arit_dec_post_typecheck(ctx, node); break;
+  case OP_ARIT_POS:      ast_expr_op_un_arit_pos_typecheck     (ctx, node); break;
+  case OP_ARIT_NEG:      ast_expr_op_un_arit_neg_typecheck     (ctx, node); break;
+  case OP_BIT_NOT:       ast_expr_op_un_bit_not_typecheck      (ctx, node); break;
+  case OP_LOGIC_NOT:     ast_expr_op_un_logic_not_typecheck    (ctx, node); break;
+  case OP_IND:           ast_expr_op_un_ind_typecheck          (ctx, node); break;
+  case OP_ADDR:          ast_expr_op_un_addr_typecheck         (ctx, node); break;
+  case OP_UNWRAP_SAFE:   ast_expr_op_un_unwrap_safe_typecheck  (ctx, node); break;
+  case OP_UNWRAP_UNSAFE: ast_expr_op_un_unwrap_unsafe_typecheck(ctx, node); break;
+  default: UNREACHABLE();
+  }
 }
 
 void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
