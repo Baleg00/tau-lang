@@ -27,6 +27,9 @@ void typedesc_ref_free(typedesc_ref_t* desc)
 
 bool typedesc_ref_is_implicitly_convertible(typedesc_ref_t* from_desc, typedesc_t* to_desc)
 {
+  if (to_desc->kind == TYPEDESC_OPT)
+    return typedesc_is_implicitly_convertible(from_desc->base_type, typedesc_remove_opt(to_desc));
+
   if (to_desc->kind != TYPEDESC_REF)
     return typedesc_is_implicitly_convertible(from_desc->base_type, to_desc);
 
@@ -35,11 +38,14 @@ bool typedesc_ref_is_implicitly_convertible(typedesc_ref_t* from_desc, typedesc_
   if (from_desc->base_type->kind != TYPEDESC_MUT && target_ref_desc->base_type->kind == TYPEDESC_MUT)
     return false;
 
-  return typedesc_is_implicitly_convertible(from_desc->base_type, typedesc_remove_ref(to_desc));
+  return typedesc_remove_mut(from_desc->base_type) == typedesc_remove_mut(to_desc);
 }
 
 bool typedesc_ref_is_explicitly_convertible(typedesc_ref_t* from_desc, typedesc_t* to_desc)
 {
+  if (to_desc->kind == TYPEDESC_OPT)
+    return typedesc_is_explicitly_convertible(from_desc->base_type, typedesc_remove_opt(to_desc));
+
   if (to_desc->kind != TYPEDESC_REF)
     return typedesc_is_explicitly_convertible(from_desc->base_type, to_desc);
 

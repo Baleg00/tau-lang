@@ -37,6 +37,28 @@ LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node);
 LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
 
 /**
+ * \brief Builds an LLVM instruction to wrap a value into an optional.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] llvm_value The LLVM value reference to be wrapped.
+ * \param[in] from_desc Pointer to the type descriptor of value ro be wrapped.
+ * \param[in] to_desc Pointer to the type descriptor of the optional.
+ * \returns The wrapped LLVM value reference.
+ */
+LLVMValueRef codegen_build_opt_wrap(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_opt_t* to_desc);
+
+/**
+ * \brief Builds an LLVM instruction to unwrap a value from an optional without
+ * checking if the optional is `null`.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] llvm_value The LLVM value reference to be unwrapped.
+ * \param[in] desc Pointer to the type descriptor of the optional.
+ * \returns The unwrapped LLVM value reference.
+ */
+LLVMValueRef codegen_build_opt_unwrap_unchecked(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_opt_t* desc);
+
+/**
  * \brief Builds an LLVM cast instruction to perform an implicit cast.
  * 
  * \param[in] ctx Pointer to the code generation context.
