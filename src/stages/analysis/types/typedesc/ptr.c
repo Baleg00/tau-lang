@@ -38,7 +38,7 @@ bool typedesc_ptr_is_implicitly_convertible(typedesc_ptr_t* from_desc, typedesc_
   if (from_desc->base_type->kind != TYPEDESC_MUT && target_ptr_desc->base_type->kind == TYPEDESC_MUT)
     return false;
 
-  return typedesc_remove_mut(from_desc->base_type) == typedesc_remove_mut(to_desc);
+  return typedesc_remove_mut(from_desc->base_type) == typedesc_remove_mut(target_ptr_desc->base_type);
 }
 
 bool typedesc_ptr_is_explicitly_convertible(typedesc_ptr_t* from_desc, typedesc_t* to_desc)

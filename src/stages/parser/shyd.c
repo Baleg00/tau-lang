@@ -247,6 +247,7 @@ bool shyd_parse_op(shyd_ctx_t* ctx)
   case TOK_PUNCT_MINUS_MINUS:           op = ctx->prev_term ? OP_ARIT_DEC_POST : OP_ARIT_DEC_PRE; break;
   case TOK_PUNCT_ASTERISK:              op = ctx->prev_term ? OP_ARIT_MUL      : OP_IND;          break;
   case TOK_PUNCT_AMPERSAND:             op = ctx->prev_term ? OP_BIT_AND       : OP_ADDR;         break;
+  case TOK_PUNCT_BANG:                  op = ctx->prev_term ? OP_UNWRAP_UNSAFE : OP_LOGIC_NOT;    break;
   case TOK_PUNCT_PLUS_EQUAL:            op = OP_ASSIGN_ARIT_ADD;  break;
   case TOK_PUNCT_MINUS_EQUAL:           op = OP_ASSIGN_ARIT_SUB;  break;
   case TOK_PUNCT_ASTERISK_EQUAL:        op = OP_ASSIGN_ARIT_MUL;  break;
@@ -263,21 +264,21 @@ bool shyd_parse_op(shyd_ctx_t* ctx)
   case TOK_PUNCT_HAT:                   op = OP_BIT_XOR;          break;
   case TOK_PUNCT_HAT_EQUAL:             op = OP_ASSIGN_BIT_XOR;   break;
   case TOK_PUNCT_TILDE:                 op = OP_BIT_NOT;          break;
-  case TOK_PUNCT_LESS:                  op = OP_CMP_LT;          break;
+  case TOK_PUNCT_LESS:                  op = OP_CMP_LT;           break;
   case TOK_PUNCT_LESS_LESS:             op = OP_BIT_LSH;          break;
   case TOK_PUNCT_LESS_LESS_EQUAL:       op = OP_ASSIGN_BIT_LSH;   break;
-  case TOK_PUNCT_LESS_EQUAL:            op = OP_CMP_LE;          break;
-  case TOK_PUNCT_GREATER:               op = OP_CMP_GT;          break;
+  case TOK_PUNCT_LESS_EQUAL:            op = OP_CMP_LE;           break;
+  case TOK_PUNCT_GREATER:               op = OP_CMP_GT;           break;
   case TOK_PUNCT_GREATER_GREATER:       op = OP_BIT_RSH;          break;
   case TOK_PUNCT_GREATER_GREATER_EQUAL: op = OP_ASSIGN_BIT_RSH;   break;
-  case TOK_PUNCT_GREATER_EQUAL:         op = OP_CMP_GE;          break;
-  case TOK_PUNCT_BANG:                  op = OP_LOGIC_NOT;        break;
-  case TOK_PUNCT_BANG_EQUAL:            op = OP_CMP_NE;          break;
+  case TOK_PUNCT_GREATER_EQUAL:         op = OP_CMP_GE;           break;
+  case TOK_PUNCT_BANG_EQUAL:            op = OP_CMP_NE;           break;
   case TOK_PUNCT_DOT:                   op = OP_ACCESS;           break;
   case TOK_PUNCT_DOT_DOT:               op = OP_RANGE;            break;
-  case TOK_PUNCT_QUESTION_DOT:          op = OP_ACCESS_OPT; break;
+  case TOK_PUNCT_QUESTION_DOT:          op = OP_ACCESS_OPT;       break;
   case TOK_PUNCT_EQUAL:                 op = OP_ASSIGN;           break;
-  case TOK_PUNCT_EQUAL_EQUAL:           op = OP_CMP_EQ;          break;
+  case TOK_PUNCT_EQUAL_EQUAL:           op = OP_CMP_EQ;           break;
+  case TOK_PUNCT_QUESTION:              op = OP_UNWRAP_SAFE;      break;
   default: return false;
   }
 

@@ -118,6 +118,17 @@ void ast_expr_op_un_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_t* node)
     desc = typebuilder_build_ptr(ctx->typebuilder, typedesc_remove_ref(expr_desc));
     break;
   }
+  case OP_UNWRAP_SAFE:
+  case OP_UNWRAP_UNSAFE:
+  {
+    if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_OPT)
+      report_error_expected_optional_type(node->expr->tok->loc);
+    
+    typedesc_opt_t* opt_desc = (typedesc_opt_t*)typedesc_remove_ref_mut(expr_desc);
+
+    desc = opt_desc->base_type;
+    break;
+  }
   default:
     UNREACHABLE();
   }
@@ -247,6 +258,54 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node)
   case OP_ADDR:
   {
     node->llvm_value = expr->llvm_value;
+    break;
+  }
+  case OP_UNWRAP_SAFE:
+  {
+    LLVMBasicBlockRef llvm_cond_block = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "unwrap_safe_cond");
+    LLVMBasicBlockRef llvm_exit_block = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "unwrap_safe_exit");
+    LLVMBasicBlockRef llvm_end_block = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "unwrap_safe_end");
+
+    LLVMBuildBr(ctx->llvm_builder, llvm_cond_block);
+
+    LLVMInsertExistingBasicBlockAfterInsertBlock(ctx->llvm_builder, llvm_cond_block);
+    LLVMPositionBuilderAtEnd(ctx->llvm_builder, llvm_cond_block);
+
+    LLVMValueRef llvm_flag_ptr = LLVMBuildStructGEP2(ctx->llvm_builder, expr_desc->llvm_type, expr->llvm_value, 0, "gep2_tmp");
+    LLVMValueRef llvm_flag_value = LLVMBuildLoad2(ctx->llvm_builder, LLVMInt1TypeInContext(ctx->llvm_ctx), llvm_flag_ptr, "load2_tmp");
+    LLVMValueRef llvm_cond_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntEQ, llvm_flag_value, LLVMConstInt(LLVMInt1TypeInContext(ctx->llvm_ctx), 0, false), "icmp_eq_tmp");
+
+    LLVMBuildCondBr(ctx->llvm_builder, llvm_cond_value, llvm_exit_block, llvm_end_block);
+
+    LLVMTypeRef llvm_param_types[] = {
+      LLVMInt32TypeInContext(ctx->llvm_ctx)
+    };
+
+    LLVMTypeRef llvm_exit_type = LLVMFunctionType(LLVMVoidTypeInContext(ctx->llvm_ctx), llvm_param_types, COUNTOF(llvm_param_types), false);
+    LLVMValueRef llvm_exit_func = LLVMAddFunction(ctx->llvm_mod, "exit", llvm_exit_type);
+    LLVMSetFunctionCallConv(llvm_exit_func, LLVMCCallConv);
+
+    LLVMInsertExistingBasicBlockAfterInsertBlock(ctx->llvm_builder, llvm_exit_block);
+    LLVMPositionBuilderAtEnd(ctx->llvm_builder, llvm_exit_block);
+    
+    LLVMValueRef llvm_args[] = {
+      LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), 1, false)
+    };
+
+    LLVMBuildCall2(ctx->llvm_builder, llvm_exit_type, llvm_exit_func, llvm_args, COUNTOF(llvm_args), "");
+    LLVMBuildUnreachable(ctx->llvm_builder);
+
+    LLVMInsertExistingBasicBlockAfterInsertBlock(ctx->llvm_builder, llvm_end_block);
+    LLVMPositionBuilderAtEnd(ctx->llvm_builder, llvm_end_block);
+
+    LLVMValueRef llvm_value_ptr = LLVMBuildStructGEP2(ctx->llvm_builder, expr_desc->llvm_type, expr->llvm_value, 1, "gep2_tmp");
+    node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_opt_t*)expr_desc)->base_type->llvm_type, llvm_value_ptr, "load2_tmp");
+    break;
+  }
+  case OP_UNWRAP_UNSAFE:
+  {
+    LLVMValueRef llvm_value_ptr = LLVMBuildStructGEP2(ctx->llvm_builder, expr_desc->llvm_type, expr->llvm_value, 1, "gep2_tmp");
+    node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_opt_t*)expr_desc)->base_type->llvm_type, llvm_value_ptr, "load2_tmp");
     break;
   }
   default:

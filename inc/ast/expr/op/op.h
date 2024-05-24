@@ -76,6 +76,8 @@ typedef enum op_kind_t
   OP_ACCESS, // Access operator `.`
   OP_ACCESS_IND, // Indirect-access operator `*.`
   OP_ACCESS_OPT, // Optional-access operator `?.`
+  OP_UNWRAP_SAFE, // Safe optional unwrap operator `?`
+  OP_UNWRAP_UNSAFE, // Unsafe optional unwrap operator `!`
   OP_RANGE, // Range operator `..`
   OP_CALL, // Call operator `()`
 } op_kind_t;
