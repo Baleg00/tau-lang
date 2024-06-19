@@ -312,6 +312,254 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] node Pointer to the AST node to be visited.
  */
+void ast_expr_op_bin_as_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_add_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_sub_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_mul_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_div_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_mod_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_and_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_or_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_xor_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_lsh_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_rsh_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_logic_and_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_logic_or_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_eq_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_ne_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_lt_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_le_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_gt_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_ge_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_add_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_sub_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_mul_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_div_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_mod_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_and_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_or_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_xor_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_lsh_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_rsh_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_subs_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs code generation pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] node Pointer to the AST node to be visited.
+ */
 void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node);
 
 /**

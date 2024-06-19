@@ -839,14 +839,8 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
   }
 }
 
-void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+void ast_expr_op_bin_as_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
 {
-  if (node->op_kind == OP_ACCESS)
-  {
-    ast_expr_op_bin_access_codegen(ctx, (ast_expr_op_bin_access_t*)node);
-    return;
-  }
-
   ast_node_codegen(ctx, node->lhs);
   ast_node_codegen(ctx, node->rhs);
 
@@ -858,241 +852,822 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
 
   LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
 
-  if (node->op_kind == OP_AS)
-  {
-    ASSERT(typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc));
-    // TODO: Add explicit cast for non-arithmetic types.
+  ASSERT(typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc));
+  // TODO: Add explicit cast for non-arithmetic types.
 
-    node->llvm_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, rhs_desc);
-    return;
+  node->llvm_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, rhs_desc);
+}
+
+void ast_expr_op_bin_arit_add_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(desc))
+  {
+    node->llvm_value = LLVMBuildAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "add_tmp");
   }
+  else if (typedesc_is_float(desc))
+  {
+    node->llvm_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fadd_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_arit_sub_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(desc))
+  {
+    node->llvm_value = LLVMBuildSub(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sub_tmp");
+  }
+  else if (typedesc_is_float(desc))
+  {
+    node->llvm_value = LLVMBuildFSub(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fsub_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_arit_mul_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(desc))
+  {
+    node->llvm_value = LLVMBuildMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "mul_tmp");
+  }
+  else if (typedesc_is_float(desc))
+  {
+    node->llvm_value = LLVMBuildFMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fmul_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_arit_div_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(desc))
+  {
+    if (typedesc_is_signed(desc))
+    {
+      node->llvm_value = LLVMBuildSDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sdiv_tmp");
+    }
+    else
+    {
+      node->llvm_value = LLVMBuildUDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "udiv_tmp");
+    }
+  }
+  else if (typedesc_is_float(desc))
+  {
+    node->llvm_value = LLVMBuildFDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fdiv_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_arit_mod_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(desc))
+  {
+    if (typedesc_is_signed(desc))
+    {
+      node->llvm_value = LLVMBuildSRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "srem_tmp");
+    }
+    else
+    {
+      node->llvm_value = LLVMBuildURem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "urem_tmp");
+    }
+  }
+  else if (typedesc_is_float(desc))
+  {
+    node->llvm_value = LLVMBuildFRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "frem_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_bit_and_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildAnd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "and_tmp");
+}
+
+void ast_expr_op_bin_bit_or_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildOr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "or_tmp");
+}
+
+void ast_expr_op_bin_bit_xor_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildXor(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "xor_tmp");
+}
+
+void ast_expr_op_bin_bit_lsh_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildShl(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "shl_tmp");
+}
+
+void ast_expr_op_bin_bit_rsh_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildLShr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "lshr_tmp");
+}
+
+void ast_expr_op_bin_logic_and_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildAnd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "and_tmp");
+}
+
+void ast_expr_op_bin_logic_or_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildOr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "or_tmp");
+}
+
+void ast_expr_op_bin_cmp_eq_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(promoted_desc))
+  {
+    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntEQ, llvm_lhs_value, llvm_rhs_value, "icmp_eq_tmp");
+  }
+  else if (typedesc_is_float(promoted_desc))
+  {
+    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOEQ, llvm_lhs_value, llvm_rhs_value, "fcmp_oeq_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_cmp_ne_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(promoted_desc))
+  {
+    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntNE, llvm_lhs_value, llvm_rhs_value, "icmp_ne_tmp");
+  }
+  else if (typedesc_is_float(promoted_desc))
+  {
+    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealONE, llvm_lhs_value, llvm_rhs_value, "fcmp_one_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_cmp_lt_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(promoted_desc))
+  {
+    if (typedesc_is_signed(promoted_desc))
+    {
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSLT, llvm_lhs_value, llvm_rhs_value, "icmp_slt_tmp");
+    }
+    else
+    {
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntULT, llvm_lhs_value, llvm_rhs_value, "icmp_ult_tmp");
+    }
+  }
+  else if (typedesc_is_float(promoted_desc))
+  {
+    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOLT, llvm_lhs_value, llvm_rhs_value, "fcmp_olt_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_cmp_le_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(promoted_desc))
+  {
+    if (typedesc_is_signed(promoted_desc))
+    {
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSLE, llvm_lhs_value, llvm_rhs_value, "icmp_sle_tmp");
+    }
+    else
+    {
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntULE, llvm_lhs_value, llvm_rhs_value, "icmp_ule_tmp");
+    }
+  }
+  else if (typedesc_is_float(promoted_desc))
+  {
+    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOLE, llvm_lhs_value, llvm_rhs_value, "fcmp_ole_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_cmp_gt_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(promoted_desc))
+  {
+    if (typedesc_is_signed(promoted_desc))
+    {
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSGT, llvm_lhs_value, llvm_rhs_value, "icmp_sgt_tmp");
+    }
+    else
+    {
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntUGT, llvm_lhs_value, llvm_rhs_value, "icmp_ugt_tmp");
+    }
+  }
+  else if (typedesc_is_float(promoted_desc))
+  {
+    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOGT, llvm_lhs_value, llvm_rhs_value, "fcmp_ogt_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_cmp_ge_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+
+  if (typedesc_is_integer(promoted_desc))
+  {
+    if (typedesc_is_signed(promoted_desc))
+    {
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSGE, llvm_lhs_value, llvm_rhs_value, "icmp_sge_tmp");
+    }
+    else
+    {
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntUGE, llvm_lhs_value, llvm_rhs_value, "icmp_uge_tmp");
+    }
+  }
+  else if (typedesc_is_float(promoted_desc))
+  {
+    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOGE, llvm_lhs_value, llvm_rhs_value, "fcmp_oge_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+}
+
+void ast_expr_op_bin_assign_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
 
   LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
 
-  typedesc_t* promoted_desc = NULL;
+  LLVMBuildStore(ctx->llvm_builder, llvm_rhs_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
 
-  if (op_is_arithmetic(node->op_kind) || op_is_comparison(node->op_kind))
-  {
-    promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+void ast_expr_op_bin_assign_arit_add_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
 
-    llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
-    llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
-  }
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
 
-  switch (node->op_kind)
-  {
-  case OP_ARIT_ADD:
-  case OP_ASSIGN_ARIT_ADD:
-  {
-    if (typedesc_is_integer(desc))
-      node->llvm_value = LLVMBuildAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "add_tmp");
-    else if (typedesc_is_float(desc))
-      node->llvm_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fadd_tmp");
-    else
-      UNREACHABLE();
-    
-    break;
-  }
-  case OP_ARIT_SUB:
-  case OP_ASSIGN_ARIT_SUB:
-  {
-    if (typedesc_is_integer(desc))
-      node->llvm_value = LLVMBuildSub(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sub_tmp");
-    else if (typedesc_is_float(desc))
-      node->llvm_value = LLVMBuildFSub(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fsub_tmp");
-    else
-      UNREACHABLE();
-    
-    break;
-  }
-  case OP_ARIT_MUL:
-  case OP_ASSIGN_ARIT_MUL:
-  {
-    if (typedesc_is_integer(desc))
-      node->llvm_value = LLVMBuildMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "mul_tmp");
-    else if (typedesc_is_float(desc))
-      node->llvm_value = LLVMBuildFMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fmul_tmp");
-    else
-      UNREACHABLE();
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
 
-    break;
-  }
-  case OP_ARIT_DIV:
-  case OP_ASSIGN_ARIT_DIV:
+  if (typedesc_is_integer(desc))
   {
-    if (typedesc_is_integer(desc))
-      if (typedesc_is_signed(desc))
-        node->llvm_value = LLVMBuildSDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sdiv_tmp");
-      else
-        node->llvm_value = LLVMBuildUDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "udiv_tmp");
-    else if (typedesc_is_float(desc))
-      node->llvm_value = LLVMBuildFDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fdiv_tmp");
-    else
-      UNREACHABLE();
-
-    break;
+    node->llvm_value = LLVMBuildAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "add_tmp");
   }
-  case OP_ARIT_MOD:
-  case OP_ASSIGN_ARIT_MOD:
+  else if (typedesc_is_float(desc))
   {
-    if (typedesc_is_integer(desc))
-      if (typedesc_is_signed(desc))
-        node->llvm_value = LLVMBuildSRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "srem_tmp");
-      else
-        node->llvm_value = LLVMBuildURem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "urem_tmp");
-    else if (typedesc_is_float(desc))
-      node->llvm_value = LLVMBuildFRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "frem_tmp");
-    else
-      UNREACHABLE();
-
-    break;
+    node->llvm_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fadd_tmp");
   }
-  case OP_BIT_AND:
-  case OP_LOGIC_AND:
-  case OP_ASSIGN_BIT_AND:
+  else
   {
-    node->llvm_value = LLVMBuildAnd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "and_tmp");
-    break;
-  }
-  case OP_BIT_OR:
-  case OP_LOGIC_OR:
-  case OP_ASSIGN_BIT_OR:
-  {
-    node->llvm_value = LLVMBuildOr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "or_tmp");
-    break;
-  }
-  case OP_BIT_XOR:
-  case OP_ASSIGN_BIT_XOR:
-  {
-    node->llvm_value = LLVMBuildXor(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "xor_tmp");
-    break;
-  }
-  case OP_BIT_LSH:
-  case OP_ASSIGN_BIT_LSH:
-  {
-    node->llvm_value = LLVMBuildShl(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "shl_tmp");
-    break;
-  }
-  case OP_BIT_RSH:
-  case OP_ASSIGN_BIT_RSH:
-  {
-    node->llvm_value = LLVMBuildLShr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "lshr_tmp");
-    break;
-  }
-  case OP_CMP_EQ:
-  {
-    if (typedesc_is_integer(promoted_desc))
-      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntEQ, llvm_lhs_value, llvm_rhs_value, "icmp_eq_tmp");
-    else if (typedesc_is_float(promoted_desc))
-      node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOEQ, llvm_lhs_value, llvm_rhs_value, "fcmp_oeq_tmp");
-    else
-      UNREACHABLE();
-
-    break;
-  }
-  case OP_CMP_NE:
-  {
-    if (typedesc_is_integer(promoted_desc))
-      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntNE, llvm_lhs_value, llvm_rhs_value, "icmp_ne_tmp");
-    else if (typedesc_is_float(promoted_desc))
-      node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealONE, llvm_lhs_value, llvm_rhs_value, "fcmp_one_tmp");
-    else
-      UNREACHABLE();
-
-    break;
-  }
-  case OP_CMP_LT:
-  {
-    if (typedesc_is_integer(promoted_desc))
-      if (typedesc_is_signed(promoted_desc))
-        node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSLT, llvm_lhs_value, llvm_rhs_value, "icmp_slt_tmp");
-      else
-        node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntULT, llvm_lhs_value, llvm_rhs_value, "icmp_ult_tmp");
-    else if (typedesc_is_float(promoted_desc))
-      node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOLT, llvm_lhs_value, llvm_rhs_value, "fcmp_olt_tmp");
-    else
-      UNREACHABLE();
-    
-    break;
-  }
-  case OP_CMP_LE:
-  {
-    if (typedesc_is_integer(promoted_desc))
-      if (typedesc_is_signed(promoted_desc))
-        node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSLE, llvm_lhs_value, llvm_rhs_value, "icmp_sle_tmp");
-      else
-        node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntULE, llvm_lhs_value, llvm_rhs_value, "icmp_ule_tmp");
-    else if (typedesc_is_float(promoted_desc))
-      node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOLE, llvm_lhs_value, llvm_rhs_value, "fcmp_ole_tmp");
-    else
-      UNREACHABLE();
-
-    break;
-  }
-  case OP_CMP_GT:
-  {
-    if (typedesc_is_integer(promoted_desc))
-      if (typedesc_is_signed(promoted_desc))
-        node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSGT, llvm_lhs_value, llvm_rhs_value, "icmp_sgt_tmp");
-      else
-        node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntUGT, llvm_lhs_value, llvm_rhs_value, "icmp_ugt_tmp");
-    else if (typedesc_is_float(promoted_desc))
-      node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOGT, llvm_lhs_value, llvm_rhs_value, "fcmp_ogt_tmp");
-    else
-      UNREACHABLE();
-
-    break;
-  }
-  case OP_CMP_GE:
-  {
-    if (typedesc_is_integer(promoted_desc))
-      if (typedesc_is_signed(promoted_desc))
-        node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSGE, llvm_lhs_value, llvm_rhs_value, "icmp_sge_tmp");
-      else
-        node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntUGE, llvm_lhs_value, llvm_rhs_value, "icmp_uge_tmp");
-    else if (typedesc_is_float(promoted_desc))
-      node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOGE, llvm_lhs_value, llvm_rhs_value, "fcmp_oge_tmp");
-    else
-      UNREACHABLE();
-
-    break;
-  }
-  case OP_ASSIGN:
-  {
-    LLVMBuildStore(ctx->llvm_builder, llvm_rhs_value, ((ast_expr_t*)node->lhs)->llvm_value);
-    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
-    break;
-  }
-  case OP_SUBS:
-  {
-    LLVMValueRef llvm_ptr_value = ((ast_expr_t*)node->lhs)->llvm_value;
-    LLVMTypeRef llvm_base_type = ((typedesc_array_t*)lhs_desc)->base_type->llvm_type;
-    node->llvm_value = LLVMBuildGEP2(ctx->llvm_builder, llvm_base_type, llvm_ptr_value, &llvm_rhs_value, 1, "gep2_tmp");
-    break;
-  }
-  default:
     UNREACHABLE();
   }
 
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_assign_arit_sub_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  if (typedesc_is_integer(desc))
+  {
+    node->llvm_value = LLVMBuildSub(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sub_tmp");
+  }
+  else if (typedesc_is_float(desc))
+  {
+    node->llvm_value = LLVMBuildFSub(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fsub_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_assign_arit_mul_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  if (typedesc_is_integer(desc))
+  {
+    node->llvm_value = LLVMBuildMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "mul_tmp");
+  }
+  else if (typedesc_is_float(desc))
+  {
+    node->llvm_value = LLVMBuildFMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fmul_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_assign_arit_div_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  if (typedesc_is_integer(desc))
+  {
+    if (typedesc_is_signed(desc))
+    {
+      node->llvm_value = LLVMBuildSDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sdiv_tmp");
+    }
+    else
+    {
+      node->llvm_value = LLVMBuildUDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "udiv_tmp");
+    }
+  }
+  else if (typedesc_is_float(desc))
+  {
+    node->llvm_value = LLVMBuildFDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fdiv_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_assign_arit_mod_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  if (typedesc_is_integer(desc))
+  {
+    if (typedesc_is_signed(desc))
+    {
+      node->llvm_value = LLVMBuildSRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "srem_tmp");
+    }
+    else
+    {
+      node->llvm_value = LLVMBuildURem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "urem_tmp");
+    }
+  }
+  else if (typedesc_is_float(desc))
+  {
+    node->llvm_value = LLVMBuildFRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "frem_tmp");
+  }
+  else
+  {
+    UNREACHABLE();
+  }
+
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_assign_bit_and_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildAnd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "and_tmp");
+
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_assign_bit_or_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildOr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "or_tmp");
+
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_assign_bit_xor_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildXor(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "xor_tmp");
+
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_assign_bit_lsh_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildShl(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "shl_tmp");
+
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_assign_bit_rsh_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  node->llvm_value = LLVMBuildLShr(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "lshr_tmp");
+
+  LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
+  node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
+}
+
+void ast_expr_op_bin_subs_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
+  ast_node_codegen(ctx, node->lhs);
+  ast_node_codegen(ctx, node->rhs);
+
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  node->llvm_type = desc->llvm_type;
+
+  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+
+  LLVMValueRef llvm_ptr_value = ((ast_expr_t*)node->lhs)->llvm_value;
+  LLVMTypeRef llvm_base_type = ((typedesc_array_t*)lhs_desc)->base_type->llvm_type;
+  node->llvm_value = LLVMBuildGEP2(ctx->llvm_builder, llvm_base_type, llvm_ptr_value, &llvm_rhs_value, 1, "gep2_tmp");
+}
+
+void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
+{
   switch (node->op_kind)
   {
-  case OP_ASSIGN_ARIT_ADD:
-  case OP_ASSIGN_ARIT_SUB:
-  case OP_ASSIGN_ARIT_MUL:
-  case OP_ASSIGN_ARIT_DIV:
-  case OP_ASSIGN_ARIT_MOD:
-  case OP_ASSIGN_BIT_AND:
-  case OP_ASSIGN_BIT_OR:
-  case OP_ASSIGN_BIT_XOR:
-  case OP_ASSIGN_BIT_LSH:
-  case OP_ASSIGN_BIT_RSH:
-  {
-    LLVMBuildStore(ctx->llvm_builder, node->llvm_value, ((ast_expr_t*)node->lhs)->llvm_value);
-    node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;
-    break;
-  }
-  default:
-    NOOP();
+  case OP_AS:              ast_expr_op_bin_as_codegen             (ctx, node); break;
+  case OP_ARIT_ADD:        ast_expr_op_bin_arit_add_codegen       (ctx, node); break;
+  case OP_ARIT_SUB:        ast_expr_op_bin_arit_sub_codegen       (ctx, node); break;
+  case OP_ARIT_MUL:        ast_expr_op_bin_arit_mul_codegen       (ctx, node); break;
+  case OP_ARIT_DIV:        ast_expr_op_bin_arit_div_codegen       (ctx, node); break;
+  case OP_ARIT_MOD:        ast_expr_op_bin_arit_mod_codegen       (ctx, node); break;
+  case OP_BIT_AND:         ast_expr_op_bin_bit_and_codegen        (ctx, node); break;
+  case OP_BIT_OR:          ast_expr_op_bin_bit_or_codegen         (ctx, node); break;
+  case OP_BIT_XOR:         ast_expr_op_bin_bit_xor_codegen        (ctx, node); break;
+  case OP_BIT_LSH:         ast_expr_op_bin_bit_lsh_codegen        (ctx, node); break;
+  case OP_BIT_RSH:         ast_expr_op_bin_bit_rsh_codegen        (ctx, node); break;
+  case OP_LOGIC_AND:       ast_expr_op_bin_logic_and_codegen      (ctx, node); break;
+  case OP_LOGIC_OR:        ast_expr_op_bin_logic_or_codegen       (ctx, node); break;
+  case OP_CMP_EQ:          ast_expr_op_bin_cmp_eq_codegen         (ctx, node); break;
+  case OP_CMP_NE:          ast_expr_op_bin_cmp_ne_codegen         (ctx, node); break;
+  case OP_CMP_LT:          ast_expr_op_bin_cmp_lt_codegen         (ctx, node); break;
+  case OP_CMP_LE:          ast_expr_op_bin_cmp_le_codegen         (ctx, node); break;
+  case OP_CMP_GT:          ast_expr_op_bin_cmp_gt_codegen         (ctx, node); break;
+  case OP_CMP_GE:          ast_expr_op_bin_cmp_ge_codegen         (ctx, node); break;
+  case OP_ASSIGN:          ast_expr_op_bin_assign_codegen         (ctx, node); break;
+  case OP_ASSIGN_ARIT_ADD: ast_expr_op_bin_assign_arit_add_codegen(ctx, node); break;
+  case OP_ASSIGN_ARIT_SUB: ast_expr_op_bin_assign_arit_sub_codegen(ctx, node); break;
+  case OP_ASSIGN_ARIT_MUL: ast_expr_op_bin_assign_arit_mul_codegen(ctx, node); break;
+  case OP_ASSIGN_ARIT_DIV: ast_expr_op_bin_assign_arit_div_codegen(ctx, node); break;
+  case OP_ASSIGN_ARIT_MOD: ast_expr_op_bin_assign_arit_mod_codegen(ctx, node); break;
+  case OP_ASSIGN_BIT_AND:  ast_expr_op_bin_assign_bit_and_codegen (ctx, node); break;
+  case OP_ASSIGN_BIT_OR:   ast_expr_op_bin_assign_bit_or_codegen  (ctx, node); break;
+  case OP_ASSIGN_BIT_XOR:  ast_expr_op_bin_assign_bit_xor_codegen (ctx, node); break;
+  case OP_ASSIGN_BIT_LSH:  ast_expr_op_bin_assign_bit_lsh_codegen (ctx, node); break;
+  case OP_ASSIGN_BIT_RSH:  ast_expr_op_bin_assign_bit_rsh_codegen (ctx, node); break;
+  case OP_SUBS:            ast_expr_op_bin_subs_codegen           (ctx, node); break;
+  case OP_ACCESS:          ast_expr_op_bin_access_codegen         (ctx, (ast_expr_op_bin_access_t*)node); break;
+  default: UNREACHABLE();
   }
 }
 
