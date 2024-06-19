@@ -56,6 +56,254 @@ void ast_expr_op_bin_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_t* node);
  * \param[in] ctx Pointer to the type check context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
+void ast_expr_op_bin_as_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_add_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_sub_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_mul_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_div_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_arit_mod_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_and_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_or_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_xor_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_lsh_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_bit_rsh_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_logic_and_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_logic_or_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_eq_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_ne_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_lt_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_le_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_gt_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_cmp_ge_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_add_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_sub_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_mul_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_div_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_arit_mod_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_and_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_or_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_xor_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_lsh_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_assign_bit_rsh_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
+void ast_expr_op_bin_subs_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
+
+/**
+ * \brief Performs type check pass on an AST binary operation expression node.
+ * 
+ * \param[in] ctx Pointer to the type check context.
+ * \param[in,out] node Pointer to the AST node to be visited.
+ */
 void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node);
 
 /**
