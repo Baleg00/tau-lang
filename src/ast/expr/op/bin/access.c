@@ -21,6 +21,7 @@ ast_expr_op_bin_access_t* ast_expr_op_bin_access_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_EXPR_OP_BINARY;
+  node->op_kind = OP_ACCESS;
 
   return node;
 }
