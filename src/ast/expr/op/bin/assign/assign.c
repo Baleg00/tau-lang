@@ -50,7 +50,7 @@ void ast_expr_op_bin_assign_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_assi
   if (typedesc_remove_ref(lhs_desc)->kind != TYPEDESC_MUT)
     report_error_expected_mutable_type(node->lhs->tok->loc);
 
-  if (typedesc_remove_ref_mut(lhs_desc) != typedesc_remove_ref_mut(rhs_desc))
+  if (!typedesc_is_implicitly_convertible(rhs_desc, typedesc_remove_ref_mut(lhs_desc)))
     report_error_type_mismatch(node->lhs->tok->loc, lhs_desc, rhs_desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, lhs_desc);
