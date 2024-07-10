@@ -13,7 +13,6 @@
 #include "utils/common.h"
 #include "utils/crumb.h"
 #include "utils/io/log.h"
-#include "utils/memory/memtrace.h"
 
 void report_error_unexpected_character(location_t* loc)
 {
@@ -378,11 +377,8 @@ void report_error_expected_ptr_to_owner(location_t* loc)
   exit(EXIT_FAILURE);
 }
 
-void report_error_type_mismatch(location_t* loc, typedesc_t* expected, typedesc_t* actual)
+void report_error_type_mismatch(location_t* loc, typedesc_t* UNUSED(expected), typedesc_t* UNUSED(actual))
 {
-  UNUSED(expected);
-  UNUSED(actual);
-
   crumb_error(1, crumb_snippet(loc, "Type mismatch.", NULL, "", NULL));
   DEBUGBREAK();
   exit(EXIT_FAILURE);

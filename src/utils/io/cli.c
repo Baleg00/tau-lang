@@ -275,13 +275,8 @@ void cli_parse_any(cli_opt_t* opt, queue_t* que)
   }
 }
 
-void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
+void cli_help_callback(cli_t* cli, queue_t* UNUSED(que), cli_opt_t* UNUSED(opt), const char* UNUSED(arg), void* UNUSED(user_ptr))
 {
-  UNUSED(que);
-  UNUSED(opt);
-  UNUSED(arg);
-  UNUSED(user_ptr);
-
   puts("Usage:");
 
   for (size_t i = 0; i < cli->usage_count; ++i)
@@ -310,32 +305,17 @@ void cli_help_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg
   exit(EXIT_SUCCESS);
 }
 
-void cli_version_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
+void cli_version_callback(cli_t* UNUSED(cli), queue_t* UNUSED(que), cli_opt_t* UNUSED(opt), const char* UNUSED(arg), void* user_ptr)
 {
-  UNUSED(cli);
-  UNUSED(que);
-  UNUSED(opt);
-  UNUSED(arg);
-
   printf("Version: %s\n", (const char*)user_ptr);
 }
 
-void cli_verbose_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
+void cli_verbose_callback(cli_t* UNUSED(cli), queue_t* UNUSED(que), cli_opt_t* UNUSED(opt), const char* UNUSED(arg), void* user_ptr)
 {
-  UNUSED(cli);
-  UNUSED(que);
-  UNUSED(opt);
-  UNUSED(arg);
-
   *(bool*)user_ptr = true;
 }
 
-void cli_flag_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_ptr)
+void cli_flag_callback(cli_t* UNUSED(cli), queue_t* UNUSED(que), cli_opt_t* UNUSED(opt), const char* UNUSED(arg), void* user_ptr)
 {
-  UNUSED(cli);
-  UNUSED(que);
-  UNUSED(opt);
-  UNUSED(arg);
-
   *(bool*)user_ptr = true;
 }

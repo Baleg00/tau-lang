@@ -115,7 +115,7 @@ static LLVMValueRef codegen_build_implicit_cast_ref(codegen_ctx_t* ctx, LLVMValu
   return llvm_value;
 }
 
-static LLVMValueRef codegen_build_implicit_cast_opt(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_opt_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_implicit_cast_opt(codegen_ctx_t* UNUSED(ctx), LLVMValueRef llvm_value, typedesc_opt_t* UNUSED(from_desc), typedesc_t* UNUSED(to_desc))
 {
   return llvm_value;
 }

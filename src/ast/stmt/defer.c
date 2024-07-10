@@ -47,11 +47,8 @@ void ast_stmt_defer_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_defer_t* node)
   ctrlflow_ctx_defer_end(ctx);
 }
 
-void ast_stmt_defer_codegen(codegen_ctx_t* ctx, ast_stmt_defer_t* node)
+void ast_stmt_defer_codegen(codegen_ctx_t* UNUSED(ctx), ast_stmt_defer_t* UNUSED(node))
 {
-  UNUSED(ctx);
-  UNUSED(node);
-  
   UNREACHABLE();
   // TODO
 }

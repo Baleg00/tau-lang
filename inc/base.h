@@ -20,9 +20,6 @@
 // enumerator in switch of enum is not explicitly handled by a case label
 # pragma warning(disable: 4061)
 
-// unreferenced formal parameter
-# pragma warning(disable: 4100)
-
 // unnamed type definition in parentheses
 # pragma warning(disable: 4116)
 
@@ -32,7 +29,7 @@
 // unreachable code
 # pragma warning(disable: 4702)
 
-// unreachable code
+// Spectre mitigation
 # pragma warning(disable: 5045)
 
 // preprocessor macro is not defined

@@ -12,7 +12,6 @@
 
 #include "ast/ast.h"
 #include "stages/parser/parser.h"
-#include "utils/collections/list.h"
 #include "utils/collections/queue.h"
 #include "utils/common.h"
 #include "utils/crumb.h"
@@ -336,10 +335,8 @@ void shyd_parse_postfix(shyd_ctx_t* ctx)
   }
 }
 
-void shyd_ast_op_un(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op_un(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_stack)
 {
-  UNUSED(ctx);
-
   ast_expr_op_un_t* node = ast_expr_op_un_init();
   node->tok = elem->tok;
   node->op_kind = elem->op;
@@ -352,10 +349,8 @@ void shyd_ast_op_un(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, node);
 }
 
-void shyd_ast_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op_bin(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_stack)
 {
-  UNUSED(ctx);
-
   ast_expr_op_bin_t* node = NULL;
 
   switch (elem->op)
@@ -380,10 +375,8 @@ void shyd_ast_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, node);
 }
 
-void shyd_ast_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_op_call(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_stack)
 {
-  UNUSED(ctx);
-
   if (stack_empty(node_stack))
     report_error_missing_callee(elem->node->tok->loc);
 
@@ -392,10 +385,8 @@ void shyd_ast_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
   stack_push(node_stack, elem->node);
 }
 
-void shyd_ast_term(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
+void shyd_ast_term(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_stack)
 {
-  UNUSED(ctx);
-
   ast_node_t* node = NULL;
 
   switch (elem->tok->kind)

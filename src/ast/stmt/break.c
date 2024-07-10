@@ -30,16 +30,12 @@ void ast_stmt_break_free(ast_stmt_break_t* node)
   free(node);
 }
 
-void ast_stmt_break_nameres(nameres_ctx_t* ctx, ast_stmt_break_t* node)
+void ast_stmt_break_nameres(nameres_ctx_t* UNUSED(ctx), ast_stmt_break_t* UNUSED(node))
 {
-  UNUSED(ctx);
-  UNUSED(node);
 }
 
-void ast_stmt_break_typecheck(typecheck_ctx_t* ctx, ast_stmt_break_t* node)
+void ast_stmt_break_typecheck(typecheck_ctx_t* UNUSED(ctx), ast_stmt_break_t* UNUSED(node))
 {
-  UNUSED(ctx);
-  UNUSED(node);
 }
 
 void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)

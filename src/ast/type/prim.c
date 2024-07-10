@@ -103,10 +103,8 @@ void ast_type_prim_free(ast_type_prim_t* node)
   free(node);
 }
 
-void ast_type_prim_nameres(nameres_ctx_t* ctx, ast_type_prim_t* node)
+void ast_type_prim_nameres(nameres_ctx_t* UNUSED(ctx), ast_type_prim_t* UNUSED(node))
 {
-  UNUSED(ctx);
-  UNUSED(node);
 }
 
 void ast_type_prim_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)

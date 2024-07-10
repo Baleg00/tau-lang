@@ -19,10 +19,8 @@ static log_level_t g_log_level = LOG_LEVEL_TRACE;
 static FILE* g_log_stream = NULL;
 static bool g_log_verbose = false;
 
-void log_log(log_level_t lvl, const char* file, int line, const char* func, const char* name, const char* fmt, ...)
+void log_log(log_level_t lvl, const char* file, int line, const char* UNUSED(func), const char* name, const char* fmt, ...)
 {
-  UNUSED(func);
-
   if (lvl < g_log_level || g_log_stream == NULL)
     return;
 

@@ -28,10 +28,8 @@ void ast_expr_lit_flt_free(ast_expr_lit_flt_t* node)
   free(node);
 }
 
-void ast_expr_lit_flt_nameres(nameres_ctx_t* ctx, ast_expr_lit_flt_t* node)
+void ast_expr_lit_flt_nameres(nameres_ctx_t* UNUSED(ctx), ast_expr_lit_flt_t* UNUSED(node))
 {
-  UNUSED(ctx);
-  UNUSED(node);
 }
 
 void ast_expr_lit_flt_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_flt_t* node)

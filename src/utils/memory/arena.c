@@ -121,10 +121,8 @@ static void* arena_allocate(arena_chunk_t* chunk, size_t size)
  * \param[in] chunk Pointer to the first chunk of the arena allocator.
  * \param[in] ptr Pointer to the memory to deallocate.
  */
-static void arena_deallocate(arena_chunk_t* chunk, void* ptr)
+static void arena_deallocate(arena_chunk_t* UNUSED(chunk), void* UNUSED(ptr))
 {
-  UNUSED(chunk);
-  UNUSED(ptr);
 }
 
 /**
@@ -135,11 +133,8 @@ static void arena_deallocate(arena_chunk_t* chunk, void* ptr)
  * \param[in] new_size The new size of the memory block.
  * \returns Pointer to the reallocated memory.
  */
-static void* arena_reallocate(arena_chunk_t* chunk, void* ptr, size_t new_size)
+static void* arena_reallocate(arena_chunk_t* UNUSED(chunk), void* UNUSED(ptr), size_t UNUSED(new_size))
 {
-  UNUSED(chunk);
-  UNUSED(ptr);
-  UNUSED(new_size);
   return NULL;
 }
 

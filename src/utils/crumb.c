@@ -13,10 +13,8 @@
 
 static FILE* g_crumb_stream = NULL;
 
-void crumb_log_message(crumb_kind_t kind, crumb_item_message_t* item)
+void crumb_log_message(crumb_kind_t UNUSED(kind), crumb_item_message_t* item)
 {
-  UNUSED(kind);
-
   fprintf(g_crumb_stream, "\n    ");
   vfprintf(g_crumb_stream, item->msg, item->msg_args);
   fputc('\n', g_crumb_stream);

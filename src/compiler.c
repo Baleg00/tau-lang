@@ -49,12 +49,8 @@ struct compiler_t
   } args;
 };
 
-static void input_file_callback(cli_t* cli, queue_t* que, cli_opt_t* opt, const char* arg, void* user_data)
+static void input_file_callback(cli_t* UNUSED(cli), queue_t* UNUSED(que), cli_opt_t* UNUSED(opt), const char* arg, void* user_data)
 {
-  UNUSED(cli);
-  UNUSED(que);
-  UNUSED(opt);
-
   compiler_t* compiler = (compiler_t*)user_data;
 
   list_push_back(compiler->input_files, (void*)arg);

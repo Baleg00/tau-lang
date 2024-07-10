@@ -63,10 +63,8 @@ void ast_expr_id_typecheck(typecheck_ctx_t* ctx, ast_expr_id_t* node)
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
-void ast_expr_id_codegen(codegen_ctx_t* ctx, ast_expr_id_t* node)
+void ast_expr_id_codegen(codegen_ctx_t* UNUSED(ctx), ast_expr_id_t* node)
 {
-  UNUSED(ctx);
-  
   switch (node->decl->kind)
   {
   case AST_DECL_VAR:

@@ -53,9 +53,8 @@ void allocator_free(allocator_t* alloc)
  * \param[in] size Number of bytes to allocate.
  * \returns Pointer to the allocated memory.
  */
-static void* allocator_global_allocate(void* ctx, size_t size)
+static void* allocator_global_allocate(void* UNUSED(ctx), size_t size)
 {
-  UNUSED(ctx);
   return malloc(size);
 }
 
@@ -65,9 +64,8 @@ static void* allocator_global_allocate(void* ctx, size_t size)
  * \param[in] ctx Pointer to the allocator context data.
  * \param[in] ptr Pointer to the memory to deallocate.
  */
-static void allocator_global_deallocate(void* ctx, void* ptr)
+static void allocator_global_deallocate(void* UNUSED(ctx), void* ptr)
 {
-  UNUSED(ctx);
   free(ptr);
 }
 
@@ -79,9 +77,8 @@ static void allocator_global_deallocate(void* ctx, void* ptr)
  * \param[in] new_size The new size of the memory block.
  * \returns Pointer to the reallocated memory.
  */
-static void* allocator_global_reallocate(void* ctx, void* ptr, size_t new_size)
+static void* allocator_global_reallocate(void* UNUSED(ctx), void* ptr, size_t new_size)
 {
-  UNUSED(ctx);
   return realloc(ptr, new_size);
 }
 
@@ -90,9 +87,8 @@ static void* allocator_global_reallocate(void* ctx, void* ptr, size_t new_size)
  * 
  * \param[in] ctx Pointer to the allocator context data.
  */
-static void allocator_global_cleanup(void* ctx)
+static void allocator_global_cleanup(void* UNUSED(ctx))
 {
-  UNUSED(ctx);
 }
 
 /**

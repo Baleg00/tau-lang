@@ -287,12 +287,8 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
   return alloc->data.ptr;
 }
 
-void memtrace_free(void* ptr, const char* file, int line, const char* func)
+void memtrace_free(void* ptr, const char* UNUSED(file), int UNUSED(line), const char* UNUSED(func))
 {
-  UNUSED(file);
-  UNUSED(line);
-  UNUSED(func);
-
   if (ptr == NULL)
     return;
   

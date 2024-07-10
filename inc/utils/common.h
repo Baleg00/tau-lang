@@ -87,12 +87,28 @@
 # undef UNUSED
 #endif
 
+#ifdef _MSC_VER
 /**
- * \brief Marks a variable as unused to suppress unused variable warnings.
- * 
- * \param[in] X The variable.
+ * \brief Marks a parameter as unused to suppress warnings.
+ *
+ * \param[in] X The parameter's identifier.
  */
-#define UNUSED(X) ((void)(1 ? 0 : ((void)(X), 0)))
+# define UNUSED(X) _Pragma("warning(suppress:4100)") unused_##X
+#elif defined(__clang__) || defined(__GNUC__)
+/**
+ * \brief Marks a parameter as unused to suppress warnings.
+ *
+ * \param[in] X The parameter's identifier.
+ */
+# define UNUSED(X) unused_##X __attribute__((__unused__))
+#else
+/**
+ * \brief Marks a parameter as unused to suppress warnings.
+ *
+ * \param[in] X The parameter's identifier.
+ */
+# define UNUSED(X)
+#endif
 
 #ifdef NOOP
 # undef NOOP
@@ -109,7 +125,7 @@
 
 #ifdef _MSC_VER
 # define NORETURN __declspec(noreturn)
-#elif defined(__GNUC__)
+#elif defined(__clang__) || defined(__GNUC__)
 # define NORETURN __attribute__((noreturn))
 #else
 # define NORETURN
@@ -132,7 +148,7 @@
  * \brief Breaks into a debugger for debugging purposes.
  */
 #   define DEBUGBREAK() __debugbreak()
-#else
+# else
 /**
  * \brief Breaks into a debugger for debugging purposes.
  */
