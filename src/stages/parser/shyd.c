@@ -109,6 +109,8 @@ bool shyd_parse_typed_expr(shyd_ctx_t* ctx)
   default: UNREACHABLE();
   }
 
+  shyd_op_flush_for_op(ctx, elem->op);
+
   stack_push(ctx->op_stack, elem);
 
   parser_next(ctx->par);
