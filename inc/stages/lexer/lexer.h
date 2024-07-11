@@ -297,6 +297,6 @@ token_t* lexer_read_next(lexer_t* lex);
  * \param[in] src Pointer to the source code.
  * \returns A vector of tokens.
  */
-vector_t* lexer_lex(lexer_t* lex, const char* path, char* src);
+vector_t* lexer_lex(lexer_t* lex, const char* path, const char* src);
 
 #endif

@@ -11,7 +11,6 @@
 
 #include "ast/ast.h"
 #include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 void typedesc_free(typedesc_t* desc)
 {
@@ -426,10 +425,12 @@ typedesc_t* typedesc_arithmetic_promote(typedesc_t* lhs_desc, typedesc_t* rhs_de
     return rhs_desc;
 
   if (typedesc_is_float(lhs_desc) && typedesc_is_float(rhs_desc))
+  {
     if (lhs_desc->kind == TYPEDESC_F64)
       return lhs_desc;
-    else
-      return rhs_desc;
+
+    return rhs_desc;
+  }
 
   if (typedesc_integer_bits(lhs_desc) < typedesc_integer_bits(rhs_desc))
     return rhs_desc;

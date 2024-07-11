@@ -34,6 +34,12 @@
 
 // preprocessor macro is not defined
 # pragma warning(disable: 4668)
+
+// function not inlined
+# pragma warning(disable: 4710)
+
+// function selected for inline expansion
+# pragma warning(disable: 4711)
 #endif
 
 #endif

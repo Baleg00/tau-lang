@@ -774,7 +774,7 @@ token_t* lexer_read_next(lexer_t* lex)
   return NULL;
 }
 
-vector_t* lexer_lex(lexer_t* lex, const char* path, char* src)
+vector_t* lexer_lex(lexer_t* lex, const char* path, const char* src)
 {
   lex->loc->path = path;
   lex->loc->src = src;
