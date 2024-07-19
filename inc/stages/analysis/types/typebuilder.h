@@ -238,6 +238,15 @@ typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_typ
 typedesc_t* typebuilder_build_struct(typebuilder_t* builder, ast_node_t* node, typedesc_t* field_types[], size_t field_count);
 
 /**
+ * \brief Builds an opaque struct type for the provided AST node.
+ *
+ * \param[in] builder Pointer to the type builder.
+ * \param[in] node The AST node of the struct type.
+ * \returns A pointer to the newly created struct type descriptor.
+ */
+typedesc_t* typebuilder_build_struct_opaque(typebuilder_t* builder, ast_node_t* node);
+
+/**
  * \brief Builds a union type with the provided identifier and field types.
  *
  * \param[in] builder Pointer to the type builder.
@@ -265,5 +274,16 @@ typedesc_t* typebuilder_build_enum(typebuilder_t* builder, ast_node_t* node);
  * \returns A pointer to the newly created type variable.
  */
 typedesc_t* typebuilder_build_var(typebuilder_t* builder, uint64_t id);
+
+/**
+ * \brief Sets the body of an opaque struct type.
+ *
+ * \param[in] builder Pointer to the type builder.
+ * \param[in] desc The opaque struct type descriptor.
+ * \param[in] field_types An array of field types for the struct.
+ * \param[in] field_count The number of fields.
+ * \returns A pointer to the modified struct type descriptor.
+ */
+typedesc_t* typebuilder_struct_set_body(typebuilder_t* builder, typedesc_t* desc, typedesc_t* field_types[], size_t field_count);
 
 #endif

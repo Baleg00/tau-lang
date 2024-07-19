@@ -125,21 +125,20 @@ static int typebuilder_cmp_struct(void* lhs, void* rhs)
   typedesc_struct_t* lhs_desc = (typedesc_struct_t*)lhs;
   typedesc_struct_t* rhs_desc = (typedesc_struct_t*)rhs;
 
-  size_t lhs_hash = (size_t)hash_digest(&lhs_desc->node, sizeof(ast_node_t*));
+  ast_decl_struct_t* lhs_node = (ast_decl_struct_t*)lhs_desc->node;
+  ast_decl_struct_t* rhs_node = (ast_decl_struct_t*)rhs_desc->node;
 
-  VECTOR_FOR_LOOP(i, lhs_desc->field_types)
-  {
-    typedesc_t* field_desc = (typedesc_t*)vector_get(lhs_desc->field_types, i);
-    lhs_hash = hash_combine_with_data(lhs_hash, &field_desc, sizeof(typedesc_t*));
-  }
+  string_view_t lhs_id_view = token_to_string_view(lhs_node->id->tok);
+  string_view_t rhs_id_view = token_to_string_view(rhs_node->id->tok);
 
-  size_t rhs_hash = (size_t)hash_digest(&rhs_desc->node, sizeof(ast_node_t*));
+  const void* lhs_id_view_begin = string_view_begin(lhs_id_view);
+  const void* rhs_id_view_begin = string_view_begin(rhs_id_view);
 
-  VECTOR_FOR_LOOP(i, rhs_desc->field_types)
-  {
-    typedesc_t* field_desc = (typedesc_t*)vector_get(rhs_desc->field_types, i);
-    rhs_hash = hash_combine_with_data(rhs_hash, &field_desc, sizeof(typedesc_t*));
-  }
+  size_t lhs_id_view_len = string_view_length(lhs_id_view);
+  size_t rhs_id_view_len = string_view_length(rhs_id_view);
+  
+  size_t lhs_hash = (size_t)hash_digest(lhs_id_view_begin, lhs_id_view_len);
+  size_t rhs_hash = (size_t)hash_digest(rhs_id_view_begin, rhs_id_view_len);
 
   if (lhs_hash < rhs_hash)
     return -1;
@@ -573,6 +572,32 @@ typedesc_t* typebuilder_build_struct(typebuilder_t* builder, ast_node_t* node, t
   return (typedesc_t*)desc;
 }
 
+typedesc_t* typebuilder_build_struct_opaque(typebuilder_t* builder, ast_node_t* node)
+{
+  typedesc_struct_t* desc = typedesc_struct_init();
+  desc->node = node;
+  desc->field_types = NULL;
+
+  typedesc_t* result = (typedesc_t*)set_get(builder->set_struct, desc);
+
+  if (result != NULL)
+  {
+    typedesc_free((typedesc_t*)desc);
+    return result;
+  }
+
+  ast_decl_struct_t* struct_node = (ast_decl_struct_t*)node;
+  string_t* id_str = token_to_string(struct_node->id->tok);
+
+  desc->llvm_type = LLVMStructCreateNamed(builder->llvm_context, string_begin(id_str));
+
+  string_free(id_str);
+
+  set_add(builder->set_struct, desc);
+
+  return (typedesc_t*)desc;
+}
+
 typedesc_t* typebuilder_build_union(typebuilder_t* builder, ast_node_t* node, typedesc_t* field_types[], size_t field_count)
 {
   typedesc_union_t* desc = typedesc_union_init();
@@ -648,6 +673,37 @@ typedesc_t* typebuilder_build_var(typebuilder_t* builder, uint64_t id)
   }
 
   set_add(builder->set_var, desc);
+
+  return (typedesc_t*)desc;
+}
+
+typedesc_t* typebuilder_struct_set_body(typebuilder_t* builder, typedesc_t* desc, typedesc_t* field_types[], size_t field_count)
+{
+  ASSERT(set_contains(builder->set_struct, desc));
+
+  LLVMTypeRef* llvm_field_types = NULL;
+
+  if (field_count > 0)
+  {
+    llvm_field_types = (LLVMTypeRef*)malloc(sizeof(LLVMTypeRef) * field_count);
+
+    for (size_t i = 0; i < field_count; i++)
+    {
+      llvm_field_types[i] = field_types[i]->llvm_type;
+    }
+  }
+
+  LLVMStructSetBody(
+    desc->llvm_type,
+    llvm_field_types,
+    (uint32_t)field_count,
+    false
+   );
+  
+  if (llvm_field_types != NULL)
+  {
+    free(llvm_field_types);
+  }
 
   return (typedesc_t*)desc;
 }

@@ -1,15 +1,3 @@
-set(TAU_TEST_SOURCES
-  ${TAU_TEST_DIR}/arena_test.c
-  ${TAU_TEST_DIR}/hash_test.c
-  ${TAU_TEST_DIR}/list_test.c
-  ${TAU_TEST_DIR}/queue_test.c
-  ${TAU_TEST_DIR}/set_test.c
-  ${TAU_TEST_DIR}/stack_test.c
-  ${TAU_TEST_DIR}/str_test.c
-  ${TAU_TEST_DIR}/str_view_test.c
-  ${TAU_TEST_DIR}/typedesc_test.c
-  ${TAU_TEST_DIR}/vector_test.c
-)
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   set(TAU_TEST_SOURCES
     ${TAU_TEST_DIR}/arena_test.c
@@ -22,6 +10,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     ${TAU_TEST_DIR}/str_view_test.c
     ${TAU_TEST_DIR}/typedesc_test.c
     ${TAU_TEST_DIR}/vector_test.c
+    ${TAU_TEST_DIR}/lexer_test.c
   )
 
   foreach (TEST_SOURCE IN ITEMS ${TAU_TEST_SOURCES})
