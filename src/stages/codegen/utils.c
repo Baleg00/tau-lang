@@ -81,9 +81,7 @@ LLVMValueRef codegen_build_opt_unwrap_unchecked(codegen_ctx_t* ctx, LLVMValueRef
 
 static LLVMValueRef codegen_build_implicit_cast_mut(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_mut_t* from_desc, typedesc_t* to_desc)
 {
-  LLVMValueRef llvm_load_value = LLVMBuildLoad2(ctx->llvm_builder, from_desc->base_type->llvm_type, llvm_value, "tmp_load2");
-
-  return codegen_build_implicit_cast(ctx, llvm_load_value, from_desc->base_type, typedesc_remove_mut(to_desc));
+  return codegen_build_implicit_cast(ctx, llvm_value, from_desc->base_type, typedesc_remove_mut(to_desc));
 }
 
 static LLVMValueRef codegen_build_implicit_cast_ptr(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_ptr_t* from_desc, typedesc_t* to_desc)
