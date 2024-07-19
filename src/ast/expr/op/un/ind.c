@@ -54,9 +54,5 @@ void ast_expr_op_un_ind_codegen(codegen_ctx_t* ctx, ast_expr_op_un_ind_t* node)
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  ast_expr_t* expr = (ast_expr_t*)node->expr;
-
-  typedesc_ptr_t* expr_desc = (typedesc_ptr_t*)typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->expr));
-
-  node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr_desc->base_type->llvm_type, expr->llvm_value, "load2_tmp");
+  node->llvm_value = ((ast_expr_t*)node->expr)->llvm_value;
 }
