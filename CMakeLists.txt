@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.13.0)
 
 project(tau
   VERSION 0.1.0
@@ -28,6 +28,7 @@ set(TAU_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/inc)
 set(TAU_TEST_DIR ${CMAKE_CURRENT_LIST_DIR}/test)
 
 set(TAU_EXECUTABLE_NAME tauc)
+set(TAU_LIBRARY_NAME tau_lib)
 
 include_directories(${TAU_SOURCE_DIR} ${TAU_INCLUDE_DIR})
 
