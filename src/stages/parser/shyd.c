@@ -468,6 +468,8 @@ void shyd_ast_op(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
 
 ast_node_t* shyd_parse_expr(parser_t* par)
 {
+  bool old_ignore_newline = parser_get_ignore_newline(par);
+
   parser_set_ignore_newline(par, false);
 
   shyd_ctx_t* ctx = shyd_init(par);
@@ -499,7 +501,7 @@ ast_node_t* shyd_parse_expr(parser_t* par)
 
   shyd_free(ctx);
 
-  parser_set_ignore_newline(par, true);
+  parser_set_ignore_newline(par, old_ignore_newline);
 
   return root;
 }
