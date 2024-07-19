@@ -1,6 +1,6 @@
 /**
  * \file
- * 
+ *
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
  */
@@ -61,8 +61,14 @@ void ast_expr_op_bin_as_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_as_t* node)
 
   LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
 
-  ASSERT(typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc));
-  // TODO: Add explicit cast for non-arithmetic types.
-
-  node->llvm_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, rhs_desc);
+  if (typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc))
+    node->llvm_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, rhs_desc);
+  else if (lhs_desc->kind == TYPEDESC_PTR && rhs_desc->kind == TYPEDESC_PTR)
+    node->llvm_value = llvm_lhs_value;
+  else if (lhs_desc->kind == TYPEDESC_PTR && typedesc_is_integer(rhs_desc))
+    node->llvm_value = LLVMBuildPtrToInt(ctx->llvm_builder, llvm_lhs_value, rhs_desc->llvm_type, "ptrtoint_tmp");
+  else if (typedesc_is_integer(lhs_desc) && rhs_desc->kind == TYPEDESC_PTR)
+    node->llvm_value = LLVMBuildIntToPtr(ctx->llvm_builder, llvm_lhs_value, rhs_desc->llvm_type, "inttoptr_tmp");
+  else
+    UNREACHABLE();
 }
