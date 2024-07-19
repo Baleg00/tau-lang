@@ -14,6 +14,8 @@
 #ifndef TAU_COMMON_H
 #define TAU_COMMON_H
 
+#include <stdalign.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,10 +60,42 @@
  */
 #define COUNTOF(ARRAY) (sizeof((ARRAY)) / sizeof((ARRAY)[0]))
 
+#ifdef _MSC_VER
+/**
+ * \brief A type whose alignment requirement is at least as strict
+ * as that of every scalar type.
+ *
+ * \details MSVC does not conform to the C standard and does not
+ * provide a definition for `max_align_t` so we make our own.
+ */
+typedef union
+{
+  int8_t i8;
+  int16_t i16;
+  int32_t i32;
+  int64_t i64;
+  intmax_t imax;
+  float f;
+  double d;
+  long double ld;
+  void* p;
+} max_align_t;
+#endif
+
 #ifdef OFFSETOF
 # undef OFFSETOF
 #endif
 
+#ifdef offsetof
+/**
+ * \brief Returns the offset of a member within a structure.
+ *
+ * \param[in] TYPE The type of the structure.
+ * \param[in] MEMBER The member within the structure.
+ * \returns The offset of the member.
+ */
+# define OFFSETOF(TYPE, MEMBER) offsetof(TYPE, MEMBER)
+#else
 /**
  * \brief Returns the offset of a member within a structure.
  * 
@@ -69,19 +103,30 @@
  * \param[in] MEMBER The member within the structure.
  * \returns The offset of the member.
  */
-#define OFFSETOF(TYPE, MEMBER) ((size_t)(&((TYPE*)NULL)->MEMBER))
+# define OFFSETOF(TYPE, MEMBER) (size_t)(&((TYPE*)NULL)->MEMBER)
+#endif
 
 #ifdef ALIGNOF
 # undef ALIGNOF
 #endif
 
+#if (defined(_MSC_VER) && defined(__alignof_is_defined)) || defined(__clang__) || defined(__GNUC__)
+/**
+ * \brief Returns the alignment requirement of a type.
+ *
+ * \param[in] TYPE The type.
+ * \returns The alignment requirement of the type.
+ */
+# define ALIGNOF(TYPE) alignof(TYPE)
+#else
 /**
  * \brief Returns the alignment requirement of a type.
  * 
  * \param[in] TYPE The type.
  * \returns The alignment requirement of the type.
  */
-#define ALIGNOF(TYPE) (OFFSETOF(struct { char c; TYPE t; }, t))
+# define ALIGNOF(TYPE) OFFSETOF(struct { char c; TYPE t; }, t)
+#endif
 
 #ifdef UNUSED
 # undef UNUSED
@@ -124,10 +169,19 @@
 #endif
 
 #ifdef _MSC_VER
+/**
+ * \brief Tells the compiler that a function cannot return.
+ */
 # define NORETURN __declspec(noreturn)
 #elif defined(__clang__) || defined(__GNUC__)
+/**
+ * \brief Tells the compiler that a function cannot return.
+ */
 # define NORETURN __attribute__((noreturn))
 #else
+/**
+ * \brief Tells the compiler that a function cannot return.
+ */
 # define NORETURN
 #endif
 
