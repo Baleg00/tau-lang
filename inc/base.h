@@ -40,6 +40,30 @@
 
 // function selected for inline expansion
 # pragma warning(disable: 4711)
+
+// structure was padded due to alignment specifier
+# pragma warning(disable: 4324)
+
+// declaration hides previous local declaration
+# pragma warning(disable: 4456)
+#elif defined(__GNUC__)
+// enumerator in switch of enum is not explicitly handled by a case label
+# pragma GCC diagnostic ignored "-Wswitch-enum"
+
+// padding added after data member
+# pragma GCC diagnostic ignored "-Wpadded"
+
+// declaration hides previous local declaration
+# pragma GCC diagnostic ignored "-Wshadow=local"
+#elif defined(__clang__)
+// enumerator in switch of enum is not explicitly handled by a case label
+# pragma clang diagnostic ignored "-Wswitch-enum"
+
+// padding added after data member
+# pragma clang diagnostic ignored "-Wpadded"
+
+// declaration hides previous local declaration
+# pragma clang diagnostic ignored "-Wshadow-uncaptured-local"
 #endif
 
 #endif
