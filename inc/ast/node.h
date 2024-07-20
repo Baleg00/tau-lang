@@ -16,7 +16,7 @@
 #include "stages/analysis/nameres.h"
 #include "stages/analysis/types/typecheck.h"
 #include "stages/codegen/codegen.h"
-#include "stages/lexer/token.h"
+#include "stages/lexer/token/token.h"
 
 /**
  * \brief Header for all AST nodes.

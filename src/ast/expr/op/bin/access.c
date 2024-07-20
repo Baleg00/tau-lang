@@ -51,7 +51,11 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
     symbol_t* mbr_sym = symtable_get_with_str_view(enum_node->scope, id_view);
 
     if (mbr_sym == NULL)
-      report_error_no_member_with_name(node->rhs->tok->loc);
+    {
+      location_t loc = token_location(node->rhs->tok);
+
+      report_error_no_member_with_name(&loc);
+    }
 
     node->idx = vector_find(enum_node->members, mbr_sym->node);
 
@@ -98,10 +102,19 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
     symbol_t* mbr_sym = symtable_get_with_str_view(decl_scope, id_view);
 
     if (mbr_sym == NULL)
-      report_error_no_member_with_name(node->rhs->tok->loc);
+    {
+      location_t loc = token_location(node->rhs->tok);
+
+      report_error_no_member_with_name(&loc);
+    }
+
 
     if (!((ast_decl_t*)mbr_sym->node)->is_pub)
-      report_error_private_member(node->rhs->tok->loc);
+    {
+      location_t loc = token_location(node->rhs->tok);
+
+      report_error_private_member(&loc);
+    }
 
     node->idx = vector_find(members, mbr_sym->node);
 

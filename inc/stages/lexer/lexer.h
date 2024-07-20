@@ -18,10 +18,8 @@
 #define TAU_LEXER_H
 
 #include <stdbool.h>
-#include <stdio.h>
 
-#include "stages/lexer/location.h"
-#include "stages/lexer/token.h"
+#include "stages/lexer/token/token.h"
 
 /**
  * \brief Represents a lexical analyzer.
@@ -43,15 +41,6 @@ lexer_t* lexer_init(void);
 void lexer_free(lexer_t* lex);
 
 /**
- * \brief Creates a copy of the current location in the lexer.
- *
- * \param[in] lex Pointer to the lexer.
- * \returns Pointer to a new location structure with the same values as the
- * current location in the lexer.
- */
-location_t* lexer_location_copy(lexer_t* lex);
-
-/**
  * \brief Initializes a new token with the given kind in the lexer.
  *
  * \param[in] lex Pointer to the lexer.
@@ -59,6 +48,14 @@ location_t* lexer_location_copy(lexer_t* lex);
  * \returns Pointer to the newly initialized token.
  */
 token_t* lexer_token_init(lexer_t* lex, token_kind_t kind);
+
+/**
+ * \brief Returns the location of the current lexer position.
+ *
+ * \param[in] lex Pointer to the lexer.
+ * \returns Location of the current lexer position.
+ */
+location_t lexer_location(lexer_t* lex);
 
 /**
  * \brief Checks if the current character in the lexer is a whitespace

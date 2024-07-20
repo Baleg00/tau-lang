@@ -40,7 +40,11 @@ void ast_expr_op_un_bit_not_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_bit_n
   ASSERT(expr_desc != NULL);
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
-      report_error_expected_arithmetic_type(node->expr->tok->loc);
+  {
+    location_t loc = token_location(node->expr->tok);
+
+    report_error_expected_arithmetic_type(&loc);
+  }
 
   typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);
 

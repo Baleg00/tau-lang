@@ -32,7 +32,9 @@ void ast_id_free(ast_id_t* node)
 
 void ast_id_dump_json(FILE* stream, ast_id_t* node)
 {
+  location_t loc = token_location(node->tok);
+
   fprintf(stream, "{\"kind\":\"%s\",\"id\":\"%.*s\"}",
     ast_kind_to_cstr(node->kind),
-    (int)node->tok->loc->len, node->tok->loc->ptr);
+    (int)loc.len, loc.ptr);
 }

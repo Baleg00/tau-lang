@@ -45,13 +45,25 @@ void ast_expr_op_bin_arit_mod_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_ar
   ASSERT(rhs_desc != NULL);
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
-    report_error_expected_arithmetic_type(node->lhs->tok->loc);
+  {
+    location_t loc = token_location(node->lhs->tok);
+
+    report_error_expected_arithmetic_type(&loc);
+  }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
-    report_error_expected_arithmetic_type(node->rhs->tok->loc);
+  {
+    location_t loc = token_location(node->rhs->tok);
+
+    report_error_expected_arithmetic_type(&loc);
+  }
 
   if (typedesc_is_signed(typedesc_remove_ref_mut(lhs_desc)) != typedesc_is_signed(typedesc_remove_ref_mut(rhs_desc)))
-    report_warning_mixed_signedness(node->tok->loc);
+  {
+    location_t loc = token_location(node->tok);
+
+    report_warning_mixed_signedness(&loc);
+  }
 
   typedesc_t* desc = typedesc_arithmetic_promote(typedesc_remove_ref_mut(lhs_desc), typedesc_remove_ref_mut(rhs_desc));
 

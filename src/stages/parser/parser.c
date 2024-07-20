@@ -119,9 +119,18 @@ token_t* parser_expect(parser_t* par, token_kind_t kind)
   token_t* tok = parser_current(par);
 
   if (tok->kind != kind)
-    report_error_unexpected_token(tok->loc);
+  {
+    location_t loc = token_location(tok);
+
+    report_error_unexpected_token(&loc);
+  }
 
   return parser_next(par);
+}
+
+bool parser_get_ignore_newline(parser_t* par)
+{
+  return par->ignore_newlines;
 }
 
 void parser_set_ignore_newline(parser_t* par, bool ignore)
@@ -204,7 +213,9 @@ callconv_kind_t parser_parse_callconv(parser_t* par)
     if (string_view_compare_cstr(callconv_str_view, str_callconv_map[i].str) == 0)
       return str_callconv_map[i].callconv;
 
-  report_error_unknown_callconv(callconv_tok->loc);
+  location_t loc = token_location(callconv_tok);
+
+  report_error_unknown_callconv(&loc);
 
   return -1;
 }
@@ -401,7 +412,12 @@ ast_node_t* parser_parse_type(parser_t* par)
     node = (ast_node_t*)ast_type_prim_unit_init();
     node->tok = parser_expect(par, TOK_KW_UNIT);
     break;
-  default: report_error_unexpected_token(parser_current(par)->loc);
+  default:
+  {
+    location_t loc = token_location(parser_current(par));
+
+    report_error_unexpected_token(&loc);
+  }
   }
 
   return node;
@@ -816,7 +832,12 @@ ast_node_t* parser_parse_decl(parser_t* par)
   case TOK_KW_UNION:   return parser_parse_decl_union     (par);
   case TOK_KW_ENUM:    return parser_parse_decl_enum      (par);
   case TOK_KW_MOD:     return parser_parse_decl_mod       (par);
-  default:             report_error_unexpected_token(parser_current(par)->loc);
+  default:
+  {
+    location_t loc = token_location(parser_current(par));
+
+    report_error_unexpected_token(&loc);
+  }
   }
 
   return NULL;
@@ -927,7 +948,12 @@ ast_node_t* parser_parse_path(parser_t* par)
     case TOK_ID:                 access_node->rhs = parser_parse_path_segment (par); break;
     case TOK_PUNCT_ASTERISK:     access_node->rhs = parser_parse_path_wildcard(par); return node;
     case TOK_PUNCT_BRACKET_LEFT: access_node->rhs = parser_parse_path_list    (par); return node;
-    default: report_error_unexpected_token(parser_current(par)->loc);
+    default:
+    {
+      location_t loc = token_location(parser_current(par));
+
+      report_error_unexpected_token(&loc);
+    }
     }
   }
 

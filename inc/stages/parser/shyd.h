@@ -17,11 +17,10 @@
 #ifndef TAU_SHYD_H
 #define TAU_SHYD_H
 
-#include <stddef.h>
 #include <stdbool.h>
 
 #include "ast/ast.h"
-#include "stages/lexer/token.h"
+#include "stages/lexer/token/token.h"
 #include "stages/parser/parser.h"
 #include "utils/collections/queue.h"
 #include "utils/collections/stack.h"

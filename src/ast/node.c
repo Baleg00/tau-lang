@@ -386,8 +386,10 @@ size_t ast_node_mangle_nested_name(ast_node_t* node, char* buf, size_t len)
   default: UNREACHABLE();
   }
 
-  const char* id_ptr = id_node->tok->loc->ptr;
-  size_t id_len = id_node->tok->loc->len;
+  location_t loc = token_location(id_node->tok);
+
+  const char* id_ptr = loc.ptr;
+  size_t id_len = loc.len;
 
   size_t written = snprintf(buf, len, "%.*s", (int)id_len, id_ptr);
 

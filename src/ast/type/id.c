@@ -37,7 +37,11 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
   symbol_t* sym = symtable_lookup_with_str_view(scope, id_view);
 
   if (sym == NULL)
-    report_error_undefined_typename(node->tok->loc);
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_undefined_typename(&loc);
+  }
 
   switch (sym->node->kind)
   {
@@ -45,7 +49,12 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
   case AST_DECL_UNION:
   case AST_DECL_ENUM:
   case AST_DECL_MOD: break;
-  default: report_error_symbol_is_not_a_typename(node->tok->loc);
+  default:
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_symbol_is_not_a_typename(&loc);
+  }
   }
 
   node->decl = sym->node;

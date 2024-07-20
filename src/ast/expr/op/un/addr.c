@@ -39,7 +39,11 @@ void ast_expr_op_un_addr_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_addr_t* 
   ASSERT(expr_desc != NULL);
 
   if (expr_desc->kind != TYPEDESC_REF)
-    report_error_expected_reference_type(node->expr->tok->loc);
+  {
+    location_t loc = token_location(node->expr->tok);
+
+    report_error_expected_reference_type(&loc);
+  }
 
   typedesc_t* desc = typebuilder_build_ptr(ctx->typebuilder, typedesc_remove_ref(expr_desc));
 

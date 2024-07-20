@@ -40,8 +40,12 @@ void ast_decl_mod_nameres(nameres_ctx_t* ctx, ast_decl_mod_t* node)
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL)
-    report_error_symbol_redeclaration(node->tok->loc);
-    
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_symbol_redeclaration(&loc);
+  }
+
   node->scope = nameres_ctx_scope_begin(ctx);
 
   VECTOR_FOR_LOOP(i, node->members)

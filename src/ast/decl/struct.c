@@ -52,6 +52,10 @@ void ast_decl_struct_nameres(nameres_ctx_t* ctx, ast_decl_struct_t* node)
 
 void ast_decl_struct_typecheck(typecheck_ctx_t* ctx, ast_decl_struct_t* node)
 {
+  typedesc_t* desc = typebuilder_build_struct_opaque(ctx->typebuilder, (ast_node_t*)node);
+
+  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+
   VECTOR_FOR_LOOP(i, node->members)
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->members, i));
 
@@ -69,12 +73,10 @@ void ast_decl_struct_typecheck(typecheck_ctx_t* ctx, ast_decl_struct_t* node)
     field_types[i] = field_desc;
   }
 
-  typedesc_t* desc = typebuilder_build_struct(ctx->typebuilder, (ast_node_t*)node, field_types, field_count);
+  typebuilder_struct_set_body(ctx->typebuilder, desc, field_types, field_count);
 
   if (field_types != NULL)
     free(field_types);
-
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
 
 void ast_decl_struct_codegen(codegen_ctx_t* ctx, ast_decl_struct_t* node)

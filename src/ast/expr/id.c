@@ -38,7 +38,11 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
   symbol_t* sym = symtable_lookup_with_str_view(scope, id_view);
   
   if (sym == NULL)
-    report_error_undefined_symbol(node->tok->loc);
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_undefined_symbol(&loc);
+  }
 
   switch (sym->node->kind)
   {
@@ -46,7 +50,12 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
   case AST_DECL_PARAM:
   case AST_DECL_FUN:
   case AST_DECL_ENUM: break;
-  default: report_error_symbol_is_not_an_expression(node->tok->loc);
+  default:
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_symbol_is_not_an_expression(&loc);
+  }
   }
   
   node->decl = sym->node;

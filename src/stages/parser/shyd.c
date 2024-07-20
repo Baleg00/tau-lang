@@ -328,10 +328,18 @@ void shyd_parse_postfix(shyd_ctx_t* ctx)
     shyd_elem_t* elem = (shyd_elem_t*)stack_pop(ctx->op_stack);
     
     if (elem->kind == SHYD_PAREN_OPEN)
-      report_error_missing_closing_parenthesis(elem->tok->loc);
-    
+    {
+      location_t loc = token_location(elem->tok);
+
+      report_error_missing_closing_parenthesis(&loc);
+    }
+
     if (elem->kind == SHYD_BRACKET_OPEN)
-      report_error_missing_closing_bracket(elem->tok->loc);
+    {
+      location_t loc = token_location(elem->tok);
+
+      report_error_missing_closing_bracket(&loc);
+    }
 
     queue_offer(ctx->out_queue, elem);
   }
@@ -344,7 +352,11 @@ void shyd_ast_op_un(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_st
   node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
-    report_error_missing_unary_argument(node->tok->loc);
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_missing_unary_argument(&loc);
+  }
 
   node->expr = (ast_node_t*)stack_pop(node_stack);
 
@@ -365,12 +377,20 @@ void shyd_ast_op_bin(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_s
   node->op_kind = elem->op;
 
   if (stack_empty(node_stack))
-    report_error_missing_binary_argument(node->tok->loc);
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_missing_binary_argument(&loc);
+  }
 
   node->rhs = (ast_node_t*)stack_pop(node_stack);
 
   if (stack_empty(node_stack))
-    report_error_missing_binary_argument(node->tok->loc);
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_missing_binary_argument(&loc);
+  }
 
   node->lhs = (ast_node_t*)stack_pop(node_stack);
 
@@ -380,7 +400,11 @@ void shyd_ast_op_bin(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_s
 void shyd_ast_op_call(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_stack)
 {
   if (stack_empty(node_stack))
-    report_error_missing_callee(elem->node->tok->loc);
+  {
+    location_t loc = token_location(elem->node->tok);
+
+    report_error_missing_callee(&loc);
+  }
 
   ((ast_expr_op_call_t*)elem->node)->callee = (ast_node_t*)stack_pop(node_stack);
 
@@ -390,6 +414,8 @@ void shyd_ast_op_call(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_
 void shyd_ast_term(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_stack)
 {
   ast_node_t* node = NULL;
+
+  location_t loc = token_location(elem->tok);
 
   switch (elem->tok->kind)
   {
@@ -419,16 +445,16 @@ void shyd_ast_term(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_sta
   case TOK_LIT_FLT:
   {
     node = (ast_node_t*)ast_expr_lit_flt_init();
-    ((ast_expr_lit_flt_t*)node)->value = strtold(elem->tok->loc->ptr, NULL);
+    ((ast_expr_lit_flt_t*)node)->value = strtold(loc.ptr, NULL);
     break;
   }
   case TOK_LIT_STR:
   {
     node = (ast_node_t*)ast_expr_lit_str_init();
 
-    ((ast_expr_lit_str_t*)node)->value = (char*)malloc(sizeof(char) * (elem->tok->loc->len - 1));
-    memset(((ast_expr_lit_str_t*)node)->value, 0, sizeof(char) * (elem->tok->loc->len - 1));
-    strncpy(((ast_expr_lit_str_t*)node)->value, elem->tok->loc->ptr + 1, elem->tok->loc->len - 2);
+    ((ast_expr_lit_str_t*)node)->value = (char*)malloc(sizeof(char) * (loc.len - 1));
+    memset(((ast_expr_lit_str_t*)node)->value, 0, sizeof(char) * (loc.len - 1));
+    strncpy(((ast_expr_lit_str_t*)node)->value, loc.ptr + 1, loc.len - 2);
     break;
   }
   case TOK_LIT_CHAR:
@@ -440,13 +466,13 @@ void shyd_ast_term(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_sta
   case TOK_LIT_BOOL:
   {
     node = (ast_node_t*)ast_expr_lit_bool_init();
-    ((ast_expr_lit_bool_t*)node)->value = strncmp(elem->tok->loc->ptr, "true", 4) == 0;
+    ((ast_expr_lit_bool_t*)node)->value = strncmp(loc.ptr, "true", 4) == 0;
     break;
   }
   case TOK_LIT_NULL:
     node = (ast_node_t*)ast_expr_lit_null_init();
     break;
-  default: report_error_unexpected_token(elem->tok->loc);
+  default: report_error_unexpected_token(&loc);
   }
 
   node->tok = elem->tok;

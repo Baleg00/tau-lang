@@ -39,8 +39,12 @@ void ast_expr_op_un_ind_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_ind_t* no
   ASSERT(expr_desc != NULL);
 
   if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_PTR)
-    report_error_expected_pointer_type(node->expr->tok->loc);
-  
+  {
+    location_t loc = token_location(node->expr->tok);
+
+    report_error_expected_pointer_type(&loc);
+  }
+
   typedesc_t* pointed_desc = ((typedesc_ptr_t*)typedesc_remove_ref_mut(expr_desc))->base_type;
   typedesc_t* desc = typebuilder_build_ref(ctx->typebuilder, pointed_desc);
 

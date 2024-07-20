@@ -39,8 +39,12 @@ void ast_expr_op_un_unwrap_safe_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_u
   ASSERT(expr_desc != NULL);
 
   if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_OPT)
-    report_error_expected_optional_type(node->expr->tok->loc);
-    
+  {
+    location_t loc = token_location(node->expr->tok);
+
+    report_error_expected_optional_type(&loc);
+  }
+
   typedesc_opt_t* opt_desc = (typedesc_opt_t*)typedesc_remove_ref_mut(expr_desc);
   typedesc_t* desc = opt_desc->base_type;
 

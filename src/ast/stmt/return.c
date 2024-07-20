@@ -41,7 +41,11 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
   ast_node_typecheck(ctx, node->expr);
 
   if (ctx->fun_desc == NULL)
-    report_error_return_outside_function(node->tok->loc);
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_return_outside_function(&loc);
+  }
 
   typedesc_t* expr_desc = typebuilder_build_unit(ctx->typebuilder);
 
@@ -52,7 +56,11 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
   }
 
   if (!typedesc_is_implicitly_convertible(expr_desc, ctx->fun_desc->return_type))
-    report_error_incompatible_return_type(node->tok->loc);
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_incompatible_return_type(&loc);
+  }
 }
 
 void ast_stmt_return_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_return_t* node)
@@ -62,7 +70,11 @@ void ast_stmt_return_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_return_t* node)
     ast_node_t* stmt_node = (ast_node_t*)vector_get(ctx->stmts, (size_t)i);
 
     if (stmt_node->kind == AST_STMT_DEFER)
-      report_error_return_inside_defer(node->tok->loc);
+    {
+      location_t loc = token_location(node->tok);
+
+      report_error_return_inside_defer(&loc);
+    }
   }
 }
 

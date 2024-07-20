@@ -45,16 +45,32 @@ void ast_expr_op_bin_assign_bit_or_typecheck(typecheck_ctx_t* ctx, ast_expr_op_b
   ASSERT(rhs_desc != NULL);
 
   if (lhs_desc->kind != TYPEDESC_REF)
-    report_error_expected_reference_type(node->lhs->tok->loc);
+  {
+    location_t loc = token_location(node->lhs->tok);
+
+    report_error_expected_reference_type(&loc);
+  }
 
   if (typedesc_remove_ref(lhs_desc)->kind != TYPEDESC_MUT)
-    report_error_expected_mutable_type(node->lhs->tok->loc);
+  {
+    location_t loc = token_location(node->lhs->tok);
+
+    report_error_expected_mutable_type(&loc);
+  }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
-    report_error_expected_arithmetic_type(node->lhs->tok->loc);
+  {
+    location_t loc = token_location(node->lhs->tok);
+
+    report_error_expected_arithmetic_type(&loc);
+  }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
-    report_error_expected_arithmetic_type(node->rhs->tok->loc);
+  {
+    location_t loc = token_location(node->rhs->tok);
+
+    report_error_expected_arithmetic_type(&loc);
+  }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, lhs_desc);
 }

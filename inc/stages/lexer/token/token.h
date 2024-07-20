@@ -22,9 +22,9 @@
 #include <stdio.h>
 
 #include "stages/lexer/location.h"
-#include "utils/collections/vector.h"
-#include "utils/str_view.h"
 #include "utils/str.h"
+#include "utils/str_view.h"
+#include "utils/collections/vector.h"
 
 /**
  * \brief Enumeration of token kinds.
@@ -143,24 +143,20 @@ typedef enum token_kind_e
 typedef struct token_t
 {
   token_kind_t kind; // Token kind.
-  location_t* loc; // Token location in the source code.
+  size_t pos; // Position of the token's first character in the source code.
 } token_t;
 
 /**
- * \brief Initializes a new token with the specified kind and location.
- * 
- * \param[in] kind The kind of the token.
- * \param[in] loc The location information of the token.
- * \returns Pointer to the newly initialized token.
+ * \brief Queries a token's location in a source file.
+ *
+ * \details The location of a token is calculated lazily in order to
+ * reduce memory usage during runtime. This function assumes that the
+ * source code for the token is syntactically correct.
+ *
+ * \param[in] tok Pointer to the token whose location is to be retrieved.
+ * \returns The token's location.
  */
-token_t* token_init(token_kind_t kind, location_t* loc);
-
-/**
- * \brief Frees the memory allocated for a token.
- * 
- * \param[in] tok The token to be freed.
- */
-void token_free(token_t* tok);
+location_t token_location(token_t* tok);
 
 /**
  * \brief Dumps the JSON representation of a token to the specified stream.
@@ -189,7 +185,7 @@ const char* token_kind_to_cstr(token_kind_t kind);
 
 /**
  * \brief Creates a string from a token.
- * 
+ *
  * \param tok Pointer to the token.
  * \returns Pointer to the string.
  */
@@ -197,7 +193,7 @@ string_t* token_to_string(token_t* tok);
 
 /**
  * \brief Creates a string view of a token.
- * 
+ *
  * \param tok Pointer to the token.
  * \returns The string view.
  */

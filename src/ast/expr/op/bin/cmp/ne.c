@@ -45,10 +45,18 @@ void ast_expr_op_bin_cmp_ne_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_cmp_
   ASSERT(rhs_desc != NULL);
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
-    report_error_expected_arithmetic_type(node->lhs->tok->loc);
+  {
+    location_t loc = token_location(node->lhs->tok);
+
+    report_error_expected_arithmetic_type(&loc);
+  }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
-    report_error_expected_arithmetic_type(node->rhs->tok->loc);
+  {
+    location_t loc = token_location(node->rhs->tok);
+
+    report_error_expected_arithmetic_type(&loc);
+  }
 
   typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);
 

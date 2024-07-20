@@ -45,10 +45,18 @@ void ast_expr_op_bin_subs_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_subs_t
   ASSERT(rhs_desc != NULL);
 
   if (typedesc_remove_ref_mut(lhs_desc)->kind != TYPEDESC_ARRAY)
-    report_error_expected_pointer_type(node->lhs->tok->loc);
+  {
+    location_t loc = token_location(node->lhs->tok);
+
+    report_error_expected_pointer_type(&loc);
+  }
 
   if (!typedesc_is_integer(typedesc_remove_ref_mut(rhs_desc)))
-    report_error_expected_integer_type(node->rhs->tok->loc);
+  {
+    location_t loc = token_location(node->rhs->tok);
+
+    report_error_expected_integer_type(&loc);
+  }
 
   typedesc_array_t* array_desc = (typedesc_array_t*)typedesc_remove_ref_mut(lhs_desc);
   typedesc_t* desc = typebuilder_build_ref(ctx->typebuilder, array_desc->base_type);

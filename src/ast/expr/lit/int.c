@@ -53,7 +53,12 @@ void ast_expr_lit_int_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_int_t* node)
   else if (node->value <= INT16_MAX) desc = typebuilder_build_i16(ctx->typebuilder);
   else if (node->value <= INT32_MAX) desc = typebuilder_build_i32(ctx->typebuilder);
   else if (node->value <= INT64_MAX) desc = typebuilder_build_i64(ctx->typebuilder);
-  else report_error_literal_out_of_range(node->tok->loc);
+  else
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_literal_out_of_range(&loc);
+  }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }

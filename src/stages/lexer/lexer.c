@@ -8,16 +8,13 @@
 #include "stages/lexer/lexer.h"
 
 #include <ctype.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "stages/lexer/location.h"
-#include "stages/lexer/token.h"
+#include "stages/lexer/token/registry.h"
 #include "utils/common.h"
 #include "utils/crumb.h"
 #include "utils/diagnostics.h"
-#include "utils/io/file.h"
-#include "utils/io/log.h"
 #include "utils/memory/memtrace.h"
 
 #define LEXER_MAX_BUFFER_SIZE 256
@@ -70,177 +67,123 @@ static const struct {
   { "null",     TOK_LIT_NULL    },
 };
 
-static const struct {
-  const token_kind_t kind;
-  const size_t len;
-} PUNCT_LOOKUP_TABLE[] = {
-  { TOK_PUNCT_PLUS,                  1 },
-  { TOK_PUNCT_PLUS_PLUS,             2 },
-  { TOK_PUNCT_PLUS_EQUAL,            2 },
-  { TOK_PUNCT_MINUS,                 1 },
-  { TOK_PUNCT_MINUS_MINUS,           2 },
-  { TOK_PUNCT_MINUS_EQUAL,           2 },
-  { TOK_PUNCT_ASTERISK,              1 },
-  { TOK_PUNCT_ASTERISK_EQUAL,        2 },
-  { TOK_PUNCT_ASTERISK_DOT,          2 },
-  { TOK_PUNCT_SLASH,                 1 },
-  { TOK_PUNCT_SLASH_EQUAL,           2 },
-  { TOK_PUNCT_PERCENT,               1 },
-  { TOK_PUNCT_PERCENT_EQUAL,         2 },
-  { TOK_PUNCT_AMPERSAND,             1 },
-  { TOK_PUNCT_AMPERSAND_AMPERSAND,   2 },
-  { TOK_PUNCT_AMPERSAND_EQUAL,       2 },
-  { TOK_PUNCT_BAR,                   1 },
-  { TOK_PUNCT_BAR_BAR,               2 },
-  { TOK_PUNCT_BAR_EQUAL,             2 },
-  { TOK_PUNCT_HAT,                   1 },
-  { TOK_PUNCT_HAT_EQUAL,             2 },
-  { TOK_PUNCT_TILDE,                 1 },
-  { TOK_PUNCT_LESS,                  1 },
-  { TOK_PUNCT_LESS_LESS,             2 },
-  { TOK_PUNCT_LESS_LESS_EQUAL,       3 },
-  { TOK_PUNCT_LESS_EQUAL,            2 },
-  { TOK_PUNCT_GREATER,               1 },
-  { TOK_PUNCT_GREATER_GREATER,       2 },
-  { TOK_PUNCT_GREATER_GREATER_EQUAL, 3 },
-  { TOK_PUNCT_GREATER_EQUAL,         2 },
-  { TOK_PUNCT_BANG,                  1 },
-  { TOK_PUNCT_BANG_EQUAL,            2 },
-  { TOK_PUNCT_DOT,                   1 },
-  { TOK_PUNCT_DOT_DOT,               2 },
-  { TOK_PUNCT_DOT_DOT_DOT,           3 },
-  { TOK_PUNCT_QUESTION,              1 },
-  { TOK_PUNCT_QUESTION_DOT,          2 },
-  { TOK_PUNCT_EQUAL,                 1 },
-  { TOK_PUNCT_EQUAL_EQUAL,           2 },
-  { TOK_PUNCT_COMMA,                 1 },
-  { TOK_PUNCT_COLON,                 1 },
-  { TOK_PUNCT_SEMICOLON,             1 },
-  { TOK_PUNCT_PAREN_LEFT,            1 },
-  { TOK_PUNCT_PAREN_RIGHT,           1 },
-  { TOK_PUNCT_BRACKET_LEFT,          1 },
-  { TOK_PUNCT_BRACKET_RIGHT,         1 },
-  { TOK_PUNCT_BRACE_LEFT,            1 },
-  { TOK_PUNCT_BRACE_RIGHT,           1 },
-  { TOK_PUNCT_HASH,                  1 },
-};
-
 struct lexer_t
 {
-  location_t* loc; // Current location in source file.
+  const char* path; // Path to the source file.
+  const char* src; // Contents of the source file.
+  size_t pos; // Current position in the source file.
   vector_t* toks; // Vector of tokens.
 };
 
 lexer_t* lexer_init(void)
 {
   lexer_t* lex = (lexer_t*)malloc(sizeof(lexer_t));
-  
-  lex->loc = location_init(NULL, NULL, NULL, 0, 0, 0);
+
+  lex->path = NULL;
+  lex->src = NULL;
+  lex->pos = 0;
 
   return lex;
 }
 
 void lexer_free(lexer_t* lex)
 {
-  location_free(lex->loc);
   free(lex);
-}
-
-location_t* lexer_location_copy(lexer_t* lex)
-{
-  location_t* loc_copy = location_init(
-    lex->loc->path,
-    lex->loc->src,
-    lex->loc->ptr,
-    lex->loc->row,
-    lex->loc->col,
-    lex->loc->len
-  );
-
-  return loc_copy;
 }
 
 token_t* lexer_token_init(lexer_t* lex, token_kind_t kind)
 {
-  location_t* loc = lexer_location_copy(lex);
-  token_t* tok = token_init(kind, loc);
-  return tok;
+  return token_registry_token_init(lex->path, kind, lex->pos);
+}
+
+location_t lexer_location(lexer_t* lex)
+{
+  size_t row = 0;
+  size_t col = 0;
+
+  for (size_t i = 0; i < lex->pos && lex->src[i] != '\0'; i++)
+  {
+    if (lex->src[i] == '\n')
+    {
+      row++;
+      col = 0;
+    }
+  }
+
+  location_t loc = {
+    .path = lex->path,
+    .src = lex->src,
+    .ptr = lex->src + lex->pos,
+    .row = row,
+    .col = col,
+    .len = 0
+  };
+
+  return loc;
 }
 
 bool lexer_is_space(lexer_t* lex)
 {
-  return isspace(*lex->loc->ptr) != 0;
+  return isspace(lex->src[lex->pos]) != 0;
 }
 
 bool lexer_is_word_begin(lexer_t* lex)
 {
-  return isalpha(*lex->loc->ptr) != 0 || *lex->loc->ptr == '_';
+  return isalpha(lex->src[lex->pos]) != 0 || lex->src[lex->pos] == '_';
 }
 
 bool lexer_is_word(lexer_t* lex)
 {
-  return isalnum(*lex->loc->ptr) != 0 || *lex->loc->ptr == '_';
+  return isalnum(lex->src[lex->pos]) != 0 || lex->src[lex->pos] == '_';
 }
 
 bool lexer_is_decimal(lexer_t* lex)
 {
-  return isdigit(*lex->loc->ptr) != 0;
+  return isdigit(lex->src[lex->pos]) != 0;
 }
 
 bool lexer_is_hexadecimal(lexer_t* lex)
 {
-  return isxdigit(*lex->loc->ptr) != 0;
+  return isxdigit(lex->src[lex->pos]) != 0;
 }
 
 bool lexer_is_octal(lexer_t* lex)
 {
-  return '0' <= *lex->loc->ptr && '7' >= *lex->loc->ptr;
+  return '0' <= lex->src[lex->pos] && '7' >= lex->src[lex->pos];
 }
 
 bool lexer_is_binary(lexer_t* lex)
 {
-  return *lex->loc->ptr == '0' || *lex->loc->ptr == '1';
+  return lex->src[lex->pos] == '0' || lex->src[lex->pos] == '1';
 }
 
 bool lexer_is_punctuation(lexer_t* lex)
 {
-  return ispunct(*lex->loc->ptr) != 0;
+  return ispunct(lex->src[lex->pos]) != 0;
 }
 
 char lexer_current(lexer_t* lex)
 {
-  return *lex->loc->ptr;
+  return lex->src[lex->pos];
 }
 
 char lexer_next(lexer_t* lex)
 {
-  if (*lex->loc->ptr == '\0')
+  if (lex->src[lex->pos] == '\0')
     return '\0';
   
-  if (*lex->loc->ptr == '\n')
+  if (lex->src[lex->pos] == '\n')
   {
-    location_t* loc = lexer_location_copy(lex);
-    loc->len = 1;
-
-    token_t* tok = token_init(TOK_NEWLINE, loc);
+    token_t* tok = token_registry_token_init(lex->path, TOK_NEWLINE, lex->pos);
     vector_push(lex->toks, tok);
-
-    lex->loc->row += 1;
-    lex->loc->col = 0;
   }
-  else
-    lex->loc->col += 1;
 
-  char ch = *lex->loc->ptr;
-
-  lex->loc->ptr++;
-
-  return ch;
+  return lex->src[lex->pos++];
 }
 
 char lexer_peek(lexer_t* lex)
 {
-  return *lex->loc->ptr == '\0' ? '\0' : *(lex->loc->ptr + 1);
+  return lex->src[lex->pos] == '\0' ? '\0' : lex->src[lex->pos + 1];
 }
 
 bool lexer_consume(lexer_t* lex, char ch)
@@ -256,12 +199,12 @@ bool lexer_consume(lexer_t* lex, char ch)
 
 size_t lexer_skip(lexer_t* lex, bool(*pred)(lexer_t*))
 {
-  const char* begin = lex->loc->ptr;
+  size_t begin = lex->pos;
 
-  while (*lex->loc->ptr != '\0' && pred(lex))
+  while (lex->src[lex->pos] != '\0' && pred(lex))
     lexer_next(lex);
 
-  return (size_t)(lex->loc->ptr - begin);
+  return lex->pos - begin;
 }
 
 void lexer_skip_n(lexer_t* lex, size_t n)
@@ -272,40 +215,37 @@ void lexer_skip_n(lexer_t* lex, size_t n)
 
 size_t lexer_skip_integer_suffix(lexer_t* lex)
 {
-  location_t* loc = lexer_location_copy(lex);
+  size_t begin = lex->pos;
+  size_t len = lexer_skip(lex, lexer_is_word);
 
-  loc->len = lexer_skip(lex, lexer_is_word);
-
-  switch (loc->len)
+  switch (len)
   {
   case 0:
     break;
   case 2:
-    if (strncmp("iz", loc->ptr, loc->len) == 0 ||
-        strncmp("uz", loc->ptr, loc->len) == 0 ||
-        strncmp("i8", loc->ptr, loc->len) == 0 ||
-        strncmp("u8", loc->ptr, loc->len) == 0)
+    if (strncmp("iz", lex->src + begin, len) == 0 ||
+        strncmp("uz", lex->src + begin, len) == 0 ||
+        strncmp("i8", lex->src + begin, len) == 0 ||
+        strncmp("u8", lex->src + begin, len) == 0)
       break;
-    
-    report_error_invalid_integer_suffix(loc);
   case 3:
-    if (strncmp("i16", loc->ptr, loc->len) == 0 ||
-        strncmp("u16", loc->ptr, loc->len) == 0 ||
-        strncmp("i32", loc->ptr, loc->len) == 0 ||
-        strncmp("u32", loc->ptr, loc->len) == 0 ||
-        strncmp("i64", loc->ptr, loc->len) == 0 ||
-        strncmp("u64", loc->ptr, loc->len) == 0)
+    if (strncmp("i16", lex->src + begin, len) == 0 ||
+        strncmp("u16", lex->src + begin, len) == 0 ||
+        strncmp("i32", lex->src + begin, len) == 0 ||
+        strncmp("u32", lex->src + begin, len) == 0 ||
+        strncmp("i64", lex->src + begin, len) == 0 ||
+        strncmp("u64", lex->src + begin, len) == 0)
       break;
-    
-    report_error_invalid_integer_suffix(loc);
   default:
-    report_error_invalid_integer_suffix(loc);
+  {
+    location_t loc = lexer_location(lex);
+
+    loc.len = len;
+
+    report_error_invalid_integer_suffix(&loc);
+  }
   }
 
-  size_t len = loc->len;
-
-  location_free(loc);
-  
   return len;
 }
 
@@ -317,10 +257,8 @@ void lexer_skip_comment_line(lexer_t* lex)
 
 void lexer_skip_comment_block(lexer_t* lex)
 {
-  for (;; lexer_next(lex))
-    if (lexer_consume(lex, '*'))
-      if (lexer_consume(lex, '/'))
-        break;
+  while (!(lexer_consume(lex, '*') && lexer_consume(lex, '/')))
+    lexer_next(lex);
 }
 
 token_t* lexer_read_word(lexer_t* lex)
@@ -328,23 +266,30 @@ token_t* lexer_read_word(lexer_t* lex)
   token_t* tok = lexer_token_init(lex, TOK_ID);
 
   size_t len = lexer_skip(lex, lexer_is_word);
-  tok->loc->len = len;
 
   if (len > LEXER_MAX_BUFFER_SIZE - 1)
-    report_error_identifier_too_long(tok->loc);
+  {
+    location_t loc = lexer_location(lex);
 
-  const char* begin = tok->loc->ptr;
+    loc.len = len;
+
+    report_error_identifier_too_long(&loc);
+  }
 
   char buf[LEXER_MAX_BUFFER_SIZE];
-  strncpy(buf, begin, len);
+
+  strncpy(buf, lex->src + tok->pos, len);
+
   buf[len] = '\0';
 
   for (size_t i = 0; i < COUNTOF(KEYWORD_LOOKUP_TABLE); ++i)
+  {
     if (strcmp(KEYWORD_LOOKUP_TABLE[i].keyword, buf) == 0)
     {
       tok->kind = KEYWORD_LOOKUP_TABLE[i].kind;
       break;
     }
+  }
 
   return tok;
 }
@@ -356,12 +301,17 @@ token_t* lexer_read_octal_integer(lexer_t* lex)
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_octal);
+
   len += lexer_skip_integer_suffix(lex);
 
-  tok->loc->len = len;
-
   if (len == 2 || lexer_is_word(lex))
-    report_error_ill_formed_integer_literal(tok->loc);
+  {
+    location_t loc = lexer_location(lex);
+
+    loc.len = len;
+
+    report_error_ill_formed_integer_literal(&loc);
+  }
 
   return tok;
 }
@@ -373,12 +323,17 @@ token_t* lexer_read_binary_integer(lexer_t* lex)
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_binary);
+
   len += lexer_skip_integer_suffix(lex);
-  
-  tok->loc->len = len;
 
   if (len == 2 || lexer_is_word(lex))
-    report_error_ill_formed_integer_literal(tok->loc);
+  {
+    location_t loc = lexer_location(lex);
+
+    loc.len = len;
+
+    report_error_ill_formed_integer_literal(&loc);
+  }
 
   return tok;
 }
@@ -392,12 +347,10 @@ token_t* lexer_read_decimal_number(lexer_t* lex)
   if (lexer_current(lex) == '.')
   {
     if (!isdigit(lexer_peek(lex)))
-    {
-      tok->loc->len = len;
       return tok;
-    }
 
     lexer_next(lex);
+
     ++len;
 
     len += lexer_skip(lex, lexer_is_decimal);
@@ -405,32 +358,43 @@ token_t* lexer_read_decimal_number(lexer_t* lex)
     if (lexer_current(lex) == 'e' || lexer_current(lex) == 'E')
     {
       lexer_next(lex);
+
       ++len;
 
       if (lexer_current(lex) == '+' || lexer_current(lex) == '-')
       {
         lexer_next(lex);
+
         ++len;
       }
 
       len += lexer_skip(lex, lexer_is_decimal);
     }
 
-    tok->loc->len = len;
-
     if (lexer_is_word(lex))
-      report_error_ill_formed_floating_point_literal(tok->loc);
-    
+    {
+      location_t loc = lexer_location(lex);
+
+      loc.len = len;
+
+      report_error_ill_formed_floating_point_literal(&loc);
+    }
+
     tok->kind = TOK_LIT_FLT;
+
     return tok;
   }
 
   len += lexer_skip_integer_suffix(lex);
 
-  tok->loc->len = len;
-
   if (lexer_is_word(lex))
-    report_error_ill_formed_integer_literal(tok->loc);
+  {
+    location_t loc = lexer_location(lex);
+
+    loc.len = len;
+
+    report_error_ill_formed_integer_literal(&loc);
+  }
 
   return tok;
 }
@@ -442,12 +406,17 @@ token_t* lexer_read_hexadecimal_integer(lexer_t* lex)
   lexer_skip_n(lex, 2);
 
   size_t len = 2 + lexer_skip(lex, lexer_is_hexadecimal);
+
   len += lexer_skip_integer_suffix(lex);
   
-  tok->loc->len = len;
-
   if (len == 2 || lexer_is_word(lex))
-    report_error_ill_formed_integer_literal(tok->loc);
+  {
+    location_t loc = lexer_location(lex);
+
+    loc.len = len;
+
+    report_error_ill_formed_integer_literal(&loc);
+  }
 
   return tok;
 }
@@ -455,18 +424,18 @@ token_t* lexer_read_hexadecimal_integer(lexer_t* lex)
 token_t* lexer_read_number(lexer_t* lex)
 {
   if (lexer_current(lex) == '0')
-    switch (lexer_peek(lex))
-    {
-    case 'x':
-    case 'X':
+  {
+    char ch = lexer_peek(lex);
+
+    if (ch == 'x' || ch == 'X')
       return lexer_read_hexadecimal_integer(lex);
-    case 'o':
-    case 'O':
-      return lexer_read_octal_integer(lex);
-    case 'b':
-    case 'B':
-      return lexer_read_binary_integer(lex);
-    }
+
+    if (ch == 'o' || ch == 'O')
+      return lexer_read_hexadecimal_integer(lex);
+
+    if (ch == 'b' || ch == 'B')
+      return lexer_read_hexadecimal_integer(lex);
+  }
 
   return lexer_read_decimal_number(lex);
 }
@@ -506,18 +475,26 @@ token_t* lexer_read_string(lexer_t* lex)
 
         if (!isxdigit(lexer_current(lex)))
         {
-          tok->loc->len = 2;
-          tok->loc->ptr = lex->loc->ptr - 2;
-          report_error_missing_hex_digits_in_escape_sequence(tok->loc);
+          location_t loc = lexer_location(lex);
+
+          loc.ptr -= 2;
+          loc.len = 2;
+
+          report_error_missing_hex_digits_in_escape_sequence(&loc);
         }
 
         len += lexer_skip(lex, lexer_is_hexadecimal);
         break;
 
       default:
-        tok->loc->len = 2;
-        tok->loc->ptr = lex->loc->ptr - 2;
-        report_error_unknown_escape_sequence(tok->loc);
+      {
+        location_t loc = lexer_location(lex);
+
+        loc.ptr -= 2;
+        loc.len = 2;
+
+        report_error_unknown_escape_sequence(&loc);
+      }
       }
     }
   }
@@ -526,11 +503,12 @@ token_t* lexer_read_string(lexer_t* lex)
 
   if (ch != '"')
   {
-    tok->loc->len = 1;
-    report_error_missing_terminating_double_quotes(tok->loc);
-  }
+    location_t loc = lexer_location(lex);
 
-  tok->loc->len = len;
+    loc.len = 1;
+
+    report_error_missing_terminating_double_quotes(&loc);
+  }
 
   return tok;
 }
@@ -545,8 +523,11 @@ token_t* lexer_read_character(lexer_t* lex)
 
   if (lexer_current(lex) == '\'')
   {
-    tok->loc->len = 2;
-    report_error_empty_character_literal(tok->loc);
+    location_t loc = lexer_location(lex);
+
+    loc.len = 2;
+
+    report_error_empty_character_literal(&loc);
   }
 
   if (lexer_next(lex) == '\\')
@@ -572,25 +553,37 @@ token_t* lexer_read_character(lexer_t* lex)
 
       if (!isxdigit(lexer_current(lex)))
       {
-        tok->loc->len = 2;
-        tok->loc->ptr = lex->loc->ptr - 2;
-        report_error_missing_hex_digits_in_escape_sequence(tok->loc);
+        location_t loc = lexer_location(lex);
+
+        loc.ptr -= 2;
+        loc.len = 2;
+
+        report_error_missing_hex_digits_in_escape_sequence(&loc);
       }
 
       len += lexer_skip(lex, lexer_is_hexadecimal);
 
       if (len > 4)
       {
-        tok->loc->len = len;
-        tok->loc->ptr = lex->loc->ptr - len;
-        report_error_too_many_hex_digits_in_escape_sequence(tok->loc);
+        location_t loc = lexer_location(lex);
+
+        loc.ptr -= len;
+        loc.len = len;
+
+        report_error_too_many_hex_digits_in_escape_sequence(&loc);
       }
       break;
 
     default:
-      tok->loc->len = 2;
-      tok->loc->ptr = lex->loc->ptr - 2;
-      report_error_unknown_escape_sequence(tok->loc);
+    {
+      location_t loc = lexer_location(lex);
+
+      loc.ptr -= 2;
+      loc.len = 2;
+
+      report_error_unknown_escape_sequence(&loc);
+    }
+
     }
   }
   else
@@ -598,11 +591,12 @@ token_t* lexer_read_character(lexer_t* lex)
 
   if (lexer_next(lex) != '\'')
   {
-    tok->loc->len = 1;
-    report_error_missing_terminating_single_quote(tok->loc);
-  }
+    location_t loc = lexer_location(lex);
 
-  tok->loc->len = len + 2;
+    loc.len = 1;
+
+    report_error_missing_terminating_single_quote(&loc);
+  }
 
   return tok;
 }
@@ -737,19 +731,15 @@ token_t* lexer_read_punctuation(lexer_t* lex)
   else if (lexer_consume(lex, '#'))
     kind = TOK_PUNCT_HASH;
   else
-    report_error_unexpected_character(lex->loc);
+  {
+    location_t loc = lexer_location(lex);
 
-  token_t* tok = lexer_token_init(lex, kind);
-  tok->loc->len = 0;
+    loc.len = 1;
 
-  for (size_t i = 0; i < COUNTOF(PUNCT_LOOKUP_TABLE); ++i)
-    if (PUNCT_LOOKUP_TABLE[i].kind == kind)
-    {
-      tok->loc->len = PUNCT_LOOKUP_TABLE[i].len;
-      break;
-    }
+    report_error_unexpected_character(&loc);
+  }
 
-  return tok;
+  return lexer_token_init(lex, kind);
 }
 
 token_t* lexer_read_next(lexer_t* lex)
@@ -758,32 +748,40 @@ token_t* lexer_read_next(lexer_t* lex)
 
   if (lexer_is_word_begin(lex))
     return lexer_read_word(lex);
-  else if (lexer_is_decimal(lex))
+
+  if (lexer_is_decimal(lex))
     return lexer_read_number(lex);
-  else if (lexer_current(lex) == '"')
+
+  if (lexer_current(lex) == '"')
     return lexer_read_string(lex);
-  else if (lexer_current(lex) == '\'')
+
+  if (lexer_current(lex) == '\'')
     return lexer_read_character(lex);
-  else if (lexer_is_punctuation(lex))
+
+  if (lexer_is_punctuation(lex))
     return lexer_read_punctuation(lex);
-  else if (lexer_current(lex) == '\0')
+
+  if (lexer_current(lex) == '\0')
     return lexer_token_init(lex, TOK_EOF);
-  
-  report_error_unexpected_character(lex->loc);
+
+  location_t loc = lexer_location(lex);
+
+  loc.len = 1;
+
+  report_error_unexpected_character(&loc);
 
   return NULL;
 }
 
 vector_t* lexer_lex(lexer_t* lex, const char* path, const char* src)
 {
-  lex->loc->path = path;
-  lex->loc->src = src;
-  lex->loc->ptr = src;
-  lex->loc->row = 0;
-  lex->loc->col = 0;
-  lex->loc->len = 0;
+  lex->path = path;
+  lex->src = src;
+  lex->pos = 0;
 
   lex->toks = vector_init();
+
+  token_registry_register_file(path, src);
 
   while (vector_empty(lex->toks) || ((token_t*)vector_back(lex->toks))->kind != TOK_EOF)
     vector_push(lex->toks, lexer_read_next(lex));

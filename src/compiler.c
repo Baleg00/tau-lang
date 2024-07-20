@@ -10,23 +10,23 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "llvm.h"
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "llvm.h"
 #include "stages/analysis/ctrlflow.h"
 #include "stages/analysis/symtable.h"
-#include "stages/analysis/types/typetable.h"
 #include "stages/lexer/lexer.h"
-#include "stages/lexer/token.h"
+#include "stages/lexer/token/registry.h"
+#include "stages/lexer/token/token.h"
 #include "stages/parser/parser.h"
-#include "utils/collections/list.h"
 #include "utils/common.h"
 #include "utils/crumb.h"
+#include "utils/timer.h"
+#include "utils/collections/list.h"
 #include "utils/io/cli.h"
 #include "utils/io/file.h"
 #include "utils/io/log.h"
 #include "utils/memory/memtrace.h"
-#include "utils/timer.h"
 
 struct compiler_t
 {
@@ -221,9 +221,6 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
   nameres_ctx_free(nameres_ctx);
   parser_free(parser);
 
-  VECTOR_FOR_LOOP(i, toks)
-    token_free((token_t*)vector_get(toks, i));
-
   vector_free(toks);
   lexer_free(lexer);
   
@@ -249,14 +246,13 @@ compiler_t* compiler_init(void)
 
   compiler->args.log_level = LOG_LEVEL_WARN;
 
-  time_it("LLVM:init", llvm_init());
-
   return compiler;
 }
 
 void compiler_free(compiler_t* compiler)
 {
   ast_registry_free();
+  token_registry_free();
   list_free(compiler->input_files);
   llvm_free();
   free(compiler);
@@ -289,6 +285,8 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 
   log_set_verbose(compiler->flags.verbose);
   log_set_level(compiler->args.log_level);
+
+  time_it("LLVM:init", llvm_init());
 
   if (list_size(compiler->input_files) == 0)
   {

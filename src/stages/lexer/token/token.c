@@ -5,33 +5,365 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "stages/lexer/token.h"
+#include "stages/lexer/token/token.h"
 
-#include "stages/lexer/location.h"
+#include <ctype.h>
+
+#include "stages/lexer/token/registry.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 
-token_t* token_init(token_kind_t kind, location_t* loc)
+static const struct
 {
-  token_t* tok = (token_t*)malloc(sizeof(token_t));
+  token_kind_t kind;
+  size_t len;
+} TOKEN_LEN_LOOKUP[] = {
+  { TOK_UNKNOWN, 0 },
+  { TOK_LIT_NULL, 4 },
+  { TOK_KW_IS, 2 },
+  { TOK_KW_AS, 2 },
+  { TOK_KW_SIZEOF, 6 },
+  { TOK_KW_ALIGNOF, 7 },
+  { TOK_KW_USE, 3 },
+  { TOK_KW_IN, 2 },
+  { TOK_KW_PUB, 3 },
+  { TOK_KW_EXTERN, 6 },
+  { TOK_KW_FUN, 3 },
+  { TOK_KW_STRUCT, 6 },
+  { TOK_KW_UNION, 5 },
+  { TOK_KW_ENUM, 4 },
+  { TOK_KW_MOD, 3 },
+  { TOK_KW_IF, 2 },
+  { TOK_KW_THEN, 4 },
+  { TOK_KW_ELSE, 4 },
+  { TOK_KW_FOR, 3 },
+  { TOK_KW_WHILE, 5 },
+  { TOK_KW_DO, 2 },
+  { TOK_KW_BREAK, 5 },
+  { TOK_KW_CONTINUE, 8 },
+  { TOK_KW_RETURN, 6 },
+  { TOK_KW_DEFER, 5 },
+  { TOK_KW_MUT, 3 },
+  { TOK_KW_I8, 2 },
+  { TOK_KW_I16, 3 },
+  { TOK_KW_I32, 3 },
+  { TOK_KW_I64, 3 },
+  { TOK_KW_ISIZE, 5 },
+  { TOK_KW_U8, 2 },
+  { TOK_KW_U16, 3 },
+  { TOK_KW_U32, 3 },
+  { TOK_KW_U64, 3 },
+  { TOK_KW_USIZE, 5 },
+  { TOK_KW_F32, 3 },
+  { TOK_KW_F64, 3 },
+  { TOK_KW_CHAR, 4 },
+  { TOK_KW_BOOL, 4 },
+  { TOK_KW_UNIT, 4 },
+  { TOK_PUNCT_PLUS, 1 },
+  { TOK_PUNCT_PLUS_PLUS, 2 },
+  { TOK_PUNCT_PLUS_EQUAL, 2 },
+  { TOK_PUNCT_MINUS, 1 },
+  { TOK_PUNCT_MINUS_MINUS, 2 },
+  { TOK_PUNCT_MINUS_EQUAL, 2 },
+  { TOK_PUNCT_ASTERISK, 1 },
+  { TOK_PUNCT_ASTERISK_EQUAL, 2 },
+  { TOK_PUNCT_ASTERISK_DOT, 2 },
+  { TOK_PUNCT_SLASH, 1 },
+  { TOK_PUNCT_SLASH_EQUAL, 2 },
+  { TOK_PUNCT_PERCENT, 1 },
+  { TOK_PUNCT_PERCENT_EQUAL, 2 },
+  { TOK_PUNCT_AMPERSAND, 1 },
+  { TOK_PUNCT_AMPERSAND_AMPERSAND, 2 },
+  { TOK_PUNCT_AMPERSAND_EQUAL, 2 },
+  { TOK_PUNCT_BAR, 1 },
+  { TOK_PUNCT_BAR_BAR, 1 },
+  { TOK_PUNCT_BAR_EQUAL, 2 },
+  { TOK_PUNCT_HAT, 1 },
+  { TOK_PUNCT_HAT_EQUAL, 2 },
+  { TOK_PUNCT_TILDE, 1 },
+  { TOK_PUNCT_LESS, 1 },
+  { TOK_PUNCT_LESS_LESS, 2 },
+  { TOK_PUNCT_LESS_LESS_EQUAL, 3 },
+  { TOK_PUNCT_LESS_EQUAL, 2 },
+  { TOK_PUNCT_GREATER, 1 },
+  { TOK_PUNCT_GREATER_GREATER, 2 },
+  { TOK_PUNCT_GREATER_GREATER_EQUAL, 3 },
+  { TOK_PUNCT_GREATER_EQUAL, 2 },
+  { TOK_PUNCT_BANG, 1 },
+  { TOK_PUNCT_BANG_EQUAL, 2 },
+  { TOK_PUNCT_DOT, 1 },
+  { TOK_PUNCT_DOT_DOT, 2 },
+  { TOK_PUNCT_DOT_DOT_DOT, 3 },
+  { TOK_PUNCT_QUESTION, 1 },
+  { TOK_PUNCT_QUESTION_DOT, 2 },
+  { TOK_PUNCT_EQUAL, 1 },
+  { TOK_PUNCT_EQUAL_EQUAL, 2 },
+  { TOK_PUNCT_COMMA, 1 },
+  { TOK_PUNCT_COLON, 1 },
+  { TOK_PUNCT_SEMICOLON, 1 },
+  { TOK_PUNCT_PAREN_LEFT, 1 },
+  { TOK_PUNCT_PAREN_RIGHT, 1 },
+  { TOK_PUNCT_BRACKET_LEFT, 1 },
+  { TOK_PUNCT_BRACKET_RIGHT, 1 },
+  { TOK_PUNCT_BRACE_LEFT, 1 },
+  { TOK_PUNCT_BRACE_RIGHT, 1 },
+  { TOK_PUNCT_HASH, 1 },
+  { TOK_NEWLINE, 0 },
+  { TOK_EOF, 0 },
+};
 
-  tok->kind = kind;
-  tok->loc = loc;
+static size_t token_len_lit_int_hex(const char* src, size_t pos)
+{
+  size_t begin = pos;
 
-  return tok;
+  pos += 2;
+
+  while (isxdigit(src[pos]))
+    pos++;
+
+  if (src[pos] == 'i' || src[pos] == 'u')
+  {
+    pos++;
+
+    while (isdigit(src[pos]))
+      pos++;
+  }
+
+  return pos - begin;
 }
 
-void token_free(token_t* tok)
+static size_t token_len_lit_int_oct(const char* src, size_t pos)
 {
-  location_free(tok->loc);
-  free(tok);
+  size_t begin = pos;
+
+  pos += 2;
+
+  while (src[pos] >= '0' && src[pos] <= '7')
+    pos++;
+
+  if (src[pos] == 'i' || src[pos] == 'u')
+  {
+    pos++;
+
+    while (isdigit(src[pos]))
+      pos++;
+  }
+
+  return pos - begin;
+}
+
+static size_t token_len_lit_int_bin(const char* src, size_t pos)
+{
+  size_t begin = pos;
+
+  pos += 2;
+
+  while (src[pos] == '0' || src[pos] == '1')
+    pos++;
+
+  if (src[pos] == 'i' || src[pos] == 'u')
+  {
+    pos++;
+
+    while (isdigit(src[pos]))
+      pos++;
+  }
+
+  return pos - begin;
+}
+
+static size_t token_len_lit_int_dec(const char* src, size_t pos)
+{
+  size_t begin = pos;
+
+  pos += 2;
+
+  while (isdigit(src[pos]))
+    pos++;
+
+  if (src[pos] == 'i' || src[pos] == 'u')
+  {
+    pos++;
+
+    while (isdigit(src[pos]))
+      pos++;
+  }
+
+  return pos - begin;
+}
+
+static size_t token_len_id(const char* src, size_t pos)
+{
+  size_t begin = pos;
+
+  while (isalnum(src[pos]) || src[pos] == '_')
+    pos++;
+
+  return pos - begin;
+}
+
+static size_t token_len_lit_int(const char* src, size_t pos)
+{
+  if (src[pos] == '0')
+  {
+    if (src[pos + 1] == 'x' || src[pos + 1] == 'X')
+      return token_len_lit_int_hex(src, pos);
+
+    if (src[pos + 1] == 'o' || src[pos + 1] == 'O')
+      return token_len_lit_int_oct(src, pos);
+
+    if (src[pos + 1] == 'b' || src[pos + 1] == 'B')
+      return token_len_lit_int_bin(src, pos);
+  }
+
+  return token_len_lit_int_dec(src, pos);
+}
+
+static size_t token_len_lit_flt(const char* src, size_t pos)
+{
+  size_t begin = pos;
+
+  while (isdigit(src[pos]))
+    pos++;
+
+  if (src[pos] == '.')
+    pos++;
+
+  while (isdigit(src[pos]))
+    pos++;
+
+  if (src[pos] == 'e' || src[pos] == 'E')
+  {
+    pos++;
+
+    if (src[pos] == '+' || src[pos] == '-')
+      pos++;
+
+    while (isdigit(src[pos]))
+      pos++;
+  }
+
+  return pos - begin;
+}
+
+static size_t token_len_lit_str(const char* src, size_t pos)
+{
+  size_t begin = pos;
+
+  pos++;
+
+  while (src[pos] != '"')
+  {
+    if (src[pos] == '\\')
+      pos++;
+
+    pos++;
+  }
+
+  pos++;
+
+  return pos - begin;
+}
+
+static size_t token_len_lit_char(const char* src, size_t pos)
+{
+  size_t begin = pos;
+
+  pos++;
+
+  while (src[pos] != '\'')
+  {
+    if (src[pos] == '\\')
+      pos++;
+
+    pos++;
+  }
+
+  pos++;
+
+  return pos - begin;
+}
+
+static size_t token_len_lit_bool(const char* src, size_t pos)
+{
+  return src[pos] == 't' ? 4 : 5;
+}
+
+static size_t token_len_by_kind(token_kind_t kind)
+{
+  for (size_t i = 0; i < COUNTOF(TOKEN_LEN_LOOKUP); i++)
+  {
+    if (TOKEN_LEN_LOOKUP[i].kind == kind)
+    {
+      return TOKEN_LEN_LOOKUP[i].len;
+    }
+  }
+
+  return 0;
+}
+
+location_t token_location(token_t* tok)
+{
+  const char* path = NULL;
+  const char* src = NULL;
+
+  token_registry_path_and_src(tok, &path, &src);
+
+  ASSERT(path != NULL);
+  ASSERT(src != NULL);
+
+  size_t row = 0;
+  size_t col = 0;
+
+  for (size_t i = 0; i < tok->pos && src[i] != '\0'; i++)
+  {
+    if (src[i] == '\n')
+    {
+      row++;
+      col = 0;
+    }
+  }
+
+  size_t len = 0;
+
+  switch (tok->kind)
+  {
+  case TOK_ID:       len = token_len_id      (src, tok->pos); break;
+  case TOK_LIT_INT:  len = token_len_lit_int (src, tok->pos); break;
+  case TOK_LIT_FLT:  len = token_len_lit_flt (src, tok->pos); break;
+  case TOK_LIT_STR:  len = token_len_lit_str (src, tok->pos); break;
+  case TOK_LIT_CHAR: len = token_len_lit_char(src, tok->pos); break;
+  case TOK_LIT_BOOL: len = token_len_lit_bool(src, tok->pos); break;
+  default:           len = token_len_by_kind (tok->kind    ); break;
+  }
+
+  location_t loc = {
+    .path = path,
+    .src = src,
+    .ptr = src + tok->pos,
+    .row = row,
+    .col = col,
+    .len = len
+  };
+
+  return loc;
 }
 
 void token_json_dump(FILE* stream, token_t* tok)
 {
   fprintf(stream, "{\"kind\":\"%s\",\"loc\":", token_kind_to_cstr(tok->kind));
 
-  location_json_dump(tok->loc, stream);
+  const char* path = NULL;
+  const char* src = NULL;
+
+  token_registry_path_and_src(tok, &path, &src);
+
+  ASSERT(path != NULL);
+  ASSERT(src != NULL);
+
+  location_t loc = token_location(tok);
+
+  location_json_dump(loc, stream);
 
   if (token_is_literal(tok) || tok->kind == TOK_ID)
   {
@@ -172,12 +504,12 @@ const char* token_kind_to_cstr(token_kind_t kind)
 
 string_t* token_to_string(token_t* tok)
 {
-  return location_to_string(tok->loc);
+  return location_to_string(token_location(tok));
 }
 
 string_view_t token_to_string_view(token_t* tok)
 {
-  return location_to_string_view(tok->loc);
+  return location_to_string_view(token_location(tok));
 }
 
 bool token_is_literal(token_t* tok)

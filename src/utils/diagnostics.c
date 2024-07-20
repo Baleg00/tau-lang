@@ -107,9 +107,12 @@ void report_error_failed_to_open_file(const char* path)
 
 void report_error_non_default_after_default_parameter(ast_decl_param_t* param_node, ast_decl_param_t* first_default_node)
 {
+  location_t param_node_id_loc = token_location(param_node->id->tok);
+  location_t first_default_node_id_loc = token_location(first_default_node->id->tok);
+
   crumb_item_t items[] = {
-    crumb_snippet(param_node->id->tok->loc, "A non-default parameter cannot appear after a default parameter.", NULL, "Parameter without a default value.", NULL),
-    crumb_snippet(first_default_node->id->tok->loc, "", NULL, "First default parameter appears here.", NULL)
+    crumb_snippet(&param_node_id_loc, "A non-default parameter cannot appear after a default parameter.", NULL, "Parameter without a default value.", NULL),
+    crumb_snippet(&first_default_node_id_loc, "", NULL, "First default parameter appears here.", NULL)
   };
   crumb_error(COUNTOF(items), items[0], items[1]);
   DEBUGBREAK();
@@ -118,9 +121,12 @@ void report_error_non_default_after_default_parameter(ast_decl_param_t* param_no
 
 void report_error_parameter_redefinition(ast_decl_param_t* param_node, ast_decl_param_t* redef_node)
 {
+  location_t redef_node_id_loc = token_location(redef_node->id->tok);
+  location_t param_node_id_loc = token_location(param_node->id->tok);
+
   crumb_item_t items[] = {
-    crumb_snippet(redef_node->id->tok->loc, "Two parameters cannot share the same name in a function declaration.", NULL, "A parameter with this name already exists.", NULL),
-    crumb_snippet(param_node->id->tok->loc, "", NULL, "First parameter with this name appears here.", NULL)
+    crumb_snippet(&redef_node_id_loc, "Two parameters cannot share the same name in a function declaration.", NULL, "A parameter with this name already exists.", NULL),
+    crumb_snippet(&param_node_id_loc, "", NULL, "First parameter with this name appears here.", NULL)
   };
   crumb_error(COUNTOF(items), items[0], items[1]);
   DEBUGBREAK();
@@ -129,9 +135,12 @@ void report_error_parameter_redefinition(ast_decl_param_t* param_node, ast_decl_
 
 void report_error_variable_redefinition(ast_decl_var_t* var_node, ast_decl_var_t* redef_node)
 {
+  location_t redef_node_id_loc = token_location(redef_node->id->tok);
+  location_t var_node_id_loc = token_location(var_node->id->tok);
+
   crumb_item_t items[] = {
-    crumb_snippet(redef_node->id->tok->loc, "Two variables cannot share the same name in a scope.", NULL, "A variable with this name already exists.", NULL),
-    crumb_snippet(var_node->id->tok->loc, "", NULL, "First variable with this name appears here.", NULL)
+    crumb_snippet(&redef_node_id_loc, "Two variables cannot share the same name in a scope.", NULL, "A variable with this name already exists.", NULL),
+    crumb_snippet(&var_node_id_loc, "", NULL, "First variable with this name appears here.", NULL)
   };
   crumb_error(COUNTOF(items), items[0], items[1]);
   DEBUGBREAK();
@@ -140,9 +149,12 @@ void report_error_variable_redefinition(ast_decl_var_t* var_node, ast_decl_var_t
 
 void report_error_struct_redefinition(ast_decl_struct_t* struct_node, ast_decl_t* redef_node)
 {
+  location_t redef_node_id_loc = token_location(redef_node->id->tok);
+  location_t struct_node_id_loc = token_location(struct_node->id->tok);
+
   crumb_item_t items[] = {
-    crumb_snippet(redef_node->id->tok->loc, "Two declarations cannot share the same name in a module.", NULL, "A struct with this name already exists.", NULL),
-    crumb_snippet(struct_node->id->tok->loc, "", NULL, "Struct with this name appears here.", NULL)
+    crumb_snippet(&redef_node_id_loc, "Two declarations cannot share the same name in a module.", NULL, "A struct with this name already exists.", NULL),
+    crumb_snippet(&struct_node_id_loc, "", NULL, "Struct with this name appears here.", NULL)
   };
   crumb_error(COUNTOF(items), items[0], items[1]);
   DEBUGBREAK();
@@ -151,9 +163,12 @@ void report_error_struct_redefinition(ast_decl_struct_t* struct_node, ast_decl_t
 
 void report_error_union_redefinition(ast_decl_union_t* union_node, ast_decl_t* redef_node)
 {
+  location_t redef_node_id_loc = token_location(redef_node->id->tok);
+  location_t union_node_id_loc = token_location(union_node->id->tok);
+
   crumb_item_t items[] = {
-    crumb_snippet(redef_node->id->tok->loc, "Two declarations cannot share the same name in a module.", NULL, "A union with this name already exists.", NULL),
-    crumb_snippet(union_node->id->tok->loc, "", NULL, "Union with this name appears here.", NULL)
+    crumb_snippet(&redef_node_id_loc, "Two declarations cannot share the same name in a module.", NULL, "A union with this name already exists.", NULL),
+    crumb_snippet(&union_node_id_loc, "", NULL, "Union with this name appears here.", NULL)
   };
   crumb_error(COUNTOF(items), items[0], items[1]);
   DEBUGBREAK();
@@ -162,9 +177,12 @@ void report_error_union_redefinition(ast_decl_union_t* union_node, ast_decl_t* r
 
 void report_error_enum_redefinition(ast_decl_enum_t* enum_node, ast_decl_t* redef_node)
 {
+  location_t redef_node_id_loc = token_location(redef_node->id->tok);
+  location_t enum_node_id_loc = token_location(enum_node->id->tok);
+
   crumb_item_t items[] = {
-    crumb_snippet(redef_node->id->tok->loc, "Two declarations cannot share the same name in a module.", NULL, "An enum with this name already exists.", NULL),
-    crumb_snippet(enum_node->id->tok->loc, "", NULL, "Enum with this name appears here.", NULL)
+    crumb_snippet(&redef_node_id_loc, "Two declarations cannot share the same name in a module.", NULL, "An enum with this name already exists.", NULL),
+    crumb_snippet(&enum_node_id_loc, "", NULL, "Enum with this name appears here.", NULL)
   };
   crumb_error(COUNTOF(items), items[0], items[1]);
   DEBUGBREAK();
@@ -184,9 +202,12 @@ void report_error_type_redefinition(ast_decl_t* node, ast_decl_t* redef_node)
 
 void report_error_enum_constant_redefinition(ast_decl_enum_constant_t* enum_node, ast_decl_enum_constant_t* redef_node)
 {
+  location_t redef_node_id_loc = token_location(redef_node->id->tok);
+  location_t enum_node_id_loc = token_location(enum_node->id->tok);
+
   crumb_item_t items[] = {
-    crumb_snippet(redef_node->id->tok->loc, "Two enum constants cannot share the same name in an enum.", NULL, "An enum constant with this name already exists.", NULL),
-    crumb_snippet(enum_node->id->tok->loc, "", NULL, "First enum constant with this name appears here.", NULL)
+    crumb_snippet(&redef_node_id_loc, "Two enum constants cannot share the same name in an enum.", NULL, "An enum constant with this name already exists.", NULL),
+    crumb_snippet(&enum_node_id_loc, "", NULL, "First enum constant with this name appears here.", NULL)
   };
   crumb_error(COUNTOF(items), items[0], items[1]);
   DEBUGBREAK();
@@ -230,9 +251,12 @@ void report_error_symbol_is_not_a_typename(location_t* loc)
 
 void report_warning_shadowed_variable(ast_decl_var_t* var_node, ast_decl_var_t* shadowing_node)
 {
+  location_t shadowing_node_id_loc = token_location(shadowing_node->id->tok);
+  location_t var_node_id_loc = token_location(var_node->id->tok);
+
   crumb_item_t items[] = {
-    crumb_snippet(shadowing_node->id->tok->loc, "A variable is shadowed by another one with the same name.", NULL, "This variable shadows another one from an outer scope.", NULL),
-    crumb_snippet(var_node->id->tok->loc, "", NULL, "The shadowed variable is declared here.", NULL)
+    crumb_snippet(&shadowing_node_id_loc, "A variable is shadowed by another one with the same name.", NULL, "This variable shadows another one from an outer scope.", NULL),
+    crumb_snippet(&var_node_id_loc, "", NULL, "The shadowed variable is declared here.", NULL)
   };
   crumb_warn(COUNTOF(items), items[0], items[1]);
   DEBUGBREAK();

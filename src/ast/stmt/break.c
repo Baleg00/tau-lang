@@ -41,8 +41,12 @@ void ast_stmt_break_typecheck(typecheck_ctx_t* UNUSED(ctx), ast_stmt_break_t* UN
 void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)
 {
   if (vector_empty(ctx->stmts))
-    report_error_break_outside_loop(node->tok->loc);
-  
+  {
+    location_t loc = token_location(node->tok);
+
+    report_error_break_outside_loop(&loc);
+  }
+
   for (int i = (int)vector_size(ctx->stmts) - 1; i >= 0; i--)
   {
     ast_node_t* stmt_node = (ast_node_t*)vector_get(ctx->stmts, (size_t)i);
@@ -51,7 +55,12 @@ void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)
     {
     case AST_STMT_FOR:
     case AST_STMT_WHILE: node->loop = stmt_node; return;
-    default: report_error_break_outside_loop(node->tok->loc);
+    default:
+    {
+      location_t loc = token_location(node->tok);
+
+      report_error_break_outside_loop(&loc);
+    }
     }
   }
 }

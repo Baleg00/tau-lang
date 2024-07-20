@@ -121,7 +121,11 @@ void* arena_alloc(arena_t* arena, size_t size)
 void* arena_alloc_aligned(arena_t* arena, size_t size, size_t alignment)
 {
   if (size > arena->capacity)
+  {
+    log_warn("arena", "Allocation size larger than capacity.");
+
     return NULL;
+  }
 
   if (arena->head == NULL)
     arena->head = arena_chunk_init_with_capacity(arena->capacity);

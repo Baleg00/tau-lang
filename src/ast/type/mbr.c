@@ -52,10 +52,18 @@ void ast_type_mbr_nameres(nameres_ctx_t* ctx, ast_type_mbr_t* node)
   symbol_t* mbr_sym = symtable_get_with_str_view(mod_node->scope, id_view);
 
   if (mbr_sym == NULL)
-    report_error_no_member_with_name(member_node->tok->loc);
+  {
+    location_t loc = token_location(member_node->tok);
+
+    report_error_no_member_with_name(&loc);
+  }
 
   if (!((ast_decl_t*)mbr_sym->node)->is_pub)
-    report_error_private_member(member_node->tok->loc);
+  {
+    location_t loc = token_location(member_node->tok);
+
+    report_error_private_member(&loc);
+  }
 
   member_node->decl = mbr_sym->node;
   node->decl = mbr_sym->node;

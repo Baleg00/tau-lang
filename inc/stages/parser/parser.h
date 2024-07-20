@@ -22,7 +22,7 @@
 #include <stdbool.h>
 
 #include "ast/ast.h"
-#include "stages/lexer/token.h"
+#include "stages/lexer/token/token.h"
 #include "utils/collections/vector.h"
 
 /**
@@ -100,7 +100,15 @@ bool parser_consume(parser_t* par, token_kind_t kind);
 token_t* parser_expect(parser_t* par, token_kind_t kind);
 
 /**
- * \brief Toggles whether the parser should ignore newlines when fetching tokens
+ * \brief Queries whether the parser ignores newlines when fetching tokens or not.
+ *
+ * \param[in] par Parser to be used.
+ * \returns `true` if the parser ignores newlines, `false` otherwise.
+ */
+bool parser_get_ignore_newline(parser_t* par);
+
+/**
+ * \brief Sets whether the parser should ignore newlines when fetching tokens
  * or not.
  * 
  * \param[in] par Parser to be used.

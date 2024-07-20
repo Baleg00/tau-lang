@@ -19,11 +19,10 @@
 #ifndef TAU_LOCATION_H
 #define TAU_LOCATION_H
 
-#include <stddef.h>
 #include <stdio.h>
 
-#include "utils/str_view.h"
 #include "utils/str.h"
+#include "utils/str_view.h"
 
 /**
  * \brief Location in the source code.
@@ -39,33 +38,13 @@ typedef struct location_t
 } location_t;
 
 /**
- * \brief Initializes a location.
- * 
- * \param[in] path The path to the source file.
- * \param[in] src Pointer to the source string.
- * \param[in] ptr Pointer to the marked location in the source string.
- * \param[in] row The row number in the source file.
- * \param[in] col The column number in the row.
- * \param[in] len The character length of marked location.
- * \returns Pointer to the newly initialized location.
-*/
-location_t* location_init(const char *path, const char* src, const char* ptr, size_t row, size_t col, size_t len);
-
-/**
- * \brief Frees a location.
- * 
- * \param[in] loc Pointer to the location.
-*/
-void location_free(location_t* loc);
-
-/**
  * \brief Dump the JSON representation of a location to a file stream.
  *
  * \param[in] loc Pointer to the location.
  * \param[in] stream Pointer to the file stream where the JSON dump will be
  * written.
  */
-void location_json_dump(location_t* loc, FILE* stream);
+void location_json_dump(location_t loc, FILE* stream);
 
 /**
  * \brief Creates a string from a location.
@@ -73,7 +52,7 @@ void location_json_dump(location_t* loc, FILE* stream);
  * \param loc Pointer to the location.
  * \returns Pointer to the string.
  */
-string_t* location_to_string(location_t* loc);
+string_t* location_to_string(location_t loc);
 
 /**
  * \brief Creates a string view of a location.
@@ -81,6 +60,6 @@ string_t* location_to_string(location_t* loc);
  * \param loc Pointer to the location.
  * \returns The string view.
  */
-string_view_t location_to_string_view(location_t* loc);
+string_view_t location_to_string_view(location_t loc);
 
 #endif

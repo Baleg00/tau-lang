@@ -40,7 +40,11 @@ void ast_expr_op_un_logic_not_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_log
   ASSERT(expr_desc != NULL);
 
   if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_BOOL)
-    report_error_expected_bool_type(node->expr->tok->loc);
+  {
+    location_t loc = token_location(node->expr->tok);
+
+    report_error_expected_bool_type(&loc);
+  }
 
   typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);
 

@@ -62,7 +62,11 @@ void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node)
     ASSERT(expr_desc != NULL);
 
     if (!typedesc_is_implicitly_convertible(expr_desc, desc))
-      report_error_type_mismatch(node->tok->loc, desc, expr_desc);
+    {
+      location_t loc = token_location(node->tok);
+
+      report_error_type_mismatch(&loc, desc, expr_desc);
+    }
   }
 }
 
