@@ -40,7 +40,7 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_undefined_typename(&loc);
+    report_error_undefined_typename(loc);
   }
 
   switch (sym->node->kind)
@@ -53,7 +53,7 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_symbol_is_not_a_typename(&loc);
+    report_error_symbol_is_not_a_typename(loc);
   }
   }
 

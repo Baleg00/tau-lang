@@ -1,7 +1,7 @@
 /**
  * \file
  * 
- * \brief Compiler message library interface.
+ * \brief Compiler diagnostic message library interface.
  * 
  * \details The crumb library provides functions to display detailed messages
  * referencing locations in the source code making it possible to create
@@ -14,120 +14,136 @@
 #ifndef TAU_CRUMB_H
 #define TAU_CRUMB_H
 
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdio.h>
 
 #include "stages/lexer/location.h"
+#include "utils/collections/vector.h"
 
 /**
- * \brief Initializes a crumb message item.
- * 
- * \param[in] MSG Message format string to be displayed.
- * \param[in] MSG_ARGS Variadic argument list for message.
-*/
-#define crumb_message(MSG, MSG_ARGS)\
-  ((crumb_item_t){\
-    .kind = CRUMB_ITEM_MESSAGE,\
-    .msg = (crumb_item_message_t){\
-      .msg = (MSG),\
-      .msg_args = (MSG_ARGS)\
-    }\
-  })
-
-/**
- * \brief Initializes a crumb snippet item.
- * 
- * \param[in] LOC Source code location to be referenced.
- * \param[in] TITLE Title format string to be displayed.
- * \param[in] TITLE_ARGS Variadic argument list for title.
- * \param[in] MSG Message format string to be displayed.
- * \param[in] MSG_ARGS Variadic argument list for message.
-*/
-#define crumb_snippet(LOC, TITLE, TITLE_ARGS, MSG, MSG_ARGS)\
-  ((crumb_item_t){\
-    .kind = CRUMB_ITEM_SNIPPET,\
-    .snip = (crumb_item_snippet_t){\
-      .loc = (LOC),\
-      .title = (TITLE),\
-      .title_args = (TITLE_ARGS),\
-      .msg = (MSG),\
-      .msg_args = (MSG_ARGS)\
-    }\
-  })
-
-/**
- * \brief Logs a crumb warning message to the output stream.
+ * \brief Represents a code snippet in a crumb message.
  */
-#define crumb_warn(...)  crumb_log(CRUMB_WARN , __VA_ARGS__)
-
-/**
- * \brief Logs an crumb error message to the output stream.
- */
-#define crumb_error(...) crumb_log(CRUMB_ERROR, __VA_ARGS__)
-
-/**
- * \brief Enumeration of crumb kinds.
- */
-typedef enum crumb_kind_e
+typedef struct crumb_snippet_t
 {
-  CRUMB_WARN, // Undesired code or behaviour.
-  CRUMB_ERROR // Illegal code or behaviour.
-} crumb_kind_t;
+  location_t loc; // Snippet location in the source code.
+  vector_t* labels; // Labels associated with the snippet.
+  vector_t* subsnippets; // Subsnippets associated with the snippet.
+} crumb_snippet_t;
 
 /**
- * \brief Enumeraion of crumb item kinds.
+ * \brief Represents a note in a crumb message.
  */
-typedef enum crumb_item_kind_e
+typedef struct crumb_note_t
 {
-  CRUMB_ITEM_MESSAGE, // Plain text.
-  CRUMB_ITEM_SNIPPET, // Source code snippet.
-} crumb_item_kind_t;
+  char* text; // The text of the note.
+  vector_t* snippets; // Snippets associated with the note.
+} crumb_note_t;
 
 /**
- * \brief Crumb message item.
-*/
-typedef struct crumb_item_message_t
-{
-  const char* msg; // Message format string.
-  va_list msg_args; // Message arguments.
-} crumb_item_message_t;
-
-/**
- * \brief Crumb snippet item.
+ * \brief Represents a crumb error message.
  */
-typedef struct crumb_item_snippet_t
+typedef struct crumb_error_t
 {
-  location_t* loc; // Source code location.
-  const char* title; // Title format string.
-  va_list title_args; // Title arguments.
-  const char* msg; // Message format string.
-  va_list msg_args; // Message arguments.
-} crumb_item_snippet_t;
+  size_t code; // Error code.
+  char* title; // Title of the error.
+  vector_t* snippets; // Snippets associated with the error.
+  vector_t* notes; // Notes associated with the error.
+} crumb_error_t;
 
 /**
- * \brief Crumb item.
+ * \brief Initializes a new snippet.
+ *
+ * \param[in] loc Source code location of the snippet.
+ * \returns Pointer to the newly initialized snippet.
  */
-typedef struct crumb_item_t
-{
-  crumb_item_kind_t kind; // Item kind.
-
-  union
-  {
-    crumb_item_message_t msg; // Message item.
-    crumb_item_snippet_t snip; // Snippet item.
-  };
-} crumb_item_t;
+crumb_snippet_t* crumb_snippet_init(location_t loc);
 
 /**
- * \brief Logs crumb messages to the output stream.
- * 
- * \param kind Crumb message kind.
- * \param count Number of crumb items.
- * \param ... Exactly `count` crumb items.
+ * \brief Frees all memory associated with a snippet.
+ *
+ * \param[in] snippet Pointer to the snippet to be freed.
  */
-void crumb_log(crumb_kind_t kind, size_t count, ...);
+void crumb_snippet_free(crumb_snippet_t* snippet);
+
+/**
+ * \brief Adds a label to a snippet.
+ *
+ * \param[in] snippet Pointer to the snippet to add a label to.
+ * \param[in] fmt Format string of the label.
+ * \param[in] ... Variadic arguments for the label.
+ */
+void crumb_snippet_label(crumb_snippet_t* snippet, const char* fmt, ...);
+
+/**
+ * \brief Adds a subsnippet to a snippet.
+ *
+ * \param[in] snippet Pointer to the snippet to add a subsnippet to.
+ * \param[in] subsnippet Pointer to the subsnippet to be added.
+ */
+void crumb_snippet_subsnippet(crumb_snippet_t* snippet, crumb_snippet_t* subsnippet);
+
+/**
+ * \brief Initializes a new note.
+ *
+ * \param[in] fmt Format string of the note.
+ * \param[in] ... Variadic arguments for the note.
+ * \returns Pointer to the newly initialized note.
+ */
+crumb_note_t* crumb_note_init(const char* fmt, ...);
+
+/**
+ * \brief Frees all memory associated with a note.
+ *
+ * \param[in] note Pointer to the note to be freed.
+ */
+void crumb_note_free(crumb_note_t* note);
+
+/**
+ * \brief Adds a snippet to a note.
+ *
+ * \param[in] note Pointer to the note to add a snippet to.
+ * \param[in] snippet Pointer to the snippet to be added.
+ */
+void crumb_note_snippet(crumb_note_t* note, crumb_snippet_t* snippet);
+
+/**
+ * \brief Initializes a new crumb error.
+ *
+ * \param[in] code Error code.
+ * \param[in] fmt Format string of the error title.
+ * \param[in] ... Variadic arguments for the error title.
+ * \returns Pointer to the newly initialized error.
+ */
+crumb_error_t* crumb_error_init(size_t code, const char* fmt, ...);
+
+/**
+ * \brief Frees all memory associated with an error.
+ *
+ * \param[in] error Pointer to the error to be freed.
+ */
+void crumb_error_free(crumb_error_t* error);
+
+/**
+ * \brief Adds a snippet to an error.
+ *
+ * \param[in] error Pointer to the error to add a snippet to.
+ * \param[in] snippet Pointer to the snippet to be added.
+ */
+void crumb_error_snippet(crumb_error_t* error, crumb_snippet_t* snippet);
+
+/**
+ * \brief Adds a note to an error.
+ *
+ * \param[in] error Pointer to the error to add a note to.
+ * \param[in] note Pointer to the note to be added.
+ */
+void crumb_error_note(crumb_error_t* error, crumb_note_t* note);
+
+/**
+ * \brief Prints an error to the global crumb output stream.
+ *
+ * \param[in] error Pointer to the error to be printed.
+ */
+void crumb_error_print(crumb_error_t* error);
 
 /**
  * \brief Sets the crumb output stream.
@@ -142,21 +158,5 @@ void crumb_set_stream(FILE* stream);
  * \returns Pointer to the output stream.
  */
 FILE* crumb_get_stream(void);
-
-/**
- * \brief Converts the crumb kind to its corresponding ANSI color string.
- * 
- * \param[in] kind The crumb kind to convert.
- * \returns The ANSI color string of the crumb kind.
- */
-const char* crumb_kind_to_color(crumb_kind_t kind);
-
-/**
- * \brief Converts the crumb kind to its corresponding string representation.
- * 
- * \param[in] kind The crumb kind to convert.
- * \returns The string representation of the crumb kind.
- */
-const char* crumb_kind_to_string(crumb_kind_t kind);
 
 #endif

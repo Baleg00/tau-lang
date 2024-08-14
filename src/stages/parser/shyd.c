@@ -331,14 +331,14 @@ void shyd_parse_postfix(shyd_ctx_t* ctx)
     {
       location_t loc = token_location(elem->tok);
 
-      report_error_missing_closing_parenthesis(&loc);
+      report_error_missing_closing_parenthesis(loc);
     }
 
     if (elem->kind == SHYD_BRACKET_OPEN)
     {
       location_t loc = token_location(elem->tok);
 
-      report_error_missing_closing_bracket(&loc);
+      report_error_missing_closing_bracket(loc);
     }
 
     queue_offer(ctx->out_queue, elem);
@@ -355,7 +355,7 @@ void shyd_ast_op_un(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_st
   {
     location_t loc = token_location(node->tok);
 
-    report_error_missing_unary_argument(&loc);
+    report_error_missing_unary_argument(loc);
   }
 
   node->expr = (ast_node_t*)stack_pop(node_stack);
@@ -380,7 +380,7 @@ void shyd_ast_op_bin(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_s
   {
     location_t loc = token_location(node->tok);
 
-    report_error_missing_binary_argument(&loc);
+    report_error_missing_binary_argument(loc);
   }
 
   node->rhs = (ast_node_t*)stack_pop(node_stack);
@@ -389,7 +389,7 @@ void shyd_ast_op_bin(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_s
   {
     location_t loc = token_location(node->tok);
 
-    report_error_missing_binary_argument(&loc);
+    report_error_missing_binary_argument(loc);
   }
 
   node->lhs = (ast_node_t*)stack_pop(node_stack);
@@ -403,7 +403,7 @@ void shyd_ast_op_call(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_
   {
     location_t loc = token_location(elem->node->tok);
 
-    report_error_missing_callee(&loc);
+    report_error_missing_callee(loc);
   }
 
   ((ast_expr_op_call_t*)elem->node)->callee = (ast_node_t*)stack_pop(node_stack);
@@ -472,7 +472,7 @@ void shyd_ast_term(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_sta
   case TOK_LIT_NULL:
     node = (ast_node_t*)ast_expr_lit_null_init();
     break;
-  default: report_error_unexpected_token(&loc);
+  default: report_error_unexpected_token(loc);
   }
 
   node->tok = elem->tok;

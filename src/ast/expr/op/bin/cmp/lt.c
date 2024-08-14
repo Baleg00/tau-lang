@@ -48,14 +48,14 @@ void ast_expr_op_bin_cmp_lt_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_cmp_
   {
     location_t loc = token_location(node->lhs->tok);
 
-    report_error_expected_arithmetic_type(&loc);
+    report_error_expected_arithmetic_type(loc);
   }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
   {
     location_t loc = token_location(node->rhs->tok);
 
-    report_error_expected_arithmetic_type(&loc);
+    report_error_expected_arithmetic_type(loc);
   }
 
   typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);

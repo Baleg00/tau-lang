@@ -48,14 +48,14 @@ void ast_expr_op_bin_logic_or_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_lo
   {
     location_t loc = token_location(node->lhs->tok);
 
-    report_error_expected_bool_type(&loc);
+    report_error_expected_bool_type(loc);
   }
 
   if (typedesc_remove_ref_mut(rhs_desc)->kind != TYPEDESC_BOOL)
   {
     location_t loc = token_location(node->rhs->tok);
 
-    report_error_expected_bool_type(&loc);
+    report_error_expected_bool_type(loc);
   }
 
   typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);

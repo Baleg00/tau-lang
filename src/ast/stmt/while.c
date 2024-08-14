@@ -52,7 +52,7 @@ void ast_stmt_while_typecheck(typecheck_ctx_t* ctx, ast_stmt_while_t* node)
   {
     location_t loc = token_location(node->cond->tok);
 
-    report_error_expected_bool_type(&loc);
+    report_error_expected_bool_type(loc);
   }
 }
 

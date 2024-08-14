@@ -44,7 +44,7 @@ void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_break_outside_loop(&loc);
+    report_error_break_outside_loop(loc);
   }
 
   for (int i = (int)vector_size(ctx->stmts) - 1; i >= 0; i--)
@@ -59,7 +59,7 @@ void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)
     {
       location_t loc = token_location(node->tok);
 
-      report_error_break_outside_loop(&loc);
+      report_error_break_outside_loop(loc);
     }
     }
   }

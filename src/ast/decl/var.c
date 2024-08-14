@@ -70,7 +70,7 @@ void ast_decl_var_typecheck(typecheck_ctx_t* ctx, ast_decl_var_t* node)
     {
       location_t loc = token_location(node->tok);
 
-      report_error_type_mismatch(&loc, desc, expr_desc);
+      report_error_type_mismatch(loc, desc, expr_desc);
     }
   }
 }

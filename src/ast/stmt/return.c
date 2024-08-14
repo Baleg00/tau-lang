@@ -44,7 +44,7 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_return_outside_function(&loc);
+    report_error_return_outside_function(loc);
   }
 
   typedesc_t* expr_desc = typebuilder_build_unit(ctx->typebuilder);
@@ -59,7 +59,7 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_incompatible_return_type(&loc);
+    report_error_incompatible_return_type(loc);
   }
 }
 
@@ -73,7 +73,7 @@ void ast_stmt_return_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_return_t* node)
     {
       location_t loc = token_location(node->tok);
 
-      report_error_return_inside_defer(&loc);
+      report_error_return_inside_defer(loc);
     }
   }
 }

@@ -315,7 +315,7 @@ location_t token_location(token_t* tok)
   size_t row = 0;
   size_t col = 0;
 
-  for (size_t i = 0; i < tok->pos && src[i] != '\0'; i++)
+  for (size_t i = 0; i < tok->pos && src[i] != '\0'; i++, col++)
   {
     if (src[i] == '\n')
     {

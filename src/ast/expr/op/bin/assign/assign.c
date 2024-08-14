@@ -48,21 +48,21 @@ void ast_expr_op_bin_assign_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_assi
   {
     location_t loc = token_location(node->lhs->tok);
 
-    report_error_expected_reference_type(&loc);
+    report_error_expected_reference_type(loc);
   }
 
   if (typedesc_remove_ref(lhs_desc)->kind != TYPEDESC_MUT)
   {
     location_t loc = token_location(node->lhs->tok);
 
-    report_error_expected_mutable_type(&loc);
+    report_error_expected_mutable_type(loc);
   }
 
   if (!typedesc_is_implicitly_convertible(rhs_desc, typedesc_remove_ref_mut(lhs_desc)))
   {
     location_t loc = token_location(node->lhs->tok);
 
-    report_error_type_mismatch(&loc, lhs_desc, rhs_desc);
+    report_error_type_mismatch(loc, lhs_desc, rhs_desc);
   }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, lhs_desc);

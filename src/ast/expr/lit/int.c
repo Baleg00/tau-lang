@@ -57,7 +57,7 @@ void ast_expr_lit_int_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_int_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_literal_out_of_range(&loc);
+    report_error_literal_out_of_range(loc);
   }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);

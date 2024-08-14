@@ -41,7 +41,7 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_undefined_symbol(&loc);
+    report_error_undefined_symbol(loc);
   }
 
   switch (sym->node->kind)
@@ -54,7 +54,7 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_symbol_is_not_an_expression(&loc);
+    report_error_symbol_is_not_an_expression(loc);
   }
   }
   

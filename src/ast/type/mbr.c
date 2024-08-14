@@ -55,14 +55,14 @@ void ast_type_mbr_nameres(nameres_ctx_t* ctx, ast_type_mbr_t* node)
   {
     location_t loc = token_location(member_node->tok);
 
-    report_error_no_member_with_name(&loc);
+    report_error_no_member_with_name(loc);
   }
 
   if (!((ast_decl_t*)mbr_sym->node)->is_pub)
   {
     location_t loc = token_location(member_node->tok);
 
-    report_error_private_member(&loc);
+    report_error_private_member(loc);
   }
 
   member_node->decl = mbr_sym->node;

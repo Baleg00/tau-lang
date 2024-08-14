@@ -42,21 +42,21 @@ void ast_expr_op_un_arit_inc_pre_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_
   {
     location_t loc = token_location(node->expr->tok);
 
-    report_error_expected_reference_type(&loc);
+    report_error_expected_reference_type(loc);
   }
 
   if (typedesc_remove_ref(expr_desc)->kind != TYPEDESC_MUT)
   {
     location_t loc = token_location(node->expr->tok);
 
-    report_error_expected_mutable_type(&loc);
+    report_error_expected_mutable_type(loc);
   }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
   {
     location_t loc = token_location(node->expr->tok);
 
-    report_error_expected_arithmetic_type(&loc);
+    report_error_expected_arithmetic_type(loc);
   }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, expr_desc);

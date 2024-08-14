@@ -54,7 +54,7 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
     {
       location_t loc = token_location(node->rhs->tok);
 
-      report_error_no_member_with_name(&loc);
+      report_error_no_member_with_name(loc);
     }
 
     node->idx = vector_find(enum_node->members, mbr_sym->node);
@@ -105,7 +105,7 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
     {
       location_t loc = token_location(node->rhs->tok);
 
-      report_error_no_member_with_name(&loc);
+      report_error_no_member_with_name(loc);
     }
 
 
@@ -113,7 +113,7 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
     {
       location_t loc = token_location(node->rhs->tok);
 
-      report_error_private_member(&loc);
+      report_error_private_member(loc);
     }
 
     node->idx = vector_find(members, mbr_sym->node);

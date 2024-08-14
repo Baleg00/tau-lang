@@ -48,28 +48,28 @@ void ast_expr_op_bin_assign_bit_lsh_typecheck(typecheck_ctx_t* ctx, ast_expr_op_
   {
     location_t loc = token_location(node->lhs->tok);
 
-    report_error_expected_reference_type(&loc);
+    report_error_expected_reference_type(loc);
   }
 
   if (typedesc_remove_ref(lhs_desc)->kind != TYPEDESC_MUT)
   {
     location_t loc = token_location(node->lhs->tok);
 
-    report_error_expected_mutable_type(&loc);
+    report_error_expected_mutable_type(loc);
   }
 
   if (!typedesc_is_integer(typedesc_remove_ref_mut(lhs_desc)))
   {
     location_t loc = token_location(node->lhs->tok);
 
-    report_error_expected_integer_type(&loc);
+    report_error_expected_integer_type(loc);
   }
 
   if (!typedesc_is_integer(typedesc_remove_ref_mut(rhs_desc)))
   {
     location_t loc = token_location(node->rhs->tok);
 
-    report_error_expected_integer_type(&loc);
+    report_error_expected_integer_type(loc);
   }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, lhs_desc);

@@ -43,7 +43,7 @@ void ast_decl_mod_nameres(nameres_ctx_t* ctx, ast_decl_mod_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_symbol_redeclaration(&loc);
+    report_error_symbol_redeclaration(loc);
   }
 
   node->scope = nameres_ctx_scope_begin(ctx);

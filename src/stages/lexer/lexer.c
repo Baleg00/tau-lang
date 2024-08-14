@@ -101,7 +101,7 @@ location_t lexer_location(lexer_t* lex)
   size_t row = 0;
   size_t col = 0;
 
-  for (size_t i = 0; i < lex->pos && lex->src[i] != '\0'; i++)
+  for (size_t i = 0; i < lex->pos && lex->src[i] != '\0'; i++, col++)
   {
     if (lex->src[i] == '\n')
     {
@@ -216,6 +216,9 @@ void lexer_skip_n(lexer_t* lex, size_t n)
 size_t lexer_skip_integer_suffix(lexer_t* lex)
 {
   size_t begin = lex->pos;
+
+  location_t loc = lexer_location(lex);
+
   size_t len = lexer_skip(lex, lexer_is_word);
 
   switch (len)
@@ -238,11 +241,9 @@ size_t lexer_skip_integer_suffix(lexer_t* lex)
       break;
   default:
   {
-    location_t loc = lexer_location(lex);
-
     loc.len = len;
 
-    report_error_invalid_integer_suffix(&loc);
+    report_error_invalid_integer_suffix(loc);
   }
   }
 
@@ -273,7 +274,7 @@ token_t* lexer_read_word(lexer_t* lex)
 
     loc.len = len;
 
-    report_error_identifier_too_long(&loc);
+    report_error_identifier_too_long(loc);
   }
 
   char buf[LEXER_MAX_BUFFER_SIZE];
@@ -310,7 +311,7 @@ token_t* lexer_read_octal_integer(lexer_t* lex)
 
     loc.len = len;
 
-    report_error_ill_formed_integer_literal(&loc);
+    report_error_ill_formed_integer_literal(loc);
   }
 
   return tok;
@@ -332,7 +333,7 @@ token_t* lexer_read_binary_integer(lexer_t* lex)
 
     loc.len = len;
 
-    report_error_ill_formed_integer_literal(&loc);
+    report_error_ill_formed_integer_literal(loc);
   }
 
   return tok;
@@ -377,7 +378,7 @@ token_t* lexer_read_decimal_number(lexer_t* lex)
 
       loc.len = len;
 
-      report_error_ill_formed_floating_point_literal(&loc);
+      report_error_ill_formed_floating_point_literal(loc);
     }
 
     tok->kind = TOK_LIT_FLT;
@@ -393,7 +394,7 @@ token_t* lexer_read_decimal_number(lexer_t* lex)
 
     loc.len = len;
 
-    report_error_ill_formed_integer_literal(&loc);
+    report_error_ill_formed_integer_literal(loc);
   }
 
   return tok;
@@ -415,7 +416,7 @@ token_t* lexer_read_hexadecimal_integer(lexer_t* lex)
 
     loc.len = len;
 
-    report_error_ill_formed_integer_literal(&loc);
+    report_error_ill_formed_integer_literal(loc);
   }
 
   return tok;
@@ -443,6 +444,8 @@ token_t* lexer_read_number(lexer_t* lex)
 token_t* lexer_read_string(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_STR);
+
+  location_t begin_loc = lexer_location(lex);
 
   char ch = lexer_next(lex);
 
@@ -480,7 +483,7 @@ token_t* lexer_read_string(lexer_t* lex)
           loc.ptr -= 2;
           loc.len = 2;
 
-          report_error_missing_hex_digits_in_escape_sequence(&loc);
+          report_error_missing_hex_digits_in_escape_sequence(loc);
         }
 
         len += lexer_skip(lex, lexer_is_hexadecimal);
@@ -493,7 +496,7 @@ token_t* lexer_read_string(lexer_t* lex)
         loc.ptr -= 2;
         loc.len = 2;
 
-        report_error_unknown_escape_sequence(&loc);
+        report_error_unknown_escape_sequence(loc);
       }
       }
     }
@@ -503,11 +506,9 @@ token_t* lexer_read_string(lexer_t* lex)
 
   if (ch != '"')
   {
-    location_t loc = lexer_location(lex);
+    begin_loc.len = 1;
 
-    loc.len = 1;
-
-    report_error_missing_terminating_double_quotes(&loc);
+    report_error_missing_terminating_double_quotes(begin_loc);
   }
 
   return tok;
@@ -517,17 +518,17 @@ token_t* lexer_read_character(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_CHAR);
 
+  location_t begin_loc = lexer_location(lex);
+
   lexer_next(lex);
 
   size_t len = 0;
 
   if (lexer_current(lex) == '\'')
   {
-    location_t loc = lexer_location(lex);
+    begin_loc.len = 2;
 
-    loc.len = 2;
-
-    report_error_empty_character_literal(&loc);
+    report_error_empty_character_literal(begin_loc);
   }
 
   if (lexer_next(lex) == '\\')
@@ -558,7 +559,7 @@ token_t* lexer_read_character(lexer_t* lex)
         loc.ptr -= 2;
         loc.len = 2;
 
-        report_error_missing_hex_digits_in_escape_sequence(&loc);
+        report_error_missing_hex_digits_in_escape_sequence(loc);
       }
 
       len += lexer_skip(lex, lexer_is_hexadecimal);
@@ -570,7 +571,7 @@ token_t* lexer_read_character(lexer_t* lex)
         loc.ptr -= len;
         loc.len = len;
 
-        report_error_too_many_hex_digits_in_escape_sequence(&loc);
+        report_error_too_many_hex_digits_in_escape_sequence(loc);
       }
       break;
 
@@ -581,7 +582,7 @@ token_t* lexer_read_character(lexer_t* lex)
       loc.ptr -= 2;
       loc.len = 2;
 
-      report_error_unknown_escape_sequence(&loc);
+      report_error_unknown_escape_sequence(loc);
     }
 
     }
@@ -591,11 +592,9 @@ token_t* lexer_read_character(lexer_t* lex)
 
   if (lexer_next(lex) != '\'')
   {
-    location_t loc = lexer_location(lex);
+    begin_loc.len = 1;
 
-    loc.len = 1;
-
-    report_error_missing_terminating_single_quote(&loc);
+    report_error_missing_terminating_single_quote(begin_loc);
   }
 
   return tok;
@@ -736,7 +735,7 @@ token_t* lexer_read_punctuation(lexer_t* lex)
 
     loc.len = 1;
 
-    report_error_unexpected_character(&loc);
+    report_error_unexpected_character(loc);
   }
 
   return lexer_token_init(lex, kind);
@@ -768,7 +767,7 @@ token_t* lexer_read_next(lexer_t* lex)
 
   loc.len = 1;
 
-  report_error_unexpected_character(&loc);
+  report_error_unexpected_character(loc);
 
   return NULL;
 }

@@ -122,7 +122,7 @@ token_t* parser_expect(parser_t* par, token_kind_t kind)
   {
     location_t loc = token_location(tok);
 
-    report_error_unexpected_token(&loc);
+    report_error_unexpected_token(loc);
   }
 
   return parser_next(par);
@@ -215,7 +215,7 @@ callconv_kind_t parser_parse_callconv(parser_t* par)
 
   location_t loc = token_location(callconv_tok);
 
-  report_error_unknown_callconv(&loc);
+  report_error_unknown_callconv(loc);
 
   return -1;
 }
@@ -416,7 +416,7 @@ ast_node_t* parser_parse_type(parser_t* par)
   {
     location_t loc = token_location(parser_current(par));
 
-    report_error_unexpected_token(&loc);
+    report_error_unexpected_token(loc);
   }
   }
 
@@ -836,7 +836,7 @@ ast_node_t* parser_parse_decl(parser_t* par)
   {
     location_t loc = token_location(parser_current(par));
 
-    report_error_unexpected_token(&loc);
+    report_error_unexpected_token(loc);
   }
   }
 
@@ -952,7 +952,7 @@ ast_node_t* parser_parse_path(parser_t* par)
     {
       location_t loc = token_location(parser_current(par));
 
-      report_error_unexpected_token(&loc);
+      report_error_unexpected_token(loc);
     }
     }
   }

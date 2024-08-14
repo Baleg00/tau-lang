@@ -42,7 +42,7 @@ void ast_expr_op_un_ind_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_ind_t* no
   {
     location_t loc = token_location(node->expr->tok);
 
-    report_error_expected_pointer_type(&loc);
+    report_error_expected_pointer_type(loc);
   }
 
   typedesc_t* pointed_desc = ((typedesc_ptr_t*)typedesc_remove_ref_mut(expr_desc))->base_type;

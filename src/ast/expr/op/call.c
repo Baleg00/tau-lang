@@ -66,7 +66,7 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
     {
       location_t loc = token_location(caller_param->tok);
 
-      report_error_type_mismatch(&loc, callee_param_desc, caller_param_desc);
+      report_error_type_mismatch(loc, callee_param_desc, caller_param_desc);
     }
   }
 
@@ -74,7 +74,7 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
   {
     location_t loc = token_location(node->tok);
 
-    report_error_too_few_arguments(&loc);
+    report_error_too_few_arguments(loc);
   }
 
   if (i != vector_size(node->params) && i == vector_size(fun_desc->param_types))
@@ -82,7 +82,7 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
     {
       location_t loc = token_location(node->tok);
 
-      report_error_too_many_arguments(&loc);
+      report_error_too_many_arguments(loc);
     }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, fun_desc->return_type);
