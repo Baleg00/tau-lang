@@ -9,6 +9,7 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
+#include "stages/codegen/utils.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
@@ -77,7 +78,9 @@ void ast_stmt_while_codegen(codegen_ctx_t* ctx, ast_stmt_while_t* node)
 
   ast_node_codegen(ctx, node->cond);
 
-  LLVMBuildCondBr(ctx->llvm_builder, ((ast_expr_t*)node->cond)->llvm_value, node->llvm_loop, node->llvm_end);
+  LLVMValueRef llvm_cond_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->cond);
+
+  LLVMBuildCondBr(ctx->llvm_builder, llvm_cond_value, node->llvm_loop, node->llvm_end);
   LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_loop);
   LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_loop);
 
