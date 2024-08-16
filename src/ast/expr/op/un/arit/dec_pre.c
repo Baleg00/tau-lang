@@ -73,13 +73,13 @@ void ast_expr_op_un_arit_dec_pre_codegen(codegen_ctx_t* ctx, ast_expr_op_un_arit
 
   typedesc_t* expr_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->expr));
 
-  LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "load_tmp");
+  LLVMValueRef llvm_value = LLVMBuildLoad2(ctx->llvm_builder, expr->llvm_type, expr->llvm_value, "");
   LLVMValueRef llvm_dec_value = NULL;
 
   if (typedesc_is_integer(expr_desc))
-    llvm_dec_value = LLVMBuildSub(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "pre_dec_tmp");
+    llvm_dec_value = LLVMBuildSub(ctx->llvm_builder, llvm_value, LLVMConstInt(expr->llvm_type, 1, false), "");
   else if (typedesc_is_float(expr_desc))
-    llvm_dec_value = LLVMBuildFSub(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "pre_dec_tmp");
+    llvm_dec_value = LLVMBuildFSub(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "");
   else
     UNREACHABLE();
 

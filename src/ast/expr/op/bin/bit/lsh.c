@@ -74,5 +74,5 @@ void ast_expr_op_bin_bit_lsh_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_bit_lsh
   LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
   LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
 
-  node->llvm_value = LLVMBuildShl(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "shl_tmp");
+  node->llvm_value = LLVMBuildShl(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
 }

@@ -85,7 +85,7 @@ void ast_decl_var_codegen(codegen_ctx_t* ctx, ast_decl_var_t* node)
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  node->llvm_value = LLVMBuildAlloca(ctx->llvm_builder, node->llvm_type, "alloca_tmp");
+  node->llvm_value = LLVMBuildAlloca(ctx->llvm_builder, node->llvm_type, "");
 
   if (node->expr != NULL)
   {

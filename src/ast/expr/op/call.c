@@ -130,7 +130,7 @@ void ast_expr_op_call_codegen(codegen_ctx_t* ctx, ast_expr_op_call_t* node)
     ((ast_expr_t*)node->callee)->llvm_value,
     llvm_param_values,
     (uint32_t)vector_size(node->params),
-    "call2_tmp"
+    ""
   );
 
   if (llvm_param_values != NULL)

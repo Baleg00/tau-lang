@@ -91,11 +91,11 @@ void ast_expr_op_bin_arit_add_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_arit_a
 
   if (typedesc_is_integer(desc))
   {
-    node->llvm_value = LLVMBuildAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "add_tmp");
+    node->llvm_value = LLVMBuildAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
   }
   else if (typedesc_is_float(desc))
   {
-    node->llvm_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fadd_tmp");
+    node->llvm_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
   }
   else
   {

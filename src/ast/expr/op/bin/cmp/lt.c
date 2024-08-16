@@ -86,16 +86,16 @@ void ast_expr_op_bin_cmp_lt_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_lt_t
   {
     if (typedesc_is_signed(promoted_desc))
     {
-      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSLT, llvm_lhs_value, llvm_rhs_value, "icmp_slt_tmp");
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntSLT, llvm_lhs_value, llvm_rhs_value, "");
     }
     else
     {
-      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntULT, llvm_lhs_value, llvm_rhs_value, "icmp_ult_tmp");
+      node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntULT, llvm_lhs_value, llvm_rhs_value, "");
     }
   }
   else if (typedesc_is_float(promoted_desc))
   {
-    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOLT, llvm_lhs_value, llvm_rhs_value, "fcmp_olt_tmp");
+    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOLT, llvm_lhs_value, llvm_rhs_value, "");
   }
   else
   {

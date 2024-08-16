@@ -71,9 +71,9 @@ void ast_expr_op_un_unwrap_safe_codegen(codegen_ctx_t* ctx, ast_expr_op_un_unwra
   LLVMInsertExistingBasicBlockAfterInsertBlock(ctx->llvm_builder, llvm_cond_block);
   LLVMPositionBuilderAtEnd(ctx->llvm_builder, llvm_cond_block);
 
-  LLVMValueRef llvm_flag_ptr = LLVMBuildStructGEP2(ctx->llvm_builder, expr_desc->llvm_type, expr->llvm_value, 0, "gep2_tmp");
-  LLVMValueRef llvm_flag_value = LLVMBuildLoad2(ctx->llvm_builder, LLVMInt1TypeInContext(ctx->llvm_ctx), llvm_flag_ptr, "load2_tmp");
-  LLVMValueRef llvm_cond_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntEQ, llvm_flag_value, LLVMConstInt(LLVMInt1TypeInContext(ctx->llvm_ctx), 0, false), "icmp_eq_tmp");
+  LLVMValueRef llvm_flag_ptr = LLVMBuildStructGEP2(ctx->llvm_builder, expr_desc->llvm_type, expr->llvm_value, 0, "");
+  LLVMValueRef llvm_flag_value = LLVMBuildLoad2(ctx->llvm_builder, LLVMInt1TypeInContext(ctx->llvm_ctx), llvm_flag_ptr, "");
+  LLVMValueRef llvm_cond_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntEQ, llvm_flag_value, LLVMConstInt(LLVMInt1TypeInContext(ctx->llvm_ctx), 0, false), "");
 
   LLVMBuildCondBr(ctx->llvm_builder, llvm_cond_value, llvm_exit_block, llvm_end_block);
 
@@ -98,6 +98,6 @@ void ast_expr_op_un_unwrap_safe_codegen(codegen_ctx_t* ctx, ast_expr_op_un_unwra
   LLVMInsertExistingBasicBlockAfterInsertBlock(ctx->llvm_builder, llvm_end_block);
   LLVMPositionBuilderAtEnd(ctx->llvm_builder, llvm_end_block);
 
-  LLVMValueRef llvm_value_ptr = LLVMBuildStructGEP2(ctx->llvm_builder, expr_desc->llvm_type, expr->llvm_value, 1, "gep2_tmp");
-  node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_opt_t*)expr_desc)->base_type->llvm_type, llvm_value_ptr, "load2_tmp");
+  LLVMValueRef llvm_value_ptr = LLVMBuildStructGEP2(ctx->llvm_builder, expr_desc->llvm_type, expr->llvm_value, 1, "");
+  node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_opt_t*)expr_desc)->base_type->llvm_type, llvm_value_ptr, "");
 }

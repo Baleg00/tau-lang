@@ -75,7 +75,7 @@ void ast_decl_param_codegen(codegen_ctx_t* ctx, ast_decl_param_t* node)
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  node->llvm_value = LLVMBuildAlloca(ctx->llvm_builder, node->llvm_type, "alloca_tmp");
+  node->llvm_value = LLVMBuildAlloca(ctx->llvm_builder, node->llvm_type, "");
 
   LLVMValueRef param_value = LLVMGetParam(ctx->fun_node->llvm_value, (uint32_t)ctx->param_idx);
   LLVMBuildStore(ctx->llvm_builder, param_value, node->llvm_value);

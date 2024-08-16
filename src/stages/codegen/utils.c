@@ -14,7 +14,7 @@ LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
 
   if (desc->kind == TYPEDESC_REF)
-    return LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_ref_t*)desc)->base_type->llvm_type, node->llvm_value, "load_tmp");
+    return LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_ref_t*)desc)->base_type->llvm_type, node->llvm_value, "");
 
   return node->llvm_value;
 }
@@ -31,32 +31,32 @@ LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm
     if (typedesc_integer_bits(from_desc) < typedesc_integer_bits(to_desc))
     {
       return typedesc_is_signed(to_desc) ?
-        LLVMBuildSExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "sextorbitcast_tmp") :
-        LLVMBuildZExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "zextorbitcast_tmp");
+        LLVMBuildSExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "") :
+        LLVMBuildZExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
     }
 
     return typedesc_integer_bits(from_desc) > typedesc_integer_bits(to_desc) ?
-      LLVMBuildTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "trunc_tmp") :
-      LLVMBuildBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "bitcast_tmp");
+      LLVMBuildTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "") :
+      LLVMBuildBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
   }
   else if (typedesc_is_integer(from_desc) && typedesc_is_float(to_desc))
   {
     return typedesc_is_signed(from_desc) ?
-      LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "sitofp_tmp") :
-      LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "uitofp_tmp");
+      LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "") :
+      LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
   }
   else if (typedesc_is_float(from_desc) && typedesc_is_integer(to_desc))
   {
     return typedesc_is_signed(to_desc) ?
-      LLVMBuildFPToSI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "fptosi_tmp") :
-      LLVMBuildFPToUI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "fptoui_tmp");
+      LLVMBuildFPToSI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "") :
+      LLVMBuildFPToUI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
   }
   else if (typedesc_is_float(from_desc) && typedesc_is_float(to_desc))
   {
     if (from_desc->kind == TYPEDESC_F32 && to_desc->kind == TYPEDESC_F64)
-      return LLVMBuildFPExt(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "fpext_tmp");
+      return LLVMBuildFPExt(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
     else if (from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32)
-      return LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "fptrunc_tmp");
+      return LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
   }
 
   UNREACHABLE();
@@ -76,7 +76,7 @@ LLVMValueRef codegen_build_opt_wrap(codegen_ctx_t* ctx, LLVMValueRef llvm_value,
 
 LLVMValueRef codegen_build_opt_unwrap_unchecked(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_opt_t* desc)
 {
-  return LLVMBuildStructGEP2(ctx->llvm_builder, desc->llvm_type, llvm_value, 1, "tmp_struct_gep2");
+  return LLVMBuildStructGEP2(ctx->llvm_builder, desc->llvm_type, llvm_value, 1, "");
 }
 
 static LLVMValueRef codegen_build_implicit_cast_mut(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_mut_t* from_desc, typedesc_t* to_desc)
@@ -105,7 +105,7 @@ static LLVMValueRef codegen_build_implicit_cast_ref(codegen_ctx_t* ctx, LLVMValu
 {
   if (to_desc->kind != TYPEDESC_REF)
   {
-    LLVMValueRef llvm_load_value = LLVMBuildLoad2(ctx->llvm_builder, from_desc->base_type->llvm_type, llvm_value, "tmp_load2");
+    LLVMValueRef llvm_load_value = LLVMBuildLoad2(ctx->llvm_builder, from_desc->base_type->llvm_type, llvm_value, "");
 
     return codegen_build_implicit_cast(ctx, llvm_load_value, from_desc->base_type, to_desc);
   }

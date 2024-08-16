@@ -66,9 +66,9 @@ void ast_expr_op_bin_as_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_as_t* node)
   else if (lhs_desc->kind == TYPEDESC_PTR && rhs_desc->kind == TYPEDESC_PTR)
     node->llvm_value = llvm_lhs_value;
   else if (lhs_desc->kind == TYPEDESC_PTR && typedesc_is_integer(rhs_desc))
-    node->llvm_value = LLVMBuildPtrToInt(ctx->llvm_builder, llvm_lhs_value, rhs_desc->llvm_type, "ptrtoint_tmp");
+    node->llvm_value = LLVMBuildPtrToInt(ctx->llvm_builder, llvm_lhs_value, rhs_desc->llvm_type, "");
   else if (typedesc_is_integer(lhs_desc) && rhs_desc->kind == TYPEDESC_PTR)
-    node->llvm_value = LLVMBuildIntToPtr(ctx->llvm_builder, llvm_lhs_value, rhs_desc->llvm_type, "inttoptr_tmp");
+    node->llvm_value = LLVMBuildIntToPtr(ctx->llvm_builder, llvm_lhs_value, rhs_desc->llvm_type, "");
   else
     UNREACHABLE();
 }

@@ -149,7 +149,7 @@ void ast_expr_op_bin_access_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_access_t
   {
   case AST_DECL_STRUCT:
   {
-    node->llvm_value = LLVMBuildStructGEP2(ctx->llvm_builder, decl_desc->llvm_type, llvm_lhs_value, (uint32_t)node->idx, "struct_gep2_tmp");
+    node->llvm_value = LLVMBuildStructGEP2(ctx->llvm_builder, decl_desc->llvm_type, llvm_lhs_value, (uint32_t)node->idx, "");
     break;
   }
   case AST_DECL_UNION:

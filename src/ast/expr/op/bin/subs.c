@@ -78,5 +78,5 @@ void ast_expr_op_bin_subs_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_subs_t* no
 
   LLVMValueRef llvm_ptr_value = ((ast_expr_t*)node->lhs)->llvm_value;
   LLVMTypeRef llvm_base_type = ((typedesc_array_t*)lhs_desc)->base_type->llvm_type;
-  node->llvm_value = LLVMBuildGEP2(ctx->llvm_builder, llvm_base_type, llvm_ptr_value, &llvm_rhs_value, 1, "gep2_tmp");
+  node->llvm_value = LLVMBuildGEP2(ctx->llvm_builder, llvm_base_type, llvm_ptr_value, &llvm_rhs_value, 1, "");
 }

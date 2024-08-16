@@ -93,16 +93,16 @@ void ast_expr_op_bin_arit_mod_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_arit_m
   {
     if (typedesc_is_signed(desc))
     {
-      node->llvm_value = LLVMBuildSRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "srem_tmp");
+      node->llvm_value = LLVMBuildSRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
     }
     else
     {
-      node->llvm_value = LLVMBuildURem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "urem_tmp");
+      node->llvm_value = LLVMBuildURem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
     }
   }
   else if (typedesc_is_float(desc))
   {
-    node->llvm_value = LLVMBuildFRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "frem_tmp");
+    node->llvm_value = LLVMBuildFRem(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
   }
   else
   {

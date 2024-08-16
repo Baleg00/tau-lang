@@ -84,11 +84,11 @@ void ast_expr_op_bin_cmp_ne_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_ne_t
 
   if (typedesc_is_integer(promoted_desc))
   {
-    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntNE, llvm_lhs_value, llvm_rhs_value, "icmp_ne_tmp");
+    node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntNE, llvm_lhs_value, llvm_rhs_value, "");
   }
   else if (typedesc_is_float(promoted_desc))
   {
-    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealONE, llvm_lhs_value, llvm_rhs_value, "fcmp_one_tmp");
+    node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealONE, llvm_lhs_value, llvm_rhs_value, "");
   }
   else
   {

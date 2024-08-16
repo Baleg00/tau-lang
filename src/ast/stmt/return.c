@@ -95,7 +95,7 @@ void ast_stmt_return_codegen(codegen_ctx_t* ctx, ast_stmt_return_t* node)
 
     if (expected_return_desc->kind != TYPEDESC_REF &&
         actual_return_desc->kind == TYPEDESC_REF)
-      llvm_return_value = LLVMBuildLoad2(ctx->llvm_builder, expr_node->llvm_type, expr_node->llvm_value, "load_tmp");
+      llvm_return_value = LLVMBuildLoad2(ctx->llvm_builder, expr_node->llvm_type, expr_node->llvm_value, "");
 
     if (typedesc_is_arithmetic(expected_return_desc) && typedesc_is_arithmetic(actual_return_desc))
       llvm_return_value = codegen_build_arithmetic_cast(ctx, llvm_return_value, actual_return_desc, expected_return_desc);

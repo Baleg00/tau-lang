@@ -95,11 +95,11 @@ void ast_expr_op_bin_assign_arit_mul_codegen(codegen_ctx_t* ctx, ast_expr_op_bin
 
   if (typedesc_is_integer(desc))
   {
-    node->llvm_value = LLVMBuildMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "mul_tmp");
+    node->llvm_value = LLVMBuildMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
   }
   else if (typedesc_is_float(desc))
   {
-    node->llvm_value = LLVMBuildFMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fmul_tmp");
+    node->llvm_value = LLVMBuildFMul(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
   }
   else
   {

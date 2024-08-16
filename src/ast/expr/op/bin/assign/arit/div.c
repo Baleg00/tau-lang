@@ -97,16 +97,16 @@ void ast_expr_op_bin_assign_arit_div_codegen(codegen_ctx_t* ctx, ast_expr_op_bin
   {
     if (typedesc_is_signed(desc))
     {
-      node->llvm_value = LLVMBuildSDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "sdiv_tmp");
+      node->llvm_value = LLVMBuildSDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
     }
     else
     {
-      node->llvm_value = LLVMBuildUDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "udiv_tmp");
+      node->llvm_value = LLVMBuildUDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
     }
   }
   else if (typedesc_is_float(desc))
   {
-    node->llvm_value = LLVMBuildFDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "fdiv_tmp");
+    node->llvm_value = LLVMBuildFDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
   }
   else
   {
