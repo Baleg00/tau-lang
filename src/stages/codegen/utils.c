@@ -123,7 +123,15 @@ static LLVMValueRef codegen_build_implicit_cast_prim(codegen_ctx_t* ctx, LLVMVal
   if (to_desc->kind == TYPEDESC_OPT)
     return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)from_desc, (typedesc_opt_t*)to_desc);
 
-  return codegen_build_arithmetic_cast(ctx, llvm_value, (typedesc_t*)from_desc, typedesc_remove_mut(to_desc));
+  if (typedesc_is_arithmetic((typedesc_t*)from_desc))
+    return codegen_build_arithmetic_cast(ctx, llvm_value, (typedesc_t*)from_desc, typedesc_remove_mut(to_desc));
+
+  if (from_desc->kind == TYPEDESC_BOOL && typedesc_remove_mut(to_desc)->kind == TYPEDESC_BOOL)
+    return llvm_value;
+
+  UNREACHABLE();
+
+  return NULL;
 }
 
 LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
