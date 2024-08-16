@@ -118,7 +118,7 @@ void memtrace_atexit(void)
 
   log_debug("memtrace", "Total allocated memory: %zu bytes", memtrace_stat_total_alloc());
   log_debug("memtrace", "Peak allocated memory: %zu bytes", memtrace_stat_peak_alloc());
-  log_debug("memtrace", "Total allocation count: %zu bytes", memtrace_stat_alloc_count());
+  log_debug("memtrace", "Total allocation count: %zu", memtrace_stat_alloc_count());
   log_debug("memtrace", "Average allocation size: %zu bytes", memtrace_stat_avg_alloc_size());
   log_debug("memtrace", "Average lifetime: %.6g ms", memtrace_stat_avg_lifetime());
 
