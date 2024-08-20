@@ -2,97 +2,109 @@
   <img src="img/logo.svg" alt="Tau Logo" width="80%">
 </p>
 
-<h2 align="center">A unified language for efficient and expressive code.</h2>
+<h1 align="center">A unified language for efficient and expressive code.</h1>
 
-Welcome to Tau, a powerful and versatile programming language for building
-efficient and reliable software. It seamlessly combines low-level capabilities
-with high-level concepts to empower developers all round the world.
+---
 
-## 📚 Documentation
+Welcome to Tau, a programming language designed to be simple yet powerful. This
+repository contains the compiler for Tau, written in C and utilizing LLVM for
+backend processing.
 
-For comprehensive information about the Tau programming language, including
-language specifications, syntax, and usage examples, please visit our
-[official website](https://docs.tau-lang.org/).
+> [!IMPORTANT]
+> The project is in its early stages, and the language is still evolving.
 
-- [**Language Reference**](https://docs.tau-lang.org/language-reference) -
-  Explore the core concepts and features of Tau.
-- [**Getting Started**](https://docs.tau-lang.org/getting-started) -
-  Learn how to set up and begin using Tau for your projects.
-- [**Tutorials**](https://docs.tau-lang.org/tutorials) -
-  Dive into practical tutorials to enhance your Tau skills.
-- [**API Reference**](https://docs.tau-lang.org/api-reference) -
-  If you're interested in extending Tau, check out the API reference.
+## 🚀 Features
+
+### Syntax
+
+- Clean, concise, consistent.
+- Keywords are short and recognizable (`fun`, `pub`, `unit` etc.).
+- Similar to other popular languages like C/C++ and Rust.
+
+### Types
+
+- Strong and strict type system.
+- Bounds checked arrays.
+- No null pointers, explicit optionals (`?i32`).
+- References (`&i32`).
+- `unit` instead of `void`.
+- Structs, unions, enums.
+
+### Control Flow
+
+- Conditional branches (`if-then`, `else`).
+- Loops (`while-do`, `do-while`).
+- Deferred statements (`defer`).
+
+### Functions
+
+- Simple function definitions (`fun factorial(x: i32): i32`).
+- External function declarations (`extern "C" fun sqrtf(x: f32): f32`).
+
+### Expressions
+
+- Arithmetic, logical, bitwise and comparison operators.
+- Safe and unsafe optional operators (`x?`, `x!`).
+- Memory related operators (`*x`, `&x`).
+- Special operators (`sizeof`, `alignof`).
 
 ## ⚙️ Installation
 
-You can easily install Tau on various platforms using the method that suits your
-environment best. Choose from the options below:
+### Prerequisites
 
-### Windows
+- **CMake**: Build tool to configure and manage the build process.
+- **LLVM**: Used as the backend for code generation and optimization.
 
-On Windows, we recommend using the **Tau Installer** for a hassle-free
-installation experience. Download the installer from our
-[website](https://tau-lang.org/downloads) and follow the on-screen instructions.
+### Building the Compiler
 
-You can also install Tau using [🍫 Chocolatey](https://chocolatey.org/).
+1. **Clone the Repository**:
+    
+    ```bash
+    git clone https://github.com/Baleg00/tau-lang.git
+    cd tau-lang
+    ```
 
-Once Chocolatey is installed, run the following command to install Tau:
+2. **Create a Build Directory**:
 
-```sh
-choco install tau
-```
+    ```bash
+    mkdir build
+    cd build
+    ```
 
-### macOS
+3. **Configure the Project**:
 
-For macOS users, you can install Tau via the popular package manager **Homebrew**.
-If you haven't already installed Homebrew, you can do so by following the instructions
-on the [🍺 Homebrew website](https://brew.sh/).
+    ```bash
+    cmake ..
+    ```
 
-Once Homebrew is installed, run the following command to install Tau:
+4. **Build the Project**:
 
-```sh
-brew install tau
-```
+    ```bash
+    cmake --build .
+    ```
 
-### Linux
+5. **Install**:
 
-On Linux distributions, we provide packages for various package managers. Choose
-the package manager that matches your distribution:
+   ```bash
+    cmake --install .
+    ```
+   
+   After installation add the folder (where Tau was installed to) to your
+   environment variables.
 
-#### Debian/Ubuntu
+6. **Verify Installation**:
 
-```sh
-sudo apt-get install tau
-```
+   Verify that Tau was installed correctly by running the following command:
 
-#### Fedora
+   ```sh
+   tauc --version
+   ```
 
-```sh
-sudo dnf install tau
-```
-
-#### Arch Linux (via AUR)
-
-```sh
-yay -S tau
-```
-
-#### Other Distributions
-
-Please refer to our [installation guide](https://tau-lang.org/install) for
-instructions tailored to your specific Linux distribution.
-
-After installation, you can verify that Tau is correctly installed by running:
-
-```sh
-tau --version
-```
-
-This will display the installed Tau version.
+   This should display the installed Tau version.
 
 👏 That's it! You're now ready to start using Tau for your programming projects.
-If you encounter any issues during installation or have questions, feel free to
-seek assistance from our [community](https://tau-lang.org/community).
+If you encounter any problems during installation or have questions, feel free to
+open an issue.
 
 ❤️ Happy coding with Tau!
 
@@ -100,41 +112,55 @@ seek assistance from our [community](https://tau-lang.org/community).
 
 Here's how you can create and compile your first Tau program.
 
-Create a file called `my_program.tau` and add the following code:
+1. **Create Source File**:
 
-```tau
-use std.io
+   Create a file called `hello.tau` and add the following code:
+   
+   ```tau
+   extern "C" fun printf(fmt: *u8, ...): i32
+   
+   fun main(): i32 {
+     printf("Hello World!")
+     
+     return 0
+   }
+   ```
+   
+2. **Compile**:
 
-fun main(): i32 {
-  stdout.write("Hello World!")
-  return 0
-}
-```
+   Compile the Tau source code into an object file.
 
-Once that's done, you can compile the program by typing:
+   ```sh
+   tauc --emit-obj hello.tau
+   ```
 
-```sh
-tau build my_program.tau -o my_program
-```
+3. **Link**:
 
-And to run it:
+   Use a linker to compile the generated object file into an executable.
+   
+   ```sh
+   gcc -o hello.exe ./hello.tau.obj
+   ```
 
-```sh
-./my_program
-```
+4. **Run**:
 
-If everything went according to plan, you should see the following printed to
-your screen:
+   Run the executable! If everything went according to plan, you should see
+   `Hello World` printed to your screen.
 
-```text
-Hello World!
-```
+   ```sh
+   ./hello.exe
+   ```
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! If you'd like to contribute to the
-Tau project, please check out our [Contribution Guidelines](CONTRIBUTING.md).
+If you'd like to contribute to the Tau project, please check out the
+[Contribution Guidelines](CONTRIBUTING.md).
 
 ## 📄 License
 
 This project is licensed under the [Apache 2.0 License](LICENSE).
+
+## 💖 Suppport
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/baleg00)
+

@@ -2,19 +2,21 @@
   <img src="img/logo.svg" alt="Tau Logo" width="80%">
 </p>
 
-<h2 align="center">Contributing to the Tau Project</h2>
+<h1 align="center">Contributing to the Tau Project</h1>
 
-Welcome to the Tau project! We're thrilled that you want to contribute.
+---
+
+Welcome to the Tau project! It's awesome that you want to contribute.
 By participating in this open-source project, you help us build a powerful and
 efficient programming language for everyone.
 
-👏 **We appreciate your help!**
+👏 **Your help is greatly appreciated!**
 
 ## 🌟 How to Contribute
 
 ### 1. Fork the Repository
 
-Click the "Fork" button at the top right corner of this repository. This creates
+Click the "Fork" button in the top right corner of this repository. This creates
 your copy of the project.
 
 For a step-by-step guide on how to create a fork, read GitHub's [official tutorial](https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository).
@@ -39,7 +41,7 @@ git checkout -b my-feature
 ### 4. Make Changes
 
 Make your changes to the code, fix bugs, or implement new features. Write clear
-and concise code with helpful comments. See our [coding guidelines](doc/coding-guidelines.md)
+and concise code with helpful comments. See the [coding guidelines](CODING_GUIDELINES.md)
 for rules, tips and best practices.
 
 ### 5. Commit Changes
@@ -68,18 +70,19 @@ For a step-by-step guide on how to create a pull request from a fork, read GitHu
 
 ## 📔 Code of Conduct
 
-Please note that we have a [Code of Conduct](https://tau-lang.org/code-of-conduct)
-that we expect all contributors to follow. Be respectful and inclusive in your
-interactions within the project.
+Please note that we have a [Code of Conduct](CODE_OF_CONDUCT.md) that we expect all
+contributors to follow. Be respectful and inclusive in your interactions within the project.
 
 ## 🙌 How to Get Help
 
-If you need assistance, have questions, or want to discuss ideas, visit our
-[community forum](https://tau-lang.org/community) and engage with the Tau community.
+If you need assistance, have questions, or want to discuss ideas, visit the issues
+page and engage with other contributors.
 
-<h2 align="center">
+---
+
+<p align="center">
   <img src="img/thank-you.svg" alt="Thank You" width="80%">
-</h2>
+</p>
 
 <p align="center">
   Thank you for contributing to the Tau project! Your efforts help us make Tau

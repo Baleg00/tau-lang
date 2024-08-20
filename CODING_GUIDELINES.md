@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../img/logo.svg" alt="Tau Logo" width="80%">
+  <img src="img/logo.svg" alt="Tau Logo" width="80%">
 </p>
 
 <h2 align="center">Coding Guidelines for the Tau Project</h2>
