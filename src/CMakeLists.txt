@@ -1,57 +1,78 @@
-llvm_map_components_to_libnames(LLVM_LIBS
-  support
-  core
+# Retrieve compile options and apply them to later targets.
+get_property(TAU_COMPILE_OPTIONS GLOBAL PROPERTY TAU_COMPILE_OPTIONS_PROPERTY)
+add_compile_options(${TAU_COMPILE_OPTIONS})
 
-  irreader
+# Retrieve compile definitions and apply them to later targets.
+get_property(TAU_COMPILE_DEFINITIONS GLOBAL PROPERTY TAU_COMPILE_DEFINITIONS_PROPERTY)
+add_compile_definitions(${TAU_COMPILE_DEFINITIONS})
 
-  executionengine
-  jitlink
-  mcjit
+# Define static libraries for various modules/components within the project.
+file(GLOB_RECURSE TAU_LIB_AST_FILES       ${PROJECT_SOURCE_DIR}/src/ast/*.c)
+file(GLOB_RECURSE TAU_LIB_LEXER_FILES     ${PROJECT_SOURCE_DIR}/src/stages/lexer/*.c)
+file(GLOB_RECURSE TAU_LIB_PARSER_FILES    ${PROJECT_SOURCE_DIR}/src/stages/parser/*.c)
+file(GLOB_RECURSE TAU_LIB_ANALYSIS_FILES  ${PROJECT_SOURCE_DIR}/src/stages/analysis/*.c)
+file(GLOB_RECURSE TAU_LIB_CODEGEN_FILES   ${PROJECT_SOURCE_DIR}/src/stages/codegen/*.c)
 
-  exegesisx86
-  x86targetmca
-  x86codegen
-  x86disassembler
-  x86asmparser
-  x86desc
-  x86info
+add_library(TAU_LIB_MEMTRACE    STATIC ${PROJECT_SOURCE_DIR}/src/utils/memory/memtrace.c)
+add_library(TAU_LIB_ARENA       STATIC ${PROJECT_SOURCE_DIR}/src/utils/memory/arena.c)
+add_library(TAU_LIB_LIST        STATIC ${PROJECT_SOURCE_DIR}/src/utils/collections/list.c)
+add_library(TAU_LIB_QUEUE       STATIC ${PROJECT_SOURCE_DIR}/src/utils/collections/queue.c)
+add_library(TAU_LIB_SET         STATIC ${PROJECT_SOURCE_DIR}/src/utils/collections/set.c)
+add_library(TAU_LIB_STACK       STATIC ${PROJECT_SOURCE_DIR}/src/utils/collections/stack.c)
+add_library(TAU_LIB_VECTOR      STATIC ${PROJECT_SOURCE_DIR}/src/utils/collections/vector.c)
+add_library(TAU_LIB_CLI         STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/cli.c)
+add_library(TAU_LIB_FILE        STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/file.c)
+add_library(TAU_LIB_LOG         STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/log.c)
+add_library(TAU_LIB_HASH        STATIC ${PROJECT_SOURCE_DIR}/src/utils/hash.c)
+add_library(TAU_LIB_STR         STATIC ${PROJECT_SOURCE_DIR}/src/utils/str.c)
+add_library(TAU_LIB_STR_VIEW    STATIC ${PROJECT_SOURCE_DIR}/src/utils/str_view.c)
+add_library(TAU_LIB_TIMER       STATIC ${PROJECT_SOURCE_DIR}/src/utils/timer.c)
+add_library(TAU_LIB_CRUMB       STATIC ${PROJECT_SOURCE_DIR}/src/utils/crumb.c)
+add_library(TAU_LIB_DIAGNOSTICS STATIC ${PROJECT_SOURCE_DIR}/src/utils/diagnostics.c)
+add_library(TAU_LIB_COMPILER    STATIC ${PROJECT_SOURCE_DIR}/src/compiler.c)
+add_library(TAU_LIB_LLVM        STATIC ${PROJECT_SOURCE_DIR}/src/llvm.c)
+add_library(TAU_LIB_AST         STATIC ${TAU_LIB_AST_FILES})
+add_library(TAU_LIB_LEXER       STATIC ${TAU_LIB_LEXER_FILES})
+add_library(TAU_LIB_PARSER      STATIC ${TAU_LIB_PARSER_FILES})
+add_library(TAU_LIB_ANALYSIS    STATIC ${TAU_LIB_ANALYSIS_FILES})
+add_library(TAU_LIB_CODEGEN     STATIC ${TAU_LIB_CODEGEN_FILES})
 
-  passes
+# Combine libraries into a single variable for easier linking later.
+set(TAU_LIBRARIES
+  TAU_LIB_MEMTRACE
+  TAU_LIB_ARENA
+  TAU_LIB_LIST
+  TAU_LIB_QUEUE
+  TAU_LIB_SET
+  TAU_LIB_STACK
+  TAU_LIB_VECTOR
+  TAU_LIB_CLI
+  TAU_LIB_FILE
+  TAU_LIB_LOG
+  TAU_LIB_HASH
+  TAU_LIB_STR
+  TAU_LIB_STR_VIEW
+  TAU_LIB_TIMER
+  TAU_LIB_CRUMB
+  TAU_LIB_DIAGNOSTICS
+  TAU_LIB_COMPILER
+  TAU_LIB_LLVM
+  TAU_LIB_AST
+  TAU_LIB_LEXER
+  TAU_LIB_PARSER
+  TAU_LIB_ANALYSIS
+  TAU_LIB_CODEGEN
 )
 
-file(GLOB_RECURSE TAU_SOURCES ${TAU_SOURCE_DIR}/*.c)
+# Store libraries in a global property for later use.
+set_property(GLOBAL PROPERTY TAU_LIBRARIES_PROPERTY ${TAU_LIBRARIES})
 
-add_library(${TAU_LIBRARY_NAME} STATIC ${TAU_SOURCES})
+# Define the main executable target for the compiler.
+add_executable(tauc ${PROJECT_SOURCE_DIR}/src/main.c)
 
-add_executable(${TAU_EXECUTABLE_NAME} ${TAU_SOURCE_DIR}/main.c)
+# Retrieve LLVM libraries and link them to the main executable.
+get_property(LLVM_LIBRARIES GLOBAL PROPERTY LLVM_LIBRARIES_PROPERTY)
+target_link_libraries(tauc PUBLIC ${TAU_LIBRARIES} ${LLVM_LIBRARIES})
 
-target_link_libraries(${TAU_EXECUTABLE_NAME} PUBLIC ${LLVM_LIBS} ${TAU_LIBRARY_NAME})
-
-if(MSVC)
-  target_compile_options(${TAU_LIBRARY_NAME} PUBLIC /Wall /WX /FIbase.h)
-  target_compile_options(${TAU_EXECUTABLE_NAME} PUBLIC /Wall /WX /FIbase.h)
-else()
-  target_compile_options(${TAU_LIBRARY_NAME} PUBLIC -Wall -Wextra -Wpedantic -Werror -include base.h)
-  target_compile_options(${TAU_EXECUTABLE_NAME} PUBLIC -Wall -Wextra -Wpedantic -Werror -include base.h)
-endif()
-
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-  target_compile_definitions(${TAU_LIBRARY_NAME} PUBLIC TAU_DEBUG _CRT_SECURE_NO_WARNINGS)
-  target_compile_definitions(${TAU_EXECUTABLE_NAME} PUBLIC TAU_DEBUG _CRT_SECURE_NO_WARNINGS)
-elseif("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-  target_compile_definitions(${TAU_LIBRARY_NAME} PUBLIC TAU_RELEASE)
-  target_compile_definitions(${TAU_EXECUTABLE_NAME} PUBLIC TAU_RELEASE)
-endif()
-
-target_compile_definitions(${TAU_LIBRARY_NAME} PUBLIC TAU_VERSION="${PROJECT_VERSION}")
-target_compile_definitions(${TAU_EXECUTABLE_NAME} PUBLIC TAU_VERSION="${PROJECT_VERSION}")
-
-get_target_property(TAU_LINK_LIBRARIES ${TAU_EXECUTABLE_NAME} LINK_LIBRARIES)
-get_target_property(TAU_COMPILE_OPTIONS ${TAU_EXECUTABLE_NAME} COMPILE_OPTIONS)
-get_target_property(TAU_COMPILE_DEFINITIONS ${TAU_EXECUTABLE_NAME} COMPILE_DEFINITIONS)
-
-message(STATUS "Tau Link Libraries: ${TAU_LINK_LIBRARIES}")
-message(STATUS "Tau Compile Options: ${TAU_COMPILE_OPTIONS}")
-message(STATUS "Tau Compile Definitions: ${TAU_COMPILE_DEFINITIONS}")
-
-install(TARGETS ${TAU_EXECUTABLE_NAME} CONFIGURATIONS "Release")
+# Install the main executable for both Debug and Release configurations.
+install(TARGETS tauc CONFIGURATIONS Debug Release)
