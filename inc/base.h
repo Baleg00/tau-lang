@@ -46,6 +46,9 @@
 
 // declaration hides previous local declaration
 # pragma warning(disable: 4456)
+
+// unsafe function pointer conversion
+# pragma warning(disable: 4191)
 #elif defined(__GNUC__)
 // enumerator in switch of enum is not explicitly handled by a case label
 # pragma GCC diagnostic ignored "-Wswitch-enum"
