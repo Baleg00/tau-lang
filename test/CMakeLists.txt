@@ -24,6 +24,7 @@ set(TAU_TEST_NAMES
   TYPEDESC
   VECTOR
   LEXER
+  COMMAND
 )
 
 # Iterate over each name in `TAU_TEST_NAMES` to create an executable and a corresponding test.

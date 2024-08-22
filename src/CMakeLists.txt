@@ -21,6 +21,7 @@ add_library(TAU_LIB_SET         STATIC ${PROJECT_SOURCE_DIR}/src/utils/collectio
 add_library(TAU_LIB_STACK       STATIC ${PROJECT_SOURCE_DIR}/src/utils/collections/stack.c)
 add_library(TAU_LIB_VECTOR      STATIC ${PROJECT_SOURCE_DIR}/src/utils/collections/vector.c)
 add_library(TAU_LIB_CLI         STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/cli.c)
+add_library(TAU_LIB_COMMAND     STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/command.c)
 add_library(TAU_LIB_FILE        STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/file.c)
 add_library(TAU_LIB_LOG         STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/log.c)
 add_library(TAU_LIB_HASH        STATIC ${PROJECT_SOURCE_DIR}/src/utils/hash.c)
@@ -47,6 +48,7 @@ set(TAU_LIBRARIES
   TAU_LIB_STACK
   TAU_LIB_VECTOR
   TAU_LIB_CLI
+  TAU_LIB_COMMAND
   TAU_LIB_FILE
   TAU_LIB_LOG
   TAU_LIB_HASH
