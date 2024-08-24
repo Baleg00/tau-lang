@@ -12,6 +12,7 @@ file(GLOB_RECURSE TAU_LIB_LEXER_FILES     ${PROJECT_SOURCE_DIR}/src/stages/lexer
 file(GLOB_RECURSE TAU_LIB_PARSER_FILES    ${PROJECT_SOURCE_DIR}/src/stages/parser/*.c)
 file(GLOB_RECURSE TAU_LIB_ANALYSIS_FILES  ${PROJECT_SOURCE_DIR}/src/stages/analysis/*.c)
 file(GLOB_RECURSE TAU_LIB_CODEGEN_FILES   ${PROJECT_SOURCE_DIR}/src/stages/codegen/*.c)
+file(GLOB_RECURSE TAU_LIB_LINKER_FILES    ${PROJECT_SOURCE_DIR}/src/linker/*.c)
 
 add_library(TAU_LIB_MEMTRACE    STATIC ${PROJECT_SOURCE_DIR}/src/utils/memory/memtrace.c)
 add_library(TAU_LIB_ARENA       STATIC ${PROJECT_SOURCE_DIR}/src/utils/memory/arena.c)
@@ -37,6 +38,7 @@ add_library(TAU_LIB_LEXER       STATIC ${TAU_LIB_LEXER_FILES})
 add_library(TAU_LIB_PARSER      STATIC ${TAU_LIB_PARSER_FILES})
 add_library(TAU_LIB_ANALYSIS    STATIC ${TAU_LIB_ANALYSIS_FILES})
 add_library(TAU_LIB_CODEGEN     STATIC ${TAU_LIB_CODEGEN_FILES})
+add_library(TAU_LIB_LINKER      STATIC ${TAU_LIB_LINKER_FILES})
 
 # Combine libraries into a single variable for easier linking later.
 set(TAU_LIBRARIES
@@ -64,6 +66,7 @@ set(TAU_LIBRARIES
   TAU_LIB_PARSER
   TAU_LIB_ANALYSIS
   TAU_LIB_CODEGEN
+  TAU_LIB_LINKER
 )
 
 # Store libraries in a global property for later use.
