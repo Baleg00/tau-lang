@@ -397,6 +397,21 @@ int command_run(command_t* cmd)
   return (int)exit_code;
 }
 
+void command_reset(command_t* cmd)
+{
+  if (cmd->cwd != NULL)
+  {
+    string_free(cmd->cwd);
+    cmd->cwd = NULL;
+  }
+
+  vector_for_each(cmd->args, string_free);
+  vector_clear(cmd->args);
+
+  vector_for_each(cmd->env, command_env_var_free);
+  vector_clear(cmd->env);
+}
+
 #else
 # error "Commands are not implemented for this platform!"
 #endif

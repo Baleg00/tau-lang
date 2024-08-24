@@ -94,4 +94,11 @@ void command_set_stderr(command_t* cmd, FILE* stream);
  */
 int command_run(command_t* cmd);
 
+/**
+ * \brief Resets a command to its initial state.
+ *
+ * \param[in] cmd Pointer to the command to be used.
+ */
+void command_reset(command_t* cmd);
+
 #endif
