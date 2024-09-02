@@ -291,13 +291,13 @@ bool linker_gcc_link(linker_t* linker)
 
   switch (ctx->level)
   {
-  case LINKER_OPTIMIZATION_NONE:     optim_arg = "-O0";    break;
-  case LINKER_OPTIMIZATION_LESS:     optim_arg = "-O1";    break;
-  case LINKER_OPTIMIZATION_DEFAULT:     optim_arg = "-O2";    break;
-  case LINKER_OPTIMIZATION_AGGRESSIVE:     optim_arg = "-O3";    break;
-  case LINKER_OPTIMIZATION_SIZE:  optim_arg = "-Os";    break;
-  case LINKER_OPTIMIZATION_SPEED: optim_arg = "-Ofast"; break;
-  case LINKER_OPTIMIZATION_DEBUG: optim_arg = "-Og";    break;
+  case LINKER_OPTIMIZATION_NONE:       optim_arg = "-O0";    break;
+  case LINKER_OPTIMIZATION_LESS:       optim_arg = "-O1";    break;
+  case LINKER_OPTIMIZATION_DEFAULT:    optim_arg = "-O2";    break;
+  case LINKER_OPTIMIZATION_AGGRESSIVE: optim_arg = "-O3";    break;
+  case LINKER_OPTIMIZATION_SIZE:       optim_arg = "-Os";    break;
+  case LINKER_OPTIMIZATION_SPEED:      optim_arg = "-Ofast"; break;
+  case LINKER_OPTIMIZATION_DEBUG:      optim_arg = "-Og";    break;
   default: UNREACHABLE();
   }
 
