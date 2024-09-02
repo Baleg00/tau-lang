@@ -7,6 +7,7 @@ get_property(TAU_COMPILE_DEFINITIONS GLOBAL PROPERTY TAU_COMPILE_DEFINITIONS_PRO
 add_compile_definitions(${TAU_COMPILE_DEFINITIONS})
 
 # Define static libraries for various modules/components within the project.
+file(GLOB_RECURSE TAU_LIB_COMPILER_FILES  ${PROJECT_SOURCE_DIR}/src/compiler/*c)
 file(GLOB_RECURSE TAU_LIB_AST_FILES       ${PROJECT_SOURCE_DIR}/src/ast/*.c)
 file(GLOB_RECURSE TAU_LIB_LEXER_FILES     ${PROJECT_SOURCE_DIR}/src/stages/lexer/*.c)
 file(GLOB_RECURSE TAU_LIB_PARSER_FILES    ${PROJECT_SOURCE_DIR}/src/stages/parser/*.c)
@@ -32,7 +33,7 @@ add_library(TAU_LIB_STR_VIEW    STATIC ${PROJECT_SOURCE_DIR}/src/utils/str_view.
 add_library(TAU_LIB_TIMER       STATIC ${PROJECT_SOURCE_DIR}/src/utils/timer.c)
 add_library(TAU_LIB_CRUMB       STATIC ${PROJECT_SOURCE_DIR}/src/utils/crumb.c)
 add_library(TAU_LIB_DIAGNOSTICS STATIC ${PROJECT_SOURCE_DIR}/src/utils/diagnostics.c)
-add_library(TAU_LIB_COMPILER    STATIC ${PROJECT_SOURCE_DIR}/src/compiler.c)
+add_library(TAU_LIB_COMPILER    STATIC ${TAU_LIB_COMPILER_FILES})
 add_library(TAU_LIB_LLVM        STATIC ${PROJECT_SOURCE_DIR}/src/llvm.c)
 add_library(TAU_LIB_AST         STATIC ${TAU_LIB_AST_FILES})
 add_library(TAU_LIB_LEXER       STATIC ${TAU_LIB_LEXER_FILES})

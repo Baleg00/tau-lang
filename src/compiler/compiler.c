@@ -5,7 +5,7 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "compiler.h"
+#include "compiler/compiler.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -13,6 +13,7 @@
 #include "llvm.h"
 #include "ast/ast.h"
 #include "ast/registry.h"
+#include "compiler/options.h"
 #include "stages/analysis/ctrlflow.h"
 #include "stages/analysis/symtable.h"
 #include "stages/lexer/lexer.h"
@@ -22,39 +23,14 @@
 #include "utils/common.h"
 #include "utils/crumb.h"
 #include "utils/timer.h"
-#include "utils/collections/list.h"
-#include "utils/io/cli.h"
 #include "utils/io/file.h"
 #include "utils/io/log.h"
 #include "utils/memory/memtrace.h"
 
 struct compiler_t
 {
-  list_t* input_files;
-
-  struct
-  {
-    bool verbose;
-    bool dump_tokens;
-    bool dump_ast;
-    bool emit_ll;
-    bool emit_bc;
-    bool emit_obj;
-    bool emit_asm;
-  } flags;
-
-  struct
-  {
-    log_level_t log_level;
-  } args;
+  options_ctx_t* options;
 };
-
-static void input_file_callback(cli_t* UNUSED(cli), queue_t* UNUSED(que), cli_opt_t* UNUSED(opt), const char* arg, void* user_data)
-{
-  compiler_t* compiler = (compiler_t*)user_data;
-
-  list_push_back(compiler->input_files, (void*)arg);
-}
 
 static void compiler_dump_tokens(const char* path, vector_t* tokens)
 {
@@ -165,14 +141,14 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
   vector_t* toks = NULL;
   time_it("lexer", toks = lexer_lex(lexer, path, src));
 
-  if (compiler->flags.dump_tokens)
+  if (options_get_dump_tokens(compiler->options))
     compiler_dump_tokens(path, toks);
 
   parser_t* parser = parser_init();
   ast_node_t* root_node = NULL;
   time_it("parser", root_node = parser_parse(parser, toks));
 
-  if (compiler->flags.dump_ast)
+  if (options_get_dump_ast(compiler->options))
     compiler_dump_ast(path, root_node);
 
   nameres_ctx_t* nameres_ctx = nameres_ctx_init();
@@ -201,17 +177,16 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
 
   LLVMDisposePassBuilderOptions(llvm_pass_builder_options);
 
-  if (compiler->flags.emit_ll)
+  if (options_get_dump_ll(compiler->options))
     compiler_emit_ll(path, llvm_module);
   
-  if (compiler->flags.emit_bc)
+  if (options_get_dump_bc(compiler->options))
     compiler_emit_bc(path, llvm_module);
 
-  if (compiler->flags.emit_obj)
-    compiler_emit_obj(path, llvm_module);
-
-  if (compiler->flags.emit_asm)
+  if (options_get_dump_asm(compiler->options))
     compiler_emit_asm(path, llvm_module);
+
+  compiler_emit_obj(path, llvm_module);
 
   LLVMDisposeModule(llvm_module);
 
@@ -234,17 +209,7 @@ compiler_t* compiler_init(void)
   log_set_stream(stdout);
   crumb_set_stream(stdout);
 
-  compiler->input_files = list_init();
-
-  compiler->flags.verbose = false;
-  compiler->flags.dump_tokens = false;
-  compiler->flags.dump_ast = false;
-  compiler->flags.emit_ll = false;
-  compiler->flags.emit_bc = false;
-  compiler->flags.emit_obj = false;
-  compiler->flags.emit_asm = false;
-
-  compiler->args.log_level = LOG_LEVEL_WARN;
+  compiler->options = options_ctx_init();
 
   return compiler;
 }
@@ -253,49 +218,30 @@ void compiler_free(compiler_t* compiler)
 {
   ast_registry_free();
   token_registry_free();
-  list_free(compiler->input_files);
+  options_ctx_free(compiler->options);
   llvm_free();
   free(compiler);
 }
 
 int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 {
-  cli_opt_t opts[] = {
-    cli_opt_help(),
-    cli_opt_version(TAU_VERSION),
-    cli_opt_verbose(&compiler->flags.verbose),
+  options_parse(compiler->options, argc, argv);
 
-    cli_opt_flag(cli_names("--dump-tokens"), 1, "Dump tokens into json file.", &compiler->flags.dump_tokens),
-    cli_opt_flag(cli_names("--dump-ast"),    1, "Dump AST into json file.",    &compiler->flags.dump_ast   ),
-    cli_opt_flag(cli_names("--emit-ll"),     1, "Emit LLVM IR into file.",     &compiler->flags.emit_ll    ),
-    cli_opt_flag(cli_names("--emit-bc"),     1, "Emit LLVM bitcode file.",     &compiler->flags.emit_bc    ),
-    cli_opt_flag(cli_names("--emit-obj"),    1, "Emit object file.",           &compiler->flags.emit_obj   ),
-    cli_opt_flag(cli_names("--emit-asm"),    1, "Emit assembly file.",         &compiler->flags.emit_asm   ),
-    
-    cli_opt_int(cli_names("--log-level"), 1, 'N', 1, &compiler->args.log_level, NULL, NULL, "Set log level.", NULL, NULL),
-    
-    cli_opt_sink(SIZE_MAX, NULL, NULL, input_file_callback, compiler)
-  };
-
-  const char* usages[] = { "tau [option...] file..." };
-
-  cli_t* cli = cli_init(opts, COUNTOF(opts), usages, COUNTOF(usages));
-  cli_parse(cli, argc, argv);
-  cli_free(cli);
-
-  log_set_verbose(compiler->flags.verbose);
-  log_set_level(compiler->args.log_level);
+  log_set_verbose(options_get_is_verbose(compiler->options));
+  log_set_level(options_get_log_level(compiler->options));
 
   time_it("LLVM:init", llvm_init());
 
-  if (list_size(compiler->input_files) == 0)
+  if (vector_empty(options_get_input_files(compiler->options)))
   {
     log_fatal("main", "No input files provided! ");
     return EXIT_FAILURE;
   }
 
-  LIST_FOR_LOOP(it, compiler->input_files)
-    compiler_process_file(compiler, (const char*)list_node_get(it));
+  vector_t* input_files = options_get_input_files(compiler->options);
+
+  VECTOR_FOR_LOOP(i, input_files)
+    compiler_process_file(compiler, (const char*)vector_get(input_files, i));
 
   return EXIT_SUCCESS;
 }
