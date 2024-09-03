@@ -78,19 +78,34 @@ size_t argparse_print_options(argparse_ctx_t* ctx, FILE* stream)
   {
     const argparse_option_t* opt = ctx->opts + i;
 
+    result += fprintf(stream, "\t");
+
+    size_t line_len = 0;
+
     if (opt->short_name != NULL)
-      result += fprintf(stream, "-%s", opt->short_name);
+      line_len += fprintf(stream, "-%s", opt->short_name);
 
     if (opt->short_name != NULL && opt->long_name != NULL)
-      result += fputs(", ", stream);
+      line_len += fputs(", ", stream);
 
     if (opt->long_name != NULL)
-      result += fprintf(stream, "--%s", opt->long_name);
+      line_len += fprintf(stream, "--%s", opt->long_name);
 
     if (opt->value_name != NULL)
-      result += fprintf(stream, " <%s>", opt->value_name);
+      line_len += fprintf(stream, " <%s>", opt->value_name);
 
-    result += fprintf(stream, "\t\t%s\n", opt->description);
+    if (line_len < 8)
+      line_len += fprintf(stream, "\t\t\t\t");
+    else if (line_len < 16)
+      line_len += fprintf(stream, "\t\t\t");
+    else if (line_len < 24)
+      line_len += fprintf(stream, "\t\t");
+    else
+      line_len += fprintf(stream, "\t");
+
+    line_len += fprintf(stream, "%s\n", opt->description);
+
+    result += line_len;
   }
 
   return result;
