@@ -138,4 +138,12 @@ bool options_get_dump_bc(options_ctx_t* ctx);
  */
 bool options_get_dump_asm(options_ctx_t* ctx);
 
+/**
+ * \brief Retrieves wether the compiler should exit safely after parsing command-line arguments.
+ *
+ * \param[in] ctx Pointer to the compiler option context to be used.
+ * \returns `true` if the compiler should exit safely, `false` otherwise.
+ */
+bool options_get_should_exit(options_ctx_t* ctx);
+
 #endif

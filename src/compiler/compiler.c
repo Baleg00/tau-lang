@@ -216,16 +216,24 @@ compiler_t* compiler_init(void)
 
 void compiler_free(compiler_t* compiler)
 {
-  ast_registry_free();
-  token_registry_free();
+  if (!options_get_should_exit(compiler->options))
+  {
+    ast_registry_free();
+    token_registry_free();
+    llvm_free();
+  }
+
   options_ctx_free(compiler->options);
-  llvm_free();
+
   free(compiler);
 }
 
 int compiler_main(compiler_t* compiler, int argc, const char* argv[])
 {
   options_parse(compiler->options, argc, argv);
+
+  if (options_get_should_exit(compiler->options))
+    return EXIT_SUCCESS;
 
   log_set_verbose(options_get_is_verbose(compiler->options));
   log_set_level(options_get_log_level(compiler->options));

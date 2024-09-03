@@ -97,18 +97,24 @@ struct options_ctx_t
   bool dump_bc;
   bool dump_asm;
   bool is_pie;
+
+  bool should_exit;
 };
 
-static void options_option_help(argparse_ctx_t* argp_ctx)
+static void options_option_help(options_ctx_t* ctx, argparse_ctx_t* argp_ctx)
 {
   puts("Usage: tauc [OPTIONS...] <FILES...>\n");
 
   argparse_print_options(argp_ctx, stdout);
+
+  ctx->should_exit = true;
 }
 
-static void options_option_version(void)
+static void options_option_version(options_ctx_t* ctx)
 {
   puts(TAU_VERSION);
+
+  ctx->should_exit = true;
 }
 
 static void options_option_verbose(options_ctx_t* ctx)
@@ -231,6 +237,7 @@ options_ctx_t* options_ctx_init(void)
   ctx->dump_bc = false;
   ctx->dump_asm = false;
   ctx->is_pie = true;
+  ctx->should_exit = false;
 
   return ctx;
 }
@@ -249,12 +256,12 @@ void options_parse(options_ctx_t* ctx, int argc, const char* argv[])
 
   int opt_id;
 
-  while ((opt_id = argparse_fetch(argp_ctx)) != ARGPARSE_EOA)
+  while (!ctx->should_exit && (opt_id = argparse_fetch(argp_ctx)) != ARGPARSE_EOA)
   {
     switch (opt_id)
     {
-    case OPTION_HELP:              options_option_help             (     argp_ctx); break;
-    case OPTION_VERSION:           options_option_version          (             ); break;
+    case OPTION_HELP:              options_option_help             (ctx, argp_ctx); break;
+    case OPTION_VERSION:           options_option_version          (ctx          ); break;
     case OPTION_VERBOSE:           options_option_verbose          (ctx          ); break;
     case OPTION_LOG_LEVEL:         options_option_log_level        (ctx, argp_ctx); break;
     case OPTION_OUTPUT:            options_option_output           (ctx, argp_ctx); break;
@@ -353,4 +360,9 @@ bool options_get_dump_bc(options_ctx_t* ctx)
 bool options_get_dump_asm(options_ctx_t* ctx)
 {
   return ctx->dump_asm;
+}
+
+bool options_get_should_exit(options_ctx_t* ctx)
+{
+  return ctx->should_exit;
 }
