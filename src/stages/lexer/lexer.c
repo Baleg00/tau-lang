@@ -447,14 +447,11 @@ token_t* lexer_read_string(lexer_t* lex)
 
   location_t begin_loc = lexer_location(lex);
 
-  char ch = lexer_next(lex);
+  lexer_next(lex);
 
-  size_t len = 1;
-
+  char ch;
   while ((ch = lexer_next(lex)) != '"' && ch != '\0')
   {
-    ++len;
-
     if (ch == '\\')
     {
       ch = lexer_next(lex);
@@ -469,13 +466,10 @@ token_t* lexer_read_string(lexer_t* lex)
       case 't': // horizontal tab
       case '\'': // single quote
       case '"': // double quote
-        ++len;
         break;
       
       case 'x':
       case 'X': // arbitrary hexadecimal bytes
-        ++len;
-
         if (!isxdigit(lexer_current(lex)))
         {
           location_t loc = lexer_location(lex);
@@ -486,7 +480,7 @@ token_t* lexer_read_string(lexer_t* lex)
           report_error_missing_hex_digits_in_escape_sequence(loc);
         }
 
-        len += lexer_skip(lex, lexer_is_hexadecimal);
+        lexer_skip(lex, lexer_is_hexadecimal);
         break;
 
       default:
@@ -501,8 +495,6 @@ token_t* lexer_read_string(lexer_t* lex)
       }
     }
   }
-
-  ++len;
 
   if (ch != '"')
   {
