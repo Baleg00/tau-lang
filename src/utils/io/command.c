@@ -80,7 +80,7 @@ static void command_env_var_free(command_env_var_t* var)
  * \param[in] size Size of TCHAR string in characters.
  * \returns The converted ANSI CHAR string.
  */
-static LPCH tstr_to_cstr(LPCTCH tstr, size_t size)
+static LPSTR tstr_to_cstr(LPTSTR tstr, size_t size)
 {
 #ifdef UNICODE
 
@@ -96,7 +96,7 @@ static LPCH tstr_to_cstr(LPCTCH tstr, size_t size)
 
 #endif
 
-  return (LPCH)buf;
+  return (LPSTR)buf;
 }
 
 /**
@@ -104,7 +104,7 @@ static LPCH tstr_to_cstr(LPCTCH tstr, size_t size)
  *
  * \param[in] cstr The ANSI CHAR string to be freed.
  */
-static void tstr_to_cstr_free(LPCH cstr)
+static void tstr_to_cstr_free(LPSTR cstr)
 {
   free(cstr);
 }
@@ -116,7 +116,7 @@ static void tstr_to_cstr_free(LPCH cstr)
  * \param[in] size Size of ANSI CHAR string in bytes.
  * \returns The converted TCHAR string.
  */
-static LPTCH cstr_to_tstr(LPCCH cstr, size_t size)
+static LPTSTR cstr_to_tstr(LPSTR cstr, size_t size)
 {
 #ifdef UNICODE
 
@@ -132,7 +132,7 @@ static LPTCH cstr_to_tstr(LPCCH cstr, size_t size)
 
 #endif
 
-  return (LPTCH)buf;
+  return (LPTSTR)buf;
 }
 
 /**
@@ -140,7 +140,7 @@ static LPTCH cstr_to_tstr(LPCCH cstr, size_t size)
  *
  * \param[in] tstr The TCHAR string to be freed.
  */
-static void cstr_to_tstr_free(LPTCH tstr)
+static void cstr_to_tstr_free(LPTSTR tstr)
 {
   free(tstr);
 }
@@ -151,7 +151,7 @@ static void cstr_to_tstr_free(LPTCH tstr)
  * \param[in] cmd Pointer to the command to be used.
  * \returns Space separated commandline TCHAR string.
  */
-static LPTCH command_get_commandline_tstr(command_t* cmd)
+static LPTSTR command_get_commandline_tstr(command_t* cmd)
 {
   string_t* commandline_str = string_init();
   string_append(commandline_str, cmd->prog);
@@ -164,7 +164,7 @@ static LPTCH command_get_commandline_tstr(command_t* cmd)
     string_append(commandline_str, arg);
   }
 
-  LPTCH commandline_tstr = cstr_to_tstr(string_begin(commandline_str), string_length(commandline_str) + 1);
+  LPTSTR commandline_tstr = cstr_to_tstr(string_begin(commandline_str), string_length(commandline_str) + 1);
 
   string_free(commandline_str);
 
@@ -176,7 +176,7 @@ static LPTCH command_get_commandline_tstr(command_t* cmd)
  *
  * \param[in] tstr The TCHAR string to be freed.
  */
-static void command_get_commandline_tstr_free(LPTCH tstr)
+static void command_get_commandline_tstr_free(LPTSTR tstr)
 {
   cstr_to_tstr_free(tstr);
 }
@@ -187,12 +187,12 @@ static void command_get_commandline_tstr_free(LPTCH tstr)
  * \param[in] cmd Pointer to the command to be used.
  * \returns TCHAR string of environment variables.
  */
-static LPTCH command_get_environment_tstr(command_t* cmd)
+static LPTSTR command_get_environment_tstr(command_t* cmd)
 {
-  LPTCH default_env_tstr = GetEnvironmentStrings();
+  LPTSTR default_env_tstr = GetEnvironmentStrings();
 
   size_t default_env_len = 0;
-  LPTCH default_env_ptr = default_env_tstr;
+  LPTSTR default_env_ptr = default_env_tstr;
 
   while (*default_env_ptr)
   {
@@ -234,10 +234,10 @@ static LPTCH command_get_environment_tstr(command_t* cmd)
 
   *cmd_env_ptr = '\0';
 
-  LPTCH cmd_env_tstr = cstr_to_tstr((LPCCH)cmd_env_cstr, cmd_env_len);
+  LPTSTR cmd_env_tstr = cstr_to_tstr((LPSTR)cmd_env_cstr, cmd_env_len);
 
   size_t joined_env_len = default_env_len + cmd_env_len;
-  LPTCH joined_env_tstr = (LPTCH)malloc(sizeof(TCHAR) * joined_env_len);
+  LPTSTR joined_env_tstr = (LPTSTR)malloc(sizeof(TCHAR) * joined_env_len);
 
   memcpy(joined_env_tstr, default_env_tstr, default_env_len * sizeof(TCHAR));
   memcpy(joined_env_tstr + default_env_len - 1, cmd_env_tstr, cmd_env_len * sizeof(TCHAR));
@@ -254,7 +254,7 @@ static LPTCH command_get_environment_tstr(command_t* cmd)
  *
  * \param[in] tstr The TCHAR string to be freed.
  */
-static void command_get_environment_tstr_free(LPTCH tstr)
+static void command_get_environment_tstr_free(LPTSTR tstr)
 {
   free(tstr);
 }
@@ -330,9 +330,9 @@ void command_set_stderr(command_t* cmd, FILE* stream)
 
 int command_run(command_t* cmd)
 {
-  LPTCH commandline_tstr = command_get_commandline_tstr(cmd);
-  LPTCH environemnt_tstr = command_get_environment_tstr(cmd);
-  LPTCH cwd_tstr = cmd->cwd == NULL ? NULL : cstr_to_tstr(string_begin(cmd->cwd), string_length(cmd->cwd) + 1);
+  LPTSTR commandline_tstr = command_get_commandline_tstr(cmd);
+  LPTSTR environemnt_tstr = command_get_environment_tstr(cmd);
+  LPTSTR cwd_tstr = cmd->cwd == NULL ? NULL : cstr_to_tstr(string_begin(cmd->cwd), string_length(cmd->cwd) + 1);
 
   DWORD flags = 0;
 
