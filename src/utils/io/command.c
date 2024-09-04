@@ -65,7 +65,7 @@ static void command_env_var_free(command_env_var_t* var)
   free(var);
 }
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 
 #include <windows.h>
 

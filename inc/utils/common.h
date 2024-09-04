@@ -60,7 +60,7 @@
  */
 #define COUNTOF(ARRAY) (sizeof((ARRAY)) / sizeof((ARRAY)[0]))
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 /**
  * \brief A type whose alignment requirement is at least as strict
  * as that of every scalar type.
@@ -132,7 +132,7 @@ typedef union
 # undef UNUSED
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 /**
  * \brief Marks a parameter as unused to suppress warnings.
  *

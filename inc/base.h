@@ -16,7 +16,7 @@
 #ifndef TAU_BASE_H
 #define TAU_BASE_H
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 // enumerator in switch of enum is not explicitly handled by a case label
 # pragma warning(disable: 4061)
 
