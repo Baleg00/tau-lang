@@ -58,6 +58,15 @@
 
 // declaration hides previous local declaration
 # pragma GCC diagnostic ignored "-Wshadow=local"
+
+// switch case implicit fallthrough
+# pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
+// conversion between pointers that have incompatible types
+# pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
+
+// function is unused
+# pragma GCC diagnostic ignored "-Wunused-function"
 #elif defined(__clang__)
 // enumerator in switch of enum is not explicitly handled by a case label
 # pragma clang diagnostic ignored "-Wswitch-enum"
@@ -67,6 +76,15 @@
 
 // declaration hides previous local declaration
 # pragma clang diagnostic ignored "-Wshadow-uncaptured-local"
+
+// extension used
+# pragma clang diagnostic ignored "-Wlanguage-extension-token"
+
+// incompatible function pointer types
+# pragma clang diagnostic ignored "-Wincompatible-function-pointer-types"
+
+// unused function
+# pragma clang diagnostic ignored "-Wunused-function"
 #endif
 
 #endif
