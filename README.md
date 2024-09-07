@@ -160,7 +160,7 @@ If you'd like to contribute to the Tau project, please check out the
 
 This project is licensed under the [Apache 2.0 License](LICENSE).
 
-## 💖 Suppport
+## 💖 Support
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/baleg00)
 

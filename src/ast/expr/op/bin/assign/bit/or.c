@@ -10,8 +10,8 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 #include "stages/codegen/utils.h"
-#include "utils/diagnostics.h"
 #include "utils/common.h"
+#include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
 
 ast_expr_op_bin_assign_bit_or_t* ast_expr_op_bin_assign_bit_or_init(void)

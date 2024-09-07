@@ -62,7 +62,7 @@ void ast_stmt_while_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_while_t* node)
   ctrlflow_ctx_while_begin(ctx, node);
 
   ast_node_ctrlflow(ctx, node->stmt);
-  
+
   ctrlflow_ctx_while_end(ctx);
 }
 

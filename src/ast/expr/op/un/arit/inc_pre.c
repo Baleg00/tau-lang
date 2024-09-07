@@ -83,6 +83,6 @@ void ast_expr_op_un_arit_inc_pre_codegen(codegen_ctx_t* ctx, ast_expr_op_un_arit
   else
     UNREACHABLE();
 
-  LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);    
+  LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
   node->llvm_value = expr->llvm_value;
 }

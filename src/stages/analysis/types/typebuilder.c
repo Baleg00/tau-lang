@@ -11,9 +11,9 @@
 #include <string.h>
 
 #include "ast/ast.h"
-#include "utils/collections/set.h"
 #include "utils/common.h"
 #include "utils/hash.h"
+#include "utils/collections/set.h"
 #include "utils/memory/memtrace.h"
 
 struct typebuilder_t
@@ -136,7 +136,7 @@ static int typebuilder_cmp_struct(void* lhs, void* rhs)
 
   size_t lhs_id_view_len = string_view_length(lhs_id_view);
   size_t rhs_id_view_len = string_view_length(rhs_id_view);
-  
+
   size_t lhs_hash = (size_t)hash_digest(lhs_id_view_begin, lhs_id_view_len);
   size_t rhs_hash = (size_t)hash_digest(rhs_id_view_begin, rhs_id_view_len);
 
@@ -203,10 +203,10 @@ static int typebuilder_cmp_var(void* lhs, void* rhs)
 
   if (lhs_desc->id < rhs_desc->id)
     return -1;
-  
+
   if (lhs_desc->id > rhs_desc->id)
     return 1;
-  
+
   return 0;
 }
 
@@ -216,7 +216,7 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
 
   builder->llvm_context = llvm_context;
   builder->llvm_layout = llvm_layout;
-  
+
   builder->desc_i8    = (typedesc_t*)typedesc_prim_i8_init   ();
   builder->desc_i16   = (typedesc_t*)typedesc_prim_i16_init  ();
   builder->desc_i32   = (typedesc_t*)typedesc_prim_i32_init  ();
@@ -517,7 +517,7 @@ typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_typ
     for (size_t i = 0; i < param_count; i++)
       llvm_param_types[i] = param_types[i]->llvm_type;
   }
-  
+
   desc->llvm_type = LLVMFunctionType(
     desc->return_type->llvm_type,
     llvm_param_types,
@@ -699,7 +699,7 @@ typedesc_t* typebuilder_struct_set_body(typebuilder_t* builder, typedesc_t* desc
     (uint32_t)field_count,
     false
    );
-  
+
   if (llvm_field_types != NULL)
   {
     free(llvm_field_types);

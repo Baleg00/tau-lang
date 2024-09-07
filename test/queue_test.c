@@ -23,13 +23,13 @@ test()
       before_each()
         queue = queue_init();
       end()
-      
+
       it("should add data to the queue")
         int data = 1;
 
         queue_offer(queue, &data);
         assert_false(queue_empty(queue));
-        
+
         queue_free(queue);
       end()
 
@@ -50,15 +50,15 @@ test()
       before_each()
         queue = queue_init();
       end()
-      
+
       it("should remove and return the head of the queue")
         int data = 1;
 
         queue_offer(queue, &data);
         void* polled_data = queue_poll(queue);
-        
+
         assert_equal(polled_data, &data);
-        
+
         queue_free(queue);
       end()
     end()
@@ -67,16 +67,16 @@ test()
       before_each()
         queue = queue_init();
       end()
-      
+
       it("should return the head of the queue without removing it")
         int data = 1;
 
         queue_offer(queue, &data);
         void* peeked_data = queue_peek(queue);
-        
+
         assert_equal(peeked_data, &data);
         assert_false(queue_empty(queue));
-        
+
         queue_free(queue);
       end()
     end()
@@ -85,7 +85,7 @@ test()
       before_each()
         queue = queue_init();
       end()
-      
+
       it("should return true if the queue is empty")
         assert_true(queue_empty(queue));
 
@@ -94,10 +94,10 @@ test()
 
       it("should return false if the queue is not empty")
         int data = 1;
-        
+
         queue_offer(queue, &data);
         assert_false(queue_empty(queue));
-        
+
         queue_free(queue);
       end()
     end()

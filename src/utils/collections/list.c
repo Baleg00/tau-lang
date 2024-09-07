@@ -194,7 +194,7 @@ void* list_pop_front(list_t* list)
   ASSERT(!list_empty(list));
 
   list_node_t* node = list->head;
-  
+
   if (list->head == list->tail)
     list->head = list->tail = NULL;
   else
@@ -217,7 +217,7 @@ void* list_pop_back(list_t* list)
   ASSERT(!list_empty(list));
 
   list_node_t* node = list->tail;
-  
+
   if (list->head == list->tail)
     list->head = list->tail = NULL;
   else
@@ -252,7 +252,7 @@ list_node_t* list_insert_before(list_node_t* node, void* data)
   node->prev = new_node;
 
   ++node->owner->len;
-  
+
   return new_node;
 }
 

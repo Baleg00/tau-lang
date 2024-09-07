@@ -87,7 +87,7 @@ void ast_stmt_return_codegen(codegen_ctx_t* ctx, ast_stmt_return_t* node)
     ast_node_codegen(ctx, node->expr);
 
     ast_expr_t* expr_node = (ast_expr_t*)node->expr;
-    
+
     LLVMValueRef llvm_return_value = expr_node->llvm_value;
 
     typedesc_t* expected_return_desc = typetable_lookup(ctx->typetable, ctx->fun_node->return_type);

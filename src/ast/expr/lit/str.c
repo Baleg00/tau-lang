@@ -54,7 +54,7 @@ void ast_expr_lit_str_dump_json(FILE* stream, ast_expr_lit_str_t* node)
 
   string_t* str = string_init_with_cstr(node->value);
   string_t* escaped = string_escape(str);
-  
+
   fprintf(stream, ",\"value\":\"%s\"", string_begin(escaped));
 
   string_free(escaped);

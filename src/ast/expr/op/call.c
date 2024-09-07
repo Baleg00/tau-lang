@@ -94,7 +94,7 @@ void ast_expr_op_call_codegen(codegen_ctx_t* ctx, ast_expr_op_call_t* node)
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
-  
+
   typedesc_fun_t* fun_desc = (typedesc_fun_t*)typedesc_remove_ref(typetable_lookup(ctx->typetable, (ast_node_t*)node->callee));
 
   LLVMValueRef* llvm_param_values = NULL;

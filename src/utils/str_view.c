@@ -11,8 +11,8 @@
 #include <string.h>
 
 #include "utils/common.h"
-#include "utils/memory/memtrace.h"
 #include "utils/str.h"
+#include "utils/memory/memtrace.h"
 
 string_view_t string_view_init(const char* buf)
 {
@@ -107,7 +107,8 @@ bool string_view_contains(string_view_t str, string_view_t sub)
 
     if (j == sub.len)
       return true;
-    else if (j == 0)
+
+    if (j == 0)
       i++;
     else
       i += j;
@@ -133,7 +134,8 @@ bool string_view_contains_cstr(string_view_t str, const char* sub)
 
     if (j == sub_len)
       return true;
-    else if (j == 0)
+
+    if (j == 0)
       i++;
     else
       i += j;
@@ -157,7 +159,8 @@ size_t string_view_find(string_view_t str, string_view_t sub)
 
     if (j == sub.len)
       return i;
-    else if (j == 0)
+
+    if (j == 0)
       i++;
     else
       i += j;
@@ -183,7 +186,8 @@ size_t string_view_find_cstr(string_view_t str, const char* sub)
 
     if (j == sub_len)
       return i;
-    else if (j == 0)
+
+    if (j == 0)
       i++;
     else
       i += j;

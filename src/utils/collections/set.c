@@ -93,6 +93,7 @@ bool set_add(set_t* set, void* data)
     int rel = set->cmp(data, node->data);
 
     if (rel < 0)
+    {
       if (node->left == NULL)
       {
         node->left = set_node_init(data);
@@ -100,9 +101,11 @@ bool set_add(set_t* set, void* data)
         set->size++;
         return true;
       }
-      else
-        node = node->left;
+
+      node = node->left;
+    }
     else if (rel > 0)
+    {
       if (node->right == NULL)
       {
         node->right = set_node_init(data);
@@ -110,8 +113,9 @@ bool set_add(set_t* set, void* data)
         set->size++;
         return true;
       }
-      else
-        node = node->right;
+
+      node = node->right;
+    }
     else
       return false;
   }
@@ -157,7 +161,7 @@ bool set_remove(set_t* set, void* data)
     {
       if (temp != NULL)
         temp->parent = NULL;
-        
+
       set->root = temp;
     }
     else if (node == parent->left)
@@ -176,21 +180,21 @@ bool set_remove(set_t* set, void* data)
     {
       if (temp != NULL)
         temp->parent = NULL;
-      
+
       set->root = temp;
     }
     else if (node == parent->left)
     {
       if (temp != NULL)
         temp->parent = parent;
-      
+
       parent->left = temp;
     }
     else
     {
       if (temp != NULL)
         temp->parent = parent;
-      
+
       parent->right = temp;
     }
 
@@ -207,7 +211,7 @@ bool set_remove(set_t* set, void* data)
 
     if (min_node->right != NULL)
       min_node->right->parent = min_node->parent;
-    
+
     min_node->parent->left = min_node->right;
 
     set_node_free(min_node);
@@ -298,7 +302,7 @@ void set_for_each(set_t* set, set_for_each_func_t func)
   set_node_t* prev = NULL;
 
   while (node != NULL)
-  {    
+  {
     if (prev == node->right && node->right != NULL)
     {
       prev = node;

@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "compiler/compiler.h"
 
 int main(int argc, const char* argv[])

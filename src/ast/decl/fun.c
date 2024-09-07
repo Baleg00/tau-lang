@@ -66,7 +66,7 @@ void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
 
   if (param_count > 0)
     param_types = (typedesc_t**)malloc(sizeof(typedesc_t*) * param_count);
-  
+
   VECTOR_FOR_LOOP(i, node->params)
   {
     typedesc_t* param_desc = typetable_lookup(ctx->typetable, (ast_node_t*)vector_get(node->params, i));
@@ -162,7 +162,7 @@ size_t ast_decl_fun_mangle(ast_decl_fun_t* node, char* buf, size_t len)
     ast_decl_param_t* param = (ast_decl_param_t*)vector_get(node->params, i);
     written += ast_node_mangle(param->type, buf + written, len <= written ? 0 : len - written);
   }
-  
+
   if (node->is_vararg)
     written += snprintf(buf + written, len <= written ? 0 : len - written, "V");
 

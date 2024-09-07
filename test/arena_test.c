@@ -9,7 +9,7 @@ test()
         arena_t* arena = arena_init();
 
         assert_not_null(arena);
-        
+
         arena_free(arena);
       end()
     end()
@@ -21,7 +21,7 @@ test()
 
         assert_not_null(arena);
         assert_equal(arena_capacity(arena), capacity);
-        
+
         arena_free(arena);
       end()
     end()
@@ -32,9 +32,9 @@ test()
 
         size_t size = 16;
         void* mem = arena_alloc(arena, size);
-        
+
         assert_not_null(mem);
-        
+
         arena_free(arena);
       end()
 
@@ -43,9 +43,9 @@ test()
 
         size_t capacity = arena_capacity(arena);
         void* mem = arena_alloc(arena, capacity + 1);
-        
+
         assert_null(mem);
-        
+
         arena_free(arena);
       end()
 

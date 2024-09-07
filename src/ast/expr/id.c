@@ -36,7 +36,7 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
 
   string_view_t id_view = token_to_string_view(node->tok);
   symbol_t* sym = symtable_lookup_with_str_view(scope, id_view);
-  
+
   if (sym == NULL)
   {
     location_t loc = token_location(node->tok);
@@ -57,7 +57,7 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
     report_error_symbol_is_not_an_expression(loc);
   }
   }
-  
+
   node->decl = sym->node;
 }
 

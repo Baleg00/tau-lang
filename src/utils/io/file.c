@@ -14,13 +14,11 @@
 
 #include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/io/log.h"
-#include "utils/memory/memtrace.h"
 
 size_t file_read(const char* path, char* buf, size_t len)
 {
   FILE* file = fopen(path, "r");
-  
+
   if (file == NULL)
     report_error_failed_to_open_file(path);
 
@@ -33,7 +31,7 @@ size_t file_read(const char* path, char* buf, size_t len)
     flen = fread(buf, sizeof(char), MIN(len, flen), file);
     memset(buf + flen, '\0', (len - flen) * sizeof(char));
   }
-  
+
   fclose(file);
 
   return flen;
@@ -138,11 +136,10 @@ size_t file_join(char* buf, size_t len, size_t count, ...)
 
   va_list paths;
   va_start(paths, count);
-  const char* path;
 
   for (size_t i = 0; i < count && len > 0; ++i)
   {
-    path = va_arg(paths, char*);
+    const char* path = va_arg(paths, char*);
     size_t path_len = strlen(path);
 
     result_len += path_len;
@@ -158,7 +155,7 @@ size_t file_join(char* buf, size_t len, size_t count, ...)
 
       if (i + 1 < count)
       {
-        *(buf++) = FILE_DIRSEP;
+        *buf++ = FILE_DIRSEP;
         --len;
       }
     }

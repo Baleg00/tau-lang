@@ -17,7 +17,7 @@ static const struct
 {
   token_kind_t kind;
   size_t len;
-} TOKEN_LEN_LOOKUP[] = {
+} g_token_len_lookup[] = {
   { TOK_UNKNOWN, 0 },
   { TOK_LIT_NULL, 4 },
   { TOK_KW_IS, 2 },
@@ -291,11 +291,11 @@ static size_t token_len_lit_bool(const char* src, size_t pos)
 
 static size_t token_len_by_kind(token_kind_t kind)
 {
-  for (size_t i = 0; i < COUNTOF(TOKEN_LEN_LOOKUP); i++)
+  for (size_t i = 0; i < COUNTOF(g_token_len_lookup); i++)
   {
-    if (TOKEN_LEN_LOOKUP[i].kind == kind)
+    if (g_token_len_lookup[i].kind == kind)
     {
-      return TOKEN_LEN_LOOKUP[i].len;
+      return g_token_len_lookup[i].len;
     }
   }
 

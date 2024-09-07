@@ -101,5 +101,5 @@ void ast_decl_struct_dump_json(FILE* stream, ast_decl_struct_t* node)
   fprintf(stream, ",\"is_pub\":%s", node->is_pub ? "true" : "false");
   fprintf(stream, ",\"members\":");
   ast_node_dump_json_vector(stream, node->members);
-  fputc('}', stream); 
+  fputc('}', stream);
 }

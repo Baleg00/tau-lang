@@ -71,7 +71,7 @@ void ast_stmt_if_codegen(codegen_ctx_t* ctx, ast_stmt_if_t* node)
 
   if (node->stmt_else != NULL)
     node->llvm_else = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "if_else");
-  
+
   node->llvm_end = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "if_end");
 
   ast_node_codegen(ctx, node->cond);

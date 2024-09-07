@@ -12,10 +12,10 @@
 
 #include "ast/ast.h"
 #include "stages/parser/parser.h"
-#include "utils/collections/queue.h"
 #include "utils/common.h"
 #include "utils/crumb.h"
 #include "utils/diagnostics.h"
+#include "utils/collections/queue.h"
 #include "utils/memory/memtrace.h"
 
 shyd_ctx_t* shyd_init(parser_t* par)
@@ -100,7 +100,7 @@ bool shyd_parse_typed_expr(shyd_ctx_t* ctx)
   }
 
   shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_OP);
-  
+
   switch (parser_current(ctx->par)->kind)
   {
   case TOK_KW_AS:      elem->op = OP_AS;      break;
@@ -120,7 +120,7 @@ bool shyd_parse_typed_expr(shyd_ctx_t* ctx)
   queue_offer(ctx->out_queue, type);
 
   ctx->prev_term = true;
-  
+
   return true;
 }
 
@@ -135,7 +135,7 @@ bool shyd_parse_paren_left(shyd_ctx_t* ctx)
   parser_next(ctx->par);
 
   ctx->prev_term = false;
-  
+
   return true;
 }
 
@@ -146,9 +146,9 @@ bool shyd_parse_paren_right(shyd_ctx_t* ctx)
 
   if (!shyd_op_flush_until_elem(ctx, SHYD_PAREN_OPEN))
     return false;
-  
+
   parser_next(ctx->par);
-  
+
   ctx->prev_term = true;
 
   return true;
@@ -161,11 +161,11 @@ bool shyd_parse_bracket_left(shyd_ctx_t* ctx)
 
   shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_BRACKET_OPEN);
   stack_push(ctx->op_stack, elem);
-  
+
   parser_next(ctx->par);
-  
+
   ctx->prev_term = false;
-  
+
   return true;
 }
 
@@ -178,15 +178,15 @@ bool shyd_parse_bracket_right(shyd_ctx_t* ctx)
     return false;
 
   shyd_op_flush_for_op(ctx, OP_SUBS);
-  
+
   shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_OP);
   elem->op = OP_SUBS;
   stack_push(ctx->op_stack, elem);
-  
+
   parser_next(ctx->par);
-  
+
   ctx->prev_term = true;
-  
+
   return true;
 }
 
@@ -209,7 +209,7 @@ bool shyd_parse_call(shyd_ctx_t* ctx)
 
     parser_expect(ctx->par, TOK_PUNCT_PAREN_RIGHT);
   }
-  
+
   shyd_op_flush_for_op(ctx, OP_CALL);
 
   shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_OP);
@@ -217,7 +217,7 @@ bool shyd_parse_call(shyd_ctx_t* ctx)
   elem->node = (ast_node_t*)node;
 
   stack_push(ctx->op_stack, elem);
-  
+
   return true;
 }
 
@@ -288,7 +288,7 @@ bool shyd_parse_op(shyd_ctx_t* ctx)
   shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_OP);
   elem->op = op;
   stack_push(ctx->op_stack, elem);
-  
+
   parser_next(ctx->par);
 
   ctx->prev_term = false;
@@ -313,7 +313,8 @@ bool shyd_parse_postfix_next(shyd_ctx_t* ctx)
 
   if (parser_current(ctx->par)->kind == TOK_ID || token_is_literal(parser_current(ctx->par)))
     return shyd_parse_term(ctx);
-  else if (token_is_punctuation(parser_current(ctx->par)))
+
+  if (token_is_punctuation(parser_current(ctx->par)))
     return shyd_parse_op(ctx);
 
   return false;
@@ -321,12 +322,13 @@ bool shyd_parse_postfix_next(shyd_ctx_t* ctx)
 
 void shyd_parse_postfix(shyd_ctx_t* ctx)
 {
-  while (shyd_parse_postfix_next(ctx));
+  while (shyd_parse_postfix_next(ctx))
+  {}
 
   while (!stack_empty(ctx->op_stack))
   {
     shyd_elem_t* elem = (shyd_elem_t*)stack_pop(ctx->op_stack);
-    
+
     if (elem->kind == SHYD_PAREN_OPEN)
     {
       location_t loc = token_location(elem->tok);

@@ -9,11 +9,9 @@
 
 #include <stdarg.h>
 #include <time.h>
-#include <string.h>
 
 #include "utils/common.h"
 #include "utils/esc_seq.h"
-#include "utils/io/file.h"
 
 static log_level_t g_log_level = LOG_LEVEL_TRACE;
 static FILE* g_log_stream = NULL;
@@ -27,7 +25,7 @@ void log_log(log_level_t lvl, const char* file, int line, const char* UNUSED(fun
   if (g_log_verbose)
   {
     time_t tm = time(NULL);
-    
+
     char time_buf[9];
     size_t len = strftime(time_buf, sizeof(time_buf), "%H:%M:%S", localtime(&tm));
     time_buf[len] = '\0';
@@ -36,7 +34,7 @@ void log_log(log_level_t lvl, const char* file, int line, const char* UNUSED(fun
       file, line, time_buf);
   }
 
-  fprintf(g_log_stream, "[%s%s:%s" ESC_RESET "]> ", 
+  fprintf(g_log_stream, "[%s%s:%s" ESC_RESET "]> ",
     log_level_to_color(lvl), log_level_to_string(lvl), name);
 
   va_list args;

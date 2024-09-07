@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stages/analysis/types/typedesc/typedesc.h"
 #include "utils/common.h"
 #include "utils/hash.h"
 #include "utils/memory/memtrace.h"
@@ -143,7 +142,7 @@ symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len)
   while (table != NULL)
   {
     symbol_t* sym = symtable_get(table, id, len);
-    
+
     if (sym != NULL)
       return sym;
 

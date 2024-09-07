@@ -53,7 +53,7 @@ void ast_decl_enum_nameres(nameres_ctx_t* ctx, ast_decl_enum_t* node)
 void ast_decl_enum_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_t* node)
 {
   typedesc_t* desc = typebuilder_build_enum(ctx->typebuilder, (ast_node_t*)node);
-  
+
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 
   typedesc_enum_t* prev_enum_desc = ctx->enum_desc;

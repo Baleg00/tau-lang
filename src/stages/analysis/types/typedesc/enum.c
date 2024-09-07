@@ -29,7 +29,7 @@ bool typedesc_enum_is_implicitly_convertible(typedesc_enum_t* from_desc, typedes
 {
   if (to_desc->kind == TYPEDESC_OPT)
     return typedesc_is_implicitly_convertible((typedesc_t*)from_desc, typedesc_remove_opt(to_desc));
-  
+
   return (typedesc_t*)from_desc == typedesc_remove_mut(to_desc);
 }
 

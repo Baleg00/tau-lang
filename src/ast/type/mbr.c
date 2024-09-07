@@ -35,7 +35,7 @@ void ast_type_mbr_nameres(nameres_ctx_t* ctx, ast_type_mbr_t* node)
   ast_node_nameres(ctx, node->parent);
 
   ast_node_t* parent_node = NULL;
-  
+
   switch (node->parent->kind)
   {
   case AST_TYPE_ID:     parent_node = ((ast_type_id_t* )node->parent)->decl; break;

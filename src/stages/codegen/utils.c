@@ -29,33 +29,31 @@ LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm
   if (typedesc_is_integer(from_desc) && typedesc_is_integer(to_desc))
   {
     if (typedesc_integer_bits(from_desc) < typedesc_integer_bits(to_desc))
-    {
       return typedesc_is_signed(to_desc) ?
         LLVMBuildSExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "") :
         LLVMBuildZExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
-    }
 
     return typedesc_integer_bits(from_desc) > typedesc_integer_bits(to_desc) ?
       LLVMBuildTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "") :
       LLVMBuildBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
   }
-  else if (typedesc_is_integer(from_desc) && typedesc_is_float(to_desc))
-  {
+
+  if (typedesc_is_integer(from_desc) && typedesc_is_float(to_desc))
     return typedesc_is_signed(from_desc) ?
       LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "") :
       LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
-  }
-  else if (typedesc_is_float(from_desc) && typedesc_is_integer(to_desc))
-  {
+
+  if (typedesc_is_float(from_desc) && typedesc_is_integer(to_desc))
     return typedesc_is_signed(to_desc) ?
       LLVMBuildFPToSI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "") :
       LLVMBuildFPToUI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
-  }
-  else if (typedesc_is_float(from_desc) && typedesc_is_float(to_desc))
+
+  if (typedesc_is_float(from_desc) && typedesc_is_float(to_desc))
   {
     if (from_desc->kind == TYPEDESC_F32 && to_desc->kind == TYPEDESC_F64)
       return LLVMBuildFPExt(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
-    else if (from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32)
+
+    if (from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32)
       return LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
   }
 
@@ -96,7 +94,7 @@ static LLVMValueRef codegen_build_implicit_cast_array(codegen_ctx_t* ctx, LLVMVa
 {
   if (to_desc->kind == TYPEDESC_OPT)
     return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)from_desc, (typedesc_opt_t*)to_desc);
-  
+
   // TODO: Cast array elements.
   return llvm_value;
 }

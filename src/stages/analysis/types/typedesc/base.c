@@ -434,7 +434,7 @@ typedesc_t* typedesc_arithmetic_promote(typedesc_t* lhs_desc, typedesc_t* rhs_de
 
   if (typedesc_integer_bits(lhs_desc) < typedesc_integer_bits(rhs_desc))
     return rhs_desc;
-  
+
   return lhs_desc;
 }
 

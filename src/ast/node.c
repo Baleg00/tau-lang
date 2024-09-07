@@ -411,7 +411,7 @@ void ast_node_dump_json_vector(FILE* stream, vector_t* vec)
   }
 
   fputc('[', stream);
-  
+
   VECTOR_FOR_LOOP(i, vec)
   {
     ast_node_dump_json(stream, (ast_node_t*)vector_get(vec, i));

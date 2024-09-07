@@ -19,10 +19,11 @@
 
 #define LEXER_MAX_BUFFER_SIZE 256
 
-static const struct {
+static const struct
+{
   const char* const keyword;
   const token_kind_t kind;
-} KEYWORD_LOOKUP_TABLE[] = {
+} g_keyword_lookup_table[] = {
   { "is",       TOK_KW_IS       },
   { "as",       TOK_KW_AS       },
   { "sizeof",   TOK_KW_SIZEOF   },
@@ -171,7 +172,7 @@ char lexer_next(lexer_t* lex)
 {
   if (lex->src[lex->pos] == '\0')
     return '\0';
-  
+
   if (lex->src[lex->pos] == '\n')
   {
     token_t* tok = token_registry_token_init(lex->path, TOK_NEWLINE, lex->pos);
@@ -283,11 +284,11 @@ token_t* lexer_read_word(lexer_t* lex)
 
   buf[len] = '\0';
 
-  for (size_t i = 0; i < COUNTOF(KEYWORD_LOOKUP_TABLE); ++i)
+  for (size_t i = 0; i < COUNTOF(g_keyword_lookup_table); ++i)
   {
-    if (strcmp(KEYWORD_LOOKUP_TABLE[i].keyword, buf) == 0)
+    if (strcmp(g_keyword_lookup_table[i].keyword, buf) == 0)
     {
-      tok->kind = KEYWORD_LOOKUP_TABLE[i].kind;
+      tok->kind = g_keyword_lookup_table[i].kind;
       break;
     }
   }
@@ -342,7 +343,7 @@ token_t* lexer_read_binary_integer(lexer_t* lex)
 token_t* lexer_read_decimal_number(lexer_t* lex)
 {
   token_t* tok = lexer_token_init(lex, TOK_LIT_INT);
-  
+
   size_t len = lexer_skip(lex, lexer_is_decimal);
 
   if (lexer_current(lex) == '.')
@@ -409,7 +410,7 @@ token_t* lexer_read_hexadecimal_integer(lexer_t* lex)
   size_t len = 2 + lexer_skip(lex, lexer_is_hexadecimal);
 
   len += lexer_skip_integer_suffix(lex);
-  
+
   if (len == 2 || lexer_is_word(lex))
   {
     location_t loc = lexer_location(lex);
@@ -467,7 +468,7 @@ token_t* lexer_read_string(lexer_t* lex)
       case '\'': // single quote
       case '"': // double quote
         break;
-      
+
       case 'x':
       case 'X': // arbitrary hexadecimal bytes
         if (!isxdigit(lexer_current(lex)))
@@ -539,7 +540,7 @@ token_t* lexer_read_character(lexer_t* lex)
     case '"': // double quote
       ++len;
       break;
-    
+
     case 'x':
     case 'X': // arbitrary hexadecimal byte
       ++len;
@@ -618,12 +619,14 @@ token_t* lexer_read_punctuation(lexer_t* lex)
     else
       kind = TOK_PUNCT_ASTERISK;
   else if (lexer_consume(lex, '/'))
+  {
     if (lexer_consume(lex, '/'))
     {
       lexer_skip_comment_line(lex);
       return lexer_read_next(lex);
     }
-    else if (lexer_consume(lex, '='))
+
+    if (lexer_consume(lex, '='))
       kind = TOK_PUNCT_SLASH_EQUAL;
     else if (lexer_consume(lex, '*'))
     {
@@ -632,6 +635,7 @@ token_t* lexer_read_punctuation(lexer_t* lex)
     }
     else
       kind = TOK_PUNCT_SLASH;
+  }
   else if (lexer_consume(lex, '%'))
     if (lexer_consume(lex, '='))
       kind = TOK_PUNCT_PERCENT_EQUAL;

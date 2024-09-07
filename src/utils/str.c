@@ -15,7 +15,7 @@
 #include "utils/io/log.h"
 #include "utils/memory/memtrace.h"
 
-struct string_t 
+struct string_t
 {
   size_t cap; // Maxmimum capacity of the buffer.
   size_t len; // Length of the string (excluding the terminating null character).
@@ -40,7 +40,7 @@ string_t* string_init_with_cstr_and_length(const char* cstr, size_t len)
   memcpy(str->buf, cstr, len);
   str->buf[len] = '\0';
   str->len = len;
-  
+
   return str;
 }
 
@@ -62,7 +62,7 @@ string_t* string_init_with_capacity(size_t cap)
 string_t* string_init_with_buffer(char* buf, size_t cap)
 {
   ASSERT(buf != NULL);
-  
+
   string_t* str = (string_t*)malloc(sizeof(string_t));
   ASSERT(str != NULL);
 
@@ -263,16 +263,16 @@ string_t* string_escape(string_t* str)
   for (char *ch = str->buf, *rch = result->buf; *ch != '\0'; ++ch, ++rch)
     switch (*ch)
     {
-    case '\'': *(rch++) = '\\'; *rch = '\''; break;
-    case '"':  *(rch++) = '\\'; *rch = '"'; break;
-    case '\\': *(rch++) = '\\'; *rch = '\\'; break;
-    case '\a': *(rch++) = '\\'; *rch = 'a'; break;
-    case '\b': *(rch++) = '\\'; *rch = 'b'; break;
-    case '\f': *(rch++) = '\\'; *rch = 'f'; break;
-    case '\n': *(rch++) = '\\'; *rch = 'n'; break;
-    case '\r': *(rch++) = '\\'; *rch = 'r'; break;
-    case '\t': *(rch++) = '\\'; *rch = 't'; break;
-    case '\v': *(rch++) = '\\'; *rch = 'v'; break;
+    case '\'': *rch++ = '\\'; *rch = '\''; break;
+    case '"':  *rch++ = '\\'; *rch = '"'; break;
+    case '\\': *rch++ = '\\'; *rch = '\\'; break;
+    case '\a': *rch++ = '\\'; *rch = 'a'; break;
+    case '\b': *rch++ = '\\'; *rch = 'b'; break;
+    case '\f': *rch++ = '\\'; *rch = 'f'; break;
+    case '\n': *rch++ = '\\'; *rch = 'n'; break;
+    case '\r': *rch++ = '\\'; *rch = 'r'; break;
+    case '\t': *rch++ = '\\'; *rch = 't'; break;
+    case '\v': *rch++ = '\\'; *rch = 'v'; break;
     default: *rch = *ch;
     }
 
@@ -321,7 +321,8 @@ bool string_contains_cstr(string_t* str, const char* sub)
 
     if (j == sub_len)
       return true;
-    else if (j == 0)
+
+    if (j == 0)
       i++;
     else
       i += j;
@@ -388,7 +389,8 @@ size_t string_find_cstr(string_t* str, const char* sub)
 
     if (j == sub_len)
       return i;
-    else if (j == 0)
+
+    if (j == 0)
       i++;
     else
       i += j;

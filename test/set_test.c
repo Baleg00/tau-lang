@@ -4,12 +4,12 @@
 
 int cmp_int(void* lhs, void* rhs)
 {
-  return (*(int*)lhs) - (*(int*)rhs);
+  return *(int*)lhs - *(int*)rhs;
 }
 
 void iter_increment(void* data)
 {
-  ++(*(int*)data);
+  ++*(int*)data;
 }
 
 test()
@@ -227,7 +227,7 @@ test()
 
         set_free(set);
       end()
-      
+
       it("should return NULL for empty set")
         set_t* set = set_init(cmp_int);
 
@@ -264,19 +264,19 @@ test()
         int data5 = 5;
 
         assert_equal(set_size(set), 0);
-        
+
         set_add(set, &data1);
         assert_equal(set_size(set), 1);
-        
+
         set_add(set, &data5);
         assert_equal(set_size(set), 2);
-        
+
         set_add(set, &data4);
         assert_equal(set_size(set), 3);
-        
+
         set_add(set, &data3);
         assert_equal(set_size(set), 4);
-        
+
         set_add(set, &data2);
         assert_equal(set_size(set), 5);
 

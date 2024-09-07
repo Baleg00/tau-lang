@@ -20,7 +20,7 @@ uint64_t hash_digest(const void* data, size_t size)
    * 
    * https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
   */
- 
+
   uint64_t h = 0xCBF29CE484222325ULL;
 
   for (size_t i = 0; i < size; ++i)
@@ -39,5 +39,5 @@ uint64_t hash_combine_with_data(uint64_t seed, const void* data, size_t size)
 
 uint64_t hash_combine_with_hash(uint64_t seed, uint64_t hash)
 {
-  return seed ^ (hash + 0x9E3779B9ULL + (seed << 6) + (seed >> 2));
+  return seed ^ hash + 0x9E3779B9ULL + (seed << 6) + (seed >> 2);
 }

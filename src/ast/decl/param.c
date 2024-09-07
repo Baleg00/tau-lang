@@ -100,5 +100,5 @@ void ast_decl_param_dump_json(FILE* stream, ast_decl_param_t* node)
   fprintf(stream, ",\"expr\":");
   ast_node_dump_json(stream, node->expr);
   fprintf(stream, ",\"is_vararg\":%s", node->is_vararg ? "true" : "false");
-  fputc('}', stream); 
+  fputc('}', stream);
 }

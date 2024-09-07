@@ -123,7 +123,7 @@ void vector_insert(vector_t* vec, size_t idx, void* data)
     vector_expand(vec);
 
   memmove(vec->data + idx + 1, vec->data + idx, sizeof(void*) * (vec->size - idx));
-  
+
   vec->data[idx] = data;
   vec->size++;
 }

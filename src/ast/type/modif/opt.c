@@ -52,7 +52,7 @@ void ast_type_opt_codegen(codegen_ctx_t* ctx, ast_type_opt_t* node)
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   ASSERT(desc != NULL);
-  
+
   node->llvm_type = desc->llvm_type;
 }
 
@@ -60,7 +60,7 @@ size_t ast_type_opt_mangle(ast_type_opt_t* node, char* buf, size_t len)
 {
   size_t written = snprintf(buf, len, "o");
   written += ast_node_mangle(node->base_type, buf + written, len <= written ? 0 : len - written);
-  
+
   return written;
 }
 

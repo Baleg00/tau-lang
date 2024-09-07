@@ -134,7 +134,7 @@ test()
         typedesc_free((typedesc_t*)mut_desc);
         typedesc_free((typedesc_t*)ref_desc);
       end()
-      
+
       it("should be able to add pointer modifier")
         typedesc_mut_t* mut_desc = typedesc_mut_init();
         typedesc_ptr_t* ptr_desc = typedesc_ptr_init();
@@ -153,7 +153,7 @@ test()
         typedesc_free((typedesc_t*)ptr_desc);
         typedesc_free((typedesc_t*)mut_desc);
       end()
-      
+
       it("should not be able to add pointer modifier")
         typedesc_ref_t* ref_desc = typedesc_ref_init();
 
@@ -180,7 +180,7 @@ test()
         typedesc_free((typedesc_t*)ptr_desc);
         typedesc_free((typedesc_t*)mut_desc);
       end()
-      
+
       it("should not be able to add array modifier")
         typedesc_ref_t* ref_desc = typedesc_ref_init();
 
@@ -199,7 +199,7 @@ test()
         typedesc_free((typedesc_t*)unit_desc);
         typedesc_free((typedesc_t*)ptr_desc);
       end()
-      
+
       it("should not be able to add optional modifier")
         typedesc_mut_t* mut_desc = typedesc_mut_init();
         typedesc_ref_t* ref_desc = typedesc_ref_init();

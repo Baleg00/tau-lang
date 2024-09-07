@@ -84,7 +84,7 @@ void ast_expr_op_un_arit_inc_post_codegen(codegen_ctx_t* ctx, ast_expr_op_un_ari
     llvm_inc_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_value, LLVMConstReal(expr->llvm_type, 1.0), "");
   else
     UNREACHABLE();
-  
+
   LLVMBuildStore(ctx->llvm_builder, llvm_inc_value, expr->llvm_value);
   node->llvm_value = llvm_value;
 }

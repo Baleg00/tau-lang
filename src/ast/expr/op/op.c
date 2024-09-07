@@ -83,7 +83,7 @@ int op_precedence(op_kind_t kind)
   case OP_UNWRAP_SAFE:
   case OP_UNWRAP_UNSAFE:
     return 0;
-  
+
   case OP_AS:
   case OP_SIZEOF:
   case OP_ALIGNOF:
@@ -96,7 +96,7 @@ int op_precedence(op_kind_t kind)
   case OP_IND:
   case OP_ADDR:
     return 1;
-  
+
   case OP_ARIT_MUL:
   case OP_ARIT_DIV:
   case OP_ARIT_MOD:

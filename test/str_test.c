@@ -30,7 +30,7 @@ test()
       it("should append nothing for empty string")
         string_t* str1 = string_init();
         string_t* str2 = string_init_with_cstr("");
-        
+
         string_append(str1, str2);
 
         assert_equal(string_length(str1), 0);
@@ -38,7 +38,7 @@ test()
 
         assert_equal(string_length(str2), 0);
         assert_str_equal(string_begin(str2), "");
-        
+
         string_free(str2);
         string_free(str1);
       end()
@@ -46,7 +46,7 @@ test()
       it("should append for non-empty string")
         string_t* str1 = string_init_with_cstr("foo");
         string_t* str2 = string_init_with_cstr("bar");
-        
+
         string_append(str1, str2);
 
         assert_equal(string_length(str1), 6);
@@ -54,7 +54,7 @@ test()
 
         assert_equal(string_length(str2), 3);
         assert_str_equal(string_begin(str2), "bar");
-        
+
         string_free(str2);
         string_free(str1);
       end()
@@ -63,18 +63,18 @@ test()
     describe("string_append_cstr")
       it("should append nothing for empty string")
         string_t* str = string_init();
-        
+
         string_append_cstr(str, "");
 
         assert_equal(string_length(str), 0);
         assert_str_equal(string_begin(str), "");
-        
+
         string_free(str);
       end()
 
       it("should append for non-empty string")
         string_t* str = string_init_with_cstr("foo");
-        
+
         string_append_cstr(str, "bar");
 
         assert_equal(string_length(str), 6);

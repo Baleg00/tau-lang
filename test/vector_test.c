@@ -19,7 +19,7 @@ test()
         vector_t* vec = vector_init_from_buffer(NULL, 0);
 
         assert_not_null(vec);
-        
+
         vector_free(vec);
       end()
 
@@ -37,7 +37,7 @@ test()
         assert_equal(vector_get(vec, 0), &data1);
         assert_equal(vector_get(vec, 1), &data2);
         assert_equal(vector_get(vec, 2), &data3);
-        
+
         vector_free(vec);
       end()
     end()

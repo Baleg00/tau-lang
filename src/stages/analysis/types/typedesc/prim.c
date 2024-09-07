@@ -119,10 +119,10 @@ bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedes
 
       return false;
     }
-    
+
     if (typedesc_is_float((typedesc_t*)from_desc) && typedesc_is_float(to_desc))
       return !(from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32);
-    
+
     return false;
   }
 

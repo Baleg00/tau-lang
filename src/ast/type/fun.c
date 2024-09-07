@@ -75,7 +75,7 @@ void ast_type_fun_codegen(codegen_ctx_t* ctx, ast_type_fun_t* node)
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   ASSERT(desc != NULL);
-  
+
   node->llvm_type = desc->llvm_type;
 }
 
@@ -88,7 +88,7 @@ size_t ast_type_fun_mangle(ast_type_fun_t* node, char* buf, size_t len)
 
   VECTOR_FOR_LOOP(i, node->params)
     written += ast_node_mangle((ast_node_t*)vector_get(node->params, i), buf + written, len <= written ? 0 : len - written);
-  
+
   if (node->is_vararg)
     written += snprintf(buf + written, len <= written ? 0 : len - written, "V");
 

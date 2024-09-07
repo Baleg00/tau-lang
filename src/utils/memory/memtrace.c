@@ -8,20 +8,18 @@
 #define TAU_MEMTRACE_IMPL
 #include "utils/memory/memtrace.h"
 
-#include <stdio.h>
-#include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
+#include <stdint.h>
+#include <stdio.h>
 
 #include "utils/common.h"
-#include "utils/esc_seq.h"
-#include "utils/io/log.h"
 #include "utils/timer.h"
+#include "utils/io/log.h"
 
 /**
  * \brief Enumeration of memory allocation kinds.
  */
-typedef enum memtrace_alloc_kind_e
+typedef enum memtrace_alloc_kind_t
 {
   MEMTRACE_MALLOC,
   MEMTRACE_CALLOC,
@@ -151,7 +149,7 @@ void* memtrace_malloc(size_t size, const char* file, int line, const char* func)
   }
 
   void* ptr = malloc(size);
-  
+
   if (ptr == NULL)
   {
     log_error("memtrace", "Allocation failed.");
@@ -194,7 +192,7 @@ void* memtrace_calloc(size_t count, size_t size, const char* file, int line, con
   }
 
   void* ptr = calloc(count, size);
-  
+
   if (ptr == NULL)
   {
     log_error("memtrace", "Allocation failed.");
@@ -291,7 +289,7 @@ void memtrace_free(void* ptr, const char* UNUSED(file), int UNUSED(line), const 
 {
   if (ptr == NULL)
     return;
-  
+
   memtrace_alloc_t *alloc = memtrace_alloc_root(), *prev = alloc;
   alloc = alloc->next;
 
@@ -311,7 +309,7 @@ void memtrace_free(void* ptr, const char* UNUSED(file), int UNUSED(line), const 
   g_memtrace_stat_total_lifetime += timer_now() - alloc->meta.time;
   g_memtrace_stat_cur_alloc -= alloc->data.size;
   g_memtrace_stat_dealloc_count++;
-  
+
   free(alloc->data.ptr);
   free(alloc);
 }
@@ -343,5 +341,5 @@ size_t memtrace_stat_avg_alloc_size(void)
 
 double memtrace_stat_avg_lifetime(void)
 {
-  return ((double)g_memtrace_stat_total_lifetime / (double)g_memtrace_stat_dealloc_count) / (double)timer_freq() * 1000.0;
+  return (double)g_memtrace_stat_total_lifetime / (double)g_memtrace_stat_dealloc_count / (double)timer_freq() * 1000.0;
 }

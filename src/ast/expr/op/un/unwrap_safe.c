@@ -87,7 +87,7 @@ void ast_expr_op_un_unwrap_safe_codegen(codegen_ctx_t* ctx, ast_expr_op_un_unwra
 
   LLVMInsertExistingBasicBlockAfterInsertBlock(ctx->llvm_builder, llvm_exit_block);
   LLVMPositionBuilderAtEnd(ctx->llvm_builder, llvm_exit_block);
-  
+
   LLVMValueRef llvm_args[] = {
     LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), 1, false)
   };

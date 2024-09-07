@@ -56,7 +56,7 @@ static void compiler_dump_ast(const char* path, ast_node_t* root)
   ASSERT(ast_file != NULL);
 
   ast_node_dump_json(ast_file, root);
-  
+
   fclose(ast_file);
 
   string_free(ast_path);
@@ -68,7 +68,7 @@ static void compiler_emit_ll(const char* path, LLVMModuleRef llvm_module)
   string_append_cstr(ll_path, ".ll");
 
   char* error_str = NULL;
-  
+
   if (LLVMPrintModuleToFile(llvm_module, string_begin(ll_path), &error_str))
   {
     log_error("LLVM:LLVMPrintModuleToFile", error_str);
@@ -179,7 +179,7 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
 
   if (options_get_dump_ll(compiler->options))
     compiler_emit_ll(path, llvm_module);
-  
+
   if (options_get_dump_bc(compiler->options))
     compiler_emit_bc(path, llvm_module);
 
@@ -198,7 +198,7 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
 
   vector_free(toks);
   lexer_free(lexer);
-  
+
   free(src);
 }
 

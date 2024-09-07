@@ -45,7 +45,7 @@ bool typedesc_ptr_is_explicitly_convertible(typedesc_ptr_t* from_desc, typedesc_
 {
   if (to_desc->kind == TYPEDESC_OPT)
     return typedesc_is_explicitly_convertible((typedesc_t*)from_desc, typedesc_remove_opt(to_desc));
-  
+
   if (to_desc->kind != TYPEDESC_PTR)
     return false;
 

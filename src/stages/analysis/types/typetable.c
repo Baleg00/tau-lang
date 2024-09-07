@@ -107,7 +107,7 @@ static void typetable_expand(typetable_t* table)
 
   table->buckets = (typetable_entry_t**)realloc(table->buckets, table->capacity * sizeof(typetable_entry_t*));
   ASSERT(table->buckets != NULL);
-  
+
   memset(table->buckets, 0, table->capacity * sizeof(typetable_entry_t*));
 
   for (size_t i = 0; i < entry_count; ++i)
@@ -166,7 +166,7 @@ typedesc_t* typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* d
     {
       typedesc_t* old_desc = it->desc;
       it->desc = desc;
-      
+
       return old_desc;
     }
 
@@ -187,6 +187,6 @@ typedesc_t* typetable_lookup(typetable_t* table, ast_node_t* node)
   for (typetable_entry_t* it = table->buckets[idx]; it != NULL; it = it->next)
     if (it->node == node)
       return it->desc;
-  
+
   return NULL;
 }
