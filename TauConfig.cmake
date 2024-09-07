@@ -5,7 +5,7 @@ include_directories(${PROJECT_SOURCE_DIR}/inc)
 # For MSVC (Microsoft Visual C++):
 if (CMAKE_C_COMPILER_ID MATCHES MSVC)
   set(_TAU_COMPILE_OPTIONS
-    /FIbase.h                 # Force include `base.h` before processing other headers.
+    /FIsuppress_warnings.h    # Force include `suppress_warnings.h` before processing other headers.
     $<$<CONFIG:Debug>:/Wall>  # Enable all warnings in Debug mode.
     $<$<CONFIG:Debug>:/WX>    # Treat all warnings as errors in Debug mode.
     $<$<CONFIG:Debug>:/Od>    # Disable optimizations in Debug mode.
@@ -14,7 +14,7 @@ if (CMAKE_C_COMPILER_ID MATCHES MSVC)
 # For Clang or GNU compilers:
 elseif (CMAKE_C_COMPILER_ID MATCHES Clang OR CMAKE_C_COMPILER_ID MATCHES GNU)
   set(_TAU_COMPILE_OPTIONS
-    -include base.h               # Force include `base.h` before processing other headers.
+    -include suppress_warnings.h  # Force include `suppress_warnings.h` before processing other headers.
     $<$<CONFIG:Debug>:-Wall>      # Enable all warnings in Debug mode.
     $<$<CONFIG:Debug>:-Wextra>    # Enable extra warnings in Debug mode.
     $<$<CONFIG:Debug>:-Wpedantic> # Enable pedantic warnings in Debug mode.

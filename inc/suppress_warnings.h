@@ -1,20 +1,21 @@
 /**
  * \file
  * 
- * \brief Project base header.
+ * \brief Warning suppression header.
  * 
- * \details This is a "force-included" header file that is included at the
- * beginning of every source file in the project, ensuring that its contents are
- * available globally throughout the codebase. This file is used for defining
- * essential project-wide macros, constants, or configurations, or for including
- * headers that provide crucial dependencies or system-level declarations.
+ * \details This header file is force-included in all source files to centrally manage
+ * compiler-specific warning suppressions. It contains various `#pragma` directives that
+ * disable or suppress specific warnings to ensure consistent compilation behavior across
+ * supported platforms. The suppressions are applied conditionally based on the detected
+ * compiler (e.g., MSVC, GCC, Clang) to avoid unnecessary warnings without altering the
+ * source code.
  * 
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
  */
 
-#ifndef TAU_BASE_H
-#define TAU_BASE_H
+#ifndef TAU_SUPPRESS_WARNINGS_H
+#define TAU_SUPPRESS_WARNINGS_H
 
 #if defined(_MSC_VER) && !defined(__clang__)
 // enumerator in switch of enum is not explicitly handled by a case label
