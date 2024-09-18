@@ -350,12 +350,8 @@ void string_replace_with_csubstr(string_t* str, size_t pos, size_t len, const ch
 {
   size_t rep_len = strlen(rep);
 
-  ASSERT(pos < str->len);
-
-  if (rep_len > 0)
-    ASSERT(rep_pos < rep_len);
-  else
-    ASSERT(rep_pos == 0);
+  ASSERT(pos <= str->len);
+  ASSERT((rep_len > 0 && rep_pos < rep_len) || rep_pos == 0);
 
   size_t new_len = str->len - len + rep_len - rep_pos;
 
