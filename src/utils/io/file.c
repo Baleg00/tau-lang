@@ -12,157 +12,207 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "os_detect.h"
 #include "utils/common.h"
-#include "utils/diagnostics.h"
+#include "utils/memory/memtrace.h"
 
-size_t file_read(const char* path, char* buf, size_t len)
+#ifdef TAU_OS_WINDOWS
+
+#include <windows.h>
+
+/**
+ * \brief Retrieves the attributes of a file or directory.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns File or directory attributes if no error occurred, INVALID_FILE_ATTRIBUTES otherwise.
+ */
+static DWORD file_attributes(path_t* path)
 {
-  FILE* file = fopen(path, "r");
+  size_t path_len = path_to_cstr(path, NULL, 0);
 
-  if (file == NULL)
-    report_error_failed_to_open_file(path);
+  LPSTR path_cstr = (LPSTR)malloc((path_len + 1) * sizeof(CHAR));
+  path_to_cstr(path, path_cstr, path_len + 1);
 
-  fseek(file, 0, SEEK_END);
-  size_t flen = (size_t)ftell(file);
-  rewind(file);
+  DWORD attrs = GetFileAttributesA(path_cstr);
 
-  if (buf != NULL)
-  {
-    flen = fread(buf, sizeof(char), MIN(len, flen), file);
-    memset(buf + flen, '\0', (len - flen) * sizeof(char));
-  }
+  free(path_cstr);
 
-  fclose(file);
-
-  return flen;
+  return attrs;
 }
 
-size_t file_name(const char* path, char* buf, size_t len)
+/**
+ * \brief Retrieves the type of a file.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns File type if no error occurred, FILE_TYPE_UNKNOWN otherwise.
+ */
+static DWORD file_type(path_t* path)
 {
-  char* sep = strrchr(path, FILE_DIRSEP);
+  size_t path_len = path_to_cstr(path, NULL, 0);
 
-  if (sep == NULL)
-    sep = (char*)path - 1;
+  LPSTR path_cstr = (LPSTR)malloc((path_len + 1) * sizeof(CHAR));
+  path_to_cstr(path, path_cstr, path_len + 1);
 
-  size_t name_len = strlen(sep + 1);
+  HANDLE handle = CreateFileA(
+    path_cstr,
+    GENERIC_READ,
+    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+    NULL,
+    OPEN_EXISTING,
+    FILE_ATTRIBUTE_NORMAL,
+    NULL
+  );
 
-  if (buf != NULL)
-  {
-    strncpy(buf, sep + 1, len);
+  free(path_cstr);
 
-    if (name_len < len)
-      buf[name_len] = '\0';
-  }
+  if (handle == INVALID_HANDLE_VALUE)
+    return FILE_TYPE_UNKNOWN;
 
-  return name_len;
+  DWORD type = GetFileType(handle);
+
+  CloseHandle(handle);
+
+  return type;
 }
 
-size_t file_ext(const char* path, char* buf, size_t len)
+bool file_is_directory(path_t* path)
 {
-  char* dot = strrchr(path, '.');
+  DWORD attrs = file_attributes(path);
 
-  if (dot == NULL || dot == path)
+  if (attrs == INVALID_FILE_ATTRIBUTES)
+    return false;
+
+  return attrs & FILE_ATTRIBUTE_DIRECTORY;
+}
+
+bool file_is_regular_file(path_t* path)
+{
+  DWORD type = file_type(path);
+
+  if (type == FILE_TYPE_UNKNOWN)
+    return false;
+
+  return type == FILE_TYPE_DISK;
+}
+
+bool file_is_block_file(path_t* UNUSED(path))
+{
+  return false;
+}
+
+bool file_is_character_file(path_t* path)
+{
+  DWORD type = file_type(path);
+
+  if (type == FILE_TYPE_UNKNOWN)
+    return false;
+
+  return type == FILE_TYPE_CHAR;
+}
+
+bool file_is_pipe(path_t* path)
+{
+  DWORD type = file_type(path);
+
+  if (type == FILE_TYPE_UNKNOWN)
+    return false;
+
+  return type == FILE_TYPE_PIPE;
+}
+
+bool file_is_socket(path_t* UNUSED(path))
+{
+  return false;
+}
+
+bool file_is_symlink(path_t* path)
+{
+  DWORD attrs = file_attributes(path);
+
+  if (attrs == INVALID_FILE_ATTRIBUTES)
+    return false;
+
+  return attrs & FILE_ATTRIBUTE_REPARSE_POINT;
+}
+
+bool file_exists(path_t* path)
+{
+  DWORD attrs = file_attributes(path);
+
+  return attrs != INVALID_FILE_ATTRIBUTES && !(attrs & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+bool file_empty(path_t* path)
+{
+  return file_size(path) == 0;
+}
+
+size_t file_size(path_t* path)
+{
+  size_t path_len = path_to_cstr(path, NULL, 0);
+
+  LPSTR path_cstr = (LPSTR)malloc((path_len + 1) * sizeof(CHAR));
+  path_to_cstr(path, path_cstr, path_len + 1);
+
+  HANDLE handle = CreateFileA(
+    path_cstr,
+    GENERIC_READ,
+    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+    NULL,
+    OPEN_EXISTING,
+    FILE_ATTRIBUTE_NORMAL,
+    NULL
+  );
+
+  free(path_cstr);
+
+  if (handle == INVALID_HANDLE_VALUE)
     return 0;
 
-  size_t ext_len = strlen(dot + 1);
+  LARGE_INTEGER size = { .QuadPart = 0 };
 
-  if (buf != NULL)
-  {
-    strncpy(buf, dot + 1, len);
+  GetFileSizeEx(handle, &size);
 
-    if (ext_len < len)
-      buf[ext_len] = '\0';
-  }
+  CloseHandle(handle);
 
-  return ext_len;
+  return (size_t)size.QuadPart;
 }
 
-size_t file_dir(const char* path, char* buf, size_t len)
+size_t file_read(path_t* path, char* buf, size_t len)
 {
-  char* sep = strrchr(path, FILE_DIRSEP);
+  if (buf == NULL)
+    return file_size(path);
 
-  if (sep == NULL)
+  size_t path_len = path_to_cstr(path, NULL, 0);
+
+  LPSTR path_cstr = (LPSTR)malloc((path_len + 1) * sizeof(CHAR));
+  path_to_cstr(path, path_cstr, path_len + 1);
+
+  HANDLE handle = CreateFileA(
+    path_cstr,
+    GENERIC_READ,
+    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+    NULL,
+    OPEN_EXISTING,
+    FILE_ATTRIBUTE_NORMAL,
+    NULL
+  );
+
+  free(path_cstr);
+
+  if (handle == INVALID_HANDLE_VALUE)
     return 0;
 
-  size_t dir_len = MAX(sep - path, 1);
+  DWORD bytes_read = 0;
 
-  if (buf != NULL)
-  {
-    strncpy(buf, path, MIN(len, dir_len));
-
-    if (dir_len < len)
-      buf[dir_len] = '\0';
-  }
-
-  return dir_len;
-}
-
-size_t file_stem(const char* path, char* buf, size_t len)
-{
-  char* dot = strrchr(path, '.');
-  char* sep = strrchr(path, FILE_DIRSEP);
-
-  if (dot == NULL || dot == path ||
-      sep == NULL || sep == path)
+  if (!ReadFile(handle, buf, (DWORD)len, &bytes_read, NULL))
     return 0;
 
-  size_t stem_len = dot - sep - 1;
+  buf[bytes_read] = '\0';
 
-  if (stem_len == 0)
-  {
-    if (buf != NULL)
-      strncpy(buf, dot, len);
-
-    return strlen(dot);
-  }
-
-  if (buf != NULL)
-  {
-    strncpy(buf, sep + 1, MIN(len, stem_len));
-
-    if (stem_len < len)
-      buf[stem_len] = '\0';
-  }
-
-  return stem_len;
+  return (size_t)bytes_read;
 }
 
-size_t file_join(char* buf, size_t len, size_t count, ...)
-{
-  if (count == 0)
-    return 0;
-
-  size_t result_len = 0;
-
-  va_list paths;
-  va_start(paths, count);
-
-  for (size_t i = 0; i < count && len > 0; ++i)
-  {
-    const char* path = va_arg(paths, char*);
-    size_t path_len = strlen(path);
-
-    result_len += path_len;
-
-    if (i + 1 < count)
-      ++result_len;
-
-    if (buf != NULL)
-    {
-      strncpy(buf, path, MIN(len, path_len));
-      buf += path_len;
-      len -= MIN(len, path_len);
-
-      if (i + 1 < count)
-      {
-        *buf++ = FILE_DIRSEP;
-        --len;
-      }
-    }
-  }
-
-  if (buf != NULL && len > 0)
-    *buf = '\0';
-
-  return result_len;
-}
+#else
+# error "File operations are not implemented for operating system!"
+#endif

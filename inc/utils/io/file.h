@@ -1,13 +1,12 @@
 /**
  * \file
  * 
- * \brief File system utility interface.
+ * \brief File system utility library.
  * 
  * \details This file system utility library provides functions for common file
- * system operations. It includes functions to read file contents, extract file
- * names, extensions, directories, and file stems from paths, as well as
- * joining multiple path components into a single path.
- * 
+ * system operations. It includes functions to read file contents, identify
+ * various file types and check if a file exists or is empty.
+ *
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
  */
@@ -15,24 +14,89 @@
 #ifndef TAU_FILE_H
 #define TAU_FILE_H
 
-#include <stddef.h>
+#include <stdbool.h>
 
-#if defined(_WIN32)
+#include "utils/io/path.h"
+
 /**
- * \brief System specific directory separator character.
+ * \brief Checks whether a path refers to a directory.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns `true` if the path refers to a directory, `false` otherwise.
  */
-# define FILE_DIRSEP '\\'
-#elif defined(__linux__) || defined(__unix__)
+bool file_is_directory(path_t* path);
+
 /**
- * \brief System specific directory separator character.
+ * \brief Checks whether a path refers to a regular file.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns `true` if the path refers to a regular file, `false` otherwise.
  */
-# define FILE_DIRSEP '/'
-#else
+bool file_is_regular_file(path_t* path);
+
 /**
- * \brief System specific directory separator character.
+ * \brief Checks whether a path refers to a block file.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns `true` if the path refers to a block file, `false` otherwise.
  */
-# define FILE_DIRSEP '/'
-#endif
+bool file_is_block_file(path_t* path);
+
+/**
+ * \brief Checks whether a path refers to a character file.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns `true` if the path refers to a character file, `false` otherwise.
+ */
+bool file_is_character_file(path_t* path);
+
+/**
+ * \brief Checks whether a path refers to a named pipe.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns `true` if the path refers to a named pipe, `false` otherwise.
+ */
+bool file_is_pipe(path_t* path);
+
+/**
+ * \brief Checks whether a path refers to a named IPC socket.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns `true` if the path refers to a named IPC socket, `false` otherwise.
+ */
+bool file_is_socket(path_t* path);
+
+/**
+ * \brief Checks whether a path refers to a symbolic link.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns `true` if the path refers to a symbolic link, `false` otherwise.
+ */
+bool file_is_symlink(path_t* path);
+
+/**
+ * \brief Checks whether a path refers to an existing file system object.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns `true` if the path refers to an existing file system object, `false` otherwise.
+ */
+bool file_exists(path_t* path);
+
+/**
+ * \brief Checks whether a path refers to an empty file.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns `true` if the path refers to an empty file, `false` otherwise.
+ */
+bool file_empty(path_t* path);
+
+/**
+ * \brief Retrieves the size of a file in bytes.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns The size of the file in bytes if path refers to a file, 0 otherwise.
+ */
+size_t file_size(path_t* path);
 
 /**
  * \brief Reads the contents of a file and stores it in the provided buffer.
@@ -46,82 +110,6 @@
  * \returns The number of characters written into the buffer, excluding the
  * null-terminator.
  */
-size_t file_read(const char* path, char* buf, size_t len);
-
-/**
- * \brief Extracts the file name from the given path and stores it in the
- * provided buffer.
- *
- * \details If buf is NULL, the function calculates the required buffer size
- * without actually writing any data.
- * 
- * \param[in] path The path to the file.
- * \param[out] buf Pointer to the buffer where the file name will be stored.
- * \param[in] len The length of the buffer.
- * \returns The number of characters written into the buffer, excluding the
- * null-terminator.
- */
-size_t file_name(const char* path, char* buf, size_t len);
-
-/**
- * \brief Extracts the file extension from the given path and stores it in the
- * provided buffer.
- *
- * \details If buf is NULL, the function calculates the required buffer size
- * without actually writing any data.
- * 
- * \param[in] path The path to the file.
- * \param[out] buf Pointer to the buffer where the file extension will be stored.
- * \param[in] len The length of the buffer.
- * \returns The number of characters written into the buffer, excluding the
- * null-terminator.
- */
-size_t file_ext(const char* path, char* buf, size_t len);
-
-/**
- * \brief Extracts the directory from the given path and stores it in the
- * provided buffer.
- *
- * \details If buf is NULL, the function calculates the required buffer size
- * without actually writing any data.
- * 
- * \param[in] path The path to the file.
- * \param[out] buf Pointer to the buffer where the directory will be stored.
- * \param[in] len The length of the buffer.
- * \returns The number of characters written into the buffer, excluding the
- * null-terminator.
- */
-size_t file_dir(const char* path, char* buf, size_t len);
-
-/**
- * \brief Extracts the file stem (filename without extension) from the given
- * path and stores it in the provided buffer.
- *
- * \details If buf is NULL, the function calculates the required buffer size
- * without actually writing any data.
- * 
- * \param[in] path The path to the file.
- * \param[out] buf Pointer to the buffer where the file stem will be stored.
- * \param[in] len The length of the buffer.
- * \returns The number of characters written into the buffer, excluding the
- * null-terminator.
- */
-size_t file_stem(const char* path, char* buf, size_t len);
-
-/**
- * \brief Joins multiple path components into a single path and stores it in
- * the provided buffer.
- *
- * \details If buf is NULL, the function calculates the required buffer size
- * without actually writing any data.
- * 
- * \param[out] buf Pointer to the buffer where the joined path will be stored.
- * \param[in] len The length of the buffer.
- * \param[in] count The number of path components to join.
- * \param[in] ... Variable number of path components to join.
- * \returns The number of characters written into the buffer, excluding the
- * null-terminator.
- */
-size_t file_join(char* buf, size_t len, size_t count, ...);
+size_t file_read(path_t* path, char* buf, size_t len);
 
 #endif

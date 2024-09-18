@@ -131,25 +131,29 @@ static void compiler_emit_asm(const char* path, LLVMModuleRef llvm_module)
   string_free(asm_path);
 }
 
-static void compiler_process_file(compiler_t* compiler, const char* path)
+static void compiler_process_file(compiler_t* compiler, const char* path_cstr)
 {
+  path_t* path = path_init_with_cstr(path_cstr);
+
   size_t src_len = file_read(path, NULL, 0);
   char* src = (char*)malloc((src_len + 1) * sizeof(char));
   file_read(path, src, src_len + 1);
 
+  path_free(path);
+
   lexer_t* lexer = lexer_init();
   vector_t* toks = NULL;
-  time_it("lexer", toks = lexer_lex(lexer, path, src));
+  time_it("lexer", toks = lexer_lex(lexer, path_cstr, src));
 
   if (options_get_dump_tokens(compiler->options))
-    compiler_dump_tokens(path, toks);
+    compiler_dump_tokens(path_cstr, toks);
 
   parser_t* parser = parser_init();
   ast_node_t* root_node = NULL;
   time_it("parser", root_node = parser_parse(parser, toks));
 
   if (options_get_dump_ast(compiler->options))
-    compiler_dump_ast(path, root_node);
+    compiler_dump_ast(path_cstr, root_node);
 
   nameres_ctx_t* nameres_ctx = nameres_ctx_init();
   time_it("analysis:nameres", ast_node_nameres(nameres_ctx, root_node));
@@ -178,15 +182,15 @@ static void compiler_process_file(compiler_t* compiler, const char* path)
   LLVMDisposePassBuilderOptions(llvm_pass_builder_options);
 
   if (options_get_dump_ll(compiler->options))
-    compiler_emit_ll(path, llvm_module);
+    compiler_emit_ll(path_cstr, llvm_module);
 
   if (options_get_dump_bc(compiler->options))
-    compiler_emit_bc(path, llvm_module);
+    compiler_emit_bc(path_cstr, llvm_module);
 
   if (options_get_dump_asm(compiler->options))
-    compiler_emit_asm(path, llvm_module);
+    compiler_emit_asm(path_cstr, llvm_module);
 
-  compiler_emit_obj(path, llvm_module);
+  compiler_emit_obj(path_cstr, llvm_module);
 
   LLVMDisposeModule(llvm_module);
 

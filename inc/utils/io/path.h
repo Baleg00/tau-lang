@@ -3,7 +3,10 @@
  *
  * \brief File system path library.
  *
- * \details
+ * \details This file system path library provides functions for manipulating
+ * paths on the file system. It includes functions to extract file names, extensions,
+ * directories, and file stems from paths, as well as joining multiple path
+ * components into a single path.
  *
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
