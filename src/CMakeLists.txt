@@ -26,6 +26,7 @@ add_library(TAU_LIB_ARGPARSE    STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/argpar
 add_library(TAU_LIB_COMMAND     STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/command.c)
 add_library(TAU_LIB_FILE        STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/file.c)
 add_library(TAU_LIB_LOG         STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/log.c)
+add_library(TAU_LIB_PATH        STATIC ${PROJECT_SOURCE_DIR}/src/utils/io/path.c)
 add_library(TAU_LIB_HASH        STATIC ${PROJECT_SOURCE_DIR}/src/utils/hash.c)
 add_library(TAU_LIB_STR         STATIC ${PROJECT_SOURCE_DIR}/src/utils/str.c)
 add_library(TAU_LIB_STR_VIEW    STATIC ${PROJECT_SOURCE_DIR}/src/utils/str_view.c)
@@ -54,6 +55,7 @@ set(TAU_LIBRARIES
   TAU_LIB_COMMAND
   TAU_LIB_FILE
   TAU_LIB_LOG
+  TAU_LIB_PATH
   TAU_LIB_HASH
   TAU_LIB_STR
   TAU_LIB_STR_VIEW
