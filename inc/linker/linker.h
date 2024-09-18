@@ -19,50 +19,22 @@
 #include <stdbool.h>
 
 /**
- * \brief Linker virtual table function pointer type.
+ * \brief Enumeration of linker implementation kinds.
  */
-typedef void(*linker_vtable_func_t)(void);
-
-/**
- * \brief Enumeration of the abstract linker's virtual table entries.
- */
-typedef enum linker_vtable_entry_kind_t
+typedef enum linker_kind_t
 {
- LINKER_VTABLE_FREE,                         ///< \copydoc linker_free
- LINKER_VTABLE_ADD_OBJECT,                   ///< \copydoc linker_add_object
- LINKER_VTABLE_ADD_LIBRARY_DIRECTORY,        ///< \copydoc linker_add_library_directory
- LINKER_VTABLE_ADD_STATIC_LIBRARY_BY_NAME,   ///< \copydoc linker_add_static_library_by_name
- LINKER_VTABLE_ADD_STATIC_LIBRARY_BY_PATH,   ///< \copydoc linker_add_static_library_by_path
- LINKER_VTABLE_ADD_DYNAMIC_LIBRARY_BY_NAME,  ///< \copydoc linker_add_dynamic_library_by_name
- LINKER_VTABLE_ADD_DYNAMIC_LIBRARY_BY_PATH,  ///< \copydoc linker_add_dynamic_library_by_path
- LINKER_VTABLE_SET_OUTPUT_KIND,              ///< \copydoc linker_set_output_kind
- LINKER_VTABLE_SET_OUTPUT_FILE,              ///< \copydoc linker_set_output_file
- LINKER_VTABLE_SET_OPTIMIZATION_LEVEL,       ///< \copydoc linker_set_optimization_level
- LINKER_VTABLE_SET_DEBUGGING,                ///< \copydoc linker_set_debugging
- LINKER_VTABLE_SET_ENTRY_POINT,              ///< \copydoc linker_set_entry_point
- LINKER_VTABLE_SET_VISIBILITY,               ///< \copydoc linker_set_visibility
- LINKER_VTABLE_ADD_FLAG,                     ///< \copydoc linker_add_flag
- LINKER_VTABLE_LINK,                         ///< \copydoc linker_link
-
- LINKER_VTABLE_SIZE                          ///< Total number of vtable entries.
-} linker_vtable_entry_kind_t;
+  LINKER_GCC, ///< GNU Compiler Collection
+  LINKER_MSVC ///< MSVC Linker
+} linker_kind_t;
 
 /**
  * \brief Represents an abstract linker.
  */
 typedef struct linker_t
 {
-  linker_vtable_func_t* vtable; ///< Pointer to the linker implementation's virtual table.
-  void* data;                   ///< Pointer to additional implementation specific data.
+  linker_kind_t kind; ///< The linker's implementation kind.
+  void* data;         ///< Pointer to additional implementation specific data.
 } linker_t;
-
-/**
- * \brief Enumeration of linker implementation kinds.
- */
-typedef enum linker_kind_t
-{
-  LINKER_GCC ///< GNU Compiler Collection
-} linker_kind_t;
 
 /**
  * \brief Enumeration of linker output kinds.

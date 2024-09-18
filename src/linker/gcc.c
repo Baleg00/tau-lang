@@ -119,23 +119,7 @@ linker_t* linker_gcc_init(void)
 {
   linker_t* linker = (linker_t*)malloc(sizeof(linker_t));
 
-  linker->vtable = (linker_vtable_func_t*)malloc(sizeof(linker_vtable_func_t) * LINKER_VTABLE_SIZE);
-
-  linker->vtable[LINKER_VTABLE_ADD_OBJECT                 ] = (linker_vtable_func_t)linker_gcc_add_object;
-  linker->vtable[LINKER_VTABLE_ADD_LIBRARY_DIRECTORY      ] = (linker_vtable_func_t)linker_gcc_add_library_directory;
-  linker->vtable[LINKER_VTABLE_ADD_STATIC_LIBRARY_BY_NAME ] = (linker_vtable_func_t)linker_gcc_add_static_library_by_name;
-  linker->vtable[LINKER_VTABLE_ADD_STATIC_LIBRARY_BY_PATH ] = (linker_vtable_func_t)linker_gcc_add_static_library_by_path;
-  linker->vtable[LINKER_VTABLE_ADD_DYNAMIC_LIBRARY_BY_NAME] = (linker_vtable_func_t)linker_gcc_add_dynamic_library_by_name;
-  linker->vtable[LINKER_VTABLE_ADD_DYNAMIC_LIBRARY_BY_PATH] = (linker_vtable_func_t)linker_gcc_add_dynamic_library_by_path;
-  linker->vtable[LINKER_VTABLE_SET_OUTPUT_KIND            ] = (linker_vtable_func_t)linker_gcc_set_output_kind;
-  linker->vtable[LINKER_VTABLE_SET_OUTPUT_FILE            ] = (linker_vtable_func_t)linker_gcc_set_output_file;
-  linker->vtable[LINKER_VTABLE_SET_OPTIMIZATION_LEVEL     ] = (linker_vtable_func_t)linker_gcc_set_optimization_level;
-  linker->vtable[LINKER_VTABLE_SET_DEBUGGING              ] = (linker_vtable_func_t)linker_gcc_set_debugging;
-  linker->vtable[LINKER_VTABLE_SET_ENTRY_POINT            ] = (linker_vtable_func_t)linker_gcc_set_entry_point;
-  linker->vtable[LINKER_VTABLE_SET_VISIBILITY             ] = (linker_vtable_func_t)linker_gcc_set_visibility;
-  linker->vtable[LINKER_VTABLE_ADD_FLAG                   ] = (linker_vtable_func_t)linker_gcc_add_flag;
-  linker->vtable[LINKER_VTABLE_LINK                       ] = (linker_vtable_func_t)linker_gcc_link;
-  linker->vtable[LINKER_VTABLE_FREE                       ] = (linker_vtable_func_t)linker_gcc_free;
+  linker->kind = LINKER_GCC;
 
   linker_gcc_ctx_t* ctx = (linker_gcc_ctx_t*)malloc(sizeof(linker_gcc_ctx_t));
 
@@ -155,7 +139,6 @@ void linker_gcc_free(linker_t* linker)
 {
   command_free(((linker_gcc_ctx_t*)linker->data)->cmd);
 
-  free(linker->vtable);
   free(linker->data);
   free(linker);
 }
