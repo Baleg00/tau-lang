@@ -137,9 +137,10 @@ void typedesc_prim_free(typedesc_prim_t* desc);
  * 
  * \param[in] from_desc Pointer to the primitive type descriptor.
  * \param[in] to_desc Pointer to the type descriptor to check conversion into.
+ * \param[in] through_ref Whether the conversion is done through any kind of reference.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedesc_t* to_desc);
+bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedesc_t* to_desc, bool through_ref);
 
 /**
  * \brief Checks if a primitive type is explicitly convertible to another type.

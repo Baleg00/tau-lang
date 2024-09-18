@@ -26,7 +26,7 @@ void typedesc_fun_free(typedesc_fun_t* desc)
   free(desc);
 }
 
-bool typedesc_fun_is_implicitly_convertible(typedesc_fun_t* from_desc, typedesc_t* to_desc)
+bool typedesc_fun_is_implicitly_convertible(typedesc_fun_t* from_desc, typedesc_t* to_desc, bool UNUSED(through_ref))
 {
   return (typedesc_t*)from_desc == to_desc;
 }

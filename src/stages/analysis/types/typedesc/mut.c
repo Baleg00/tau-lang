@@ -25,9 +25,9 @@ void typedesc_mut_free(typedesc_mut_t* desc)
   free(desc);
 }
 
-bool typedesc_mut_is_implicitly_convertible(typedesc_mut_t* from_desc, typedesc_t* to_desc)
+bool typedesc_mut_is_implicitly_convertible(typedesc_mut_t* from_desc, typedesc_t* to_desc, bool through_ref)
 {
-  return typedesc_is_implicitly_convertible(from_desc->base_type, typedesc_remove_mut(to_desc));
+  return typedesc_is_implicitly_convertible(from_desc->base_type, typedesc_remove_mut(to_desc), through_ref);
 }
 
 bool typedesc_mut_is_explicitly_convertible(typedesc_mut_t* from_desc, typedesc_t* to_desc)

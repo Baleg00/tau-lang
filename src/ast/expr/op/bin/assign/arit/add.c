@@ -72,7 +72,7 @@ void ast_expr_op_bin_assign_arit_add_typecheck(typecheck_ctx_t* ctx, ast_expr_op
     report_error_expected_arithmetic_type(loc);
   }
 
-  if (typedesc_is_implicitly_convertible(typedesc_remove_ref_mut(rhs_desc), typedesc_remove_ref_mut(lhs_desc)))
+  if (typedesc_is_implicitly_convertible(typedesc_remove_ref_mut(rhs_desc), typedesc_remove_ref_mut(lhs_desc), false))
   {
     location_t loc = token_location(node->lhs->tok);
 

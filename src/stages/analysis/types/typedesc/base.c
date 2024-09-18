@@ -315,15 +315,15 @@ bool typedesc_can_add_opt(typedesc_t* desc)
   }
 }
 
-bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc)
+bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc, bool through_ref)
 {
   switch (from_desc->kind)
   {
-  case TYPEDESC_MUT:    return typedesc_mut_is_implicitly_convertible   ((typedesc_mut_t*   )from_desc, to_desc);
-  case TYPEDESC_PTR:    return typedesc_ptr_is_implicitly_convertible   ((typedesc_ptr_t*   )from_desc, to_desc);
-  case TYPEDESC_ARRAY:  return typedesc_array_is_implicitly_convertible ((typedesc_array_t* )from_desc, to_desc);
-  case TYPEDESC_REF:    return typedesc_ref_is_implicitly_convertible   ((typedesc_ref_t*   )from_desc, to_desc);
-  case TYPEDESC_OPT:    return typedesc_opt_is_implicitly_convertible   ((typedesc_opt_t*   )from_desc, to_desc);
+  case TYPEDESC_MUT:    return typedesc_mut_is_implicitly_convertible   ((typedesc_mut_t*   )from_desc, to_desc, through_ref);
+  case TYPEDESC_PTR:    return typedesc_ptr_is_implicitly_convertible   ((typedesc_ptr_t*   )from_desc, to_desc, through_ref);
+  case TYPEDESC_ARRAY:  return typedesc_array_is_implicitly_convertible ((typedesc_array_t* )from_desc, to_desc, through_ref);
+  case TYPEDESC_REF:    return typedesc_ref_is_implicitly_convertible   ((typedesc_ref_t*   )from_desc, to_desc, through_ref);
+  case TYPEDESC_OPT:    return typedesc_opt_is_implicitly_convertible   ((typedesc_opt_t*   )from_desc, to_desc, through_ref);
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -338,11 +338,11 @@ bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_de
   case TYPEDESC_F64:
   case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
-  case TYPEDESC_UNIT:   return typedesc_prim_is_implicitly_convertible  ((typedesc_prim_t*  )from_desc, to_desc);
-  case TYPEDESC_FUN:    return typedesc_fun_is_implicitly_convertible   ((typedesc_fun_t*   )from_desc, to_desc);
-  case TYPEDESC_STRUCT: return typedesc_struct_is_implicitly_convertible((typedesc_struct_t*)from_desc, to_desc);
-  case TYPEDESC_UNION:  return typedesc_union_is_implicitly_convertible ((typedesc_union_t* )from_desc, to_desc);
-  case TYPEDESC_ENUM:   return typedesc_enum_is_implicitly_convertible  ((typedesc_enum_t*  )from_desc, to_desc);
+  case TYPEDESC_UNIT:   return typedesc_prim_is_implicitly_convertible  ((typedesc_prim_t*  )from_desc, to_desc, through_ref);
+  case TYPEDESC_FUN:    return typedesc_fun_is_implicitly_convertible   ((typedesc_fun_t*   )from_desc, to_desc, through_ref);
+  case TYPEDESC_STRUCT: return typedesc_struct_is_implicitly_convertible((typedesc_struct_t*)from_desc, to_desc, through_ref);
+  case TYPEDESC_UNION:  return typedesc_union_is_implicitly_convertible ((typedesc_union_t* )from_desc, to_desc, through_ref);
+  case TYPEDESC_ENUM:   return typedesc_enum_is_implicitly_convertible  ((typedesc_enum_t*  )from_desc, to_desc, through_ref);
   default: UNREACHABLE();
   }
 

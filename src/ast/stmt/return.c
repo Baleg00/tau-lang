@@ -55,7 +55,7 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
     ASSERT(expr_desc != NULL);
   }
 
-  if (!typedesc_is_implicitly_convertible(expr_desc, ctx->fun_desc->return_type))
+  if (!typedesc_is_implicitly_convertible(expr_desc, ctx->fun_desc->return_type, false))
   {
     location_t loc = token_location(node->tok);
 

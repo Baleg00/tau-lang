@@ -26,12 +26,17 @@ void typedesc_struct_free(typedesc_struct_t* desc)
   free(desc);
 }
 
-bool typedesc_struct_is_implicitly_convertible(typedesc_struct_t* from_desc, typedesc_t* to_desc)
+bool typedesc_struct_is_implicitly_convertible(typedesc_struct_t* from_desc, typedesc_t* to_desc, bool through_ref)
 {
   if (to_desc->kind == TYPEDESC_OPT)
-    return typedesc_is_implicitly_convertible((typedesc_t*)from_desc, typedesc_remove_opt(to_desc));
+  {
+    if (through_ref)
+      return false;
 
-  return (typedesc_t*)from_desc == typedesc_remove_mut(to_desc);
+    return typedesc_is_implicitly_convertible((typedesc_t*)from_desc, typedesc_remove_opt(to_desc), through_ref);
+  }
+
+  return (typedesc_t*)from_desc == to_desc;
 }
 
 bool typedesc_struct_is_explicitly_convertible(typedesc_struct_t* from_desc, typedesc_t* to_desc)

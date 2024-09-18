@@ -66,7 +66,7 @@ void ast_decl_var_typecheck(typecheck_ctx_t* ctx, ast_decl_var_t* node)
     typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
     ASSERT(expr_desc != NULL);
 
-    if (!typedesc_is_implicitly_convertible(expr_desc, desc))
+    if (!typedesc_is_implicitly_convertible(expr_desc, desc, false))
     {
       location_t loc = token_location(node->tok);
 

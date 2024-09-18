@@ -100,10 +100,18 @@ void typedesc_prim_free(typedesc_prim_t* desc)
   free(desc);
 }
 
-bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedesc_t* to_desc)
+bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedesc_t* to_desc, bool through_ref)
 {
   if (to_desc->kind == TYPEDESC_OPT)
-    return typedesc_is_implicitly_convertible((typedesc_t*)from_desc, typedesc_remove_opt(to_desc));
+  {
+    if (through_ref)
+      return false;
+
+    return typedesc_is_implicitly_convertible((typedesc_t*)from_desc, typedesc_remove_opt(to_desc), through_ref);
+  }
+
+  if (through_ref)
+    return (typedesc_t*)from_desc == to_desc;
 
   to_desc = typedesc_remove_mut(to_desc);
 
@@ -117,13 +125,22 @@ bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedes
       if (typedesc_is_signed((typedesc_t*)from_desc) == typedesc_is_signed(to_desc))
         return typedesc_integer_bits((typedesc_t*)from_desc) <= typedesc_integer_bits(to_desc);
 
-      return false;
+      if (typedesc_is_signed((typedesc_t*)from_desc) && !typedesc_is_signed(to_desc))
+        return false;
+
+      return typedesc_integer_bits((typedesc_t*)from_desc) < typedesc_integer_bits(to_desc);
     }
 
     if (typedesc_is_float((typedesc_t*)from_desc) && typedesc_is_float(to_desc))
       return !(from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32);
 
-    return false;
+    if (typedesc_is_float((typedesc_t*)from_desc))
+      return false;
+
+    if (to_desc->kind == TYPEDESC_F32)
+      return typedesc_integer_bits((typedesc_t*)from_desc) <= 16;
+
+    return typedesc_integer_bits((typedesc_t*)from_desc) <= 32;
   }
 
   return false;

@@ -62,7 +62,7 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
 
     typedesc_t* callee_param_desc = (typedesc_t*)vector_get(fun_desc->param_types, i);
 
-    if (!typedesc_is_implicitly_convertible(caller_param_desc, callee_param_desc))
+    if (!typedesc_is_implicitly_convertible(caller_param_desc, callee_param_desc, false))
     {
       location_t loc = token_location(caller_param->tok);
 

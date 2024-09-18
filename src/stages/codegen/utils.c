@@ -134,7 +134,7 @@ static LLVMValueRef codegen_build_implicit_cast_prim(codegen_ctx_t* ctx, LLVMVal
 
 LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
 {
-  ASSERT(typedesc_is_implicitly_convertible(from_desc, to_desc));
+  ASSERT(typedesc_is_implicitly_convertible(from_desc, to_desc, false));
 
   switch (from_desc->kind)
   {

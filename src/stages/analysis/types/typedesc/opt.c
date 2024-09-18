@@ -25,12 +25,12 @@ void typedesc_opt_free(typedesc_opt_t* desc)
   free(desc);
 }
 
-bool typedesc_opt_is_implicitly_convertible(typedesc_opt_t* from_desc, typedesc_t* to_desc)
+bool typedesc_opt_is_implicitly_convertible(typedesc_opt_t* from_desc, typedesc_t* to_desc, bool UNUSED(through_ref))
 {
   if (to_desc->kind != TYPEDESC_OPT)
     return false;
 
-  return from_desc->base_type == ((typedesc_opt_t*)to_desc)->base_type;
+  return typedesc_is_implicitly_convertible(from_desc->base_type, typedesc_remove_opt(to_desc), true);
 }
 
 bool typedesc_opt_is_explicitly_convertible(typedesc_opt_t* from_desc, typedesc_t* to_desc)
