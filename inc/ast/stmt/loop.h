@@ -14,7 +14,7 @@
 #include "llvm.h"
 
 /**
- * \brief AST while-loop statement node.
+ * \brief AST loop statement node.
  */
 typedef struct ast_stmt_loop_t
 {
