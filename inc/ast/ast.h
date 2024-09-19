@@ -99,6 +99,7 @@
 #include "ast/stmt/break.h"
 #include "ast/stmt/continue.h"
 #include "ast/stmt/defer.h"
+#include "ast/stmt/do_while.h"
 #include "ast/stmt/expr.h"
 #include "ast/stmt/for.h"
 #include "ast/stmt/if.h"

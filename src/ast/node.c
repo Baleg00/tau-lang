@@ -54,6 +54,7 @@ void ast_node_free(ast_node_t* node)
   case AST_STMT_IF:            ast_stmt_if_free           ((ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_free          ((ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_free        ((ast_stmt_while_t*        )node); break;
+  case AST_STMT_DO_WHILE:      ast_stmt_do_while_free     ((ast_stmt_do_while_t*     )node); break;
   case AST_STMT_BREAK:         ast_stmt_break_free        ((ast_stmt_break_t*        )node); break;
   case AST_STMT_CONTINUE:      ast_stmt_continue_free     ((ast_stmt_continue_t*     )node); break;
   case AST_STMT_RETURN:        ast_stmt_return_free       ((ast_stmt_return_t*       )node); break;
@@ -122,6 +123,7 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_STMT_IF:            ast_stmt_if_nameres           (ctx, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_nameres          (ctx, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_nameres        (ctx, (ast_stmt_while_t*        )node); break;
+  case AST_STMT_DO_WHILE:      ast_stmt_do_while_nameres     (ctx, (ast_stmt_do_while_t*     )node); break;
   case AST_STMT_BREAK:         ast_stmt_break_nameres        (ctx, (ast_stmt_break_t*        )node); break;
   case AST_STMT_CONTINUE:      ast_stmt_continue_nameres     (ctx, (ast_stmt_continue_t*     )node); break;
   case AST_STMT_RETURN:        ast_stmt_return_nameres       (ctx, (ast_stmt_return_t*       )node); break;
@@ -184,6 +186,7 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_STMT_IF:            ast_stmt_if_typecheck           (ctx, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_typecheck          (ctx, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_typecheck        (ctx, (ast_stmt_while_t*        )node); break;
+  case AST_STMT_DO_WHILE:      ast_stmt_do_while_typecheck     (ctx, (ast_stmt_do_while_t*     )node); break;
   case AST_STMT_BREAK:         ast_stmt_break_typecheck        (ctx, (ast_stmt_break_t*        )node); break;
   case AST_STMT_CONTINUE:      ast_stmt_continue_typecheck     (ctx, (ast_stmt_continue_t*     )node); break;
   case AST_STMT_RETURN:        ast_stmt_return_typecheck       (ctx, (ast_stmt_return_t*       )node); break;
@@ -254,6 +257,7 @@ void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
   case AST_STMT_IF:            ast_stmt_if_ctrlflow           (ctx, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_ctrlflow          (ctx, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_ctrlflow        (ctx, (ast_stmt_while_t*        )node); break;
+  case AST_STMT_DO_WHILE:      ast_stmt_do_while_ctrlflow     (ctx, (ast_stmt_do_while_t*     )node); break;
   case AST_STMT_BREAK:         ast_stmt_break_ctrlflow        (ctx, (ast_stmt_break_t*        )node); break;
   case AST_STMT_CONTINUE:      ast_stmt_continue_ctrlflow     (ctx, (ast_stmt_continue_t*     )node); break;
   case AST_STMT_RETURN:        ast_stmt_return_ctrlflow       (ctx, (ast_stmt_return_t*       )node); break;
@@ -309,6 +313,7 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   case AST_STMT_IF:            ast_stmt_if_codegen           (ctx, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_codegen          (ctx, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_codegen        (ctx, (ast_stmt_while_t*        )node); break;
+  case AST_STMT_DO_WHILE:      ast_stmt_do_while_codegen     (ctx, (ast_stmt_do_while_t*     )node); break;
   case AST_STMT_BREAK:         ast_stmt_break_codegen        (ctx, (ast_stmt_break_t*        )node); break;
   case AST_STMT_CONTINUE:      ast_stmt_continue_codegen     (ctx, (ast_stmt_continue_t*     )node); break;
   case AST_STMT_RETURN:        ast_stmt_return_codegen       (ctx, (ast_stmt_return_t*       )node); break;
@@ -470,6 +475,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_STMT_IF:            ast_stmt_if_dump_json           (stream, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_dump_json          (stream, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_dump_json        (stream, (ast_stmt_while_t*        )node); break;
+  case AST_STMT_DO_WHILE:      ast_stmt_do_while_dump_json     (stream, (ast_stmt_do_while_t*     )node); break;
   case AST_STMT_BREAK:         ast_stmt_break_dump_json        (stream, (ast_stmt_break_t*        )node); break;
   case AST_STMT_CONTINUE:      ast_stmt_continue_dump_json     (stream, (ast_stmt_continue_t*     )node); break;
   case AST_STMT_RETURN:        ast_stmt_return_dump_json       (stream, (ast_stmt_return_t*       )node); break;
@@ -537,6 +543,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_STMT_IF:            return "AST_STMT_IF";
   case AST_STMT_FOR:           return "AST_STMT_FOR";
   case AST_STMT_WHILE:         return "AST_STMT_WHILE";
+  case AST_STMT_DO_WHILE:      return "AST_STMT_DO_WHILE";
   case AST_STMT_BREAK:         return "AST_STMT_BREAK";
   case AST_STMT_CONTINUE:      return "AST_STMT_CONTINUE";
   case AST_STMT_RETURN:        return "AST_STMT_RETURN";
@@ -625,6 +632,7 @@ bool ast_is_stmt(ast_node_t* node)
   case AST_STMT_IF:
   case AST_STMT_FOR:
   case AST_STMT_WHILE:
+  case AST_STMT_DO_WHILE:
   case AST_STMT_BREAK:
   case AST_STMT_CONTINUE:
   case AST_STMT_RETURN:

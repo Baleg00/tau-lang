@@ -329,6 +329,19 @@ ast_node_t* parser_parse_stmt_for_var(parser_t* par);
 ast_node_t* parser_parse_stmt_while(parser_t* par);
 
 /**
+ * \brief Parses a do-while-loop.
+ *
+ * \details A do-while-loop is introduced by the `do` keyword followed by a
+ * statement, the `while` keyword, and an expression evaluating to a boolean type.
+ * The condition is checked before each execution of the statement except the first
+ * one and the loop is terminated if the condition it is not met.
+ *
+ * \param[in] par Parser to be used.
+ * \returns While-loop node.
+ */
+ast_node_t* parser_parse_stmt_do_while(parser_t* par);
+
+/**
  * \brief Parses a break-statement.
  * 
  * \details A break-statement is just a `break` keyword. It prematurely

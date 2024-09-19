@@ -67,10 +67,11 @@ typedef enum ast_kind_e
   AST_EXPR_OP_UNARY, // Unary operation expression.
   AST_EXPR_OP_BINARY, // Binary operation expression.
   AST_EXPR_OP_CALL, // Call operation expression.
-  
+
   AST_STMT_IF, // If statement.
   AST_STMT_FOR, // For statement.
   AST_STMT_WHILE, // While statement.
+  AST_STMT_DO_WHILE, //  Do-while statement.
   AST_STMT_BREAK, // Break statement.
   AST_STMT_CONTINUE, // Continue statement.
   AST_STMT_RETURN, // Return statement.
@@ -94,7 +95,7 @@ typedef enum ast_kind_e
   AST_PATH_ALIAS, // Path alias.
 
   AST_USE, // Use directive.
-  
+
   AST_PROG, // Program.
 } ast_kind_t;
 

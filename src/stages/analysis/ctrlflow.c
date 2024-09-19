@@ -56,6 +56,16 @@ void ctrlflow_ctx_while_end(ctrlflow_ctx_t* ctx)
   vector_pop(ctx->stmts);
 }
 
+void ctrlflow_ctx_do_while_begin(ctrlflow_ctx_t* ctx, ast_stmt_do_while_t* node)
+{
+  vector_push(ctx->stmts, node);
+}
+
+void ctrlflow_ctx_do_while_end(ctrlflow_ctx_t* ctx)
+{
+  vector_pop(ctx->stmts);
+}
+
 void ctrlflow_ctx_for_begin(ctrlflow_ctx_t* ctx, ast_stmt_for_t* node)
 {
   vector_push(ctx->stmts, node);

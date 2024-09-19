@@ -53,29 +53,24 @@ void ast_stmt_continue_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_continue_t* node)
 
     switch (stmt_node->kind)
     {
-    case AST_STMT_FOR:
-    case AST_STMT_WHILE: node->loop = stmt_node; return;
-    default:
-    {
-      location_t loc = token_location(node->tok);
-
-      report_error_continue_outside_loop(loc);
-    }
+    case AST_STMT_WHILE:
+    case AST_STMT_DO_WHILE: node->loop = stmt_node; return;
+    default: NOOP();
     }
   }
+
+  location_t loc = token_location(node->tok);
+
+  report_error_continue_outside_loop(loc);
 }
 
 void ast_stmt_continue_codegen(codegen_ctx_t* ctx, ast_stmt_continue_t* node)
 {
   switch (node->loop->kind)
   {
-  case AST_STMT_WHILE:
-  {
-    LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_while_t*)node->loop)->llvm_cond);
-    break;
-  }
-  default:
-    UNREACHABLE();
+  case AST_STMT_WHILE:    LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_while_t*   )node->loop)->llvm_cond); break;
+  case AST_STMT_DO_WHILE: LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_do_while_t*)node->loop)->llvm_cond); break;
+  default: UNREACHABLE();
   }
 }
 
