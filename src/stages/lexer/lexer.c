@@ -43,6 +43,7 @@ static const struct
   { "for",      TOK_KW_FOR      },
   { "while",    TOK_KW_WHILE    },
   { "do",       TOK_KW_DO       },
+  { "loop",     TOK_KW_LOOP     },
   { "break",    TOK_KW_BREAK    },
   { "continue", TOK_KW_CONTINUE },
   { "return",   TOK_KW_RETURN   },

@@ -61,6 +61,7 @@ typedef enum token_kind_e
   TOK_KW_FOR, // Keyword `for`
   TOK_KW_WHILE, // Keyword `while`
   TOK_KW_DO, // Keyword `do`
+  TOK_KW_LOOP, // Keyword `loop`
   TOK_KW_BREAK, // Keyword `break`
   TOK_KW_CONTINUE, // Keyword `continue`
   TOK_KW_RETURN, // Keyword `return`

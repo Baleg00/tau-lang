@@ -514,6 +514,18 @@ ast_node_t* parser_parse_stmt_do_while(parser_t* par)
   return (ast_node_t*)node;
 }
 
+ast_node_t* parser_parse_stmt_loop(parser_t* par)
+{
+  ast_stmt_loop_t* node = ast_stmt_loop_init();
+  node->tok = parser_current(par);
+
+  parser_expect(par, TOK_KW_LOOP);
+
+  node->stmt = parser_parse_stmt(par);
+
+  return (ast_node_t*)node;
+}
+
 ast_node_t* parser_parse_stmt_break(parser_t* par)
 {
   ast_stmt_break_t* node = ast_stmt_break_init();
@@ -595,6 +607,7 @@ ast_node_t* parser_parse_stmt(parser_t* par)
   case TOK_KW_FOR:           return parser_parse_stmt_for(par);
   case TOK_KW_WHILE:         return parser_parse_stmt_while(par);
   case TOK_KW_DO:            return parser_parse_stmt_do_while(par);
+  case TOK_KW_LOOP:          return parser_parse_stmt_loop(par);
   case TOK_KW_BREAK:         return parser_parse_stmt_break(par);
   case TOK_KW_CONTINUE:      return parser_parse_stmt_continue(par);
   case TOK_KW_RETURN:        return parser_parse_stmt_return(par);

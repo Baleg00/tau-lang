@@ -103,6 +103,7 @@
 #include "ast/stmt/expr.h"
 #include "ast/stmt/for.h"
 #include "ast/stmt/if.h"
+#include "ast/stmt/loop.h"
 #include "ast/stmt/return.h"
 #include "ast/stmt/stmt.h"
 #include "ast/stmt/while.h"

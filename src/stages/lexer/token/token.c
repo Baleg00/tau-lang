@@ -39,6 +39,7 @@ static const struct
   { TOK_KW_FOR, 3 },
   { TOK_KW_WHILE, 5 },
   { TOK_KW_DO, 2 },
+  { TOK_KW_LOOP, 4 },
   { TOK_KW_BREAK, 5 },
   { TOK_KW_CONTINUE, 8 },
   { TOK_KW_RETURN, 6 },
@@ -425,6 +426,7 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_FOR:                      return "TOK_KW_FOR";
   case TOK_KW_WHILE:                    return "TOK_KW_WHILE";
   case TOK_KW_DO:                       return "TOK_KW_DO";
+  case TOK_KW_LOOP:                     return "TOK_KW_LOOP";
   case TOK_KW_BREAK:                    return "TOK_KW_BREAK";
   case TOK_KW_CONTINUE:                 return "TOK_KW_CONTINUE";
   case TOK_KW_RETURN:                   return "TOK_KW_RETURN";
@@ -551,6 +553,7 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_FOR:
   case TOK_KW_WHILE:
   case TOK_KW_DO:
+  case TOK_KW_LOOP:
   case TOK_KW_BREAK:
   case TOK_KW_CONTINUE:
   case TOK_KW_RETURN:

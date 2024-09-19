@@ -337,9 +337,19 @@ ast_node_t* parser_parse_stmt_while(parser_t* par);
  * one and the loop is terminated if the condition it is not met.
  *
  * \param[in] par Parser to be used.
- * \returns While-loop node.
+ * \returns Do-while-loop node.
  */
 ast_node_t* parser_parse_stmt_do_while(parser_t* par);
+
+/**
+ * \brief Parses a loop.
+ *
+ * \details A loop is introduced by the `loop` keyword followed by a statement.
+ *
+ * \param[in] par Parser to be used.
+ * \returns Loop node.
+ */
+ast_node_t* parser_parse_stmt_loop(parser_t* par);
 
 /**
  * \brief Parses a break-statement.

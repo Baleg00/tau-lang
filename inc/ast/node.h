@@ -72,6 +72,7 @@ typedef enum ast_kind_e
   AST_STMT_FOR, // For statement.
   AST_STMT_WHILE, // While statement.
   AST_STMT_DO_WHILE, //  Do-while statement.
+  AST_STMT_LOOP, //  Loop statement.
   AST_STMT_BREAK, // Break statement.
   AST_STMT_CONTINUE, // Continue statement.
   AST_STMT_RETURN, // Return statement.

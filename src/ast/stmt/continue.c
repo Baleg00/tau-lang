@@ -54,7 +54,8 @@ void ast_stmt_continue_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_continue_t* node)
     switch (stmt_node->kind)
     {
     case AST_STMT_WHILE:
-    case AST_STMT_DO_WHILE: node->loop = stmt_node; return;
+    case AST_STMT_DO_WHILE:
+    case AST_STMT_LOOP: node->loop = stmt_node; return;
     default: NOOP();
     }
   }
@@ -68,8 +69,9 @@ void ast_stmt_continue_codegen(codegen_ctx_t* ctx, ast_stmt_continue_t* node)
 {
   switch (node->loop->kind)
   {
-  case AST_STMT_WHILE:    LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_while_t*   )node->loop)->llvm_cond); break;
-  case AST_STMT_DO_WHILE: LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_do_while_t*)node->loop)->llvm_cond); break;
+  case AST_STMT_WHILE:    LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_while_t*   )node->loop)->llvm_cond ); break;
+  case AST_STMT_DO_WHILE: LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_do_while_t*)node->loop)->llvm_cond ); break;
+  case AST_STMT_LOOP:     LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_loop_t*    )node->loop)->llvm_begin); break;
   default: UNREACHABLE();
   }
 }

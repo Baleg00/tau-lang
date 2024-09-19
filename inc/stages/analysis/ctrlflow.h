@@ -24,6 +24,11 @@ typedef struct ast_stmt_while_t ast_stmt_while_t;
 typedef struct ast_stmt_do_while_t ast_stmt_do_while_t;
 
 /**
+ * \see ast/stmt/loop.h
+ */
+typedef struct ast_stmt_loop_t ast_stmt_loop_t;
+
+/**
  * \see ast/stmt/for.h
  */
 typedef struct ast_stmt_for_t ast_stmt_for_t;
@@ -113,6 +118,21 @@ void ctrlflow_ctx_do_while_begin(ctrlflow_ctx_t* ctx, ast_stmt_do_while_t* node)
  * \param[in] ctx Pointer to the control flow analysis context.
  */
 void ctrlflow_ctx_do_while_end(ctrlflow_ctx_t* ctx);
+
+/**
+ * \brief Marks the beginning of a new do-while statement.
+ *
+ * \param[in] ctx Pointer to the control flow analysis context.
+ * \param[in] node Pointer to the AST while statement node.
+ */
+void ctrlflow_ctx_loop_begin(ctrlflow_ctx_t* ctx, ast_stmt_loop_t* node);
+
+/**
+ * \brief Marks the end of the current do-while statement.
+ *
+ * \param[in] ctx Pointer to the control flow analysis context.
+ */
+void ctrlflow_ctx_loop_end(ctrlflow_ctx_t* ctx);
 
 /**
  * \brief Marks the beginning of a new for statement.
