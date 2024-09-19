@@ -515,6 +515,14 @@ ast_node_t* parser_parse_decl_enum(parser_t* par);
 ast_node_t* parser_parse_decl_mod(parser_t* par);
 
 /**
+ * \brief Parses a type alias declaration.
+ *
+ * \param[in] par Parser to be used.
+ * \returns Module declaration node.
+ */
+ast_node_t* parser_parse_decl_type_alias(parser_t* par);
+
+/**
  * \brief Parses a declaration.
  * 
  * \param[in] par Parser to be used.

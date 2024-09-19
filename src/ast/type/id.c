@@ -48,7 +48,8 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
   case AST_DECL_STRUCT:
   case AST_DECL_UNION:
   case AST_DECL_ENUM:
-  case AST_DECL_MOD: break;
+  case AST_DECL_MOD:
+  case AST_DECL_TYPE_ALIAS: break;
   default:
   {
     location_t loc = token_location(node->tok);

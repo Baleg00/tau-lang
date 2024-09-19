@@ -26,6 +26,7 @@
 #include "ast/decl/mod.h"
 #include "ast/decl/param.h"
 #include "ast/decl/struct.h"
+#include "ast/decl/type_alias.h"
 #include "ast/decl/union.h"
 #include "ast/decl/var.h"
 #include "ast/expr/expr.h"

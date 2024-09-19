@@ -70,6 +70,7 @@ void ast_node_free(ast_node_t* node)
   case AST_DECL_ENUM:          ast_decl_enum_free         ((ast_decl_enum_t*         )node); break;
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_free((ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_free          ((ast_decl_mod_t*          )node); break;
+  case AST_DECL_TYPE_ALIAS:    ast_decl_type_alias_free   ((ast_decl_type_alias_t*   )node); break;
   case AST_PATH_SEGMENT:       ast_path_segment_free      ((ast_path_segment_t*      )node); break;
   case AST_PATH_ACCESS:        ast_path_access_free       ((ast_path_access_t*       )node); break;
   case AST_PATH_LIST:          ast_path_list_free         ((ast_path_list_t*         )node); break;
@@ -140,6 +141,7 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_ENUM:          ast_decl_enum_nameres         (ctx, (ast_decl_enum_t*         )node); break;
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_nameres(ctx, (ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_nameres          (ctx, (ast_decl_mod_t*          )node); break;
+  case AST_DECL_TYPE_ALIAS:    ast_decl_type_alias_nameres   (ctx, (ast_decl_type_alias_t*   )node); break;
   case AST_PROG:               ast_prog_nameres              (ctx, (ast_prog_t*              )node); break;
   default: UNREACHABLE();
   }
@@ -204,6 +206,7 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_ENUM:          ast_decl_enum_typecheck         (ctx, (ast_decl_enum_t*         )node); break;
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_typecheck(ctx, (ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_typecheck          (ctx, (ast_decl_mod_t*          )node); break;
+  case AST_DECL_TYPE_ALIAS:    ast_decl_type_alias_typecheck   (ctx, (ast_decl_type_alias_t*   )node); break;
   case AST_PROG:               ast_prog_typecheck              (ctx, (ast_prog_t*              )node); break;
   default: UNREACHABLE();
   }
@@ -256,7 +259,8 @@ void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_STRUCT:
   case AST_DECL_UNION:
   case AST_DECL_ENUM:
-  case AST_DECL_ENUM_CONSTANT: break;
+  case AST_DECL_ENUM_CONSTANT:
+  case AST_DECL_TYPE_ALIAS:    break;
   case AST_STMT_IF:            ast_stmt_if_ctrlflow           (ctx, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_ctrlflow          (ctx, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_ctrlflow        (ctx, (ast_stmt_while_t*        )node); break;
@@ -333,6 +337,7 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   case AST_DECL_ENUM:          ast_decl_enum_codegen         (ctx, (ast_decl_enum_t*         )node); break;
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_codegen(ctx, (ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_codegen          (ctx, (ast_decl_mod_t*          )node); break;
+  case AST_DECL_TYPE_ALIAS:    ast_decl_type_alias_codegen   (ctx, (ast_decl_type_alias_t*   )node); break;
   case AST_PROG:               ast_prog_codegen              (ctx, (ast_prog_t*              )node); break;
   default: UNREACHABLE();
   }
@@ -496,6 +501,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_DECL_ENUM:          ast_decl_enum_dump_json         (stream, (ast_decl_enum_t*         )node); break;
   case AST_DECL_ENUM_CONSTANT: ast_decl_enum_constant_dump_json(stream, (ast_decl_enum_constant_t*)node); break;
   case AST_DECL_MOD:           ast_decl_mod_dump_json          (stream, (ast_decl_mod_t*          )node); break;
+  case AST_DECL_TYPE_ALIAS:    ast_decl_type_alias_dump_json   (stream, (ast_decl_type_alias_t*   )node); break;
   case AST_PATH_SEGMENT:       ast_path_segment_dump_json      (stream, (ast_path_segment_t*      )node); break;
   case AST_PATH_ACCESS:        ast_path_access_dump_json       (stream, (ast_path_access_t*       )node); break;
   case AST_PATH_LIST:          ast_path_list_dump_json         (stream, (ast_path_list_t*         )node); break;
@@ -565,6 +571,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_DECL_ENUM:          return "AST_DECL_ENUM";
   case AST_DECL_ENUM_CONSTANT: return "AST_DECL_ENUM_CONSTANT";
   case AST_DECL_MOD:           return "AST_DECL_MOD";
+  case AST_DECL_TYPE_ALIAS:    return "AST_DECL_TYPE_ALIAS";
   case AST_PATH_SEGMENT:       return "AST_PATH_SEGMENT";
   case AST_PATH_ACCESS:        return "AST_PATH_ACCESS";
   case AST_PATH_LIST:          return "AST_PATH_LIST";
@@ -665,6 +672,7 @@ bool ast_is_decl(ast_node_t* node)
   case AST_DECL_ENUM:
   case AST_DECL_ENUM_CONSTANT:
   case AST_DECL_MOD:
+  case AST_DECL_TYPE_ALIAS:
     return true;
   default:
     return false;

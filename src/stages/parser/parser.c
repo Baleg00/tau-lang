@@ -851,6 +851,23 @@ ast_node_t* parser_parse_decl_mod(parser_t* par)
   return (ast_node_t*)node;
 }
 
+ast_node_t* parser_parse_decl_type_alias(parser_t* par)
+{
+  ast_decl_type_alias_t* node = ast_decl_type_alias_init();
+  node->tok = parser_current(par);
+  node->parent = stack_top(par->parents);
+
+  parser_expect(par, TOK_KW_TYPE);
+
+  node->id = parser_parse_id(par);
+
+  parser_expect(par, TOK_PUNCT_EQUAL);
+
+  node->type = parser_parse_type(par);
+
+  return (ast_node_t*)node;
+}
+
 ast_node_t* parser_parse_decl(parser_t* par)
 {
   switch (parser_current(par)->kind)
@@ -861,6 +878,7 @@ ast_node_t* parser_parse_decl(parser_t* par)
   case TOK_KW_UNION:   return parser_parse_decl_union     (par);
   case TOK_KW_ENUM:    return parser_parse_decl_enum      (par);
   case TOK_KW_MOD:     return parser_parse_decl_mod       (par);
+  case TOK_KW_TYPE:    return parser_parse_decl_type_alias(par);
   default:
   {
     location_t loc = token_location(parser_current(par));
