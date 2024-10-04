@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "os_detect.h"
+#include "utils/os_detect.h"
 #include "utils/extern_c.h"
 
 /// Cross-platform directory separator character.

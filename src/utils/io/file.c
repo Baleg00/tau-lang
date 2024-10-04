@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "os_detect.h"
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 

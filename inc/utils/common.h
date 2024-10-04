@@ -20,7 +20,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "utils/compiler_detect.h"
 #include "utils/extern_c.h"
+#include "utils/os_detect.h"
 #include "utils/io/log.h"
 
 #ifdef MAX
