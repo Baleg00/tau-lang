@@ -21,6 +21,8 @@
 #include "stages/analysis/types/typedesc/typedesc.h"
 #include "utils/str.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents a type builder.
  * 
@@ -285,5 +287,7 @@ typedesc_t* typebuilder_build_var(typebuilder_t* builder, uint64_t id);
  * \returns A pointer to the modified struct type descriptor.
  */
 typedesc_t* typebuilder_struct_set_body(typebuilder_t* builder, typedesc_t* desc, typedesc_t* field_types[], size_t field_count);
+
+TAU_EXTERN_C_END
 
 #endif

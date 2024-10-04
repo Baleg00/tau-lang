@@ -13,6 +13,8 @@
 #include "ast/decl/decl.h"
 #include "llvm.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST enum declaration node.
  */
@@ -86,5 +88,7 @@ size_t ast_decl_enum_mangle(ast_decl_enum_t* node, char* buf, size_t len);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_decl_enum_dump_json(FILE* stream, ast_decl_enum_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -12,6 +12,8 @@
 
 #include "ast/node.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST use directive node.
  */
@@ -42,5 +44,7 @@ void ast_use_free(ast_use_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_use_dump_json(FILE* stream, ast_use_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -12,6 +12,10 @@
 
 #include <stddef.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Enumeration of calling convention kinds.
  */
@@ -50,5 +54,7 @@ const char* callconv_kind_to_cstr(callconv_kind_t kind);
  * have been written to the buffer if `len` was ignored.
  */
 size_t callconv_mangle(callconv_kind_t kind, char* buf, size_t len);
+
+TAU_EXTERN_C_END
 
 #endif

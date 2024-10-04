@@ -12,6 +12,8 @@
 
 #include "ast/stmt/stmt.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST break statement node.
  */
@@ -74,5 +76,7 @@ void ast_stmt_break_codegen(codegen_ctx_t* ctx, ast_stmt_break_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_stmt_break_dump_json(FILE* stream, ast_stmt_break_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -19,6 +19,8 @@
   AST_EXPR_HEADER;\
   op_kind_t op_kind
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Enumeration of operator kinds.
  */
@@ -177,5 +179,7 @@ bool op_is_left_assoc(op_kind_t kind);
  * \returns `true` if the operator is right associative, `false` otherwise.
  */
 bool op_is_right_assoc(op_kind_t kind);
+
+TAU_EXTERN_C_END
 
 #endif

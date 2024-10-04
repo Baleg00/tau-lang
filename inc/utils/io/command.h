@@ -17,6 +17,10 @@
 
 #include <stdio.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents a terminal command.
  */
@@ -100,5 +104,7 @@ int command_run(command_t* cmd);
  * \param[in] cmd Pointer to the command to be used.
  */
 void command_reset(command_t* cmd);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -23,6 +23,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents an arena allocator.
  */
@@ -86,5 +90,7 @@ void* arena_alloc(arena_t* arena, size_t size);
  * \returns Pointer to the newly allocated memory or `NULL`.
  */
 void* arena_alloc_aligned(arena_t* arena, size_t size, size_t alignment);
+
+TAU_EXTERN_C_END
 
 #endif

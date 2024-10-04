@@ -21,6 +21,10 @@
 
 #include <stdio.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Creates a new option.
  *
@@ -140,5 +144,7 @@ const char* argparse_get_arg_at(argparse_ctx_t* ctx, size_t idx);
  * \returns The current argument or NULL if there are no more arguments.
  */
 const char* argparse_next_arg(argparse_ctx_t* ctx);
+
+TAU_EXTERN_C_END
 
 #endif

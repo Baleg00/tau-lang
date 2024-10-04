@@ -10,6 +10,10 @@
 #ifndef TAU_COMPILER_H
 #define TAU_COMPILER_H
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents a compiler context.
  */
@@ -39,5 +43,7 @@ void compiler_free(compiler_t* compiler);
  * \returns `0` on success, otherwise a non-zero value.
  */
 int compiler_main(compiler_t* compiler, int argc, const char* argv[]);
+
+TAU_EXTERN_C_END
 
 #endif

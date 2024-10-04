@@ -14,6 +14,8 @@
 
 #include "linker/linker.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Initializes a new MSVC linker.
  *
@@ -139,5 +141,7 @@ void linker_msvc_add_flag(linker_t* linker, const char* flag);
  * \returns `true` if linking was successful, `false` otherwise.
  */
 bool linker_msvc_link(linker_t* linker);
+
+TAU_EXTERN_C_END
 
 #endif

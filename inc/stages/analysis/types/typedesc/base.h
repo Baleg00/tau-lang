@@ -22,6 +22,8 @@
   typedesc_kind_t kind; /** Type kind. */\
   LLVMTypeRef llvm_type /** LLVM type. */\
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \see ast/node.h 
  */
@@ -308,5 +310,7 @@ bool typedesc_is_callable(typedesc_t* desc);
  * \returns Pointer to the underlying callable type descriptor.
  */
 typedesc_t* typedesc_underlying_callable(typedesc_t* desc);
+
+TAU_EXTERN_C_END
 
 #endif

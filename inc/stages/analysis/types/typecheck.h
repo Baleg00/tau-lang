@@ -21,6 +21,8 @@
 #include "stages/analysis/types/typebuilder.h"
 #include "stages/analysis/types/typetable.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Type check context.
  */
@@ -48,5 +50,7 @@ typecheck_ctx_t* typecheck_ctx_init(LLVMContextRef llvm_ctx, LLVMTargetDataRef l
  * \param[in] ctx Pointer to the type check context to be freed.
  */
 void typecheck_ctx_free(typecheck_ctx_t* ctx);
+
+TAU_EXTERN_C_END
 
 #endif

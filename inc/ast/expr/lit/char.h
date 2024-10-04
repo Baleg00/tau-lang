@@ -12,6 +12,8 @@
 
 #include "ast/expr/lit/lit.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST literal character expression node.
  */
@@ -66,5 +68,7 @@ void ast_expr_lit_char_codegen(codegen_ctx_t* ctx, ast_expr_lit_char_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_expr_lit_char_dump_json(FILE* stream, ast_expr_lit_char_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

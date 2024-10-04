@@ -21,6 +21,8 @@
   LLVMTypeRef llvm_type;\
   LLVMValueRef llvm_value
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST expression node.
  */
@@ -28,5 +30,7 @@ typedef struct ast_expr_t
 {
   AST_EXPR_HEADER;
 } ast_expr_t;
+
+TAU_EXTERN_C_END
 
 #endif

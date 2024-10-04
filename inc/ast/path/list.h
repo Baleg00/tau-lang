@@ -13,6 +13,8 @@
 #include "ast/node.h"
 #include "utils/collections/vector.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST path list node.
  */
@@ -43,5 +45,7 @@ void ast_path_list_free(ast_path_list_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_path_list_dump_json(FILE* stream, ast_path_list_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

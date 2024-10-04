@@ -14,6 +14,8 @@
 #include "utils/collections/vector.h"
 #include "utils/io/log.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents a compiler option context.
  */
@@ -145,5 +147,7 @@ bool options_get_dump_asm(options_ctx_t* ctx);
  * \returns `true` if the compiler should exit safely, `false` otherwise.
  */
 bool options_get_should_exit(options_ctx_t* ctx);
+
+TAU_EXTERN_C_END
 
 #endif

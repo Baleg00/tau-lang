@@ -12,6 +12,8 @@
 
 #include "ast/expr/op/bin/bin.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST binary access operation expression node.
  */
@@ -52,5 +54,7 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
  * \param[in] node Pointer to the AST node to be visited.
  */
 void ast_expr_op_bin_access_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_access_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -25,6 +25,8 @@
 #include "utils/collections/queue.h"
 #include "utils/collections/stack.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Enumeration of element kinds.
  */
@@ -250,5 +252,7 @@ void shyd_ast_op(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
  * \returns Expression node.
  */
 ast_node_t* shyd_parse_expr(parser_t* par);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -21,6 +21,8 @@
 #include "stages/analysis/symtable.h"
 #include "utils/collections/stack.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Name resolution context.
  */
@@ -66,5 +68,7 @@ void nameres_ctx_scope_end(nameres_ctx_t* ctx);
  * \returns Pointer to the current scope.
  */
 symtable_t* nameres_ctx_scope_cur(nameres_ctx_t* ctx);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -23,6 +23,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "utils/extern_c.h"
+
 #ifdef TAU_DEBUG
 # ifndef TAU_MEMTRACE_IMPL
 /**
@@ -59,6 +61,8 @@
 #   define free(PTR) memtrace_free((PTR), __FILE__, __LINE__, __func__)
 # endif
 #endif
+
+TAU_EXTERN_C_BEGIN
 
 /**
  * \brief Allocates memory of the specified size and tracks the allocation
@@ -150,5 +154,7 @@ size_t memtrace_stat_avg_alloc_size(void);
  * \returns The average lifetime of allocated memory in milliseconds.
  */
 double memtrace_stat_avg_lifetime(void);
+
+TAU_EXTERN_C_END
 
 #endif

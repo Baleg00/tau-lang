@@ -13,6 +13,8 @@
 
 #include "ast/expr/op/bin/bin.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST binary arithmetic logical OR expression node.
  */
@@ -54,5 +56,7 @@ void ast_expr_op_bin_logic_or_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_lo
  * \param[in] node Pointer to the AST node to be visited.
  */
 void ast_expr_op_bin_logic_or_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_logic_or_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

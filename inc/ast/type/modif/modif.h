@@ -19,6 +19,8 @@
   AST_TYPE_HEADER;\
   ast_node_t* base_type
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST type modifier node.
  */
@@ -26,5 +28,7 @@ typedef struct ast_type_modif_t
 {
   AST_TYPE_MODIFIER_HEADER;
 } ast_type_modif_t;
+
+TAU_EXTERN_C_END
 
 #endif

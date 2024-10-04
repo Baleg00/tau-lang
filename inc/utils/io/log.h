@@ -23,6 +23,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Logs a message with the TRACE log level.
  *
@@ -148,5 +152,7 @@ void log_set_verbose(bool value);
  * \returns The current verbosity mode.
  */
 bool log_get_verbose(void);
+
+TAU_EXTERN_C_END
 
 #endif

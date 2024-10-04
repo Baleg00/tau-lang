@@ -13,6 +13,8 @@
 
 #include "ast/expr/op/bin/bin.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST binary arithmetic modulo assignment operation expression node.
  */
@@ -55,5 +57,7 @@ void ast_expr_op_bin_assign_arit_mod_typecheck(typecheck_ctx_t* ctx, ast_expr_op
  * \param[in] node Pointer to the AST node to be visited.
  */
 void ast_expr_op_bin_assign_arit_mod_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_assign_arit_mod_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

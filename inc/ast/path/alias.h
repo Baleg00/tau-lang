@@ -12,6 +12,8 @@
 
 #include "ast/node.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST path alias node.
  */
@@ -43,5 +45,7 @@ void ast_path_alias_free(ast_path_alias_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_path_alias_dump_json(FILE* stream, ast_path_alias_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

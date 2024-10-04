@@ -37,6 +37,10 @@
 #include <llvm-c/Transforms/PassBuilder.h>
 #include <llvm-c/Types.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Initializes LLVM and all of its components.
  * 
@@ -98,5 +102,7 @@ const char* llvm_get_cpu_name(void);
  * \returns The host CPU's features.
  */
 const char* llvm_get_cpu_features(void);
+
+TAU_EXTERN_C_END
 
 #endif

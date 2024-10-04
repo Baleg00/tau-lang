@@ -12,6 +12,8 @@
 
 #include "ast/node.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST identifier node.
  */
@@ -41,5 +43,7 @@ void ast_id_free(ast_id_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_id_dump_json(FILE* stream, ast_id_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

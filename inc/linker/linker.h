@@ -18,6 +18,10 @@
 
 #include <stdbool.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Enumeration of linker implementation kinds.
  */
@@ -199,5 +203,7 @@ void linker_add_flag(linker_t* linker, const char* flag);
  * \returns `true` if linking was successful, `false` otherwise.
  */
 bool linker_link(linker_t* linker);
+
+TAU_EXTERN_C_END
 
 #endif

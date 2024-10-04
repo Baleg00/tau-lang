@@ -20,6 +20,8 @@
   ast_node_t* id; /** The associated identifier. */\
   bool is_pub /** Is declaration public (in case it is a member). */
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST declaration node.
  */
@@ -27,5 +29,7 @@ typedef struct ast_decl_t
 {
   AST_DECL_HEADER;
 } ast_decl_t;
+
+TAU_EXTERN_C_END
 
 #endif

@@ -19,6 +19,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Macro for iterating over each element in a vector using a for loop.
  * 
@@ -201,5 +205,7 @@ void vector_for_each(vector_t* vec, vector_for_each_func_t func);
  * \param buffer Pointer to the memory buffer.
  */
 void vector_to_buffer(vector_t* vec, void* buffer);
+
+TAU_EXTERN_C_END
 
 #endif

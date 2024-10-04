@@ -12,6 +12,8 @@
 
 #include "stages/analysis/types/typedesc/modif.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Type descriptor for reference types.
  */
@@ -52,5 +54,7 @@ bool typedesc_ref_is_implicitly_convertible(typedesc_ref_t* from_desc, typedesc_
  * \returns `true` if the explicit conversion is possible, `false` otherwise.
  */
 bool typedesc_ref_is_explicitly_convertible(typedesc_ref_t* from_desc, typedesc_t* to_desc);
+
+TAU_EXTERN_C_END
 
 #endif

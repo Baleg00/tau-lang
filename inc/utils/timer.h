@@ -36,6 +36,8 @@
     log_debug("timer", "[" ESC_FG_BRIGHT_BLACK NAME ESC_RESET "] Elapsed time: %.6g ms", (double)(time_it_end - time_it_begin) / (double)timer_freq() * 1000.0);\
   } while (0)\
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Returns the frequency of the timer in ticks per second.
  * 
@@ -49,5 +51,7 @@ uint64_t timer_freq(void);
  * \returns The current value of the timer.
  */
 uint64_t timer_now(void);
+
+TAU_EXTERN_C_END
 
 #endif

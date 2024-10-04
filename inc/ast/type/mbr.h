@@ -12,6 +12,8 @@
 
 #include "ast/type/type.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST member type node.
  */
@@ -83,5 +85,7 @@ size_t ast_type_mbr_mangle(ast_type_mbr_t* node, char* buf, size_t len);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_type_mbr_dump_json(FILE* stream, ast_type_mbr_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

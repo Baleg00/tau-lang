@@ -14,6 +14,8 @@
 #include "stages/analysis/types/typedesc/base.h"
 #include "utils/collections/vector.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Type descriptor for function types.
  */
@@ -58,5 +60,7 @@ bool typedesc_fun_is_implicitly_convertible(typedesc_fun_t* from_desc, typedesc_
  * \returns `true` if the explicit conversion is possible, `false` otherwise.
  */
 bool typedesc_fun_is_explicitly_convertible(typedesc_fun_t* from_desc, typedesc_t* to_desc);
+
+TAU_EXTERN_C_END
 
 #endif

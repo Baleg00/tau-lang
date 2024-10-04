@@ -12,6 +12,8 @@
 
 #include "ast/stmt/stmt.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST block statement node.
  */
@@ -75,5 +77,7 @@ void ast_stmt_block_codegen(codegen_ctx_t* ctx, ast_stmt_block_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_stmt_block_dump_json(FILE* stream, ast_stmt_block_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

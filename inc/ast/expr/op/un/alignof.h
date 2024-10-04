@@ -12,6 +12,8 @@
 
 #include "ast/expr/op/un/un.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST unary alignof operation expression node.
  */
@@ -53,5 +55,7 @@ void ast_expr_op_un_alignof_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_align
  * \param[in] node Pointer to the AST node to be visited.
  */
 void ast_expr_op_un_alignof_codegen(codegen_ctx_t* ctx, ast_expr_op_un_alignof_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

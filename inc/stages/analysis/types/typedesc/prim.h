@@ -12,6 +12,8 @@
 
 #include "stages/analysis/types/typedesc/base.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Type descriptor for primitive types.
  */
@@ -150,5 +152,7 @@ bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedes
  * \returns `true` if the explicit conversion is possible, `false` otherwise.
  */
 bool typedesc_prim_is_explicitly_convertible(typedesc_prim_t* from_desc, typedesc_t* to_desc);
+
+TAU_EXTERN_C_END
 
 #endif

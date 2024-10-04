@@ -24,6 +24,8 @@
 #include "utils/collections/list.h"
 #include "utils/str_view.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \see ast/node.h
  */
@@ -164,5 +166,7 @@ symbol_t* symtable_lookup_with_str_view(symtable_t* table, string_view_t id);
  * \param[in] table Pointer to the symbol table.
  */
 void symtable_expand(symtable_t* table);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -19,6 +19,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Set data structure.
  */
@@ -124,5 +128,7 @@ size_t set_size(set_t* set);
  * \param[in] func The function to be applied to each element.
  */
 void set_for_each(set_t* set, set_for_each_func_t func);
+
+TAU_EXTERN_C_END
 
 #endif

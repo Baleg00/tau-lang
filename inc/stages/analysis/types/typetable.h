@@ -21,6 +21,8 @@
 
 #include "stages/analysis/types/typedesc/typedesc.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \see ast/node.h 
  */
@@ -74,5 +76,7 @@ typedesc_t* typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* d
  * \returns A pointer to the type descriptor if found, or NULL if not found.
  */
 typedesc_t* typetable_lookup(typetable_t* table, ast_node_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

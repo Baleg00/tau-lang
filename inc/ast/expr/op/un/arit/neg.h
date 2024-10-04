@@ -13,6 +13,8 @@
 
 #include "ast/expr/op/un/un.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST unary negative operation expression node.
  */
@@ -54,5 +56,7 @@ void ast_expr_op_un_arit_neg_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_arit
  * \param[in] node Pointer to the AST node to be visited.
  */
 void ast_expr_op_un_arit_neg_codegen(codegen_ctx_t* ctx, ast_expr_op_un_arit_neg_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

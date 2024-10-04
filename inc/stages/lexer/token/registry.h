@@ -16,6 +16,8 @@
 
 #include "stages/lexer/token/token.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Adds a file to associate tokens with in the registry.
  *
@@ -47,5 +49,7 @@ void token_registry_path_and_src(token_t* tok, const char** path, const char** s
  * \brief Frees all registered tokens.
  */
 void token_registry_free(void);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "os_detect.h"
+#include "utils/extern_c.h"
 
 /// Cross-platform directory separator character.
 #define PATH_GENERIC_DIRECTORY_SEPARATOR_CHAR '/'
@@ -39,6 +40,8 @@
 /// Platform specific directory separator C-string.
 # define PATH_NATIVE_DIRECTORY_SEPARATOR_CSTR "/"
 #endif
+
+TAU_EXTERN_C_BEGIN
 
 /**
  * \brief Represents a file system path.
@@ -269,5 +272,7 @@ path_t* path_replace_extension(path_t* path, const char* extension);
  * after rhs, zero if lhs and rhs compare equal.
  */
 int path_compare(path_t* lhs, path_t* rhs);
+
+TAU_EXTERN_C_END
 
 #endif

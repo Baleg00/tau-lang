@@ -13,6 +13,8 @@
 
 #include "ast/expr/op/bin/bin.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST binary subscript operation expression node.
  */
@@ -54,5 +56,7 @@ void ast_expr_op_bin_subs_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_subs_t
  * \param[in] node Pointer to the AST node to be visited.
  */
 void ast_expr_op_bin_subs_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_subs_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

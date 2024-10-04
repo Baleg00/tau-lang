@@ -21,6 +21,9 @@
 
 #include <stdbool.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
 /**
  * \brief Queue data structure.
  */
@@ -71,5 +74,7 @@ void* queue_peek(queue_t* que);
  * \returns `true` if the queue is empty, `false` otherwise.
  */
 bool queue_empty(queue_t* que);
+
+TAU_EXTERN_C_END
 
 #endif

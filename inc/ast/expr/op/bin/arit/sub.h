@@ -13,6 +13,8 @@
 
 #include "ast/expr/op/bin/bin.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST binary arithmetic subtraction operation expression node.
  */
@@ -55,5 +57,7 @@ void ast_expr_op_bin_arit_sub_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_ar
  * \param[in] node Pointer to the AST node to be visited.
  */
 void ast_expr_op_bin_arit_sub_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_arit_sub_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -25,6 +25,8 @@
 #include "stages/lexer/token/token.h"
 #include "utils/collections/vector.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents a syntax analyzer.
  */
@@ -610,5 +612,7 @@ ast_node_t* parser_parse_use_directive(parser_t* par);
  * \returns Pointer to the root node.
  */
 ast_node_t* parser_parse(parser_t* par, vector_t* toks);
+
+TAU_EXTERN_C_END
 
 #endif

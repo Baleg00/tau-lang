@@ -13,6 +13,8 @@
 #include "utils/collections/stack.h"
 #include "utils/collections/vector.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \see ast/stmt/while.h
  */
@@ -163,5 +165,7 @@ void ctrlflow_ctx_defer_begin(ctrlflow_ctx_t* ctx, ast_stmt_defer_t* node);
  * \param[in] ctx Pointer to the control flow analysis context.
  */
 void ctrlflow_ctx_defer_end(ctrlflow_ctx_t* ctx);
+
+TAU_EXTERN_C_END
 
 #endif

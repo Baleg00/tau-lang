@@ -15,6 +15,8 @@
 #include "llvm.h"
 #include "stages/analysis/types/typetable.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \see ast/decl/fun.h
  */
@@ -52,5 +54,7 @@ codegen_ctx_t* codegen_ctx_init(typetable_t* typetable, LLVMContextRef llvm_ctx,
  * \param[in] ctx Pointer to the code generation context to be freed.
  */
 void codegen_ctx_free(codegen_ctx_t* ctx);
+
+TAU_EXTERN_C_END
 
 #endif

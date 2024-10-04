@@ -24,6 +24,8 @@
 #include "utils/str.h"
 #include "utils/str_view.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Location in the source code.
  */
@@ -61,5 +63,7 @@ string_t* location_to_string(location_t loc);
  * \returns The string view.
  */
 string_view_t location_to_string_view(location_t loc);
+
+TAU_EXTERN_C_END
 
 #endif

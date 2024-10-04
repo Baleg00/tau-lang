@@ -12,6 +12,8 @@
 
 #include "ast/expr/expr.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST identifier expression node.
  */
@@ -66,5 +68,7 @@ void ast_expr_id_codegen(codegen_ctx_t* ctx, ast_expr_id_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_expr_id_dump_json(FILE* stream, ast_expr_id_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

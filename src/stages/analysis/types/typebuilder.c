@@ -89,7 +89,7 @@ static int typebuilder_cmp_fun(void* lhs, void* rhs)
   typedesc_fun_t* lhs_desc = (typedesc_fun_t*)lhs;
   typedesc_fun_t* rhs_desc = (typedesc_fun_t*)rhs;
 
-  size_t lhs_hash = (size_t)hash_digest(&lhs_desc->return_type, sizeof(typedesc_t*));
+  uint64_t lhs_hash = hash_digest(&lhs_desc->return_type, sizeof(typedesc_t*));
 
   VECTOR_FOR_LOOP(i, lhs_desc->param_types)
   {
@@ -100,7 +100,7 @@ static int typebuilder_cmp_fun(void* lhs, void* rhs)
   lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->is_vararg, sizeof(bool));
   lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->callconv, sizeof(callconv_kind_t));
 
-  size_t rhs_hash = (size_t)hash_digest(&rhs_desc->return_type, sizeof(typedesc_t*));
+  uint64_t rhs_hash = hash_digest(&rhs_desc->return_type, sizeof(typedesc_t*));
 
   VECTOR_FOR_LOOP(i, rhs_desc->param_types)
   {
@@ -137,8 +137,8 @@ static int typebuilder_cmp_struct(void* lhs, void* rhs)
   size_t lhs_id_view_len = string_view_length(lhs_id_view);
   size_t rhs_id_view_len = string_view_length(rhs_id_view);
 
-  size_t lhs_hash = (size_t)hash_digest(lhs_id_view_begin, lhs_id_view_len);
-  size_t rhs_hash = (size_t)hash_digest(rhs_id_view_begin, rhs_id_view_len);
+  uint64_t lhs_hash = hash_digest(lhs_id_view_begin, lhs_id_view_len);
+  uint64_t rhs_hash = hash_digest(rhs_id_view_begin, rhs_id_view_len);
 
   if (lhs_hash < rhs_hash)
     return -1;
@@ -154,7 +154,7 @@ static int typebuilder_cmp_union(void* lhs, void* rhs)
   typedesc_union_t* lhs_desc = (typedesc_union_t*)lhs;
   typedesc_union_t* rhs_desc = (typedesc_union_t*)rhs;
 
-  size_t lhs_hash = (size_t)hash_digest(&lhs_desc->node, sizeof(ast_node_t*));
+  uint64_t lhs_hash = hash_digest(&lhs_desc->node, sizeof(ast_node_t*));
 
   VECTOR_FOR_LOOP(i, lhs_desc->field_types)
   {
@@ -162,7 +162,7 @@ static int typebuilder_cmp_union(void* lhs, void* rhs)
     lhs_hash = hash_combine_with_data(lhs_hash, &field_desc, sizeof(typedesc_t*));
   }
 
-  size_t rhs_hash = (size_t)hash_digest(&rhs_desc->node, sizeof(ast_node_t*));
+  uint64_t rhs_hash = hash_digest(&rhs_desc->node, sizeof(ast_node_t*));
 
   VECTOR_FOR_LOOP(i, rhs_desc->field_types)
   {
@@ -184,8 +184,8 @@ static int typebuilder_cmp_enum(void* lhs, void* rhs)
   typedesc_enum_t* lhs_desc = (typedesc_enum_t*)lhs;
   typedesc_enum_t* rhs_desc = (typedesc_enum_t*)rhs;
 
-  size_t lhs_hash = (size_t)hash_digest(&lhs_desc->node, sizeof(ast_node_t*));
-  size_t rhs_hash = (size_t)hash_digest(&rhs_desc->node, sizeof(ast_node_t*));
+  uint64_t lhs_hash = hash_digest(&lhs_desc->node, sizeof(ast_node_t*));
+  uint64_t rhs_hash = hash_digest(&rhs_desc->node, sizeof(ast_node_t*));
 
   if (lhs_hash < rhs_hash)
     return -1;

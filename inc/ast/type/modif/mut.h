@@ -12,6 +12,8 @@
 
 #include "ast/type/modif/modif.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST mutable type node.
  */
@@ -80,5 +82,7 @@ size_t ast_type_mut_mangle(ast_type_mut_t* node, char* buf, size_t len);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_type_mut_dump_json(FILE* stream, ast_type_mut_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

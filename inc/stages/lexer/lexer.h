@@ -21,6 +21,8 @@
 
 #include "stages/lexer/token/token.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents a lexical analyzer.
  */
@@ -295,5 +297,7 @@ token_t* lexer_read_next(lexer_t* lex);
  * \returns A vector of tokens.
  */
 vector_t* lexer_lex(lexer_t* lex, const char* path, const char* src);
+
+TAU_EXTERN_C_END
 
 #endif

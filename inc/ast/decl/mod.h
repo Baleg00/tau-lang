@@ -12,6 +12,8 @@
 
 #include "ast/decl/decl.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST module declaration node.
  */
@@ -76,5 +78,7 @@ void ast_decl_mod_codegen(codegen_ctx_t* ctx, ast_decl_mod_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_decl_mod_dump_json(FILE* stream, ast_decl_mod_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

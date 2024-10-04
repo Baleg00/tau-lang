@@ -16,6 +16,8 @@
 
 #include "ast/node.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Adds an AST node to the registry.
  * 
@@ -27,5 +29,7 @@ void ast_registry_register(ast_node_t* node);
  * \brief Frees all registered AST nodes. 
  */
 void ast_registry_free(void);
+
+TAU_EXTERN_C_END
 
 #endif

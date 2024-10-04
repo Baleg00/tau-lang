@@ -12,6 +12,8 @@
 
 #include "stages/analysis/types/typedesc/base.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Type variable.
  */
@@ -35,5 +37,7 @@ typedesc_var_t* typedesc_var_init(void);
  * \param[in] desc Pointer to the type variable to be freed.
  */
 void typedesc_var_free(typedesc_var_t* desc);
+
+TAU_EXTERN_C_END
 
 #endif

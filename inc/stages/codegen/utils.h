@@ -14,6 +14,8 @@
 #include "llvm.h"
 #include "stages/codegen/codegen.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Builds an LLVM `load` instruction if `node` has a reference type.
  * 
@@ -69,5 +71,7 @@ LLVMValueRef codegen_build_opt_unwrap_unchecked(codegen_ctx_t* ctx, LLVMValueRef
  * `llvm_value`.
  */
 LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
+
+TAU_EXTERN_C_END
 
 #endif

@@ -18,6 +18,8 @@
 #define AST_STMT_HEADER\
   AST_NODE_HEADER
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST statement node.
  */
@@ -25,5 +27,7 @@ typedef struct ast_stmt_t
 {
   AST_STMT_HEADER;
 } ast_stmt_t;
+
+TAU_EXTERN_C_END
 
 #endif

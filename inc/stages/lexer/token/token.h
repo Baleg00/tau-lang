@@ -26,6 +26,8 @@
 #include "utils/str_view.h"
 #include "utils/collections/vector.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Enumeration of token kinds.
  */
@@ -224,5 +226,7 @@ bool token_is_keyword(token_t* tok);
  * \returns `true` if the token is a punctuation token, `false` otherwise.
  */
 bool token_is_punctuation(token_t* tok);
+
+TAU_EXTERN_C_END
 
 #endif

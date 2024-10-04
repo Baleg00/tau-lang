@@ -19,6 +19,10 @@
 
 #include <stdbool.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Stack data structure.
  */
@@ -76,5 +80,7 @@ void* stack_top(stack_t* stack);
  * \returns `true` if the stack is empty, `false` otherwise.
  */
 bool stack_empty(stack_t* stack);
+
+TAU_EXTERN_C_END
 
 #endif

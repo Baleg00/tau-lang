@@ -19,6 +19,8 @@
   AST_EXPR_OP_HEADER;\
   ast_node_t* expr /** The associated expression node. */
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST unary operation expression node.
  */
@@ -72,5 +74,7 @@ void ast_expr_op_un_codegen(codegen_ctx_t* ctx, ast_expr_op_un_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_expr_op_un_dump_json(FILE* stream, ast_expr_op_un_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

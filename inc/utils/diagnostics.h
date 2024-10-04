@@ -15,6 +15,8 @@
 #include "stages/lexer/location.h"
 #include "utils/common.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Reports an error for encountering an unexpected character.
  * 
@@ -392,5 +394,7 @@ NORETURN void report_error_return_inside_defer(location_t loc);
  * \param[in] loc Location where the error occurred.
  */
 NORETURN void report_error_literal_out_of_range(location_t loc);
+
+TAU_EXTERN_C_END
 
 #endif

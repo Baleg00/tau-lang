@@ -12,6 +12,8 @@
 
 #include "ast/node.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST path member access node.
  */
@@ -43,5 +45,7 @@ void ast_path_access_free(ast_path_access_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_path_access_dump_json(FILE* stream, ast_path_access_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

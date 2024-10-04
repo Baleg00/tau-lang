@@ -22,6 +22,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents a string.
  */
@@ -367,5 +371,7 @@ size_t string_find(string_t* str, string_t* sub);
  * \returns The position of the first occurrence of the c-string.
  */
 size_t string_find_cstr(string_t* str, const char* sub);
+
+TAU_EXTERN_C_END
 
 #endif

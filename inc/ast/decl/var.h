@@ -13,6 +13,8 @@
 #include "ast/decl/decl.h"
 #include "llvm.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST variable declaration node.
  */
@@ -87,5 +89,7 @@ size_t ast_decl_var_mangle(ast_decl_var_t* node, char* buf, size_t len);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_decl_var_dump_json(FILE* stream, ast_decl_var_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

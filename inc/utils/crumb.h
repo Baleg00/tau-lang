@@ -19,6 +19,8 @@
 #include "stages/lexer/location.h"
 #include "utils/collections/vector.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents a code snippet in a crumb message.
  */
@@ -158,5 +160,7 @@ void crumb_set_stream(FILE* stream);
  * \returns Pointer to the output stream.
  */
 FILE* crumb_get_stream(void);
+
+TAU_EXTERN_C_END
 
 #endif

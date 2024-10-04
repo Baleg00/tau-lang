@@ -12,6 +12,8 @@
 
 #include "ast/node.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST program node.
  */
@@ -75,5 +77,7 @@ void ast_prog_codegen(codegen_ctx_t* ctx, ast_prog_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_prog_dump_json(FILE* stream, ast_prog_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

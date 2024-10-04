@@ -25,6 +25,8 @@
   ast_kind_t kind; /** AST node kind. */\
   token_t* tok /** The token associated with this node. */
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Enumeration of AST node kinds.
  */
@@ -233,5 +235,7 @@ bool ast_is_stmt(ast_node_t* node);
  * \returns `true` if node is a declaration, `false` otherwise.
  */
 bool ast_is_decl(ast_node_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

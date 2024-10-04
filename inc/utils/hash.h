@@ -17,6 +17,10 @@
 
 #include <stdint.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Generates a hash value for a given data.
  *
@@ -44,5 +48,7 @@ uint64_t hash_combine_with_data(uint64_t seed, const void* data, size_t size);
  * \returns The combined hash value.
  */
 uint64_t hash_combine_with_hash(uint64_t seed, uint64_t hash);
+
+TAU_EXTERN_C_END
 
 #endif

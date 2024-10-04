@@ -12,6 +12,8 @@
 
 #include "ast/expr/op/op.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST call operation expression node.
  */
@@ -67,5 +69,7 @@ void ast_expr_op_call_codegen(codegen_ctx_t* ctx, ast_expr_op_call_t* node);
  * \param[in] node Pointer to the AST node to be dumped.
 */
 void ast_expr_op_call_dump_json(FILE* stream, ast_expr_op_call_t* node);
+
+TAU_EXTERN_C_END
 
 #endif

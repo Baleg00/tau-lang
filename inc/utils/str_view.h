@@ -20,6 +20,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "utils/extern_c.h"
+
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Represents a lightweight, readonly, non-owning string.
  */
@@ -198,5 +202,7 @@ int string_view_printf(FILE* stream, string_view_t fmt, ...);
  * \returns The number of characters written.
  */
 int string_view_print_escaped(FILE* stream, string_view_t str);
+
+TAU_EXTERN_C_END
 
 #endif

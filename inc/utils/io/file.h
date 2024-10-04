@@ -18,6 +18,8 @@
 
 #include "utils/io/path.h"
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Checks whether a path refers to a directory.
  *
@@ -111,5 +113,7 @@ size_t file_size(path_t* path);
  * null-terminator.
  */
 size_t file_read(path_t* path, char* buf, size_t len);
+
+TAU_EXTERN_C_END
 
 #endif

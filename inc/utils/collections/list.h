@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "utils/extern_c.h"
+
 /**
  * \brief Macro for iterating over each element in a list using a for loop.
  *
@@ -33,6 +35,8 @@
     (VAR) != NULL;\
     (VAR) = list_node_next((VAR))\
   )
+
+TAU_EXTERN_C_BEGIN
 
 /**
  * \brief Function type to serve as parameter in `list_for_each`.
@@ -279,5 +283,7 @@ void list_for_each(list_t* list, list_for_each_func_t func);
  * \param buffer Pointer to the memory buffer.
  */
 void list_to_buffer(list_t* list, void* buffer);
+
+TAU_EXTERN_C_END
 
 #endif

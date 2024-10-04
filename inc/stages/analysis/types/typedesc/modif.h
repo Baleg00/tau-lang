@@ -19,6 +19,8 @@
   TYPEDESC_HEADER;\
   typedesc_t* base_type /** Underlying type. */
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief Type descriptor for type modifiers.
  */
@@ -26,5 +28,7 @@ typedef struct typedesc_modif_t
 {
   TYPEDESC_MODIF_HEADER;
 } typedesc_modif_t;
+
+TAU_EXTERN_C_END
 
 #endif

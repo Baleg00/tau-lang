@@ -20,6 +20,8 @@
   AST_NODE_HEADER;\
   LLVMTypeRef llvm_type
 
+TAU_EXTERN_C_BEGIN
+
 /**
  * \brief AST type node.
  */
@@ -27,5 +29,7 @@ typedef struct ast_type_t
 {
   AST_TYPE_HEADER;
 } ast_type_t;
+
+TAU_EXTERN_C_END
 
 #endif
