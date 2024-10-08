@@ -40,13 +40,15 @@ typedef struct codegen_ctx_t
 
 /**
  * \brief Initializes a new code generation context.
- * 
+ *
+ * \param[in] typetable The type table to be used.
  * \param[in] llvm_ctx The LLVM context to be used.
  * \param[in] llvm_layout The LLVM target data layout to be used.
  * \param[in] llvm_mod The LLVM module to be used.
+ * \param[in] llvm_builder The LLVM builder to be used.
  * \returns Pointer to the newly initialized code generation context.
  */
-codegen_ctx_t* codegen_ctx_init(typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_mod);
+codegen_ctx_t* codegen_ctx_init(typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_mod, LLVMBuilderRef llvm_builder);
 
 /**
  * \brief Frees all memory allocated by a code generation context.

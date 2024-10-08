@@ -10,20 +10,18 @@
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 
-typecheck_ctx_t* typecheck_ctx_init(LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout)
+typecheck_ctx_t* typecheck_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable)
 {
   typecheck_ctx_t* ctx = (typecheck_ctx_t*)malloc(sizeof(typecheck_ctx_t));
   CLEAROBJ(ctx);
 
-  ctx->typebuilder = typebuilder_init(llvm_ctx, llvm_layout);
-  ctx->typetable = typetable_init();
+  ctx->typebuilder = typebuilder;
+  ctx->typetable = typetable;
 
   return ctx;
 }
 
 void typecheck_ctx_free(typecheck_ctx_t* ctx)
 {
-  typebuilder_free(ctx->typebuilder);
-  typetable_free(ctx->typetable);
   free(ctx);
 }

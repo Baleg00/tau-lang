@@ -158,17 +158,22 @@ static void compiler_process_file(compiler_t* compiler, const char* path_cstr)
   nameres_ctx_t* nameres_ctx = nameres_ctx_init();
   time_it("analysis:nameres", ast_node_nameres(nameres_ctx, root_node));
 
-  typecheck_ctx_t* typecheck_ctx = typecheck_ctx_init(llvm_get_context(), llvm_get_data());
+  typebuilder_t* typebuilder = typebuilder_init(llvm_get_context(), llvm_get_data());
+  typetable_t* typetable = typetable_init();
+
+  typecheck_ctx_t* typecheck_ctx = typecheck_ctx_init(typebuilder, typetable);
   time_it("analysis:typecheck", ast_node_typecheck(typecheck_ctx, root_node));
 
   ctrlflow_ctx_t* ctrlflow_ctx = ctrlflow_ctx_init();
   time_it("analysis:ctrlflow", ast_node_ctrlflow(ctrlflow_ctx, root_node));
 
-  LLVMModuleRef llvm_module = LLVMModuleCreateWithNameInContext("module", llvm_get_context());
-  codegen_ctx_t* codegen_ctx = codegen_ctx_init(typecheck_ctx->typetable, llvm_get_context(), llvm_get_data(), llvm_module);
+  LLVMModuleRef llvm_mod = LLVMModuleCreateWithNameInContext("module", llvm_get_context());
+  LLVMBuilderRef llvm_builder = LLVMCreateBuilderInContext(llvm_get_context());
+
+  codegen_ctx_t* codegen_ctx = codegen_ctx_init(typecheck_ctx->typetable, llvm_get_context(), llvm_get_data(), llvm_mod, llvm_builder);
   time_it("codegen", ast_node_codegen(codegen_ctx, root_node));
 
-  LLVMVerifyModule(llvm_module, LLVMAbortProcessAction, NULL);
+  LLVMVerifyModule(llvm_mod, LLVMAbortProcessAction, NULL);
 
   LLVMPassBuilderOptionsRef llvm_pass_builder_options = LLVMCreatePassBuilderOptions();
   LLVMPassBuilderOptionsSetVerifyEach(llvm_pass_builder_options, true);
@@ -182,21 +187,24 @@ static void compiler_process_file(compiler_t* compiler, const char* path_cstr)
   LLVMDisposePassBuilderOptions(llvm_pass_builder_options);
 
   if (options_get_dump_ll(compiler->options))
-    compiler_emit_ll(path_cstr, llvm_module);
+    compiler_emit_ll(path_cstr, llvm_mod);
 
   if (options_get_dump_bc(compiler->options))
-    compiler_emit_bc(path_cstr, llvm_module);
+    compiler_emit_bc(path_cstr, llvm_mod);
 
   if (options_get_dump_asm(compiler->options))
-    compiler_emit_asm(path_cstr, llvm_module);
+    compiler_emit_asm(path_cstr, llvm_mod);
 
-  compiler_emit_obj(path_cstr, llvm_module);
+  compiler_emit_obj(path_cstr, llvm_mod);
 
-  LLVMDisposeModule(llvm_module);
+  LLVMDisposeBuilder(llvm_builder);
+  LLVMDisposeModule(llvm_mod);
 
   codegen_ctx_free(codegen_ctx);
   ctrlflow_ctx_free(ctrlflow_ctx);
   typecheck_ctx_free(typecheck_ctx);
+  typetable_free(typetable);
+  typebuilder_free(typebuilder);
   nameres_ctx_free(nameres_ctx);
   parser_free(parser);
 

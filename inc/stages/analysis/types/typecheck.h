@@ -38,11 +38,11 @@ typedef struct typecheck_ctx_t
 /**
  * \brief Initializes a new type check context.
  * 
- * \param[in] llvm_ctx The LLVM context to be used.
- * \param[in] llvm_layout The LLVM target data layout to be used.
+ * \param[in,out] typebuilder The type builder to be used.
+ * \param[in,out] typetable The type table target data layout to be used.
  * \returns Pointer to the newly initialized type check context.
  */
-typecheck_ctx_t* typecheck_ctx_init(LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout);
+typecheck_ctx_t* typecheck_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable);
 
 /**
  * \brief Frees all memory allocated by a type check context.
