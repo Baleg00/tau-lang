@@ -25,7 +25,9 @@ ast_type_fun_t* ast_type_fun_init(void)
 
 void ast_type_fun_free(ast_type_fun_t* node)
 {
-  vector_free(node->params);
+  if (node->params != NULL)
+    vector_free(node->params);
+
   free(node);
 }
 

@@ -25,7 +25,9 @@ ast_path_list_t* ast_path_list_init(void)
 
 void ast_path_list_free(ast_path_list_t* node)
 {
-  vector_free(node->paths);
+  if (node->paths != NULL)
+    vector_free(node->paths);
+
   free(node);
 }
 

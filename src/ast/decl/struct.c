@@ -26,7 +26,9 @@ ast_decl_struct_t* ast_decl_struct_init(void)
 
 void ast_decl_struct_free(ast_decl_struct_t* node)
 {
-  vector_free(node->members);
+  if (node->members != NULL)
+    vector_free(node->members);
+
   free(node);
 }
 

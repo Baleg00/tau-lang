@@ -26,7 +26,9 @@ ast_decl_union_t* ast_decl_union_init(void)
 
 void ast_decl_union_free(ast_decl_union_t* node)
 {
-  vector_free(node->members);
+  if (node->members != NULL)
+    vector_free(node->members);
+
   free(node);
 }
 

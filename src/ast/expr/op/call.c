@@ -27,7 +27,9 @@ ast_expr_op_call_t* ast_expr_op_call_init(void)
 
 void ast_expr_op_call_free(ast_expr_op_call_t* node)
 {
-  vector_free(node->params);
+  if (node->params != NULL)
+    vector_free(node->params);
+
   free(node);
 }
 

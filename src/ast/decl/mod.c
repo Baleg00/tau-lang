@@ -26,7 +26,9 @@ ast_decl_mod_t* ast_decl_mod_init(void)
 
 void ast_decl_mod_free(ast_decl_mod_t* node)
 {
-  vector_free(node->members);
+  if (node->members != NULL)
+    vector_free(node->members);
+
   free(node);
 }
 

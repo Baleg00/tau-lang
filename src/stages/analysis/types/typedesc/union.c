@@ -22,7 +22,9 @@ typedesc_union_t* typedesc_union_init(void)
 
 void typedesc_union_free(typedesc_union_t* desc)
 {
-  vector_free(desc->field_types);
+  if (desc->field_types != NULL)
+    vector_free(desc->field_types);
+
   free(desc);
 }
 

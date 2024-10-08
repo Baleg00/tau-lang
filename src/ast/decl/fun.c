@@ -27,7 +27,9 @@ ast_decl_fun_t* ast_decl_fun_init(void)
 
 void ast_decl_fun_free(ast_decl_fun_t* node)
 {
-  vector_free(node->params);
+  if (node->params != NULL)
+    vector_free(node->params);
+
   free(node);
 }
 

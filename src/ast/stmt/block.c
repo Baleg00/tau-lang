@@ -25,7 +25,9 @@ ast_stmt_block_t* ast_stmt_block_init(void)
 
 void ast_stmt_block_free(ast_stmt_block_t* node)
 {
-  vector_free(node->stmts);
+  if (node->stmts != NULL)
+    vector_free(node->stmts);
+
   free(node);
 }
 

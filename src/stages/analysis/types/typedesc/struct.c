@@ -22,7 +22,9 @@ typedesc_struct_t* typedesc_struct_init(void)
 
 void typedesc_struct_free(typedesc_struct_t* desc)
 {
-  vector_free(desc->field_types);
+  if (desc->field_types != NULL)
+    vector_free(desc->field_types);
+
   free(desc);
 }
 

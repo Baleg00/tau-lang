@@ -22,7 +22,9 @@ typedesc_fun_t* typedesc_fun_init(void)
 
 void typedesc_fun_free(typedesc_fun_t* desc)
 {
-  vector_free(desc->param_types);
+  if (desc->param_types != NULL)
+    vector_free(desc->param_types);
+
   free(desc);
 }
 

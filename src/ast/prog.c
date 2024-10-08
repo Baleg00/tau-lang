@@ -25,7 +25,9 @@ ast_prog_t* ast_prog_init(void)
 
 void ast_prog_free(ast_prog_t* node)
 {
-  vector_free(node->decls);
+  if (node->decls != NULL)
+    vector_free(node->decls);
+
   free(node);
 }
 
