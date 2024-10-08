@@ -7,20 +7,27 @@
 
 #include "utils/collections/vector.h"
 
+#include <stdint.h>
 #include <string.h>
 
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 
+/// The initial number of elements a vector should be able to hold.
 #define VECTOR_INITIAL_CAPACITY ((size_t)16)
 
 struct vector_t
 {
-  size_t size;
-  size_t capacity;
-  void** data;
+  size_t size;     ///< The number of elements in the vector.
+  size_t capacity; ///< The maximum number of elements the vector can hold.
+  void** data;     ///< Pointer to the contained elements.
 };
 
+/**
+ * \brief Doubles the capacity of a vector.
+ *
+ * \param[in,out] vec Pointer to the vector to be expanded.
+ */
 static void vector_expand(vector_t* vec)
 {
   vec->capacity <<= 1;
@@ -43,6 +50,7 @@ vector_t* vector_init_with_capacity(size_t capacity)
   vec->size = 0;
   vec->capacity = capacity;
   vec->data = (void**)malloc(sizeof(void*) * capacity);
+  ASSERT(vec->data != NULL);
 
   return vec;
 }
@@ -62,9 +70,6 @@ vector_t* vector_init_from_buffer(void* buffer, size_t length)
 
 void vector_free(vector_t* vec)
 {
-  if (vec == NULL)
-    return;
-
   free(vec->data);
   free(vec);
 }
@@ -81,25 +86,21 @@ vector_t* vector_copy(vector_t* vec)
 
 void* vector_get(vector_t* vec, size_t idx)
 {
-  ASSERT(idx < vec->size);
   return vec->data[idx];
 }
 
 void vector_set(vector_t* vec, size_t idx, void* data)
 {
-  ASSERT(idx < vec->size);
   vec->data[idx] = data;
 }
 
 void* vector_front(vector_t* vec)
 {
-  ASSERT(vec->size > 0);
   return vec->data[0];
 }
 
 void* vector_back(vector_t* vec)
 {
-  ASSERT(vec->size > 0);
   return vec->data[vec->size - 1];
 }
 
@@ -113,7 +114,6 @@ void vector_push(vector_t* vec, void* data)
 
 void* vector_pop(vector_t* vec)
 {
-  ASSERT(vec->size > 0);
   return vec->data[--vec->size];
 }
 
@@ -130,8 +130,6 @@ void vector_insert(vector_t* vec, size_t idx, void* data)
 
 void* vector_remove(vector_t* vec, size_t idx)
 {
-  ASSERT(idx < vec->size);
-
   void* temp = vec->data[idx];
 
   memmove(vec->data + idx, vec->data + idx + 1, sizeof(void*) * (vec->size - idx - 1));
@@ -154,7 +152,7 @@ size_t vector_find(vector_t* vec, void* data)
 {
   size_t i = 0;
 
-  for (; i < vector_size(vec); i++)
+  for (; i < vec->size; i++)
     if (vec->data[i] == data)
       return i;
 
@@ -173,8 +171,8 @@ bool vector_empty(vector_t* vec)
 
 void vector_for_each(vector_t* vec, vector_for_each_func_t func)
 {
-  VECTOR_FOR_LOOP(i, vec)
-    func(vector_get(vec, i));
+  for (size_t i = 0; i < vec->size; ++i)
+    func(vec->data[i]);
 }
 
 void vector_to_buffer(vector_t* vec, void* buffer)

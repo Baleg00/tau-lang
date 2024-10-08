@@ -36,14 +36,10 @@ TAU_EXTERN_C_BEGIN
     (VAR)++\
   )
 
-/**
- * \brief Function type to serve as parameter in `vector_for_each`.
- */
+/// Utility function pointer type for `vector_for_each` function.
 typedef void(*vector_for_each_func_t)(void*);
 
-/**
- * \brief Dynamic array-based vector data structure.
- */
+/// Represents a vector (dynamic array).
 typedef struct vector_t vector_t;
 
 /**
