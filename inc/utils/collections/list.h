@@ -250,6 +250,13 @@ void* list_remove_before(list_node_t* node);
 void* list_remove_after(list_node_t* node);
 
 /**
+ * \brief Removes all elements from a list.
+ *
+ * \param[in,out] list Pointer to the list to be cleared.
+ */
+void list_clear(list_t* list);
+
+/**
  * \brief Checks if a list is empty.
  *
  * \param[in] list Pointer to the list.

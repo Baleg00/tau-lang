@@ -312,6 +312,19 @@ void* list_remove_after(list_node_t* node)
   return list_remove(node->next);
 }
 
+void list_clear(list_t* list)
+{
+  for (list_node_t* node = list->head, *next; node != NULL; node = next)
+  {
+    next = node->next;
+    list_node_free(node);
+  }
+
+  list->head = NULL;
+  list->tail = NULL;
+  list->len = 0;
+}
+
 bool list_empty(list_t* list)
 {
   ASSERT(list != NULL);
