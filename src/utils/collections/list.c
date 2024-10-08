@@ -14,20 +14,26 @@
 
 struct list_node_t
 {
-  void* data; // Pointer to the stored data.
-  list_t* owner; // Pointer to the list which the node belongs to.
-  list_node_t* prev; // Pointer to the previous node or NULL.
-  list_node_t* next; // Pointer to the next node or NULL.
+  void* data;        ///< Pointer to the stored data.
+  list_t* owner;     ///< Pointer to the list which the node belongs to.
+  list_node_t* prev; ///< Pointer to the previous node or NULL.
+  list_node_t* next; ///< Pointer to the next node or NULL.
 };
 
 struct list_t
 {
-  list_node_t* head; // Pointer to the first node in the list or NULL.
-  list_node_t* tail; // Pointer to the last node in the list or NULL.
-  size_t len; // Number of nodes in the list.
+  list_node_t* head; ///< Pointer to the first node in the list or NULL.
+  list_node_t* tail; ///< Pointer to the last node in the list or NULL.
+  size_t len;        ///< Number of nodes in the list.
 };
 
-list_node_t* list_node_init(void* data)
+/**
+ * \brief Initializes a list node with the given data.
+ *
+ * \param[in] data The data to be stored in the node.
+ * \returns Pointer to the initialized list node.
+ */
+static list_node_t* list_node_init(void* data)
 {
   list_node_t* node = (list_node_t*)malloc(sizeof(list_node_t));
   ASSERT(node != NULL);
@@ -40,38 +46,33 @@ list_node_t* list_node_init(void* data)
   return node;
 }
 
-void list_node_free(list_node_t* node)
+/**
+ * \brief Frees the resources associated with a list node.
+ *
+ * \param[in] node Pointer to the list node to free.
+ */
+static void list_node_free(list_node_t* node)
 {
   free(node);
 }
 
-list_node_t* list_node_copy(list_node_t* node)
-{
-  ASSERT(node != NULL);
-  return list_node_init(node->data);
-}
-
 list_node_t* list_node_prev(list_node_t* node)
 {
-  ASSERT(node != NULL);
   return node->prev;
 }
 
 list_node_t* list_node_next(list_node_t* node)
 {
-  ASSERT(node != NULL);
   return node->next;
 }
 
 void* list_node_get(list_node_t* node)
 {
-  ASSERT(node != NULL);
   return node->data;
 }
 
 void list_node_set(list_node_t* node, void* data)
 {
-  ASSERT(node != NULL);
   node->data = data;
 }
 
@@ -99,12 +100,9 @@ list_t* list_init_from_buffer(void* buffer, size_t length)
 
 void list_free(list_t* list)
 {
-  if (list == NULL)
-    return;
-
-  for (list_node_t *node = list_front_node(list), *next; node != NULL; node = next)
+  for (list_node_t *node = list->head, *next; node != NULL; node = next)
   {
-    next = list_node_next(node);
+    next = node->next;
     list_node_free(node);
   }
 
@@ -116,39 +114,33 @@ list_t* list_copy(list_t* list)
   list_t* new_list = list_init();
 
   LIST_FOR_LOOP(node, list)
-    list_push_back(new_list, list_node_get(node));
+    list_push_back(new_list, node->data);
 
   return new_list;
 }
 
 void* list_front(list_t* list)
 {
-  ASSERT(!list_empty(list));
-  return list_node_get(list_front_node(list));
+  return list->head->data;
 }
 
 void* list_back(list_t* list)
 {
-  ASSERT(!list_empty(list));
-  return list_node_get(list_back_node(list));
+  return list->tail->data;
 }
 
 list_node_t* list_front_node(list_t* list)
 {
-  ASSERT(list != NULL);
-  return list_empty(list) ? NULL : list->head;
+  return list->head;
 }
 
 list_node_t* list_back_node(list_t* list)
 {
-  ASSERT(list != NULL);
-  return list_empty(list) ? NULL : list->tail;
+  return list->tail;
 }
 
 list_node_t* list_push_front(list_t* list, void* data)
 {
-  ASSERT(list != NULL);
-
   list_node_t* new_node = list_node_init(data);
 
   new_node->owner = list;
@@ -169,8 +161,6 @@ list_node_t* list_push_front(list_t* list, void* data)
 
 list_node_t* list_push_back(list_t* list, void* data)
 {
-  ASSERT(list != NULL);
-
   list_node_t* new_node = list_node_init(data);
 
   new_node->owner = list;
@@ -191,8 +181,6 @@ list_node_t* list_push_back(list_t* list, void* data)
 
 void* list_pop_front(list_t* list)
 {
-  ASSERT(!list_empty(list));
-
   list_node_t* node = list->head;
 
   if (list->head == list->tail)
@@ -214,8 +202,6 @@ void* list_pop_front(list_t* list)
 
 void* list_pop_back(list_t* list)
 {
-  ASSERT(!list_empty(list));
-
   list_node_t* node = list->tail;
 
   if (list->head == list->tail)
@@ -237,8 +223,6 @@ void* list_pop_back(list_t* list)
 
 list_node_t* list_insert_before(list_node_t* node, void* data)
 {
-  ASSERT(node != NULL);
-
   if (node->owner->head == node)
     return list_push_front(node->owner, data);
 
@@ -258,8 +242,6 @@ list_node_t* list_insert_before(list_node_t* node, void* data)
 
 list_node_t* list_insert_after(list_node_t* node, void* data)
 {
-  ASSERT(node != NULL);
-
   if (node->owner->tail == node)
     return list_push_back(node->owner, data);
 
@@ -279,8 +261,6 @@ list_node_t* list_insert_after(list_node_t* node, void* data)
 
 void* list_remove(list_node_t* node)
 {
-  ASSERT(node != NULL);
-
   if (node->owner->head == node)
     return list_pop_front(node->owner);
 
@@ -300,15 +280,11 @@ void* list_remove(list_node_t* node)
 
 void* list_remove_before(list_node_t* node)
 {
-  ASSERT(node != NULL);
-  ASSERT(list_node_prev(node) != NULL);
   return list_remove(node->prev);
 }
 
 void* list_remove_after(list_node_t* node)
 {
-  ASSERT(node != NULL);
-  ASSERT(list_node_next(node) != NULL);
   return list_remove(node->next);
 }
 
@@ -327,20 +303,18 @@ void list_clear(list_t* list)
 
 bool list_empty(list_t* list)
 {
-  ASSERT(list != NULL);
   return list->len == 0;
 }
 
 size_t list_size(list_t* list)
 {
-  ASSERT(list != NULL);
   return list->len;
 }
 
 void list_for_each(list_t* list, list_for_each_func_t func)
 {
   LIST_FOR_LOOP(node, list)
-    func(list_node_get(node));
+    func(node->data);
 }
 
 void list_to_buffer(list_t* list, void* buffer)
@@ -348,5 +322,5 @@ void list_to_buffer(list_t* list, void* buffer)
   size_t i = 0;
 
   LIST_FOR_LOOP(node, list)
-    ((void**)buffer)[i++] = list_node_get(node);
+    ((void**)buffer)[i++] = node->data;
 }

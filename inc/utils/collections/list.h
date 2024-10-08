@@ -38,43 +38,14 @@
 
 TAU_EXTERN_C_BEGIN
 
-/**
- * \brief Function type to serve as parameter in `list_for_each`.
- */
+/// Utility function pointer type for `list_for_each` function.
 typedef void(*list_for_each_func_t)(void*);
 
-/**
- * \brief Node of a linked list.
- */
+/// Represents a node in a linked list.
 typedef struct list_node_t list_node_t;
 
-/**
- * \brief Linked list data structure.
- */
+/// Represents a linked list.
 typedef struct list_t list_t;
-
-/**
- * \brief Initializes a list node with the given data.
- *
- * \param[in] data The data to be stored in the node.
- * \returns Pointer to the initialized list node.
- */
-list_node_t* list_node_init(void* data);
-
-/**
- * \brief Frees the resources associated with a list node.
- *
- * \param[in] node Pointer to the list node to free.
- */
-void list_node_free(list_node_t* node);
-
-/**
- * \brief Creates a copy of a list node.
- *
- * \param[in] node Pointer to the list node to copy.
- * \returns Pointer to the copied list node.
- */
-list_node_t* list_node_copy(list_node_t* node);
 
 /**
  * \brief Returns the previous node in the list.
