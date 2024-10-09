@@ -209,8 +209,12 @@ void symtable_merge(symtable_t* dest, symtable_t* src)
     symtable_expand(dest, new_capacity);
 
   for (size_t i = 0, j = 0; i < src->capacity && j < src->size; ++i)
-    for (symbol_t* sym = src->buckets[i]; sym != NULL; sym = sym->next, ++j)
+    for (symbol_t* sym = src->buckets[i], *next = NULL; sym != NULL; sym = next, ++j)
+    {
+      next = sym->next;
+
       symtable_insert_no_expand(dest, sym);
+    }
 
   src->size = 0;
   memset(src->buckets, 0, sizeof(symbol_t*) * src->capacity);
