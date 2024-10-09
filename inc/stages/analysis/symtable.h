@@ -19,9 +19,7 @@
 #ifndef TAU_SYMTABLE_H
 #define TAU_SYMTABLE_H
 
-#include <stddef.h>
-
-#include "utils/collections/list.h"
+#include "utils/collections/vector.h"
 #include "utils/str_view.h"
 
 TAU_EXTERN_C_BEGIN
@@ -51,20 +49,20 @@ typedef struct symtable_t symtable_t;
 
 struct symbol_t
 {
-  symtable_t* parent; // The symbol's parent symbol table.
-  const char* id; // The symbol's identifier.
-  size_t len; // The length of the identifier.
-  ast_node_t* node; // The AST node associated with the symbol.
-  symbol_t* next; // The next symbol in the same bucket (for handling collisions).
+  symtable_t* parent; ///< The symbol's parent symbol table.
+  const char* id;     ///< The symbol's identifier.
+  size_t len;         ///< The length of the identifier.
+  ast_node_t* node;   ///< The AST node associated with the symbol.
+  symbol_t* next;     ///< The next symbol in the same bucket (for handling collisions).
 };
 
 struct symtable_t
 {
-  symtable_t* parent; // The parent symbol table (lexical scope).
-  list_t* children; // List of child symbol tables (nested scopes).
-  size_t size; // The number of symbols stored in the table.
-  size_t capacity; // The capacity (number of buckets) of the symbol table.
-  symbol_t** buckets; // An array of symbol pointers (hash buckets).
+  symtable_t* parent; ///< Pointer to the parent symbol table.
+  vector_t* children; ///< Nested child symbol tables.
+  size_t size;        ///< The number of symbols stored in the table.
+  size_t capacity;    ///< The number of buckets in the symbol table.
+  symbol_t** buckets; ///< Array of hash table buckets.
 };
 
 /**
@@ -161,11 +159,13 @@ symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len);
 symbol_t* symtable_lookup_with_str_view(symtable_t* table, string_view_t id);
 
 /**
- * \brief Expands the capacity of the symbol table to accommodate more symbols.
+ * \brief Merges a symbol table into another. The source symbol table is
+ * freed in the process.
  *
- * \param[in] table Pointer to the symbol table.
+ * \param[in,out] dest Pointer to the symbol table to merge into.
+ * \param[in] src Pointer to the symbol table to be merged.
  */
-void symtable_expand(symtable_t* table);
+void symtable_merge(symtable_t* dest, symtable_t* src);
 
 TAU_EXTERN_C_END
 

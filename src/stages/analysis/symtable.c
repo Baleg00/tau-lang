@@ -15,35 +15,97 @@
 #include "utils/hash.h"
 #include "utils/memory/memtrace.h"
 
-/**
- * \brief The initial capacity of a symbol table.
- *
- * \details This macro defines the initial number of buckets in a symbol table's
- * hash table when the symbol table is first created. A larger initial capacity
- * can reduce the likelihood of hash collisions and improve symbol lookup
- * performance.
- */
-#define SYMTABLE_INITIAL_CAPACITY 16
+/// The initial number of buckets in a symbol table.
+#define SYMTABLE_INITIAL_CAPACITY ((size_t)16)
+
+/// The load factor threshold for symbol table resizing.
+#define SYMTABLE_LOAD_FACTOR 0.75
 
 /**
- * \brief The load factor threshold for symbol table resizing.
+ * \brief Inserts a symbol into a symbol table without checking the
+ * load factor and expanding the table's capacity.
  *
- * \details This macro defines the load factor threshold at which a symbol table
- * should be resized (rehashed) to maintain efficient symbol lookup operations.
- * When the number of symbols in the table exceeds this threshold as a ratio of
- * the capacity, a resizing operation is triggered to prevent hash collisions
- * and ensure performance.
+ * \param[int,out] table Pointer to the symbol table to insert into.
+ * \param[int] new_sym Pointer to the symbol to be inserted.
+ * \returns NULL if insertion was successful, otherwise a pointer to the
+ * colliding symbol.
  */
-#define SYMTABLE_LOAD_FACTOR 0.75
+static symbol_t* symtable_insert_no_expand(symtable_t* table, symbol_t* new_sym)
+{
+  size_t h = (size_t)hash_digest(new_sym->id, new_sym->len);
+  size_t idx = h % table->capacity;
+
+  if (table->buckets[idx] == NULL)
+  {
+    table->size++;
+    table->buckets[idx] = new_sym;
+    new_sym->next = NULL;
+    new_sym->parent = table;
+
+    return NULL;
+  }
+
+  symbol_t* last = NULL;
+
+  for (symbol_t* sym = table->buckets[idx]; sym != NULL; last = sym, sym = sym->next)
+    if (sym->len == new_sym->len && strncmp(sym->id, new_sym->id, sym->len) == 0)
+      return sym;
+
+  ASSERT(last != NULL);
+
+  table->size++;
+
+  last->next = new_sym;
+  new_sym->next = NULL;
+  new_sym->parent = table;
+
+  return NULL;
+}
+
+/**
+ * \brief Expands the capacity of a symbol table to accommodate more symbols.
+ *
+ * \param[in,out] table Pointer to the symbol table to be expanded.
+ * \param[in] new_capacity The new capacity of the symbol table.
+ */
+static void symtable_expand(symtable_t* table, size_t new_capacity)
+{
+  if (new_capacity <= table->capacity)
+    return;
+
+  size_t symbol_count = table->size;
+
+  symbol_t** symbols = (symbol_t**)malloc(symbol_count * sizeof(symbol_t*));
+  ASSERT(symbols != NULL);
+
+  for (size_t i = 0, j = 0; i < table->capacity && j < symbol_count; ++i)
+    for (symbol_t* sym = table->buckets[i]; sym != NULL; sym = sym->next, ++j)
+      symbols[j] = sym;
+
+  table->size = 0;
+  table->capacity = new_capacity;
+
+  table->buckets = (symbol_t**)realloc(table->buckets, table->capacity * sizeof(symbol_t*));
+  ASSERT(table->buckets != NULL);
+
+  memset(table->buckets, 0, table->capacity * sizeof(symbol_t*));
+
+  for (size_t i = 0; i < symbol_count; ++i)
+    symtable_insert_no_expand(table, symbols[i]);
+
+  free(symbols);
+}
 
 symbol_t* symbol_init(const char* id, size_t len, ast_node_t* node)
 {
   symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
   ASSERT(sym != NULL);
+
   sym->parent = NULL;
   sym->id = id;
   sym->len = len;
   sym->node = node;
+
   return sym;
 }
 
@@ -63,21 +125,22 @@ symtable_t* symtable_init(symtable_t* parent)
   ASSERT(table != NULL);
 
   if (parent != NULL)
-    list_push_back(parent->children, table);
+    vector_push(parent->children, table);
 
   table->parent = parent;
-  table->children = list_init();
+  table->children = vector_init();
   table->size = 0;
   table->capacity = SYMTABLE_INITIAL_CAPACITY;
   table->buckets = (symbol_t**)calloc(table->capacity, sizeof(symbol_t*));
   ASSERT(table->buckets != NULL);
+
   return table;
 }
 
 void symtable_free(symtable_t* table)
 {
-  list_for_each(table->children, (list_for_each_func_t)symtable_free);
-  list_free(table->children);
+  vector_for_each(table->children, (vector_for_each_func_t)symtable_free);
+  vector_free(table->children);
 
   for (size_t i = 0, j = 0; i < table->capacity && j < table->size; ++i)
     for (symbol_t *next, *sym = table->buckets[i]; sym != NULL; sym = next, ++j)
@@ -92,32 +155,10 @@ void symtable_free(symtable_t* table)
 
 symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
 {
-  if (((double)table->size + 1) / (double)table->capacity >= SYMTABLE_LOAD_FACTOR)
-    symtable_expand(table);
+  if ((double)table->size + 1 >= SYMTABLE_LOAD_FACTOR * (double)table->capacity)
+    symtable_expand(table, table->capacity << 1);
 
-  size_t h = (size_t)hash_digest(new_sym->id, new_sym->len);
-  size_t idx = h % table->capacity;
-
-  if (table->buckets[idx] == NULL)
-  {
-    ++table->size;
-    table->buckets[idx] = new_sym;
-    new_sym->next = NULL;
-    new_sym->parent = table;
-    return NULL;
-  }
-
-  symbol_t* last = NULL;
-
-  for (symbol_t* sym = table->buckets[idx]; sym != NULL; last = sym, sym = sym->next)
-    if (sym->len == new_sym->len && strncmp(sym->id, new_sym->id, sym->len) == 0)
-      return sym;
-
-  ++table->size;
-  last->next = new_sym;
-  new_sym->next = NULL;
-  new_sym->parent = table;
-  return NULL;
+  return symtable_insert_no_expand(table, new_sym);
 }
 
 symbol_t* symtable_get(symtable_t* table, const char* id, size_t len)
@@ -157,25 +198,33 @@ symbol_t* symtable_lookup_with_str_view(symtable_t* table, string_view_t id)
   return symtable_lookup(table, id.buf, id.len);
 }
 
-void symtable_expand(symtable_t* table)
+void symtable_merge(symtable_t* dest, symtable_t* src)
 {
-  list_t* syms = list_init();
+  size_t new_capacity = dest->capacity;
 
-  for (size_t i = 0, j = 0; i < table->capacity && j < table->size; ++i)
-    for (symbol_t* sym = table->buckets[i]; sym != NULL; sym = sym->next, ++j)
-      list_push_back(syms, sym);
+  while ((double)dest->size + (double)src->size >= SYMTABLE_LOAD_FACTOR * (double)new_capacity)
+    new_capacity <<= 1;
 
-  table->size = 0;
-  table->capacity <<= 1;
+  if (dest->capacity < new_capacity)
+    symtable_expand(dest, new_capacity);
 
-  table->buckets = (symbol_t**)realloc(table->buckets, table->capacity * sizeof(symbol_t*));
-  memset(table->buckets, 0, table->capacity * sizeof(symbol_t*));
+  for (size_t i = 0, j = 0; i < src->capacity && j < src->size; ++i)
+    for (symbol_t* sym = src->buckets[i]; sym != NULL; sym = sym->next, ++j)
+      symtable_insert_no_expand(dest, sym);
 
-  while (!list_empty(syms))
+  src->size = 0;
+  memset(src->buckets, 0, sizeof(symbol_t*) * src->capacity);
+
+  vector_extend(dest->children, src->children);
+
+  for (size_t i = 0; i < vector_size(src->children); ++i)
   {
-    symbol_t* sym = (symbol_t*)list_pop_back(syms);
-    symtable_insert(table, sym);
+    symtable_t* child = (symtable_t*)vector_get(src->children, i);
+
+    child->parent = dest;
   }
 
-  list_free(syms);
+  vector_clear(src->children);
+
+  symtable_free(src);
 }
