@@ -17,8 +17,6 @@
 #ifndef TAU_TYPETABLE_H
 #define TAU_TYPETABLE_H
 
-#include <stdbool.h>
-
 #include "stages/analysis/types/typedesc/typedesc.h"
 
 TAU_EXTERN_C_BEGIN
@@ -76,6 +74,15 @@ typedesc_t* typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* d
  * \returns A pointer to the type descriptor if found, or NULL if not found.
  */
 typedesc_t* typetable_lookup(typetable_t* table, ast_node_t* node);
+
+/**
+ * \brief Merges a type table into another. The source type table is freed
+ * in the process.
+ *
+ * \param[in,out] dest Pointer to the type table to merge into.
+ * \param[in] src Pointer to the type table to be merged.
+ */
+void typetable_merge(typetable_t* dest, typetable_t* src);
 
 TAU_EXTERN_C_END
 

@@ -15,47 +15,36 @@
 #include "utils/hash.h"
 #include "utils/memory/memtrace.h"
 
-/**
- * \brief The initial capacity for the type table.
- *
- * \details This macro defines the initial capacity for the type table, which
- * represents the number of buckets used to store type information. Increasing
- * this capacity may improve performance when dealing with a large number of types.
- */
+/// The initial number of buckets in a type table.
 #define TYPETABLE_INITIAL_CAPACITY 16
 
-/**
- * \brief The load factor of the typetable.
- * 
- * \details The load factor determines when the typetable should be resized to
- * maintain efficient access times. When the number of entries reaches the
- * capacity multiplied by the load factor, the table will be resized to increase
- * its capacity.
- */
+/// The load factor threshold for type table resizing.
 #define TYPETABLE_LOAD_FACTOR 0.75
 
-/**
- * \brief Represents an entry in a type table.
- *
- * \details This structure holds information about a type entry in a type table.
- * It includes a reference to the AST node and the associated type descriptor.
- */
+/// Represents an entry in a type table.
 typedef struct typetable_entry_t typetable_entry_t;
 
 struct typetable_entry_t
 {
-  ast_node_t* node; // A pointer to the AST node associated with the type.
-  typedesc_t* desc; // A pointer to the descriptor of the type.
-  typetable_entry_t* next; // A pointer to the next entry in case of collisions.
+  ast_node_t* node;        ///< Pointer to the AST node associated with the type.
+  typedesc_t* desc;        ///< Pointer to the descriptor of the type.
+  typetable_entry_t* next; ///< Pointer to the next entry in the bucket.
 };
 
 struct typetable_t
 {
-  size_t size; // The number of type entries in the table.
-  size_t capacity; // The total capacity of the table.
-  typetable_entry_t** buckets; // An array of buckets for storing type entries.
+  size_t size;                 ///< The number of type entries in the table.
+  size_t capacity;             ///< The total capacity of the table.
+  typetable_entry_t** buckets; ///< An array of buckets for storing type entries.
 };
 
+/**
+ * \brief Initializes a new type table entry.
+ *
+ * \param[in] node Pointer to the AST node to be associated with the entry.
+ * \param[in] desc Pointer to the type descriptor for the AST node.
+ * \returns Pointer to the newly initialized type table entry.
+ */
 static typetable_entry_t* typetable_entry_init(ast_node_t* node, typedesc_t* desc)
 {
   typetable_entry_t* entry = (typetable_entry_t*)malloc(sizeof(typetable_entry_t));
@@ -68,6 +57,12 @@ static typetable_entry_t* typetable_entry_init(ast_node_t* node, typedesc_t* des
   return entry;
 }
 
+/**
+ * \brief Inserts an entry into a type table.
+ *
+ * \param[in,out] table Pointer to the type table to insert into.
+ * \param[in] entry Pointer to the entry to be inserted.
+ */
 static void typetable_insert_entry(typetable_t* table, typetable_entry_t* entry)
 {
   size_t h = (size_t)hash_digest(&entry->node, sizeof(ast_node_t*));
@@ -77,6 +72,7 @@ static void typetable_insert_entry(typetable_t* table, typetable_entry_t* entry)
   {
     table->size++;
     table->buckets[idx] = entry;
+    entry->next = NULL;
 
     return;
   }
@@ -88,10 +84,20 @@ static void typetable_insert_entry(typetable_t* table, typetable_entry_t* entry)
 
   table->size++;
   last->next = entry;
+  entry->next = NULL;
 }
 
-static void typetable_expand(typetable_t* table)
+/**
+ * \brief Expands the capacity of a type table.
+ *
+ * \param[in,out] table Pointer to the type table to be expanded.
+ * \param[in] new_capacity The new capacity of the type table.
+ */
+static void typetable_expand(typetable_t* table, size_t new_capacity)
 {
+  if (table->capacity >= new_capacity)
+    return;
+
   size_t entry_count = 0;
   typetable_entry_t** entries = (typetable_entry_t**)malloc(table->size * sizeof(typetable_entry_t*));
 
@@ -103,7 +109,7 @@ static void typetable_expand(typetable_t* table)
     entries[i]->next = NULL;
 
   table->size = 0;
-  table->capacity <<= 1;
+  table->capacity = new_capacity;
 
   table->buckets = (typetable_entry_t**)realloc(table->buckets, table->capacity * sizeof(typetable_entry_t*));
   ASSERT(table->buckets != NULL);
@@ -145,8 +151,8 @@ void typetable_free(typetable_t* table)
 
 typedesc_t* typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc)
 {
-  if (((double)table->size + 1) / (double)table->capacity >= TYPETABLE_LOAD_FACTOR)
-    typetable_expand(table);
+  if ((double)table->size + 1 >= TYPETABLE_LOAD_FACTOR * (double)table->capacity)
+    typetable_expand(table, table->capacity << 1);
 
   size_t h = (size_t)hash_digest(&node, sizeof(ast_node_t*));
   size_t idx = h % table->capacity;
@@ -170,6 +176,8 @@ typedesc_t* typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* d
       return old_desc;
     }
 
+  ASSERT(last != NULL);
+
   table->size++;
   last->next = typetable_entry_init(node, desc);
 
@@ -189,4 +197,27 @@ typedesc_t* typetable_lookup(typetable_t* table, ast_node_t* node)
       return it->desc;
 
   return NULL;
+}
+
+void typetable_merge(typetable_t* dest, typetable_t* src)
+{
+  size_t new_capacity = dest->capacity;
+
+  while (dest->size + src->size >= new_capacity)
+    new_capacity <<= 1;
+
+  typetable_expand(dest, new_capacity);
+
+  for (size_t i = 0, j = 0; i < src->capacity && j < src->size; ++i)
+    for (typetable_entry_t* entry = src->buckets[i], *next = NULL; entry != NULL; entry = next, ++j)
+    {
+      next = entry->next;
+
+      typetable_insert_entry(dest, entry);
+    }
+
+  src->size = 0;
+  memset(src->buckets, 0, sizeof(typetable_entry_t*) * src->capacity);
+
+  typetable_free(src);
 }
