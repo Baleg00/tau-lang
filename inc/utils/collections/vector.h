@@ -142,6 +142,14 @@ void* vector_pop(vector_t* vec);
 void vector_insert(vector_t* vec, size_t idx, void* data);
 
 /**
+ * \brief Appends all elements of a vector to another vector.
+ *
+ * \param[in,out] dest Pointer to the vector to extend.
+ * \param[in] src Pointer to the vector to append.
+ */
+void vector_extend(vector_t* dest, vector_t* src);
+
+/**
  * \brief Removes and returns the element at the specified index, shifting other
  * elements to the left.
  *

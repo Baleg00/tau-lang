@@ -24,13 +24,17 @@ struct vector_t
 };
 
 /**
- * \brief Doubles the capacity of a vector.
+ * \brief Expands the capacity of a vector.
  *
  * \param[in,out] vec Pointer to the vector to be expanded.
+ * \param[in] new_capacity The new capacity of the vector.
  */
-static void vector_expand(vector_t* vec)
+static void vector_expand(vector_t* vec, size_t new_capacity)
 {
-  vec->capacity <<= 1;
+  if (vec->capacity >= new_capacity)
+    return;
+
+  vec->capacity = new_capacity;
   vec->data = (void**)realloc(vec->data, sizeof(void*) * vec->capacity);
   ASSERT(vec->data != NULL);
 }
@@ -106,8 +110,8 @@ void* vector_back(vector_t* vec)
 
 void vector_push(vector_t* vec, void* data)
 {
-  if (vec->size == vec->capacity)
-    vector_expand(vec);
+  if (vec->size + 1 >= vec->capacity)
+    vector_expand(vec, vec->capacity << 1);
 
   vec->data[vec->size++] = data;
 }
@@ -119,13 +123,27 @@ void* vector_pop(vector_t* vec)
 
 void vector_insert(vector_t* vec, size_t idx, void* data)
 {
-  if (vec->size == vec->capacity)
-    vector_expand(vec);
+  if (vec->size + 1 >= vec->capacity)
+    vector_expand(vec, vec->capacity << 1);
 
   memmove(vec->data + idx + 1, vec->data + idx, sizeof(void*) * (vec->size - idx));
 
   vec->data[idx] = data;
   vec->size++;
+}
+
+void vector_extend(vector_t* dest, vector_t* src)
+{
+  size_t new_capacity = dest->capacity;
+
+  while (new_capacity < dest->size + src->size)
+    new_capacity <<= 1;
+
+  vector_expand(dest, new_capacity);
+
+  memcpy(dest->data + dest->size, src->data, sizeof(void*) * src->size);
+
+  dest->size += src->size;
 }
 
 void* vector_remove(vector_t* vec, size_t idx)
