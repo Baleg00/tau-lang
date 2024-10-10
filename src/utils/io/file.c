@@ -10,10 +10,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 #ifdef TAU_OS_WINDOWS
 
@@ -27,14 +25,11 @@
  */
 static DWORD file_attributes(path_t* path)
 {
-  size_t path_len = path_to_cstr(path, NULL, 0);
+  string_t* path_str = path_to_string(path);
 
-  LPSTR path_cstr = (LPSTR)malloc((path_len + 1) * sizeof(CHAR));
-  path_to_cstr(path, path_cstr, path_len + 1);
+  DWORD attrs = GetFileAttributesA(string_begin(path_str));
 
-  DWORD attrs = GetFileAttributesA(path_cstr);
-
-  free(path_cstr);
+  string_free(path_str);
 
   return attrs;
 }
@@ -47,13 +42,10 @@ static DWORD file_attributes(path_t* path)
  */
 static DWORD file_type(path_t* path)
 {
-  size_t path_len = path_to_cstr(path, NULL, 0);
-
-  LPSTR path_cstr = (LPSTR)malloc((path_len + 1) * sizeof(CHAR));
-  path_to_cstr(path, path_cstr, path_len + 1);
+  string_t* path_str = path_to_string(path);
 
   HANDLE handle = CreateFileA(
-    path_cstr,
+    string_begin(path_str),
     GENERIC_READ,
     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
     NULL,
@@ -62,7 +54,7 @@ static DWORD file_type(path_t* path)
     NULL
   );
 
-  free(path_cstr);
+  string_free(path_str);
 
   if (handle == INVALID_HANDLE_VALUE)
     return FILE_TYPE_UNKNOWN;
@@ -148,13 +140,10 @@ bool file_empty(path_t* path)
 
 size_t file_size(path_t* path)
 {
-  size_t path_len = path_to_cstr(path, NULL, 0);
-
-  LPSTR path_cstr = (LPSTR)malloc((path_len + 1) * sizeof(CHAR));
-  path_to_cstr(path, path_cstr, path_len + 1);
+  string_t* path_str = path_to_string(path);
 
   HANDLE handle = CreateFileA(
-    path_cstr,
+    string_begin(path_str),
     GENERIC_READ,
     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
     NULL,
@@ -163,7 +152,7 @@ size_t file_size(path_t* path)
     NULL
   );
 
-  free(path_cstr);
+  string_free(path_str);
 
   if (handle == INVALID_HANDLE_VALUE)
     return 0;
@@ -182,22 +171,19 @@ size_t file_read(path_t* path, char* buf, size_t len)
   if (buf == NULL)
     return file_size(path);
 
-  size_t path_len = path_to_cstr(path, NULL, 0);
-
-  LPSTR path_cstr = (LPSTR)malloc((path_len + 1) * sizeof(CHAR));
-  path_to_cstr(path, path_cstr, path_len + 1);
+  string_t* path_str = path_to_string(path);
 
   HANDLE handle = CreateFileA(
-    path_cstr,
+    string_begin(path_str),
     GENERIC_READ,
-    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+    FILE_SHARE_READ,
     NULL,
     OPEN_EXISTING,
     FILE_ATTRIBUTE_NORMAL,
     NULL
   );
 
-  free(path_cstr);
+  string_free(path_str);
 
   if (handle == INVALID_HANDLE_VALUE)
     return 0;
