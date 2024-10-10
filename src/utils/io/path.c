@@ -78,6 +78,18 @@ size_t path_to_cstr(path_t* path, char* buf, size_t size)
   return min_len;
 }
 
+string_t* path_to_string(path_t* path)
+{
+  return string_copy((string_t*)path);
+}
+
+string_view_t path_to_string_view(path_t* path)
+{
+  string_t* str = (string_t*)path;
+
+  return string_view_init_with_length(string_begin(str), string_length(str));
+}
+
 bool path_is_relative(path_t* path)
 {
   return !path_is_absolute(path);

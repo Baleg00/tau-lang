@@ -16,10 +16,11 @@
 #define TAU_PATH_H
 
 #include <stdbool.h>
-#include <stdint.h>
 
-#include "utils/os_detect.h"
 #include "utils/extern_c.h"
+#include "utils/os_detect.h"
+#include "utils/str.h"
+#include "utils/str_view.h"
 
 /// Cross-platform directory separator character.
 #define PATH_GENERIC_DIRECTORY_SEPARATOR_CHAR '/'
@@ -122,6 +123,22 @@ void path_clear(path_t* path);
  * \returns The number of characters written to the output buffer.
  */
 size_t path_to_cstr(path_t* path, char* buf, size_t size);
+
+/**
+ * \brief Returns the string value of a path.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns The path as a string.
+ */
+string_t* path_to_string(path_t* path);
+
+/**
+ * \brief Returns a string view of a path.
+ *
+ * \param[in] path Pointer to the path to be used.
+ * \returns A string view of the path.
+ */
+string_view_t path_to_string_view(path_t* path);
 
 /**
  * \brief Checks whether a path is relative.
