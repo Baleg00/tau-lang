@@ -29,12 +29,12 @@ void* queue_poll(queue_t* que)
   return list_pop_back((list_t*)que);
 }
 
-void* queue_peek(queue_t* que)
+void* queue_peek(const queue_t* que)
 {
-  return list_back((list_t*)que);
+  return list_back((const list_t*)que);
 }
 
-bool queue_empty(queue_t* que)
+bool queue_empty(const queue_t* que)
 {
-  return list_empty((list_t*)que);
+  return list_empty((const list_t*)que);
 }

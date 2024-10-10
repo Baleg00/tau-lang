@@ -39,14 +39,14 @@ queue_t* queue_init(void);
 /**
  * \brief Frees the resources associated with a queue.
  *
- * \param[in] queue Pointer to the queue to free.
+ * \param[in] que Pointer to the queue to free.
  */
 void queue_free(queue_t* que);
 
 /**
  * \brief Adds the given data to the back of a queue.
  *
- * \param[in,out] queue Pointer to the queue.
+ * \param[in,out] que Pointer to the queue.
  * \param[in] data Pointer to the data to be added.
  */
 void queue_offer(queue_t* que, void* data);
@@ -54,7 +54,7 @@ void queue_offer(queue_t* que, void* data);
 /**
  * \brief Removes and returns the data stored at the front of a queue.
  *
- * \param[in,out] queue Pointer to the queue.
+ * \param[in,out] que Pointer to the queue.
  * \returns Pointer to the data removed from the front of the queue.
  */
 void* queue_poll(queue_t* que);
@@ -62,18 +62,18 @@ void* queue_poll(queue_t* que);
 /**
  * \brief Retrieves the data stored at the front of a queue.
  *
- * \param[in] queue Pointer to the queue.
+ * \param[in] que Pointer to the queue.
  * \returns Pointer to the data at the front of the queue.
  */
-void* queue_peek(queue_t* que);
+void* queue_peek(const queue_t* que);
 
 /**
  * \brief Checks if a queue is empty.
  *
- * \param[in] queue Pointer to the queue.
+ * \param[in] que Pointer to the queue.
  * \returns `true` if the queue is empty, `false` otherwise.
  */
-bool queue_empty(queue_t* que);
+bool queue_empty(const queue_t* que);
 
 TAU_EXTERN_C_END
 
