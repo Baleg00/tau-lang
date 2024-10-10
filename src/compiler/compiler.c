@@ -32,128 +32,130 @@ struct compiler_t
   options_ctx_t* options;
 };
 
-static void compiler_dump_tokens(const char* path, vector_t* tokens)
+static void compiler_dump_tokens(path_t* path, vector_t* tokens)
 {
-  string_t* tokens_path = string_init_with_cstr(path);
-  string_append_cstr(tokens_path, ".tokens.json");
+  path_t* tokens_path = path_replace_extension(path, "tokens.json");
 
-  FILE* tokens_file = fopen(string_begin(tokens_path), "w");
+  string_t* tokens_path_str = path_to_string(tokens_path);
+
+  FILE* tokens_file = fopen(string_begin(tokens_path_str), "w");
   ASSERT(tokens_file != NULL);
+
+  string_free(tokens_path_str);
+  path_free(tokens_path);
 
   token_json_dump_vector(tokens_file, tokens);
 
   fclose(tokens_file);
-
-  string_free(tokens_path);
 }
 
-static void compiler_dump_ast(const char* path, ast_node_t* root)
+static void compiler_dump_ast(path_t* path, ast_node_t* root)
 {
-  string_t* ast_path = string_init_with_cstr(path);
-  string_append_cstr(ast_path, ".ast.json");
+  path_t* ast_path = path_replace_extension(path, "ast.json");
 
-  FILE* ast_file = fopen(string_begin(ast_path), "w");
+  string_t* ast_path_str = path_to_string(ast_path);
+
+  FILE* ast_file = fopen(string_begin(ast_path_str), "w");
   ASSERT(ast_file != NULL);
+
+  string_free(ast_path_str);
+  path_free(ast_path);
 
   ast_node_dump_json(ast_file, root);
 
   fclose(ast_file);
-
-  string_free(ast_path);
 }
 
-static void compiler_emit_ll(const char* path, LLVMModuleRef llvm_module)
+static void compiler_emit_ll(path_t* path, LLVMModuleRef llvm_module)
 {
-  string_t* ll_path = string_init_with_cstr(path);
-  string_append_cstr(ll_path, ".ll");
+  path_t* ll_path = path_replace_extension(path, "ll");
+
+  string_t* ll_path_str = path_to_string(ll_path);
 
   char* error_str = NULL;
 
-  if (LLVMPrintModuleToFile(llvm_module, string_begin(ll_path), &error_str))
+  if (LLVMPrintModuleToFile(llvm_module, string_begin(ll_path_str), &error_str))
   {
-    log_error("LLVM:LLVMPrintModuleToFile", error_str);
+    log_error("LLVM", "Failed to emit LL file (%s): %s", string_begin(ll_path_str), error_str);
     LLVMDisposeMessage(error_str);
-    string_free(ll_path);
-    return;
   }
 
-  string_free(ll_path);
+  string_free(ll_path_str);
+  path_free(ll_path);
 }
 
-static void compiler_emit_bc(const char* path, LLVMModuleRef llvm_module)
+static void compiler_emit_bc(path_t* path, LLVMModuleRef llvm_module)
 {
-  string_t* bc_path = string_init_with_cstr(path);
-  string_append_cstr(bc_path, ".bc");
+  path_t* bc_path = path_replace_extension(path, "bc");
 
-  if (LLVMWriteBitcodeToFile(llvm_module, string_begin(bc_path)))
-  {
-    log_error("LLVM:LLVMWriteBitcodeToFile", "Failed to write bitcode to file.");
-    string_free(bc_path);
-    return;
-  }
+  string_t* bc_path_str = path_to_string(bc_path);
 
-  string_free(bc_path);
+  if (LLVMWriteBitcodeToFile(llvm_module, string_begin(bc_path_str)))
+    log_error("LLVM", "Failed to emit bitcode file (%s).", string_begin(bc_path_str));
+
+  string_free(bc_path_str);
+  path_free(bc_path);
 }
 
-static void compiler_emit_obj(const char* path, LLVMModuleRef llvm_module)
+static void compiler_emit_obj(path_t* path, LLVMModuleRef llvm_module)
 {
-  string_t* obj_path = string_init_with_cstr(path);
-  string_append_cstr(obj_path, ".obj");
+  path_t* obj_path = path_replace_extension(path, "obj");
+
+  string_t* obj_path_str = path_to_string(obj_path);
 
   char* error_str = NULL;
 
-  if (LLVMTargetMachineEmitToFile(llvm_get_machine(), llvm_module, string_begin(obj_path), LLVMObjectFile, &error_str))
+  if (LLVMTargetMachineEmitToFile(llvm_get_machine(), llvm_module, string_begin(obj_path_str), LLVMObjectFile, &error_str))
   {
-    log_error("LLVM:LLVMTargetMachineEmitToFile", error_str);
+    log_error("LLVM", "Failed to emit object file (%s): %s", string_begin(obj_path_str), error_str);
     LLVMDisposeMessage(error_str);
-    string_free(obj_path);
-    return;
   }
 
-  string_free(obj_path);
+  string_free(obj_path_str);
+  path_free(obj_path);
 }
 
-static void compiler_emit_asm(const char* path, LLVMModuleRef llvm_module)
+static void compiler_emit_asm(path_t* path, LLVMModuleRef llvm_module)
 {
-  string_t* asm_path = string_init_with_cstr(path);
-  string_append_cstr(asm_path, ".asm");
+  path_t* asm_path = path_replace_extension(path, "asm");
+
+  string_t* asm_path_str = path_to_string(asm_path);
 
   char* error_str = NULL;
 
-  if (LLVMTargetMachineEmitToFile(llvm_get_machine(), llvm_module, string_begin(asm_path), LLVMAssemblyFile, &error_str))
+  if (LLVMTargetMachineEmitToFile(llvm_get_machine(), llvm_module, string_begin(asm_path_str), LLVMAssemblyFile, &error_str))
   {
-    log_error("LLVM:LLVMTargetMachineEmitToFile", error_str);
+    log_error("LLVM", "Failed to emit assembly file (%s): %s", string_begin(asm_path_str), error_str);
     LLVMDisposeMessage(error_str);
-    string_free(asm_path);
-    return;
   }
 
-  string_free(asm_path);
+  string_free(asm_path_str);
+  path_free(asm_path);
 }
 
-static void compiler_process_file(compiler_t* compiler, const char* path_cstr)
+void compiler_process_file(compiler_t* compiler, path_t* path)
 {
-  path_t* path = path_init_with_cstr(path_cstr);
+  size_t path_len = path_to_cstr(path, NULL, 0);
+  char* path_cstr = (char*)malloc(sizeof(char) * (path_len + 1));
+  path_to_cstr(path, path_cstr, path_len + 1);
 
   size_t src_len = file_read(path, NULL, 0);
   char* src = (char*)malloc((src_len + 1) * sizeof(char));
   file_read(path, src, src_len + 1);
 
-  path_free(path);
-
   lexer_t* lexer = lexer_init();
-  vector_t* toks = NULL;
-  time_it("lexer", toks = lexer_lex(lexer, path_cstr, src));
+  vector_t* tokens = NULL;
+  time_it("lexer", tokens = lexer_lex(lexer, path_cstr, src));
 
   if (options_get_dump_tokens(compiler->options))
-    compiler_dump_tokens(path_cstr, toks);
+    compiler_dump_tokens(path, tokens);
 
   parser_t* parser = parser_init();
   ast_node_t* root_node = NULL;
-  time_it("parser", root_node = parser_parse(parser, toks));
+  time_it("parser", root_node = parser_parse(parser, tokens));
 
   if (options_get_dump_ast(compiler->options))
-    compiler_dump_ast(path_cstr, root_node);
+    compiler_dump_ast(path, root_node);
 
   nameres_ctx_t* nameres_ctx = nameres_ctx_init();
   time_it("analysis:nameres", ast_node_nameres(nameres_ctx, root_node));
@@ -187,15 +189,15 @@ static void compiler_process_file(compiler_t* compiler, const char* path_cstr)
   LLVMDisposePassBuilderOptions(llvm_pass_builder_options);
 
   if (options_get_dump_ll(compiler->options))
-    compiler_emit_ll(path_cstr, llvm_mod);
+    compiler_emit_ll(path, llvm_mod);
 
   if (options_get_dump_bc(compiler->options))
-    compiler_emit_bc(path_cstr, llvm_mod);
+    compiler_emit_bc(path, llvm_mod);
 
   if (options_get_dump_asm(compiler->options))
-    compiler_emit_asm(path_cstr, llvm_mod);
+    compiler_emit_asm(path, llvm_mod);
 
-  compiler_emit_obj(path_cstr, llvm_mod);
+  compiler_emit_obj(path, llvm_mod);
 
   LLVMDisposeBuilder(llvm_builder);
   LLVMDisposeModule(llvm_mod);
@@ -208,10 +210,11 @@ static void compiler_process_file(compiler_t* compiler, const char* path_cstr)
   nameres_ctx_free(nameres_ctx);
   parser_free(parser);
 
-  vector_free(toks);
+  vector_free(tokens);
   lexer_free(lexer);
 
   free(src);
+  free(path_cstr);
 }
 
 compiler_t* compiler_init(void)
@@ -261,7 +264,14 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[])
   vector_t* input_files = options_get_input_files(compiler->options);
 
   VECTOR_FOR_LOOP(i, input_files)
-    compiler_process_file(compiler, (const char*)vector_get(input_files, i));
+  {
+    const char* path_cstr = (const char*)vector_get(input_files, i);
+    path_t* path = path_init_with_cstr(path_cstr);
+
+    compiler_process_file(compiler, path);
+
+    path_free(path);
+  }
 
   return EXIT_SUCCESS;
 }
