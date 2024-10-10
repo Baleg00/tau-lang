@@ -10,38 +10,30 @@
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 
-/**
- * \brief Node in a binary search tree.
- */
+/// Node in a binary search tree.
 typedef struct set_node_t set_node_t;
 
 struct set_node_t
 {
-  void* data; // Pointer to the data stored in the node.
-  set_node_t* parent; // Pointer to the parent node.
-  set_node_t* left; // Pointer to the left child node.
-  set_node_t* right; // Pointer to the right child node.
+  void* data;         ///< Pointer to the data stored in the node.
+  set_node_t* parent; ///< Pointer to the parent node.
+  set_node_t* left;   ///< Pointer to the left child node.
+  set_node_t* right;  ///< Pointer to the right child node.
 };
 
 struct set_t
 {
-  set_cmp_func_t cmp; // Comparison function used to order elements in the set.
-  size_t size; // Number of elements in the set.
-  set_node_t* root; // Pointer to the root node of the binary search tree.
+  set_cmp_func_t cmp; ///< Comparison function used to order elements in the set.
+  size_t size;        ///< Number of elements in the set.
+  set_node_t* root;   ///< Pointer to the root node of the binary search tree.
 };
 
-set_t* set_init(set_cmp_func_t cmp)
-{
-  set_t* set = (set_t*)malloc(sizeof(set_t));
-  ASSERT(set != NULL);
-
-  set->cmp = cmp;
-  set->size = 0;
-  set->root = NULL;
-
-  return set;
-}
-
+/**
+ * \brief Initializes a new tree node.
+ *
+ * \param[in] data Pointer to the data to be associated with the node.
+ * \returns Pointer to the newly initialized node.
+ */
 static set_node_t* set_node_init(void* data)
 {
   set_node_t* node = (set_node_t*)malloc(sizeof(set_node_t));
@@ -55,29 +47,51 @@ static set_node_t* set_node_init(void* data)
   return node;
 }
 
+/**
+ * \brief Frees a tree node.
+ *
+ * \param[in] node Pointer to the node to be freed.
+ */
 static void set_node_free(set_node_t* node)
 {
   free(node);
 }
 
-static void set_free_impl(set_node_t* node)
+/**
+ * \brief Frees the nodes of a set recursively.
+ *
+ * \param[in] node Pointer to the root node of the subtree to be freed.
+ */
+static void set_free_recur(set_node_t* node)
 {
   if (node == NULL)
     return;
 
-  set_free_impl(node->left);
-  set_free_impl(node->right);
+  set_free_recur(node->left);
+  set_free_recur(node->right);
 
   free(node);
 }
 
+set_t* set_init(set_cmp_func_t cmp)
+{
+  set_t* set = (set_t*)malloc(sizeof(set_t));
+  ASSERT(set != NULL);
+
+  set->cmp = cmp;
+  set->size = 0;
+  set->root = NULL;
+
+  return set;
+}
+
 void set_free(set_t* set)
 {
-  set_free_impl(set->root);
+  set_free_recur(set->root);
   free(set);
 }
 
-bool set_add(set_t* set, void* data)
+bool set_add(set_t* restrict set, void* restrict data)
 {
   if (set->root == NULL)
   {
@@ -125,7 +139,7 @@ bool set_add(set_t* set, void* data)
   return false;
 }
 
-bool set_remove(set_t* set, void* data)
+bool set_remove(set_t* restrict set, void* restrict data)
 {
   if (set->root == NULL)
     return false;
@@ -222,7 +236,7 @@ bool set_remove(set_t* set, void* data)
   return true;
 }
 
-void* set_get(set_t* set, void* data)
+void* set_get(const set_t* restrict set, const void* restrict data)
 {
   set_node_t* node = set->root;
 
@@ -241,7 +255,7 @@ void* set_get(set_t* set, void* data)
   return NULL;
 }
 
-bool set_contains(set_t* set, void* data)
+bool set_contains(const set_t* restrict set, const void* restrict data)
 {
   set_node_t* node = set->root;
 
@@ -260,7 +274,7 @@ bool set_contains(set_t* set, void* data)
   return false;
 }
 
-void* set_min(set_t* set)
+void* set_min(const set_t* set)
 {
   if (set->root == NULL)
     return NULL;
@@ -273,7 +287,7 @@ void* set_min(set_t* set)
   return node->data;
 }
 
-void* set_max(set_t* set)
+void* set_max(const set_t* set)
 {
   if (set->root == NULL)
     return NULL;
@@ -286,12 +300,12 @@ void* set_max(set_t* set)
   return node->data;
 }
 
-bool set_empty(set_t* set)
+bool set_empty(const set_t* set)
 {
   return set->size == 0;
 }
 
-size_t set_size(set_t* set)
+size_t set_size(const set_t* set)
 {
   return set->size;
 }

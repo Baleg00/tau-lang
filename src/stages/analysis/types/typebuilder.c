@@ -49,17 +49,17 @@ struct typebuilder_t
   set_t* set_var;
 };
 
-static int typebuilder_cmp_mut(void* lhs, void* rhs)
+static int typebuilder_cmp_mut(const void* lhs, const void* rhs)
 {
   return (int)(((typedesc_mut_t*)lhs)->base_type - ((typedesc_mut_t*)rhs)->base_type);
 }
 
-static int typebuilder_cmp_ptr(void* lhs, void* rhs)
+static int typebuilder_cmp_ptr(const void* lhs, const void* rhs)
 {
   return (int)(((typedesc_ptr_t*)lhs)->base_type - ((typedesc_ptr_t*)rhs)->base_type);
 }
 
-static int typebuilder_cmp_array(void* lhs, void* rhs)
+static int typebuilder_cmp_array(const void* lhs, const void* rhs)
 {
   typedesc_array_t* lhs_desc = (typedesc_array_t*)lhs;
   typedesc_array_t* rhs_desc = (typedesc_array_t*)rhs;
@@ -74,17 +74,17 @@ static int typebuilder_cmp_array(void* lhs, void* rhs)
   return cmp2;
 }
 
-static int typebuilder_cmp_ref(void* lhs, void* rhs)
+static int typebuilder_cmp_ref(const void* lhs, const void* rhs)
 {
   return (int)(((typedesc_ref_t*)lhs)->base_type - ((typedesc_ref_t*)rhs)->base_type);
 }
 
-static int typebuilder_cmp_opt(void* lhs, void* rhs)
+static int typebuilder_cmp_opt(const void* lhs, const void* rhs)
 {
   return (int)(((typedesc_opt_t*)lhs)->base_type - ((typedesc_opt_t*)rhs)->base_type);
 }
 
-static int typebuilder_cmp_fun(void* lhs, void* rhs)
+static int typebuilder_cmp_fun(const void* lhs, const void* rhs)
 {
   typedesc_fun_t* lhs_desc = (typedesc_fun_t*)lhs;
   typedesc_fun_t* rhs_desc = (typedesc_fun_t*)rhs;
@@ -120,7 +120,7 @@ static int typebuilder_cmp_fun(void* lhs, void* rhs)
   return 0;
 }
 
-static int typebuilder_cmp_struct(void* lhs, void* rhs)
+static int typebuilder_cmp_struct(const void* lhs, const void* rhs)
 {
   typedesc_struct_t* lhs_desc = (typedesc_struct_t*)lhs;
   typedesc_struct_t* rhs_desc = (typedesc_struct_t*)rhs;
@@ -149,7 +149,7 @@ static int typebuilder_cmp_struct(void* lhs, void* rhs)
   return 0;
 }
 
-static int typebuilder_cmp_union(void* lhs, void* rhs)
+static int typebuilder_cmp_union(const void* lhs, const void* rhs)
 {
   typedesc_union_t* lhs_desc = (typedesc_union_t*)lhs;
   typedesc_union_t* rhs_desc = (typedesc_union_t*)rhs;
@@ -179,7 +179,7 @@ static int typebuilder_cmp_union(void* lhs, void* rhs)
   return 0;
 }
 
-static int typebuilder_cmp_enum(void* lhs, void* rhs)
+static int typebuilder_cmp_enum(const void* lhs, const void* rhs)
 {
   typedesc_enum_t* lhs_desc = (typedesc_enum_t*)lhs;
   typedesc_enum_t* rhs_desc = (typedesc_enum_t*)rhs;
@@ -196,7 +196,7 @@ static int typebuilder_cmp_enum(void* lhs, void* rhs)
   return 0;
 }
 
-static int typebuilder_cmp_var(void* lhs, void* rhs)
+static int typebuilder_cmp_var(const void* lhs, const void* rhs)
 {
   typedesc_var_t* lhs_desc = (typedesc_var_t*)lhs;
   typedesc_var_t* rhs_desc = (typedesc_var_t*)rhs;
