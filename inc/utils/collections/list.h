@@ -69,7 +69,7 @@ list_node_t* list_node_next(list_node_t* node);
  * \param[in] node Pointer to the list node.
  * \returns Pointer to the data stored in the node.
  */
-void* list_node_get(list_node_t* node);
+void* list_node_get(const list_node_t* node);
 
 /**
  * \brief Sets the data stored in a list node.
@@ -77,7 +77,7 @@ void* list_node_get(list_node_t* node);
  * \param[out] node Pointer to the list node.
  * \param[in] data Pointer to the data to be stored in the node.
  */
-void list_node_set(list_node_t* node, void* data);
+void list_node_set(list_node_t* restrict node, void* restrict data);
 
 /**
  * \brief Initializes a new empty list.
@@ -93,7 +93,7 @@ list_t* list_init(void);
  * \param[in] length The number of elements in the buffer.
  * \returns Pointer to the initialized list.
  */
-list_t* list_init_from_buffer(void* buffer, size_t length);
+list_t* list_init_from_buffer(const void* buffer, size_t length);
 
 /**
  * \brief Frees the resources associated with a list.
@@ -108,7 +108,7 @@ void list_free(list_t* list);
  * \param[in] list Pointer to the list to copy.
  * \returns Pointer to the copied list.
  */
-list_t* list_copy(list_t* list);
+list_t* list_copy(const list_t* list);
 
 /**
  * \brief Retrieves the data stored in the front of a list.
@@ -116,7 +116,7 @@ list_t* list_copy(list_t* list);
  * \param[in] list Pointer to the list.
  * \returns Pointer to the data at the front of the list.
  */
-void* list_front(list_t* list);
+void* list_front(const list_t* list);
 
 /**
  * \brief Retrieves the data stored in the back of a list.
@@ -124,7 +124,7 @@ void* list_front(list_t* list);
  * \param[in] list Pointer to the list.
  * \returns Pointer to the data at the back of the list.
  */
-void* list_back(list_t* list);
+void* list_back(const list_t* list);
 
 /**
  * \brief Retrieves the front node of a list.
@@ -132,7 +132,7 @@ void* list_back(list_t* list);
  * \param[in] list Pointer to the list.
  * \returns Pointer to the front node of the list.
  */
-list_node_t* list_front_node(list_t* list);
+list_node_t* list_front_node(const list_t* list);
 
 /**
  * \brief Retrieves the back node of a list.
@@ -140,7 +140,7 @@ list_node_t* list_front_node(list_t* list);
  * \param[in] list Pointer to the list.
  * \returns Pointer to the back node of the list.
  */
-list_node_t* list_back_node(list_t* list);
+list_node_t* list_back_node(const list_t* list);
 
 /**
  * \brief Adds a new node with the given data to the front of a list.
@@ -149,7 +149,7 @@ list_node_t* list_back_node(list_t* list);
  * \param[in] data Pointer to the data to be added.
  * \returns Pointer to the newly added list node.
  */
-list_node_t* list_push_front(list_t* list, void* data);
+list_node_t* list_push_front(list_t* restrict list, void* restrict data);
 
 /**
  * \brief Adds a new node with the given data to the back of a list.
@@ -158,7 +158,7 @@ list_node_t* list_push_front(list_t* list, void* data);
  * \param[in] data Pointer to the data to be added.
  * \returns Pointer to the newly added list node.
  */
-list_node_t* list_push_back(list_t* list, void* data);
+list_node_t* list_push_back(list_t* restrict list, void* restrict data);
 
 /**
  * \brief Removes and returns the data stored in the front of a list.
@@ -183,7 +183,7 @@ void* list_pop_back(list_t* list);
  * \param[in] data Pointer to the data to be inserted.
  * \returns Pointer to the newly inserted list node.
  */
-list_node_t* list_insert_before(list_node_t* node, void* data);
+list_node_t* list_insert_before(list_node_t* restrict node, void* restrict data);
 
 /**
  * \brief Inserts a new node with the given data after the specified node.
@@ -192,7 +192,7 @@ list_node_t* list_insert_before(list_node_t* node, void* data);
  * \param[in] data Pointer to the data to be inserted.
  * \returns Pointer to the newly inserted list node.
  */
-list_node_t* list_insert_after(list_node_t* node, void* data);
+list_node_t* list_insert_after(list_node_t* restrict node, void* restrict data);
 
 /**
  * \brief Removes a node from the list and returns the associated data.
@@ -233,7 +233,7 @@ void list_clear(list_t* list);
  * \param[in] list Pointer to the list.
  * \returns `true` if the list is empty, `false` otherwise.
  */
-bool list_empty(list_t* list);
+bool list_empty(const list_t* list);
 
 /**
  * \brief Returns the size of a list.
@@ -241,7 +241,7 @@ bool list_empty(list_t* list);
  * \param[in] list Pointer to the list.
  * \returns The number of elements in the list.
  */
-size_t list_size(list_t* list);
+size_t list_size(const list_t* list);
 
 /**
  * \brief Applies a given function to each element in the list.
@@ -260,7 +260,7 @@ void list_for_each(list_t* list, list_for_each_func_t func);
  * \param list Pointer to the list.
  * \param buffer Pointer to the memory buffer.
  */
-void list_to_buffer(list_t* list, void* buffer);
+void list_to_buffer(const list_t* restrict list, void* restrict buffer);
 
 TAU_EXTERN_C_END
 

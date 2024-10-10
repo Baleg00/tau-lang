@@ -66,12 +66,12 @@ list_node_t* list_node_next(list_node_t* node)
   return node->next;
 }
 
-void* list_node_get(list_node_t* node)
+void* list_node_get(const list_node_t* node)
 {
   return node->data;
 }
 
-void list_node_set(list_node_t* node, void* data)
+void list_node_set(list_node_t* restrict node, void* restrict data)
 {
   node->data = data;
 }
@@ -88,12 +88,12 @@ list_t* list_init(void)
   return list;
 }
 
-list_t* list_init_from_buffer(void* buffer, size_t length)
+list_t* list_init_from_buffer(const void* buffer, size_t length)
 {
   list_t* list = list_init();
 
   for (size_t i = 0; i < length; i++)
-    list_push_back(list, ((void**)buffer)[i]);
+    list_push_back(list, ((void* const*)buffer)[i]);
 
   return list;
 }
@@ -109,7 +109,7 @@ void list_free(list_t* list)
   free(list);
 }
 
-list_t* list_copy(list_t* list)
+list_t* list_copy(const list_t* list)
 {
   list_t* new_list = list_init();
 
@@ -119,27 +119,27 @@ list_t* list_copy(list_t* list)
   return new_list;
 }
 
-void* list_front(list_t* list)
+void* list_front(const list_t* list)
 {
   return list->head->data;
 }
 
-void* list_back(list_t* list)
+void* list_back(const list_t* list)
 {
   return list->tail->data;
 }
 
-list_node_t* list_front_node(list_t* list)
+list_node_t* list_front_node(const list_t* list)
 {
   return list->head;
 }
 
-list_node_t* list_back_node(list_t* list)
+list_node_t* list_back_node(const list_t* list)
 {
   return list->tail;
 }
 
-list_node_t* list_push_front(list_t* list, void* data)
+list_node_t* list_push_front(list_t* restrict list, void* restrict data)
 {
   list_node_t* new_node = list_node_init(data);
 
@@ -159,7 +159,7 @@ list_node_t* list_push_front(list_t* list, void* data)
   return new_node;
 }
 
-list_node_t* list_push_back(list_t* list, void* data)
+list_node_t* list_push_back(list_t* restrict list, void* restrict data)
 {
   list_node_t* new_node = list_node_init(data);
 
@@ -221,7 +221,7 @@ void* list_pop_back(list_t* list)
   return data;
 }
 
-list_node_t* list_insert_before(list_node_t* node, void* data)
+list_node_t* list_insert_before(list_node_t* restrict node, void* restrict data)
 {
   if (node->owner->head == node)
     return list_push_front(node->owner, data);
@@ -240,7 +240,7 @@ list_node_t* list_insert_before(list_node_t* node, void* data)
   return new_node;
 }
 
-list_node_t* list_insert_after(list_node_t* node, void* data)
+list_node_t* list_insert_after(list_node_t* restrict node, void* restrict data)
 {
   if (node->owner->tail == node)
     return list_push_back(node->owner, data);
@@ -301,12 +301,12 @@ void list_clear(list_t* list)
   list->len = 0;
 }
 
-bool list_empty(list_t* list)
+bool list_empty(const list_t* list)
 {
   return list->len == 0;
 }
 
-size_t list_size(list_t* list)
+size_t list_size(const list_t* list)
 {
   return list->len;
 }
@@ -317,7 +317,7 @@ void list_for_each(list_t* list, list_for_each_func_t func)
     func(node->data);
 }
 
-void list_to_buffer(list_t* list, void* buffer)
+void list_to_buffer(const list_t* restrict list, void* restrict buffer)
 {
   size_t i = 0;
 
