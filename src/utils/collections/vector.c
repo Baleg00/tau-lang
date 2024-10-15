@@ -88,27 +88,27 @@ vector_t* vector_copy(vector_t* vec)
   return new_vec;
 }
 
-void* vector_get(vector_t* vec, size_t idx)
+void* vector_get(const vector_t* vec, size_t idx)
 {
   return vec->data[idx];
 }
 
-void vector_set(vector_t* vec, size_t idx, void* data)
+void vector_set(const vector_t* restrict vec, size_t idx, void* restrict data)
 {
   vec->data[idx] = data;
 }
 
-void* vector_front(vector_t* vec)
+void* vector_front(const vector_t* vec)
 {
   return vec->data[0];
 }
 
-void* vector_back(vector_t* vec)
+void* vector_back(const vector_t* vec)
 {
   return vec->data[vec->size - 1];
 }
 
-void vector_push(vector_t* vec, void* data)
+void vector_push(vector_t* restrict vec, void* restrict data)
 {
   if (vec->size + 1 >= vec->capacity)
     vector_expand(vec, vec->capacity << 1);
@@ -121,7 +121,7 @@ void* vector_pop(vector_t* vec)
   return vec->data[--vec->size];
 }
 
-void vector_insert(vector_t* vec, size_t idx, void* data)
+void vector_insert(vector_t* restrict vec, size_t idx, void* restrict data)
 {
   if (vec->size + 1 >= vec->capacity)
     vector_expand(vec, vec->capacity << 1);
@@ -132,7 +132,7 @@ void vector_insert(vector_t* vec, size_t idx, void* data)
   vec->size++;
 }
 
-void vector_extend(vector_t* dest, vector_t* src)
+void vector_extend(vector_t* restrict dest, const vector_t* restrict src)
 {
   size_t new_capacity = dest->capacity;
 
@@ -166,7 +166,7 @@ void vector_clear(vector_t* vec)
   ASSERT(vec->data != NULL);
 }
 
-size_t vector_find(vector_t* vec, void* data)
+size_t vector_find(const vector_t* restrict vec, void* restrict data)
 {
   size_t i = 0;
 
@@ -177,23 +177,23 @@ size_t vector_find(vector_t* vec, void* data)
   return i;
 }
 
-size_t vector_size(vector_t* vec)
+size_t vector_size(const vector_t* vec)
 {
   return vec->size;
 }
 
-bool vector_empty(vector_t* vec)
+bool vector_empty(const vector_t* vec)
 {
   return vec->size == 0;
 }
 
-void vector_for_each(vector_t* vec, vector_for_each_func_t func)
+void vector_for_each(const vector_t* vec, vector_for_each_func_t func)
 {
   for (size_t i = 0; i < vec->size; ++i)
     func(vec->data[i]);
 }
 
-void vector_to_buffer(vector_t* vec, void* buffer)
+void vector_to_buffer(const vector_t* restrict vec, void* restrict buffer)
 {
   memcpy(buffer, vec->data, sizeof(void*) * vec->size);
 }

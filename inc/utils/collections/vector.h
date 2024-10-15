@@ -79,7 +79,7 @@ void vector_free(vector_t* vec);
  * \param[in] vec Pointer to the vector to copy.
  * \returns Pointer to the copied vector.
  */
-vector_t* vector_copy(vector_t* vec);
+vector_t* vector_copy(const vector_t* vec);
 
 /**
  * \brief Retrieves the element at the specified index.
@@ -88,7 +88,7 @@ vector_t* vector_copy(vector_t* vec);
  * \param[in] idx Index of the element to retrieve.
  * \returns A pointer to the element at the specified index.
  */
-void* vector_get(vector_t* vec, size_t idx);
+void* vector_get(const vector_t* vec, size_t idx);
 
 /**
  * \brief Sets the element at the specified index.
@@ -97,7 +97,7 @@ void* vector_get(vector_t* vec, size_t idx);
  * \param[in] idx Index of the element to set.
  * \param[in] data Pointer to the data to set.
  */
-void vector_set(vector_t* vec, size_t idx, void* data);
+void vector_set(const vector_t* restrict vec, size_t idx, void* restrict data);
 
 /**
  * \brief Retrieves the data stored in the front of a vector.
@@ -105,7 +105,7 @@ void vector_set(vector_t* vec, size_t idx, void* data);
  * \param[in] vec Pointer to the vector.
  * \returns Pointer to the data at the front of the vector.
  */
-void* vector_front(vector_t* vec);
+void* vector_front(const vector_t* vec);
 
 /**
  * \brief Retrieves the data stored in the back of a vector.
@@ -113,7 +113,7 @@ void* vector_front(vector_t* vec);
  * \param[in] vec Pointer to the vector.
  * \returns Pointer to the data at the back of the vector.
  */
-void* vector_back(vector_t* vec);
+void* vector_back(const vector_t* vec);
 
 /**
  * \brief Appends an element to the end of the vector.
@@ -121,7 +121,7 @@ void* vector_back(vector_t* vec);
  * \param[in,out] vec Pointer to the vector.
  * \param[in] data Pointer to the data to be appended.
  */
-void vector_push(vector_t* vec, void* data);
+void vector_push(vector_t* restrict vec, void* restrict data);
 
 /**
  * \brief Removes and returns the last element of the vector.
@@ -139,7 +139,7 @@ void* vector_pop(vector_t* vec);
  * \param[in] idx Index at which the element should be inserted.
  * \param[in] data Pointer to the data to be inserted.
  */
-void vector_insert(vector_t* vec, size_t idx, void* data);
+void vector_insert(vector_t* restrict vec, size_t idx, void* restrict data);
 
 /**
  * \brief Appends all elements of a vector to another vector.
@@ -147,7 +147,7 @@ void vector_insert(vector_t* vec, size_t idx, void* data);
  * \param[in,out] dest Pointer to the vector to extend.
  * \param[in] src Pointer to the vector to append.
  */
-void vector_extend(vector_t* dest, vector_t* src);
+void vector_extend(vector_t* restrict dest, const vector_t* restrict src);
 
 /**
  * \brief Removes and returns the element at the specified index, shifting other
@@ -173,7 +173,7 @@ void vector_clear(vector_t* vec);
  * \param[in] data Pointer to the data to be found.
  * \returns The index of the element if it is present, `vector_size(vec)` otherwise.
  */
-size_t vector_find(vector_t* vec, void* data);
+size_t vector_find(const vector_t* restrict vec, void* restrict data);
 
 /**
  * \brief Returns the number of elements in the vector.
@@ -181,7 +181,7 @@ size_t vector_find(vector_t* vec, void* data);
  * \param[in] vec Pointer to the vector.
  * \returns The number of elements in the vector.
  */
-size_t vector_size(vector_t* vec);
+size_t vector_size(const vector_t* vec);
 
 /**
  * \brief Checks if the vector is empty.
@@ -189,7 +189,7 @@ size_t vector_size(vector_t* vec);
  * \param[in] vec Pointer to the vector.
  * \returns `true` if the vector is empty, `false` otherwise.
  */
-bool vector_empty(vector_t* vec);
+bool vector_empty(const vector_t* vec);
 
 /**
  * \brief Applies a given function to each element of the vector.
@@ -197,7 +197,7 @@ bool vector_empty(vector_t* vec);
  * \param[in] vec Pointer to the vector.
  * \param[in] func The function to be applied to each element.
  */
-void vector_for_each(vector_t* vec, vector_for_each_func_t func);
+void vector_for_each(const vector_t* vec, vector_for_each_func_t func);
 
 /**
  * \brief Writes every element of a vector into a memory buffer.
@@ -208,7 +208,7 @@ void vector_for_each(vector_t* vec, vector_for_each_func_t func);
  * \param vec Pointer to the vector.
  * \param buffer Pointer to the memory buffer.
  */
-void vector_to_buffer(vector_t* vec, void* buffer);
+void vector_to_buffer(const vector_t* restrict vec, void* restrict buffer);
 
 TAU_EXTERN_C_END
 
