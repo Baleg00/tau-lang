@@ -48,7 +48,7 @@ void stack_free(stack_t* stack);
  * \param[in,out] stack Pointer to the stack.
  * \param[in] data Pointer to the data to be added.
  */
-void stack_push(stack_t* stack, void* data);
+void stack_push(stack_t* restrict stack, void* restrict data);
 
 /**
  * \brief Removes and returns the data stored at the top of a stack.
@@ -71,7 +71,7 @@ void stack_clear(stack_t* stack);
  * \param[in] stack Pointer to the stack.
  * \returns Pointer to the data at the top of the stack.
  */
-void* stack_top(stack_t* stack);
+void* stack_top(const stack_t* stack);
 
 /**
  * \brief Checks if a stack is empty.
@@ -79,7 +79,7 @@ void* stack_top(stack_t* stack);
  * \param[in] stack Pointer to the stack.
  * \returns `true` if the stack is empty, `false` otherwise.
  */
-bool stack_empty(stack_t* stack);
+bool stack_empty(const stack_t* stack);
 
 TAU_EXTERN_C_END
 
