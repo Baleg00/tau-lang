@@ -2,7 +2,7 @@
 
 #include "utils/collections/set.h"
 
-int cmp_int(void* lhs, void* rhs)
+int cmp_int(const void* lhs, const void* rhs)
 {
   return *(int*)lhs - *(int*)rhs;
 }
