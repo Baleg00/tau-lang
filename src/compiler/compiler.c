@@ -157,7 +157,9 @@ void compiler_process_file(compiler_t* compiler, path_t* path)
   if (options_get_dump_ast(compiler->options))
     compiler_dump_ast(path, root_node);
 
-  nameres_ctx_t* nameres_ctx = nameres_ctx_init();
+  symtable_t* symtable = symtable_init(NULL);
+
+  nameres_ctx_t* nameres_ctx = nameres_ctx_init(symtable);
   time_it("analysis:nameres", ast_node_nameres(nameres_ctx, root_node));
 
   typebuilder_t* typebuilder = typebuilder_init(llvm_get_context(), llvm_get_data());
@@ -208,6 +210,7 @@ void compiler_process_file(compiler_t* compiler, path_t* path)
   typetable_free(typetable);
   typebuilder_free(typebuilder);
   nameres_ctx_free(nameres_ctx);
+  symtable_free(symtable);
   parser_free(parser);
 
   vector_free(tokens);
