@@ -10,6 +10,7 @@
 #ifndef TAU_COMPILER_H
 #define TAU_COMPILER_H
 
+#include "compiler/environment.h"
 #include "utils/extern_c.h"
 #include "utils/io/path.h"
 
@@ -51,7 +52,7 @@ int compiler_main(compiler_t* compiler, int argc, const char* argv[]);
  * \param[in,out] compiler Pointer to the compiler context to be used.
  * \param[in] path Pointer to the path of the source file.
  */
-void compiler_process_file(compiler_t* compiler, path_t* path);
+environment_t* compiler_process_file(compiler_t* compiler, path_t* path);
 
 TAU_EXTERN_C_END
 

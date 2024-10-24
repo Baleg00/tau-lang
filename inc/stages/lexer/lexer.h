@@ -294,9 +294,9 @@ token_t* lexer_read_next(lexer_t* lex);
  * \param[in] lex Pointer to the lexer.
  * \param[in] path The path of the source file.
  * \param[in] src Pointer to the source code.
- * \returns A vector of tokens.
+ * \param[out] tokens Pointer to the vector to add tokens to.
  */
-vector_t* lexer_lex(lexer_t* lex, const char* path, const char* src);
+void lexer_lex(lexer_t* lex, const char* path, const char* src, vector_t* tokens);
 
 TAU_EXTERN_C_END
 

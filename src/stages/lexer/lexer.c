@@ -75,7 +75,7 @@ struct lexer_t
   const char* path; // Path to the source file.
   const char* src; // Contents of the source file.
   size_t pos; // Current position in the source file.
-  vector_t* toks; // Vector of tokens.
+  vector_t* tokens; // Vector of tokens.
 };
 
 lexer_t* lexer_init(void)
@@ -178,7 +178,7 @@ char lexer_next(lexer_t* lex)
   if (lex->src[lex->pos] == '\n')
   {
     token_t* tok = token_registry_token_init(lex->path, TOK_NEWLINE, lex->pos);
-    vector_push(lex->toks, tok);
+    vector_push(lex->tokens, tok);
   }
 
   return lex->src[lex->pos++];
@@ -770,18 +770,16 @@ token_t* lexer_read_next(lexer_t* lex)
   return NULL;
 }
 
-vector_t* lexer_lex(lexer_t* lex, const char* path, const char* src)
+void lexer_lex(lexer_t* lex, const char* path, const char* src, vector_t* tokens)
 {
   lex->path = path;
   lex->src = src;
   lex->pos = 0;
 
-  lex->toks = vector_init();
+  lex->tokens = tokens;
 
   token_registry_register_file(path, src);
 
-  while (vector_empty(lex->toks) || ((token_t*)vector_back(lex->toks))->kind != TOK_EOF)
-    vector_push(lex->toks, lexer_read_next(lex));
-
-  return lex->toks;
+  while (vector_empty(lex->tokens) || ((token_t*)vector_back(lex->tokens))->kind != TOK_EOF)
+    vector_push(lex->tokens, lexer_read_next(lex));
 }
