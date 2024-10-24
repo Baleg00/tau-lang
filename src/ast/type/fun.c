@@ -19,22 +19,23 @@ ast_type_fun_t* ast_type_fun_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_TYPE_FUN;
+  node->params = vector_init();
 
   return node;
 }
 
 void ast_type_fun_free(ast_type_fun_t* node)
 {
-  if (node->params != NULL)
-    vector_free(node->params);
-
+  vector_free(node->params);
   free(node);
 }
 
 void ast_type_fun_nameres(nameres_ctx_t* ctx, ast_type_fun_t* node)
 {
   VECTOR_FOR_LOOP(i, node->params)
+  {
     ast_node_nameres(ctx, (ast_node_t*)vector_get(node->params, i));
+  }
 
   ast_node_nameres(ctx, node->return_type);
 }
@@ -42,7 +43,9 @@ void ast_type_fun_nameres(nameres_ctx_t* ctx, ast_type_fun_t* node)
 void ast_type_fun_typecheck(typecheck_ctx_t* ctx, ast_type_fun_t* node)
 {
   VECTOR_FOR_LOOP(i, node->params)
+  {
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->params, i));
+  }
 
   ast_node_typecheck(ctx, node->return_type);
 
@@ -73,7 +76,9 @@ void ast_type_fun_codegen(codegen_ctx_t* ctx, ast_type_fun_t* node)
   ast_node_codegen(ctx, node->return_type);
 
   VECTOR_FOR_LOOP(i, node->params)
+  {
     ast_node_codegen(ctx, (ast_node_t*)vector_get(node->params, i));
+  }
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   ASSERT(desc != NULL);
@@ -89,7 +94,9 @@ size_t ast_type_fun_mangle(ast_type_fun_t* node, char* buf, size_t len)
   written += snprintf(buf + written, len <= written ? 0 : len - written, "%zu", vector_size(node->params));
 
   VECTOR_FOR_LOOP(i, node->params)
+  {
     written += ast_node_mangle((ast_node_t*)vector_get(node->params, i), buf + written, len <= written ? 0 : len - written);
+  }
 
   if (node->is_vararg)
     written += snprintf(buf + written, len <= written ? 0 : len - written, "V");

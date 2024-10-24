@@ -20,15 +20,14 @@ ast_decl_struct_t* ast_decl_struct_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_DECL_STRUCT;
+  node->members = vector_init();
 
   return node;
 }
 
 void ast_decl_struct_free(ast_decl_struct_t* node)
 {
-  if (node->members != NULL)
-    vector_free(node->members);
-
+  vector_free(node->members);
   free(node);
 }
 
@@ -42,12 +41,16 @@ void ast_decl_struct_nameres(nameres_ctx_t* ctx, ast_decl_struct_t* node)
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL)
+  {
     report_error_type_redefinition((ast_decl_t*)collision->node, (ast_decl_t*)node);
+  }
 
   node->scope = nameres_ctx_scope_begin(ctx);
 
   VECTOR_FOR_LOOP(i, node->members)
+  {
     ast_node_nameres(ctx, (ast_node_t*)vector_get(node->members, i));
+  }
 
   nameres_ctx_scope_end(ctx);
 }
@@ -59,16 +62,22 @@ void ast_decl_struct_typecheck(typecheck_ctx_t* ctx, ast_decl_struct_t* node)
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 
   VECTOR_FOR_LOOP(i, node->members)
+  {
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->members, i));
+  }
 
   size_t field_count = vector_size(node->members);
   typedesc_t** field_types = NULL;
 
   if (field_count > 0)
+  {
     field_types = (typedesc_t**)malloc(sizeof(typedesc_t*) * field_count);
+  }
 
   VECTOR_FOR_LOOP(i, node->members)
   {
+    ASSERT(field_types != NULL);
+
     typedesc_t* field_desc = typetable_lookup(ctx->typetable, (ast_node_t*)vector_get(node->members, i));
     ASSERT(field_desc != NULL);
 
@@ -78,7 +87,9 @@ void ast_decl_struct_typecheck(typecheck_ctx_t* ctx, ast_decl_struct_t* node)
   typebuilder_struct_set_body(ctx->typebuilder, desc, field_types, field_count);
 
   if (field_types != NULL)
+  {
     free(field_types);
+  }
 }
 
 void ast_decl_struct_codegen(codegen_ctx_t* ctx, ast_decl_struct_t* node)

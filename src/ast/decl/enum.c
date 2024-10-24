@@ -20,15 +20,14 @@ ast_decl_enum_t* ast_decl_enum_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_DECL_ENUM;
+  node->members = vector_init();
 
   return node;
 }
 
 void ast_decl_enum_free(ast_decl_enum_t* node)
 {
-  if (node->members != NULL)
-    vector_free(node->members);
-
+  vector_free(node->members);
   free(node);
 }
 
@@ -42,12 +41,16 @@ void ast_decl_enum_nameres(nameres_ctx_t* ctx, ast_decl_enum_t* node)
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL)
+  {
     report_error_type_redefinition((ast_decl_t*)collision->node, (ast_decl_t*)node);
+  }
 
   node->scope = nameres_ctx_scope_begin(ctx);
 
   VECTOR_FOR_LOOP(i, node->members)
+  {
     ast_node_nameres(ctx, (ast_node_t*)vector_get(node->members, i));
+  }
 
   nameres_ctx_scope_end(ctx);
 }
@@ -62,7 +65,9 @@ void ast_decl_enum_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_t* node)
   ctx->enum_desc = (typedesc_enum_t*)desc;
 
   VECTOR_FOR_LOOP(i, node->members)
+  {
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->members, i));
+  }
 
   ctx->enum_desc = prev_enum_desc;
 }

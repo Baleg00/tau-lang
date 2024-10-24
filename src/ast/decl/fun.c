@@ -21,15 +21,14 @@ ast_decl_fun_t* ast_decl_fun_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_DECL_FUN;
+  node->params = vector_init();
 
   return node;
 }
 
 void ast_decl_fun_free(ast_decl_fun_t* node)
 {
-  if (node->params != NULL)
-    vector_free(node->params);
-
+  vector_free(node->params);
   free(node);
 }
 
@@ -43,15 +42,23 @@ void ast_decl_fun_nameres(nameres_ctx_t* ctx, ast_decl_fun_t* node)
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL)
+  {
     report_error_type_redefinition((ast_decl_t*)collision->node, (ast_decl_t*)node);
+  }
 
   node->scope = nameres_ctx_scope_begin(ctx);
 
   VECTOR_FOR_LOOP(i, node->params)
+  {
     ast_node_nameres(ctx, (ast_node_t*)vector_get(node->params, i));
+  }
 
   ast_node_nameres(ctx, node->return_type);
-  ast_node_nameres(ctx, node->stmt);
+
+  if (node->stmt != NULL)
+  {
+    ast_node_nameres(ctx, node->stmt);
+  }
 
   nameres_ctx_scope_end(ctx);
 }
@@ -59,7 +66,9 @@ void ast_decl_fun_nameres(nameres_ctx_t* ctx, ast_decl_fun_t* node)
 void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
 {
   VECTOR_FOR_LOOP(i, node->params)
+  {
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->params, i));
+  }
 
   ast_node_typecheck(ctx, node->return_type);
 
@@ -67,10 +76,14 @@ void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
   typedesc_t** param_types = NULL;
 
   if (param_count > 0)
+  {
     param_types = (typedesc_t**)malloc(sizeof(typedesc_t*) * param_count);
+  }
 
   VECTOR_FOR_LOOP(i, node->params)
   {
+    ASSERT(param_types != NULL);
+
     typedesc_t* param_desc = typetable_lookup(ctx->typetable, (ast_node_t*)vector_get(node->params, i));
     ASSERT(param_desc != NULL);
 
@@ -83,20 +96,28 @@ void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
   typedesc_t* desc = typebuilder_build_fun(ctx->typebuilder, return_desc, param_types, param_count, node->is_vararg, node->callconv);
 
   if (param_types != NULL)
+  {
     free(param_types);
+  }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 
   ctx->fun_desc = (typedesc_fun_t*)desc;
 
-  ast_node_typecheck(ctx, node->stmt);
+  if (node->stmt != NULL)
+  {
+    ast_node_typecheck(ctx, node->stmt);
+  }
 
   ctx->fun_desc = NULL;
 }
 
 void ast_decl_fun_ctrlflow(ctrlflow_ctx_t* ctx, ast_decl_fun_t* node)
 {
-  ast_node_ctrlflow(ctx, node->stmt);
+  if (node->stmt != NULL)
+  {
+    ast_node_ctrlflow(ctx, node->stmt);
+  }
 }
 
 void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)

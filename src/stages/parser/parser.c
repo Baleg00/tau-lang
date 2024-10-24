@@ -162,29 +162,21 @@ void parser_parse_decl_context_extern(parser_t* par)
     par->decl_ctx.callconv = parser_parse_callconv(par);
 }
 
-vector_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func)
+void parser_parse_delimited_list(parser_t* par, vector_t* dest, token_kind_t delim, parse_func_t parse_func)
 {
-  vector_t* vec = vector_init_with_capacity(1);
-
   for (;;)
   {
-    vector_push(vec, parse_func(par));
+    vector_push(dest, parse_func(par));
 
     if (!parser_consume(par, delim))
       break;
   }
-
-  return vec;
 }
 
-vector_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func)
+void parser_parse_terminated_list(parser_t* par, vector_t* dest, token_kind_t termin, parse_func_t parse_func)
 {
-  vector_t* vec = vector_init_with_capacity(1);
-
   while (!parser_consume(par, termin))
-    vector_push(vec, parse_func(par));
-
-  return vec;
+    vector_push(dest, parse_func(par));
 }
 
 callconv_kind_t parser_parse_callconv(parser_t* par)
@@ -310,7 +302,7 @@ ast_node_t* parser_parse_type_fun(parser_t* par)
   parser_expect(par, TOK_KW_FUN);
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
 
-  node->params = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_type);
+  parser_parse_delimited_list(par, node->params, TOK_PUNCT_COMMA, parser_parse_type);
 
   parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
   parser_expect(par, TOK_PUNCT_COLON);
@@ -577,7 +569,7 @@ ast_node_t* parser_parse_stmt_block(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
 
-  node->stmts = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_stmt);
+  parser_parse_terminated_list(par, node->stmts, TOK_PUNCT_BRACE_RIGHT, parser_parse_stmt);
 
   return (ast_node_t*)node;
 }
@@ -652,8 +644,6 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   node->id = parser_parse_id(par);
 
   // Parse parameters.
-  node->params = vector_init_with_capacity(1);
-
   parser_expect(par, TOK_PUNCT_PAREN_LEFT);
 
   if (!parser_consume(par, TOK_PUNCT_PAREN_RIGHT))
@@ -734,7 +724,7 @@ ast_node_t* parser_parse_decl_struct(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
 
-  node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_struct_member);
+  parser_parse_terminated_list(par, node->members, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_struct_member);
 
   return (ast_node_t*)node;
 }
@@ -778,7 +768,7 @@ ast_node_t* parser_parse_decl_union(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACE_LEFT);
 
-  node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_union_member);
+  parser_parse_terminated_list(par, node->members, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_union_member);
 
   return (ast_node_t*)node;
 }
@@ -819,7 +809,7 @@ ast_node_t* parser_parse_decl_enum(parser_t* par)
 
   stack_push(par->parents, node);
 
-  node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_enum_constant);
+  parser_parse_terminated_list(par, node->members, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_enum_constant);
 
   stack_pop(par->parents);
 
@@ -844,7 +834,7 @@ ast_node_t* parser_parse_decl_mod(parser_t* par)
 
   stack_push(par->parents, node);
 
-  node->members = parser_parse_terminated_list(par, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_in_mod);
+  parser_parse_terminated_list(par, node->members, TOK_PUNCT_BRACE_RIGHT, parser_parse_decl_in_mod);
 
   stack_pop(par->parents);
 
@@ -971,7 +961,7 @@ ast_node_t* parser_parse_path_list(parser_t* par)
 
   parser_expect(par, TOK_PUNCT_BRACKET_LEFT);
 
-  node->paths = parser_parse_delimited_list(par, TOK_PUNCT_COMMA, parser_parse_path);
+  parser_parse_delimited_list(par, node->paths, TOK_PUNCT_COMMA, parser_parse_path);
 
   parser_expect(par, TOK_PUNCT_BRACKET_RIGHT);
 
@@ -1042,7 +1032,7 @@ ast_node_t* parser_parse(parser_t* par, vector_t* toks)
   ast_prog_t* root = ast_prog_init();
   root->tok = parser_current(par);
 
-  root->decls = parser_parse_terminated_list(par, TOK_EOF, parser_parse_decl_top_level);
+  parser_parse_terminated_list(par, root->decls, TOK_EOF, parser_parse_decl_top_level);
 
   return (ast_node_t*)root;
 }

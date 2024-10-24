@@ -19,15 +19,14 @@ ast_path_list_t* ast_path_list_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_PATH_LIST;
+  node->paths = vector_init();
 
   return node;
 }
 
 void ast_path_list_free(ast_path_list_t* node)
 {
-  if (node->paths != NULL)
-    vector_free(node->paths);
-
+  vector_free(node->paths);
   free(node);
 }
 

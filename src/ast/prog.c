@@ -19,15 +19,14 @@ ast_prog_t* ast_prog_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_PROG;
+  node->decls = vector_init();
 
   return node;
 }
 
 void ast_prog_free(ast_prog_t* node)
 {
-  if (node->decls != NULL)
-    vector_free(node->decls);
-
+  vector_free(node->decls);
   free(node);
 }
 

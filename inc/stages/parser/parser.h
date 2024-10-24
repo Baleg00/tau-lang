@@ -146,11 +146,11 @@ void parser_parse_decl_context_extern(parser_t* par);
  * delimiter.
  * 
  * \param[in] par Parser to be used.
+ * \param[out] dest Pointer to the vector to push parsed nodes onto.
  * \param[in] delim Delimiter token kind.
  * \param[in] parse_func Function to be used for parsing a node.
- * \returns Vector of parsed nodes.
  */
-vector_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_func_t parse_func);
+void parser_parse_delimited_list(parser_t* par, vector_t* dest, token_kind_t delim, parse_func_t parse_func);
 
 /**
  * \brief Parses a list of nodes terminated by a specific token.
@@ -159,11 +159,11 @@ vector_t* parser_parse_delimited_list(parser_t* par, token_kind_t delim, parse_f
  * encountered.
  * 
  * \param[in] par Parser to be used.
+ * \param[out] dest Pointer to the vector to push parsed nodes onto.
  * \param[in] termin Terminator token kind.
  * \param[in] parse_func Function to be used for parsing a node.
- * \returns Vector of parsed nodes.
  */
-vector_t* parser_parse_terminated_list(parser_t* par, token_kind_t termin, parse_func_t parse_func);
+void parser_parse_terminated_list(parser_t* par, vector_t* dest, token_kind_t termin, parse_func_t parse_func);
 
 /**
  * \brief Parses a string literal and returns the corresponding calling convention kind.

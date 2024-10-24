@@ -20,15 +20,14 @@ ast_decl_mod_t* ast_decl_mod_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_DECL_MOD;
+  node->members = vector_init();
 
   return node;
 }
 
 void ast_decl_mod_free(ast_decl_mod_t* node)
 {
-  if (node->members != NULL)
-    vector_free(node->members);
-
+  vector_free(node->members);
   free(node);
 }
 
@@ -51,7 +50,9 @@ void ast_decl_mod_nameres(nameres_ctx_t* ctx, ast_decl_mod_t* node)
   node->scope = nameres_ctx_scope_begin(ctx);
 
   VECTOR_FOR_LOOP(i, node->members)
+  {
     ast_node_nameres(ctx, (ast_node_t*)vector_get(node->members, i));
+  }
 
   nameres_ctx_scope_end(ctx);
 }
@@ -59,19 +60,25 @@ void ast_decl_mod_nameres(nameres_ctx_t* ctx, ast_decl_mod_t* node)
 void ast_decl_mod_typecheck(typecheck_ctx_t* ctx, ast_decl_mod_t* node)
 {
   VECTOR_FOR_LOOP(i, node->members)
+  {
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->members, i));
+  }
 }
 
 void ast_decl_mod_ctrlflow(ctrlflow_ctx_t* ctx, ast_decl_mod_t* node)
 {
   VECTOR_FOR_LOOP(i, node->members)
+  {
     ast_node_ctrlflow(ctx, (ast_node_t*)vector_get(node->members, i));
+  }
 }
 
 void ast_decl_mod_codegen(codegen_ctx_t* ctx, ast_decl_mod_t* node)
 {
   VECTOR_FOR_LOOP(i, node->members)
+  {
     ast_node_codegen(ctx, (ast_node_t*)vector_get(node->members, i));
+  }
 }
 
 void ast_decl_mod_dump_json(FILE* stream, ast_decl_mod_t* node)

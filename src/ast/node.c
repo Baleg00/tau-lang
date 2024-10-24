@@ -12,8 +12,7 @@
 
 void ast_node_free(ast_node_t* node)
 {
-  if (node == NULL)
-    return;
+  ASSERT(node != NULL);
 
   switch (node->kind)
   {
@@ -87,8 +86,7 @@ void ast_node_free(ast_node_t* node)
 
 void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
 {
-  if (node == NULL)
-    return;
+  ASSERT(node != NULL);
 
   switch (node->kind)
   {
@@ -162,8 +160,7 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
 
 void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
 {
-  if (node == NULL)
-    return;
+  ASSERT(node != NULL);
 
   switch (node->kind)
   {
@@ -237,8 +234,7 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
 
 void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
 {
-  if (node == NULL)
-    return;
+  ASSERT(node != NULL);
 
   switch (node->kind)
   {
@@ -313,8 +309,7 @@ void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
 
 void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
 {
-  if (node == NULL)
-    return;
+  ASSERT(node != NULL);
 
   switch (node->kind)
   {
@@ -636,6 +631,8 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
 
 bool ast_is_type(ast_node_t* node)
 {
+  ASSERT(node != NULL);
+
   switch (node->kind)
   {
   case AST_TYPE_ID:
@@ -671,6 +668,8 @@ bool ast_is_type(ast_node_t* node)
 
 bool ast_is_expr(ast_node_t* node)
 {
+  ASSERT(node != NULL);
+
   switch (node->kind)
   {
   case AST_EXPR_ID:
@@ -691,6 +690,8 @@ bool ast_is_expr(ast_node_t* node)
 
 bool ast_is_stmt(ast_node_t* node)
 {
+  ASSERT(node != NULL);
+
   switch (node->kind)
   {
   case AST_STMT_IF:
@@ -712,6 +713,8 @@ bool ast_is_stmt(ast_node_t* node)
 
 bool ast_is_decl(ast_node_t* node)
 {
+  ASSERT(node != NULL);
+
   switch (node->kind)
   {
   case AST_DECL_VAR:

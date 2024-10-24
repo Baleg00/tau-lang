@@ -201,11 +201,9 @@ bool shyd_parse_call(shyd_ctx_t* ctx)
 
   parser_expect(ctx->par, TOK_PUNCT_PAREN_LEFT);
 
-  node->params = NULL;
-
   if (!parser_consume(ctx->par, TOK_PUNCT_PAREN_RIGHT))
   {
-    node->params = parser_parse_delimited_list(ctx->par, TOK_PUNCT_COMMA, parser_parse_expr);
+    parser_parse_delimited_list(ctx->par, node->params, TOK_PUNCT_COMMA, parser_parse_expr);
 
     parser_expect(ctx->par, TOK_PUNCT_PAREN_RIGHT);
   }

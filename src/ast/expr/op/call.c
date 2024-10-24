@@ -21,15 +21,14 @@ ast_expr_op_call_t* ast_expr_op_call_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_EXPR_OP_CALL;
+  node->params = vector_init();
 
   return node;
 }
 
 void ast_expr_op_call_free(ast_expr_op_call_t* node)
 {
-  if (node->params != NULL)
-    vector_free(node->params);
-
+  vector_free(node->params);
   free(node);
 }
 
@@ -38,7 +37,9 @@ void ast_expr_op_call_nameres(nameres_ctx_t* ctx, ast_expr_op_call_t* node)
   ast_node_nameres(ctx, node->callee);
 
   VECTOR_FOR_LOOP(i, node->params)
+  {
     ast_node_nameres(ctx, (ast_node_t*)vector_get(node->params, i));
+  }
 }
 
 void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
@@ -46,7 +47,9 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
   ast_node_typecheck(ctx, node->callee);
 
   VECTOR_FOR_LOOP(i, node->params)
+  {
     ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->params, i));
+  }
 
   typedesc_t* callee_desc = typetable_lookup(ctx->typetable, node->callee);
   ASSERT(callee_desc != NULL);
@@ -80,12 +83,14 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
   }
 
   if (i != vector_size(node->params) && i == vector_size(fun_desc->param_types))
+  {
     if (fun_desc->callconv != CALLCONV_CDECL)
     {
       location_t loc = token_location(node->tok);
 
       report_error_too_many_arguments(loc);
     }
+  }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, fun_desc->return_type);
 }
