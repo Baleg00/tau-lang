@@ -88,6 +88,8 @@
 #include "ast/expr/op/un/un.h"
 #include "ast/expr/op/un/unwrap_safe.h"
 #include "ast/expr/op/un/unwrap_unsafe.h"
+#include "ast/generic/generic.h"
+#include "ast/generic/param.h"
 #include "ast/id.h"
 #include "ast/node.h"
 #include "ast/path/access.h"
@@ -119,6 +121,7 @@
 #include "ast/type/modif/ref.h"
 #include "ast/type/prim.h"
 #include "ast/type/type.h"
+#include "ast/type/type_type.h"
 #include "ast/use.h"
 
 #endif

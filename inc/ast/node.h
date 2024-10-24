@@ -58,6 +58,7 @@ typedef enum ast_kind_e
   AST_TYPE_PRIM_BOOL, ///< Primitive type `bool`.
   AST_TYPE_PRIM_UNIT, ///< Primitive type `unit`.
   AST_TYPE_MEMBER, ///< Member type.
+  AST_TYPE_TYPE, ///< Type of types.
 
   AST_EXPR_ID, ///< Identifier expression.
   AST_EXPR_LIT_INT, ///< Literal integer expression.
@@ -99,6 +100,9 @@ typedef enum ast_kind_e
   AST_PATH_ALIAS, ///< Path alias.
 
   AST_USE, ///< Use directive.
+
+  AST_GENERIC, ///< Generic.
+  AST_GENERIC_PARAM, ///< Generic parameter.
 
   AST_PROG, ///< Program.
 } ast_kind_t;
