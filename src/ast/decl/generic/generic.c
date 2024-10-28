@@ -19,12 +19,14 @@ ast_decl_generic_t* ast_decl_generic_init(void)
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_DECL_GENERIC;
+  node->params = vector_init();
 
   return node;
 }
 
 void ast_decl_generic_free(ast_decl_generic_t* node)
 {
+  vector_free(node->params);
   free(node);
 }
 
