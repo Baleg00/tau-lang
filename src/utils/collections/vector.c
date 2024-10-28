@@ -78,7 +78,7 @@ void vector_free(vector_t* vec)
   free(vec);
 }
 
-vector_t* vector_copy(vector_t* vec)
+vector_t* vector_copy(const vector_t* vec)
 {
   vector_t* new_vec = vector_init_with_capacity(vec->size);
 
