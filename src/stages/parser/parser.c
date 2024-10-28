@@ -403,6 +403,10 @@ ast_node_t* parser_parse_type(parser_t* par)
     node = (ast_node_t*)ast_type_prim_unit_init();
     node->tok = parser_expect(par, TOK_KW_UNIT);
     break;
+  case TOK_KW_TYPE:
+    node = (ast_node_t*)ast_type_type_init();
+    node->tok = parser_expect(par, TOK_KW_TYPE);
+    break;
   default:
   {
     location_t loc = token_location(parser_current(par));
@@ -641,6 +645,20 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
   parser_expect(par, TOK_KW_FUN);
 
+  ast_decl_generic_t* generic_node = NULL;
+
+  // Parse generic parameters if present.
+  if (parser_consume(par, TOK_PUNCT_LESS))
+  {
+    generic_node = ast_decl_generic_init();
+    generic_node->tok = node->tok;
+    generic_node->node = (ast_node_t*)node;
+
+    parser_parse_delimited_list(par, generic_node->params, TOK_PUNCT_COMMA, parser_parse_decl_generic_param);
+
+    parser_expect(par, TOK_PUNCT_GREATER);
+  }
+
   node->id = parser_parse_id(par);
 
   // Parse parameters.
@@ -705,7 +723,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
   node->stmt = !node->is_extern ? parser_parse_stmt(par) : NULL;
 
-  return (ast_node_t*)node;
+  return generic_node != NULL ? (ast_node_t*)generic_node : (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_decl_struct(parser_t* par)
@@ -912,6 +930,22 @@ ast_node_t* parser_parse_decl_top_level(parser_t* par)
 ast_node_t* parser_parse_decl_param(parser_t* par)
 {
   ast_decl_param_t* node = ast_decl_param_init();
+  node->tok = parser_current(par);
+
+  node->id = parser_parse_id(par);
+
+  parser_expect(par, TOK_PUNCT_COLON);
+
+  node->type = parser_parse_type(par);
+
+  node->expr = parser_consume(par, TOK_PUNCT_EQUAL) ? parser_parse_expr(par) : NULL;
+
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_decl_generic_param(parser_t* par)
+{
+  ast_decl_generic_param_t* node = ast_decl_generic_param_init();
   node->tok = parser_current(par);
 
   node->id = parser_parse_id(par);

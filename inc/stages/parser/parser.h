@@ -557,6 +557,14 @@ ast_node_t* parser_parse_decl_top_level(parser_t* par);
 ast_node_t* parser_parse_decl_param(parser_t* par);
 
 /**
+ * \brief Parses a generic parameter.
+ *
+ * \param[in] par Parser to be used.
+ * \returns Generic parameter node.
+ */
+ast_node_t* parser_parse_decl_generic_param(parser_t* par);
+
+/**
  * \brief Parses an enumerator in an enum declaration.
  * 
  * \param[in] par Parser to be used.
