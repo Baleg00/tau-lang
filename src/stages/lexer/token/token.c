@@ -96,6 +96,7 @@ static const struct
   { TOK_PUNCT_DOT, 1 },
   { TOK_PUNCT_DOT_DOT, 2 },
   { TOK_PUNCT_DOT_DOT_DOT, 3 },
+  { TOK_PUNCT_DOT_LESS, 2 },
   { TOK_PUNCT_QUESTION, 1 },
   { TOK_PUNCT_QUESTION_DOT, 2 },
   { TOK_PUNCT_EQUAL, 1 },

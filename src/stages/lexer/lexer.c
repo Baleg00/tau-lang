@@ -695,6 +695,8 @@ token_t* lexer_read_punctuation(lexer_t* lex)
         kind = TOK_PUNCT_DOT_DOT_DOT;
       else
         kind = TOK_PUNCT_DOT_DOT;
+    else if (lexer_consume(lex, '<'))
+      kind = TOK_PUNCT_DOT_LESS;
     else
       kind = TOK_PUNCT_DOT;
   else if (lexer_consume(lex, '?'))
