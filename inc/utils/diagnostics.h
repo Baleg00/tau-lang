@@ -128,6 +128,14 @@ NORETURN void report_error_non_default_after_default_parameter(ast_decl_param_t*
 NORETURN void report_error_parameter_redefinition(ast_decl_param_t* param_node, ast_decl_param_t* redef_node);
 
 /**
+ * \brief Reports an error for redefining a generic parameter.
+ *
+ * \param[in] param_node Pointer to the redefined AST generic parameter declaration node.
+ * \param[in] redef_node Pointer to the redefining AST generic parameter declaration node.
+ */
+NORETURN void report_error_generic_parameter_redefinition(ast_decl_generic_param_t* param_node, ast_decl_generic_param_t* redef_node);
+
+/**
  * \brief Reports an error for redefining a variable.
  * 
  * \param[in] var_node Pointer to the redefined AST variable declaration node.

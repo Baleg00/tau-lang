@@ -220,6 +220,26 @@ void report_error_parameter_redefinition(ast_decl_param_t* param_node, ast_decl_
   exit(EXIT_FAILURE);
 }
 
+void report_error_generic_parameter_redefinition(ast_decl_generic_param_t* param_node, ast_decl_generic_param_t* redef_node)
+{
+  location_t redef_node_id_loc = token_location(redef_node->id->tok);
+  location_t param_node_id_loc = token_location(param_node->id->tok);
+
+  crumb_error_t* error = crumb_error_init(13, "Generic parameter redefinition.");
+  crumb_snippet_t* snippet1 = crumb_snippet_init(redef_node_id_loc);
+  crumb_snippet_t* snippet2 = crumb_snippet_init(param_node_id_loc);
+
+  crumb_snippet_label(snippet1, "A parameter named `%.*s` already exists.", (int)redef_node_id_loc.len, redef_node_id_loc.ptr);
+  crumb_snippet_subsnippet(snippet1, snippet2);
+  crumb_snippet_label(snippet2, "First parameter named `%.*s` appears here.", (int)redef_node_id_loc.len, redef_node_id_loc.ptr);
+  crumb_error_snippet(error, snippet1);
+  crumb_error_print(error);
+  crumb_error_free(error);
+
+  DEBUGBREAK();
+  exit(EXIT_FAILURE);
+}
+
 void report_error_variable_redefinition(ast_decl_var_t* var_node, ast_decl_var_t* redef_node)
 {
   location_t redef_node_id_loc = token_location(redef_node->id->tok);

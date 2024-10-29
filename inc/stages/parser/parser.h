@@ -453,6 +453,14 @@ ast_node_t* parser_parse_decl_var(parser_t* par);
 ast_node_t* parser_parse_decl_fun(parser_t* par);
 
 /**
+ * \brief Parses a generic function declaration.
+ *
+ * \param[in] par Parser to be used.
+ * \returns Generic function declaration node.
+ */
+ast_node_t* parser_parse_decl_generic_fun(parser_t* par);
+
+/**
  * \brief Parses a struct declaration.
  * 
  * \details A struct is introduced by the `struct` keyword followed by an

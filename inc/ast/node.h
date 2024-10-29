@@ -92,7 +92,7 @@ typedef enum ast_kind_e
   AST_DECL_ENUM_CONSTANT, ///< Enum constant declaration.
   AST_DECL_MOD, ///< Module declaration.
   AST_DECL_TYPE_ALIAS, ///< Type alias declaration.
-  AST_DECL_GENERIC, ///< Generic declaration.
+  AST_DECL_GENERIC_FUN, ///< Generic function declaration.
   AST_DECL_GENERIC_PARAM, ///< Generic parameter declaration.
 
   AST_PATH_SEGMENT, ///< Path segment.

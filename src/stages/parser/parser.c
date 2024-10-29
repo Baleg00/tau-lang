@@ -635,6 +635,11 @@ ast_node_t* parser_parse_decl_var(parser_t* par)
 
 ast_node_t* parser_parse_decl_fun(parser_t* par)
 {
+  if (parser_peek(par)->kind == TOK_PUNCT_LESS)
+  {
+    return parser_parse_decl_generic_fun(par);
+  }
+
   ast_decl_fun_t* node = ast_decl_fun_init();
   node->tok = parser_current(par);
   node->parent = stack_top(par->parents);
@@ -644,20 +649,6 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
   node->callconv  = par->decl_ctx.callconv;
 
   parser_expect(par, TOK_KW_FUN);
-
-  ast_decl_generic_t* generic_node = NULL;
-
-  // Parse generic parameters if present.
-  if (parser_consume(par, TOK_PUNCT_LESS))
-  {
-    generic_node = ast_decl_generic_init();
-    generic_node->tok = node->tok;
-    generic_node->node = (ast_node_t*)node;
-
-    parser_parse_delimited_list(par, generic_node->params, TOK_PUNCT_COMMA, parser_parse_decl_generic_param);
-
-    parser_expect(par, TOK_PUNCT_GREATER);
-  }
 
   node->id = parser_parse_id(par);
 
@@ -723,7 +714,38 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
   node->stmt = !node->is_extern ? parser_parse_stmt(par) : NULL;
 
-  return generic_node != NULL ? (ast_node_t*)generic_node : (ast_node_t*)node;
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_decl_generic_fun(parser_t* par)
+{
+  ast_decl_generic_fun_t* node = ast_decl_generic_fun_init();
+  node->tok = parser_current(par);
+  node->is_pub = par->decl_ctx.is_pub;
+
+  ASSERT(!par->decl_ctx.is_extern);
+  ASSERT(par->decl_ctx.callconv == CALLCONV_TAU);
+
+  parser_expect(par, TOK_KW_FUN);
+  parser_expect(par, TOK_PUNCT_LESS);
+
+  parser_parse_delimited_list(par, node->generic_params, TOK_PUNCT_COMMA, parser_parse_decl_generic_param);
+
+  parser_expect(par, TOK_PUNCT_GREATER);
+
+  node->id = parser_parse_id(par);
+
+  parser_expect(par, TOK_PUNCT_PAREN_LEFT);
+
+  parser_parse_delimited_list(par, node->params, TOK_PUNCT_COMMA, parser_parse_decl_param);
+
+  parser_expect(par, TOK_PUNCT_PAREN_RIGHT);
+  parser_expect(par, TOK_PUNCT_COLON);
+
+  node->return_type = parser_parse_type(par);
+  node->stmt = parser_parse_stmt(par);
+
+  return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_decl_struct(parser_t* par)

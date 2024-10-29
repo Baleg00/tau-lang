@@ -23,7 +23,7 @@
 #include "ast/decl/enum_constant.h"
 #include "ast/decl/enum.h"
 #include "ast/decl/fun.h"
-#include "ast/decl/generic/generic.h"
+#include "ast/decl/generic/fun.h"
 #include "ast/decl/generic/param.h"
 #include "ast/decl/mod.h"
 #include "ast/decl/param.h"

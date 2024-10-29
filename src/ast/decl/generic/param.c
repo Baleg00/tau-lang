@@ -9,6 +9,7 @@
 
 #include "ast/registry.h"
 #include "utils/common.h"
+#include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"
 
 ast_decl_generic_param_t* ast_decl_generic_param_init(void)
@@ -36,35 +37,17 @@ void ast_decl_generic_param_nameres(nameres_ctx_t* ctx, ast_decl_generic_param_t
   {
     ast_node_nameres(ctx, node->expr);
   }
-}
 
-void ast_decl_generic_param_typecheck(typecheck_ctx_t* ctx, ast_decl_generic_param_t* node)
-{
-  ast_node_typecheck(ctx, node->type);
+  symtable_t* scope = nameres_ctx_scope_cur(ctx);
 
-  if (node->expr != NULL)
+  string_view_t id_view = token_to_string_view(node->id->tok);
+  symbol_t* sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
+
+  symbol_t* collision = symtable_insert(scope, sym);
+
+  if (collision != NULL && collision->node->kind == AST_DECL_GENERIC_PARAM)
   {
-    ast_node_typecheck(ctx, node->expr);
-  }
-}
-
-void ast_generic_param_ctrlflow(ctrlflow_ctx_t* ctx, ast_decl_generic_param_t* node)
-{
-  ast_node_ctrlflow(ctx, node->type);
-
-  if (node->expr != NULL)
-  {
-    ast_node_ctrlflow(ctx, node->expr);
-  }
-}
-
-void ast_decl_generic_param_codegen(codegen_ctx_t* ctx, ast_decl_generic_param_t* node)
-{
-  ast_node_codegen(ctx, node->type);
-
-  if (node->expr != NULL)
-  {
-    ast_node_codegen(ctx, node->expr);
+    report_error_generic_parameter_redefinition((ast_decl_generic_param_t*)collision->node, node);
   }
 }
 
