@@ -1,6 +1,6 @@
 /**
  * \file
- * 
+ *
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
  */
@@ -82,22 +82,22 @@ void string_free(string_t* str)
   free(str);
 }
 
-char* string_begin(string_t* str)
+char* string_begin(const string_t* str)
 {
   return str->buf;
 }
 
-char* string_end(string_t* str)
+char* string_end(const string_t* str)
 {
   return str->buf + str->len;
 }
 
-size_t string_length(string_t* str)
+size_t string_length(const string_t* str)
 {
   return str->len;
 }
 
-size_t string_capacity(string_t* str)
+size_t string_capacity(const string_t* str)
 {
   return str->cap;
 }
@@ -128,7 +128,7 @@ void string_fit(string_t* str)
   str->buf = new_buf;
 }
 
-int string_printf(FILE* stream, string_t* fmt, ...)
+int string_printf(FILE* restrict stream, const string_t* restrict fmt, ...)
 {
   va_list args;
   va_start(args, fmt);
@@ -140,7 +140,7 @@ int string_printf(FILE* stream, string_t* fmt, ...)
   return result;
 }
 
-int string_print_escaped(FILE* stream, string_t* str)
+int string_print_escaped(FILE* restrict stream, const string_t* restrict str)
 {
   int result = 0;
 
@@ -163,12 +163,12 @@ int string_print_escaped(FILE* stream, string_t* str)
   return result;
 }
 
-void string_append(string_t* str, string_t* other)
+void string_append(string_t* restrict str, const string_t* restrict other)
 {
   string_append_cstr(str, other->buf);
 }
 
-void string_append_cstr(string_t* str, const char* other)
+void string_append_cstr(string_t* restrict str, const char* restrict other)
 {
   size_t other_len = strlen(other);
 
@@ -179,12 +179,12 @@ void string_append_cstr(string_t* str, const char* other)
   strcat(str->buf, other);
 }
 
-void string_insert(string_t* str, size_t pos, string_t* other)
+void string_insert(string_t* restrict str, size_t pos, const string_t* restrict other)
 {
   string_insert_cstr(str, pos, other->buf);
 }
 
-void string_insert_cstr(string_t* str, size_t pos, const char* other)
+void string_insert_cstr(string_t* restrict str, size_t pos, const char* restrict other)
 {
   ASSERT(pos <= str->len);
 
@@ -212,12 +212,12 @@ void string_clear(string_t* str)
   str->len = 0;
 }
 
-string_t* string_copy(string_t* str)
+string_t* string_copy(const string_t* str)
 {
   return string_init_with_cstr(str->buf);
 }
 
-string_t* string_substr(string_t* str, size_t begin, size_t len)
+string_t* string_substr(const string_t* str, size_t begin, size_t len)
 {
   string_t* result = string_init_with_capacity(len + 1);
 
@@ -227,17 +227,17 @@ string_t* string_substr(string_t* str, size_t begin, size_t len)
   return result;
 }
 
-int string_compare(string_t* lhs, string_t* rhs)
+int string_compare(const string_t* lhs, const string_t* rhs)
 {
   return strcmp(lhs->buf, rhs->buf);
 }
 
-int string_compare_cstr(string_t* lhs, const char* rhs)
+int string_compare_cstr(const string_t* restrict lhs, const char* restrict rhs)
 {
   return strcmp(lhs->buf, rhs);
 }
 
-string_t* string_escape(string_t* str)
+string_t* string_escape(const string_t* str)
 {
   size_t len = str->len;
 
@@ -279,32 +279,32 @@ string_t* string_escape(string_t* str)
   return result;
 }
 
-bool string_starts_with(string_t* str, string_t* prefix)
+bool string_starts_with(const string_t* restrict str, const string_t* restrict prefix)
 {
   return string_starts_with_cstr(str, prefix->buf);
 }
 
-bool string_starts_with_cstr(string_t* str, const char* prefix)
+bool string_starts_with_cstr(const string_t* restrict str, const char* restrict prefix)
 {
   return strncmp(str->buf, prefix, MIN(str->len, strlen(prefix))) == 0;
 }
 
-bool string_ends_with(string_t* str, string_t* suffix)
+bool string_ends_with(const string_t* restrict str, const string_t* restrict suffix)
 {
   return string_ends_with_cstr(str, suffix->buf);
 }
 
-bool string_ends_with_cstr(string_t* str, const char* suffix)
+bool string_ends_with_cstr(const string_t* restrict str, const char* restrict suffix)
 {
   return strcmp(str->buf + (str->len - strlen(suffix)), suffix) == 0;
 }
 
-bool string_contains(string_t* str, string_t* sub)
+bool string_contains(const string_t* restrict str, const string_t* restrict sub)
 {
   return string_contains_cstr(str, sub->buf);
 }
 
-bool string_contains_cstr(string_t* str, const char* sub)
+bool string_contains_cstr(const string_t* restrict str, const char* restrict sub)
 {
   size_t sub_len = strlen(sub);
 
@@ -331,22 +331,22 @@ bool string_contains_cstr(string_t* str, const char* sub)
   return false;
 }
 
-void string_replace(string_t* str, size_t pos, size_t len, string_t* rep)
+void string_replace(string_t* restrict str, size_t pos, size_t len, const string_t* restrict rep)
 {
   string_replace_with_csubstr(str, pos, len, rep->buf, 0);
 }
 
-void string_replace_with_substr(string_t* str, size_t pos, size_t len, string_t* rep, size_t rep_pos)
+void string_replace_with_substr(string_t* restrict str, size_t pos, size_t len, const string_t* restrict rep, size_t rep_pos)
 {
   string_replace_with_csubstr(str, pos, len, rep->buf, rep_pos);
 }
 
-void string_replace_with_cstr(string_t* str, size_t pos, size_t len, const char* rep)
+void string_replace_with_cstr(string_t* restrict str, size_t pos, size_t len, const char* restrict rep)
 {
   string_replace_with_csubstr(str, pos, len, rep, 0);
 }
 
-void string_replace_with_csubstr(string_t* str, size_t pos, size_t len, const char* rep, size_t rep_pos)
+void string_replace_with_csubstr(string_t* restrict str, size_t pos, size_t len, const char* restrict rep, size_t rep_pos)
 {
   size_t rep_len = strlen(rep);
 
@@ -363,12 +363,12 @@ void string_replace_with_csubstr(string_t* str, size_t pos, size_t len, const ch
   str->len = new_len;
 }
 
-size_t string_find(string_t* str, string_t* sub)
+size_t string_find(const string_t* restrict str, const string_t* restrict sub)
 {
   return string_find_cstr(str, sub->buf);
 }
 
-size_t string_find_cstr(string_t* str, const char* sub)
+size_t string_find_cstr(const string_t* restrict str, const char* restrict sub)
 {
   size_t sub_len = strlen(sub);
 

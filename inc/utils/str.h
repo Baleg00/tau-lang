@@ -88,7 +88,7 @@ void string_free(string_t* str);
  * \param[in] str Pointer to the string.
  * \returns Pointer to beginning of the string.
  */
-char* string_begin(string_t* str);
+char* string_begin(const string_t* str);
 
 /**
  * \brief Returns a pointer to the end of a string.
@@ -96,7 +96,7 @@ char* string_begin(string_t* str);
  * \param[in] str Pointer to the string.
  * \returns Pointer to end of the string.
 */
-char* string_end(string_t* str);
+char* string_end(const string_t* str);
 
 /**
  * \brief Returns the length of a string.
@@ -106,7 +106,7 @@ char* string_end(string_t* str);
  * \param[in] str Pointer to the string.
  * \returns The length of the string.
 */
-size_t string_length(string_t* str);
+size_t string_length(const string_t* str);
 
 /**
  * \brief Returns the capacity of the string.
@@ -114,7 +114,7 @@ size_t string_length(string_t* str);
  * \param[in] str Pointer to the string.
  * \returns The capacity of the string.
 */
-size_t string_capacity(string_t* str);
+size_t string_capacity(const string_t* str);
 
 /**
  * \brief Reserves space for a given number of characters.
@@ -139,7 +139,7 @@ void string_fit(string_t* str);
  * \param ... Arguments according to the format string.
  * \returns The number of characters written.
  */
-int string_printf(FILE* stream, string_t* fmt, ...);
+int string_printf(FILE* restrict stream, const string_t* restrict fmt, ...);
 
 /**
  * \brief Writes the escaped version of a string to a stream.
@@ -148,7 +148,7 @@ int string_printf(FILE* stream, string_t* fmt, ...);
  * \param str Pointer to the string to be printed.
  * \returns The number of characters written.
  */
-int string_print_escaped(FILE* stream, string_t* str);
+int string_print_escaped(FILE* restrict stream, const string_t* restrict str);
 
 /**
  * \brief Appends a string to the end of another.
@@ -156,7 +156,7 @@ int string_print_escaped(FILE* stream, string_t* str);
  * \param[in,out] str Pointer to the string to append to.
  * \param[in] other Pointer to the string to be appended.
 */
-void string_append(string_t* str, string_t* other);
+void string_append(string_t* restrict str, const string_t* restrict other);
 
 /**
  * \brief Appends a c-string to the end of a string.
@@ -164,7 +164,7 @@ void string_append(string_t* str, string_t* other);
  * \param[in,out] str Pointer to the string to append to.
  * \param[in] other Pointer to the c-string to be appended.
 */
-void string_append_cstr(string_t* str, const char* other);
+void string_append_cstr(string_t* restrict str, const char* restrict other);
 
 /**
  * \brief Inserts a string into another string.
@@ -173,7 +173,7 @@ void string_append_cstr(string_t* str, const char* other);
  * \param[in] pos Position of the insertion.
  * \param[in] other Pointer to the string to be inserted.
 */
-void string_insert(string_t* str, size_t pos, string_t* other);
+void string_insert(string_t* restrict str, size_t pos, const string_t* restrict other);
 
 /**
  * \brief Inserts a c-string into a string.
@@ -182,7 +182,7 @@ void string_insert(string_t* str, size_t pos, string_t* other);
  * \param[in] pos Position of the insertion.
  * \param[in] other Pointer to the c-string to be inserted.
 */
-void string_insert_cstr(string_t* str, size_t pos, const char* other);
+void string_insert_cstr(string_t* restrict str, size_t pos, const char* restrict other);
 
 /**
  * \brief Erases a range of characters from a string.
@@ -206,7 +206,7 @@ void string_clear(string_t* str);
  * \param[in] str Pointer to the string.
  * \returns Pointer to the copy.
 */
-string_t* string_copy(string_t* str);
+string_t* string_copy(const string_t* str);
 
 /**
  * \brief Creates a new sub-string from another string.
@@ -216,7 +216,7 @@ string_t* string_copy(string_t* str);
  * \param[in] len The length of the sub-string.
  * \returns Pointer to the new sub-string.
 */
-string_t* string_substr(string_t* str, size_t begin, size_t len);
+string_t* string_substr(const string_t* str, size_t begin, size_t len);
 
 /**
  * \brief Compares two strings lexicographically.
@@ -226,7 +226,7 @@ string_t* string_substr(string_t* str, size_t begin, size_t len);
  * \returns Zero if the strings are the same, a negative value if `lhs` comes
  * before `rhs`, and a positive value if `lhs` comes after `rhs`.
 */
-int string_compare(string_t* lhs, string_t* rhs);
+int string_compare(const string_t* lhs, const string_t* rhs);
 
 /**
  * \brief Compares a string and a c-string lexicographically.
@@ -236,7 +236,7 @@ int string_compare(string_t* lhs, string_t* rhs);
  * \returns Zero if the strings are the same, a negative value if `lhs` comes
  * before `rhs`, and a positive value if `lhs` comes after `rhs`.
 */
-int string_compare_cstr(string_t* lhs, const char* rhs);
+int string_compare_cstr(const string_t* restrict lhs, const char* restrict rhs);
 
 /**
  * \brief Escapes special characters in a string.
@@ -248,7 +248,7 @@ int string_compare_cstr(string_t* lhs, const char* rhs);
  * \param[in] str Pointer to the string.
  * \returns Pointer to the new escaped string.
 */
-string_t* string_escape(string_t* str);
+string_t* string_escape(const string_t* str);
 
 /**
  * \brief Checks if a string starts with the specified prefix.
@@ -258,7 +258,7 @@ string_t* string_escape(string_t* str);
  * \returns `true` if the string starts with the specified prefix, `false`
  * otherwise.
  */
-bool string_starts_with(string_t* str, string_t* prefix);
+bool string_starts_with(const string_t* restrict str, const string_t* restrict prefix);
 
 /**
  * \brief Checks if a string starts with the specified c-string prefix.
@@ -268,7 +268,7 @@ bool string_starts_with(string_t* str, string_t* prefix);
  * \returns `true` if the string starts with the specified prefix, `false`
  * otherwise.
  */
-bool string_starts_with_cstr(string_t* str, const char* prefix);
+bool string_starts_with_cstr(const string_t* restrict str, const char* restrict prefix);
 
 /**
  * \brief Checks if a string ends with the specified suffix.
@@ -278,7 +278,7 @@ bool string_starts_with_cstr(string_t* str, const char* prefix);
  * \returns `true` if the string ends with the specified suffix, `false`
  * otherwise.
  */
-bool string_ends_with(string_t* str, string_t* suffix);
+bool string_ends_with(const string_t* restrict str, const string_t* restrict suffix);
 
 /**
  * \brief Checks if a string ends with the specified c-string suffix.
@@ -288,7 +288,7 @@ bool string_ends_with(string_t* str, string_t* suffix);
  * \returns `true` if the string ends with the specified suffix, `false`
  * otherwise.
  */
-bool string_ends_with_cstr(string_t* str, const char* suffix);
+bool string_ends_with_cstr(const string_t* restrict str, const char* restrict suffix);
 
 /**
  * \brief Checks if a string contains the specified sub-string.
@@ -298,7 +298,7 @@ bool string_ends_with_cstr(string_t* str, const char* suffix);
  * \returns `true` if the string contains the specified sub-string, `false`
  * otherwise.
  */
-bool string_contains(string_t* str, string_t* sub);
+bool string_contains(const string_t* restrict str, const string_t* restrict sub);
 
 /**
  * \brief Checks if a string contains the specified c-string.
@@ -308,7 +308,7 @@ bool string_contains(string_t* str, string_t* sub);
  * \returns `true` if the string contains the specified sub-string, `false`
  * otherwise.
  */
-bool string_contains_cstr(string_t* str, const char* sub);
+bool string_contains_cstr(const string_t* restrict str, const char* restrict sub);
 
 /**
  * \brief Replaces the specified range of a string with a replacement string.
@@ -318,7 +318,7 @@ bool string_contains_cstr(string_t* str, const char* sub);
  * \param len Length of the sub-string to be replaced.
  * \param rep Pointer to the string to be used for replacement.
  */
-void string_replace(string_t* str, size_t pos, size_t len, string_t* rep);
+void string_replace(string_t* restrict str, size_t pos, size_t len, const string_t* restrict rep);
 
 /**
  * \brief Replaces the specified range of a string with a sub-string of a
@@ -330,7 +330,7 @@ void string_replace(string_t* str, size_t pos, size_t len, string_t* rep);
  * \param rep Pointer to the string to be used for replacement.
  * \param rep_pos Start of the sub-string in the replacement string.
  */
-void string_replace_with_substr(string_t* str, size_t pos, size_t len, string_t* rep, size_t rep_pos);
+void string_replace_with_substr(string_t* restrict str, size_t pos, size_t len, const string_t* restrict rep, size_t rep_pos);
 
 /**
  * \brief Replaces the specified range of a string with a replacement c-string.
@@ -340,7 +340,7 @@ void string_replace_with_substr(string_t* str, size_t pos, size_t len, string_t*
  * \param len Length of the sub-string to be replaced.
  * \param rep Pointer to the c-string to be used for replacement.
  */
-void string_replace_with_cstr(string_t* str, size_t pos, size_t len, const char* rep);
+void string_replace_with_cstr(string_t* restrict str, size_t pos, size_t len, const char* restrict rep);
 
 /**
  * \brief Replaces the specified range of a string with a sub-string of a
@@ -352,7 +352,7 @@ void string_replace_with_cstr(string_t* str, size_t pos, size_t len, const char*
  * \param rep Pointer to the c-string to be used for replacement.
  * \param rep_pos Start of the sub-string in the replacement c-string.
  */
-void string_replace_with_csubstr(string_t* str, size_t pos, size_t len, const char* rep, size_t rep_pos);
+void string_replace_with_csubstr(string_t* restrict str, size_t pos, size_t len, const char* restrict rep, size_t rep_pos);
 
 /**
  * \brief Finds the first occurrence of a sub-string.
@@ -361,7 +361,7 @@ void string_replace_with_csubstr(string_t* str, size_t pos, size_t len, const ch
  * \param sub Pointer to the sub-string.
  * \returns The position of the first occurrence of the sub-string.
  */
-size_t string_find(string_t* str, string_t* sub);
+size_t string_find(const string_t* restrict str, const string_t* restrict sub);
 
 /**
  * \brief Finds the first occurrence of a c-string.
@@ -370,7 +370,7 @@ size_t string_find(string_t* str, string_t* sub);
  * \param sub Pointer to the c-string.
  * \returns The position of the first occurrence of the c-string.
  */
-size_t string_find_cstr(string_t* str, const char* sub);
+size_t string_find_cstr(const string_t* restrict str, const char* restrict sub);
 
 TAU_EXTERN_C_END
 
