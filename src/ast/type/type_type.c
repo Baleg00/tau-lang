@@ -16,6 +16,8 @@ ast_type_type_t* ast_type_type_init(void)
   ast_type_type_t* node = (ast_type_type_t*)malloc(sizeof(ast_type_type_t));
   CLEAROBJ(node);
 
+  ast_registry_register((ast_node_t*)node);
+
   node->kind = AST_TYPE_TYPE;
 
   return node;
