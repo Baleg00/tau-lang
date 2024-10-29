@@ -22,7 +22,7 @@ TAU_EXTERN_C_BEGIN
 typedef struct ast_decl_fun_t
 {
   AST_DECL_HEADER;
-  symtable_t* scope;            // The associated scope of parameters and funciton body.
+  symtable_t* scope;            // The associated scope of parameters and function body.
   ast_node_t* parent;           // The associated parent module declaration.
   vector_t* params;             // Vector of associated parameter declarations.
   ast_node_t* return_type;      // The associated return type.
