@@ -167,6 +167,8 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   switch (node->kind)
   {
   case AST_ID:
+  case AST_DECL_GENERIC_FUN:
+  case AST_DECL_GENERIC_PARAM:
   case AST_PATH_SEGMENT:
   case AST_PATH_ACCESS:
   case AST_PATH_LIST:
