@@ -29,7 +29,7 @@ typedef enum op_kind_t
   OP_AS, // Type conversion operator `as`
   OP_SIZEOF, // Size-of operator `sizeof`
   OP_ALIGNOF, // Alignment-of operator `alignof`
-  
+
   OP_ARIT_INC_PRE, // Arithmetic pre-increment operator `++`
   OP_ARIT_INC_POST, // Arithmetic post-increment operator `++`
   OP_ARIT_DEC_PRE, // Arithmetic pre-decrement operator `--`
@@ -41,7 +41,7 @@ typedef enum op_kind_t
   OP_ARIT_MUL, // Arithmetic multiply operator `*`
   OP_ARIT_DIV, // Arithmetic divide operator `/`
   OP_ARIT_MOD, // Arithmetic modulo operator `%`
-  
+
   OP_BIT_AND, // Bitwise and operator `&`
   OP_BIT_OR, // Bitwise or operator `|`
   OP_BIT_XOR, // Bitwise xor operator `^`
