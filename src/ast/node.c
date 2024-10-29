@@ -51,6 +51,7 @@ void ast_node_free(ast_node_t* node)
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_free        ((ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_free       ((ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_free      ((ast_expr_op_call_t*      )node); break;
+  case AST_EXPR_GENERIC_SPEC:  ast_expr_generic_spec_free ((ast_expr_generic_spec_t* )node); break;
   case AST_STMT_IF:            ast_stmt_if_free           ((ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_free          ((ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_free        ((ast_stmt_while_t*        )node); break;
@@ -131,6 +132,7 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_nameres        (ctx, (ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_nameres       (ctx, (ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_nameres      (ctx, (ast_expr_op_call_t*      )node); break;
+  case AST_EXPR_GENERIC_SPEC:  ast_expr_generic_spec_nameres (ctx, (ast_expr_generic_spec_t* )node); break;
   case AST_STMT_IF:            ast_stmt_if_nameres           (ctx, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_nameres          (ctx, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_nameres        (ctx, (ast_stmt_while_t*        )node); break;
@@ -205,6 +207,7 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_typecheck        (ctx, (ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_typecheck       (ctx, (ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_typecheck      (ctx, (ast_expr_op_call_t*      )node); break;
+  case AST_EXPR_GENERIC_SPEC:  ast_expr_generic_spec_typecheck (ctx, (ast_expr_generic_spec_t* )node); break;
   case AST_STMT_IF:            ast_stmt_if_typecheck           (ctx, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_typecheck          (ctx, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_typecheck        (ctx, (ast_stmt_while_t*        )node); break;
@@ -272,6 +275,7 @@ void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
   case AST_EXPR_OP_UNARY:
   case AST_EXPR_OP_BINARY:
   case AST_EXPR_OP_CALL:
+  case AST_EXPR_GENERIC_SPEC:
   case AST_STMT_EXPR:
   case AST_DECL_VAR:
   case AST_DECL_PARAM:
@@ -354,6 +358,7 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_codegen        (ctx, (ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_codegen       (ctx, (ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_codegen      (ctx, (ast_expr_op_call_t*      )node); break;
+  case AST_EXPR_GENERIC_SPEC:  ast_expr_generic_spec_codegen (ctx, (ast_expr_generic_spec_t* )node); break;
   case AST_STMT_IF:            ast_stmt_if_codegen           (ctx, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_codegen          (ctx, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_codegen        (ctx, (ast_stmt_while_t*        )node); break;
@@ -519,6 +524,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_dump_json        (stream, (ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_dump_json       (stream, (ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_dump_json      (stream, (ast_expr_op_call_t*      )node); break;
+  case AST_EXPR_GENERIC_SPEC:  ast_expr_generic_spec_dump_json (stream, (ast_expr_generic_spec_t* )node); break;
   case AST_STMT_IF:            ast_stmt_if_dump_json           (stream, (ast_stmt_if_t*           )node); break;
   case AST_STMT_FOR:           ast_stmt_for_dump_json          (stream, (ast_stmt_for_t*          )node); break;
   case AST_STMT_WHILE:         ast_stmt_while_dump_json        (stream, (ast_stmt_while_t*        )node); break;
@@ -592,6 +598,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_EXPR_OP_UNARY:      return "AST_EXPR_OP_UNARY";
   case AST_EXPR_OP_BINARY:     return "AST_EXPR_OP_BINARY";
   case AST_EXPR_OP_CALL:       return "AST_EXPR_OP_CALL";
+  case AST_EXPR_GENERIC_SPEC:  return "AST_EXPR_GENERIC_SPEC";
   case AST_STMT_IF:            return "AST_STMT_IF";
   case AST_STMT_FOR:           return "AST_STMT_FOR";
   case AST_STMT_WHILE:         return "AST_STMT_WHILE";
@@ -680,6 +687,7 @@ bool ast_is_expr(ast_node_t* node)
   case AST_EXPR_OP_UNARY:
   case AST_EXPR_OP_BINARY:
   case AST_EXPR_OP_CALL:
+  case AST_EXPR_GENERIC_SPEC:
     return true;
   default:
     return false;

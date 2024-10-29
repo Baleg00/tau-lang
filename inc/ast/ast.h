@@ -32,6 +32,7 @@
 #include "ast/decl/union.h"
 #include "ast/decl/var.h"
 #include "ast/expr/expr.h"
+#include "ast/expr/generic/spec.h"
 #include "ast/expr/id.h"
 #include "ast/expr/lit/bool.h"
 #include "ast/expr/lit/char.h"

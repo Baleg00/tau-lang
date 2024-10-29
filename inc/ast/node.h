@@ -70,6 +70,7 @@ typedef enum ast_kind_e
   AST_EXPR_OP_UNARY, ///< Unary operation expression.
   AST_EXPR_OP_BINARY, ///< Binary operation expression.
   AST_EXPR_OP_CALL, ///< Call operation expression.
+  AST_EXPR_GENERIC_SPEC, ///< Generic specialization expression.
 
   AST_STMT_IF, ///< If statement.
   AST_STMT_FOR, ///< For statement.
