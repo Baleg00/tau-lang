@@ -121,6 +121,7 @@ typedef enum token_kind_e
   TOK_PUNCT_DOT, ///< Punctuation `.`
   TOK_PUNCT_DOT_DOT, ///< Punctuation `..`
   TOK_PUNCT_DOT_DOT_DOT, ///< Punctuation `...`
+  TOK_PUNCT_DOT_LESS, ///< Punctuation `.<`
   TOK_PUNCT_QUESTION, ///< Punctuation `?`
   TOK_PUNCT_QUESTION_DOT, ///< Punctuation `?.`
   TOK_PUNCT_EQUAL, ///< Punctuation `=`

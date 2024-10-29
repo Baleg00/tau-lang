@@ -484,6 +484,7 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_PUNCT_DOT:                   return "TOK_PUNCT_DOT";
   case TOK_PUNCT_DOT_DOT:               return "TOK_PUNCT_DOT_DOT";
   case TOK_PUNCT_DOT_DOT_DOT:           return "TOK_PUNCT_DOT_DOT_DOT";
+  case TOK_PUNCT_DOT_LESS:              return "TOK_PUNCT_DOT_LESS";
   case TOK_PUNCT_QUESTION:              return "TOK_PUNCT_QUESTION";
   case TOK_PUNCT_QUESTION_DOT:          return "TOK_PUNCT_QUESTION_DOT";
   case TOK_PUNCT_EQUAL:                 return "TOK_PUNCT_EQUAL";
@@ -622,6 +623,7 @@ bool token_is_punctuation(token_t* tok)
   case TOK_PUNCT_DOT:
   case TOK_PUNCT_DOT_DOT:
   case TOK_PUNCT_DOT_DOT_DOT:
+  case TOK_PUNCT_DOT_LESS:
   case TOK_PUNCT_QUESTION:
   case TOK_PUNCT_QUESTION_DOT:
   case TOK_PUNCT_EQUAL:
