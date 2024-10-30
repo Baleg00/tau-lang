@@ -55,12 +55,11 @@ typedef struct shyd_elem_t
  */
 typedef struct shyd_ctx_t
 {
-  parser_t* par; // Pointer to the parser to be used.
-
-  queue_t* out_queue; // Output queue.
-  stack_t* op_stack; // Operator stack.
-
-  bool prev_term; // `true` if the previously parsed element was a term, `false` otherwise.
+  parser_t* par;       ///< Pointer to the parser to be used.
+  queue_t* out_queue;  ///< Queue of shunting yard output elements.
+  stack_t* op_stack;   ///< Stack of shunting yard operator elements.
+  stack_t* node_stack; ///< Stack of result AST nodes.
+  bool prev_term;      ///< `true` if the previously parsed element was a term, `false` otherwise.
 } shyd_ctx_t;
 
 /**
@@ -69,14 +68,14 @@ typedef struct shyd_ctx_t
  * \param[in] par Pointer to the parser to be used.
  * \returns Pointer to the newly initialized shunting yard context.
  */
-shyd_ctx_t* shyd_init(parser_t* par);
+shyd_ctx_t* shyd_ctx_init(parser_t* par);
 
 /**
  * \brief Frees all memory associated with a shunting yard context.
  * 
  * \param[in] ctx Pointer to the shunting yard context to be freed.
  */
-void shyd_free(shyd_ctx_t* ctx);
+void shyd_ctx_free(shyd_ctx_t* ctx);
 
 /**
  * \brief Initializes a new shunting yard element.
@@ -98,7 +97,7 @@ void shyd_elem_free(shyd_elem_t* elem);
  * \brief Move elements from the operator stack into the output queue until an
  * element of a specific kind is encountered.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
  * \param[in] kind Element kind to flush until.
  * \returns `true` if an element of the specified kind was encountered, `false`
  * otherwise.
@@ -109,97 +108,100 @@ bool shyd_op_flush_until_elem(shyd_ctx_t* ctx, shyd_elem_kind_t kind);
  * \brief Move elements from the operator stack into the output queue according
  * to the next operator and precedence rules.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
- * \param[in] op Kind of the next operator.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
+ * \param[in] op Next operator kind.
  */
 void shyd_op_flush_for_op(shyd_ctx_t* ctx, op_kind_t op);
 
 /**
- * \brief Parses an expression that contains a type.
+ * \brief Parses an expression that contains a type (e.g. sizeof, alignof).
  * 
- * \param[in] ctx Pointer to the shunting yard context.
- * \return `true` if a typed exression was parsed successfully, `false` otherwise.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
+ * \return `true` if a typed expression was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_typed_expr(shyd_ctx_t* ctx);
+bool shyd_parse_expr_typed(shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a left parenthesis.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a left parenthesis was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_paren_left(shyd_ctx_t* ctx);
+bool shyd_parse_punct_paren_left(shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a right parenthesis.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a right parenthesis was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_paren_right(shyd_ctx_t* ctx);
+bool shyd_parse_punct_paren_right(shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a left bracket.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a left bracket was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_bracket_left(shyd_ctx_t* ctx);
+bool shyd_parse_punct_bracket_left(shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a right bracket.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a right bracket was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_bracket_right(shyd_ctx_t* ctx);
+bool shyd_parse_punct_bracket_right(shyd_ctx_t* ctx);
 
 /**
- * \brief Parses a call expression.
+ * \brief Parses a call operation expression.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
- * \return `true` if a call expression was parsed successfully, `false` otherwise.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
+ * \return `true` if a call operation expression was parsed successfully,
+ * `false` otherwise.
  */
-bool shyd_parse_call(shyd_ctx_t* ctx);
+bool shyd_parse_expr_op_call(shyd_ctx_t* ctx);
 
 /**
- * \brief Parses a generic specialization expression.
+ * \brief Parses a generic specialization operation expression.
  *
- * \param[in] ctx Pointer to the shunting yard context.
- * \return `true` if a generic specialization expression was parsed successfully, `false` otherwise.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
+ * \return `true` if a generic specialization operation expression was parsed
+ * successfully, `false` otherwise.
  */
-bool shyd_parse_spec(shyd_ctx_t* ctx);
+bool shyd_parse_expr_op_spec(shyd_ctx_t* ctx);
 
 /**
  * \brief Parses an expression term.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a term was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_term(shyd_ctx_t* ctx);
+bool shyd_parse_expr_term(shyd_ctx_t* ctx);
 
 /**
- * \brief Parses an operator.
+ * \brief Parses an operation expression.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
- * \return `true` if an operator was parsed successfully, `false` otherwise.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
+ * \return `true` if an operation expression was parsed successfully,
+ * `false` otherwise.
  */
-bool shyd_parse_op(shyd_ctx_t* ctx);
+bool shyd_parse_expr_op(shyd_ctx_t* ctx);
 
 /**
- * \brief Parse the next element of an expression.
+ * \brief Parses the next element of an expression.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
  * \returns `true` if the expression may have more terms to be parsed, `false`
  * otherwise.
  */
 bool shyd_parse_postfix_next(shyd_ctx_t* ctx);
 
 /**
- * \brief Parse an expression and store the resulting elements in the output
+ * \brief Parses an expression and stores the resulting elements in the output
  * queue in postfix order.
  * 
- * \param[in] ctx Pointer to the shunting yard context.
+ * \param[in] ctx Pointer to the shunting yard context to be used.
  */
 void shyd_parse_postfix(shyd_ctx_t* ctx);
 
@@ -209,9 +211,8 @@ void shyd_parse_postfix(shyd_ctx_t* ctx);
  * 
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard unary operator element.
- * \param[in] node_stack Pointer to the AST node stack.
  */
-void shyd_ast_term(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_expr_term(shyd_ctx_t* ctx, shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST unary operator expression node and pushes it onto the
@@ -219,9 +220,8 @@ void shyd_ast_term(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
  * 
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard unary operator element.
- * \param[in] node_stack Pointer to the AST node stack.
  */
-void shyd_ast_op_un(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_expr_op_un(shyd_ctx_t* ctx, shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST binary operator expression node and pushes it onto the
@@ -229,9 +229,8 @@ void shyd_ast_op_un(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
  * 
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard binary operator element.
- * \param[in] node_stack Pointer to the AST node stack.
  */
-void shyd_ast_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_expr_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST call operator expression node and pushes it onto the
@@ -239,9 +238,8 @@ void shyd_ast_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
  * 
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard call operator element.
- * \param[in] node_stack Pointer to the AST node stack.
  */
-void shyd_ast_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_expr_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST generic specialization operator expression node and
@@ -249,9 +247,8 @@ void shyd_ast_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
  *
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard specialization operator element.
- * \param[in] node_stack Pointer to the AST node stack.
  */
-void shyd_ast_op_spec(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_expr_op_spec(shyd_ctx_t* ctx, shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST operator expression node and pushes it onto the node
@@ -259,9 +256,8 @@ void shyd_ast_op_spec(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
  * 
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard operator element.
- * \param[in] node_stack Pointer to the AST node stack.
  */
-void shyd_ast_op(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
+void shyd_ast_expr_op(shyd_ctx_t* ctx, shyd_elem_t* elem);
 
 /**
  * \brief Parses an expression.
