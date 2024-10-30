@@ -163,6 +163,14 @@ bool shyd_parse_bracket_right(shyd_ctx_t* ctx);
 bool shyd_parse_call(shyd_ctx_t* ctx);
 
 /**
+ * \brief Parses a generic specialization expression.
+ *
+ * \param[in] ctx Pointer to the shunting yard context.
+ * \return `true` if a generic specialization expression was parsed successfully, `false` otherwise.
+ */
+bool shyd_parse_spec(shyd_ctx_t* ctx);
+
+/**
  * \brief Parses an expression term.
  * 
  * \param[in] ctx Pointer to the shunting yard context.
@@ -234,6 +242,16 @@ void shyd_ast_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
  * \param[in] node_stack Pointer to the AST node stack.
  */
 void shyd_ast_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
+
+/**
+ * \brief Creates an AST generic specialization operator expression node and
+ * pushes it onto the node stack.
+ *
+ * \param[in] ctx Pointer to the shunting yard context.
+ * \param[in] elem Pointer to the shunting yard specialization operator element.
+ * \param[in] node_stack Pointer to the AST node stack.
+ */
+void shyd_ast_op_spec(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack);
 
 /**
  * \brief Creates an AST operator expression node and pushes it onto the node

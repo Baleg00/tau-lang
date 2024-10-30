@@ -219,6 +219,34 @@ bool shyd_parse_call(shyd_ctx_t* ctx)
   return true;
 }
 
+bool shyd_parse_spec(shyd_ctx_t* ctx)
+{
+  if (!ctx->prev_term)
+    return false;
+
+  ast_expr_op_spec_t* node = ast_expr_op_spec_init();
+  node->tok = parser_current(ctx->par);
+
+  parser_expect(ctx->par, TOK_PUNCT_DOT_LESS);
+
+  if (!parser_consume(ctx->par, TOK_PUNCT_GREATER))
+  {
+    parser_parse_delimited_list(ctx->par, node->params, TOK_PUNCT_COMMA, parser_parse_type);
+
+    parser_expect(ctx->par, TOK_PUNCT_GREATER);
+  }
+
+  shyd_op_flush_for_op(ctx, OP_SPEC);
+
+  shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_OP);
+  elem->op = OP_SPEC;
+  elem->node = (ast_node_t*)node;
+
+  stack_push(ctx->op_stack, elem);
+
+  return true;
+}
+
 bool shyd_parse_term(shyd_ctx_t* ctx)
 {
   if (ctx->prev_term)
@@ -302,6 +330,7 @@ bool shyd_parse_postfix_next(shyd_ctx_t* ctx)
   case TOK_KW_AS:
   case TOK_KW_SIZEOF:
   case TOK_KW_ALIGNOF:          return shyd_parse_typed_expr(ctx);
+  case TOK_PUNCT_DOT_LESS:      return shyd_parse_spec(ctx);
   case TOK_PUNCT_PAREN_LEFT:    return ctx->prev_term ? shyd_parse_call(ctx) : shyd_parse_paren_left(ctx);
   case TOK_PUNCT_PAREN_RIGHT:   return shyd_parse_paren_right(ctx);
   case TOK_PUNCT_BRACKET_LEFT:  return shyd_parse_bracket_left(ctx);
@@ -411,6 +440,20 @@ void shyd_ast_op_call(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_
   stack_push(node_stack, elem->node);
 }
 
+void shyd_ast_op_spec(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_stack)
+{
+  if (stack_empty(node_stack))
+  {
+    location_t loc = token_location(elem->node->tok);
+
+    report_error_missing_callee(loc); // TODO: create new report error function for specialization operator
+  }
+
+  ((ast_expr_op_spec_t*)elem->node)->generic = (ast_node_t*)stack_pop(node_stack);
+
+  stack_push(node_stack, elem->node);
+}
+
 void shyd_ast_term(shyd_ctx_t* UNUSED(ctx), shyd_elem_t* elem, stack_t* node_stack)
 {
   ast_node_t* node = NULL;
@@ -488,6 +531,8 @@ void shyd_ast_op(shyd_ctx_t* ctx, shyd_elem_t* elem, stack_t* node_stack)
     shyd_ast_op_bin(ctx, elem, node_stack);
   else if (elem->op == OP_CALL)
     shyd_ast_op_call(ctx, elem, node_stack);
+  else if (elem->op == OP_SPEC)
+    shyd_ast_op_spec(ctx, elem, node_stack);
   else
     UNREACHABLE();
 }

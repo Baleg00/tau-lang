@@ -63,6 +63,7 @@ const char* op_kind_to_cstr(op_kind_t kind)
   case OP_UNWRAP_UNSAFE:    return "OP_UNWRAP_UNSAFE";
   case OP_RANGE:            return "OP_RANGE";
   case OP_CALL:             return "OP_CALL";
+  case OP_SPEC:             return "OP_SPEC";
   default: UNREACHABLE();
   }
 
@@ -80,6 +81,7 @@ int op_precedence(op_kind_t kind)
   case OP_ARIT_DEC_POST:
   case OP_SUBS:
   case OP_CALL:
+  case OP_SPEC:
   case OP_UNWRAP_SAFE:
   case OP_UNWRAP_UNSAFE:
     return 0;
@@ -352,6 +354,7 @@ bool op_is_left_assoc(op_kind_t kind)
   case OP_UNWRAP_UNSAFE:
   case OP_RANGE:
   case OP_CALL:
+  case OP_SPEC:
     return true;
   default:
     return false;
