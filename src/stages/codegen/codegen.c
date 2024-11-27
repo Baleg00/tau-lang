@@ -10,11 +10,12 @@
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 
-codegen_ctx_t* codegen_ctx_init(typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_mod, LLVMBuilderRef llvm_builder)
+codegen_ctx_t* codegen_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_mod, LLVMBuilderRef llvm_builder)
 {
   codegen_ctx_t* ctx = (codegen_ctx_t*)malloc(sizeof(codegen_ctx_t));
   CLEAROBJ(ctx);
 
+  ctx->typebuilder = typebuilder;
   ctx->typetable = typetable;
   ctx->llvm_ctx = llvm_ctx;
   ctx->llvm_layout = llvm_layout;

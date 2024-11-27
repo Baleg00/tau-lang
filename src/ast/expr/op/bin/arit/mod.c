@@ -65,7 +65,7 @@ void ast_expr_op_bin_arit_mod_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_ar
     report_warning_mixed_signedness(loc);
   }
 
-  typedesc_t* desc = typedesc_arithmetic_promote(typedesc_remove_ref_mut(lhs_desc), typedesc_remove_ref_mut(rhs_desc));
+  typedesc_t* desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, typedesc_remove_ref_mut(lhs_desc), typedesc_remove_ref_mut(rhs_desc));
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
@@ -84,10 +84,8 @@ void ast_expr_op_bin_arit_mod_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_arit_m
   typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
   typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
 
-  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
-
-  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
-  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, desc);
 
   if (typedesc_is_integer(desc))
   {

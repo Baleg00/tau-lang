@@ -83,6 +83,16 @@ ast_type_prim_t* ast_type_prim_f64_init(void)
   return ast_type_prim_init(AST_TYPE_PRIM_F64);
 }
 
+ast_type_prim_t* ast_type_prim_c64_init(void)
+{
+  return ast_type_prim_init(AST_TYPE_PRIM_C64);
+}
+
+ast_type_prim_t* ast_type_prim_c128_init(void)
+{
+  return ast_type_prim_init(AST_TYPE_PRIM_C128);
+}
+
 ast_type_prim_t* ast_type_prim_char_init(void)
 {
   return ast_type_prim_init(AST_TYPE_PRIM_CHAR);
@@ -125,6 +135,8 @@ void ast_type_prim_typecheck(typecheck_ctx_t* ctx, ast_type_prim_t* node)
   case AST_TYPE_PRIM_USIZE: desc = typebuilder_build_usize(ctx->typebuilder); break;
   case AST_TYPE_PRIM_F32:   desc = typebuilder_build_f32  (ctx->typebuilder); break;
   case AST_TYPE_PRIM_F64:   desc = typebuilder_build_f64  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_C64:   desc = typebuilder_build_c64  (ctx->typebuilder); break;
+  case AST_TYPE_PRIM_C128:  desc = typebuilder_build_c128 (ctx->typebuilder); break;
   case AST_TYPE_PRIM_CHAR:  desc = typebuilder_build_char (ctx->typebuilder); break;
   case AST_TYPE_PRIM_BOOL:  desc = typebuilder_build_bool (ctx->typebuilder); break;
   case AST_TYPE_PRIM_UNIT:  desc = typebuilder_build_unit (ctx->typebuilder); break;

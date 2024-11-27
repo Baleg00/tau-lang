@@ -80,6 +80,16 @@ typedesc_prim_t* typedesc_prim_f64_init(void)
   return typedesc_prim_init(TYPEDESC_F64);
 }
 
+typedesc_prim_t* typedesc_prim_c64_init(void)
+{
+  return typedesc_prim_init(TYPEDESC_C64);
+}
+
+typedesc_prim_t* typedesc_prim_c128_init(void)
+{
+  return typedesc_prim_init(TYPEDESC_C128);
+}
+
 typedesc_prim_t* typedesc_prim_char_init(void)
 {
   return typedesc_prim_init(TYPEDESC_CHAR);
@@ -120,27 +130,43 @@ bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedes
 
   if (typedesc_is_arithmetic((typedesc_t*)from_desc) && typedesc_is_arithmetic(to_desc))
   {
-    if (typedesc_is_integer((typedesc_t*)from_desc) && typedesc_is_integer(to_desc))
+    if (typedesc_is_float((typedesc_t*)from_desc))
     {
-      if (typedesc_is_signed((typedesc_t*)from_desc) == typedesc_is_signed(to_desc))
-        return typedesc_integer_bits((typedesc_t*)from_desc) <= typedesc_integer_bits(to_desc);
+      if (typedesc_is_float(to_desc))
+        return !(from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32);
 
-      if (typedesc_is_signed((typedesc_t*)from_desc) && !typedesc_is_signed(to_desc))
+      if (typedesc_is_integer(to_desc))
         return false;
 
-      return typedesc_integer_bits((typedesc_t*)from_desc) < typedesc_integer_bits(to_desc);
+      if (typedesc_is_complex(to_desc))
+        return !(from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_C64);
     }
 
-    if (typedesc_is_float((typedesc_t*)from_desc) && typedesc_is_float(to_desc))
-      return !(from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32);
+    if (typedesc_is_integer((typedesc_t*)from_desc))
+    {
+      if (typedesc_is_integer(to_desc))
+      {
+        if (typedesc_is_signed((typedesc_t*)from_desc) == typedesc_is_signed(to_desc))
+          return typedesc_integer_bits((typedesc_t*)from_desc) <= typedesc_integer_bits(to_desc);
 
-    if (typedesc_is_float((typedesc_t*)from_desc))
-      return false;
+        if (typedesc_is_signed((typedesc_t*)from_desc) && typedesc_is_unsigned(to_desc))
+          return false;
 
-    if (to_desc->kind == TYPEDESC_F32)
-      return typedesc_integer_bits((typedesc_t*)from_desc) <= 16;
+        return typedesc_integer_bits((typedesc_t*)from_desc) < typedesc_integer_bits(to_desc);
+      }
 
-    return typedesc_integer_bits((typedesc_t*)from_desc) <= 32;
+      if (to_desc->kind == TYPEDESC_F32)
+        return typedesc_integer_bits((typedesc_t*)from_desc) <= 16;
+
+      if (to_desc->kind == TYPEDESC_F64)
+        return typedesc_integer_bits((typedesc_t*)from_desc) <= 32;
+
+      if (to_desc->kind == TYPEDESC_C64)
+        return typedesc_integer_bits((typedesc_t*)from_desc) <= 16;
+
+      if (to_desc->kind == TYPEDESC_C128)
+        return typedesc_integer_bits((typedesc_t*)from_desc) <= 32;
+    }
   }
 
   return false;

@@ -36,6 +36,8 @@ void ast_node_free(ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_C64:
+  case AST_TYPE_PRIM_C128:
   case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:     ast_type_prim_free         ((ast_type_prim_t*         )node); break;
@@ -117,6 +119,8 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_C64:
+  case AST_TYPE_PRIM_C128:
   case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:     ast_type_prim_nameres         (ctx, (ast_type_prim_t*         )node); break;
@@ -194,6 +198,8 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_C64:
+  case AST_TYPE_PRIM_C128:
   case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:     ast_type_prim_typecheck         (ctx, (ast_type_prim_t*         )node); break;
@@ -262,6 +268,8 @@ void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_C64:
+  case AST_TYPE_PRIM_C128:
   case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:
@@ -345,6 +353,8 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_C64:
+  case AST_TYPE_PRIM_C128:
   case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:     ast_type_prim_codegen         (ctx, (ast_type_prim_t*         )node); break;
@@ -511,6 +521,8 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_C64:
+  case AST_TYPE_PRIM_C128:
   case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:     ast_type_prim_dump_json         (stream, (ast_type_prim_t*         )node); break;
@@ -585,6 +597,8 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_TYPE_PRIM_USIZE:    return "AST_TYPE_PRIM_USIZE";
   case AST_TYPE_PRIM_F32:      return "AST_TYPE_PRIM_F32";
   case AST_TYPE_PRIM_F64:      return "AST_TYPE_PRIM_F64";
+  case AST_TYPE_PRIM_C64:      return "AST_TYPE_PRIM_C64";
+  case AST_TYPE_PRIM_C128:     return "AST_TYPE_PRIM_C128";
   case AST_TYPE_PRIM_CHAR:     return "AST_TYPE_PRIM_CHAR";
   case AST_TYPE_PRIM_BOOL:     return "AST_TYPE_PRIM_BOOL";
   case AST_TYPE_PRIM_UNIT:     return "AST_TYPE_PRIM_UNIT";
@@ -662,6 +676,8 @@ bool ast_is_type(ast_node_t* node)
   case AST_TYPE_PRIM_USIZE:
   case AST_TYPE_PRIM_F32:
   case AST_TYPE_PRIM_F64:
+  case AST_TYPE_PRIM_C64:
+  case AST_TYPE_PRIM_C128:
   case AST_TYPE_PRIM_CHAR:
   case AST_TYPE_PRIM_BOOL:
   case AST_TYPE_PRIM_UNIT:

@@ -218,6 +218,7 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
 
   {
     codegen_ctx_t* codegen_ctx = codegen_ctx_init(
+      env->typebuilder,
       env->typetable,
       env->llvm_context,
       env->llvm_layout,

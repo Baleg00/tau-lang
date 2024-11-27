@@ -54,6 +54,8 @@ typedef enum ast_kind_e
   AST_TYPE_PRIM_USIZE, ///< Primitive type `usize`.
   AST_TYPE_PRIM_F32, ///< Primitive type `f32`.
   AST_TYPE_PRIM_F64, ///< Primitive type `f64`.
+  AST_TYPE_PRIM_C64, ///< Primitive type `c64`.
+  AST_TYPE_PRIM_C128, ///< Primitive type `c128`.
   AST_TYPE_PRIM_CHAR, ///< Primitive type `char`.
   AST_TYPE_PRIM_BOOL, ///< Primitive type `bool`.
   AST_TYPE_PRIM_UNIT, ///< Primitive type `unit`.

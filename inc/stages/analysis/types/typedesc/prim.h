@@ -107,6 +107,20 @@ typedesc_prim_t* typedesc_prim_f32_init(void);
 typedesc_prim_t* typedesc_prim_f64_init(void);
 
 /**
+ * \brief Initializes a new primitive `c64` type descriptor.
+ *
+ * \returns Pointer to the newly initialized type descriptor.
+ */
+typedesc_prim_t* typedesc_prim_c64_init(void);
+
+/**
+ * \brief Initializes a new primitive `c128` type descriptor.
+ *
+ * \returns Pointer to the newly initialized type descriptor.
+ */
+typedesc_prim_t* typedesc_prim_c128_init(void);
+
+/**
  * \brief Initializes a new primitive `char` type descriptor.
  * 
  * \returns Pointer to the newly initialized type descriptor.

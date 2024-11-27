@@ -136,7 +136,7 @@ typedesc_t* typebuilder_build_i64(typebuilder_t* builder);
 typedesc_t* typebuilder_build_isize(typebuilder_t* builder);
 
 /**
- * \brief Builds a unsigned 8-bit integer type.
+ * \brief Builds an unsigned 8-bit integer type.
  *
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 8-bit integer type descriptor.
@@ -144,7 +144,7 @@ typedesc_t* typebuilder_build_isize(typebuilder_t* builder);
 typedesc_t* typebuilder_build_u8(typebuilder_t* builder);
 
 /**
- * \brief Builds a unsigned 16-bit integer type.
+ * \brief Builds an unsigned 16-bit integer type.
  *
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 16-bit integer type descriptor.
@@ -152,7 +152,7 @@ typedesc_t* typebuilder_build_u8(typebuilder_t* builder);
 typedesc_t* typebuilder_build_u16(typebuilder_t* builder);
 
 /**
- * \brief Builds a unsigned 32-bit integer type.
+ * \brief Builds an unsigned 32-bit integer type.
  *
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 32-bit integer type descriptor.
@@ -160,7 +160,7 @@ typedesc_t* typebuilder_build_u16(typebuilder_t* builder);
 typedesc_t* typebuilder_build_u32(typebuilder_t* builder);
 
 /**
- * \brief Builds a unsigned 64-bit integer type.
+ * \brief Builds an unsigned 64-bit integer type.
  *
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 64-bit integer type descriptor.
@@ -168,12 +168,22 @@ typedesc_t* typebuilder_build_u32(typebuilder_t* builder);
 typedesc_t* typebuilder_build_u64(typebuilder_t* builder);
 
 /**
- * \brief Builds a unsigned size type.
+ * \brief Builds an unsigned size type.
  *
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created size type descriptor.
  */
 typedesc_t* typebuilder_build_usize(typebuilder_t* builder);
+
+/**
+ * \brief Builds an integer type that satisfies the specified requirements.
+ *
+ * \param[in] builder Pointer to the type builder.
+ * \param[in] bits The Least number of bits the integer type should have.
+ * \param[in] is_signed `true` if the integer type should be signed, `false` otherwise.
+ * \returns A pointer to the newly created integer type descriptor.
+ */
+typedesc_t* typebuilder_build_integer(typebuilder_t* builder, size_t bits, bool is_signed);
 
 /**
  * \brief Builds a 32-bit floating-point type.
@@ -190,6 +200,22 @@ typedesc_t* typebuilder_build_f32(typebuilder_t* builder);
  * \returns A pointer to the newly created 64-bit floating-point type descriptor.
  */
 typedesc_t* typebuilder_build_f64(typebuilder_t* builder);
+
+/**
+ * \brief Builds a 64-bit complex floating-point type.
+ *
+ * \param[in] builder Pointer to the type builder.
+ * \returns A pointer to the newly created 64-bit complex floating-point type descriptor.
+ */
+typedesc_t* typebuilder_build_c64(typebuilder_t* builder);
+
+/**
+ * \brief Builds a 128-bit complex floating-point type.
+ *
+ * \param[in] builder Pointer to the type builder.
+ * \returns A pointer to the newly created 128-bit complex floating-point type descriptor.
+ */
+typedesc_t* typebuilder_build_c128(typebuilder_t* builder);
 
 /**
  * \brief Builds a character type.
@@ -287,6 +313,16 @@ typedesc_t* typebuilder_build_var(typebuilder_t* builder, uint64_t id);
  * \returns A pointer to the modified struct type descriptor.
  */
 typedesc_t* typebuilder_struct_set_body(typebuilder_t* builder, typedesc_t* desc, typedesc_t* field_types[], size_t field_count);
+
+/**
+ * \brief Builds a promoted arithmetic type.
+ *
+ * \param[in] builder Pointer to the type builder to be used.
+ * \param[in] lhs_desc Pointer to the left-hand type descriptor to be used.
+ * \param[in] rhs_desc Pointer to the right-hand type descriptor to be used.
+ * \returns Pointer to the descriptor of the promoted arithmetic type.
+ */
+typedesc_t* typebuilder_build_promoted_arithmetic(typebuilder_t* builder, typedesc_t* lhs_desc, typedesc_t* rhs_desc);
 
 TAU_EXTERN_C_END
 

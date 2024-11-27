@@ -65,7 +65,7 @@ void ast_expr_op_bin_bit_and_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_bit
     report_warning_mixed_signedness(loc);
   }
 
-  typedesc_t* desc = typedesc_arithmetic_promote(typedesc_remove_ref_mut(lhs_desc), typedesc_remove_ref_mut(rhs_desc));
+  typedesc_t* desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, typedesc_remove_ref_mut(lhs_desc), typedesc_remove_ref_mut(rhs_desc));
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }

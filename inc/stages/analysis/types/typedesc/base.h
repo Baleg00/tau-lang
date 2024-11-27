@@ -51,6 +51,8 @@ typedef enum typedesc_kind_e
   TYPEDESC_USIZE, // Built-in type usize
   TYPEDESC_F32, // Built-in type f32
   TYPEDESC_F64, // Built-in type f64
+  TYPEDESC_C64, // Built-in type c64
+  TYPEDESC_C128, // Built-in type c128
   TYPEDESC_CHAR, // Built-in type char
   TYPEDESC_BOOL, // Built-in type bool
   TYPEDESC_UNIT, // Built-in type unit
@@ -108,6 +110,15 @@ bool typedesc_is_integer(typedesc_t* desc);
  * `false`.
  */
 bool typedesc_is_float(typedesc_t* desc);
+
+/**
+ * \brief Checks if the given type descriptor is a complex floating-point type.
+ *
+ * \param[in] desc The type descriptor.
+ * \returns `true` if the descriptor is a complex floating-point type, otherwise
+ * `false`.
+ */
+bool typedesc_is_complex(typedesc_t* desc);
 
 /**
  * \brief Checks if the given type descriptor is an arithmetic type.
@@ -284,15 +295,6 @@ bool typedesc_is_explicitly_convertible(typedesc_t* from_desc, typedesc_t* to_de
  * \returns The bit-width of the type.
  */
 size_t typedesc_integer_bits(typedesc_t* desc);
-
-/**
- * \brief Performs type promotion using the specified arithmetic types.
- * 
- * \param lhs_desc Pointer to the type descriptor.
- * \param rhs_desc Pointer to the type descriptor.
- * \returns Pointer to the promoted type.
- */
-typedesc_t* typedesc_arithmetic_promote(typedesc_t* lhs_desc, typedesc_t* rhs_desc);
 
 /**
  * \brief Checks if the given type descriptor is a callable type.

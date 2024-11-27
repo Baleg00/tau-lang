@@ -33,6 +33,8 @@ struct typebuilder_t
   typedesc_t* desc_usize;
   typedesc_t* desc_f32;
   typedesc_t* desc_f64;
+  typedesc_t* desc_c64;
+  typedesc_t* desc_c128;
   typedesc_t* desc_char;
   typedesc_t* desc_bool;
   typedesc_t* desc_unit;
@@ -229,6 +231,8 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->desc_usize = (typedesc_t*)typedesc_prim_usize_init();
   builder->desc_f32   = (typedesc_t*)typedesc_prim_f32_init  ();
   builder->desc_f64   = (typedesc_t*)typedesc_prim_f64_init  ();
+  builder->desc_c64   = (typedesc_t*)typedesc_prim_c64_init  ();
+  builder->desc_c128  = (typedesc_t*)typedesc_prim_c128_init ();
   builder->desc_char  = (typedesc_t*)typedesc_prim_char_init ();
   builder->desc_bool  = (typedesc_t*)typedesc_prim_bool_init ();
   builder->desc_unit  = (typedesc_t*)typedesc_prim_unit_init ();
@@ -248,6 +252,14 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->desc_char->llvm_type  = LLVMInt32TypeInContext (builder->llvm_context                      );
   builder->desc_bool->llvm_type  = LLVMInt1TypeInContext  (builder->llvm_context                      );
   builder->desc_unit->llvm_type  = LLVMVoidTypeInContext  (builder->llvm_context                      );
+
+  LLVMTypeRef llvm_c64_type = LLVMStructCreateNamed(builder->llvm_context, "complex64");
+  LLVMStructSetBody(llvm_c64_type, (LLVMTypeRef[]){ builder->desc_f32->llvm_type, builder->desc_f32->llvm_type }, 2, false);
+  builder->desc_c64->llvm_type = llvm_c64_type;
+
+  LLVMTypeRef llvm_c128_type = LLVMStructCreateNamed(builder->llvm_context, "complex128");
+  LLVMStructSetBody(llvm_c128_type, (LLVMTypeRef[]){ builder->desc_f64->llvm_type, builder->desc_f64->llvm_type }, 2, false);
+  builder->desc_c128->llvm_type = llvm_c128_type;
 
   builder->set_mut    = set_init(typebuilder_cmp_mut   );
   builder->set_ptr    = set_init(typebuilder_cmp_ptr   );
@@ -277,6 +289,8 @@ void typebuilder_free(typebuilder_t* builder)
   typedesc_free(builder->desc_usize);
   typedesc_free(builder->desc_f32);
   typedesc_free(builder->desc_f64);
+  typedesc_free(builder->desc_c64);
+  typedesc_free(builder->desc_c128);
   typedesc_free(builder->desc_char);
   typedesc_free(builder->desc_bool);
   typedesc_free(builder->desc_unit);
@@ -467,6 +481,24 @@ typedesc_t* typebuilder_build_usize(typebuilder_t* builder)
   return builder->desc_usize;
 }
 
+typedesc_t* typebuilder_build_integer(typebuilder_t* builder, size_t bits, bool is_signed)
+{
+  if (bits <= 8)
+    return is_signed ? builder->desc_i8 : builder->desc_u8;
+
+  if (bits <= 16)
+    return is_signed ? builder->desc_i16 : builder->desc_u16;
+
+  if (bits <= 32)
+    return is_signed ? builder->desc_i32 : builder->desc_u32;
+
+  if (bits <= 64)
+    return is_signed ? builder->desc_i64 : builder->desc_u64;
+
+  UNREACHABLE();
+  return NULL;
+}
+
 typedesc_t* typebuilder_build_f32(typebuilder_t* builder)
 {
   return builder->desc_f32;
@@ -475,6 +507,16 @@ typedesc_t* typebuilder_build_f32(typebuilder_t* builder)
 typedesc_t* typebuilder_build_f64(typebuilder_t* builder)
 {
   return builder->desc_f64;
+}
+
+typedesc_t* typebuilder_build_c64(typebuilder_t* builder)
+{
+  return builder->desc_c64;
+}
+
+typedesc_t* typebuilder_build_c128(typebuilder_t* builder)
+{
+  return builder->desc_c128;
 }
 
 typedesc_t* typebuilder_build_char(typebuilder_t* builder)
@@ -706,4 +748,77 @@ typedesc_t* typebuilder_struct_set_body(typebuilder_t* builder, typedesc_t* desc
   }
 
   return (typedesc_t*)desc;
+}
+
+typedesc_t* typebuilder_build_promoted_arithmetic(typebuilder_t* builder, typedesc_t* lhs_desc, typedesc_t* rhs_desc)
+{
+  ASSERT(typedesc_is_arithmetic(lhs_desc));
+  ASSERT(typedesc_is_arithmetic(rhs_desc));
+
+  if (lhs_desc == rhs_desc)
+    return lhs_desc;
+
+  if (typedesc_is_float(lhs_desc))
+  {
+    if (typedesc_is_float(rhs_desc))
+      return lhs_desc->kind == TYPEDESC_F64 ? lhs_desc : rhs_desc;
+
+    if (typedesc_is_integer(rhs_desc))
+    {
+      if (lhs_desc->kind == TYPEDESC_F32)
+        return typedesc_integer_bits(rhs_desc) <= 16 ? lhs_desc : typebuilder_build_f64(builder);
+
+      return lhs_desc;
+    }
+
+    if (typedesc_is_complex(rhs_desc))
+      return lhs_desc->kind == TYPEDESC_F32 ? rhs_desc : typebuilder_build_c128(builder);
+  }
+
+  if (typedesc_is_integer(lhs_desc))
+  {
+    if (typedesc_is_integer(rhs_desc))
+    {
+      if (typedesc_is_signed(lhs_desc) == typedesc_is_signed(rhs_desc))
+        return typedesc_integer_bits(lhs_desc) >= typedesc_integer_bits(rhs_desc) ? lhs_desc : rhs_desc;
+
+      return typebuilder_build_integer(builder, MAX(typedesc_integer_bits(lhs_desc), typedesc_integer_bits(rhs_desc)), true);
+    }
+
+    if (typedesc_is_float(rhs_desc))
+    {
+      if (rhs_desc->kind == TYPEDESC_F32)
+        return typedesc_integer_bits(lhs_desc) <= 16 ? rhs_desc : typebuilder_build_f64(builder);
+
+      return rhs_desc;
+    }
+
+    if (typedesc_is_complex(rhs_desc))
+    {
+      if (typedesc_integer_bits(lhs_desc) > 16)
+        return typebuilder_build_c128(builder);
+
+      return rhs_desc;
+    }
+  }
+
+  if (typedesc_is_complex(lhs_desc))
+  {
+    if (typedesc_is_complex(rhs_desc))
+      return lhs_desc->kind == TYPEDESC_C128 ? lhs_desc : rhs_desc;
+
+    if (typedesc_is_integer(rhs_desc))
+    {
+      if (typedesc_integer_bits(rhs_desc) > 16)
+        return typebuilder_build_c128(builder);
+
+      return lhs_desc;
+    }
+
+    if (typedesc_is_float(rhs_desc))
+      return rhs_desc->kind == TYPEDESC_F32 ? lhs_desc : typebuilder_build_c128(builder);
+  }
+
+  UNREACHABLE();
+  return NULL;
 }

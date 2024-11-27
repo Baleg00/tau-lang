@@ -77,7 +77,7 @@ void ast_expr_op_bin_cmp_ge_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_ge_t
   LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
   LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
 
-  typedesc_t* promoted_desc = typedesc_arithmetic_promote(lhs_desc, rhs_desc);
+  typedesc_t* promoted_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_desc, rhs_desc);
 
   llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
   llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);

@@ -33,6 +33,8 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_USIZE:
   case TYPEDESC_F32:
   case TYPEDESC_F64:
+  case TYPEDESC_C64:
+  case TYPEDESC_C128:
   case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
   case TYPEDESC_UNIT:   typedesc_prim_free  ((typedesc_prim_t*  )desc); break;
@@ -76,6 +78,8 @@ bool typedesc_is_builtin(typedesc_t* desc)
   case TYPEDESC_USIZE:
   case TYPEDESC_F32:
   case TYPEDESC_F64:
+  case TYPEDESC_C64:
+  case TYPEDESC_C128:
   case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
   case TYPEDESC_UNIT:
@@ -117,6 +121,18 @@ bool typedesc_is_float(typedesc_t* desc)
   }
 }
 
+bool typedesc_is_complex(typedesc_t* desc)
+{
+  switch (desc->kind)
+  {
+  case TYPEDESC_C64:
+  case TYPEDESC_C128:
+    return true;
+  default:
+    return false;
+  }
+}
+
 bool typedesc_is_arithmetic(typedesc_t* desc)
 {
   switch (desc->kind)
@@ -133,6 +149,8 @@ bool typedesc_is_arithmetic(typedesc_t* desc)
   case TYPEDESC_USIZE:
   case TYPEDESC_F32:
   case TYPEDESC_F64:
+  case TYPEDESC_C64:
+  case TYPEDESC_C128:
     return true;
   default:
     return false;
@@ -150,6 +168,8 @@ bool typedesc_is_signed(typedesc_t* desc)
   case TYPEDESC_ISIZE:
   case TYPEDESC_F32:
   case TYPEDESC_F64:
+  case TYPEDESC_C64:
+  case TYPEDESC_C128:
     return true;
   default:
     return false;
@@ -336,6 +356,8 @@ bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_de
   case TYPEDESC_USIZE:
   case TYPEDESC_F32:
   case TYPEDESC_F64:
+  case TYPEDESC_C64:
+  case TYPEDESC_C128:
   case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
   case TYPEDESC_UNIT:   return typedesc_prim_is_implicitly_convertible  ((typedesc_prim_t*  )from_desc, to_desc, through_ref);
@@ -370,6 +392,8 @@ bool typedesc_is_explicitly_convertible(typedesc_t* from_desc, typedesc_t* to_de
   case TYPEDESC_USIZE:
   case TYPEDESC_F32:
   case TYPEDESC_F64:
+  case TYPEDESC_C64:
+  case TYPEDESC_C128:
   case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
   case TYPEDESC_UNIT:   return typedesc_prim_is_explicitly_convertible  ((typedesc_prim_t*  )from_desc, to_desc);
@@ -409,33 +433,6 @@ size_t typedesc_integer_bits(typedesc_t* desc)
   }
 
   return 0;
-}
-
-typedesc_t* typedesc_arithmetic_promote(typedesc_t* lhs_desc, typedesc_t* rhs_desc)
-{
-  ASSERT(typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc));
-
-  if (lhs_desc->kind == rhs_desc->kind)
-    return lhs_desc;
-
-  if (typedesc_is_float(lhs_desc) && !typedesc_is_float(rhs_desc))
-    return lhs_desc;
-
-  if (!typedesc_is_float(lhs_desc) && typedesc_is_float(rhs_desc))
-    return rhs_desc;
-
-  if (typedesc_is_float(lhs_desc) && typedesc_is_float(rhs_desc))
-  {
-    if (lhs_desc->kind == TYPEDESC_F64)
-      return lhs_desc;
-
-    return rhs_desc;
-  }
-
-  if (typedesc_integer_bits(lhs_desc) < typedesc_integer_bits(rhs_desc))
-    return rhs_desc;
-
-  return lhs_desc;
 }
 
 bool typedesc_is_callable(typedesc_t* desc)
