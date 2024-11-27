@@ -61,6 +61,8 @@ static const struct
   { "usize",    TOK_KW_USIZE    },
   { "f32",      TOK_KW_F32      },
   { "f64",      TOK_KW_F64      },
+  { "c64",      TOK_KW_C64      },
+  { "c128",     TOK_KW_C128     },
   { "char",     TOK_KW_CHAR     },
   { "bool",     TOK_KW_BOOL     },
   { "unit",     TOK_KW_UNIT     },
@@ -77,6 +79,110 @@ struct lexer_t
   size_t pos; // Current position in the source file.
   vector_t* tokens; // Vector of tokens.
 };
+
+static bool lexer_is_kw_vec(const char* str, size_t len)
+{
+  if (len < 6)
+    return false;
+
+  if (strncmp(str, "vec", 3) != 0)
+    return false;
+
+  str += 3;
+
+  if (!isdigit(*str))
+    return false;
+
+  while (isdigit(*str))
+    str++;
+
+  if (*str == '\0')
+    return false;
+
+  size_t suffix_len = 0;
+
+  while (isalnum(str[suffix_len]))
+    suffix_len++;
+
+  switch (suffix_len)
+  {
+  case 2:
+    if (strncmp("i8", str, suffix_len) == 0 ||
+        strncmp("u8", str, suffix_len) == 0)
+      return true;
+  case 3:
+    if (strncmp("i16", str, suffix_len) == 0 ||
+        strncmp("u16", str, suffix_len) == 0 ||
+        strncmp("i32", str, suffix_len) == 0 ||
+        strncmp("u32", str, suffix_len) == 0 ||
+        strncmp("i64", str, suffix_len) == 0 ||
+        strncmp("u64", str, suffix_len) == 0 ||
+        strncmp("f32", str, suffix_len) == 0 ||
+        strncmp("f64", str, suffix_len) == 0)
+      return true;
+  default:
+    return false;
+  }
+}
+
+static bool lexer_is_kw_mat(const char* str, size_t len)
+{
+  if (len < 6)
+    return false;
+
+  if (strncmp(str, "mat", 3) != 0)
+    return false;
+
+  str += 3;
+
+  if (!isdigit(*str))
+    return false;
+
+  while (isdigit(*str))
+    str++;
+
+  if (*str == '\0')
+    return false;
+
+  if (*str == 'x')
+  {
+    str++;
+
+    if (!isdigit(*str))
+      return false;
+
+    while (isdigit(*str))
+      str++;
+
+    if (*str == '\0')
+      return false;
+  }
+
+  size_t suffix_len = 0;
+
+  while (isalnum(str[suffix_len]))
+    suffix_len++;
+
+  switch (suffix_len)
+  {
+  case 2:
+    if (strncmp("i8", str, suffix_len) == 0 ||
+        strncmp("u8", str, suffix_len) == 0)
+      return true;
+  case 3:
+    if (strncmp("i16", str, suffix_len) == 0 ||
+        strncmp("u16", str, suffix_len) == 0 ||
+        strncmp("i32", str, suffix_len) == 0 ||
+        strncmp("u32", str, suffix_len) == 0 ||
+        strncmp("i64", str, suffix_len) == 0 ||
+        strncmp("u64", str, suffix_len) == 0 ||
+        strncmp("f32", str, suffix_len) == 0 ||
+        strncmp("f64", str, suffix_len) == 0)
+      return true;
+  default:
+    return false;
+  }
+}
 
 lexer_t* lexer_init(void)
 {
@@ -240,7 +346,11 @@ size_t lexer_skip_integer_suffix(lexer_t* lex)
         strncmp("i32", lex->src + begin, len) == 0 ||
         strncmp("u32", lex->src + begin, len) == 0 ||
         strncmp("i64", lex->src + begin, len) == 0 ||
-        strncmp("u64", lex->src + begin, len) == 0)
+        strncmp("u64", lex->src + begin, len) == 0 ||
+        strncmp("c64", lex->src + begin, len) == 0)
+      break;
+  case 4:
+    if (strncmp("c128", lex->src + begin, len) == 0)
       break;
   default:
   {
@@ -286,12 +396,23 @@ token_t* lexer_read_word(lexer_t* lex)
 
   buf[len] = '\0';
 
-  for (size_t i = 0; i < COUNTOF(g_keyword_lookup_table); ++i)
+  if (lexer_is_kw_vec(buf, len))
   {
-    if (strcmp(g_keyword_lookup_table[i].keyword, buf) == 0)
+    tok->kind = TOK_KW_VEC;
+  }
+  else if (lexer_is_kw_mat(buf, len))
+  {
+    tok->kind = TOK_KW_MAT;
+  }
+  else
+  {
+    for (size_t i = 0; i < COUNTOF(g_keyword_lookup_table); ++i)
     {
-      tok->kind = g_keyword_lookup_table[i].kind;
-      break;
+      if (strcmp(g_keyword_lookup_table[i].keyword, buf) == 0)
+      {
+        tok->kind = g_keyword_lookup_table[i].kind;
+        break;
+      }
     }
   }
 

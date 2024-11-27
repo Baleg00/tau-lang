@@ -81,6 +81,10 @@ typedef enum token_kind_e
   TOK_KW_USIZE, ///< Keyword `usize`
   TOK_KW_F32, ///< Keyword `f32`
   TOK_KW_F64, ///< Keyword `f64`
+  TOK_KW_C64, ///< Keyword `c64`
+  TOK_KW_C128, ///< Keyword `c128`
+  TOK_KW_VEC, ///< Keyword `vec`
+  TOK_KW_MAT, ///< Keyword `mat`
   TOK_KW_CHAR, ///< Keyword `char`
   TOK_KW_BOOL, ///< Keyword `bool`
   TOK_KW_UNIT, ///< Keyword `unit`

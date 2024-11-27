@@ -57,6 +57,8 @@ static const struct
   { TOK_KW_USIZE, 5 },
   { TOK_KW_F32, 3 },
   { TOK_KW_F64, 3 },
+  { TOK_KW_C64, 3 },
+  { TOK_KW_C128, 4 },
   { TOK_KW_CHAR, 4 },
   { TOK_KW_BOOL, 4 },
   { TOK_KW_UNIT, 4 },
@@ -292,6 +294,26 @@ static size_t token_len_lit_bool(const char* src, size_t pos)
   return src[pos] == 't' ? 4 : 5;
 }
 
+static size_t token_len_kw_vec(const char* src, size_t pos)
+{
+  size_t begin = pos;
+
+  while (isalnum(src[pos]))
+    pos++;
+
+  return pos - begin;
+}
+
+static size_t token_len_kw_mat(const char* src, size_t pos)
+{
+  size_t begin = pos;
+
+  while (isalnum(src[pos]))
+    pos++;
+
+  return pos - begin;
+}
+
 static size_t token_len_by_kind(token_kind_t kind)
 {
   for (size_t i = 0; i < COUNTOF(g_token_len_lookup); i++)
@@ -337,6 +359,8 @@ location_t token_location(token_t* tok)
   case TOK_LIT_STR:  len = token_len_lit_str (src, tok->pos); break;
   case TOK_LIT_CHAR: len = token_len_lit_char(src, tok->pos); break;
   case TOK_LIT_BOOL: len = token_len_lit_bool(src, tok->pos); break;
+  case TOK_KW_VEC:   len = token_len_kw_vec  (src, tok->pos); break;
+  case TOK_KW_MAT:   len = token_len_kw_mat  (src, tok->pos); break;
   default:           len = token_len_by_kind (tok->kind    ); break;
   }
 
@@ -446,6 +470,10 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_USIZE:                    return "TOK_KW_USIZE";
   case TOK_KW_F32:                      return "TOK_KW_F32";
   case TOK_KW_F64:                      return "TOK_KW_F64";
+  case TOK_KW_C64:                      return "TOK_KW_C64";
+  case TOK_KW_C128:                     return "TOK_KW_C128";
+  case TOK_KW_VEC:                      return "TOK_KW_VEC";
+  case TOK_KW_MAT:                      return "TOK_KW_MAT";
   case TOK_KW_CHAR:                     return "TOK_KW_CHAR";
   case TOK_KW_BOOL:                     return "TOK_KW_BOOL";
   case TOK_KW_UNIT:                     return "TOK_KW_UNIT";
@@ -575,6 +603,10 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_USIZE:
   case TOK_KW_F32:
   case TOK_KW_F64:
+  case TOK_KW_C64:
+  case TOK_KW_C128:
+  case TOK_KW_VEC:
+  case TOK_KW_MAT:
   case TOK_KW_CHAR:
   case TOK_KW_BOOL:
   case TOK_KW_UNIT:

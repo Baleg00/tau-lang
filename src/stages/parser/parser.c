@@ -391,6 +391,14 @@ ast_node_t* parser_parse_type(parser_t* par)
     node = (ast_node_t*)ast_type_prim_f64_init();
     node->tok = parser_expect(par, TOK_KW_F64);
     break;
+  case TOK_KW_C64:
+    node = (ast_node_t*)ast_type_prim_c64_init();
+    node->tok = parser_expect(par, TOK_KW_C64);
+    break;
+  case TOK_KW_C128:
+    node = (ast_node_t*)ast_type_prim_c128_init();
+    node->tok = parser_expect(par, TOK_KW_C128);
+    break;
   case TOK_KW_CHAR:
     node = (ast_node_t*)ast_type_prim_char_init();
     node->tok = parser_expect(par, TOK_KW_CHAR);
