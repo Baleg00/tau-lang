@@ -79,9 +79,6 @@ void ast_decl_var_codegen(codegen_ctx_t* ctx, ast_decl_var_t* node)
 {
   ast_node_codegen(ctx, node->type);
 
-  if (node->expr != NULL)
-    ast_node_codegen(ctx, node->expr);
-
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
@@ -89,6 +86,8 @@ void ast_decl_var_codegen(codegen_ctx_t* ctx, ast_decl_var_t* node)
 
   if (node->expr != NULL)
   {
+    ast_node_codegen(ctx, node->expr);
+
     typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
 
     LLVMValueRef llvm_value = ((ast_expr_t*)node->expr)->llvm_value;

@@ -43,7 +43,7 @@ LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm
  * 
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] llvm_value The LLVM value reference to be wrapped.
- * \param[in] from_desc Pointer to the type descriptor of value ro be wrapped.
+ * \param[in] from_desc Pointer to the type descriptor of value to be wrapped.
  * \param[in] to_desc Pointer to the type descriptor of the optional.
  * \returns The wrapped LLVM value reference.
  */
@@ -71,6 +71,85 @@ LLVMValueRef codegen_build_opt_unwrap_unchecked(codegen_ctx_t* ctx, LLVMValueRef
  * `llvm_value`.
  */
 LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
+
+/**
+ * \brief Builds an LLVM instruction to create a complex floating-point number.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] llvm_value_real The LLVM value reference of the real argument.
+ * \param[in] llvm_value_imag The LLVM value reference of the imaginary argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_complex(codegen_ctx_t* ctx, LLVMValueRef llvm_value_real, LLVMValueRef llvm_value_imag);
+
+/**
+ * \brief Builds an LLVM instruction to negate a complex floating-point number.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] llvm_value The LLVM value reference of the argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_complex_neg(codegen_ctx_t* ctx, LLVMValueRef llvm_value);
+
+/**
+ * \brief Builds an LLVM instruction to add two complex floating-point numbers.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] llvm_lhs The LLVM value reference of the left-hand argument.
+ * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_complex_add(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+
+/**
+ * \brief Builds an LLVM instruction to subtract two complex floating-point numbers.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] llvm_lhs The LLVM value reference of the left-hand argument.
+ * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_complex_sub(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+
+/**
+ * \brief Builds an LLVM instruction to multiply two complex floating-point numbers.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] llvm_lhs The LLVM value reference of the left-hand argument.
+ * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_complex_mul(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+
+/**
+ * \brief Builds an LLVM instruction to divide two complex floating-point numbers.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] llvm_lhs The LLVM value reference of the left-hand argument.
+ * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_complex_div(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+
+/**
+ * \brief Builds an LLVM instruction to compare two complex floating-point numbers for equality.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] llvm_lhs The LLVM value reference of the left-hand argument.
+ * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_complex_eq(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+
+/**
+ * \brief Builds an LLVM instruction to compare two complex floating-point numbers for inequality.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] llvm_lhs The LLVM value reference of the left-hand argument.
+ * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_complex_ne(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
 
 TAU_EXTERN_C_END
 

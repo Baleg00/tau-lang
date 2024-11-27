@@ -90,6 +90,10 @@ void ast_expr_op_bin_cmp_ne_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_ne_t
   {
     node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealONE, llvm_lhs_value, llvm_rhs_value, "");
   }
+  else if (typedesc_is_complex(promoted_desc))
+  {
+    node->llvm_value = codegen_build_complex_ne(ctx, llvm_lhs_value, llvm_rhs_value);
+  }
   else
   {
     UNREACHABLE();

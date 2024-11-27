@@ -102,6 +102,10 @@ void ast_expr_op_bin_arit_div_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_arit_d
   {
     node->llvm_value = LLVMBuildFDiv(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, "");
   }
+  else if (typedesc_is_complex(desc))
+  {
+    node->llvm_value = codegen_build_complex_div(ctx, llvm_lhs_value, llvm_rhs_value);
+  }
   else
   {
     UNREACHABLE();
