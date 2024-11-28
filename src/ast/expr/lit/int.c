@@ -8,7 +8,7 @@
 #include "ast/expr/lit/int.h"
 
 #include "ast/registry.h"
-#include "stages/codegen/utils.h"
+#include "stages/codegen/codegen.h"
 #include "utils/common.h"
 #include "utils/diagnostics.h"
 #include "utils/memory/memtrace.h"

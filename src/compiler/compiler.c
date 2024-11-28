@@ -231,6 +231,9 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
     codegen_ctx_free(codegen_ctx);
   }
 
+  if (options_get_dump_ll(compiler->options))
+    compiler_emit_ll(path, env->llvm_module);
+
   LLVMVerifyModule(env->llvm_module, LLVMAbortProcessAction, NULL);
 
   LLVMPassBuilderOptionsRef llvm_pass_builder_options = LLVMCreatePassBuilderOptions();
@@ -243,9 +246,6 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
   // LLVMRunPasses(llvm_module, "default<O3>", llvm_get_machine(), llvm_pass_builder_options);
 
   LLVMDisposePassBuilderOptions(llvm_pass_builder_options);
-
-  if (options_get_dump_ll(compiler->options))
-    compiler_emit_ll(path, env->llvm_module);
 
   if (options_get_dump_bc(compiler->options))
     compiler_emit_bc(path, env->llvm_module);
