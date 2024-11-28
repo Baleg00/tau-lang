@@ -58,7 +58,7 @@ void ast_expr_op_bin_assign_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_assi
     report_error_expected_mutable_type(loc);
   }
 
-  if (!typedesc_is_implicitly_convertible(rhs_desc, typedesc_remove_ref_mut(lhs_desc), false))
+  if (!typedesc_is_implicitly_direct_convertible(rhs_desc, typedesc_remove_ref_mut(lhs_desc)))
   {
     location_t loc = token_location(node->lhs->tok);
 

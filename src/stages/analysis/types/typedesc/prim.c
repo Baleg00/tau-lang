@@ -110,74 +110,66 @@ void typedesc_prim_free(typedesc_prim_t* desc)
   free(desc);
 }
 
-bool typedesc_prim_is_implicitly_convertible(typedesc_prim_t* from_desc, typedesc_t* to_desc, bool through_ref)
+bool typedesc_prim_is_implicitly_direct_convertible(typedesc_prim_t* src_desc, typedesc_t* dst_desc)
 {
-  if (to_desc->kind == TYPEDESC_OPT)
-  {
-    if (through_ref)
-      return false;
+  if (dst_desc->kind == TYPEDESC_OPT)
+    return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
 
-    return typedesc_is_implicitly_convertible((typedesc_t*)from_desc, typedesc_remove_opt(to_desc), through_ref);
-  }
+  dst_desc = typedesc_remove_mut(dst_desc);
 
-  if (through_ref)
-    return (typedesc_t*)from_desc == to_desc;
-
-  to_desc = typedesc_remove_mut(to_desc);
-
-  if ((typedesc_t*)from_desc == to_desc)
+  if ((typedesc_t*)src_desc == dst_desc)
     return true;
 
-  if (typedesc_is_arithmetic((typedesc_t*)from_desc) && typedesc_is_arithmetic(to_desc))
+  if (typedesc_is_arithmetic((typedesc_t*)src_desc) && typedesc_is_arithmetic(dst_desc))
   {
-    if (typedesc_is_float((typedesc_t*)from_desc))
+    if (typedesc_is_float((typedesc_t*)src_desc))
     {
-      if (typedesc_is_float(to_desc))
-        return !(from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32);
+      if (typedesc_is_float(dst_desc))
+        return !(src_desc->kind == TYPEDESC_F64 && dst_desc->kind == TYPEDESC_F32);
 
-      if (typedesc_is_integer(to_desc))
+      if (typedesc_is_integer(dst_desc))
         return false;
 
-      if (typedesc_is_complex(to_desc))
-        return !(from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_C64);
+      if (typedesc_is_complex(dst_desc))
+        return !(src_desc->kind == TYPEDESC_F64 && dst_desc->kind == TYPEDESC_C64);
     }
 
-    if (typedesc_is_integer((typedesc_t*)from_desc))
+    if (typedesc_is_integer((typedesc_t*)src_desc))
     {
-      if (typedesc_is_integer(to_desc))
+      if (typedesc_is_integer(dst_desc))
       {
-        if (typedesc_is_signed((typedesc_t*)from_desc) == typedesc_is_signed(to_desc))
-          return typedesc_integer_bits((typedesc_t*)from_desc) <= typedesc_integer_bits(to_desc);
+        if (typedesc_is_signed((typedesc_t*)src_desc) == typedesc_is_signed(dst_desc))
+          return typedesc_integer_bits((typedesc_t*)src_desc) <= typedesc_integer_bits(dst_desc);
 
-        if (typedesc_is_signed((typedesc_t*)from_desc) && typedesc_is_unsigned(to_desc))
+        if (typedesc_is_signed((typedesc_t*)src_desc) && typedesc_is_unsigned(dst_desc))
           return false;
 
-        return typedesc_integer_bits((typedesc_t*)from_desc) < typedesc_integer_bits(to_desc);
+        return typedesc_integer_bits((typedesc_t*)src_desc) < typedesc_integer_bits(dst_desc);
       }
 
-      if (to_desc->kind == TYPEDESC_F32)
-        return typedesc_integer_bits((typedesc_t*)from_desc) <= 16;
+      if (dst_desc->kind == TYPEDESC_F32)
+        return typedesc_integer_bits((typedesc_t*)src_desc) <= 16;
 
-      if (to_desc->kind == TYPEDESC_F64)
-        return typedesc_integer_bits((typedesc_t*)from_desc) <= 32;
+      if (dst_desc->kind == TYPEDESC_F64)
+        return typedesc_integer_bits((typedesc_t*)src_desc) <= 32;
 
-      if (to_desc->kind == TYPEDESC_C64)
-        return typedesc_integer_bits((typedesc_t*)from_desc) <= 16;
+      if (dst_desc->kind == TYPEDESC_C64)
+        return typedesc_integer_bits((typedesc_t*)src_desc) <= 16;
 
-      if (to_desc->kind == TYPEDESC_C128)
-        return typedesc_integer_bits((typedesc_t*)from_desc) <= 32;
+      if (dst_desc->kind == TYPEDESC_C128)
+        return typedesc_integer_bits((typedesc_t*)src_desc) <= 32;
     }
   }
 
   return false;
 }
 
-bool typedesc_prim_is_explicitly_convertible(typedesc_prim_t* from_desc, typedesc_t* to_desc)
+bool typedesc_prim_is_implicitly_indirect_convertible(typedesc_prim_t* src_desc, typedesc_t* dst_desc)
 {
-  to_desc = typedesc_remove_mut(to_desc);
+  return (typedesc_t*)src_desc == dst_desc;
+}
 
-  if (typedesc_is_arithmetic((typedesc_t*)from_desc) && typedesc_is_arithmetic(to_desc))
-    return true;
-
-  return false;
+bool typedesc_prim_is_explicitly_convertible(typedesc_prim_t* UNUSED(src_desc), typedesc_t* dst_desc)
+{
+  return typedesc_is_arithmetic(typedesc_remove_mut(dst_desc));
 }

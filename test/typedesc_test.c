@@ -256,7 +256,7 @@ test()
       end()
     end()
 
-    describe("typedesc_is_implicitly_convertible")
+    describe("typedesc_is_implicitly_direct_convertible")
       it("should convert primitive type to itself")
         typedesc_prim_t* i8_desc    = typedesc_prim_i8_init();
         typedesc_prim_t* i16_desc   = typedesc_prim_i16_init();
@@ -269,16 +269,16 @@ test()
         typedesc_prim_t* u64_desc   = typedesc_prim_u64_init();
         typedesc_prim_t* usize_desc = typedesc_prim_usize_init();
 
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)i8_desc,    (typedesc_t*)i8_desc,    false));
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)i16_desc,   (typedesc_t*)i16_desc,   false));
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)i32_desc,   (typedesc_t*)i32_desc,   false));
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)i64_desc,   (typedesc_t*)i64_desc,   false));
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)isize_desc, (typedesc_t*)isize_desc, false));
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)u8_desc,    (typedesc_t*)u8_desc,    false));
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)u16_desc,   (typedesc_t*)u16_desc,   false));
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)u32_desc,   (typedesc_t*)u32_desc,   false));
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)u64_desc,   (typedesc_t*)u64_desc,   false));
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)usize_desc, (typedesc_t*)usize_desc, false));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)i8_desc,    (typedesc_t*)i8_desc   ));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)i16_desc,   (typedesc_t*)i16_desc  ));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)i32_desc,   (typedesc_t*)i32_desc  ));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)i64_desc,   (typedesc_t*)i64_desc  ));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)isize_desc, (typedesc_t*)isize_desc));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)u8_desc,    (typedesc_t*)u8_desc   ));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)u16_desc,   (typedesc_t*)u16_desc  ));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)u32_desc,   (typedesc_t*)u32_desc  ));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)u64_desc,   (typedesc_t*)u64_desc  ));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)usize_desc, (typedesc_t*)usize_desc));
 
         typedesc_free((typedesc_t*)i8_desc   );
         typedesc_free((typedesc_t*)i16_desc  );
@@ -298,7 +298,7 @@ test()
 
         mut_desc->base_type = (typedesc_t*)unit_desc;
 
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)mut_desc, (typedesc_t*)unit_desc, false));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)mut_desc, (typedesc_t*)unit_desc));
 
         typedesc_free((typedesc_t*)mut_desc);
         typedesc_free((typedesc_t*)unit_desc);
@@ -310,7 +310,7 @@ test()
 
         mut_desc->base_type = (typedesc_t*)unit_desc;
 
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)unit_desc, (typedesc_t*)mut_desc, false));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)unit_desc, (typedesc_t*)mut_desc));
 
         typedesc_free((typedesc_t*)mut_desc);
         typedesc_free((typedesc_t*)unit_desc);
@@ -326,7 +326,7 @@ test()
         mut_desc->base_type = (typedesc_t*)unit_desc;
         ref_mut_desc->base_type = (typedesc_t*)mut_desc;
 
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)ref_mut_desc, (typedesc_t*)ref_imm_desc, false));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)ref_mut_desc, (typedesc_t*)ref_imm_desc));
 
         typedesc_free((typedesc_t*)ref_mut_desc);
         typedesc_free((typedesc_t*)mut_desc);
@@ -344,7 +344,7 @@ test()
         mut_desc->base_type = (typedesc_t*)unit_desc;
         ref_mut_desc->base_type = (typedesc_t*)mut_desc;
 
-        assert_false(typedesc_is_implicitly_convertible((typedesc_t*)ref_imm_desc, (typedesc_t*)ref_mut_desc, false));
+        assert_false(typedesc_is_implicitly_direct_convertible((typedesc_t*)ref_imm_desc, (typedesc_t*)ref_mut_desc));
 
         typedesc_free((typedesc_t*)ref_mut_desc);
         typedesc_free((typedesc_t*)mut_desc);
@@ -362,7 +362,7 @@ test()
         mut_desc->base_type = (typedesc_t*)unit_desc;
         ptr_mut_desc->base_type = (typedesc_t*)mut_desc;
 
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)ptr_mut_desc, (typedesc_t*)ptr_imm_desc, false));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)ptr_mut_desc, (typedesc_t*)ptr_imm_desc));
 
         typedesc_free((typedesc_t*)ptr_mut_desc);
         typedesc_free((typedesc_t*)mut_desc);
@@ -380,7 +380,7 @@ test()
         mut_desc->base_type = (typedesc_t*)unit_desc;
         ptr_mut_desc->base_type = (typedesc_t*)mut_desc;
 
-        assert_false(typedesc_is_implicitly_convertible((typedesc_t*)ptr_imm_desc, (typedesc_t*)ptr_mut_desc, false));
+        assert_false(typedesc_is_implicitly_direct_convertible((typedesc_t*)ptr_imm_desc, (typedesc_t*)ptr_mut_desc));
 
         typedesc_free((typedesc_t*)ptr_mut_desc);
         typedesc_free((typedesc_t*)mut_desc);
@@ -405,7 +405,7 @@ test()
         mut_ptr_desc->base_type = (typedesc_t*)ptr_mut_desc;
         ref_ptr_mut_desc->base_type = (typedesc_t*)mut_ptr_desc;
 
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)ref_ptr_mut_desc, (typedesc_t*)ref_ptr_imm_desc, false));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)ref_ptr_mut_desc, (typedesc_t*)ref_ptr_imm_desc));
 
         typedesc_free((typedesc_t*)ref_ptr_imm_desc);
         typedesc_free((typedesc_t*)ref_ptr_mut_desc);
@@ -433,7 +433,7 @@ test()
         mut_ptr_desc->base_type = (typedesc_t*)ptr_mut_desc;
         ref_ptr_mut_desc->base_type = (typedesc_t*)mut_ptr_desc;
 
-        assert_false(typedesc_is_implicitly_convertible((typedesc_t*)ref_ptr_imm_desc, (typedesc_t*)ref_ptr_mut_desc, false));
+        assert_false(typedesc_is_implicitly_direct_convertible((typedesc_t*)ref_ptr_imm_desc, (typedesc_t*)ref_ptr_mut_desc));
 
         typedesc_free((typedesc_t*)ref_ptr_imm_desc);
         typedesc_free((typedesc_t*)ref_ptr_mut_desc);
@@ -459,7 +459,7 @@ test()
         mut_ptr_desc->base_type = (typedesc_t*)ptr_mut_desc;
         ref_mut_desc->base_type = (typedesc_t*)mut_ptr_desc;
 
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)ref_mut_desc, (typedesc_t*)ref_imm_desc, false));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)ref_mut_desc, (typedesc_t*)ref_imm_desc));
 
         typedesc_free((typedesc_t*)ref_mut_desc);
         typedesc_free((typedesc_t*)ptr_mut_desc);
@@ -484,7 +484,7 @@ test()
         mut_ptr_desc->base_type = (typedesc_t*)ptr_mut_desc;
         ref_mut_desc->base_type = (typedesc_t*)mut_ptr_desc;
 
-        assert_false(typedesc_is_implicitly_convertible((typedesc_t*)ref_imm_desc, (typedesc_t*)ref_mut_desc, false));
+        assert_false(typedesc_is_implicitly_direct_convertible((typedesc_t*)ref_imm_desc, (typedesc_t*)ref_mut_desc));
 
         typedesc_free((typedesc_t*)ref_mut_desc);
         typedesc_free((typedesc_t*)ptr_mut_desc);
@@ -511,7 +511,7 @@ test()
         mut_ptr_desc->base_type = (typedesc_t*)ptr_mut_desc;
         ref_mut_desc->base_type = (typedesc_t*)mut_ptr_desc;
 
-        assert_true(typedesc_is_implicitly_convertible((typedesc_t*)ref_mut_desc, (typedesc_t*)ref_imm_desc, false));
+        assert_true(typedesc_is_implicitly_direct_convertible((typedesc_t*)ref_mut_desc, (typedesc_t*)ref_imm_desc));
 
         typedesc_free((typedesc_t*)ref_mut_desc);
         typedesc_free((typedesc_t*)ptr_mut_desc);
@@ -539,7 +539,7 @@ test()
         mut_ptr_desc->base_type = (typedesc_t*)ptr_mut_desc;
         ref_mut_desc->base_type = (typedesc_t*)mut_ptr_desc;
 
-        assert_false(typedesc_is_implicitly_convertible((typedesc_t*)ref_imm_desc, (typedesc_t*)ref_mut_desc, false));
+        assert_false(typedesc_is_implicitly_direct_convertible((typedesc_t*)ref_imm_desc, (typedesc_t*)ref_mut_desc));
 
         typedesc_free((typedesc_t*)ref_mut_desc);
         typedesc_free((typedesc_t*)ptr_mut_desc);

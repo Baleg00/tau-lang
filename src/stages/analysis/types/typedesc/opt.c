@@ -25,18 +25,26 @@ void typedesc_opt_free(typedesc_opt_t* desc)
   free(desc);
 }
 
-bool typedesc_opt_is_implicitly_convertible(typedesc_opt_t* from_desc, typedesc_t* to_desc, bool UNUSED(through_ref))
+bool typedesc_opt_is_implicitly_direct_convertible(typedesc_opt_t* src_desc, typedesc_t* dst_desc)
 {
-  if (to_desc->kind != TYPEDESC_OPT)
+  if (dst_desc->kind != TYPEDESC_OPT)
     return false;
 
-  return typedesc_is_implicitly_convertible(from_desc->base_type, typedesc_remove_opt(to_desc), true);
+  return typedesc_is_implicitly_indirect_convertible(src_desc->base_type, typedesc_remove_opt(dst_desc));
 }
 
-bool typedesc_opt_is_explicitly_convertible(typedesc_opt_t* from_desc, typedesc_t* to_desc)
+bool typedesc_opt_is_implicitly_indirect_convertible(typedesc_opt_t* src_desc, typedesc_t* dst_desc)
 {
-  if (to_desc->kind != TYPEDESC_OPT)
+  if (dst_desc->kind != TYPEDESC_OPT)
     return false;
 
-  return typedesc_is_explicitly_convertible(from_desc->base_type, typedesc_remove_opt(to_desc));
+  return typedesc_is_implicitly_indirect_convertible(src_desc->base_type, typedesc_remove_opt(dst_desc));
+}
+
+bool typedesc_opt_is_explicitly_convertible(typedesc_opt_t* src_desc, typedesc_t* dst_desc)
+{
+  if (dst_desc->kind != TYPEDESC_OPT)
+    return false;
+
+  return typedesc_is_explicitly_convertible(src_desc->base_type, typedesc_remove_opt(dst_desc));
 }

@@ -39,23 +39,31 @@ typedesc_struct_t* typedesc_struct_init(void);
 void typedesc_struct_free(typedesc_struct_t* desc);
 
 /**
- * \brief Checks if a struct type is implicitly convertible to another type.
+ * \brief Checks if a struct type is implicitly direct convertible to another type.
  * 
- * \param[in] from_desc Pointer to the struct type descriptor.
- * \param[in] to_desc Pointer to the type descriptor to check conversion into.
- * \param[in] through_ref Whether the conversion is done through any kind of reference.
+ * \param[in] src_desc Pointer to the source struct type descriptor.
+ * \param[in] dst_desc Pointer to the destination type descriptor.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_struct_is_implicitly_convertible(typedesc_struct_t* from_desc, typedesc_t* to_desc, bool through_ref);
+bool typedesc_struct_is_implicitly_direct_convertible(typedesc_struct_t* src_desc, typedesc_t* dst_desc);
+
+/**
+ * \brief Checks if a struct type is implicitly indirect convertible to another type.
+ *
+ * \param[in] src_desc Pointer to the source struct type descriptor.
+ * \param[in] dst_desc Pointer to the destination type descriptor.
+ * \returns `true` if the implicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_struct_is_implicitly_indirect_convertible(typedesc_struct_t* src_desc, typedesc_t* dst_desc);
 
 /**
  * \brief Checks if a struct type is explicitly convertible to another type.
  * 
- * \param[in] from_desc Pointer to the struct type descriptor.
- * \param[in] to_desc Pointer to the type descriptor to check conversion into.
+ * \param[in] src_desc Pointer to the source struct type descriptor.
+ * \param[in] dst_desc Pointer to the destination type descriptor.
  * \returns `true` if the explicit conversion is possible, `false` otherwise.
  */
-bool typedesc_struct_is_explicitly_convertible(typedesc_struct_t* from_desc, typedesc_t* to_desc);
+bool typedesc_struct_is_explicitly_convertible(typedesc_struct_t* src_desc, typedesc_t* dst_desc);
 
 TAU_EXTERN_C_END
 
