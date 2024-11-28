@@ -797,6 +797,44 @@ typedesc_t* typebuilder_struct_set_body(typebuilder_t* builder, typedesc_t* desc
   return (typedesc_t*)desc;
 }
 
+static typedesc_t* typebuilder_build_promoted_arithmetic_from_integer_and_integer(typebuilder_t* builder, typedesc_t* int_desc1, typedesc_t* int_desc2)
+{
+  if (typedesc_is_signed(int_desc1) == typedesc_is_signed(int_desc2))
+    return typedesc_integer_bits(int_desc1) >= typedesc_integer_bits(int_desc2) ? int_desc1 : int_desc2;
+
+  size_t max_bits = MAX(typedesc_integer_bits(int_desc1), typedesc_integer_bits(int_desc2));
+
+  if (max_bits < 64)
+    max_bits += 1;
+
+  return typebuilder_build_integer(builder, max_bits, true);
+}
+
+static typedesc_t* typebuilder_build_promoted_arithmetic_from_integer_and_float(typebuilder_t* builder, typedesc_t* int_desc, typedesc_t* float_desc)
+{
+  return typedesc_integer_bits(int_desc) <= 16 ? float_desc : typebuilder_build_f64(builder);
+}
+
+static typedesc_t* typebuilder_build_promoted_arithmetic_from_integer_and_complex(typebuilder_t* builder, typedesc_t* int_desc, typedesc_t* complex_desc)
+{
+  return typedesc_integer_bits(int_desc) <= 16 ? complex_desc : typebuilder_build_c128(builder);
+}
+
+static typedesc_t* typebuilder_build_promoted_arithmetic_from_float_and_float(typebuilder_t* UNUSED(builder), typedesc_t* float_desc1, typedesc_t* float_desc2)
+{
+  return float_desc1->kind == TYPEDESC_F64 ? float_desc1 : float_desc2;
+}
+
+static typedesc_t* typebuilder_build_promoted_arithmetic_from_float_and_complex(typebuilder_t* builder, typedesc_t* float_desc, typedesc_t* complex_desc)
+{
+  return float_desc->kind == TYPEDESC_F32 ? complex_desc : typebuilder_build_c128(builder);
+}
+
+static typedesc_t* typebuilder_build_promoted_arithmetic_from_complex_and_complex(typebuilder_t* UNUSED(builder), typedesc_t* complex_desc1, typedesc_t* complex_desc2)
+{
+  return complex_desc1->kind == TYPEDESC_C128 ? complex_desc1 : complex_desc2;
+}
+
 typedesc_t* typebuilder_build_promoted_arithmetic(typebuilder_t* builder, typedesc_t* lhs_desc, typedesc_t* rhs_desc)
 {
   ASSERT(typedesc_is_arithmetic(lhs_desc));
@@ -805,66 +843,32 @@ typedesc_t* typebuilder_build_promoted_arithmetic(typebuilder_t* builder, typede
   if (lhs_desc == rhs_desc)
     return lhs_desc;
 
-  if (typedesc_is_float(lhs_desc))
-  {
-    if (typedesc_is_float(rhs_desc))
-      return lhs_desc->kind == TYPEDESC_F64 ? lhs_desc : rhs_desc;
+  if (typedesc_is_integer(lhs_desc) && typedesc_is_integer(rhs_desc))
+    return typebuilder_build_promoted_arithmetic_from_integer_and_integer(builder, lhs_desc, rhs_desc);
 
-    if (typedesc_is_integer(rhs_desc))
-    {
-      if (lhs_desc->kind == TYPEDESC_F32)
-        return typedesc_integer_bits(rhs_desc) <= 16 ? lhs_desc : typebuilder_build_f64(builder);
+  if (typedesc_is_integer(lhs_desc) && typedesc_is_float(rhs_desc))
+    return typebuilder_build_promoted_arithmetic_from_integer_and_float(builder, lhs_desc, rhs_desc);
 
-      return lhs_desc;
-    }
+  if (typedesc_is_float(lhs_desc) && typedesc_is_integer(rhs_desc))
+    return typebuilder_build_promoted_arithmetic_from_integer_and_float(builder, rhs_desc, lhs_desc);
 
-    if (typedesc_is_complex(rhs_desc))
-      return lhs_desc->kind == TYPEDESC_F32 ? rhs_desc : typebuilder_build_c128(builder);
-  }
+  if (typedesc_is_integer(lhs_desc) && typedesc_is_complex(rhs_desc))
+    return typebuilder_build_promoted_arithmetic_from_integer_and_complex(builder, lhs_desc, rhs_desc);
 
-  if (typedesc_is_integer(lhs_desc))
-  {
-    if (typedesc_is_integer(rhs_desc))
-    {
-      if (typedesc_is_signed(lhs_desc) == typedesc_is_signed(rhs_desc))
-        return typedesc_integer_bits(lhs_desc) >= typedesc_integer_bits(rhs_desc) ? lhs_desc : rhs_desc;
+  if (typedesc_is_complex(lhs_desc) && typedesc_is_integer(rhs_desc))
+    return typebuilder_build_promoted_arithmetic_from_integer_and_complex(builder, rhs_desc, lhs_desc);
 
-      return typebuilder_build_integer(builder, MAX(typedesc_integer_bits(lhs_desc), typedesc_integer_bits(rhs_desc)), true);
-    }
+  if (typedesc_is_float(lhs_desc) && typedesc_is_float(rhs_desc))
+    return typebuilder_build_promoted_arithmetic_from_float_and_float(builder, lhs_desc, rhs_desc);
 
-    if (typedesc_is_float(rhs_desc))
-    {
-      if (rhs_desc->kind == TYPEDESC_F32)
-        return typedesc_integer_bits(lhs_desc) <= 16 ? rhs_desc : typebuilder_build_f64(builder);
+  if (typedesc_is_float(lhs_desc) && typedesc_is_complex(rhs_desc))
+    return typebuilder_build_promoted_arithmetic_from_float_and_complex(builder, lhs_desc, rhs_desc);
 
-      return rhs_desc;
-    }
+  if (typedesc_is_complex(lhs_desc) && typedesc_is_float(rhs_desc))
+    return typebuilder_build_promoted_arithmetic_from_float_and_complex(builder, rhs_desc, lhs_desc);
 
-    if (typedesc_is_complex(rhs_desc))
-    {
-      if (typedesc_integer_bits(lhs_desc) > 16)
-        return typebuilder_build_c128(builder);
-
-      return rhs_desc;
-    }
-  }
-
-  if (typedesc_is_complex(lhs_desc))
-  {
-    if (typedesc_is_complex(rhs_desc))
-      return lhs_desc->kind == TYPEDESC_C128 ? lhs_desc : rhs_desc;
-
-    if (typedesc_is_integer(rhs_desc))
-    {
-      if (typedesc_integer_bits(rhs_desc) > 16)
-        return typebuilder_build_c128(builder);
-
-      return lhs_desc;
-    }
-
-    if (typedesc_is_float(rhs_desc))
-      return rhs_desc->kind == TYPEDESC_F32 ? lhs_desc : typebuilder_build_c128(builder);
-  }
+  if (typedesc_is_complex(lhs_desc) && typedesc_is_complex(rhs_desc))
+    return typebuilder_build_promoted_arithmetic_from_complex_and_complex(builder, lhs_desc, rhs_desc);
 
   UNREACHABLE();
   return NULL;
