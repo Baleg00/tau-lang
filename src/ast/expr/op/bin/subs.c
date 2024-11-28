@@ -44,7 +44,7 @@ void ast_expr_op_bin_subs_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_subs_t
   typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
   ASSERT(rhs_desc != NULL);
 
-  if (typedesc_remove_ref_mut(lhs_desc)->kind != TYPEDESC_ARRAY)
+  if (!typedesc_is_array(typedesc_remove_ref_mut(lhs_desc)))
   {
     location_t loc = token_location(node->lhs->tok);
 

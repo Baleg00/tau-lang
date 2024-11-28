@@ -30,7 +30,7 @@ void typedesc_union_free(typedesc_union_t* desc)
 
 bool typedesc_union_is_implicitly_direct_convertible(typedesc_union_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(dst_desc))
     return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
 
   return (typedesc_t*)src_desc == dst_desc;

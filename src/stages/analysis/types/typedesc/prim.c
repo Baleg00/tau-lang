@@ -112,7 +112,7 @@ void typedesc_prim_free(typedesc_prim_t* desc)
 
 bool typedesc_prim_is_implicitly_direct_convertible(typedesc_prim_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(dst_desc))
     return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
 
   dst_desc = typedesc_remove_mut(dst_desc);

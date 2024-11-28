@@ -38,7 +38,7 @@ void ast_expr_op_un_ind_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_ind_t* no
   typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
   ASSERT(expr_desc != NULL);
 
-  if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_PTR)
+  if (!typedesc_is_ptr(typedesc_remove_ref_mut(expr_desc)))
   {
     location_t loc = token_location(node->expr->tok);
 

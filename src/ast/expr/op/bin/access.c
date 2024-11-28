@@ -63,9 +63,9 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
   }
   else
   {
-    ASSERT(lhs_desc->kind == TYPEDESC_REF);
+    ASSERT(typedesc_is_ref(lhs_desc));
 
-    bool is_mut = typedesc_remove_ref(lhs_desc)->kind == TYPEDESC_MUT;
+    bool is_mut = typedesc_is_mut(typedesc_remove_ref(lhs_desc));
 
     typedesc_t* base_desc = typedesc_remove_ref_mut(lhs_desc);
 

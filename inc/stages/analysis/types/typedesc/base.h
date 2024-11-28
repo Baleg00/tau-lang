@@ -180,6 +180,46 @@ bool typedesc_is_composite(typedesc_t* desc);
 bool typedesc_is_decl(typedesc_t* desc);
 
 /**
+ * \brief Checks if the given type descriptor is a mutable type.
+ *
+ * \param[in] desc The type descriptor.
+ * \returns `true` if the descriptor is a mutable type, otherwise `false`.
+ */
+bool typedesc_is_mut(typedesc_t* desc);
+
+/**
+ * \brief Checks if the given type descriptor is a pointer type.
+ *
+ * \param[in] desc The type descriptor.
+ * \returns `true` if the descriptor is a pointer type, otherwise `false`.
+ */
+bool typedesc_is_ptr(typedesc_t* desc);
+
+/**
+ * \brief Checks if the given type descriptor is an array type.
+ *
+ * \param[in] desc The type descriptor.
+ * \returns `true` if the descriptor is an array type, otherwise `false`.
+ */
+bool typedesc_is_array(typedesc_t* desc);
+
+/**
+ * \brief Checks if the given type descriptor is a reference type.
+ *
+ * \param[in] desc The type descriptor.
+ * \returns `true` if the descriptor is a reference type, otherwise `false`.
+ */
+bool typedesc_is_ref(typedesc_t* desc);
+
+/**
+ * \brief Checks if the given type descriptor is an optional type.
+ *
+ * \param[in] desc The type descriptor.
+ * \returns `true` if the descriptor is an optional type, otherwise `false`.
+ */
+bool typedesc_is_opt(typedesc_t* desc);
+
+/**
  * \brief Removes the topmost mutable modifier from a type descriptor.
  * 
  * \param[in] desc Pointer to the type descriptor.

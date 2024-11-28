@@ -30,7 +30,7 @@ void typedesc_struct_free(typedesc_struct_t* desc)
 
 bool typedesc_struct_is_implicitly_direct_convertible(typedesc_struct_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(dst_desc))
     return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
 
   return (typedesc_t*)src_desc == dst_desc;

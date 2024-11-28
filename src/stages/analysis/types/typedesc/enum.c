@@ -27,7 +27,7 @@ void typedesc_enum_free(typedesc_enum_t* desc)
 
 bool typedesc_enum_is_implicitly_direct_convertible(typedesc_enum_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(dst_desc))
     return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
 
   return (typedesc_t*)src_desc == dst_desc;

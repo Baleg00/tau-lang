@@ -27,12 +27,12 @@ void typedesc_ref_free(typedesc_ref_t* desc)
 
 bool typedesc_ref_is_implicitly_direct_convertible(typedesc_ref_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind != TYPEDESC_REF)
+  if (!typedesc_is_ref(dst_desc))
     return typedesc_is_implicitly_direct_convertible(src_desc->base_type, dst_desc);
 
   typedesc_ref_t* dst_ref_desc = (typedesc_ref_t*)dst_desc;
 
-  if (src_desc->base_type->kind != TYPEDESC_MUT && dst_ref_desc->base_type->kind == TYPEDESC_MUT)
+  if (!typedesc_is_mut(src_desc->base_type) && typedesc_is_mut(dst_ref_desc->base_type))
     return false;
 
   return typedesc_is_implicitly_indirect_convertible(typedesc_remove_mut(src_desc->base_type), typedesc_remove_mut(dst_ref_desc->base_type));
@@ -40,12 +40,12 @@ bool typedesc_ref_is_implicitly_direct_convertible(typedesc_ref_t* src_desc, typ
 
 bool typedesc_ref_is_implicitly_indirect_convertible(typedesc_ref_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind != TYPEDESC_REF)
+  if (!typedesc_is_ref(dst_desc))
     return false;
 
   typedesc_ref_t* dst_ref_desc = (typedesc_ref_t*)dst_desc;
 
-  if (src_desc->base_type->kind != TYPEDESC_MUT && dst_ref_desc->base_type->kind == TYPEDESC_MUT)
+  if (!typedesc_is_mut(src_desc->base_type) && typedesc_is_mut(dst_ref_desc->base_type))
     return false;
 
   return typedesc_is_implicitly_indirect_convertible(typedesc_remove_mut(src_desc->base_type), typedesc_remove_mut(dst_ref_desc->base_type));
@@ -53,10 +53,10 @@ bool typedesc_ref_is_implicitly_indirect_convertible(typedesc_ref_t* src_desc, t
 
 bool typedesc_ref_is_explicitly_convertible(typedesc_ref_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(dst_desc))
     return typedesc_is_explicitly_convertible(src_desc->base_type, dst_desc);
 
-  if (dst_desc->kind != TYPEDESC_REF)
+  if (!typedesc_is_ref(dst_desc))
     return typedesc_is_explicitly_convertible(src_desc->base_type, dst_desc);
 
   return typedesc_is_explicitly_convertible(src_desc->base_type, typedesc_remove_ref(dst_desc));

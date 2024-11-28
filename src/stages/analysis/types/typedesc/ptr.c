@@ -27,15 +27,15 @@ void typedesc_ptr_free(typedesc_ptr_t* desc)
 
 bool typedesc_ptr_is_implicitly_direct_convertible(typedesc_ptr_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(dst_desc))
     return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
 
-  if (dst_desc->kind != TYPEDESC_PTR)
+  if (!typedesc_is_ptr(dst_desc))
     return false;
 
   typedesc_ptr_t* dst_ptr_desc = (typedesc_ptr_t*)dst_desc;
 
-  if (src_desc->base_type->kind != TYPEDESC_MUT && dst_ptr_desc->base_type->kind == TYPEDESC_MUT)
+  if (!typedesc_is_mut(src_desc->base_type) && typedesc_is_mut(dst_ptr_desc->base_type))
     return false;
 
   return typedesc_is_implicitly_indirect_convertible(typedesc_remove_mut(src_desc->base_type), typedesc_remove_mut(dst_ptr_desc->base_type));
@@ -43,12 +43,12 @@ bool typedesc_ptr_is_implicitly_direct_convertible(typedesc_ptr_t* src_desc, typ
 
 bool typedesc_ptr_is_implicitly_indirect_convertible(typedesc_ptr_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind != TYPEDESC_PTR)
+  if (!typedesc_is_ptr(dst_desc))
     return false;
 
   typedesc_ptr_t* dst_ptr_desc = (typedesc_ptr_t*)dst_desc;
 
-  if (src_desc->base_type->kind != TYPEDESC_MUT && dst_ptr_desc->base_type->kind == TYPEDESC_MUT)
+  if (!typedesc_is_mut(src_desc->base_type) && typedesc_is_mut(dst_ptr_desc->base_type))
     return false;
 
   return typedesc_is_implicitly_indirect_convertible(typedesc_remove_mut(src_desc->base_type), typedesc_remove_mut(dst_ptr_desc->base_type));
@@ -56,10 +56,10 @@ bool typedesc_ptr_is_implicitly_indirect_convertible(typedesc_ptr_t* src_desc, t
 
 bool typedesc_ptr_is_explicitly_convertible(typedesc_ptr_t* src_desc, typedesc_t* dst_desc)
 {
-  if (dst_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(dst_desc))
     return typedesc_is_explicitly_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
 
-  if (dst_desc->kind != TYPEDESC_PTR)
+  if (!typedesc_is_ptr(dst_desc))
     return false;
 
   return typedesc_is_explicitly_convertible(src_desc->base_type, typedesc_remove_ptr(dst_desc));

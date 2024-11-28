@@ -35,7 +35,7 @@ LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
 {
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
 
-  if (desc->kind == TYPEDESC_REF)
+  if (typedesc_is_ref(desc))
     return LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_ref_t*)desc)->base_type->llvm_type, node->llvm_value, "");
 
   return node->llvm_value;
@@ -280,7 +280,7 @@ static LLVMValueRef codegen_build_implicit_cast_mut(codegen_ctx_t* ctx, LLVMValu
 
 static LLVMValueRef codegen_build_implicit_cast_ptr(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_ptr_t* from_desc, typedesc_t* to_desc)
 {
-  if (to_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(to_desc))
     return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)from_desc, (typedesc_opt_t*)to_desc);
 
   return llvm_value;
@@ -288,7 +288,7 @@ static LLVMValueRef codegen_build_implicit_cast_ptr(codegen_ctx_t* ctx, LLVMValu
 
 static LLVMValueRef codegen_build_implicit_cast_array(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_array_t* from_desc, typedesc_t* to_desc)
 {
-  if (to_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(to_desc))
     return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)from_desc, (typedesc_opt_t*)to_desc);
 
   // TODO: Cast array elements.
@@ -297,7 +297,7 @@ static LLVMValueRef codegen_build_implicit_cast_array(codegen_ctx_t* ctx, LLVMVa
 
 static LLVMValueRef codegen_build_implicit_cast_ref(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_ref_t* from_desc, typedesc_t* to_desc)
 {
-  if (to_desc->kind != TYPEDESC_REF)
+  if (!typedesc_is_ref(to_desc))
   {
     LLVMValueRef llvm_load_value = LLVMBuildLoad2(ctx->llvm_builder, from_desc->base_type->llvm_type, llvm_value, "");
 
@@ -314,7 +314,7 @@ static LLVMValueRef codegen_build_implicit_cast_opt(codegen_ctx_t* UNUSED(ctx), 
 
 static LLVMValueRef codegen_build_implicit_cast_prim(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_prim_t* from_desc, typedesc_t* to_desc)
 {
-  if (to_desc->kind == TYPEDESC_OPT)
+  if (typedesc_is_opt(to_desc))
     return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)from_desc, (typedesc_opt_t*)to_desc);
 
   if (typedesc_is_arithmetic((typedesc_t*)from_desc))

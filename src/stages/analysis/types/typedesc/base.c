@@ -236,24 +236,49 @@ bool typedesc_is_decl(typedesc_t* desc)
   }
 }
 
+bool typedesc_is_mut(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_MUT;
+}
+
+bool typedesc_is_ptr(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_PTR;
+}
+
+bool typedesc_is_array(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_ARRAY;
+}
+
+bool typedesc_is_ref(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_REF;
+}
+
+bool typedesc_is_opt(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_OPT;
+}
+
 typedesc_t* typedesc_remove_mut(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_MUT ? ((typedesc_mut_t*)desc)->base_type : desc;
+  return typedesc_is_mut(desc) ? ((typedesc_mut_t*)desc)->base_type : desc;
 }
 
 typedesc_t* typedesc_remove_ptr(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_PTR ? ((typedesc_ptr_t*)desc)->base_type : desc;
+  return typedesc_is_ptr(desc) ? ((typedesc_ptr_t*)desc)->base_type : desc;
 }
 
 typedesc_t* typedesc_remove_array(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_ARRAY ? ((typedesc_array_t*)desc)->base_type : desc;
+  return typedesc_is_array(desc) ? ((typedesc_array_t*)desc)->base_type : desc;
 }
 
 typedesc_t* typedesc_remove_ref(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_REF ? ((typedesc_ref_t*)desc)->base_type : desc;
+  return typedesc_is_ref(desc) ? ((typedesc_ref_t*)desc)->base_type : desc;
 }
 
 typedesc_t* typedesc_remove_ref_mut(typedesc_t* desc)
@@ -263,7 +288,7 @@ typedesc_t* typedesc_remove_ref_mut(typedesc_t* desc)
 
 typedesc_t* typedesc_remove_opt(typedesc_t* desc)
 {
-  return desc->kind == TYPEDESC_OPT ? ((typedesc_opt_t*)desc)->base_type : desc;
+  return typedesc_is_opt(desc) ? ((typedesc_opt_t*)desc)->base_type : desc;
 }
 
 bool typedesc_can_add_modifier(typedesc_kind_t kind, typedesc_t* desc)
@@ -448,14 +473,14 @@ bool typedesc_is_callable(typedesc_t* desc)
 {
   desc = typedesc_remove_mut(desc);
 
-  if (desc->kind == TYPEDESC_REF)
+  if (typedesc_is_ref(desc))
   {
     desc = typedesc_remove_ptr(typedesc_remove_mut(typedesc_remove_ref(desc)));
 
     if (desc->kind == TYPEDESC_FUN)
       return true;
   }
-  else if (desc->kind == TYPEDESC_PTR)
+  else if (typedesc_is_ptr(desc))
   {
     desc = typedesc_remove_ptr(desc);
 
@@ -470,14 +495,14 @@ typedesc_t* typedesc_underlying_callable(typedesc_t* desc)
 {
   desc = typedesc_remove_mut(desc);
 
-  if (desc->kind == TYPEDESC_REF)
+  if (typedesc_is_ref(desc))
   {
     desc = typedesc_remove_ptr(typedesc_remove_mut(typedesc_remove_ref(desc)));
 
     if (desc->kind == TYPEDESC_FUN)
       return desc;
   }
-  else if (desc->kind == TYPEDESC_PTR)
+  else if (typedesc_is_ptr(desc))
   {
     desc = typedesc_remove_ptr(desc);
 

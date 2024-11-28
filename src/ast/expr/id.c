@@ -66,7 +66,7 @@ void ast_expr_id_typecheck(typecheck_ctx_t* ctx, ast_expr_id_t* node)
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->decl);
   ASSERT(desc != NULL);
 
-  if (node->decl->kind != AST_DECL_ENUM && desc->kind != TYPEDESC_REF)
+  if (node->decl->kind != AST_DECL_ENUM && !typedesc_is_ref(desc))
     desc = typebuilder_build_ref(ctx->typebuilder, desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);

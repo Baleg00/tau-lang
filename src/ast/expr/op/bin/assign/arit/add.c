@@ -44,14 +44,14 @@ void ast_expr_op_bin_assign_arit_add_typecheck(typecheck_ctx_t* ctx, ast_expr_op
   typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
   ASSERT(rhs_desc != NULL);
 
-  if (lhs_desc->kind != TYPEDESC_REF)
+  if (!typedesc_is_ref(lhs_desc))
   {
     location_t loc = token_location(node->lhs->tok);
 
     report_error_expected_reference_type(loc);
   }
 
-  if (typedesc_remove_ref(lhs_desc)->kind != TYPEDESC_MUT)
+  if (!typedesc_is_mut(typedesc_remove_ref(lhs_desc)))
   {
     location_t loc = token_location(node->lhs->tok);
 
