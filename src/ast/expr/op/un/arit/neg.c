@@ -65,9 +65,19 @@ void ast_expr_op_un_arit_neg_codegen(codegen_ctx_t* ctx, ast_expr_op_un_arit_neg
   LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, expr);
 
   if (typedesc_is_integer(expr_desc))
+  {
     node->llvm_value = LLVMBuildNeg(ctx->llvm_builder, llvm_value, "");
+  }
   else if (typedesc_is_float(expr_desc))
+  {
     node->llvm_value = LLVMBuildFNeg(ctx->llvm_builder, llvm_value, "");
+  }
+  else if (typedesc_is_complex(expr_desc))
+  {
+    node->llvm_value = codegen_build_complex_neg(ctx, llvm_value);
+  }
   else
+  {
     UNREACHABLE();
+  }
 }
