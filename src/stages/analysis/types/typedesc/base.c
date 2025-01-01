@@ -21,6 +21,7 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_ARRAY:  typedesc_array_free ((typedesc_array_t* )desc); break;
   case TYPEDESC_REF:    typedesc_ref_free   ((typedesc_ref_t*   )desc); break;
   case TYPEDESC_OPT:    typedesc_opt_free   ((typedesc_opt_t*   )desc); break;
+  case TYPEDESC_VEC:    typedesc_vec_free   ((typedesc_vec_t*   )desc); break;
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -66,6 +67,7 @@ bool typedesc_is_builtin(typedesc_t* desc)
 {
   switch (desc->kind)
   {
+  case TYPEDESC_VEC:
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -131,6 +133,11 @@ bool typedesc_is_complex(typedesc_t* desc)
   default:
     return false;
   }
+}
+
+bool typedesc_is_vector(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_VEC;
 }
 
 bool typedesc_is_arithmetic(typedesc_t* desc)
@@ -344,6 +351,7 @@ bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_de
   case TYPEDESC_ARRAY:  return typedesc_array_is_implicitly_convertible ((typedesc_array_t* )from_desc, to_desc, through_ref);
   case TYPEDESC_REF:    return typedesc_ref_is_implicitly_convertible   ((typedesc_ref_t*   )from_desc, to_desc, through_ref);
   case TYPEDESC_OPT:    return typedesc_opt_is_implicitly_convertible   ((typedesc_opt_t*   )from_desc, to_desc, through_ref);
+  case TYPEDESC_VEC:    return typedesc_vec_is_implicitly_convertible   ((typedesc_vec_t*   )from_desc, to_desc, through_ref);
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -380,6 +388,7 @@ bool typedesc_is_explicitly_convertible(typedesc_t* from_desc, typedesc_t* to_de
   case TYPEDESC_ARRAY:  return typedesc_array_is_explicitly_convertible ((typedesc_array_t* )from_desc, to_desc);
   case TYPEDESC_REF:    return typedesc_ref_is_explicitly_convertible   ((typedesc_ref_t*   )from_desc, to_desc);
   case TYPEDESC_OPT:    return typedesc_opt_is_explicitly_convertible   ((typedesc_opt_t*   )from_desc, to_desc);
+  case TYPEDESC_VEC:    return typedesc_vec_is_explicitly_convertible   ((typedesc_vec_t*   )from_desc, to_desc);
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:

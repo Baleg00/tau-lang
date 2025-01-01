@@ -32,5 +32,6 @@
 #include "stages/analysis/types/typedesc/struct.h"
 #include "stages/analysis/types/typedesc/union.h"
 #include "stages/analysis/types/typedesc/var.h"
+#include "stages/analysis/types/typedesc/vec.h"
 
 #endif

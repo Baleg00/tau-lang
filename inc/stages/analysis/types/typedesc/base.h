@@ -34,33 +34,34 @@ typedef struct ast_node_t ast_node_t;
  */
 typedef enum typedesc_kind_e
 {
-  TYPEDESC_MUT, // Mutable type
-  TYPEDESC_PTR, // Pointer type
-  TYPEDESC_ARRAY, // Array type
-  TYPEDESC_REF, // Reference type
-  TYPEDESC_OPT, // Optional type
-  TYPEDESC_I8, // Built-in type i8
-  TYPEDESC_I16, // Built-in type i16
-  TYPEDESC_I32, // Built-in type i32
-  TYPEDESC_I64, // Built-in type i64
-  TYPEDESC_ISIZE, // Built-in type isize
-  TYPEDESC_U8, // Built-in type u8
-  TYPEDESC_U16, // Built-in type u16
-  TYPEDESC_U32, // Built-in type u32
-  TYPEDESC_U64, // Built-in type u64
-  TYPEDESC_USIZE, // Built-in type usize
-  TYPEDESC_F32, // Built-in type f32
-  TYPEDESC_F64, // Built-in type f64
-  TYPEDESC_C64, // Built-in type c64
-  TYPEDESC_C128, // Built-in type c128
-  TYPEDESC_CHAR, // Built-in type char
-  TYPEDESC_BOOL, // Built-in type bool
-  TYPEDESC_UNIT, // Built-in type unit
-  TYPEDESC_FUN, // Function type
-  TYPEDESC_STRUCT, // Struct type
-  TYPEDESC_UNION, // Union type
-  TYPEDESC_ENUM, // Enum type
-  TYPEDESC_VAR, // Type variable
+  TYPEDESC_MUT,    ///< Mutable type.
+  TYPEDESC_PTR,    ///< Pointer type.
+  TYPEDESC_ARRAY,  ///< Array type.
+  TYPEDESC_REF,    ///< Reference type.
+  TYPEDESC_OPT,    ///< Optional type.
+  TYPEDESC_VEC,    ///< Vector type.
+  TYPEDESC_I8,     ///< Built-in type `i8`.
+  TYPEDESC_I16,    ///< Built-in type `i16`.
+  TYPEDESC_I32,    ///< Built-in type `i32`.
+  TYPEDESC_I64,    ///< Built-in type `i64`.
+  TYPEDESC_ISIZE,  ///< Built-in type `isize`.
+  TYPEDESC_U8,     ///< Built-in type `u8`.
+  TYPEDESC_U16,    ///< Built-in type `u16`.
+  TYPEDESC_U32,    ///< Built-in type `u32`.
+  TYPEDESC_U64,    ///< Built-in type `u64`.
+  TYPEDESC_USIZE,  ///< Built-in type `usize`.
+  TYPEDESC_F32,    ///< Built-in type `f32`.
+  TYPEDESC_F64,    ///< Built-in type `f64`.
+  TYPEDESC_C64,    ///< Built-in type `c64`.
+  TYPEDESC_C128,   ///< Built-in type `c128`.
+  TYPEDESC_CHAR,   ///< Built-in type `char`.
+  TYPEDESC_BOOL,   ///< Built-in type `bool`.
+  TYPEDESC_UNIT,   ///< Built-in type `unit`.
+  TYPEDESC_FUN,    ///< Function type.
+  TYPEDESC_STRUCT, ///< Struct type.
+  TYPEDESC_UNION,  ///< Union type.
+  TYPEDESC_ENUM,   ///< Enum type.
+  TYPEDESC_VAR,    ///< Type variable.
 } typedesc_kind_t;
 
 /**
@@ -119,6 +120,14 @@ bool typedesc_is_float(typedesc_t* desc);
  * `false`.
  */
 bool typedesc_is_complex(typedesc_t* desc);
+
+/**
+ * \brief Checks if the given type descriptor is a vector type.
+ *
+ * \param[in] desc The type descriptor.
+ * \returns `true` if the descriptor is a vector type, otherwise `false`.
+ */
+bool typedesc_is_vector(typedesc_t* desc);
 
 /**
  * \brief Checks if the given type descriptor is an arithmetic type.
