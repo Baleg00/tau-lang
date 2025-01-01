@@ -34,7 +34,11 @@ void ast_decl_var_free(ast_decl_var_t* node)
 void ast_decl_var_nameres(nameres_ctx_t* ctx, ast_decl_var_t* node)
 {
   ast_node_nameres(ctx, node->type);
-  ast_node_nameres(ctx, node->expr);
+
+  if (node->expr != NULL)
+  {
+    ast_node_nameres(ctx, node->expr);
+  }
 
   symtable_t* scope = nameres_ctx_scope_cur(ctx);
 
@@ -54,7 +58,6 @@ void ast_decl_var_nameres(nameres_ctx_t* ctx, ast_decl_var_t* node)
 void ast_decl_var_typecheck(typecheck_ctx_t* ctx, ast_decl_var_t* node)
 {
   ast_node_typecheck(ctx, node->type);
-  ast_node_typecheck(ctx, node->expr);
 
   typedesc_t* desc = typetable_lookup(ctx->typetable, node->type);
   ASSERT(desc != NULL);
@@ -63,6 +66,8 @@ void ast_decl_var_typecheck(typecheck_ctx_t* ctx, ast_decl_var_t* node)
 
   if (node->expr != NULL)
   {
+    ast_node_typecheck(ctx, node->expr);
+
     typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
     ASSERT(expr_desc != NULL);
 
