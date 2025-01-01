@@ -636,7 +636,10 @@ ast_node_t* parser_parse_decl_var(parser_t* par)
   parser_expect(par, TOK_PUNCT_COLON);
 
   node->type = parser_parse_type(par);
-  node->expr = parser_consume(par, TOK_PUNCT_EQUAL) ? parser_parse_expr(par) : NULL;
+
+  parser_expect(par, TOK_PUNCT_EQUAL);
+
+  node->expr = parser_consume(par, TOK_KW_UNDEF) ? NULL : parser_parse_expr(par);
 
   return (ast_node_t*)node;
 }

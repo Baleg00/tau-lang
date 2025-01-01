@@ -89,6 +89,7 @@ typedef enum token_kind_e
   TOK_KW_BOOL, ///< Keyword `bool`
   TOK_KW_UNIT, ///< Keyword `unit`
   TOK_KW_TYPE, ///< Keyword `type`
+  TOK_KW_UNDEF, ///< Keyword `undef`
 
   TOK_PUNCT_PLUS, ///< Punctuation `+`
   TOK_PUNCT_PLUS_PLUS, ///< Punctuation `++`

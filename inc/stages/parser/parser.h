@@ -93,7 +93,7 @@ bool parser_consume(parser_t* par, token_kind_t kind);
 
 /**
  * \brief Checks if the current token's kind matches the specified one. If it
- * does returns the token and advances to the next one, raises an error otherwise.
+ * does, returns the token and advances to the next one, raises an error otherwise.
  * 
  * \param[in] par Parser to be used.
  * \param[in] kind Expected token kind.

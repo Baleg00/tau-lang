@@ -63,6 +63,7 @@ static const struct
   { TOK_KW_BOOL, 4 },
   { TOK_KW_UNIT, 4 },
   { TOK_KW_TYPE, 4 },
+  { TOK_KW_UNDEF, 5 },
   { TOK_PUNCT_PLUS, 1 },
   { TOK_PUNCT_PLUS_PLUS, 2 },
   { TOK_PUNCT_PLUS_EQUAL, 2 },
@@ -478,6 +479,7 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_KW_BOOL:                     return "TOK_KW_BOOL";
   case TOK_KW_UNIT:                     return "TOK_KW_UNIT";
   case TOK_KW_TYPE:                     return "TOK_KW_TYPE";
+  case TOK_KW_UNDEF:                    return "TOK_KW_UNDEF";
   case TOK_PUNCT_PLUS:                  return "TOK_PUNCT_PLUS";
   case TOK_PUNCT_PLUS_PLUS:             return "TOK_PUNCT_PLUS_PLUS";
   case TOK_PUNCT_PLUS_EQUAL:            return "TOK_PUNCT_PLUS_EQUAL";
@@ -611,6 +613,7 @@ bool token_is_keyword(token_t* tok)
   case TOK_KW_BOOL:
   case TOK_KW_UNIT:
   case TOK_KW_TYPE:
+  case TOK_KW_UNDEF:
     return true;
   default:
     return false;
