@@ -312,6 +312,39 @@ ast_node_t* parser_parse_type_fun(parser_t* par)
   return (ast_node_t*)node;
 }
 
+ast_node_t* parser_parse_type_vec(parser_t* par)
+{
+  ast_type_vec_t* node = ast_type_vec_init();
+  node->tok = parser_next(par);
+
+  string_view_t tok_view = token_to_string_view(node->tok);
+  const char* tok_cstr = string_view_begin(tok_view);
+
+  const char* size_end = NULL;
+  size_t size = strtoull(tok_cstr + 3, &size_end, 10);
+
+  ASSERT(errno != ERANGE);
+  ASSERT(size > 0);
+
+  node->size = size;
+
+       if (strncmp(size_end, "i8" , 2) == 0) node->base_type = (ast_node_t*)ast_type_prim_i8_init();
+  else if (strncmp(size_end, "u8" , 2) == 0) node->base_type = (ast_node_t*)ast_type_prim_u8_init();
+  else if (strncmp(size_end, "i16", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_i16_init();
+  else if (strncmp(size_end, "u16", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_u16_init();
+  else if (strncmp(size_end, "i32", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_i32_init();
+  else if (strncmp(size_end, "u32", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_u32_init();
+  else if (strncmp(size_end, "i64", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_i64_init();
+  else if (strncmp(size_end, "u64", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_u64_init();
+  else if (strncmp(size_end, "f32", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_f32_init();
+  else if (strncmp(size_end, "f64", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_f64_init();
+  else UNREACHABLE();
+
+  node->base_type->tok = node->tok;
+
+  return (ast_node_t*)node;
+}
+
 ast_node_t* parser_parse_type_member(parser_t* par)
 {
   ast_node_t* node = parser_parse_type_id(par);
@@ -343,6 +376,7 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_PUNCT_AMPERSAND:    return parser_parse_type_ref     (par);
   case TOK_PUNCT_QUESTION:     return parser_parse_type_opt     (par);
   case TOK_KW_FUN:             return parser_parse_type_fun     (par);
+  case TOK_KW_VEC:             return parser_parse_type_vec     (par);
   case TOK_KW_I8:
     node = (ast_node_t*)ast_type_prim_i8_init();
     node->tok = parser_expect(par, TOK_KW_I8);

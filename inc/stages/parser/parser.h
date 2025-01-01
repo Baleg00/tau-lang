@@ -255,6 +255,14 @@ ast_node_t* parser_parse_type_opt(parser_t* par);
 ast_node_t* parser_parse_type_fun(parser_t* par);
 
 /**
+ * \brief Parses a vector type.
+ *
+ * \param[in] par Parser to be used.
+ * \returns Vector type node.
+ */
+ast_node_t* parser_parse_type_vec(parser_t* par);
+
+/**
  * \brief Parses a type that may be defined inside another one.
  * 
  * \details Member types are defined inside one or more namespaces and can be
