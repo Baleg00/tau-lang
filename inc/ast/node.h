@@ -42,6 +42,7 @@ typedef enum ast_kind_e
   AST_TYPE_REF, ///< Reference type.
   AST_TYPE_OPT, ///< Optional type.
   AST_TYPE_FUN, ///< Function type.
+  AST_TYPE_VEC, ///< Vector type.
   AST_TYPE_PRIM_I8, ///< Primitive type `i8`.
   AST_TYPE_PRIM_I16, ///< Primitive type `i16`.
   AST_TYPE_PRIM_I32, ///< Primitive type `i32`.

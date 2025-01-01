@@ -24,6 +24,7 @@ void ast_node_free(ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_free          ((ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_free          ((ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_free          ((ast_type_fun_t*          )node); break;
+  case AST_TYPE_VEC:           ast_type_vec_free          ((ast_type_vec_t*          )node); break;
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
   case AST_TYPE_PRIM_I32:
@@ -107,6 +108,7 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_nameres          (ctx, (ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_nameres          (ctx, (ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_nameres          (ctx, (ast_type_fun_t*          )node); break;
+  case AST_TYPE_VEC:           ast_type_vec_nameres          (ctx, (ast_type_vec_t*          )node); break;
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
   case AST_TYPE_PRIM_I32:
@@ -186,6 +188,7 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_typecheck          (ctx, (ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_typecheck          (ctx, (ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_typecheck          (ctx, (ast_type_fun_t*          )node); break;
+  case AST_TYPE_VEC:           ast_type_vec_typecheck          (ctx, (ast_type_vec_t*          )node); break;
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
   case AST_TYPE_PRIM_I32:
@@ -256,6 +259,7 @@ void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_REF:
   case AST_TYPE_OPT:
   case AST_TYPE_FUN:
+  case AST_TYPE_VEC:
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
   case AST_TYPE_PRIM_I32:
@@ -341,6 +345,7 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_codegen          (ctx, (ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_codegen          (ctx, (ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_codegen          (ctx, (ast_type_fun_t*          )node); break;
+  case AST_TYPE_VEC:           ast_type_vec_codegen          (ctx, (ast_type_vec_t*          )node); break;
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
   case AST_TYPE_PRIM_I32:
@@ -509,6 +514,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_TYPE_REF:           ast_type_ref_dump_json          (stream, (ast_type_ref_t*          )node); break;
   case AST_TYPE_OPT:           ast_type_opt_dump_json          (stream, (ast_type_opt_t*          )node); break;
   case AST_TYPE_FUN:           ast_type_fun_dump_json          (stream, (ast_type_fun_t*          )node); break;
+  case AST_TYPE_VEC:           ast_type_vec_dump_json          (stream, (ast_type_vec_t*          )node); break;
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
   case AST_TYPE_PRIM_I32:
@@ -585,6 +591,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_TYPE_REF:           return "AST_TYPE_REF";
   case AST_TYPE_OPT:           return "AST_TYPE_OPT";
   case AST_TYPE_FUN:           return "AST_TYPE_FUN";
+  case AST_TYPE_VEC:           return "AST_TYPE_VEC";
   case AST_TYPE_PRIM_I8:       return "AST_TYPE_PRIM_I8";
   case AST_TYPE_PRIM_I16:      return "AST_TYPE_PRIM_I16";
   case AST_TYPE_PRIM_I32:      return "AST_TYPE_PRIM_I32";
@@ -664,6 +671,7 @@ bool ast_is_type(ast_node_t* node)
   case AST_TYPE_REF:
   case AST_TYPE_OPT:
   case AST_TYPE_FUN:
+  case AST_TYPE_VEC:
   case AST_TYPE_PRIM_I8:
   case AST_TYPE_PRIM_I16:
   case AST_TYPE_PRIM_I32:

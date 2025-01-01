@@ -123,6 +123,7 @@
 #include "ast/type/prim.h"
 #include "ast/type/type.h"
 #include "ast/type/type_type.h"
+#include "ast/type/vec.h"
 #include "ast/use.h"
 
 #endif
