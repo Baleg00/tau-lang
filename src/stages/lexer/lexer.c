@@ -67,6 +67,7 @@ static const struct
   { "bool",     TOK_KW_BOOL     },
   { "unit",     TOK_KW_UNIT     },
   { "type",     TOK_KW_TYPE     },
+  { "undef",    TOK_KW_UNDEF    },
   { "true",     TOK_LIT_BOOL    },
   { "false",    TOK_LIT_BOOL    },
   { "null",     TOK_LIT_NULL    },
