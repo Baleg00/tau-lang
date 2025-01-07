@@ -60,13 +60,13 @@ bool typedesc_array_is_implicitly_indirect_convertible(typedesc_array_t* src_des
   return typedesc_is_implicitly_indirect_convertible(typedesc_remove_mut(src_desc->base_type), typedesc_remove_mut(dst_desc));
 }
 
-bool typedesc_array_is_explicitly_convertible(typedesc_array_t* src_dest, typedesc_t* dst_desc)
+bool typedesc_array_is_explicitly_convertible(typedesc_array_t* src_desc, typedesc_t* dst_desc)
 {
   if (typedesc_is_opt(dst_desc))
-    return typedesc_is_explicitly_convertible((typedesc_t*)src_dest, typedesc_remove_opt(dst_desc));
+    return typedesc_is_explicitly_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
 
   if (!typedesc_is_array(dst_desc))
     return false;
 
-  return typedesc_is_explicitly_convertible(src_dest->base_type, typedesc_remove_array(dst_desc));
+  return typedesc_is_explicitly_convertible(src_desc->base_type, typedesc_remove_array(dst_desc));
 }

@@ -25,45 +25,41 @@ void typedesc_vec_free(typedesc_vec_t* desc)
   free(desc);
 }
 
-bool typedesc_vec_is_implicitly_convertible(typedesc_vec_t* from_desc, typedesc_t* to_desc, bool through_ref)
+bool typedesc_vec_is_implicitly_direct_convertible(typedesc_vec_t* src_desc, typedesc_t* dst_desc)
 {
-  if (to_desc->kind == TYPEDESC_OPT)
-  {
-    if (through_ref)
-      return false;
+  if (typedesc_is_opt(dst_desc))
+    return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
 
-    return typedesc_is_implicitly_convertible((typedesc_t*)from_desc, typedesc_remove_opt(to_desc), through_ref);
-  }
-
-  if (to_desc->kind != TYPEDESC_ARRAY)
+  if (!typedesc_is_vector(dst_desc))
     return false;
 
-  typedesc_vec_t* target_array_desc = (typedesc_vec_t*)to_desc;
+  typedesc_vec_t* dst_vec_desc = (typedesc_vec_t*)dst_desc;
 
-  if (from_desc->size < target_array_desc->size)
+  if (src_desc->size < dst_vec_desc->size)
     return false;
 
-  if (from_desc->base_type->kind != TYPEDESC_MUT && target_array_desc->base_type->kind == TYPEDESC_MUT)
-    return false;
-
-  return typedesc_is_implicitly_convertible(typedesc_remove_mut(from_desc->base_type), typedesc_remove_mut(to_desc), true);
+  return typedesc_is_implicitly_direct_convertible(src_desc->base_type, dst_vec_desc->base_type);
 }
 
-bool typedesc_vec_is_explicitly_convertible(typedesc_vec_t* from_desc, typedesc_t* to_desc)
+bool typedesc_vec_is_implicitly_indirect_convertible(typedesc_vec_t* src_desc, typedesc_t* dst_desc)
 {
-  if (to_desc->kind == TYPEDESC_OPT)
-    return typedesc_is_explicitly_convertible((typedesc_t*)from_desc, typedesc_remove_opt(to_desc));
-
-  if (to_desc->kind != TYPEDESC_ARRAY)
+  if (!typedesc_is_vector(dst_desc))
     return false;
 
-  typedesc_vec_t* target_array_desc = (typedesc_vec_t*)to_desc;
+  typedesc_vec_t* dst_vec_desc = (typedesc_vec_t*)dst_desc;
 
-  if (from_desc->size < target_array_desc->size)
+  return typedesc_is_implicitly_indirect_convertible(src_desc->base_type, dst_vec_desc->base_type);
+}
+
+bool typedesc_vec_is_explicitly_convertible(typedesc_vec_t* src_desc, typedesc_t* dst_desc)
+{
+  if (typedesc_is_opt(dst_desc))
+    return typedesc_is_explicitly_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
+
+  if (!typedesc_is_vector(dst_desc))
     return false;
 
-  if (from_desc->base_type->kind != TYPEDESC_MUT && target_array_desc->base_type->kind == TYPEDESC_MUT)
-    return false;
+  typedesc_vec_t* dst_vec_desc = (typedesc_vec_t*)dst_desc;
 
-  return typedesc_is_explicitly_convertible(from_desc->base_type, target_array_desc->base_type);
+  return typedesc_is_explicitly_convertible(src_desc->base_type, dst_vec_desc->base_type);
 }

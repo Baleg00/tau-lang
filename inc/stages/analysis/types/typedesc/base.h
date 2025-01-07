@@ -319,23 +319,31 @@ bool typedesc_can_add_ref(typedesc_t* desc);
 bool typedesc_can_add_opt(typedesc_t* desc);
 
 /**
- * \brief Checks if a type is implicitly convertible to another type.
- * 
- * \param[in] from_desc Pointer to the source type descriptor.
- * \param[in] to_desc Pointer to the type descriptor to check conversion into.
- * \param[in] through_ref Whether the conversion is done through any kind of reference.
+ * \brief Checks if a type is implicitly direct convertible to another type.
+ *
+ * \param[in] src_desc Pointer to the source type descriptor.
+ * \param[in] dst_desc Pointer to the destination type descriptor.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_is_implicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc, bool through_ref);
+bool typedesc_is_implicitly_direct_convertible(typedesc_t* src_desc, typedesc_t* dst_desc);
+
+/**
+ * \brief Checks if a type is implicitly indirect convertible to another type.
+ *
+ * \param[in] src_desc Pointer to the source type descriptor.
+ * \param[in] dst_desc Pointer to the destination type descriptor.
+ * \returns `true` if the implicit conversion is possible, `false` otherwise.
+ */
+bool typedesc_is_implicitly_indirect_convertible(typedesc_t* src_desc, typedesc_t* dst_desc);
 
 /**
  * \brief Checks if a type is explicitly convertible to another type.
  * 
- * \param[in] from_desc Pointer to the source type descriptor.
- * \param[in] to_desc Pointer to the type descriptor to check conversion into.
+ * \param[in] src_desc Pointer to the source type descriptor.
+ * \param[in] dst_desc Pointer to the type descriptor to check conversion into.
  * \returns `true` if the explicit conversion is possible, `false` otherwise.
  */
-bool typedesc_is_explicitly_convertible(typedesc_t* from_desc, typedesc_t* to_desc);
+bool typedesc_is_explicitly_convertible(typedesc_t* src_desc, typedesc_t* dst_desc);
 
 /**
  * \brief Retrieves the bit-width of an integer type descriptor.
