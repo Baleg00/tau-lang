@@ -33,6 +33,7 @@ add_library(TAU_LIB_STR_VIEW    STATIC ${PROJECT_SOURCE_DIR}/src/utils/str_view.
 add_library(TAU_LIB_TIMER       STATIC ${PROJECT_SOURCE_DIR}/src/utils/timer.c)
 add_library(TAU_LIB_CRUMB       STATIC ${PROJECT_SOURCE_DIR}/src/utils/crumb.c)
 add_library(TAU_LIB_DIAGNOSTICS STATIC ${PROJECT_SOURCE_DIR}/src/utils/diagnostics.c)
+add_library(TAU_LIB_ERROR       STATIC ${PROJECT_SOURCE_DIR}/src/utils/error.c)
 add_library(TAU_LIB_COMPILER    STATIC ${TAU_LIB_COMPILER_FILES})
 add_library(TAU_LIB_LLVM        STATIC ${PROJECT_SOURCE_DIR}/src/llvm.c)
 add_library(TAU_LIB_AST         STATIC ${TAU_LIB_AST_FILES})
@@ -62,6 +63,7 @@ set(TAU_LIBRARIES
   TAU_LIB_TIMER
   TAU_LIB_CRUMB
   TAU_LIB_DIAGNOSTICS
+  TAU_LIB_ERROR
   TAU_LIB_COMPILER
   TAU_LIB_LLVM
   TAU_LIB_AST
