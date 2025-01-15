@@ -48,22 +48,22 @@ static void error_print_compiler_file_open_failed(error_t error)
 
 static void error_print_lexer_unexpected_character(error_t error)
 {
-  error_print_helper_snippet(error.unexpected_character.loc, "Unexpected character");
+  error_print_helper_snippet(error.unexpected_character.loc, "Unexpected character.");
 }
 
 static void error_print_lexer_identifier_too_long(error_t error)
 {
-  error_print_helper_snippet(error.identifier_too_long.loc, "Identifier cannot exceed 255 characters");
+  error_print_helper_snippet(error.identifier_too_long.loc, "Identifier cannot exceed 255 characters.");
 }
 
 static void error_print_lexer_missing_single_quote(error_t error)
 {
-  error_print_helper_snippet_with_label(error.missing_single_quote.loc, "Missing terminating single quote", "Character literal starts here.");
+  error_print_helper_snippet_with_label(error.missing_single_quote.loc, "Missing terminating single quote.", "Character literal starts here.");
 }
 
 static void error_print_lexer_missing_double_quote(error_t error)
 {
-  error_print_helper_snippet_with_label(error.missing_single_quote.loc, "Missing terminating double quote", "String literal starts here.");
+  error_print_helper_snippet_with_label(error.missing_single_quote.loc, "Missing terminating double quote.", "String literal starts here.");
 }
 
 static void error_print_lexer_empty_character(error_t error)
