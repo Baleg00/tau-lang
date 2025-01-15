@@ -20,6 +20,7 @@
 #include <stdbool.h>
 
 #include "stages/lexer/token/token.h"
+#include "utils/error.h"
 
 TAU_EXTERN_C_BEGIN
 
@@ -295,8 +296,9 @@ token_t* lexer_read_next(lexer_t* lex);
  * \param[in] path The path of the source file.
  * \param[in] src Pointer to the source code.
  * \param[out] tokens Pointer to the vector to add tokens to.
+ * \param[out] errors Pointer to the error bag to add errors to.
  */
-void lexer_lex(lexer_t* lex, const char* path, const char* src, vector_t* tokens);
+void lexer_lex(lexer_t* lex, const char* path, const char* src, vector_t* tokens, error_bag_t* errors);
 
 TAU_EXTERN_C_END
 

@@ -169,11 +169,28 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
   vector_push(env->sources, src_cstr);
 
   {
+    error_bag_t* errors = error_bag_init(10);
+
     lexer_t* lexer = lexer_init();
 
-    time_it("lexer", lexer_lex(lexer, path_cstr, src_cstr, env->tokens));
+    time_it("lexer", lexer_lex(lexer, path_cstr, src_cstr, env->tokens, errors));
 
     lexer_free(lexer);
+
+    if (!error_bag_empty(errors))
+    {
+      while (!error_bag_empty(errors))
+      {
+        error_t error;
+
+        if (error_bag_get(errors, &error))
+          error_print(error);
+      }
+
+      exit(EXIT_FAILURE);
+    }
+
+    error_bag_free(errors);
   }
 
   if (options_get_dump_tokens(compiler->options))
