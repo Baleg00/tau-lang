@@ -19,6 +19,7 @@
 #include "utils/clearobj.h"
 #include "utils/compiler_detect.h"
 #include "utils/countof.h"
+#include "utils/c_std.h"
 #include "utils/debugbreak.h"
 #include "utils/extern_c.h"
 #include "utils/max_align.h"
