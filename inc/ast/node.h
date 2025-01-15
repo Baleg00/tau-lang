@@ -34,6 +34,8 @@ typedef enum ast_kind_e
 {
   AST_ID, ///< Identifier.
 
+  AST_POISON, ///< Poison node.
+
   AST_TYPE_ID, ///< Type identifier.
   AST_TYPE_MUT, ///< Mutable type.
   AST_TYPE_CONST, ///< Compile-time type.

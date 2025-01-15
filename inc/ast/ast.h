@@ -98,6 +98,7 @@
 #include "ast/path/list.h"
 #include "ast/path/segment.h"
 #include "ast/path/wildcard.h"
+#include "ast/poison.h"
 #include "ast/prog.h"
 #include "ast/stmt/block.h"
 #include "ast/stmt/break.h"

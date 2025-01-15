@@ -17,6 +17,7 @@ void ast_node_free(ast_node_t* node)
   switch (node->kind)
   {
   case AST_ID:                 ast_id_free                ((ast_id_t*                )node); break;
+  case AST_POISON:             ast_poison_free            ((ast_poison_t*            )node); break;
   case AST_TYPE_ID:            ast_type_id_free           ((ast_type_id_t*           )node); break;
   case AST_TYPE_MUT:           ast_type_mut_free          ((ast_type_mut_t*          )node); break;
   case AST_TYPE_PTR:           ast_type_ptr_free          ((ast_type_ptr_t*          )node); break;
@@ -95,6 +96,7 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   switch (node->kind)
   {
   case AST_ID:
+  case AST_POISON:
   case AST_PATH_SEGMENT:
   case AST_PATH_ACCESS:
   case AST_PATH_LIST:
@@ -173,6 +175,7 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   switch (node->kind)
   {
   case AST_ID:
+  case AST_POISON:
   case AST_DECL_GENERIC_FUN:
   case AST_DECL_GENERIC_PARAM:
   case AST_PATH_SEGMENT:
@@ -251,6 +254,7 @@ void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
   switch (node->kind)
   {
   case AST_ID:
+  case AST_POISON:
   case AST_TYPE_ID:
   case AST_TYPE_MUT:
   case AST_TYPE_CONST:
@@ -330,6 +334,7 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   switch (node->kind)
   {
   case AST_ID:
+  case AST_POISON:
   case AST_DECL_GENERIC_FUN:
   case AST_DECL_GENERIC_PARAM:
   case AST_PATH_SEGMENT:
@@ -507,6 +512,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   switch (node->kind)
   {
   case AST_ID:                 ast_id_dump_json                (stream, (ast_id_t*                )node); break;
+  case AST_POISON:             ast_poison_dump_json            (stream, (ast_poison_t*            )node); break;
   case AST_TYPE_ID:            ast_type_id_dump_json           (stream, (ast_type_id_t*           )node); break;
   case AST_TYPE_MUT:           ast_type_mut_dump_json          (stream, (ast_type_mut_t*          )node); break;
   case AST_TYPE_PTR:           ast_type_ptr_dump_json          (stream, (ast_type_ptr_t*          )node); break;
@@ -583,6 +589,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   switch (kind)
   {
   case AST_ID:                 return "AST_ID";
+  case AST_POISON:             return "AST_POISON";
   case AST_TYPE_ID:            return "AST_TYPE_ID";
   case AST_TYPE_MUT:           return "AST_TYPE_MUT";
   case AST_TYPE_CONST:         return "AST_TYPE_CONST";
