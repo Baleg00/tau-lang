@@ -194,11 +194,28 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
   ast_node_t* root_node = NULL;
 
   {
+    error_bag_t* errors = error_bag_init(10);
+
     parser_t* parser = parser_init();
 
-    time_it("parser", root_node = parser_parse(parser, env->tokens));
+    time_it("parser", root_node = parser_parse(parser, env->tokens, errors));
 
     parser_free(parser);
+
+    if (!error_bag_empty(errors))
+    {
+      while (!error_bag_empty(errors))
+      {
+        error_t error;
+
+        if (error_bag_get(errors, &error))
+          error_print(error);
+      }
+
+      exit(EXIT_FAILURE);
+    }
+
+    error_bag_free(errors);
   }
 
   if (options_get_dump_ast(compiler->options))

@@ -8,7 +8,6 @@
 #include "stages/parser/parser.h"
 
 #include "stages/parser/shyd.h"
-#include "utils/diagnostics.h"
 
 /**
  * \brief Declaration context.
@@ -20,29 +19,29 @@
  */
 typedef struct parser_decl_context_t
 {
-  bool is_pub; // Is public.
-  bool is_extern; // Is external.
-  callconv_kind_t callconv; // Calling convention.
+  bool is_pub; ///< Is the declaration being parsed public.
+  bool is_extern; ///< Is the declaration being parsed external.
+  callconv_kind_t callconv; ///< Calling convention of external function declaration.
 } parser_decl_context_t;
 
 struct parser_t
 {
-  vector_t* toks; // Vector of tokens to be processed.
-  size_t cur; // Current token index.
-  bool ignore_newlines; // Ignore newlines.
-  stack_t* parents; // Stack of parent declarations.
-
-  parser_decl_context_t decl_ctx; // Current declaration context.
+  vector_t* tokens; ///< Vector of tokens to be processed.
+  size_t cur; ///< Current token index.
+  bool ignore_newlines; ///< Ignore newlines while parsing.
+  stack_t* parents; ///< Stack of parent declarations.
+  parser_decl_context_t decl_ctx; ///< Context for the declaration being parsed.
+  error_bag_t* errors; ///< Associated error bag.
 };
 
 static void parser_skip_newlines(parser_t* par)
 {
-  token_t* tok = (token_t*)vector_get(par->toks, par->cur);
+  token_t* tok = (token_t*)vector_get(par->tokens, par->cur);
 
   while (tok->kind == TOK_NEWLINE)
   {
     par->cur++;
-    tok = (token_t*)vector_get(par->toks, par->cur);
+    tok = (token_t*)vector_get(par->tokens, par->cur);
   }
 }
 
@@ -67,7 +66,7 @@ token_t* parser_current(parser_t* par)
   if (par->ignore_newlines)
     parser_skip_newlines(par);
 
-  return (token_t*)vector_get(par->toks, par->cur);
+  return (token_t*)vector_get(par->tokens, par->cur);
 }
 
 token_t* parser_next(parser_t* par)
@@ -89,7 +88,7 @@ token_t* parser_peek(parser_t* par)
 
   size_t next = par->cur + 1;
 
-  while (par->ignore_newlines && (tok = (token_t*)vector_get(par->toks, next))->kind == TOK_NEWLINE)
+  while (par->ignore_newlines && (tok = (token_t*)vector_get(par->tokens, next))->kind == TOK_NEWLINE)
     next++;
 
   return tok;
@@ -108,16 +107,19 @@ bool parser_consume(parser_t* par, token_kind_t kind)
 
 token_t* parser_expect(parser_t* par, token_kind_t kind)
 {
-  token_t* tok = parser_current(par);
+  token_t* token = parser_next(par);
 
-  if (tok->kind != kind)
+  if (token->kind != kind)
   {
-    location_t loc = token_location(tok);
+    error_bag_put(par->errors, (error_t){
+      .kind = ERROR_PARSER_UNEXPECTED_TOKEN,
+      .unexpected_token = { .loc = token_location(token) }
+    });
 
-    report_error_unexpected_token(loc);
+    return NULL;
   }
 
-  return parser_next(par);
+  return token;
 }
 
 bool parser_get_ignore_newline(parser_t* par)
@@ -190,31 +192,53 @@ callconv_kind_t parser_parse_callconv(parser_t* par)
     { "\"thiscall\"",   CALLCONV_THISCALL   },
   };
 
-  token_t* callconv_tok = parser_expect(par, TOK_LIT_STR);
-  string_view_t callconv_str_view = token_to_string_view(callconv_tok);
+  token_t* callconv_token = parser_next(par);
+
+  if (callconv_token->kind != TOK_LIT_STR)
+  {
+    error_bag_put(par->errors, (error_t){
+      .kind = ERROR_PARSER_EXPECTED_CALLING_CONVENTION,
+      .expected_calling_convention = { .loc = token_location(callconv_token) }
+    });
+
+    return CALLCONV_UNKNOWN;
+  }
+
+  string_view_t callconv_str_view = token_to_string_view(callconv_token);
 
   for (size_t i = 0; i < COUNTOF(str_callconv_map); i++)
     if (string_view_compare_cstr(callconv_str_view, str_callconv_map[i].str) == 0)
       return str_callconv_map[i].callconv;
 
-  location_t loc = token_location(callconv_tok);
+  error_bag_put(par->errors, (error_t){
+    .kind = ERROR_PARSER_UNKNOWN_CALLING_CONVENTION,
+    .unknown_calling_convention = { .loc = token_location(callconv_token) }
+  });
 
-  report_error_unknown_callconv(loc);
-
-  return -1;
+  return CALLCONV_UNKNOWN;
 }
 
 ast_node_t* parser_parse_id(parser_t* par)
 {
   ast_id_t* node = ast_id_init();
+
   node->tok = parser_expect(par, TOK_ID);
+
+  if (node->tok == NULL)
+    return (ast_node_t*)ast_poison_init();
+
   return (ast_node_t*)node;
 }
 
 ast_node_t* parser_parse_type_id(parser_t* par)
 {
   ast_type_id_t* node = ast_type_id_init();
+
   node->tok = parser_expect(par, TOK_ID);
+
+  if (node->tok == NULL)
+    return (ast_node_t*)ast_poison_init();
+
   return (ast_node_t*)node;
 }
 
@@ -444,11 +468,17 @@ ast_node_t* parser_parse_type(parser_t* par)
     break;
   default:
   {
-    location_t loc = token_location(parser_current(par));
+    error_bag_put(par->errors, (error_t){
+      .kind = ERROR_PARSER_UNEXPECTED_TOKEN,
+      .unexpected_token = { .loc = token_location(parser_current(par)) }
+    });
 
-    report_error_unexpected_token(loc);
+    return (ast_node_t*)ast_poison_init();
   }
   }
+
+  if (node->tok == NULL)
+    return (ast_node_t*)ast_poison_init();
 
   return node;
 }
@@ -712,7 +742,15 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
           // Default parameters must be followed only by default parameters.
           if (seen_default)
-            report_error_non_default_after_default_parameter(variadic_param, (ast_decl_param_t*)vector_front(node->params));
+          {
+            error_bag_put(par->errors, (error_t){
+              .kind = ERROR_PARSER_DEFAULT_PARAMETER_ORDER,
+              .default_parameter_order = {
+                .default_param_loc = token_location(((ast_decl_param_t*)vector_front(node->params))->tok),
+                .param_loc = token_location(variadic_param->tok)
+              }
+            });
+          }
 
           vector_push(node->params, variadic_param);
         }
@@ -735,7 +773,15 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
 
       // Default parameters must be followed only by default parameters.
       if (seen_default && param->expr == NULL)
-        report_error_non_default_after_default_parameter(param, (ast_decl_param_t*)vector_front(node->params));
+      {
+        error_bag_put(par->errors, (error_t){
+          .kind = ERROR_PARSER_DEFAULT_PARAMETER_ORDER,
+          .default_parameter_order = {
+            .default_param_loc = token_location(((ast_decl_param_t*)vector_front(node->params))->tok),
+            .param_loc = token_location(param->tok)
+          }
+        });
+      }
 
       vector_push(node->params, param);
 
@@ -949,9 +995,12 @@ ast_node_t* parser_parse_decl(parser_t* par)
   case TOK_KW_TYPE:    return parser_parse_decl_type_alias(par);
   default:
   {
-    location_t loc = token_location(parser_current(par));
+    error_bag_put(par->errors, (error_t){
+      .kind = ERROR_PARSER_UNEXPECTED_TOKEN,
+      .unexpected_token = { .loc = token_location(parser_current(par)) }
+    });
 
-    report_error_unexpected_token(loc);
+    return (ast_node_t*)ast_poison_init();
   }
   }
 
@@ -1081,9 +1130,12 @@ ast_node_t* parser_parse_path(parser_t* par)
     case TOK_PUNCT_BRACKET_LEFT: access_node->rhs = parser_parse_path_list    (par); return node;
     default:
     {
-      location_t loc = token_location(parser_current(par));
+      error_bag_put(par->errors, (error_t){
+        .kind = ERROR_PARSER_UNEXPECTED_TOKEN,
+        .unexpected_token = { .loc = token_location(parser_current(par)) }
+      });
 
-      report_error_unexpected_token(loc);
+      return (ast_node_t*)ast_poison_init();
     }
     }
   }
@@ -1112,10 +1164,11 @@ ast_node_t* parser_parse_use_directive(parser_t* par)
   return (ast_node_t*)node;
 }
 
-ast_node_t* parser_parse(parser_t* par, vector_t* toks)
+ast_node_t* parser_parse(parser_t* par, vector_t* tokens, error_bag_t* errors)
 {
-  par->toks = toks;
+  par->tokens = tokens;
   par->cur = 0;
+  par->errors = errors;
 
   stack_clear(par->parents);
   stack_push(par->parents, NULL);
@@ -1126,7 +1179,13 @@ ast_node_t* parser_parse(parser_t* par, vector_t* toks)
   ast_prog_t* root = ast_prog_init();
   root->tok = parser_current(par);
 
-  parser_parse_terminated_list(par, root->decls, TOK_EOF, parser_parse_decl_top_level);
+  while (!parser_consume(par, TOK_EOF))
+  {
+    vector_push(root->decls, parser_parse_decl_top_level(par));
+
+    if (error_bag_full(par->errors))
+      break;
+  }
 
   return (ast_node_t*)root;
 }

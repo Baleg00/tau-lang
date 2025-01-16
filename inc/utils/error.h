@@ -13,6 +13,7 @@
 #include <stdbool.h>
 
 #include "stages/lexer/location.h"
+#include "stages/lexer/token/token.h"
 
 TAU_EXTERN_C_BEGIN
 
@@ -37,6 +38,7 @@ typedef enum error_kind_t
 
   ERROR_PARSER_UNEXPECTED_TOKEN,
   ERROR_PARSER_UNKNOWN_CALLING_CONVENTION,
+  ERROR_PARSER_EXPECTED_CALLING_CONVENTION,
   ERROR_PARSER_DEFAULT_PARAMETER_ORDER,
   ERROR_PARSER_MISSING_PAREN,
   ERROR_PARSER_MISSING_BRACKET,
@@ -102,8 +104,8 @@ typedef struct error_t
       ill_formed_integer,
       ill_formed_float,
       invalid_integer_suffix,
-      unexpected_token,
       unknown_calling_convention,
+      expected_calling_convention,
       undefined_symbol,
       expected_expression_symbol,
       expected_typename,
@@ -124,6 +126,12 @@ typedef struct error_t
       break_outside_loop,
       continue_outside_loop,
       return_inside_defer;
+
+    struct
+    {
+      location_t loc;
+      token_kind_t kind;
+    } unexpected_token;
 
     struct
     {

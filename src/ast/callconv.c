@@ -11,6 +11,7 @@ const char* callconv_kind_to_cstr(callconv_kind_t kind)
 {
   switch (kind)
   {
+  case CALLCONV_UNKNOWN:    return "unknown";
   case CALLCONV_TAU:        return "Tau";
   case CALLCONV_CDECL:      return "cdecl";
   case CALLCONV_STDCALL:    return "stdcall";

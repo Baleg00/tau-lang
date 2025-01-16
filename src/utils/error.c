@@ -122,6 +122,11 @@ static void error_print_parser_unknown_calling_convention(error_t error)
   error_print_helper_snippet(error.unknown_calling_convention.loc, "Unknown calling convention.");
 }
 
+static void error_print_parser_expected_calling_convention(error_t error)
+{
+  error_print_helper_snippet(error.expected_calling_convention.loc, "Expected calling convention.");
+}
+
 static void error_print_parser_default_parameter_order(error_t error)
 {
   crumb_error_t* crumb_error = crumb_error_init(1, "Default parameter followed by non-default parameter.");
@@ -314,6 +319,7 @@ void error_print(error_t error)
   case ERROR_LEXER_INVALID_INTEGER_SUFFIX:           error_print_lexer_invalid_integer_suffix          (error); break;
   case ERROR_PARSER_UNEXPECTED_TOKEN:                error_print_parser_unexpected_token               (error); break;
   case ERROR_PARSER_UNKNOWN_CALLING_CONVENTION:      error_print_parser_unknown_calling_convention     (error); break;
+  case ERROR_PARSER_EXPECTED_CALLING_CONVENTION:     error_print_parser_expected_calling_convention    (error); break;
   case ERROR_PARSER_DEFAULT_PARAMETER_ORDER:         error_print_parser_default_parameter_order        (error); break;
   case ERROR_PARSER_MISSING_PAREN:                   error_print_parser_missing_paren                  (error); break;
   case ERROR_PARSER_MISSING_BRACKET:                 error_print_parser_missing_bracket                (error); break;

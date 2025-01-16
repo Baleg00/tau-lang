@@ -19,15 +19,16 @@ TAU_EXTERN_C_BEGIN
  */
 typedef enum callconv_kind_t
 {
-  CALLCONV_TAU, // The default Tau calling convention.
-  CALLCONV_CDECL, // Standard C calling convention, parameters pushed onto the stack.
-  CALLCONV_STDCALL, // Win32 API standard calling convention.
-  CALLCONV_WIN64, // Windows 64-bit calling convention.
-  CALLCONV_SYSV64, // Calling convention of 64-bit Unix-like operating systems.
-  CALLCONV_AAPCS, // ARM Architecture Procedure Call Standard.
-  CALLCONV_FASTCALL, // Fast parameter passing via registers.
-  CALLCONV_VECTORCALL, // Calling convention for SIMD (Single Instruction, Multiple Data) operations.
-  CALLCONV_THISCALL, // Windows C++ method calling convention.
+  CALLCONV_UNKNOWN, ///< Unknown calling convention.
+  CALLCONV_TAU, ///< The default Tau calling convention.
+  CALLCONV_CDECL, ///< Standard C calling convention, parameters pushed onto the stack.
+  CALLCONV_STDCALL, ///< Win32 API standard calling convention.
+  CALLCONV_WIN64, ///< Windows 64-bit calling convention.
+  CALLCONV_SYSV64, ///< Calling convention of 64-bit Unix-like operating systems.
+  CALLCONV_AAPCS, ///< ARM Architecture Procedure Call Standard.
+  CALLCONV_FASTCALL, ///< Fast parameter passing via registers.
+  CALLCONV_VECTORCALL, ///< Calling convention for SIMD (Single Instruction, Multiple Data) operations.
+  CALLCONV_THISCALL, ///< Windows C++ method calling convention.
 } callconv_kind_t;
 
 /**

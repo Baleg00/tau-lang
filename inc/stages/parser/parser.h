@@ -23,6 +23,7 @@
 #include "stages/lexer/token/token.h"
 #include "utils/common.h"
 #include "utils/collections/vector.h"
+#include "utils/error.h"
 
 TAU_EXTERN_C_BEGIN
 
@@ -91,12 +92,13 @@ token_t* parser_peek(parser_t* par);
 bool parser_consume(parser_t* par, token_kind_t kind);
 
 /**
- * \brief Checks if the current token's kind matches the specified one. If it
- * does, returns the token and advances to the next one, raises an error otherwise.
+ * \brief Checks if the current token's kind matches the specified one and
+ * advances to the next one. If it does, returns the token, otherwise reports
+ * an error and returns `NULL`.
  * 
  * \param[in] par Parser to be used.
  * \param[in] kind Expected token kind.
- * \returns Current token.
+ * \returns Current token or `NULL`.
  */
 token_t* parser_expect(parser_t* par, token_kind_t kind);
 
@@ -631,10 +633,11 @@ ast_node_t* parser_parse_use_directive(parser_t* par);
  * \brief Processes a list of tokens and produces an abstract syntax tree.
  * 
  * \param[in] par Parser to be used.
- * \param[in] toks Vector of tokens to be parsed.
+ * \param[in] tokens Vector of tokens to be parsed.
+ * \param[in] errors Pointer to the error bag to add errors to.
  * \returns Pointer to the root node.
  */
-ast_node_t* parser_parse(parser_t* par, vector_t* toks);
+ast_node_t* parser_parse(parser_t* par, vector_t* tokens, error_bag_t* errors);
 
 TAU_EXTERN_C_END
 
