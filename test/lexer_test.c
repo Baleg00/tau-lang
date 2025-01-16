@@ -8,6 +8,7 @@ test()
   describe("lexer")
     lexer_t* lex = NULL;
     vector_t* tokens = NULL;
+    error_bag_t* errors = NULL;
 
     before()
       lex = lexer_init();
@@ -20,16 +21,20 @@ test()
 
     before_each()
       tokens = vector_init();
+      errors = error_bag_init(10);
     end()
 
     after_each()
       vector_free(tokens);
+      error_bag_free(errors);
     end()
 
     it("should lex empty source code")
       const char* src = "";
 
-      lexer_lex(lex, "", src, tokens);
+      lexer_lex(lex, "", src, tokens, errors);
+
+      assert_true(error_bag_empty(errors));
 
       assert_false(vector_empty(tokens));
       assert_equal(vector_size(tokens), 1);
@@ -39,7 +44,9 @@ test()
     it("should lex identifiers")
       const char* src = "foo BaR _f_i_z_z __BUZZ__";
 
-      lexer_lex(lex, "", src, tokens);
+      lexer_lex(lex, "", src, tokens, errors);
+
+      assert_true(error_bag_empty(errors));
 
       assert_false(vector_empty(tokens));
       assert_equal(vector_size(tokens), 5);
@@ -95,7 +102,9 @@ test()
 
       const char* src = "is as sizeof alignof use in pub extern fun struct union enum mod if then else for while do break continue return defer mut i8 i16 i32 i64 isize u8 u16 u32 u64 usize f32 f64 char bool unit";
 
-      lexer_lex(lex, "", src, tokens);
+      lexer_lex(lex, "", src, tokens, errors);
+
+      assert_true(error_bag_empty(errors));
 
       assert_false(vector_empty(tokens));
       assert_equal(vector_size(tokens), COUNTOF(keyword_kinds) + 1);
@@ -111,7 +120,9 @@ test()
     it("should lex integer literals")
       const char* src = "0 1 123 0x1234567890abcdefABCDEF 0X1234567890abcdefABCDEF 0o12345670 0O12345670 0b10 0B10";
 
-      lexer_lex(lex, "", src, tokens);
+      lexer_lex(lex, "", src, tokens, errors);
+
+      assert_true(error_bag_empty(errors));
 
       assert_equal(vector_size(tokens), 10);
 
