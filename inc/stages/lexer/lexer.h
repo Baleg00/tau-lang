@@ -17,9 +17,8 @@
 #ifndef TAU_LEXER_H
 #define TAU_LEXER_H
 
-#include <stdbool.h>
-
 #include "stages/lexer/token/token.h"
+#include "utils/common.h"
 #include "utils/error.h"
 
 TAU_EXTERN_C_BEGIN

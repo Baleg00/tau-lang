@@ -7,12 +7,7 @@
 
 #include "utils/str_view.h"
 
-#include <stdarg.h>
-#include <string.h>
-
 #include "utils/common.h"
-#include "utils/str.h"
-#include "utils/memory/memtrace.h"
 
 string_view_t string_view_init(const char* buf)
 {

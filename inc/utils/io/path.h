@@ -16,9 +16,8 @@
 #define TAU_PATH_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
-#include "utils/extern_c.h"
-#include "utils/os_detect.h"
 #include "utils/str.h"
 #include "utils/str_view.h"
 

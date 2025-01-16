@@ -15,6 +15,7 @@
 #ifndef TAU_HASH_H
 #define TAU_HASH_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "utils/extern_c.h"

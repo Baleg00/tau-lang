@@ -7,11 +7,7 @@
 
 #include "stages/lexer/token/token.h"
 
-#include <ctype.h>
-
 #include "stages/lexer/token/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 static const struct
 {

@@ -7,11 +7,6 @@
 
 #include "utils/collections/list.h"
 
-#include <stdlib.h>
-
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 struct list_node_t
 {
   void* data;        ///< Pointer to the stored data.

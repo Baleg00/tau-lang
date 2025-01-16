@@ -11,8 +11,8 @@
 #define TAU_OPTIONS_H
 
 #include "linker/linker.h"
+#include "utils/common.h"
 #include "utils/collections/vector.h"
-#include "utils/io/log.h"
 
 TAU_EXTERN_C_BEGIN
 

@@ -9,10 +9,7 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "stages/codegen/codegen.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_expr_op_bin_assign_bit_xor_t* ast_expr_op_bin_assign_bit_xor_init(void)
 {

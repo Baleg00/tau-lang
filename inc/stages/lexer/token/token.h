@@ -18,10 +18,8 @@
 #ifndef TAU_TOKEN_H
 #define TAU_TOKEN_H
 
-#include <stdbool.h>
-#include <stdio.h>
-
 #include "stages/lexer/location.h"
+#include "utils/common.h"
 #include "utils/str.h"
 #include "utils/str_view.h"
 #include "utils/collections/vector.h"

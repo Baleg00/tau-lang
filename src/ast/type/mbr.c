@@ -9,9 +9,7 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_mbr_t* ast_type_mbr_init(void)
 {

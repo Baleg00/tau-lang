@@ -9,8 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_array_t* ast_type_array_init(void)
 {

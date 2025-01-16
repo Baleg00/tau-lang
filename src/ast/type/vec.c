@@ -8,8 +8,6 @@
 #include "ast/type/vec.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_vec_t* ast_type_vec_init(void)
 {

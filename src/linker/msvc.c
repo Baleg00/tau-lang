@@ -7,10 +7,8 @@
 
 #include "linker/msvc.h"
 
-#include "utils/common.h"
 #include "utils/str.h"
 #include "utils/io/command.h"
-#include "utils/memory/memtrace.h"
 
 /**
  * \brief Context data for the MSVC linker.

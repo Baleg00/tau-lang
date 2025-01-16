@@ -7,9 +7,6 @@
 
 #include "utils/io/log.h"
 
-#include <stdarg.h>
-#include <time.h>
-
 #include "utils/common.h"
 #include "utils/esc_seq.h"
 

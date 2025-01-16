@@ -8,8 +8,6 @@
 #include "ast/expr/lit/char.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_expr_lit_char_t* ast_expr_lit_char_init(void)
 {

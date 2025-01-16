@@ -19,6 +19,7 @@
 #define TAU_NAMERES_H
 
 #include "stages/analysis/symtable.h"
+#include "utils/common.h"
 #include "utils/collections/stack.h"
 
 TAU_EXTERN_C_BEGIN

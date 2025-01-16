@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/mut.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_mut_t* typedesc_mut_init(void)
 {
   typedesc_mut_t* desc = (typedesc_mut_t*)malloc(sizeof(typedesc_mut_t));

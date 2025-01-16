@@ -9,9 +9,7 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_stmt_continue_t* ast_stmt_continue_init(void)
 {

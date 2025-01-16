@@ -7,12 +7,8 @@
 
 #include "utils/diagnostics.h"
 
-#include <stdarg.h>
-#include <stdlib.h>
-
 #include "utils/common.h"
 #include "utils/crumb.h"
-#include "utils/io/log.h"
 
 void report_error_unexpected_character(location_t loc)
 {

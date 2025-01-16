@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/fun.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_fun_t* typedesc_fun_init(void)
 {
   typedesc_fun_t* desc = (typedesc_fun_t*)malloc(sizeof(typedesc_fun_t));

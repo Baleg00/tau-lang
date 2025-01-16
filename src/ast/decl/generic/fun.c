@@ -8,9 +8,7 @@
 #include "ast/decl/generic/fun.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_decl_generic_fun_t* ast_decl_generic_fun_init(void)
 {

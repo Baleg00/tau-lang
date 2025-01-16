@@ -8,8 +8,6 @@
 #include "stages/codegen/codegen.h"
 
 #include "ast/ast.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 codegen_ctx_t* codegen_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_mod, LLVMBuilderRef llvm_builder)
 {

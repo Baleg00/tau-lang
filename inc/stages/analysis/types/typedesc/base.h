@@ -10,10 +10,8 @@
 #ifndef TAU_TYPEDESC_BASE_H
 #define TAU_TYPEDESC_BASE_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "llvm.h"
+#include "utils/common.h"
 
 /**
  * \brief Header for all type descriptors.

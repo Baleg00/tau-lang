@@ -11,7 +11,6 @@
 #define TAU_AST_STMT_WHILE_H
 
 #include "ast/stmt/stmt.h"
-#include "llvm.h"
 
 TAU_EXTERN_C_BEGIN
 

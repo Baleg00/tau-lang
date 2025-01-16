@@ -7,14 +7,9 @@
 
 #include "stages/analysis/types/typebuilder.h"
 
-#include <stdint.h>
-#include <string.h>
-
 #include "ast/ast.h"
-#include "utils/common.h"
 #include "utils/hash.h"
 #include "utils/collections/set.h"
-#include "utils/memory/memtrace.h"
 
 struct typebuilder_t
 {

@@ -7,12 +7,7 @@
 
 #include "utils/io/path.h"
 
-#include <ctype.h>
-#include <string.h>
-
 #include "utils/common.h"
-#include "utils/str.h"
-#include "utils/memory/memtrace.h"
 
 /**
  * \brief Checks whether a character is a directory separator.

@@ -10,8 +10,6 @@
 #ifndef TAU_LINKER_GCC_H
 #define TAU_LINKER_GCC_H
 
-#include <stdbool.h>
-
 #include "linker/linker.h"
 
 TAU_EXTERN_C_BEGIN

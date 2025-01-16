@@ -19,10 +19,9 @@
 #ifndef TAU_PARSER_H
 #define TAU_PARSER_H
 
-#include <stdbool.h>
-
 #include "ast/ast.h"
 #include "stages/lexer/token/token.h"
+#include "utils/common.h"
 #include "utils/collections/vector.h"
 
 TAU_EXTERN_C_BEGIN

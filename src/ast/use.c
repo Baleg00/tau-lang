@@ -8,8 +8,6 @@
 #include "ast/use.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_use_t* ast_use_init(void)
 {

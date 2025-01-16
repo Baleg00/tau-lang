@@ -8,8 +8,6 @@
 #include "ast/expr/op/spec.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_expr_op_spec_t* ast_expr_op_spec_init(void)
 {

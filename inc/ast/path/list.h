@@ -11,7 +11,6 @@
 #define TAU_AST_PATH_LIST_H
 
 #include "ast/node.h"
-#include "utils/collections/vector.h"
 
 TAU_EXTERN_C_BEGIN
 

@@ -8,8 +8,6 @@
 #include "ast/type/modif/opt.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_opt_t* ast_type_opt_init(void)
 {

@@ -7,9 +7,7 @@
 
 #include "utils/io/argparse.h"
 
-#include <string.h>
-
-#include "utils/memory/memtrace.h"
+#include "utils/common.h"
 
 struct argparse_ctx_t
 {

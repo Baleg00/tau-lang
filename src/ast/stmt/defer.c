@@ -8,8 +8,6 @@
 #include "ast/stmt/defer.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_stmt_defer_t* ast_stmt_defer_init(void)
 {

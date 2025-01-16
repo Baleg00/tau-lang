@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/union.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_union_t* typedesc_union_init(void)
 {
   typedesc_union_t* desc = (typedesc_union_t*)malloc(sizeof(typedesc_union_t));

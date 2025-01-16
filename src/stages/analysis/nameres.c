@@ -7,9 +7,6 @@
 
 #include "stages/analysis/nameres.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 nameres_ctx_t* nameres_ctx_init(symtable_t* symtable)
 {
   nameres_ctx_t* ctx = (nameres_ctx_t*)malloc(sizeof(nameres_ctx_t));

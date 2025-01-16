@@ -19,7 +19,7 @@
 
 #include "llvm.h"
 #include "stages/analysis/types/typedesc/typedesc.h"
-#include "utils/str.h"
+#include "utils/common.h"
 
 TAU_EXTERN_C_BEGIN
 

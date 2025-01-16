@@ -8,8 +8,6 @@
 #include "ast/type/modif/ptr.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_ptr_t* ast_type_ptr_init(void)
 {

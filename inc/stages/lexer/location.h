@@ -19,8 +19,7 @@
 #ifndef TAU_LOCATION_H
 #define TAU_LOCATION_H
 
-#include <stdio.h>
-
+#include "utils/common.h"
 #include "utils/str.h"
 #include "utils/str_view.h"
 

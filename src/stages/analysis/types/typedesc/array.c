@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/array.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_array_t* typedesc_array_init(void)
 {
   typedesc_array_t* desc = (typedesc_array_t*)malloc(sizeof(typedesc_array_t));

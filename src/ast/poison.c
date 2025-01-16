@@ -8,8 +8,6 @@
 #include "ast/poison.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_poison_t* ast_poison_init(void)
 {

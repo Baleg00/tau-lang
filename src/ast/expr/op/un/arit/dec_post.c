@@ -9,9 +9,7 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_expr_op_un_arit_dec_post_t* ast_expr_op_un_arit_dec_post_init(void)
 {

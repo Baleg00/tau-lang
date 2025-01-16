@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/opt.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_opt_t* typedesc_opt_init(void)
 {
   typedesc_opt_t* desc = (typedesc_opt_t*)malloc(sizeof(typedesc_opt_t));

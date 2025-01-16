@@ -12,8 +12,7 @@
 
 #include "llvm.h"
 #include "stages/analysis/symtable.h"
-#include "stages/analysis/types/typebuilder.h"
-#include "stages/analysis/types/typetable.h"
+#include "stages/analysis/types/types.h"
 #include "utils/collections/vector.h"
 
 /**

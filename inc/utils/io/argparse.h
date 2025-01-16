@@ -19,6 +19,7 @@
 #ifndef TAU_ARGPARSE_H
 #define TAU_ARGPARSE_H
 
+#include <stddef.h>
 #include <stdio.h>
 
 #include "utils/extern_c.h"
@@ -129,7 +130,7 @@ void argparse_set_index(argparse_ctx_t* ctx, size_t idx);
 const char* argparse_get_arg(argparse_ctx_t* ctx);
 
 /**
- * \brief Retrieves the an argument from the argument list given its index.
+ * \brief Retrieves an argument from the argument list given its index.
  *
  * \param[in] ctx Pointer to the argument parser context to be used.
  * \param[in] idx The index of the argument.

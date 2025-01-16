@@ -8,9 +8,7 @@
 #include "ast/decl/mod.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_decl_mod_t* ast_decl_mod_init(void)
 {

@@ -7,11 +7,9 @@
 
 #include "stages/lexer/token/registry.h"
 
-#include "utils/common.h"
 #include "utils/hash.h"
 #include "utils/collections/vector.h"
 #include "utils/memory/arena.h"
-#include "utils/memory/memtrace.h"
 
 /**
  * \brief Represents an entry corresponding to a source file in the token registry.

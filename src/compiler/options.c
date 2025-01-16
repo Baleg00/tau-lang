@@ -7,13 +7,7 @@
 
 #include "compiler/options.h"
 
-#include <stdbool.h>
-
-#include "utils/common.h"
-#include "utils/collections/vector.h"
 #include "utils/io/argparse.h"
-#include "utils/io/log.h"
-#include "utils/memory/memtrace.h"
 
 /**
  * \brief Enumeration of compiler option kinds.

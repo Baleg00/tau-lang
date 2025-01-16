@@ -7,9 +7,6 @@
 
 #include "utils/collections/set.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 /// Node in a binary search tree.
 typedef struct set_node_t set_node_t;
 

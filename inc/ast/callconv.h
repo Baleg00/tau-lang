@@ -10,9 +10,7 @@
 #ifndef TAU_CALLCONV_H
 #define TAU_CALLCONV_H
 
-#include <stddef.h>
-
-#include "utils/extern_c.h"
+#include "utils/common.h"
 
 TAU_EXTERN_C_BEGIN
 

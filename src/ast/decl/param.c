@@ -9,9 +9,7 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_decl_param_t* ast_decl_param_init(void)
 {

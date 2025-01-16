@@ -8,8 +8,6 @@
 #include "utils/memory/arena.h"
 
 #include "utils/common.h"
-#include "utils/io/log.h"
-#include "utils/memory/memtrace.h"
 
 /**
  * \brief Default capacity of an arena allocator.

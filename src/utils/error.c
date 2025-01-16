@@ -7,6 +7,7 @@
 
 #include "utils/error.h"
 
+#include "utils/common.h"
 #include "utils/crumb.h"
 
 struct error_bag_t

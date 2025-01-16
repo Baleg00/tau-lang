@@ -8,15 +8,9 @@
 #include "stages/parser/shyd.h"
 
 #include <errno.h>
-#include <string.h>
 
 #include "ast/ast.h"
-#include "stages/parser/parser.h"
-#include "utils/common.h"
-#include "utils/crumb.h"
 #include "utils/diagnostics.h"
-#include "utils/collections/queue.h"
-#include "utils/memory/memtrace.h"
 
 shyd_ctx_t* shyd_ctx_init(parser_t* par)
 {

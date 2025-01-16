@@ -10,7 +10,6 @@
 #ifndef TAU_AST_STMT_DO_WHILE_H
 #define TAU_AST_STMT_DO_WHILE_H
 
-#include "llvm.h"
 #include "ast/stmt/stmt.h"
 
 TAU_EXTERN_C_BEGIN

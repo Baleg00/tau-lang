@@ -8,9 +8,7 @@
 #include "ast/decl/union.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_decl_union_t* ast_decl_union_init(void)
 {

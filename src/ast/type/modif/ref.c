@@ -8,8 +8,6 @@
 #include "ast/type/modif/ref.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_ref_t* ast_type_ref_init(void)
 {

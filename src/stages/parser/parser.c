@@ -7,15 +7,8 @@
 
 #include "stages/parser/parser.h"
 
-#include <stdlib.h>
-#include <string.h>
-
-#include "stages/lexer/location.h"
 #include "stages/parser/shyd.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/io/log.h"
-#include "utils/memory/memtrace.h"
 
 /**
  * \brief Declaration context.

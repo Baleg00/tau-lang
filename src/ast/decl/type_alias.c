@@ -8,9 +8,7 @@
 #include "ast/decl/type_alias.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_decl_type_alias_t* ast_decl_type_alias_init(void)
 {

@@ -8,9 +8,7 @@
 #include "ast/decl/struct.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_decl_struct_t* ast_decl_struct_init(void)
 {

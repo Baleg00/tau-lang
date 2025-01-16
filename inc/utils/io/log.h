@@ -20,8 +20,8 @@
 #ifndef TAU_LOG_H
 #define TAU_LOG_H
 
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "utils/extern_c.h"
 

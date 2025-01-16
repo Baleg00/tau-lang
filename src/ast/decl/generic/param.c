@@ -8,9 +8,7 @@
 #include "ast/decl/generic/param.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_decl_generic_param_t* ast_decl_generic_param_init(void)
 {

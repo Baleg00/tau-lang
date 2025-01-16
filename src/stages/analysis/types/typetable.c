@@ -7,13 +7,8 @@
 
 #include "stages/analysis/types/typetable.h"
 
-#include <stddef.h>
-#include <string.h>
-
 #include "ast/ast.h"
-#include "utils/common.h"
 #include "utils/hash.h"
-#include "utils/memory/memtrace.h"
 
 /// The initial number of buckets in a type table.
 #define TYPETABLE_INITIAL_CAPACITY 16

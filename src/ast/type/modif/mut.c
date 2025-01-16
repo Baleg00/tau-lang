@@ -8,8 +8,6 @@
 #include "ast/type/modif/mut.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_mut_t* ast_type_mut_init(void)
 {

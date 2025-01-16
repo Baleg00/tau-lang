@@ -5,14 +5,9 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include <stdarg.h>
-#include <stddef.h>
-#include <stdio.h>
-
 #include "utils/crumb.h"
-#include "utils/common.h"
+
 #include "utils/esc_seq.h"
-#include "utils/memory/memtrace.h"
 
 static FILE* g_crumb_stream = NULL;
 

@@ -7,9 +7,6 @@
 
 #include "compiler/compiler.h"
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "llvm.h"
 #include "ast/ast.h"
 #include "ast/registry.h"
@@ -24,8 +21,6 @@
 #include "utils/crumb.h"
 #include "utils/timer.h"
 #include "utils/io/file.h"
-#include "utils/io/log.h"
-#include "utils/memory/memtrace.h"
 
 struct compiler_t
 {

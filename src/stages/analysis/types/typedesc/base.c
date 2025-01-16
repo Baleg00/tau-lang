@@ -7,10 +7,7 @@
 
 #include "stages/analysis/types/typedesc/base.h"
 
-#include <string.h>
-
 #include "ast/ast.h"
-#include "utils/common.h"
 
 void typedesc_free(typedesc_t* desc)
 {

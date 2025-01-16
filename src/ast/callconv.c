@@ -7,8 +7,6 @@
 
 #include "ast/callconv.h"
 
-#include "utils/common.h"
-
 const char* callconv_kind_to_cstr(callconv_kind_t kind)
 {
   switch (kind)

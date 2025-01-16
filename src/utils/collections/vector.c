@@ -7,12 +7,6 @@
 
 #include "utils/collections/vector.h"
 
-#include <stdint.h>
-#include <string.h>
-
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 /// The initial number of elements a vector should be able to hold.
 #define VECTOR_INITIAL_CAPACITY ((size_t)16)
 

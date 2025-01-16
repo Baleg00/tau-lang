@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/prim.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 static typedesc_prim_t* typedesc_prim_init(typedesc_kind_t kind)
 {
   typedesc_prim_t* desc = (typedesc_prim_t*)malloc(sizeof(typedesc_prim_t));

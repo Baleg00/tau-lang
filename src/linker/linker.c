@@ -9,8 +9,6 @@
 
 #include "linker/gcc.h"
 #include "linker/msvc.h"
-#include "utils/common.h"
-#include "utils/collections/vector.h"
 
 linker_t* linker_init(linker_kind_t kind)
 {

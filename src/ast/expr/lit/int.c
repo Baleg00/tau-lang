@@ -8,10 +8,7 @@
 #include "ast/expr/lit/int.h"
 
 #include "ast/registry.h"
-#include "stages/codegen/codegen.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_expr_lit_int_t* ast_expr_lit_int_init(void)
 {

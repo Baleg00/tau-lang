@@ -8,8 +8,6 @@
 #include "ast/expr/lit/bool.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_expr_lit_bool_t* ast_expr_lit_bool_init(void)
 {

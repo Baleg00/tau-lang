@@ -8,9 +8,7 @@
 #include "ast/type/id.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_id_t* ast_type_id_init(void)
 {

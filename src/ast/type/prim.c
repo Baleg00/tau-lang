@@ -8,8 +8,6 @@
 #include "ast/type/prim.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 static ast_type_prim_t* ast_type_prim_init(ast_kind_t kind)
 {

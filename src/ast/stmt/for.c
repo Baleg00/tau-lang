@@ -8,8 +8,6 @@
 #include "ast/stmt/for.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_stmt_for_t* ast_stmt_for_init(void)
 {

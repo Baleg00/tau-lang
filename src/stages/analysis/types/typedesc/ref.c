@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/ref.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_ref_t* typedesc_ref_init(void)
 {
   typedesc_ref_t* desc = (typedesc_ref_t*)malloc(sizeof(typedesc_ref_t));

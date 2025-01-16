@@ -11,7 +11,6 @@
 #define TAU_AST_TYPE_H
 
 #include "ast/node.h"
-#include "llvm.h"
 
 /**
  * \brief Header for all AST type nodes.

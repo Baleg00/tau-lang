@@ -18,10 +18,7 @@
 #ifndef TAU_LIST_H
 #define TAU_LIST_H
 
-#include <stdbool.h>
-#include <stddef.h>
-
-#include "utils/extern_c.h"
+#include "utils/common.h"
 
 /**
  * \brief Macro for iterating over each element in a list using a for loop.

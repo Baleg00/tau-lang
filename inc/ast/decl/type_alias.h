@@ -11,7 +11,6 @@
 #define TAU_AST_DECL_TYPE_ALIAS_H
 
 #include "ast/decl/decl.h"
-#include "llvm.h"
 
 TAU_EXTERN_C_BEGIN
 

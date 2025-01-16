@@ -19,9 +19,7 @@
 #ifndef TAU_QUEUE_H
 #define TAU_QUEUE_H
 
-#include <stdbool.h>
-
-#include "utils/extern_c.h"
+#include "utils/common.h"
 
 TAU_EXTERN_C_BEGIN
 /**

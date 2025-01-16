@@ -11,7 +11,6 @@
 #define TAU_AST_DECL_GENERIC_FUN_H
 
 #include "ast/decl/decl.h"
-#include "utils/collections/vector.h"
 
 TAU_EXTERN_C_BEGIN
 

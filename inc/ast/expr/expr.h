@@ -11,7 +11,6 @@
 #define TAU_AST_EXPR_H
 
 #include "ast/node.h"
-#include "llvm.h"
 
 /**
  * \brief Header for all AST expression nodes.

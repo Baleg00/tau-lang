@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/var.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_var_t* typedesc_var_init(void)
 {
   typedesc_var_t* desc = (typedesc_var_t*)malloc(sizeof(typedesc_var_t));

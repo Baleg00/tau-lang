@@ -7,11 +7,7 @@
 
 #include "ast/id.h"
 
-#include <string.h>
-
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_id_t* ast_id_init(void)
 {

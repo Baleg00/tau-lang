@@ -8,8 +8,6 @@
 #include "ast/prog.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_prog_t* ast_prog_init(void)
 {

@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/struct.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_struct_t* typedesc_struct_init(void)
 {
   typedesc_struct_t* desc = (typedesc_struct_t*)malloc(sizeof(typedesc_struct_t));

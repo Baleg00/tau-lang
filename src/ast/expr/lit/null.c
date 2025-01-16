@@ -8,8 +8,6 @@
 #include "ast/expr/lit/null.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_expr_lit_null_t* ast_expr_lit_null_init(void)
 {

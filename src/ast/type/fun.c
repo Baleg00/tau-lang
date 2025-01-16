@@ -8,8 +8,6 @@
 #include "ast/type/fun.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_fun_t* ast_type_fun_init(void)
 {

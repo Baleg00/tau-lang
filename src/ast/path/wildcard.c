@@ -8,8 +8,6 @@
 #include "ast/path/wildcard.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_path_wildcard_t* ast_path_wildcard_init(void)
 {

@@ -8,7 +8,6 @@
 #include "compiler/environment.h"
 
 #include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 environment_t* environment_init(symtable_t* symtable, typebuilder_t* typebuilder, typetable_t* typetable, LLVMContextRef llvm_context, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_module, LLVMBuilderRef llvm_builder)
 {

@@ -8,7 +8,6 @@
 #include "stages/analysis/ctrlflow.h"
 
 #include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ctrlflow_ctx_t* ctrlflow_ctx_init(void)
 {

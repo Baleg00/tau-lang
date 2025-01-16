@@ -8,7 +8,6 @@
 #include "ast/node.h"
 
 #include "ast/ast.h"
-#include "utils/common.h"
 
 void ast_node_free(ast_node_t* node)
 {

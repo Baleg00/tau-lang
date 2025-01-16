@@ -7,12 +7,8 @@
 
 #include "utils/io/command.h"
 
-#include <stdio.h>
-
-#include "utils/common.h"
 #include "utils/str.h"
 #include "utils/collections/vector.h"
-#include "utils/memory/memtrace.h"
 
 /**
  * \brief Represents an environment variable.

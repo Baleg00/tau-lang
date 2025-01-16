@@ -19,6 +19,7 @@
 #ifndef TAU_SYMTABLE_H
 #define TAU_SYMTABLE_H
 
+#include "utils/common.h"
 #include "utils/collections/vector.h"
 #include "utils/str_view.h"
 

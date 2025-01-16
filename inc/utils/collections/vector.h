@@ -16,10 +16,7 @@
 #ifndef TAU_VECTOR_H
 #define TAU_VECTOR_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "utils/extern_c.h"
+#include "utils/common.h"
 
 TAU_EXTERN_C_BEGIN
 

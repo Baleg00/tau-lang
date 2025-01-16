@@ -8,8 +8,6 @@
 #include "ast/path/segment.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_path_segment_t* ast_path_segment_init(void)
 {

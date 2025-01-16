@@ -15,6 +15,7 @@
 #define TAU_TOKEN_REGISTRY_H
 
 #include "stages/lexer/token/token.h"
+#include "utils/common.h"
 
 TAU_EXTERN_C_BEGIN
 

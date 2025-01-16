@@ -8,8 +8,6 @@
 #include "ast/path/access.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_path_access_t* ast_path_access_init(void)
 {

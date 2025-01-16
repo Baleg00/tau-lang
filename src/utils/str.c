@@ -7,13 +7,7 @@
 
 #include "utils/str.h"
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "utils/common.h"
-#include "utils/io/log.h"
-#include "utils/memory/memtrace.h"
 
 struct string_t
 {

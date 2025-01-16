@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/vec.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_vec_t* typedesc_vec_init(void)
 {
   typedesc_vec_t* desc = (typedesc_vec_t*)malloc(sizeof(typedesc_vec_t));

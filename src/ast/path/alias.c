@@ -8,8 +8,6 @@
 #include "ast/path/alias.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_path_alias_t* ast_path_alias_init(void)
 {

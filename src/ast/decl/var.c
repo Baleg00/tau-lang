@@ -10,9 +10,7 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 #include "stages/codegen/codegen.h"
-#include "utils/common.h"
 #include "utils/diagnostics.h"
-#include "utils/memory/memtrace.h"
 
 ast_decl_var_t* ast_decl_var_init(void)
 {

@@ -9,8 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_expr_op_un_alignof_t* ast_expr_op_un_alignof_init(void)
 {

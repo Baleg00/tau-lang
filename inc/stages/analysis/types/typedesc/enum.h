@@ -11,7 +11,6 @@
 #define TAU_TYPEDESC_DECL_ENUM_H
 
 #include "stages/analysis/types/typedesc/decl.h"
-#include "utils/collections/vector.h"
 
 TAU_EXTERN_C_BEGIN
 

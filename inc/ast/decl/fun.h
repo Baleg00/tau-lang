@@ -12,7 +12,6 @@
 
 #include "ast/callconv.h"
 #include "ast/decl/decl.h"
-#include "llvm.h"
 
 TAU_EXTERN_C_BEGIN
 

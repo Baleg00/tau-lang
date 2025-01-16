@@ -15,6 +15,7 @@
 #define TAU_FILE_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "utils/io/path.h"
 

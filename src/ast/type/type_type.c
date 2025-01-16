@@ -8,8 +8,6 @@
 #include "ast/type/type_type.h"
 
 #include "ast/registry.h"
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 ast_type_type_t* ast_type_type_init(void)
 {

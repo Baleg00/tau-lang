@@ -7,13 +7,7 @@
 
 #include "stages/analysis/symtable.h"
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "utils/common.h"
 #include "utils/hash.h"
-#include "utils/memory/memtrace.h"
 
 /// The initial number of buckets in a symbol table.
 #define SYMTABLE_INITIAL_CAPACITY ((size_t)16)

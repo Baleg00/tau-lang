@@ -8,13 +8,8 @@
 #define TAU_MEMTRACE_IMPL
 #include "utils/memory/memtrace.h"
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-
 #include "utils/common.h"
 #include "utils/timer.h"
-#include "utils/io/log.h"
 
 /**
  * \brief Enumeration of memory allocation kinds.

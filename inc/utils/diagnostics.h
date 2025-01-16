@@ -13,7 +13,8 @@
 #include "ast/ast.h"
 #include "stages/analysis/types/typedesc/typedesc.h"
 #include "stages/lexer/location.h"
-#include "utils/common.h"
+#include "utils/extern_c.h"
+#include "utils/noreturn.h"
 
 TAU_EXTERN_C_BEGIN
 

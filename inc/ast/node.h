@@ -10,13 +10,12 @@
 #ifndef TAU_AST_NODE_H
 #define TAU_AST_NODE_H
 
-#include <stdio.h>
-
 #include "stages/analysis/ctrlflow.h"
 #include "stages/analysis/nameres.h"
 #include "stages/analysis/types/typecheck.h"
 #include "stages/codegen/codegen.h"
 #include "stages/lexer/token/token.h"
+#include "utils/common.h"
 
 /**
  * \brief Header for all AST nodes.

@@ -31,5 +31,6 @@
 #include "utils/unreachable.h"
 #include "utils/unused.h"
 #include "utils/io/log.h"
+#include "utils/memory/memtrace.h"
 
 #endif

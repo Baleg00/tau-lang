@@ -14,9 +14,8 @@
 #ifndef TAU_CRUMB_H
 #define TAU_CRUMB_H
 
-#include <stdio.h>
-
 #include "stages/lexer/location.h"
+#include "utils/common.h"
 #include "utils/collections/vector.h"
 
 TAU_EXTERN_C_BEGIN

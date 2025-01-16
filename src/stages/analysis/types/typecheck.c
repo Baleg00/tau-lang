@@ -8,7 +8,6 @@
 #include "stages/analysis/types/typecheck.h"
 
 #include "utils/common.h"
-#include "utils/memory/memtrace.h"
 
 typecheck_ctx_t* typecheck_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable)
 {

@@ -7,9 +7,6 @@
 
 #include "stages/analysis/types/typedesc/enum.h"
 
-#include "utils/common.h"
-#include "utils/memory/memtrace.h"
-
 typedesc_enum_t* typedesc_enum_init(void)
 {
   typedesc_enum_t* desc = (typedesc_enum_t*)malloc(sizeof(typedesc_enum_t));

@@ -10,8 +10,9 @@
 #ifndef TAU_ERROR_H
 #define TAU_ERROR_H
 
+#include <stdbool.h>
+
 #include "stages/lexer/location.h"
-#include "utils/common.h"
 
 TAU_EXTERN_C_BEGIN
 

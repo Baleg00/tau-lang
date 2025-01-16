@@ -7,8 +7,6 @@
 
 #include "ast/expr/op/op.h"
 
-#include "utils/common.h"
-
 const char* op_kind_to_cstr(op_kind_t kind)
 {
   switch (kind)
