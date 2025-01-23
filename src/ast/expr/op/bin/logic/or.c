@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_bin_logic_or_t* ast_expr_op_bin_logic_or_init(void)
 {
@@ -43,16 +42,14 @@ void ast_expr_op_bin_logic_or_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_lo
 
   if (typedesc_remove_ref_mut(lhs_desc)->kind != TYPEDESC_BOOL)
   {
-    location_t loc = token_location(node->lhs->tok);
-
-    report_error_expected_bool_type(loc);
+    error_bag_put_typecheck_expected_bool(ctx->errors, token_location(node->lhs->tok));
+    return;
   }
 
   if (typedesc_remove_ref_mut(rhs_desc)->kind != TYPEDESC_BOOL)
   {
-    location_t loc = token_location(node->rhs->tok);
-
-    report_error_expected_bool_type(loc);
+    error_bag_put_typecheck_expected_bool(ctx->errors, token_location(node->rhs->tok));
+    return;
   }
 
   typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);

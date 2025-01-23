@@ -8,7 +8,6 @@
 #include "ast/expr/op/call.h"
 
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_call_t* ast_expr_op_call_init(void)
 {
@@ -66,26 +65,23 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
 
     if (!typedesc_is_implicitly_direct_convertible(caller_param_desc, callee_param_desc))
     {
-      location_t loc = token_location(caller_param->tok);
-
-      report_error_type_mismatch(loc, callee_param_desc, caller_param_desc);
+      error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(caller_param->tok));
+      return;
     }
   }
 
   if (i == vector_size(node->params) && i != vector_size(fun_desc->param_types))
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_too_few_arguments(loc);
+    error_bag_put_typecheck_too_few_function_parameters(ctx->errors, token_location(node->tok));
+    return;
   }
 
   if (i != vector_size(node->params) && i == vector_size(fun_desc->param_types))
   {
     if (fun_desc->callconv != CALLCONV_CDECL)
     {
-      location_t loc = token_location(node->tok);
-
-      report_error_too_many_arguments(loc);
+      error_bag_put_typecheck_too_many_function_parameters(ctx->errors, token_location(node->tok));
+      return;
     }
   }
 

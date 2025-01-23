@@ -8,7 +8,6 @@
 #include "ast/decl/type_alias.h"
 
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_decl_type_alias_t* ast_decl_type_alias_init(void)
 {
@@ -37,7 +36,10 @@ void ast_decl_type_alias_nameres(nameres_ctx_t* ctx, ast_decl_type_alias_t* node
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL)
-    report_error_type_redefinition((ast_decl_t*)collision->node, (ast_decl_t*)node);
+  {
+    error_bag_put_nameres_symbol_collision(ctx->errors, token_location(node->tok), token_location(collision->node->tok));
+    return;
+  }
 
   node->scope = nameres_ctx_scope_begin(ctx);
 

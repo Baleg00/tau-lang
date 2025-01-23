@@ -19,6 +19,7 @@
 
 #include "stages/analysis/types/typebuilder.h"
 #include "stages/analysis/types/typetable.h"
+#include "utils/error.h"
 
 TAU_EXTERN_C_BEGIN
 
@@ -30,8 +31,10 @@ typedef struct typecheck_ctx_t
   typebuilder_t* typebuilder;
   typetable_t* typetable;
 
-  typedesc_fun_t* fun_desc; // Type descriptor of the containing function declaration.
-  typedesc_enum_t* enum_desc; // Type descriptor of the containing enum declaration.
+  typedesc_fun_t* fun_desc; ///< Type descriptor of the containing function declaration.
+  typedesc_enum_t* enum_desc; ///< Type descriptor of the containing enum declaration.
+
+  error_bag_t* errors; ///< Associated error bag to add errors to.
 } typecheck_ctx_t;
 
 /**
@@ -39,9 +42,10 @@ typedef struct typecheck_ctx_t
  * 
  * \param[in,out] typebuilder The type builder to be used.
  * \param[in,out] typetable The type table target data layout to be used.
+ * \param[in] errors Pointer to the error bag to be used.
  * \returns Pointer to the newly initialized type check context.
  */
-typecheck_ctx_t* typecheck_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable);
+typecheck_ctx_t* typecheck_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable, error_bag_t* errors);
 
 /**
  * \brief Frees all memory allocated by a type check context.

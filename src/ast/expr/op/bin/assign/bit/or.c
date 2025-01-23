@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_bin_assign_bit_or_t* ast_expr_op_bin_assign_bit_or_init(void)
 {
@@ -43,30 +42,26 @@ void ast_expr_op_bin_assign_bit_or_typecheck(typecheck_ctx_t* ctx, ast_expr_op_b
 
   if (!typedesc_is_ref(lhs_desc))
   {
-    location_t loc = token_location(node->lhs->tok);
-
-    report_error_expected_reference_type(loc);
+    error_bag_put_typecheck_expected_reference(ctx->errors, token_location(node->lhs->tok));
+    return;
   }
 
   if (!typedesc_is_mut(typedesc_remove_ref(lhs_desc)))
   {
-    location_t loc = token_location(node->lhs->tok);
-
-    report_error_expected_mutable_type(loc);
+    error_bag_put_typecheck_expected_mutable(ctx->errors, token_location(node->lhs->tok));
+    return;
   }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
   {
-    location_t loc = token_location(node->lhs->tok);
-
-    report_error_expected_arithmetic_type(loc);
+    error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->lhs->tok));
+    return;
   }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
   {
-    location_t loc = token_location(node->rhs->tok);
-
-    report_error_expected_arithmetic_type(loc);
+    error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->rhs->tok));
+    return;
   }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, lhs_desc);

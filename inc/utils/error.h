@@ -44,12 +44,15 @@ typedef enum error_kind_t
   ERROR_PARSER_MISSING_BRACKET,
   ERROR_PARSER_MISSING_UNARY_ARGUMENT,
   ERROR_PARSER_MISSING_BINARY_ARGUMENT,
+  ERROR_PARSER_MISSING_CALLEE,
 
   ERROR_NAMERES_SYMBOL_COLLISION,
   ERROR_NAMERES_UNDEFINED_SYMBOL,
   ERROR_NAMERES_EXPECTED_EXPRESSION_SYMBOL,
   ERROR_NAMERES_EXPECTED_TYPENAME,
   ERROR_NAMERES_SHADOWED_SYMBOL,
+  ERROR_NAMERES_NO_MEMBER,
+  ERROR_NAMERES_PRIVATE_MEMBER,
 
   ERROR_TYPECHECK_EXPECTED_INTEGER,
   ERROR_TYPECHECK_EXPECTED_ARITHMETIC,
@@ -57,7 +60,9 @@ typedef enum error_kind_t
   ERROR_TYPECHECK_EXPECTED_MUTABLE,
   ERROR_TYPECHECK_EXPECTED_OPTIONAL,
   ERROR_TYPECHECK_EXPECTED_POINTER,
+  ERROR_TYPECHECK_EXPECTED_ARRAY,
   ERROR_TYPECHECK_EXPECTED_REFERENCE,
+  ERROR_TYPECHECK_EXPECTED_VECTOR,
   ERROR_TYPECHECK_INCOMPATIBLE_RETURN_TYPE,
   ERROR_TYPECHECK_TOO_MANY_FUNCTION_PARAMETERS,
   ERROR_TYPECHECK_TOO_FEW_FUNCTION_PARAMETERS,
@@ -101,9 +106,11 @@ typedef struct error_t
       missing_bracket,
       missing_unary_argument,
       missing_binary_argument,
+      missing_callee,
       ill_formed_integer,
       ill_formed_float,
       invalid_integer_suffix,
+      unexpected_token,
       unknown_calling_convention,
       expected_calling_convention,
       undefined_symbol,
@@ -115,7 +122,9 @@ typedef struct error_t
       expected_mutable,
       expected_optional,
       expected_pointer,
+      expected_array,
       expected_reference,
+      expected_vector,
       incompatible_return_type,
       too_many_function_parameters,
       too_few_function_parameters,
@@ -126,12 +135,6 @@ typedef struct error_t
       break_outside_loop,
       continue_outside_loop,
       return_inside_defer;
-
-    struct
-    {
-      location_t loc;
-      token_kind_t kind;
-    } unexpected_token;
 
     struct
     {
@@ -181,6 +184,13 @@ error_bag_t* error_bag_init(size_t capacity);
 void error_bag_free(error_bag_t* bag);
 
 /**
+ * \brief Prints all errors contained in an error bag.
+ *
+ * \param[in] bag Pointer to the error bag to be used.
+ */
+void error_bag_print(const error_bag_t* bag);
+
+/**
  * \brief Adds an error to the error bag.
  *
  * \param[in] bag Pointer to the error bag to be used.
@@ -213,6 +223,385 @@ bool error_bag_empty(const error_bag_t* bag);
  * \returns `true` if the error bag is full, `false` otherwise.
  */
 bool error_bag_full(const error_bag_t* bag);
+
+/**
+ * \brief Adds an error to the error bag.
+ *
+ * \param[in] bag Pointer to the error bag to be used.
+ * \param[in] path The path to the file that failed to open.
+ */
+void error_bag_put_compiler_file_open_failed(error_bag_t* bag, const char* path);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_unexpected_character(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_identifier_too_long(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_missing_single_quote(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_missing_double_quote(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_empty_character(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_missing_hex_digits(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_too_many_hex_digits(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_unknown_escape_sequence(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_ill_formed_integer(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_ill_formed_float(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_lexer_invalid_integer_suffix(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_parser_unexpected_token(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_parser_unknown_calling_convention(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_parser_expected_calling_convention(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] default_param_loc The location of the first default parameter.
+ * \param[in] param_loc The location of invalid non-default parameter.
+ */
+void error_bag_put_parser_default_parameter_order(error_bag_t* bag, location_t default_param_loc, location_t param_loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_parser_missing_paren(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_parser_missing_bracket(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_parser_missing_unary_argument(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_parser_missing_callee(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_parser_missing_binary_argument(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] symbol_loc The location of the original symbol.
+ * \param[in] new_symbol_loc The location of the colliding symbol.
+ */
+void error_bag_put_nameres_symbol_collision(error_bag_t* bag, location_t symbol_loc, location_t new_symbol_loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_nameres_undefined_symbol(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_nameres_expected_expression_symbol(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_nameres_expected_typename(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] shadowed_symbol_loc The location of the shadowed symbol.
+ * \param[in] inner_symbol_loc The location of the symbol that shadows the other one.
+ */
+void error_bag_put_nameres_shadowed_symbol(error_bag_t* bag, location_t shadowed_symbol_loc, location_t inner_symbol_loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_nameres_no_member(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_nameres_private_member(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_integer(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_arithmetic(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_bool(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_mutable(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_optional(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_pointer(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_array(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_reference(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_vector(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_incompatible_return_type(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_too_many_function_parameters(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_too_few_function_parameters(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_no_member(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_private_member(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_illegal_conversion(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_integer_literal_too_large(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_ctrlflow_break_outside_loop(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_ctrlflow_continue_outside_loop(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_ctrlflow_return_inside_defer(error_bag_t* bag, location_t loc);
 
 TAU_EXTERN_C_END
 

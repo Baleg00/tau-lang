@@ -10,7 +10,6 @@
 #include <errno.h>
 
 #include "ast/ast.h"
-#include "utils/diagnostics.h"
 
 shyd_ctx_t* shyd_ctx_init(parser_t* par)
 {
@@ -354,16 +353,14 @@ void shyd_parse_postfix(shyd_ctx_t* ctx)
 
     if (elem->kind == SHYD_PAREN_OPEN)
     {
-      location_t loc = token_location(elem->tok);
-
-      report_error_missing_closing_parenthesis(loc);
+      error_bag_put_parser_missing_paren(ctx->par->errors, token_location(elem->tok));
+      continue;
     }
 
     if (elem->kind == SHYD_BRACKET_OPEN)
     {
-      location_t loc = token_location(elem->tok);
-
-      report_error_missing_closing_bracket(loc);
+      error_bag_put_parser_missing_bracket(ctx->par->errors, token_location(elem->tok));
+      continue;
     }
 
     queue_offer(ctx->out_queue, elem);
@@ -378,9 +375,8 @@ void shyd_ast_expr_op_un(shyd_ctx_t* ctx, shyd_elem_t* elem)
 
   if (stack_empty(ctx->node_stack))
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_missing_unary_argument(loc);
+    error_bag_put_parser_missing_unary_argument(ctx->par->errors, token_location(node->tok));
+    return;
   }
 
   node->expr = (ast_node_t*)stack_pop(ctx->node_stack);
@@ -403,18 +399,16 @@ void shyd_ast_expr_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem)
 
   if (stack_empty(ctx->node_stack))
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_missing_binary_argument(loc);
+    error_bag_put_parser_missing_binary_argument(ctx->par->errors, token_location(node->tok));
+    return;
   }
 
   node->rhs = (ast_node_t*)stack_pop(ctx->node_stack);
 
   if (stack_empty(ctx->node_stack))
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_missing_binary_argument(loc);
+    error_bag_put_parser_missing_binary_argument(ctx->par->errors, token_location(node->tok));
+    return;
   }
 
   node->lhs = (ast_node_t*)stack_pop(ctx->node_stack);
@@ -426,9 +420,8 @@ void shyd_ast_expr_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem)
 {
   if (stack_empty(ctx->node_stack))
   {
-    location_t loc = token_location(elem->node->tok);
-
-    report_error_missing_callee(loc);
+    error_bag_put_parser_missing_callee(ctx->par->errors, token_location(elem->tok));
+    return;
   }
 
   ((ast_expr_op_call_t*)elem->node)->callee = (ast_node_t*)stack_pop(ctx->node_stack);
@@ -440,9 +433,9 @@ void shyd_ast_expr_op_spec(shyd_ctx_t* ctx, shyd_elem_t* elem)
 {
   if (stack_empty(ctx->node_stack))
   {
-    location_t loc = token_location(elem->node->tok);
-
-    report_error_missing_callee(loc); // TODO: create new report error function for specialization operator
+    // TODO: create new report error function for specialization operator
+    error_bag_put_parser_missing_callee(ctx->par->errors, token_location(elem->node->tok));
+    return;
   }
 
   ((ast_expr_op_spec_t*)elem->node)->generic = (ast_node_t*)stack_pop(ctx->node_stack);
@@ -511,7 +504,9 @@ void shyd_ast_expr_term(shyd_ctx_t* ctx, shyd_elem_t* elem)
   case TOK_LIT_NULL:
     node = (ast_node_t*)ast_expr_lit_null_init();
     break;
-  default: report_error_unexpected_token(loc);
+  default:
+    error_bag_put_parser_unexpected_token(ctx->par->errors, loc);
+    return;
   }
 
   node->tok = elem->tok;

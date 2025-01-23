@@ -12,6 +12,7 @@
 
 #include "utils/collections/stack.h"
 #include "utils/collections/vector.h"
+#include "utils/error.h"
 
 TAU_EXTERN_C_BEGIN
 
@@ -50,16 +51,18 @@ typedef struct ast_stmt_block_t ast_stmt_block_t;
  */
 typedef struct ctrlflow_ctx_t
 {
-  stack_t* blocks; // Stack of AST block statements currently being visited.
-  vector_t* stmts; // Stack of AST statements (for, while, defer) currently being visited.
+  stack_t* blocks; ///< Stack of AST block statements currently being visited.
+  vector_t* stmts; ///< Stack of AST statements (for, while, defer) currently being visited.
+  error_bag_t* errors; ///< Associated error bag to add errors to.
 } ctrlflow_ctx_t;
 
 /**
  * \brief Initializes a new control flow analysis context.
- * 
+ *
+ * \param[in] errors Pointer to the error bag to be used.
  * \returns Pointer to the newly initialized control flow analysis context.
  */
-ctrlflow_ctx_t* ctrlflow_ctx_init(void);
+ctrlflow_ctx_t* ctrlflow_ctx_init(error_bag_t* errors);
 
 /**
  * \brief Frees all memory allocated by a control flow analysis context.

@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_un_unwrap_safe_t* ast_expr_op_un_unwrap_safe_init(void)
 {
@@ -38,9 +37,8 @@ void ast_expr_op_un_unwrap_safe_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_u
 
   if (!typedesc_is_opt(typedesc_remove_ref_mut(expr_desc)))
   {
-    location_t loc = token_location(node->expr->tok);
-
-    report_error_expected_optional_type(loc);
+    error_bag_put_typecheck_expected_optional(ctx->errors, token_location(node->expr->tok));
+    return;
   }
 
   typedesc_opt_t* opt_desc = (typedesc_opt_t*)typedesc_remove_ref_mut(expr_desc);

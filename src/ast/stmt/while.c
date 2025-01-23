@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_stmt_while_t* ast_stmt_while_init(void)
 {
@@ -48,9 +47,7 @@ void ast_stmt_while_typecheck(typecheck_ctx_t* ctx, ast_stmt_while_t* node)
 
   if (typedesc_remove_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
   {
-    location_t loc = token_location(node->cond->tok);
-
-    report_error_expected_bool_type(loc);
+    error_bag_put_typecheck_expected_bool(ctx->errors, token_location(node->cond->tok));
   }
 }
 

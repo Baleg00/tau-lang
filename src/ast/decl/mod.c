@@ -8,7 +8,6 @@
 #include "ast/decl/mod.h"
 
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_decl_mod_t* ast_decl_mod_init(void)
 {
@@ -40,9 +39,8 @@ void ast_decl_mod_nameres(nameres_ctx_t* ctx, ast_decl_mod_t* node)
 
   if (collision != NULL)
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_symbol_redeclaration(loc);
+    error_bag_put_nameres_symbol_collision(ctx->errors, token_location(node->tok), token_location(collision->node->tok));
+    return;
   }
 
   node->scope = nameres_ctx_scope_begin(ctx);

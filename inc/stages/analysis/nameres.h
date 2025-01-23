@@ -18,6 +18,8 @@
 #ifndef TAU_NAMERES_H
 #define TAU_NAMERES_H
 
+#include <utils/error.h>
+
 #include "stages/analysis/symtable.h"
 #include "utils/common.h"
 #include "utils/collections/stack.h"
@@ -29,17 +31,19 @@ TAU_EXTERN_C_BEGIN
  */
 typedef struct nameres_ctx_t
 {
-  symtable_t* global_scope; // The symbol table of the global scope.
-  stack_t* scopes; // Current scope stack.
+  symtable_t* global_scope; ///< The symbol table of the global scope.
+  stack_t* scopes; ///< Current scope stack.
+  error_bag_t* errors; ///< Associated error bag to add errors to.
 } nameres_ctx_t;
 
 /**
  * \brief Initializes a new name resolution context.
  *
  * \param[in] symtable Pointer to the symbol table to be used.
+ * \param[in] errors Pointer to the error bag to be used.
  * \returns Pointer to the newly initialized name resolution context.
  */
-nameres_ctx_t* nameres_ctx_init(symtable_t* symtable);
+nameres_ctx_t* nameres_ctx_init(symtable_t* symtable, error_bag_t* errors);
 
 /**
  * \brief Frees all memory allocated by a name resolution context.

@@ -7,13 +7,14 @@
 
 #include "stages/analysis/nameres.h"
 
-nameres_ctx_t* nameres_ctx_init(symtable_t* symtable)
+nameres_ctx_t* nameres_ctx_init(symtable_t* symtable, error_bag_t* errors)
 {
   nameres_ctx_t* ctx = (nameres_ctx_t*)malloc(sizeof(nameres_ctx_t));
   CLEAROBJ(ctx);
 
   ctx->global_scope = symtable;
   ctx->scopes = stack_init();
+  ctx->errors = errors;
 
   stack_push(ctx->scopes, ctx->global_scope);
 

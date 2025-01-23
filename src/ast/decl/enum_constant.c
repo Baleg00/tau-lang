@@ -8,7 +8,6 @@
 #include "ast/decl/enum_constant.h"
 
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_decl_enum_constant_t* ast_decl_enum_constant_init(void)
 {
@@ -36,7 +35,9 @@ void ast_decl_enum_constant_nameres(nameres_ctx_t* ctx, ast_decl_enum_constant_t
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL)
-    report_error_enum_constant_redefinition((ast_decl_enum_constant_t*)collision->node, node);
+  {
+    error_bag_put_nameres_symbol_collision(ctx->errors, token_location(node->tok), token_location(collision->node->tok));
+  }
 }
 
 void ast_decl_enum_constant_typecheck(typecheck_ctx_t* ctx, ast_decl_enum_constant_t* node)

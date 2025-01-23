@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_type_mbr_t* ast_type_mbr_init(void)
 {
@@ -51,16 +50,14 @@ void ast_type_mbr_nameres(nameres_ctx_t* ctx, ast_type_mbr_t* node)
 
   if (mbr_sym == NULL)
   {
-    location_t loc = token_location(member_node->tok);
-
-    report_error_no_member_with_name(loc);
+    error_bag_put_nameres_no_member(ctx->errors, token_location(node->tok));
+    return;
   }
 
   if (!((ast_decl_t*)mbr_sym->node)->is_pub)
   {
-    location_t loc = token_location(member_node->tok);
-
-    report_error_private_member(loc);
+    error_bag_put_nameres_private_member(ctx->errors, token_location(node->member->tok));
+    return;
   }
 
   member_node->decl = mbr_sym->node;

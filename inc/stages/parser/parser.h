@@ -28,9 +28,32 @@
 TAU_EXTERN_C_BEGIN
 
 /**
+ * \brief Declaration context.
+ *
+ * \details This structure contains context information for parsing declarations.
+ * It is used to track attributes, modifiers, and other relevant information
+ * associated with a declaration until the actual declaration parsing occurs.
+ * This allows for proper handling of modifiers like 'pub' and 'extern'.
+ */
+typedef struct parser_decl_context_t
+{
+  bool is_pub; ///< Is the declaration being parsed public.
+  bool is_extern; ///< Is the declaration being parsed external.
+  callconv_kind_t callconv; ///< Calling convention of external function declaration.
+} parser_decl_context_t;
+
+/**
  * \brief Represents a syntax analyzer.
  */
-typedef struct parser_t parser_t;
+typedef struct parser_t
+{
+  vector_t* tokens; ///< Vector of tokens to be processed.
+  size_t cur; ///< Current token index.
+  bool ignore_newlines; ///< Ignore newlines while parsing.
+  stack_t* parents; ///< Stack of parent declarations.
+  parser_decl_context_t decl_ctx; ///< Context for the declaration being parsed.
+  error_bag_t* errors; ///< Associated error bag.
+} parser_t;
 
 /**
  * \brief Function pointer type to be used when parsing delimited or terminated

@@ -8,7 +8,6 @@
 #include "ast/expr/lit/int.h"
 
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_lit_int_t* ast_expr_lit_int_init(void)
 {
@@ -55,9 +54,8 @@ void ast_expr_lit_int_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_int_t* node)
   else if (node->value <= INT64_MAX) desc = typebuilder_build_i64(ctx->typebuilder);
   else
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_literal_out_of_range(loc);
+    error_bag_put_typecheck_integer_literal_too_large(ctx->errors, token_location(node->tok));
+    return;
   }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);

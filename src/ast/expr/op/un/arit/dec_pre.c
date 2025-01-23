@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_un_arit_dec_pre_t* ast_expr_op_un_arit_dec_pre_init(void)
 {
@@ -38,23 +37,20 @@ void ast_expr_op_un_arit_dec_pre_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_
 
   if (!typedesc_is_ref(expr_desc))
   {
-    location_t loc = token_location(node->expr->tok);
-
-    report_error_expected_reference_type(loc);
+    error_bag_put_typecheck_expected_reference(ctx->errors, token_location(node->expr->tok));
+    return;
   }
 
   if (!typedesc_is_mut(typedesc_remove_ref(expr_desc)))
   {
-    location_t loc = token_location(node->expr->tok);
-
-    report_error_expected_mutable_type(loc);
+    error_bag_put_typecheck_expected_mutable(ctx->errors, token_location(node->expr->tok));
+    return;
   }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
   {
-    location_t loc = token_location(node->expr->tok);
-
-    report_error_expected_arithmetic_type(loc);
+    error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->expr->tok));
+    return;
   }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, expr_desc);

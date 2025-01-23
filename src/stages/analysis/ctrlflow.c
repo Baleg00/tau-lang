@@ -9,13 +9,14 @@
 
 #include "utils/common.h"
 
-ctrlflow_ctx_t* ctrlflow_ctx_init(void)
+ctrlflow_ctx_t* ctrlflow_ctx_init(error_bag_t* errors)
 {
   ctrlflow_ctx_t* ctx = (ctrlflow_ctx_t*)malloc(sizeof(ctrlflow_ctx_t));
   CLEAROBJ(ctx);
 
   ctx->blocks = stack_init();
   ctx->stmts = vector_init_with_capacity(1);
+  ctx->errors = errors;
 
   return ctx;
 }

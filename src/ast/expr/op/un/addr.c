@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_un_addr_t* ast_expr_op_un_addr_init(void)
 {
@@ -38,9 +37,8 @@ void ast_expr_op_un_addr_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_addr_t* 
 
   if (!typedesc_is_ref(expr_desc))
   {
-    location_t loc = token_location(node->expr->tok);
-
-    report_error_expected_reference_type(loc);
+    error_bag_put_typecheck_expected_reference(ctx->errors, token_location(node->expr->tok));
+    return;
   }
 
   typedesc_t* desc = typebuilder_build_ptr(ctx->typebuilder, typedesc_remove_ref(expr_desc));

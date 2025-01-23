@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_id_t* ast_expr_id_init(void)
 {
@@ -37,9 +36,8 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
 
   if (sym == NULL)
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_undefined_symbol(loc);
+    error_bag_put_nameres_undefined_symbol(ctx->errors, token_location(node->tok));
+    return;
   }
 
   switch (sym->node->kind)
@@ -50,9 +48,8 @@ void ast_expr_id_nameres(nameres_ctx_t* ctx, ast_expr_id_t* node)
   case AST_DECL_ENUM: break;
   default:
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_symbol_is_not_an_expression(loc);
+    error_bag_put_nameres_expected_expression_symbol(ctx->errors, token_location(node->tok));
+    return;
   }
   }
 

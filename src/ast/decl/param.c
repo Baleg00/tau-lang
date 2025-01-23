@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_decl_param_t* ast_decl_param_init(void)
 {
@@ -45,7 +44,9 @@ void ast_decl_param_nameres(nameres_ctx_t* ctx, ast_decl_param_t* node)
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL && collision->node->kind == AST_DECL_PARAM)
-    report_error_parameter_redefinition((ast_decl_param_t*)collision->node, node);
+  {
+    error_bag_put_nameres_symbol_collision(ctx->errors, token_location(node->tok), token_location(collision->node->tok));
+  }
 }
 
 void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node)
@@ -69,9 +70,7 @@ void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node)
 
     if (!typedesc_is_implicitly_direct_convertible(expr_desc, desc))
     {
-      location_t loc = token_location(node->tok);
-
-      report_error_type_mismatch(loc, desc, expr_desc);
+      error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(node->tok));
     }
   }
 }

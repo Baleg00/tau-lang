@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_bin_cmp_ne_t* ast_expr_op_bin_cmp_ne_init(void)
 {
@@ -43,16 +42,14 @@ void ast_expr_op_bin_cmp_ne_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_cmp_
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
   {
-    location_t loc = token_location(node->lhs->tok);
-
-    report_error_expected_arithmetic_type(loc);
+    error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->lhs->tok));
+    return;
   }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
   {
-    location_t loc = token_location(node->rhs->tok);
-
-    report_error_expected_arithmetic_type(loc);
+    error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->rhs->tok));
+    return;
   }
 
   typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);

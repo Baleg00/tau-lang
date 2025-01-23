@@ -10,7 +10,6 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 #include "stages/codegen/codegen.h"
-#include "utils/diagnostics.h"
 
 ast_decl_var_t* ast_decl_var_init(void)
 {
@@ -47,10 +46,15 @@ void ast_decl_var_nameres(nameres_ctx_t* ctx, ast_decl_var_t* node)
   symbol_t* collision = symtable_insert(scope, sym);
 
   if (collision != NULL && collision->node->kind == AST_DECL_VAR)
-    report_error_variable_redefinition((ast_decl_var_t*)collision->node, node);
+  {
+    error_bag_put_nameres_symbol_collision(ctx->errors, token_location(node->tok), token_location(collision->node->tok));
+    return;
+  }
 
   if (lookup != NULL && (lookup->node->kind == AST_DECL_VAR || lookup->node->kind == AST_DECL_PARAM))
-    report_warning_shadowed_variable((ast_decl_var_t*)lookup->node, node);
+  {
+    error_bag_put_nameres_shadowed_symbol(ctx->errors, token_location(lookup->node->tok), token_location(node->tok));
+  }
 }
 
 void ast_decl_var_typecheck(typecheck_ctx_t* ctx, ast_decl_var_t* node)
@@ -71,9 +75,7 @@ void ast_decl_var_typecheck(typecheck_ctx_t* ctx, ast_decl_var_t* node)
 
     if (!typedesc_is_implicitly_direct_convertible(expr_desc, desc))
     {
-      location_t loc = token_location(node->tok);
-
-      report_error_type_mismatch(loc, desc, expr_desc);
+      error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(node->tok));
     }
   }
 }

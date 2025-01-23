@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_bin_subs_t* ast_expr_op_bin_subs_init(void)
 {
@@ -43,16 +42,14 @@ void ast_expr_op_bin_subs_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_subs_t
 
   if (!typedesc_is_array(typedesc_remove_ref_mut(lhs_desc)))
   {
-    location_t loc = token_location(node->lhs->tok);
-
-    report_error_expected_pointer_type(loc);
+    error_bag_put_typecheck_expected_array(ctx->errors, token_location(node->lhs->tok));
+    return;
   }
 
   if (!typedesc_is_integer(typedesc_remove_ref_mut(rhs_desc)))
   {
-    location_t loc = token_location(node->rhs->tok);
-
-    report_error_expected_integer_type(loc);
+    error_bag_put_typecheck_expected_integer(ctx->errors, token_location(node->rhs->tok));
+    return;
   }
 
   typedesc_array_t* array_desc = (typedesc_array_t*)typedesc_remove_ref_mut(lhs_desc);

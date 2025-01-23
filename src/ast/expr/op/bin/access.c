@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_bin_access_t* ast_expr_op_bin_access_init(void)
 {
@@ -50,9 +49,8 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
 
     if (mbr_sym == NULL)
     {
-      location_t loc = token_location(node->rhs->tok);
-
-      report_error_no_member_with_name(loc);
+      error_bag_put_typecheck_no_member(ctx->errors, token_location(node->rhs->tok));
+      return;
     }
 
     node->idx = vector_find(enum_node->members, mbr_sym->node);
@@ -101,17 +99,15 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
 
     if (mbr_sym == NULL)
     {
-      location_t loc = token_location(node->rhs->tok);
-
-      report_error_no_member_with_name(loc);
+      error_bag_put_typecheck_no_member(ctx->errors, token_location(node->rhs->tok));
+      return;
     }
 
 
     if (!((ast_decl_t*)mbr_sym->node)->is_pub)
     {
-      location_t loc = token_location(node->rhs->tok);
-
-      report_error_private_member(loc);
+      error_bag_put_typecheck_private_member(ctx->errors, token_location(node->rhs->tok));
+      return;
     }
 
     node->idx = vector_find(members, mbr_sym->node);

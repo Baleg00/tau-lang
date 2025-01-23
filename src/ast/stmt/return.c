@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_stmt_return_t* ast_stmt_return_init(void)
 {
@@ -37,26 +36,23 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
 {
   ast_node_typecheck(ctx, node->expr);
 
-  if (ctx->fun_desc == NULL)
-  {
-    location_t loc = token_location(node->tok);
-
-    report_error_return_outside_function(loc);
-  }
-
   typedesc_t* expr_desc = typebuilder_build_unit(ctx->typebuilder);
 
   if (node->expr != NULL)
   {
     expr_desc = typetable_lookup(ctx->typetable, node->expr);
     ASSERT(expr_desc != NULL);
+
+    if (!typedesc_is_implicitly_direct_convertible(expr_desc, ctx->fun_desc->return_type))
+    {
+      error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(node->expr->tok));
+      return;
+    }
   }
 
   if (!typedesc_is_implicitly_direct_convertible(expr_desc, ctx->fun_desc->return_type))
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_incompatible_return_type(loc);
+    error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(node->tok));
   }
 }
 
@@ -68,9 +64,8 @@ void ast_stmt_return_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_return_t* node)
 
     if (stmt_node->kind == AST_STMT_DEFER)
     {
-      location_t loc = token_location(node->tok);
-
-      report_error_return_inside_defer(loc);
+      error_bag_put_ctrlflow_return_inside_defer(ctx->errors, token_location(node->tok));
+      return;
     }
   }
 }

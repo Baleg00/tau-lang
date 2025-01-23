@@ -9,31 +9,6 @@
 
 #include "stages/parser/shyd.h"
 
-/**
- * \brief Declaration context.
- *
- * \details This structure contains context information for parsing declarations.
- * It is used to track attributes, modifiers, and other relevant information
- * associated with a declaration until the actual declaration parsing occurs.
- * This allows for proper handling of modifiers like 'pub' and 'extern'.
- */
-typedef struct parser_decl_context_t
-{
-  bool is_pub; ///< Is the declaration being parsed public.
-  bool is_extern; ///< Is the declaration being parsed external.
-  callconv_kind_t callconv; ///< Calling convention of external function declaration.
-} parser_decl_context_t;
-
-struct parser_t
-{
-  vector_t* tokens; ///< Vector of tokens to be processed.
-  size_t cur; ///< Current token index.
-  bool ignore_newlines; ///< Ignore newlines while parsing.
-  stack_t* parents; ///< Stack of parent declarations.
-  parser_decl_context_t decl_ctx; ///< Context for the declaration being parsed.
-  error_bag_t* errors; ///< Associated error bag.
-};
-
 static void parser_skip_newlines(parser_t* par)
 {
   token_t* tok = (token_t*)vector_get(par->tokens, par->cur);
@@ -111,11 +86,7 @@ token_t* parser_expect(parser_t* par, token_kind_t kind)
 
   if (token->kind != kind)
   {
-    error_bag_put(par->errors, (error_t){
-      .kind = ERROR_PARSER_UNEXPECTED_TOKEN,
-      .unexpected_token = { .loc = token_location(token) }
-    });
-
+    error_bag_put_parser_unexpected_token(par->errors, token_location(token));
     return NULL;
   }
 
@@ -196,11 +167,7 @@ callconv_kind_t parser_parse_callconv(parser_t* par)
 
   if (callconv_token->kind != TOK_LIT_STR)
   {
-    error_bag_put(par->errors, (error_t){
-      .kind = ERROR_PARSER_EXPECTED_CALLING_CONVENTION,
-      .expected_calling_convention = { .loc = token_location(callconv_token) }
-    });
-
+    error_bag_put_parser_expected_calling_convention(par->errors, token_location(callconv_token));
     return CALLCONV_UNKNOWN;
   }
 
@@ -210,10 +177,7 @@ callconv_kind_t parser_parse_callconv(parser_t* par)
     if (string_view_compare_cstr(callconv_str_view, str_callconv_map[i].str) == 0)
       return str_callconv_map[i].callconv;
 
-  error_bag_put(par->errors, (error_t){
-    .kind = ERROR_PARSER_UNKNOWN_CALLING_CONVENTION,
-    .unknown_calling_convention = { .loc = token_location(callconv_token) }
-  });
+  error_bag_put_parser_unknown_calling_convention(par->errors, token_location(callconv_token));
 
   return CALLCONV_UNKNOWN;
 }
@@ -468,10 +432,7 @@ ast_node_t* parser_parse_type(parser_t* par)
     break;
   default:
   {
-    error_bag_put(par->errors, (error_t){
-      .kind = ERROR_PARSER_UNEXPECTED_TOKEN,
-      .unexpected_token = { .loc = token_location(parser_current(par)) }
-    });
+    error_bag_put_parser_unexpected_token(par->errors, token_location(parser_current(par)));
 
     return (ast_node_t*)ast_poison_init();
   }
@@ -743,13 +704,11 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
           // Default parameters must be followed only by default parameters.
           if (seen_default)
           {
-            error_bag_put(par->errors, (error_t){
-              .kind = ERROR_PARSER_DEFAULT_PARAMETER_ORDER,
-              .default_parameter_order = {
-                .default_param_loc = token_location(((ast_decl_param_t*)vector_front(node->params))->tok),
-                .param_loc = token_location(variadic_param->tok)
-              }
-            });
+            error_bag_put_parser_default_parameter_order(
+              par->errors,
+              token_location(((ast_decl_param_t*)vector_front(node->params))->tok),
+              token_location(variadic_param->tok)
+            );
           }
 
           vector_push(node->params, variadic_param);
@@ -774,13 +733,11 @@ ast_node_t* parser_parse_decl_fun(parser_t* par)
       // Default parameters must be followed only by default parameters.
       if (seen_default && param->expr == NULL)
       {
-        error_bag_put(par->errors, (error_t){
-          .kind = ERROR_PARSER_DEFAULT_PARAMETER_ORDER,
-          .default_parameter_order = {
-            .default_param_loc = token_location(((ast_decl_param_t*)vector_front(node->params))->tok),
-            .param_loc = token_location(param->tok)
-          }
-        });
+        error_bag_put_parser_default_parameter_order(
+          par->errors,
+          token_location(((ast_decl_param_t*)vector_front(node->params))->tok),
+          token_location(param->tok)
+        );
       }
 
       vector_push(node->params, param);
@@ -995,10 +952,7 @@ ast_node_t* parser_parse_decl(parser_t* par)
   case TOK_KW_TYPE:    return parser_parse_decl_type_alias(par);
   default:
   {
-    error_bag_put(par->errors, (error_t){
-      .kind = ERROR_PARSER_UNEXPECTED_TOKEN,
-      .unexpected_token = { .loc = token_location(parser_current(par)) }
-    });
+    error_bag_put_parser_unexpected_token(par->errors, token_location(parser_current(par)));
 
     return (ast_node_t*)ast_poison_init();
   }
@@ -1130,10 +1084,7 @@ ast_node_t* parser_parse_path(parser_t* par)
     case TOK_PUNCT_BRACKET_LEFT: access_node->rhs = parser_parse_path_list    (par); return node;
     default:
     {
-      error_bag_put(par->errors, (error_t){
-        .kind = ERROR_PARSER_UNEXPECTED_TOKEN,
-        .unexpected_token = { .loc = token_location(parser_current(par)) }
-      });
+      error_bag_put_parser_unexpected_token(par->errors, token_location(parser_current(par)));
 
       return (ast_node_t*)ast_poison_init();
     }

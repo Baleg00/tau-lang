@@ -8,7 +8,6 @@
 #include "ast/type/id.h"
 
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_type_id_t* ast_type_id_init(void)
 {
@@ -36,9 +35,8 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
 
   if (sym == NULL)
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_undefined_typename(loc);
+    error_bag_put_nameres_undefined_symbol(ctx->errors, token_location(node->tok));
+    return;
   }
 
   switch (sym->node->kind)
@@ -50,9 +48,8 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node)
   case AST_DECL_TYPE_ALIAS: break;
   default:
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_symbol_is_not_a_typename(loc);
+    error_bag_put_nameres_expected_typename(ctx->errors, token_location(node->tok));
+    return;
   }
   }
 

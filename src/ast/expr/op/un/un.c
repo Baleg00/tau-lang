@@ -7,8 +7,8 @@
 
 #include "ast/expr/op/un/un.h"
 
+#include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_un_t* ast_expr_op_un_init(void)
 {

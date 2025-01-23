@@ -8,7 +8,6 @@
 #include "ast/decl/generic/param.h"
 
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_decl_generic_param_t* ast_decl_generic_param_init(void)
 {
@@ -45,7 +44,7 @@ void ast_decl_generic_param_nameres(nameres_ctx_t* ctx, ast_decl_generic_param_t
 
   if (collision != NULL && collision->node->kind == AST_DECL_GENERIC_PARAM)
   {
-    report_error_generic_parameter_redefinition((ast_decl_generic_param_t*)collision->node, node);
+    error_bag_put_nameres_symbol_collision(ctx->errors, token_location(node->tok), token_location(collision->node->tok));
   }
 }
 

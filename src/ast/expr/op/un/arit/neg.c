@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_un_arit_neg_t* ast_expr_op_un_arit_neg_init(void)
 {
@@ -38,9 +37,8 @@ void ast_expr_op_un_arit_neg_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_arit
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
   {
-    location_t loc = token_location(node->expr->tok);
-
-    report_error_expected_arithmetic_type(loc);
+    error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->expr->tok));
+    return;
   }
 
   typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);

@@ -7,8 +7,8 @@
 
 #include "ast/expr/op/bin/bin.h"
 
+#include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_expr_op_bin_t* ast_expr_op_bin_init(void)
 {

@@ -163,9 +163,9 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
 
   vector_push(env->sources, src_cstr);
 
-  {
-    error_bag_t* errors = error_bag_init(10);
+  error_bag_t* errors = error_bag_init(10);
 
+  {
     lexer_t* lexer = lexer_init();
 
     time_it("lexer", lexer_lex(lexer, path_cstr, src_cstr, env->tokens, errors));
@@ -174,18 +174,10 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
 
     if (!error_bag_empty(errors))
     {
-      while (!error_bag_empty(errors))
-      {
-        error_t error;
-
-        if (error_bag_get(errors, &error))
-          error_print(error);
-      }
-
+      error_bag_print(errors);
+      error_bag_free(errors);
       exit(EXIT_FAILURE);
     }
-
-    error_bag_free(errors);
   }
 
   if (options_get_dump_tokens(compiler->options))
@@ -194,8 +186,6 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
   ast_node_t* root_node = NULL;
 
   {
-    error_bag_t* errors = error_bag_init(10);
-
     parser_t* parser = parser_init();
 
     time_it("parser", root_node = parser_parse(parser, env->tokens, errors));
@@ -204,45 +194,58 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
 
     if (!error_bag_empty(errors))
     {
-      while (!error_bag_empty(errors))
-      {
-        error_t error;
-
-        if (error_bag_get(errors, &error))
-          error_print(error);
-      }
-
+      error_bag_print(errors);
+      error_bag_free(errors);
       exit(EXIT_FAILURE);
     }
-
-    error_bag_free(errors);
   }
 
   if (options_get_dump_ast(compiler->options))
     compiler_dump_ast(path, root_node);
 
   {
-    nameres_ctx_t* nameres_ctx = nameres_ctx_init(env->symtable);
+    nameres_ctx_t* nameres_ctx = nameres_ctx_init(env->symtable, errors);
 
     time_it("analysis:nameres", ast_node_nameres(nameres_ctx, root_node));
 
     nameres_ctx_free(nameres_ctx);
+
+    if (!error_bag_empty(errors))
+    {
+      error_bag_print(errors);
+      error_bag_free(errors);
+      exit(EXIT_FAILURE);
+    }
   }
 
   {
-    typecheck_ctx_t* typecheck_ctx = typecheck_ctx_init(env->typebuilder, env->typetable);
+    typecheck_ctx_t* typecheck_ctx = typecheck_ctx_init(env->typebuilder, env->typetable, errors);
 
     time_it("analysis:typecheck", ast_node_typecheck(typecheck_ctx, root_node));
 
     typecheck_ctx_free(typecheck_ctx);
+
+    if (!error_bag_empty(errors))
+    {
+      error_bag_print(errors);
+      error_bag_free(errors);
+      exit(EXIT_FAILURE);
+    }
   }
 
   {
-    ctrlflow_ctx_t* ctrlflow_ctx = ctrlflow_ctx_init();
+    ctrlflow_ctx_t* ctrlflow_ctx = ctrlflow_ctx_init(errors);
 
     time_it("analysis:ctrlflow", ast_node_ctrlflow(ctrlflow_ctx, root_node));
 
     ctrlflow_ctx_free(ctrlflow_ctx);
+
+    if (!error_bag_empty(errors))
+    {
+      error_bag_print(errors);
+      error_bag_free(errors);
+      exit(EXIT_FAILURE);
+    }
   }
 
   {

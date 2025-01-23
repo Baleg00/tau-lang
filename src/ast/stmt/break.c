@@ -9,7 +9,6 @@
 
 #include "ast/ast.h"
 #include "ast/registry.h"
-#include "utils/diagnostics.h"
 
 ast_stmt_break_t* ast_stmt_break_init(void)
 {
@@ -40,9 +39,8 @@ void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)
 {
   if (vector_empty(ctx->stmts))
   {
-    location_t loc = token_location(node->tok);
-
-    report_error_break_outside_loop(loc);
+    error_bag_put_ctrlflow_break_outside_loop(ctx->errors, token_location(node->tok));
+    return;
   }
 
   for (int i = (int)vector_size(ctx->stmts) - 1; i >= 0; i--)
@@ -58,9 +56,7 @@ void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)
     }
   }
 
-  location_t loc = token_location(node->tok);
-
-  report_error_break_outside_loop(loc);
+  error_bag_put_ctrlflow_break_outside_loop(ctx->errors, token_location(node->tok));
 }
 
 void ast_stmt_break_codegen(codegen_ctx_t* ctx, ast_stmt_break_t* node)
