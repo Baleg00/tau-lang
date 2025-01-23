@@ -152,33 +152,6 @@ void ast_type_prim_codegen(codegen_ctx_t* ctx, ast_type_prim_t* node)
   node->llvm_type = desc->llvm_type;
 }
 
-size_t ast_type_prim_mangle(ast_type_prim_t* node, char* buf, size_t len)
-{
-  const char* mangled_prim = NULL;
-
-  switch (node->kind)
-  {
-  case AST_TYPE_PRIM_I8:    mangled_prim = "sb"; break;
-  case AST_TYPE_PRIM_I16:   mangled_prim = "ss"; break;
-  case AST_TYPE_PRIM_I32:   mangled_prim = "si"; break;
-  case AST_TYPE_PRIM_I64:   mangled_prim = "sl"; break;
-  case AST_TYPE_PRIM_ISIZE: mangled_prim = "sz"; break;
-  case AST_TYPE_PRIM_U8:    mangled_prim = "ub"; break;
-  case AST_TYPE_PRIM_U16:   mangled_prim = "us"; break;
-  case AST_TYPE_PRIM_U32:   mangled_prim = "ui"; break;
-  case AST_TYPE_PRIM_U64:   mangled_prim = "ul"; break;
-  case AST_TYPE_PRIM_USIZE: mangled_prim = "uz"; break;
-  case AST_TYPE_PRIM_F32:   mangled_prim =  "f"; break;
-  case AST_TYPE_PRIM_F64:   mangled_prim =  "d"; break;
-  case AST_TYPE_PRIM_CHAR:  mangled_prim =  "c"; break;
-  case AST_TYPE_PRIM_BOOL:  mangled_prim =  "b"; break;
-  case AST_TYPE_PRIM_UNIT:  mangled_prim =  "v"; break;
-  default: UNREACHABLE();
-  }
-
-  return snprintf(buf, len, "%s", mangled_prim);
-}
-
 void ast_type_prim_dump_json(FILE* stream, ast_type_prim_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));

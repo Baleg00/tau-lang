@@ -102,15 +102,6 @@ void ast_decl_var_codegen(codegen_ctx_t* ctx, ast_decl_var_t* node)
   }
 }
 
-size_t ast_decl_var_mangle(ast_decl_var_t* node, char* buf, size_t len)
-{
-  size_t written = snprintf(buf, len, "_T");
-  written += ast_node_mangle_nested_name((ast_node_t*)node, buf + written, len <= written ? 0 : len - written);
-  written += ast_node_mangle(node->type, buf + written, len <= written ? 0 : len - written);
-
-  return written;
-}
-
 void ast_decl_var_dump_json(FILE* stream, ast_decl_var_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

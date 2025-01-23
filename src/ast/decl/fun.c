@@ -169,27 +169,6 @@ void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)
   }
 }
 
-size_t ast_decl_fun_mangle(ast_decl_fun_t* node, char* buf, size_t len)
-{
-  size_t written = snprintf(buf, len, "_T");
-  written += ast_node_mangle_nested_name((ast_node_t*)node, buf + written, len <= written ? 0 : len - written);
-  written += snprintf(buf + written, len <= written ? 0 : len - written, "F");
-  written += callconv_mangle(node->callconv, buf + written, len <= written ? 0 : len - written);
-  written += ast_node_mangle(node->return_type, buf + written, len <= written ? 0 : len - written);
-  written += snprintf(buf + written, len <= written ? 0 : len - written, "%zu", vector_size(node->params));
-
-  VECTOR_FOR_LOOP(i, node->params)
-  {
-    ast_decl_param_t* param = (ast_decl_param_t*)vector_get(node->params, i);
-    written += ast_node_mangle(param->type, buf + written, len <= written ? 0 : len - written);
-  }
-
-  if (node->is_vararg)
-    written += snprintf(buf + written, len <= written ? 0 : len - written, "V");
-
-  return written;
-}
-
 void ast_decl_fun_dump_json(FILE* stream, ast_decl_fun_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));

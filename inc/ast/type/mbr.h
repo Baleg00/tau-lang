@@ -64,21 +64,6 @@ void ast_type_mbr_typecheck(typecheck_ctx_t* ctx, ast_type_mbr_t* node);
 void ast_type_mbr_codegen(codegen_ctx_t* ctx, ast_type_mbr_t* node);
 
 /**
- * \brief Writes at most `len` characters (including the null-terminator) of the
- * mangled name of an AST member type node into `buf`.
- * 
- * \details If `len` is zero, `buf` and `len` are ignored and nothing is written,
- * however the return value is still calculated.
- * 
- * \param[in] node Pointer to the AST member type node.
- * \param[in,out] buf Pointer to the buffer where the mangled name is to be stored.
- * \param[in] len The length of the buffer.
- * \returns The number of characters (excluding the null-terminator) that would
- * have been written to the buffer if `len` was ignored.
- */
-size_t ast_type_mbr_mangle(ast_type_mbr_t* node, char* buf, size_t len);
-
-/**
  * \brief Writes a JSON dump of an AST member type node into a stream.
  * 
  * \param[in] stream The stream to be written to.
