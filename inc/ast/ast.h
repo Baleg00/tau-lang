@@ -40,6 +40,7 @@
 #include "ast/expr/lit/lit.h"
 #include "ast/expr/lit/null.h"
 #include "ast/expr/lit/str.h"
+#include "ast/expr/lit/vec.h"
 #include "ast/expr/op/bin/access.h"
 #include "ast/expr/op/bin/arit/add.h"
 #include "ast/expr/op/bin/arit/div.h"

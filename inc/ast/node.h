@@ -71,6 +71,7 @@ typedef enum ast_kind_e
   AST_EXPR_LIT_CHAR, ///< Literal character expression.
   AST_EXPR_LIT_BOOL, ///< Literal boolean expression.
   AST_EXPR_LIT_NULL, ///< Literal null expression.
+  AST_EXPR_LIT_VEC, ///< Literal vector expression.
   AST_EXPR_OP_UNARY, ///< Unary operation expression.
   AST_EXPR_OP_BINARY, ///< Binary operation expression.
   AST_EXPR_OP_CALL, ///< Call operation expression.

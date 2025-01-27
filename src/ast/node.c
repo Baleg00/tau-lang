@@ -51,6 +51,7 @@ void ast_node_free(ast_node_t* node)
   case AST_EXPR_LIT_CHAR:      ast_expr_lit_char_free     ((ast_expr_lit_char_t*     )node); break;
   case AST_EXPR_LIT_BOOL:      ast_expr_lit_bool_free     ((ast_expr_lit_bool_t*     )node); break;
   case AST_EXPR_LIT_NULL:      ast_expr_lit_null_free     ((ast_expr_lit_null_t*     )node); break;
+  case AST_EXPR_LIT_VEC:       ast_expr_lit_vec_free      ((ast_expr_lit_vec_t*      )node); break;
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_free        ((ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_free       ((ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_free      ((ast_expr_op_call_t*      )node); break;
@@ -136,6 +137,7 @@ void ast_node_nameres(nameres_ctx_t* ctx, ast_node_t* node)
   case AST_EXPR_LIT_CHAR:      ast_expr_lit_char_nameres     (ctx, (ast_expr_lit_char_t*     )node); break;
   case AST_EXPR_LIT_BOOL:      ast_expr_lit_bool_nameres     (ctx, (ast_expr_lit_bool_t*     )node); break;
   case AST_EXPR_LIT_NULL:      ast_expr_lit_null_nameres     (ctx, (ast_expr_lit_null_t*     )node); break;
+  case AST_EXPR_LIT_VEC:       ast_expr_lit_vec_nameres      (ctx, (ast_expr_lit_vec_t*      )node); break;
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_nameres        (ctx, (ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_nameres       (ctx, (ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_nameres      (ctx, (ast_expr_op_call_t*      )node); break;
@@ -217,6 +219,7 @@ void ast_node_typecheck(typecheck_ctx_t* ctx, ast_node_t* node)
   case AST_EXPR_LIT_CHAR:      ast_expr_lit_char_typecheck     (ctx, (ast_expr_lit_char_t*     )node); break;
   case AST_EXPR_LIT_BOOL:      ast_expr_lit_bool_typecheck     (ctx, (ast_expr_lit_bool_t*     )node); break;
   case AST_EXPR_LIT_NULL:      ast_expr_lit_null_typecheck     (ctx, (ast_expr_lit_null_t*     )node); break;
+  case AST_EXPR_LIT_VEC:       ast_expr_lit_vec_typecheck      (ctx, (ast_expr_lit_vec_t*      )node); break;
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_typecheck        (ctx, (ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_typecheck       (ctx, (ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_typecheck      (ctx, (ast_expr_op_call_t*      )node); break;
@@ -289,6 +292,7 @@ void ast_node_ctrlflow(ctrlflow_ctx_t* ctx, ast_node_t* node)
   case AST_EXPR_LIT_CHAR:
   case AST_EXPR_LIT_BOOL:
   case AST_EXPR_LIT_NULL:
+  case AST_EXPR_LIT_VEC:
   case AST_EXPR_OP_UNARY:
   case AST_EXPR_OP_BINARY:
   case AST_EXPR_OP_CALL:
@@ -376,6 +380,7 @@ void ast_node_codegen(codegen_ctx_t* ctx, ast_node_t* node)
   case AST_EXPR_LIT_CHAR:      ast_expr_lit_char_codegen     (ctx, (ast_expr_lit_char_t*     )node); break;
   case AST_EXPR_LIT_BOOL:      ast_expr_lit_bool_codegen     (ctx, (ast_expr_lit_bool_t*     )node); break;
   case AST_EXPR_LIT_NULL:      ast_expr_lit_null_codegen     (ctx, (ast_expr_lit_null_t*     )node); break;
+  case AST_EXPR_LIT_VEC:       ast_expr_lit_vec_codegen      (ctx, (ast_expr_lit_vec_t*      )node); break;
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_codegen        (ctx, (ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_codegen       (ctx, (ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_codegen      (ctx, (ast_expr_op_call_t*      )node); break;
@@ -472,6 +477,7 @@ void ast_node_dump_json(FILE* stream, ast_node_t* node)
   case AST_EXPR_LIT_CHAR:      ast_expr_lit_char_dump_json     (stream, (ast_expr_lit_char_t*     )node); break;
   case AST_EXPR_LIT_BOOL:      ast_expr_lit_bool_dump_json     (stream, (ast_expr_lit_bool_t*     )node); break;
   case AST_EXPR_LIT_NULL:      ast_expr_lit_null_dump_json     (stream, (ast_expr_lit_null_t*     )node); break;
+  case AST_EXPR_LIT_VEC:       ast_expr_lit_vec_dump_json      (stream, (ast_expr_lit_vec_t*      )node); break;
   case AST_EXPR_OP_UNARY:      ast_expr_op_un_dump_json        (stream, (ast_expr_op_un_t*        )node); break;
   case AST_EXPR_OP_BINARY:     ast_expr_op_bin_dump_json       (stream, (ast_expr_op_bin_t*       )node); break;
   case AST_EXPR_OP_CALL:       ast_expr_op_call_dump_json      (stream, (ast_expr_op_call_t*      )node); break;
@@ -550,6 +556,7 @@ const char* ast_kind_to_cstr(ast_kind_t kind)
   case AST_EXPR_LIT_CHAR:      return "AST_EXPR_LIT_CHAR";
   case AST_EXPR_LIT_BOOL:      return "AST_EXPR_LIT_BOOL";
   case AST_EXPR_LIT_NULL:      return "AST_EXPR_LIT_NULL";
+  case AST_EXPR_LIT_VEC:       return "AST_EXPR_LIT_VEC";
   case AST_EXPR_OP_UNARY:      return "AST_EXPR_OP_UNARY";
   case AST_EXPR_OP_BINARY:     return "AST_EXPR_OP_BINARY";
   case AST_EXPR_OP_CALL:       return "AST_EXPR_OP_CALL";
@@ -642,6 +649,7 @@ bool ast_is_expr(ast_node_t* node)
   case AST_EXPR_LIT_CHAR:
   case AST_EXPR_LIT_BOOL:
   case AST_EXPR_LIT_NULL:
+  case AST_EXPR_LIT_VEC:
   case AST_EXPR_OP_UNARY:
   case AST_EXPR_OP_BINARY:
   case AST_EXPR_OP_CALL:

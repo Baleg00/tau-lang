@@ -63,6 +63,7 @@ typedef enum error_kind_t
   ERROR_TYPECHECK_EXPECTED_ARRAY,
   ERROR_TYPECHECK_EXPECTED_REFERENCE,
   ERROR_TYPECHECK_EXPECTED_VECTOR,
+  ERROR_TYPECHECK_EXPECTED_INTEGER_OR_FLOAT,
   ERROR_TYPECHECK_INCOMPATIBLE_RETURN_TYPE,
   ERROR_TYPECHECK_TOO_MANY_FUNCTION_PARAMETERS,
   ERROR_TYPECHECK_TOO_FEW_FUNCTION_PARAMETERS,
@@ -132,6 +133,7 @@ typedef struct error_t
       private_member,
       illegal_conversion,
       integer_literal_too_large,
+      expected_integer_or_float,
       break_outside_loop,
       continue_outside_loop,
       return_inside_defer;
@@ -578,6 +580,14 @@ void error_bag_put_typecheck_illegal_conversion(error_bag_t* bag, location_t loc
  * \param[in] loc The location of the error.
  */
 void error_bag_put_typecheck_integer_literal_too_large(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_expected_integer_or_float(error_bag_t* bag, location_t loc);
 
 /**
  * \brief Adds a specific error to the error bag.
