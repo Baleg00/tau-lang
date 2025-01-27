@@ -136,6 +136,8 @@ typedef enum token_kind_e
   TOK_PUNCT_PAREN_RIGHT, ///< Punctuation `)`
   TOK_PUNCT_BRACKET_LEFT, ///< Punctuation `[`
   TOK_PUNCT_BRACKET_RIGHT, ///< Punctuation `]`
+  TOK_PUNCT_BRACKET_ANGLE_LEFT, ///< Punctuation `[<`
+  TOK_PUNCT_BRACKET_ANGLE_RIGHT, ///< Punctuation `>]`
   TOK_PUNCT_BRACE_LEFT, ///< Punctuation `{`
   TOK_PUNCT_BRACE_RIGHT, ///< Punctuation `}`
   TOK_PUNCT_HASH, ///< Punctuation `#`

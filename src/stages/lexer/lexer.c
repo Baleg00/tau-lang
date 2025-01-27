@@ -809,6 +809,8 @@ token_t* lexer_read_punctuation(lexer_t* lex)
         kind = TOK_PUNCT_GREATER_GREATER;
     else if (lexer_consume(lex, '='))
       kind = TOK_PUNCT_GREATER_EQUAL;
+    else if (lexer_consume(lex, ']'))
+      kind = TOK_PUNCT_BRACKET_ANGLE_RIGHT;
     else
       kind = TOK_PUNCT_GREATER;
   else if (lexer_consume(lex, '!'))
@@ -847,7 +849,10 @@ token_t* lexer_read_punctuation(lexer_t* lex)
   else if (lexer_consume(lex, ')'))
     kind = TOK_PUNCT_PAREN_RIGHT;
   else if (lexer_consume(lex, '['))
-    kind = TOK_PUNCT_BRACKET_LEFT;
+    if (lexer_consume(lex, '<'))
+      kind = TOK_PUNCT_BRACKET_ANGLE_LEFT;
+    else
+      kind = TOK_PUNCT_BRACKET_LEFT;
   else if (lexer_consume(lex, ']'))
     kind = TOK_PUNCT_BRACKET_RIGHT;
   else if (lexer_consume(lex, '{'))

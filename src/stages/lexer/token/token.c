@@ -107,6 +107,8 @@ static const struct
   { TOK_PUNCT_PAREN_RIGHT, 1 },
   { TOK_PUNCT_BRACKET_LEFT, 1 },
   { TOK_PUNCT_BRACKET_RIGHT, 1 },
+  { TOK_PUNCT_BRACKET_ANGLE_LEFT, 2 },
+  { TOK_PUNCT_BRACKET_ANGLE_RIGHT, 2 },
   { TOK_PUNCT_BRACE_LEFT, 1 },
   { TOK_PUNCT_BRACE_RIGHT, 1 },
   { TOK_PUNCT_HASH, 1 },
@@ -523,6 +525,8 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_PUNCT_PAREN_RIGHT:           return "TOK_PUNCT_PAREN_RIGHT";
   case TOK_PUNCT_BRACKET_LEFT:          return "TOK_PUNCT_BRACKET_LEFT";
   case TOK_PUNCT_BRACKET_RIGHT:         return "TOK_PUNCT_BRACKET_RIGHT";
+  case TOK_PUNCT_BRACKET_ANGLE_LEFT:    return "TOK_PUNCT_BRACKET_ANGLE_LEFT";
+  case TOK_PUNCT_BRACKET_ANGLE_RIGHT:   return "TOK_PUNCT_BRACKET_ANGLE_RIGHT";
   case TOK_PUNCT_BRACE_LEFT:            return "TOK_PUNCT_BRACE_LEFT";
   case TOK_PUNCT_BRACE_RIGHT:           return "TOK_PUNCT_BRACE_RIGHT";
   case TOK_PUNCT_HASH:                  return "TOK_PUNCT_HASH";
@@ -667,6 +671,8 @@ bool token_is_punctuation(token_t* tok)
   case TOK_PUNCT_PAREN_RIGHT:
   case TOK_PUNCT_BRACKET_LEFT:
   case TOK_PUNCT_BRACKET_RIGHT:
+  case TOK_PUNCT_BRACKET_ANGLE_LEFT:
+  case TOK_PUNCT_BRACKET_ANGLE_RIGHT:
   case TOK_PUNCT_BRACE_LEFT:
   case TOK_PUNCT_BRACE_RIGHT:
   case TOK_PUNCT_HASH:
