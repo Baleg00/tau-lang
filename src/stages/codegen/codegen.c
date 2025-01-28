@@ -674,3 +674,27 @@ LLVMValueRef codegen_build_vector_eq(codegen_ctx_t* ctx, typedesc_vec_t* desc, L
 
   return llvm_result_value;
 }
+
+LLVMValueRef codegen_build_vector_ne(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs)
+{
+  LLVMValueRef llvm_vec_value = NULL;
+
+  if (typedesc_is_integer(desc->base_type))
+    llvm_vec_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntNE, llvm_lhs, llvm_rhs, "");
+  else if (typedesc_is_float(desc->base_type))
+    llvm_vec_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealONE, llvm_lhs, llvm_rhs, "");
+  else
+    UNREACHABLE();
+
+  LLVMValueRef llvm_result_value = LLVMConstInt(LLVMInt1TypeInContext(ctx->llvm_ctx), 0, false);
+
+  for (size_t i = 0; i < desc->size; i++)
+  {
+    LLVMValueRef llvm_index = LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), i, false);
+    LLVMValueRef llvm_vec_element = LLVMBuildExtractElement(ctx->llvm_builder, llvm_vec_value, llvm_index, "");
+
+    llvm_result_value = LLVMBuildOr(ctx->llvm_builder, llvm_result_value, llvm_vec_element, "");
+  }
+
+  return llvm_result_value;
+}
