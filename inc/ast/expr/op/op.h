@@ -99,6 +99,14 @@ typedef enum op_subkind_t
   OP_ARIT_SUB_FLOAT, ///< Arithmetic float subtraction
   OP_ARIT_SUB_COMPLEX, ///< Arithmetic complex subtraction
   OP_ARIT_SUB_VECTOR, ///< Arithmetic vector subtraction
+  OP_CMP_EQ_INTEGER, ///< Integer equality comparison
+  OP_CMP_EQ_FLOAT, ///< Float equality comparison
+  OP_CMP_EQ_COMPLEX, ///< Complex equality comparison
+  OP_CMP_EQ_VECTOR, ///< Vector equality comparison
+  OP_CMP_NE_INTEGER, ///< Integer inequality comparison
+  OP_CMP_NE_FLOAT, ///< Float inequality comparison
+  OP_CMP_NE_COMPLEX, ///< Complex inequality comparison
+  OP_CMP_NE_VECTOR, ///< Vector inequality comparison
 } op_subkind_t;
 
 /**

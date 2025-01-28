@@ -9,36 +9,6 @@
 
 #include "ast/ast.h"
 
-codegen_ctx_t* codegen_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_mod, LLVMBuilderRef llvm_builder)
-{
-  codegen_ctx_t* ctx = (codegen_ctx_t*)malloc(sizeof(codegen_ctx_t));
-  CLEAROBJ(ctx);
-
-  ctx->typebuilder = typebuilder;
-  ctx->typetable = typetable;
-  ctx->llvm_ctx = llvm_ctx;
-  ctx->llvm_layout = llvm_layout;
-  ctx->llvm_mod = llvm_mod;
-  ctx->llvm_builder = llvm_builder;
-
-  return ctx;
-}
-
-void codegen_ctx_free(codegen_ctx_t* ctx)
-{
-  free(ctx);
-}
-
-LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
-{
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
-
-  if (typedesc_is_ref(desc))
-    return LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_ref_t*)desc)->base_type->llvm_type, node->llvm_value, "");
-
-  return node->llvm_value;
-}
-
 static LLVMValueRef codegen_build_arithmetic_cast_from_integer_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
   if (typedesc_integer_bits(src_desc) < typedesc_integer_bits(dst_desc))
@@ -297,6 +267,36 @@ static LLVMValueRef codegen_build_vector_cast_from_float(codegen_ctx_t* ctx, LLV
   UNREACHABLE();
 
   return NULL;
+}
+
+codegen_ctx_t* codegen_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable, LLVMContextRef llvm_ctx, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_mod, LLVMBuilderRef llvm_builder)
+{
+  codegen_ctx_t* ctx = (codegen_ctx_t*)malloc(sizeof(codegen_ctx_t));
+  CLEAROBJ(ctx);
+
+  ctx->typebuilder = typebuilder;
+  ctx->typetable = typetable;
+  ctx->llvm_ctx = llvm_ctx;
+  ctx->llvm_layout = llvm_layout;
+  ctx->llvm_mod = llvm_mod;
+  ctx->llvm_builder = llvm_builder;
+
+  return ctx;
+}
+
+void codegen_ctx_free(codegen_ctx_t* ctx)
+{
+  free(ctx);
+}
+
+LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
+{
+  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+
+  if (typedesc_is_ref(desc))
+    return LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_ref_t*)desc)->base_type->llvm_type, node->llvm_value, "");
+
+  return node->llvm_value;
 }
 
 LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
@@ -649,4 +649,28 @@ LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_vec_t* desc, 
   UNREACHABLE();
 
   return NULL;
+}
+
+LLVMValueRef codegen_build_vector_eq(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs)
+{
+  LLVMValueRef llvm_vec_value = NULL;
+
+  if (typedesc_is_integer(desc->base_type))
+    llvm_vec_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntEQ, llvm_lhs, llvm_rhs, "");
+  else if (typedesc_is_float(desc->base_type))
+    llvm_vec_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealOEQ, llvm_lhs, llvm_rhs, "");
+  else
+    UNREACHABLE();
+
+  LLVMValueRef llvm_result_value = LLVMConstInt(LLVMInt1TypeInContext(ctx->llvm_ctx), 1, false);
+
+  for (size_t i = 0; i < desc->size; i++)
+  {
+    LLVMValueRef llvm_index = LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), i, false);
+    LLVMValueRef llvm_vec_element = LLVMBuildExtractElement(ctx->llvm_builder, llvm_vec_value, llvm_index, "");
+
+    llvm_result_value = LLVMBuildAnd(ctx->llvm_builder, llvm_result_value, llvm_vec_element, "");
+  }
+
+  return llvm_result_value;
 }
