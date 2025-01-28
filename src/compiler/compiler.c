@@ -263,6 +263,8 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
     codegen_ctx_free(codegen_ctx);
   }
 
+  error_bag_free(errors);
+
   if (options_get_dump_ll(compiler->options))
     compiler_emit_ll(path, env->llvm_module);
 
