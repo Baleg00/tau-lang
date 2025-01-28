@@ -79,34 +79,33 @@ LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node);
  *
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] llvm_value The LLVM value reference.
- * \param[in] from_desc Pointer to the source type descriptor.
- * \param[in] to_desc Pointer to the target type descriptor.
- * \returns The result of the cast instruction if it is required, otherwise
- * `llvm_value`.
+ * \param[in] src_desc Pointer to the source type descriptor.
+ * \param[in] dst_desc Pointer to the target type descriptor.
+ * \returns The result of the cast instruction.
  */
-LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
+LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc);
 
 /**
  * \brief Builds an LLVM cast instruction to perform a vector cast.
  *
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] llvm_value The LLVM value reference.
- * \param[in] from_desc Pointer to the source type descriptor.
- * \param[in] to_desc Pointer to the target type descriptor.
+ * \param[in] src_desc Pointer to the source type descriptor.
+ * \param[in] dst_desc Pointer to the target type descriptor.
  * \returns The result of the cast instruction.
  */
-LLVMValueRef codegen_build_vector_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
+LLVMValueRef codegen_build_vector_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc);
 
 /**
  * \brief Builds an LLVM instruction to wrap a value into an optional.
  *
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] llvm_value The LLVM value reference to be wrapped.
- * \param[in] from_desc Pointer to the type descriptor of value to be wrapped.
- * \param[in] to_desc Pointer to the type descriptor of the optional.
+ * \param[in] src_desc Pointer to the type descriptor of value to be wrapped.
+ * \param[in] dst_desc Pointer to the type descriptor of the optional.
  * \returns The wrapped LLVM value reference.
  */
-LLVMValueRef codegen_build_opt_wrap(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_opt_t* to_desc);
+LLVMValueRef codegen_build_opt_wrap(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_opt_t* dst_desc);
 
 /**
  * \brief Builds an LLVM instruction to unwrap a value from an optional without
@@ -124,12 +123,12 @@ LLVMValueRef codegen_build_opt_unwrap_unchecked(codegen_ctx_t* ctx, LLVMValueRef
  *
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] llvm_value The LLVM value reference.
- * \param[in] from_desc Pointer to the source type descriptor.
- * \param[in] to_desc Pointer to the target type descriptor.
+ * \param[in] src_desc Pointer to the source type descriptor.
+ * \param[in] dst_desc Pointer to the target type descriptor.
  * \returns The result of the cast instruction if it is required, otherwise
  * `llvm_value`.
  */
-LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
+LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc);
 
 /**
  * \brief Builds an LLVM instruction to create a complex floating-point number.

@@ -39,38 +39,38 @@ LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node)
   return node->llvm_value;
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_integer_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_integer_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  if (typedesc_integer_bits(from_desc) < typedesc_integer_bits(to_desc))
+  if (typedesc_integer_bits(src_desc) < typedesc_integer_bits(dst_desc))
   {
-    if (typedesc_is_signed(to_desc))
-      return LLVMBuildSExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+    if (typedesc_is_signed(dst_desc))
+      return LLVMBuildSExtOrBitCast(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-    return LLVMBuildZExtOrBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+    return LLVMBuildZExtOrBitCast(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
   }
 
-  if (typedesc_integer_bits(from_desc) > typedesc_integer_bits(to_desc))
-    return LLVMBuildTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (typedesc_integer_bits(src_desc) > typedesc_integer_bits(dst_desc))
+    return LLVMBuildTrunc(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-  return LLVMBuildBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  return LLVMBuildBitCast(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 }
 
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_integer_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_integer_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  if (typedesc_is_signed(from_desc))
-    return LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (typedesc_is_signed(src_desc))
+    return LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-  return LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  return LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_integer_to_complex(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_integer_to_complex(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  LLVMTypeRef llvm_float_type = to_desc->kind == TYPEDESC_C64 ?
+  LLVMTypeRef llvm_float_type = dst_desc->kind == TYPEDESC_C64 ?
     LLVMFloatTypeInContext(ctx->llvm_ctx) :
     LLVMDoubleTypeInContext(ctx->llvm_ctx);
 
-  LLVMValueRef llvm_value_real = typedesc_is_signed(from_desc) ?
+  LLVMValueRef llvm_value_real = typedesc_is_signed(src_desc) ?
     LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, llvm_float_type, "") :
     LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, llvm_float_type, "");
 
@@ -79,49 +79,49 @@ static LLVMValueRef codegen_build_arithmetic_cast_from_integer_to_complex(codege
   return codegen_build_complex(ctx, llvm_value_real, llvm_value_imag);
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  if (typedesc_is_integer(to_desc))
-    return codegen_build_arithmetic_cast_from_integer_to_integer(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_integer(dst_desc))
+    return codegen_build_arithmetic_cast_from_integer_to_integer(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_float(to_desc))
-    return codegen_build_arithmetic_cast_from_integer_to_float(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_float(dst_desc))
+    return codegen_build_arithmetic_cast_from_integer_to_float(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_complex(to_desc))
-    return codegen_build_arithmetic_cast_from_integer_to_complex(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_complex(dst_desc))
+    return codegen_build_arithmetic_cast_from_integer_to_complex(ctx, llvm_value, src_desc, dst_desc);
 
   UNREACHABLE();
 
   return NULL;
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_float_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_float_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  if (from_desc->kind == TYPEDESC_F32 && to_desc->kind == TYPEDESC_F64)
-    return LLVMBuildFPExt(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (src_desc->kind == TYPEDESC_F32 && dst_desc->kind == TYPEDESC_F64)
+    return LLVMBuildFPExt(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-  if (from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_F32)
-    return LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (src_desc->kind == TYPEDESC_F64 && dst_desc->kind == TYPEDESC_F32)
+    return LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
   return llvm_value;
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_float_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* UNUSED(from_desc), typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_float_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* UNUSED(src_desc), typedesc_t* dst_desc)
 {
-  if (typedesc_is_signed(to_desc))
-    return LLVMBuildFPToSI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (typedesc_is_signed(dst_desc))
+    return LLVMBuildFPToSI(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-  return LLVMBuildFPToUI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  return LLVMBuildFPToUI(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_float_to_complex(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_float_to_complex(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  LLVMValueRef llvm_value_imag = LLVMConstReal(from_desc->llvm_type, 0.0);
+  LLVMValueRef llvm_value_imag = LLVMConstReal(src_desc->llvm_type, 0.0);
 
-  if (from_desc->kind == TYPEDESC_F32 && to_desc->kind == TYPEDESC_C64)
+  if (src_desc->kind == TYPEDESC_F32 && dst_desc->kind == TYPEDESC_C64)
     return codegen_build_complex(ctx, llvm_value, llvm_value_imag);
 
-  if (from_desc->kind == TYPEDESC_F32 && to_desc->kind == TYPEDESC_C128)
+  if (src_desc->kind == TYPEDESC_F32 && dst_desc->kind == TYPEDESC_C128)
   {
     LLVMTypeRef llvm_float_type = LLVMDoubleTypeInContext(ctx->llvm_ctx);
     LLVMValueRef llvm_value_real = LLVMBuildFPExt(ctx->llvm_builder, llvm_value, llvm_float_type, "");
@@ -129,7 +129,7 @@ static LLVMValueRef codegen_build_arithmetic_cast_from_float_to_complex(codegen_
     return codegen_build_complex(ctx, llvm_value_real, llvm_value_imag);
   }
 
-  if (from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_C64)
+  if (src_desc->kind == TYPEDESC_F64 && dst_desc->kind == TYPEDESC_C64)
   {
     LLVMTypeRef llvm_float_type = LLVMFloatTypeInContext(ctx->llvm_ctx);
     LLVMValueRef llvm_value_real = LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value, llvm_float_type, "");
@@ -137,7 +137,7 @@ static LLVMValueRef codegen_build_arithmetic_cast_from_float_to_complex(codegen_
     return codegen_build_complex(ctx, llvm_value_real, llvm_value_imag);
   }
 
-  if (from_desc->kind == TYPEDESC_F64 && to_desc->kind == TYPEDESC_C128)
+  if (src_desc->kind == TYPEDESC_F64 && dst_desc->kind == TYPEDESC_C128)
     return codegen_build_complex(ctx, llvm_value, llvm_value_imag);
 
   UNREACHABLE();
@@ -145,28 +145,28 @@ static LLVMValueRef codegen_build_arithmetic_cast_from_float_to_complex(codegen_
   return NULL;
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  if (typedesc_is_float(to_desc))
-    return codegen_build_arithmetic_cast_from_float_to_float(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_float(dst_desc))
+    return codegen_build_arithmetic_cast_from_float_to_float(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_integer(to_desc))
-    return codegen_build_arithmetic_cast_from_float_to_integer(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_integer(dst_desc))
+    return codegen_build_arithmetic_cast_from_float_to_integer(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_complex(to_desc))
-    return codegen_build_arithmetic_cast_from_float_to_complex(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_complex(dst_desc))
+    return codegen_build_arithmetic_cast_from_float_to_complex(ctx, llvm_value, src_desc, dst_desc);
 
   UNREACHABLE();
 
   return NULL;
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_complex_to_complex(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_complex_to_complex(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
   LLVMValueRef llvm_value_real = LLVMBuildExtractValue(ctx->llvm_builder, llvm_value, 0, "");
   LLVMValueRef llvm_value_imag = LLVMBuildExtractValue(ctx->llvm_builder, llvm_value, 1, "");
 
-  if (from_desc->kind == TYPEDESC_C64 && to_desc->kind == TYPEDESC_C128)
+  if (src_desc->kind == TYPEDESC_C64 && dst_desc->kind == TYPEDESC_C128)
   {
     LLVMTypeRef llvm_float_type = LLVMDoubleTypeInContext(ctx->llvm_ctx);
 
@@ -176,7 +176,7 @@ static LLVMValueRef codegen_build_arithmetic_cast_from_complex_to_complex(codege
     return codegen_build_complex(ctx, llvm_result_real, llvm_result_imag);
   }
 
-  if (from_desc->kind == TYPEDESC_C128 && to_desc->kind == TYPEDESC_C64)
+  if (src_desc->kind == TYPEDESC_C128 && dst_desc->kind == TYPEDESC_C64)
   {
     LLVMTypeRef llvm_float_type = LLVMFloatTypeInContext(ctx->llvm_ctx);
 
@@ -191,141 +191,141 @@ static LLVMValueRef codegen_build_arithmetic_cast_from_complex_to_complex(codege
   return NULL;
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_complex_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_complex_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
   LLVMValueRef llvm_value_real = LLVMBuildExtractValue(ctx->llvm_builder, llvm_value, 0, "");
 
-  if (from_desc->kind == TYPEDESC_C64 && to_desc->kind == TYPEDESC_F64)
-    return LLVMBuildFPExt(ctx->llvm_builder, llvm_value_real, to_desc->llvm_type, "");
+  if (src_desc->kind == TYPEDESC_C64 && dst_desc->kind == TYPEDESC_F64)
+    return LLVMBuildFPExt(ctx->llvm_builder, llvm_value_real, dst_desc->llvm_type, "");
 
-  if (from_desc->kind == TYPEDESC_C128 && to_desc->kind == TYPEDESC_F32)
-    return LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value_real, to_desc->llvm_type, "");
+  if (src_desc->kind == TYPEDESC_C128 && dst_desc->kind == TYPEDESC_F32)
+    return LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value_real, dst_desc->llvm_type, "");
 
   return llvm_value_real;
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_complex_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* UNUSED(from_desc), typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_complex_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* UNUSED(src_desc), typedesc_t* dst_desc)
 {
   LLVMValueRef llvm_value_real = LLVMBuildExtractValue(ctx->llvm_builder, llvm_value, 0, "");
 
-  if (typedesc_is_signed(to_desc))
-    return LLVMBuildFPToSI(ctx->llvm_builder, llvm_value_real, to_desc->llvm_type, "");
+  if (typedesc_is_signed(dst_desc))
+    return LLVMBuildFPToSI(ctx->llvm_builder, llvm_value_real, dst_desc->llvm_type, "");
 
-  return LLVMBuildFPToUI(ctx->llvm_builder, llvm_value_real, to_desc->llvm_type, "");
+  return LLVMBuildFPToUI(ctx->llvm_builder, llvm_value_real, dst_desc->llvm_type, "");
 }
 
-static LLVMValueRef codegen_build_arithmetic_cast_from_complex(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_arithmetic_cast_from_complex(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  if (typedesc_is_integer(to_desc))
-    return codegen_build_arithmetic_cast_from_complex_to_integer(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_integer(dst_desc))
+    return codegen_build_arithmetic_cast_from_complex_to_integer(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_float(to_desc))
-    return codegen_build_arithmetic_cast_from_complex_to_float(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_float(dst_desc))
+    return codegen_build_arithmetic_cast_from_complex_to_float(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_complex(to_desc))
-    return codegen_build_arithmetic_cast_from_complex_to_complex(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_complex(dst_desc))
+    return codegen_build_arithmetic_cast_from_complex_to_complex(ctx, llvm_value, src_desc, dst_desc);
 
   UNREACHABLE();
 
   return NULL;
 }
 
-static LLVMValueRef codegen_build_vector_cast_from_integer_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* from_desc, typedesc_vec_t* to_desc)
+static LLVMValueRef codegen_build_vector_cast_from_integer_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* src_desc, typedesc_vec_t* dst_desc)
 {
-  if (typedesc_integer_bits(from_desc->base_type) < typedesc_integer_bits(to_desc->base_type))
+  if (typedesc_integer_bits(src_desc->base_type) < typedesc_integer_bits(dst_desc->base_type))
   {
-    if (typedesc_is_signed(to_desc->base_type))
-      return LLVMBuildSExt(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+    if (typedesc_is_signed(dst_desc->base_type))
+      return LLVMBuildSExt(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-    return LLVMBuildZExt(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+    return LLVMBuildZExt(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
   }
 
-  if (typedesc_integer_bits(from_desc->base_type) > typedesc_integer_bits(to_desc->base_type))
-    return LLVMBuildTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (typedesc_integer_bits(src_desc->base_type) > typedesc_integer_bits(dst_desc->base_type))
+    return LLVMBuildTrunc(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-  return LLVMBuildBitCast(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  return LLVMBuildBitCast(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 }
 
-static LLVMValueRef codegen_build_vector_cast_from_integer_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* from_desc, typedesc_vec_t* to_desc)
+static LLVMValueRef codegen_build_vector_cast_from_integer_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* src_desc, typedesc_vec_t* dst_desc)
 {
-  if (typedesc_is_signed(from_desc->base_type))
-    return LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (typedesc_is_signed(src_desc->base_type))
+    return LLVMBuildSIToFP(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-  return LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  return LLVMBuildUIToFP(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 }
 
-static LLVMValueRef codegen_build_vector_cast_from_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* from_desc, typedesc_vec_t* to_desc)
+static LLVMValueRef codegen_build_vector_cast_from_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* src_desc, typedesc_vec_t* dst_desc)
 {
-  if (typedesc_is_integer(to_desc->base_type))
-    return codegen_build_vector_cast_from_integer_to_integer(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_integer(dst_desc->base_type))
+    return codegen_build_vector_cast_from_integer_to_integer(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_float(to_desc->base_type))
-    return codegen_build_vector_cast_from_integer_to_float(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_float(dst_desc->base_type))
+    return codegen_build_vector_cast_from_integer_to_float(ctx, llvm_value, src_desc, dst_desc);
 
   UNREACHABLE();
 
   return NULL;
 }
 
-static LLVMValueRef codegen_build_vector_cast_from_float_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* UNUSED(from_desc), typedesc_vec_t* to_desc)
+static LLVMValueRef codegen_build_vector_cast_from_float_to_integer(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* UNUSED(src_desc), typedesc_vec_t* dst_desc)
 {
-  if (typedesc_is_signed(to_desc->base_type))
-    return LLVMBuildFPToSI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (typedesc_is_signed(dst_desc->base_type))
+    return LLVMBuildFPToSI(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-  return LLVMBuildFPToUI(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  return LLVMBuildFPToUI(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 }
 
-static LLVMValueRef codegen_build_vector_cast_from_float_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* from_desc, typedesc_vec_t* to_desc)
+static LLVMValueRef codegen_build_vector_cast_from_float_to_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* src_desc, typedesc_vec_t* dst_desc)
 {
-  if (from_desc->base_type->kind == TYPEDESC_F32 && to_desc->base_type->kind == TYPEDESC_F64)
-    return LLVMBuildFPExt(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (src_desc->base_type->kind == TYPEDESC_F32 && dst_desc->base_type->kind == TYPEDESC_F64)
+    return LLVMBuildFPExt(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
-  if (from_desc->base_type->kind == TYPEDESC_F64 && to_desc->base_type->kind == TYPEDESC_F32)
-    return LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value, to_desc->llvm_type, "");
+  if (src_desc->base_type->kind == TYPEDESC_F64 && dst_desc->base_type->kind == TYPEDESC_F32)
+    return LLVMBuildFPTrunc(ctx->llvm_builder, llvm_value, dst_desc->llvm_type, "");
 
   return llvm_value;
 }
 
-static LLVMValueRef codegen_build_vector_cast_from_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* from_desc, typedesc_vec_t* to_desc)
+static LLVMValueRef codegen_build_vector_cast_from_float(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* src_desc, typedesc_vec_t* dst_desc)
 {
-  if (typedesc_is_integer(to_desc->base_type))
-    return codegen_build_vector_cast_from_float_to_integer(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_integer(dst_desc->base_type))
+    return codegen_build_vector_cast_from_float_to_integer(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_float(to_desc->base_type))
-    return codegen_build_vector_cast_from_float_to_float(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_float(dst_desc->base_type))
+    return codegen_build_vector_cast_from_float_to_float(ctx, llvm_value, src_desc, dst_desc);
 
   UNREACHABLE();
 
   return NULL;
 }
 
-LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  ASSERT(typedesc_is_arithmetic(from_desc) && typedesc_is_arithmetic(to_desc));
+  ASSERT(typedesc_is_arithmetic(src_desc) && typedesc_is_arithmetic(dst_desc));
 
-  if (from_desc == to_desc)
+  if (src_desc == dst_desc)
     return llvm_value;
 
-  if (typedesc_is_integer(from_desc))
-    return codegen_build_arithmetic_cast_from_integer(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_integer(src_desc))
+    return codegen_build_arithmetic_cast_from_integer(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_float(from_desc))
-    return codegen_build_arithmetic_cast_from_float(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_float(src_desc))
+    return codegen_build_arithmetic_cast_from_float(ctx, llvm_value, src_desc, dst_desc);
 
-  if (typedesc_is_complex(from_desc))
-    return codegen_build_arithmetic_cast_from_complex(ctx, llvm_value, from_desc, to_desc);
+  if (typedesc_is_complex(src_desc))
+    return codegen_build_arithmetic_cast_from_complex(ctx, llvm_value, src_desc, dst_desc);
 
   UNREACHABLE();
 
   return NULL;
 }
 
-LLVMValueRef codegen_build_vector_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+LLVMValueRef codegen_build_vector_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  ASSERT(typedesc_is_vector(from_desc) && typedesc_is_vector(to_desc));
+  ASSERT(typedesc_is_vector(src_desc) && typedesc_is_vector(dst_desc));
 
-  typedesc_vec_t* from_vec_desc = (typedesc_vec_t*)from_desc;
-  typedesc_vec_t* to_vec_desc = (typedesc_vec_t*)to_desc;
+  typedesc_vec_t* from_vec_desc = (typedesc_vec_t*)src_desc;
+  typedesc_vec_t* to_vec_desc = (typedesc_vec_t*)dst_desc;
 
   ASSERT(from_vec_desc->size == to_vec_desc->size);
 
@@ -340,14 +340,14 @@ LLVMValueRef codegen_build_vector_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_val
   return NULL;
 }
 
-LLVMValueRef codegen_build_opt_wrap(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_opt_t* to_desc)
+LLVMValueRef codegen_build_opt_wrap(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_opt_t* dst_desc)
 {
   LLVMTypeRef llvm_bool_type = LLVMInt1TypeInContext(ctx->llvm_ctx);
 
   LLVMValueRef llvm_value_flag = LLVMConstInt(llvm_bool_type, 1, false);
-  LLVMValueRef llvm_value_wrapped = codegen_build_implicit_cast(ctx, llvm_value, from_desc, to_desc->base_type);
+  LLVMValueRef llvm_value_wrapped = codegen_build_implicit_cast(ctx, llvm_value, src_desc, dst_desc->base_type);
 
-  LLVMValueRef llvm_tmp1 = LLVMGetUndef(to_desc->llvm_type);
+  LLVMValueRef llvm_tmp1 = LLVMGetUndef(dst_desc->llvm_type);
 
   LLVMValueRef llvm_tmp2 = LLVMBuildInsertValue(ctx->llvm_builder, llvm_tmp1, llvm_value_flag, 0, "");
   LLVMValueRef llvm_tmp3 = LLVMBuildInsertValue(ctx->llvm_builder, llvm_tmp2, llvm_value_wrapped, 1, "");
@@ -360,59 +360,59 @@ LLVMValueRef codegen_build_opt_unwrap_unchecked(codegen_ctx_t* ctx, LLVMValueRef
   return LLVMBuildStructGEP2(ctx->llvm_builder, desc->llvm_type, llvm_value, 1, "");
 }
 
-static LLVMValueRef codegen_build_implicit_cast_mut(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_mut_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_implicit_cast_mut(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_mut_t* src_desc, typedesc_t* dst_desc)
 {
-  return codegen_build_implicit_cast(ctx, llvm_value, from_desc->base_type, typedesc_remove_mut(to_desc));
+  return codegen_build_implicit_cast(ctx, llvm_value, src_desc->base_type, typedesc_remove_mut(dst_desc));
 }
 
-static LLVMValueRef codegen_build_implicit_cast_ptr(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_ptr_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_implicit_cast_ptr(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_ptr_t* src_desc, typedesc_t* dst_desc)
 {
-  if (typedesc_is_opt(to_desc))
-    return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)from_desc, (typedesc_opt_t*)to_desc);
+  if (typedesc_is_opt(dst_desc))
+    return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)src_desc, (typedesc_opt_t*)dst_desc);
 
   return llvm_value;
 }
 
-static LLVMValueRef codegen_build_implicit_cast_array(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_array_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_implicit_cast_array(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_array_t* src_desc, typedesc_t* dst_desc)
 {
-  if (typedesc_is_opt(to_desc))
-    return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)from_desc, (typedesc_opt_t*)to_desc);
+  if (typedesc_is_opt(dst_desc))
+    return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)src_desc, (typedesc_opt_t*)dst_desc);
 
   // TODO: Cast array elements.
   return llvm_value;
 }
 
-static LLVMValueRef codegen_build_implicit_cast_ref(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_ref_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_implicit_cast_ref(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_ref_t* src_desc, typedesc_t* dst_desc)
 {
-  if (!typedesc_is_ref(to_desc))
+  if (!typedesc_is_ref(dst_desc))
   {
-    LLVMValueRef llvm_load_value = LLVMBuildLoad2(ctx->llvm_builder, from_desc->base_type->llvm_type, llvm_value, "");
+    LLVMValueRef llvm_load_value = LLVMBuildLoad2(ctx->llvm_builder, src_desc->base_type->llvm_type, llvm_value, "");
 
-    return codegen_build_implicit_cast(ctx, llvm_load_value, from_desc->base_type, to_desc);
+    return codegen_build_implicit_cast(ctx, llvm_load_value, src_desc->base_type, dst_desc);
   }
 
   return llvm_value;
 }
 
-static LLVMValueRef codegen_build_implicit_cast_opt(codegen_ctx_t* UNUSED(ctx), LLVMValueRef llvm_value, typedesc_opt_t* UNUSED(from_desc), typedesc_t* UNUSED(to_desc))
+static LLVMValueRef codegen_build_implicit_cast_opt(codegen_ctx_t* UNUSED(ctx), LLVMValueRef llvm_value, typedesc_opt_t* UNUSED(src_desc), typedesc_t* UNUSED(dst_desc))
 {
   return llvm_value;
 }
 
-static LLVMValueRef codegen_build_implicit_cast_vec(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_implicit_cast_vec(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_vec_t* src_desc, typedesc_t* dst_desc)
 {
-  return codegen_build_vector_cast(ctx, llvm_value, (typedesc_t*)from_desc, to_desc);
+  return codegen_build_vector_cast(ctx, llvm_value, (typedesc_t*)src_desc, dst_desc);
 }
 
-static LLVMValueRef codegen_build_implicit_cast_prim(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_prim_t* from_desc, typedesc_t* to_desc)
+static LLVMValueRef codegen_build_implicit_cast_prim(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_prim_t* src_desc, typedesc_t* dst_desc)
 {
-  if (typedesc_is_opt(to_desc))
-    return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)from_desc, (typedesc_opt_t*)to_desc);
+  if (typedesc_is_opt(dst_desc))
+    return codegen_build_opt_wrap(ctx, llvm_value, (typedesc_t*)src_desc, (typedesc_opt_t*)dst_desc);
 
-  if (typedesc_is_arithmetic((typedesc_t*)from_desc))
-    return codegen_build_arithmetic_cast(ctx, llvm_value, (typedesc_t*)from_desc, typedesc_remove_mut(to_desc));
+  if (typedesc_is_arithmetic((typedesc_t*)src_desc))
+    return codegen_build_arithmetic_cast(ctx, llvm_value, (typedesc_t*)src_desc, typedesc_remove_mut(dst_desc));
 
-  if (from_desc->kind == TYPEDESC_BOOL && typedesc_remove_mut(to_desc)->kind == TYPEDESC_BOOL)
+  if (src_desc->kind == TYPEDESC_BOOL && typedesc_remove_mut(dst_desc)->kind == TYPEDESC_BOOL)
     return llvm_value;
 
   UNREACHABLE();
@@ -420,18 +420,18 @@ static LLVMValueRef codegen_build_implicit_cast_prim(codegen_ctx_t* ctx, LLVMVal
   return NULL;
 }
 
-LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc)
+LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc)
 {
-  ASSERT(typedesc_is_implicitly_direct_convertible(from_desc, to_desc));
+  ASSERT(typedesc_is_implicitly_direct_convertible(src_desc, dst_desc));
 
-  switch (from_desc->kind)
+  switch (src_desc->kind)
   {
-  case TYPEDESC_MUT:    return codegen_build_implicit_cast_mut   (ctx, llvm_value, (typedesc_mut_t*   )from_desc, to_desc);
-  case TYPEDESC_PTR:    return codegen_build_implicit_cast_ptr   (ctx, llvm_value, (typedesc_ptr_t*   )from_desc, to_desc);
-  case TYPEDESC_ARRAY:  return codegen_build_implicit_cast_array (ctx, llvm_value, (typedesc_array_t* )from_desc, to_desc);
-  case TYPEDESC_REF:    return codegen_build_implicit_cast_ref   (ctx, llvm_value, (typedesc_ref_t*   )from_desc, to_desc);
-  case TYPEDESC_OPT:    return codegen_build_implicit_cast_opt   (ctx, llvm_value, (typedesc_opt_t*   )from_desc, to_desc);
-  case TYPEDESC_VEC:    return codegen_build_implicit_cast_vec   (ctx, llvm_value, (typedesc_vec_t*   )from_desc, to_desc);
+  case TYPEDESC_MUT:    return codegen_build_implicit_cast_mut   (ctx, llvm_value, (typedesc_mut_t*   )src_desc, dst_desc);
+  case TYPEDESC_PTR:    return codegen_build_implicit_cast_ptr   (ctx, llvm_value, (typedesc_ptr_t*   )src_desc, dst_desc);
+  case TYPEDESC_ARRAY:  return codegen_build_implicit_cast_array (ctx, llvm_value, (typedesc_array_t* )src_desc, dst_desc);
+  case TYPEDESC_REF:    return codegen_build_implicit_cast_ref   (ctx, llvm_value, (typedesc_ref_t*   )src_desc, dst_desc);
+  case TYPEDESC_OPT:    return codegen_build_implicit_cast_opt   (ctx, llvm_value, (typedesc_opt_t*   )src_desc, dst_desc);
+  case TYPEDESC_VEC:    return codegen_build_implicit_cast_vec   (ctx, llvm_value, (typedesc_vec_t*   )src_desc, dst_desc);
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -448,7 +448,7 @@ LLVMValueRef codegen_build_implicit_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_v
   case TYPEDESC_C128:
   case TYPEDESC_CHAR:
   case TYPEDESC_BOOL:
-  case TYPEDESC_UNIT:   return codegen_build_implicit_cast_prim  (ctx, llvm_value, (typedesc_prim_t*  )from_desc, to_desc);
+  case TYPEDESC_UNIT:   return codegen_build_implicit_cast_prim  (ctx, llvm_value, (typedesc_prim_t*  )src_desc, dst_desc);
   case TYPEDESC_FUN:    return llvm_value; // TODO: add implicit cast
   case TYPEDESC_STRUCT: return llvm_value; // TODO: add implicit cast
   case TYPEDESC_UNION:  return llvm_value; // TODO: add implicit cast
