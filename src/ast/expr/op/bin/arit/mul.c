@@ -44,19 +44,19 @@ void ast_expr_op_bin_arit_mul_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_ar
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
   {
     error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->lhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
   {
     error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->rhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
   if (typedesc_is_signed(typedesc_remove_ref_mut(lhs_desc)) != typedesc_is_signed(typedesc_remove_ref_mut(rhs_desc)))
-  {
     report_warning_mixed_signedness(token_location(node->tok));
-  }
 
   typedesc_t* desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, typedesc_remove_ref_mut(lhs_desc), typedesc_remove_ref_mut(rhs_desc));
 

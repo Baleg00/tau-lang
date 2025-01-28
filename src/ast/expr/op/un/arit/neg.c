@@ -38,6 +38,7 @@ void ast_expr_op_un_arit_neg_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_arit
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
   {
     error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->expr->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 

@@ -38,6 +38,7 @@ void ast_expr_op_un_addr_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_addr_t* 
   if (!typedesc_is_ref(expr_desc))
   {
     error_bag_put_typecheck_expected_reference(ctx->errors, token_location(node->expr->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 

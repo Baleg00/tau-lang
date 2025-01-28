@@ -32,7 +32,7 @@ bool typedesc_vec_is_implicitly_direct_convertible(typedesc_vec_t* src_desc, typ
 
   typedesc_vec_t* dst_vec_desc = (typedesc_vec_t*)dst_desc;
 
-  if (src_desc->size < dst_vec_desc->size)
+  if (src_desc->size != dst_vec_desc->size)
     return false;
 
   return typedesc_is_implicitly_direct_convertible(src_desc->base_type, dst_vec_desc->base_type);
@@ -44,6 +44,9 @@ bool typedesc_vec_is_implicitly_indirect_convertible(typedesc_vec_t* src_desc, t
     return false;
 
   typedesc_vec_t* dst_vec_desc = (typedesc_vec_t*)dst_desc;
+
+  if (src_desc->size != dst_vec_desc->size)
+    return false;
 
   return typedesc_is_implicitly_indirect_convertible(src_desc->base_type, dst_vec_desc->base_type);
 }

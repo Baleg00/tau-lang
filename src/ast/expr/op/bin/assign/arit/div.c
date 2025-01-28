@@ -43,32 +43,22 @@ void ast_expr_op_bin_assign_arit_div_typecheck(typecheck_ctx_t* ctx, ast_expr_op
   if (!typedesc_is_ref(lhs_desc))
   {
     error_bag_put_typecheck_expected_reference(ctx->errors, token_location(node->lhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
   if (!typedesc_is_mut(typedesc_remove_ref(lhs_desc)))
-  {
     error_bag_put_typecheck_expected_mutable(ctx->errors, token_location(node->lhs->tok));
-    return;
-  }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
   {
     error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->lhs->tok));
-    return;
-  }
-
-  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
-  {
-    error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->rhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
   if (typedesc_is_implicitly_direct_convertible(typedesc_remove_ref_mut(rhs_desc), typedesc_remove_ref_mut(lhs_desc)))
-  {
     error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(node->rhs->tok));
-    return;
-  }
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, lhs_desc);
 }

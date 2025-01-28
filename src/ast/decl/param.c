@@ -69,9 +69,7 @@ void ast_decl_param_typecheck(typecheck_ctx_t* ctx, ast_decl_param_t* node)
     ASSERT(expr_desc != NULL);
 
     if (!typedesc_is_implicitly_direct_convertible(expr_desc, desc))
-    {
       error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(node->tok));
-    }
   }
 }
 

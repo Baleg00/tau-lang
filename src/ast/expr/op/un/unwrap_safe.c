@@ -38,6 +38,7 @@ void ast_expr_op_un_unwrap_safe_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_u
   if (!typedesc_is_opt(typedesc_remove_ref_mut(expr_desc)))
   {
     error_bag_put_typecheck_expected_optional(ctx->errors, token_location(node->expr->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 

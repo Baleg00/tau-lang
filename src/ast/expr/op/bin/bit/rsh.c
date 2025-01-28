@@ -43,14 +43,12 @@ void ast_expr_op_bin_bit_rsh_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_bit
   if (!typedesc_is_integer(typedesc_remove_ref_mut(lhs_desc)))
   {
     error_bag_put_typecheck_expected_integer(ctx->errors, token_location(node->lhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
   if (!typedesc_is_integer(typedesc_remove_ref_mut(rhs_desc)))
-  {
     error_bag_put_typecheck_expected_integer(ctx->errors, token_location(node->rhs->tok));
-    return;
-  }
 
   typedesc_t* desc = typedesc_remove_ref_mut(lhs_desc);
 

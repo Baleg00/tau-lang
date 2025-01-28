@@ -38,18 +38,17 @@ void ast_expr_op_un_arit_inc_post_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un
   if (!typedesc_is_ref(expr_desc))
   {
     error_bag_put_typecheck_expected_reference(ctx->errors, token_location(node->expr->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
   if (!typedesc_is_mut(typedesc_remove_ref(expr_desc)))
-  {
     error_bag_put_typecheck_expected_mutable(ctx->errors, token_location(node->expr->tok));
-    return;
-  }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(expr_desc)))
   {
     error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->expr->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 

@@ -41,16 +41,10 @@ void ast_expr_op_bin_cmp_gt_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_cmp_
   ASSERT(rhs_desc != NULL);
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
-  {
     error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->lhs->tok));
-    return;
-  }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
-  {
     error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->rhs->tok));
-    return;
-  }
 
   typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);
 

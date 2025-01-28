@@ -43,14 +43,12 @@ void ast_expr_op_bin_subs_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_subs_t
   if (!typedesc_is_array(typedesc_remove_ref_mut(lhs_desc)))
   {
     error_bag_put_typecheck_expected_array(ctx->errors, token_location(node->lhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
   if (!typedesc_is_integer(typedesc_remove_ref_mut(rhs_desc)))
-  {
     error_bag_put_typecheck_expected_integer(ctx->errors, token_location(node->rhs->tok));
-    return;
-  }
 
   typedesc_array_t* array_desc = (typedesc_array_t*)typedesc_remove_ref_mut(lhs_desc);
   typedesc_t* desc = typebuilder_build_ref(ctx->typebuilder, array_desc->base_type);

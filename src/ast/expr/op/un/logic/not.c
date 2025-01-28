@@ -36,10 +36,7 @@ void ast_expr_op_un_logic_not_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_log
   ASSERT(expr_desc != NULL);
 
   if (typedesc_remove_ref_mut(expr_desc)->kind != TYPEDESC_BOOL)
-  {
     error_bag_put_typecheck_expected_bool(ctx->errors, token_location(node->expr->tok));
-    return;
-  }
 
   typedesc_t* desc = typedesc_remove_ref_mut(expr_desc);
 

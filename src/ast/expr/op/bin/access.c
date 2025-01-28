@@ -40,6 +40,9 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
   if (node->lhs->kind == AST_EXPR_ID && ((ast_expr_id_t*)node->lhs)->decl->kind == AST_DECL_ENUM)
   {
     typedesc_enum_t* enum_desc = (typedesc_enum_t*)lhs_desc;
+
+    typetable_insert(ctx->typetable, (ast_node_t*)node, (typedesc_t*)enum_desc);
+
     ast_decl_enum_t* enum_node = (ast_decl_enum_t*)enum_desc->node;
 
     node->decl = (ast_node_t*)enum_node;
@@ -54,8 +57,6 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
     }
 
     node->idx = vector_find(enum_node->members, mbr_sym->node);
-
-    typetable_insert(ctx->typetable, (ast_node_t*)node, (typedesc_t*)enum_desc);
   }
   else
   {
@@ -100,15 +101,12 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
     if (mbr_sym == NULL)
     {
       error_bag_put_typecheck_no_member(ctx->errors, token_location(node->rhs->tok));
+      typecheck_poison(ctx, (ast_node_t*)node);
       return;
     }
-
 
     if (!((ast_decl_t*)mbr_sym->node)->is_pub)
-    {
       error_bag_put_typecheck_private_member(ctx->errors, token_location(node->rhs->tok));
-      return;
-    }
 
     node->idx = vector_find(members, mbr_sym->node);
 

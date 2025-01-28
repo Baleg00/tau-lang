@@ -49,6 +49,7 @@ void ast_expr_lit_vec_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_vec_t* node)
     if (!typedesc_is_integer(value_desc) && !typedesc_is_float(value_desc))
     {
       error_bag_put_typecheck_expected_integer_or_float(ctx->errors, token_location(value_node->tok));
+      typecheck_poison(ctx, (ast_node_t*)node);
       return;
     }
 

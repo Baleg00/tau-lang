@@ -64,26 +64,14 @@ void ast_expr_op_call_typecheck(typecheck_ctx_t* ctx, ast_expr_op_call_t* node)
     typedesc_t* callee_param_desc = (typedesc_t*)vector_get(fun_desc->param_types, i);
 
     if (!typedesc_is_implicitly_direct_convertible(caller_param_desc, callee_param_desc))
-    {
       error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(caller_param->tok));
-      return;
-    }
   }
 
   if (i == vector_size(node->params) && i != vector_size(fun_desc->param_types))
-  {
     error_bag_put_typecheck_too_few_function_parameters(ctx->errors, token_location(node->tok));
-    return;
-  }
 
-  if (i != vector_size(node->params) && i == vector_size(fun_desc->param_types))
-  {
-    if (fun_desc->callconv != CALLCONV_CDECL)
-    {
-      error_bag_put_typecheck_too_many_function_parameters(ctx->errors, token_location(node->tok));
-      return;
-    }
-  }
+  if (i != vector_size(node->params) && i == vector_size(fun_desc->param_types) && fun_desc->callconv != CALLCONV_CDECL)
+    error_bag_put_typecheck_too_many_function_parameters(ctx->errors, token_location(node->tok));
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, fun_desc->return_type);
 }

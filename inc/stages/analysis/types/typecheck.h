@@ -54,6 +54,14 @@ typecheck_ctx_t* typecheck_ctx_init(typebuilder_t* typebuilder, typetable_t* typ
  */
 void typecheck_ctx_free(typecheck_ctx_t* ctx);
 
+/**
+ * \brief Poisons an AST node in the typetable.
+ *
+ * \param[in] ctx Pointer to the type check context to be used.
+ * \param[in] node Pointer to the AST node to be poisoned.
+ */
+void typecheck_poison(typecheck_ctx_t* ctx, ast_node_t* node);
+
 TAU_EXTERN_C_END
 
 #endif

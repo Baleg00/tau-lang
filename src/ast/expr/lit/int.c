@@ -55,6 +55,7 @@ void ast_expr_lit_int_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_int_t* node)
   else
   {
     error_bag_put_typecheck_integer_literal_too_large(ctx->errors, token_location(node->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 

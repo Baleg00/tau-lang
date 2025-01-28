@@ -46,9 +46,7 @@ void ast_stmt_while_typecheck(typecheck_ctx_t* ctx, ast_stmt_while_t* node)
   ASSERT(cond_desc != NULL);
 
   if (typedesc_remove_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
-  {
     error_bag_put_typecheck_expected_bool(ctx->errors, token_location(node->cond->tok));
-  }
 }
 
 void ast_stmt_while_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_while_t* node)

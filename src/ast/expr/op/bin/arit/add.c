@@ -16,12 +16,14 @@ void ast_expr_op_bin_arit_add_typecheck_scalar(typecheck_ctx_t* ctx, ast_expr_op
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
   {
     error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->lhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
   {
     error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->rhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
@@ -47,12 +49,14 @@ void ast_expr_op_bin_arit_add_typecheck_vector(typecheck_ctx_t* ctx, ast_expr_op
   if (!typedesc_is_vector(typedesc_remove_ref_mut(lhs_desc)))
   {
     error_bag_put_typecheck_expected_vector(ctx->errors, token_location(node->lhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
   if (!typedesc_is_vector(typedesc_remove_ref_mut(rhs_desc)))
   {
     error_bag_put_typecheck_expected_vector(ctx->errors, token_location(node->rhs->tok));
+    typecheck_poison(ctx, (ast_node_t*)node);
     return;
   }
 
@@ -60,10 +64,7 @@ void ast_expr_op_bin_arit_add_typecheck_vector(typecheck_ctx_t* ctx, ast_expr_op
   typedesc_vec_t* rhs_vec_desc = (typedesc_vec_t*)typedesc_remove_ref_mut(rhs_desc);
 
   if (lhs_vec_desc->size != rhs_vec_desc->size)
-  {
     error_bag_put_typecheck_incompatible_vector_dimensions(ctx->errors, token_location(node->tok));
-    return;
-  }
 
   if (typedesc_is_signed(lhs_vec_desc->base_type) != typedesc_is_signed(rhs_vec_desc->base_type))
     report_warning_mixed_signedness(token_location(node->tok));

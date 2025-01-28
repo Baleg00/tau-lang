@@ -42,18 +42,10 @@ void ast_stmt_return_typecheck(typecheck_ctx_t* ctx, ast_stmt_return_t* node)
   {
     expr_desc = typetable_lookup(ctx->typetable, node->expr);
     ASSERT(expr_desc != NULL);
-
-    if (!typedesc_is_implicitly_direct_convertible(expr_desc, ctx->fun_desc->return_type))
-    {
-      error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(node->expr->tok));
-      return;
-    }
   }
 
   if (!typedesc_is_implicitly_direct_convertible(expr_desc, ctx->fun_desc->return_type))
-  {
     error_bag_put_typecheck_illegal_conversion(ctx->errors, token_location(node->tok));
-  }
 }
 
 void ast_stmt_return_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_return_t* node)

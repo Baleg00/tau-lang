@@ -25,3 +25,10 @@ void typecheck_ctx_free(typecheck_ctx_t* ctx)
 {
   free(ctx);
 }
+
+void typecheck_poison(typecheck_ctx_t* ctx, ast_node_t* node)
+{
+  typedesc_t* poison_desc = typebuilder_build_poison(ctx->typebuilder);
+
+  typetable_insert(ctx->typetable, node, poison_desc);
+}
