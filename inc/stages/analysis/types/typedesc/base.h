@@ -60,6 +60,7 @@ typedef enum typedesc_kind_e
   TYPEDESC_UNION,  ///< Union type.
   TYPEDESC_ENUM,   ///< Enum type.
   TYPEDESC_VAR,    ///< Type variable.
+  TYPEDESC_POISON, ///< Poison type.
 } typedesc_kind_t;
 
 /**
@@ -216,6 +217,14 @@ bool typedesc_is_ref(typedesc_t* desc);
  * \returns `true` if the descriptor is an optional type, otherwise `false`.
  */
 bool typedesc_is_opt(typedesc_t* desc);
+
+/**
+ * \brief Checks if the given type descriptor is a poison type.
+ *
+ * \param[in] desc The type descriptor.
+ * \returns `true` if the descriptor is a poison type, otherwise `false`.
+ */
+bool typedesc_is_poison(typedesc_t* desc);
 
 /**
  * \brief Removes the topmost mutable modifier from a type descriptor.

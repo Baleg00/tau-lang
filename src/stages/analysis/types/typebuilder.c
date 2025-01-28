@@ -33,6 +33,7 @@ struct typebuilder_t
   typedesc_t* desc_char;
   typedesc_t* desc_bool;
   typedesc_t* desc_unit;
+  typedesc_t* desc_poison;
 
   set_t* set_mut;
   set_t* set_ptr;
@@ -235,39 +236,41 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->llvm_context = llvm_context;
   builder->llvm_layout = llvm_layout;
 
-  builder->desc_i8    = (typedesc_t*)typedesc_prim_i8_init   ();
-  builder->desc_i16   = (typedesc_t*)typedesc_prim_i16_init  ();
-  builder->desc_i32   = (typedesc_t*)typedesc_prim_i32_init  ();
-  builder->desc_i64   = (typedesc_t*)typedesc_prim_i64_init  ();
-  builder->desc_isize = (typedesc_t*)typedesc_prim_isize_init();
-  builder->desc_u8    = (typedesc_t*)typedesc_prim_u8_init   ();
-  builder->desc_u16   = (typedesc_t*)typedesc_prim_u16_init  ();
-  builder->desc_u32   = (typedesc_t*)typedesc_prim_u32_init  ();
-  builder->desc_u64   = (typedesc_t*)typedesc_prim_u64_init  ();
-  builder->desc_usize = (typedesc_t*)typedesc_prim_usize_init();
-  builder->desc_f32   = (typedesc_t*)typedesc_prim_f32_init  ();
-  builder->desc_f64   = (typedesc_t*)typedesc_prim_f64_init  ();
-  builder->desc_c64   = (typedesc_t*)typedesc_prim_c64_init  ();
-  builder->desc_c128  = (typedesc_t*)typedesc_prim_c128_init ();
-  builder->desc_char  = (typedesc_t*)typedesc_prim_char_init ();
-  builder->desc_bool  = (typedesc_t*)typedesc_prim_bool_init ();
-  builder->desc_unit  = (typedesc_t*)typedesc_prim_unit_init ();
+  builder->desc_i8     = (typedesc_t*)typedesc_prim_i8_init   ();
+  builder->desc_i16    = (typedesc_t*)typedesc_prim_i16_init  ();
+  builder->desc_i32    = (typedesc_t*)typedesc_prim_i32_init  ();
+  builder->desc_i64    = (typedesc_t*)typedesc_prim_i64_init  ();
+  builder->desc_isize  = (typedesc_t*)typedesc_prim_isize_init();
+  builder->desc_u8     = (typedesc_t*)typedesc_prim_u8_init   ();
+  builder->desc_u16    = (typedesc_t*)typedesc_prim_u16_init  ();
+  builder->desc_u32    = (typedesc_t*)typedesc_prim_u32_init  ();
+  builder->desc_u64    = (typedesc_t*)typedesc_prim_u64_init  ();
+  builder->desc_usize  = (typedesc_t*)typedesc_prim_usize_init();
+  builder->desc_f32    = (typedesc_t*)typedesc_prim_f32_init  ();
+  builder->desc_f64    = (typedesc_t*)typedesc_prim_f64_init  ();
+  builder->desc_c64    = (typedesc_t*)typedesc_prim_c64_init  ();
+  builder->desc_c128   = (typedesc_t*)typedesc_prim_c128_init ();
+  builder->desc_char   = (typedesc_t*)typedesc_prim_char_init ();
+  builder->desc_bool   = (typedesc_t*)typedesc_prim_bool_init ();
+  builder->desc_unit   = (typedesc_t*)typedesc_prim_unit_init ();
+  builder->desc_poison = (typedesc_t*)typedesc_poison_init    ();
 
-  builder->desc_i8->llvm_type    = LLVMInt8TypeInContext  (builder->llvm_context                      );
-  builder->desc_i16->llvm_type   = LLVMInt16TypeInContext (builder->llvm_context                      );
-  builder->desc_i32->llvm_type   = LLVMInt32TypeInContext (builder->llvm_context                      );
-  builder->desc_i64->llvm_type   = LLVMInt64TypeInContext (builder->llvm_context                      );
-  builder->desc_isize->llvm_type = LLVMIntPtrTypeInContext(builder->llvm_context, builder->llvm_layout);
-  builder->desc_u8->llvm_type    = LLVMInt8TypeInContext  (builder->llvm_context                      );
-  builder->desc_u16->llvm_type   = LLVMInt16TypeInContext (builder->llvm_context                      );
-  builder->desc_u32->llvm_type   = LLVMInt32TypeInContext (builder->llvm_context                      );
-  builder->desc_u64->llvm_type   = LLVMInt64TypeInContext (builder->llvm_context                      );
-  builder->desc_usize->llvm_type = LLVMIntPtrTypeInContext(builder->llvm_context, builder->llvm_layout);
-  builder->desc_f32->llvm_type   = LLVMFloatTypeInContext (builder->llvm_context                      );
-  builder->desc_f64->llvm_type   = LLVMDoubleTypeInContext(builder->llvm_context                      );
-  builder->desc_char->llvm_type  = LLVMInt32TypeInContext (builder->llvm_context                      );
-  builder->desc_bool->llvm_type  = LLVMInt1TypeInContext  (builder->llvm_context                      );
-  builder->desc_unit->llvm_type  = LLVMVoidTypeInContext  (builder->llvm_context                      );
+  builder->desc_i8->llvm_type     = LLVMInt8TypeInContext  (builder->llvm_context                      );
+  builder->desc_i16->llvm_type    = LLVMInt16TypeInContext (builder->llvm_context                      );
+  builder->desc_i32->llvm_type    = LLVMInt32TypeInContext (builder->llvm_context                      );
+  builder->desc_i64->llvm_type    = LLVMInt64TypeInContext (builder->llvm_context                      );
+  builder->desc_isize->llvm_type  = LLVMIntPtrTypeInContext(builder->llvm_context, builder->llvm_layout);
+  builder->desc_u8->llvm_type     = LLVMInt8TypeInContext  (builder->llvm_context                      );
+  builder->desc_u16->llvm_type    = LLVMInt16TypeInContext (builder->llvm_context                      );
+  builder->desc_u32->llvm_type    = LLVMInt32TypeInContext (builder->llvm_context                      );
+  builder->desc_u64->llvm_type    = LLVMInt64TypeInContext (builder->llvm_context                      );
+  builder->desc_usize->llvm_type  = LLVMIntPtrTypeInContext(builder->llvm_context, builder->llvm_layout);
+  builder->desc_f32->llvm_type    = LLVMFloatTypeInContext (builder->llvm_context                      );
+  builder->desc_f64->llvm_type    = LLVMDoubleTypeInContext(builder->llvm_context                      );
+  builder->desc_char->llvm_type   = LLVMInt32TypeInContext (builder->llvm_context                      );
+  builder->desc_bool->llvm_type   = LLVMInt1TypeInContext  (builder->llvm_context                      );
+  builder->desc_unit->llvm_type   = LLVMVoidTypeInContext  (builder->llvm_context                      );
+  builder->desc_poison->llvm_type = LLVMVoidTypeInContext  (builder->llvm_context                      );
 
   LLVMTypeRef llvm_c64_type = LLVMStructCreateNamed(builder->llvm_context, "complex64");
   LLVMStructSetBody(llvm_c64_type, (LLVMTypeRef[]){ builder->desc_f32->llvm_type, builder->desc_f32->llvm_type }, 2, false);
@@ -311,6 +314,7 @@ void typebuilder_free(typebuilder_t* builder)
   typedesc_free(builder->desc_char);
   typedesc_free(builder->desc_bool);
   typedesc_free(builder->desc_unit);
+  typedesc_free(builder->desc_poison);
 
   set_for_each(builder->set_mut,    (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_ptr,    (set_for_each_func_t)typedesc_free);
@@ -574,6 +578,11 @@ typedesc_t* typebuilder_build_bool(typebuilder_t* builder)
 typedesc_t* typebuilder_build_unit(typebuilder_t* builder)
 {
   return builder->desc_unit;
+}
+
+typedesc_t* typebuilder_build_poison(typebuilder_t* builder)
+{
+  return builder->desc_poison;
 }
 
 typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count, bool is_vararg, callconv_kind_t callconv)

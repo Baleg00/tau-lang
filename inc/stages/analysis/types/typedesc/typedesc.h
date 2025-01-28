@@ -26,6 +26,7 @@
 #include "stages/analysis/types/typedesc/modif.h"
 #include "stages/analysis/types/typedesc/mut.h"
 #include "stages/analysis/types/typedesc/opt.h"
+#include "stages/analysis/types/typedesc/poison.h"
 #include "stages/analysis/types/typedesc/prim.h"
 #include "stages/analysis/types/typedesc/ptr.h"
 #include "stages/analysis/types/typedesc/ref.h"

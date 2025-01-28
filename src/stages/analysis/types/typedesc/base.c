@@ -41,6 +41,7 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_UNION:  typedesc_union_free ((typedesc_union_t* )desc); break;
   case TYPEDESC_ENUM:   typedesc_enum_free  ((typedesc_enum_t*  )desc); break;
   case TYPEDESC_VAR:    typedesc_var_free   ((typedesc_var_t*   )desc); break;
+  case TYPEDESC_POISON: typedesc_poison_free((typedesc_poison_t*)desc); break;
   default: UNREACHABLE();
   }
 }
@@ -258,6 +259,11 @@ bool typedesc_is_opt(typedesc_t* desc)
   return desc->kind == TYPEDESC_OPT;
 }
 
+bool typedesc_is_poison(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_POISON;
+}
+
 typedesc_t* typedesc_remove_mut(typedesc_t* desc)
 {
   return typedesc_is_mut(desc) ? ((typedesc_mut_t*)desc)->base_type : desc;
@@ -395,6 +401,7 @@ bool typedesc_is_implicitly_direct_convertible(typedesc_t* src_desc, typedesc_t*
   case TYPEDESC_STRUCT: return typedesc_struct_is_implicitly_direct_convertible((typedesc_struct_t*)src_desc, dst_desc);
   case TYPEDESC_UNION:  return typedesc_union_is_implicitly_direct_convertible ((typedesc_union_t* )src_desc, dst_desc);
   case TYPEDESC_ENUM:   return typedesc_enum_is_implicitly_direct_convertible  ((typedesc_enum_t*  )src_desc, dst_desc);
+  case TYPEDESC_POISON: return typedesc_poison_is_implicitly_direct_convertible((typedesc_poison_t*)src_desc, dst_desc);
   default: UNREACHABLE();
   }
 
@@ -432,6 +439,7 @@ bool typedesc_is_implicitly_indirect_convertible(typedesc_t* src_desc, typedesc_
   case TYPEDESC_STRUCT: return typedesc_struct_is_implicitly_indirect_convertible((typedesc_struct_t*)src_desc, dst_desc);
   case TYPEDESC_UNION:  return typedesc_union_is_implicitly_indirect_convertible ((typedesc_union_t* )src_desc, dst_desc);
   case TYPEDESC_ENUM:   return typedesc_enum_is_implicitly_indirect_convertible  ((typedesc_enum_t*  )src_desc, dst_desc);
+  case TYPEDESC_POISON: return typedesc_poison_is_implicitly_indirect_convertible((typedesc_poison_t*)src_desc, dst_desc);
   default: UNREACHABLE();
   }
 
@@ -469,6 +477,7 @@ bool typedesc_is_explicitly_convertible(typedesc_t* src_desc, typedesc_t* dst_de
   case TYPEDESC_STRUCT: return typedesc_struct_is_explicitly_convertible((typedesc_struct_t*)src_desc, dst_desc);
   case TYPEDESC_UNION:  return typedesc_union_is_explicitly_convertible ((typedesc_union_t* )src_desc, dst_desc);
   case TYPEDESC_ENUM:   return typedesc_enum_is_explicitly_convertible  ((typedesc_enum_t*  )src_desc, dst_desc);
+  case TYPEDESC_POISON: return typedesc_poison_is_explicitly_convertible((typedesc_poison_t*)src_desc, dst_desc);
   default: UNREACHABLE();
   }
 

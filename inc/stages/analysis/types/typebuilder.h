@@ -252,6 +252,14 @@ typedesc_t* typebuilder_build_bool(typebuilder_t* builder);
 typedesc_t* typebuilder_build_unit(typebuilder_t* builder);
 
 /**
+ * \brief Builds a poison type.
+ *
+ * \param[in] builder Pointer to the type builder.
+ * \returns A pointer to the newly created poison type descriptor.
+ */
+typedesc_t* typebuilder_build_poison(typebuilder_t* builder);
+
+/**
  * \brief Builds a function type with the provided return type and parameter types.
  *
  * \param[in] builder Pointer to the type builder.
