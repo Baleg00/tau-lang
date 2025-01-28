@@ -11,7 +11,7 @@
 #include "ast/registry.h"
 #include "utils/diagnostics.h"
 
-void ast_expr_op_bin_arit_add_typecheck_scalar(typecheck_ctx_t* ctx, ast_expr_op_bin_arit_add_t* node, typedesc_t* lhs_desc, typedesc_t* rhs_desc)
+static void ast_expr_op_bin_arit_add_typecheck_scalar(typecheck_ctx_t* ctx, ast_expr_op_bin_arit_add_t* node, typedesc_t* lhs_desc, typedesc_t* rhs_desc)
 {
   if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
   {
@@ -44,7 +44,7 @@ void ast_expr_op_bin_arit_add_typecheck_scalar(typecheck_ctx_t* ctx, ast_expr_op
     UNREACHABLE();
 }
 
-void ast_expr_op_bin_arit_add_typecheck_vector(typecheck_ctx_t* ctx, ast_expr_op_bin_arit_add_t* node, typedesc_t* lhs_desc, typedesc_t* rhs_desc)
+static void ast_expr_op_bin_arit_add_typecheck_vector(typecheck_ctx_t* ctx, ast_expr_op_bin_arit_add_t* node, typedesc_t* lhs_desc, typedesc_t* rhs_desc)
 {
   if (!typedesc_is_vector(typedesc_remove_ref_mut(lhs_desc)))
   {
