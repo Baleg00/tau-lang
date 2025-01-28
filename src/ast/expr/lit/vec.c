@@ -65,6 +65,9 @@ void ast_expr_lit_vec_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_vec_t* node)
 
 void ast_expr_lit_vec_codegen(codegen_ctx_t* ctx, ast_expr_lit_vec_t* node)
 {
+  VECTOR_FOR_LOOP(i, node->values)
+    ast_node_codegen(ctx, (ast_node_t*)vector_get(node->values, i));
+
   typedesc_vec_t* desc = (typedesc_vec_t*)typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
@@ -82,7 +85,7 @@ void ast_expr_lit_vec_codegen(codegen_ctx_t* ctx, ast_expr_lit_vec_t* node)
     llvm_values[i] = llvm_value;
   }
 
-  node->llvm_value = LLVMConstVector(llvm_values, vector_size(node->values));
+  node->llvm_value = LLVMConstVector(llvm_values, (uint32_t)vector_size(node->values));
 
   free(llvm_values);
 }
