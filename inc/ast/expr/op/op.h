@@ -17,7 +17,8 @@
  */
 #define AST_EXPR_OP_HEADER\
   AST_EXPR_HEADER;\
-  op_kind_t op_kind
+  op_kind_t op_kind;\
+  op_subkind_t op_subkind
 
 TAU_EXTERN_C_BEGIN
 
@@ -84,6 +85,17 @@ typedef enum op_kind_t
   OP_CALL, ///< Call operator `()`
   OP_SPEC, ///< Generic specialization operator `.<>`
 } op_kind_t;
+
+/**
+ * \brief Enumeration of operator sub-kinds.
+ */
+typedef enum op_subkind_t
+{
+  OP_ARIT_ADD_INTEGER, ///< Arithmetic integer addition
+  OP_ARIT_ADD_FLOAT, ///< Arithmetic float addition
+  OP_ARIT_ADD_COMPLEX, ///< Arithmetic complex addition
+  OP_ARIT_ADD_VECTOR, ///< Arithmetic vector addition
+} op_subkind_t;
 
 /**
  * \brief AST operation expression node.

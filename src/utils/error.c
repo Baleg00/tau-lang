@@ -306,6 +306,11 @@ static void error_print_typecheck_integer_literal_too_large(error_t error)
   error_print_helper_snippet(error.integer_literal_too_large.loc, "Integer literal too large.");
 }
 
+static void error_print_typecheck_incompatible_vector_dimensions(error_t error)
+{
+  error_print_helper_snippet(error.incompatible_vector_dimensions.loc, "Incompatible vector dimensions.");
+}
+
 static void error_print_ctrlflow_break_outside_loop(error_t error)
 {
   error_print_helper_snippet(error.break_outside_loop.loc, "Break statement not within a loop.");
@@ -325,51 +330,6 @@ void error_print(error_t error)
 {
   switch (error.kind)
   {
-  case ERROR_COMPILER_FILE_OPEN_FAILED:              error_print_compiler_file_open_failed             (error); break;
-  case ERROR_LEXER_UNEXPECTED_CHARACTER:             error_print_lexer_unexpected_character            (error); break;
-  case ERROR_LEXER_IDENTIFIER_TOO_LONG:              error_print_lexer_identifier_too_long             (error); break;
-  case ERROR_LEXER_MISSING_SINGLE_QUOTE:             error_print_lexer_missing_single_quote            (error); break;
-  case ERROR_LEXER_MISSING_DOUBLE_QUOTE:             error_print_lexer_missing_double_quote            (error); break;
-  case ERROR_LEXER_EMPTY_CHARACTER:                  error_print_lexer_empty_character                 (error); break;
-  case ERROR_LEXER_MISSING_HEX_DIGITS:               error_print_lexer_missing_hex_digits              (error); break;
-  case ERROR_LEXER_TOO_MANY_HEX_DIGITS:              error_print_lexer_too_many_hex_digits             (error); break;
-  case ERROR_LEXER_UNKNOWN_ESCAPE_SEQUENCE:          error_print_lexer_unknown_escape_sequence         (error); break;
-  case ERROR_LEXER_ILL_FORMED_INTEGER:               error_print_lexer_ill_formed_integer              (error); break;
-  case ERROR_LEXER_ILL_FORMED_FLOAT:                 error_print_lexer_ill_formed_float                (error); break;
-  case ERROR_LEXER_INVALID_INTEGER_SUFFIX:           error_print_lexer_invalid_integer_suffix          (error); break;
-  case ERROR_PARSER_UNEXPECTED_TOKEN:                error_print_parser_unexpected_token               (error); break;
-  case ERROR_PARSER_UNKNOWN_CALLING_CONVENTION:      error_print_parser_unknown_calling_convention     (error); break;
-  case ERROR_PARSER_EXPECTED_CALLING_CONVENTION:     error_print_parser_expected_calling_convention    (error); break;
-  case ERROR_PARSER_DEFAULT_PARAMETER_ORDER:         error_print_parser_default_parameter_order        (error); break;
-  case ERROR_PARSER_MISSING_PAREN:                   error_print_parser_missing_paren                  (error); break;
-  case ERROR_PARSER_MISSING_BRACKET:                 error_print_parser_missing_bracket                (error); break;
-  case ERROR_PARSER_MISSING_UNARY_ARGUMENT:          error_print_parser_missing_unary_argument         (error); break;
-  case ERROR_PARSER_MISSING_BINARY_ARGUMENT:         error_print_parser_missing_binary_argument        (error); break;
-  case ERROR_PARSER_MISSING_CALLEE:                  error_print_parser_missing_callee                 (error); break;
-  case ERROR_NAMERES_SYMBOL_COLLISION:               error_print_nameres_symbol_collision              (error); break;
-  case ERROR_NAMERES_UNDEFINED_SYMBOL:               error_print_nameres_undefined_symbol              (error); break;
-  case ERROR_NAMERES_EXPECTED_EXPRESSION_SYMBOL:     error_print_nameres_expected_expression_symbol    (error); break;
-  case ERROR_NAMERES_EXPECTED_TYPENAME:              error_print_nameres_expected_typename             (error); break;
-  case ERROR_NAMERES_SHADOWED_SYMBOL:                error_print_nameres_shadowed_symbol               (error); break;
-  case ERROR_TYPECHECK_EXPECTED_INTEGER:             error_print_typecheck_expected_integer            (error); break;
-  case ERROR_TYPECHECK_EXPECTED_ARITHMETIC:          error_print_typecheck_expected_arithmetic         (error); break;
-  case ERROR_TYPECHECK_EXPECTED_BOOL:                error_print_typecheck_expected_bool               (error); break;
-  case ERROR_TYPECHECK_EXPECTED_MUTABLE:             error_print_typecheck_expected_mutable            (error); break;
-  case ERROR_TYPECHECK_EXPECTED_OPTIONAL:            error_print_typecheck_expected_optional           (error); break;
-  case ERROR_TYPECHECK_EXPECTED_POINTER:             error_print_typecheck_expected_pointer            (error); break;
-  case ERROR_TYPECHECK_EXPECTED_ARRAY:               error_print_typecheck_expected_array              (error); break;
-  case ERROR_TYPECHECK_EXPECTED_REFERENCE:           error_print_typecheck_expected_reference          (error); break;
-  case ERROR_TYPECHECK_EXPECTED_VECTOR:              error_print_typecheck_expected_vector             (error); break;
-  case ERROR_TYPECHECK_INCOMPATIBLE_RETURN_TYPE:     error_print_typecheck_incompatible_return_type    (error); break;
-  case ERROR_TYPECHECK_TOO_MANY_FUNCTION_PARAMETERS: error_print_typecheck_too_many_function_parameters(error); break;
-  case ERROR_TYPECHECK_TOO_FEW_FUNCTION_PARAMETERS:  error_print_typecheck_too_few_function_parameters (error); break;
-  case ERROR_TYPECHECK_NO_MEMBER:                    error_print_typecheck_no_member                   (error); break;
-  case ERROR_TYPECHECK_PRIVATE_MEMBER:               error_print_typecheck_private_member              (error); break;
-  case ERROR_TYPECHECK_ILLEGAL_CONVERSION:           error_print_typecheck_illegal_conversion          (error); break;
-  case ERROR_TYPECHECK_INTEGER_LITERAL_TOO_LARGE:    error_print_typecheck_integer_literal_too_large   (error); break;
-  case ERROR_CTRLFLOW_BREAK_OUTSIDE_LOOP:            error_print_ctrlflow_break_outside_loop           (error); break;
-  case ERROR_CTRLFLOW_CONTINUE_OUTSIDE_LOOP:         error_print_ctrlflow_continue_outside_loop        (error); break;
-  case ERROR_CTRLFLOW_RETURN_INSIDE_DEFER:           error_print_ctrlflow_return_inside_defer          (error); break;
   case ERROR_COMPILER_FILE_OPEN_FAILED:                error_print_compiler_file_open_failed               (error); break;
   case ERROR_LEXER_UNEXPECTED_CHARACTER:               error_print_lexer_unexpected_character              (error); break;
   case ERROR_LEXER_IDENTIFIER_TOO_LONG:                error_print_lexer_identifier_too_long               (error); break;
@@ -413,6 +373,7 @@ void error_print(error_t error)
   case ERROR_TYPECHECK_PRIVATE_MEMBER:                 error_print_typecheck_private_member                (error); break;
   case ERROR_TYPECHECK_ILLEGAL_CONVERSION:             error_print_typecheck_illegal_conversion            (error); break;
   case ERROR_TYPECHECK_INTEGER_LITERAL_TOO_LARGE:      error_print_typecheck_integer_literal_too_large     (error); break;
+  case ERROR_TYPECHECK_INCOMPATIBLE_VECTOR_DIMENSIONS: error_print_typecheck_incompatible_vector_dimensions(error); break;
   case ERROR_CTRLFLOW_BREAK_OUTSIDE_LOOP:              error_print_ctrlflow_break_outside_loop             (error); break;
   case ERROR_CTRLFLOW_CONTINUE_OUTSIDE_LOOP:           error_print_ctrlflow_continue_outside_loop          (error); break;
   case ERROR_CTRLFLOW_RETURN_INSIDE_DEFER:             error_print_ctrlflow_return_inside_defer            (error); break;
@@ -911,6 +872,16 @@ void error_bag_put_typecheck_integer_literal_too_large(error_bag_t* bag, locatio
   error_bag_put(bag, (error_t){
     .kind = ERROR_TYPECHECK_INTEGER_LITERAL_TOO_LARGE,
     .integer_literal_too_large = {
+      .loc = loc
+    }
+  });
+}
+
+void error_bag_put_typecheck_incompatible_vector_dimensions(error_bag_t* bag, location_t loc)
+{
+  error_bag_put(bag, (error_t){
+    .kind = ERROR_TYPECHECK_INCOMPATIBLE_VECTOR_DIMENSIONS,
+    .incompatible_vector_dimensions = {
       .loc = loc
     }
   });

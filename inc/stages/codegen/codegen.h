@@ -87,6 +87,17 @@ LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node);
 LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
 
 /**
+ * \brief Builds an LLVM cast instruction to perform a vector cast.
+ *
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] llvm_value The LLVM value reference.
+ * \param[in] from_desc Pointer to the source type descriptor.
+ * \param[in] to_desc Pointer to the target type descriptor.
+ * \returns The result of the cast instruction.
+ */
+LLVMValueRef codegen_build_vector_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* from_desc, typedesc_t* to_desc);
+
+/**
  * \brief Builds an LLVM instruction to wrap a value into an optional.
  *
  * \param[in] ctx Pointer to the code generation context.
@@ -198,6 +209,17 @@ LLVMValueRef codegen_build_complex_eq(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs,
  * \returns The result of the instruction.
  */
 LLVMValueRef codegen_build_complex_ne(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+
+/**
+ * \brief Builds an LLVM instruction to add two vectors.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] desc Pointer to the type descriptor of the vectors.
+ * \param[in] llvm_lhs The LLVM value reference of the left-hand argument.
+ * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_vector_add(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
 
 TAU_EXTERN_C_END
 
