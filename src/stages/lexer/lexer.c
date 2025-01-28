@@ -726,6 +726,8 @@ token_t* lexer_read_punctuation(lexer_t* lex)
 {
   token_kind_t kind = TOK_UNKNOWN;
 
+  size_t pos = lex->pos;
+
   if (lexer_consume(lex, '+'))
     if (lexer_consume(lex, '+'))
       kind = TOK_PUNCT_PLUS_PLUS;
@@ -870,7 +872,7 @@ token_t* lexer_read_punctuation(lexer_t* lex)
     error_bag_put_lexer_unexpected_character(lex->errors, loc);
   }
 
-  return lexer_token_init(lex, kind);
+  return token_registry_token_init(lex->path, kind, pos);
 }
 
 token_t* lexer_read_next(lexer_t* lex)
