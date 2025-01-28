@@ -11,6 +11,100 @@
 
 #include "ast/ast.h"
 
+static ast_node_t* shyd_parse_expr_term_id(shyd_ctx_t* ctx)
+{
+  ast_node_t* node = (ast_node_t*)ast_expr_id_init();
+
+  node->tok = parser_next(ctx->par);
+
+  return node;
+}
+
+static ast_node_t* shyd_parse_expr_term_lit_int(shyd_ctx_t* ctx)
+{
+  ast_node_t* node = (ast_node_t*)ast_expr_lit_int_init();
+
+  node->tok = parser_next(ctx->par);
+
+  string_view_t view = token_to_string_view(node->tok);
+
+  uint64_t value = 0;
+
+  errno = 0;
+
+  if (string_view_starts_with_cstr(view, "0x")) value = strtoull(string_view_begin(view) + 2, NULL, 16);
+  else if (string_view_starts_with_cstr(view, "0o")) value = strtoull(string_view_begin(view) + 2, NULL, 8 );
+  else if (string_view_starts_with_cstr(view, "0b")) value = strtoull(string_view_begin(view) + 2, NULL, 2 );
+  else value = strtoull(string_view_begin(view), NULL, 10);
+
+  ASSERT(errno == 0);
+
+  ((ast_expr_lit_int_t*)node)->value = value;
+
+  return node;
+}
+
+static ast_node_t* shyd_parse_expr_term_lit_flt(shyd_ctx_t* ctx)
+{
+  ast_node_t* node = (ast_node_t*)ast_expr_lit_flt_init();
+
+  node->tok = parser_next(ctx->par);
+
+  location_t loc = token_location(node->tok);
+
+  ((ast_expr_lit_flt_t*)node)->value = strtold(loc.ptr, NULL);
+
+  return node;
+}
+
+static ast_node_t* shyd_parse_expr_term_lit_str(shyd_ctx_t* ctx)
+{
+  ast_node_t* node = (ast_node_t*)ast_expr_lit_str_init();
+
+  node->tok = parser_next(ctx->par);
+
+  location_t loc = token_location(node->tok);
+
+  ((ast_expr_lit_str_t*)node)->value = (char*)malloc(sizeof(char) * (loc.len - 1));
+  memset(((ast_expr_lit_str_t*)node)->value, 0, sizeof(char) * (loc.len - 1));
+  strncpy(((ast_expr_lit_str_t*)node)->value, loc.ptr + 1, loc.len - 2);
+
+  return node;
+}
+
+static ast_node_t* shyd_parse_expr_term_lit_char(shyd_ctx_t* ctx)
+{
+  ast_node_t* node = (ast_node_t*)ast_expr_lit_char_init();
+
+  node->tok = parser_next(ctx->par);
+
+  ((ast_expr_lit_char_t*)node)->value = '\0';
+
+  return node;
+}
+
+static ast_node_t* shyd_parse_expr_term_lit_bool(shyd_ctx_t* ctx)
+{
+  ast_node_t* node = (ast_node_t*)ast_expr_lit_bool_init();
+
+  node->tok = parser_next(ctx->par);
+
+  location_t loc = token_location(node->tok);
+
+  ((ast_expr_lit_bool_t*)node)->value = strncmp(loc.ptr, "true", 4) == 0;
+
+  return node;
+}
+
+static ast_node_t* shyd_parse_expr_term_lit_null(shyd_ctx_t* ctx)
+{
+  ast_node_t* node = (ast_node_t*)ast_expr_lit_null_init();
+
+  node->tok = parser_next(ctx->par);
+
+  return node;
+}
+
 shyd_ctx_t* shyd_ctx_init(parser_t* par)
 {
   shyd_ctx_t* ctx = (shyd_ctx_t*)malloc(sizeof(shyd_ctx_t));
@@ -185,6 +279,32 @@ bool shyd_parse_punct_bracket_right(shyd_ctx_t* ctx)
   return true;
 }
 
+bool shyd_parse_lit_vec(shyd_ctx_t* ctx)
+{
+  if (ctx->prev_term)
+    return false;
+
+  ast_expr_lit_vec_t* node = ast_expr_lit_vec_init();
+  node->tok = parser_current(ctx->par);
+
+  parser_expect(ctx->par, TOK_PUNCT_BRACKET_ANGLE_LEFT);
+
+  parser_parse_delimited_list(ctx->par, node->values, TOK_PUNCT_COMMA, parser_parse_expr);
+
+  parser_expect(ctx->par, TOK_PUNCT_BRACKET_ANGLE_RIGHT);
+
+  ASSERT(vector_size(node->values) > 0);
+
+  shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_TERM);
+  elem->node = (ast_node_t*)node;
+
+  queue_offer(ctx->out_queue, elem);
+
+  ctx->prev_term = true;
+
+  return true;
+}
+
 bool shyd_parse_expr_op_call(shyd_ctx_t* ctx)
 {
   if (!ctx->prev_term)
@@ -250,7 +370,21 @@ bool shyd_parse_expr_term(shyd_ctx_t* ctx)
   shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_TERM);
   queue_offer(ctx->out_queue, elem);
 
-  parser_next(ctx->par);
+  switch (parser_current(ctx->par)->kind)
+  {
+  case TOK_ID:       elem->node = shyd_parse_expr_term_id      (ctx); break;
+  case TOK_LIT_INT:  elem->node = shyd_parse_expr_term_lit_int (ctx); break;
+  case TOK_LIT_FLT:  elem->node = shyd_parse_expr_term_lit_flt (ctx); break;
+  case TOK_LIT_STR:  elem->node = shyd_parse_expr_term_lit_str (ctx); break;
+  case TOK_LIT_CHAR: elem->node = shyd_parse_expr_term_lit_char(ctx); break;
+  case TOK_LIT_BOOL: elem->node = shyd_parse_expr_term_lit_bool(ctx); break;
+  case TOK_LIT_NULL: elem->node = shyd_parse_expr_term_lit_null(ctx); break;
+  default:
+  {
+    error_bag_put_parser_unexpected_token(ctx->par->errors, token_location(parser_current(ctx->par)));
+    return false;
+  }
+  }
 
   ctx->prev_term = true;
 
@@ -324,12 +458,13 @@ bool shyd_parse_postfix_next(shyd_ctx_t* ctx)
   case TOK_KW_IS:
   case TOK_KW_AS:
   case TOK_KW_SIZEOF:
-  case TOK_KW_ALIGNOF:          return shyd_parse_expr_typed(ctx);
-  case TOK_PUNCT_DOT_LESS:      return shyd_parse_expr_op_spec(ctx);
-  case TOK_PUNCT_PAREN_LEFT:    return ctx->prev_term ? shyd_parse_expr_op_call(ctx) : shyd_parse_punct_paren_left(ctx);
-  case TOK_PUNCT_PAREN_RIGHT:   return shyd_parse_punct_paren_right(ctx);
-  case TOK_PUNCT_BRACKET_LEFT:  return shyd_parse_punct_bracket_left(ctx);
-  case TOK_PUNCT_BRACKET_RIGHT: return shyd_parse_punct_bracket_right(ctx);
+  case TOK_KW_ALIGNOF:                return shyd_parse_expr_typed(ctx);
+  case TOK_PUNCT_DOT_LESS:            return shyd_parse_expr_op_spec(ctx);
+  case TOK_PUNCT_PAREN_LEFT:          return ctx->prev_term ? shyd_parse_expr_op_call(ctx) : shyd_parse_punct_paren_left(ctx);
+  case TOK_PUNCT_PAREN_RIGHT:         return shyd_parse_punct_paren_right(ctx);
+  case TOK_PUNCT_BRACKET_LEFT:        return shyd_parse_punct_bracket_left(ctx);
+  case TOK_PUNCT_BRACKET_RIGHT:       return shyd_parse_punct_bracket_right(ctx);
+  case TOK_PUNCT_BRACKET_ANGLE_LEFT:  return shyd_parse_lit_vec(ctx);
   default: NOOP();
   }
 
@@ -445,73 +580,7 @@ void shyd_ast_expr_op_spec(shyd_ctx_t* ctx, shyd_elem_t* elem)
 
 void shyd_ast_expr_term(shyd_ctx_t* ctx, shyd_elem_t* elem)
 {
-  ast_node_t* node = NULL;
-
-  location_t loc = token_location(elem->tok);
-
-  switch (elem->tok->kind)
-  {
-  case TOK_ID:
-    node = (ast_node_t*)ast_expr_id_init();
-    break;
-  case TOK_LIT_INT:
-  {
-    node = (ast_node_t*)ast_expr_lit_int_init();
-
-    string_view_t view = token_to_string_view(elem->tok);
-
-    uint64_t value = 0;
-
-    errno = 0;
-
-         if (string_view_starts_with_cstr(view, "0x")) value = strtoull(string_view_begin(view) + 2, NULL, 16);
-    else if (string_view_starts_with_cstr(view, "0o")) value = strtoull(string_view_begin(view) + 2, NULL, 8 );
-    else if (string_view_starts_with_cstr(view, "0b")) value = strtoull(string_view_begin(view) + 2, NULL, 2 );
-    else value = strtoull(string_view_begin(view), NULL, 10);
-
-    ASSERT(errno == 0);
-
-    ((ast_expr_lit_int_t*)node)->value = value;
-    break;
-  }
-  case TOK_LIT_FLT:
-  {
-    node = (ast_node_t*)ast_expr_lit_flt_init();
-    ((ast_expr_lit_flt_t*)node)->value = strtold(loc.ptr, NULL);
-    break;
-  }
-  case TOK_LIT_STR:
-  {
-    node = (ast_node_t*)ast_expr_lit_str_init();
-
-    ((ast_expr_lit_str_t*)node)->value = (char*)malloc(sizeof(char) * (loc.len - 1));
-    memset(((ast_expr_lit_str_t*)node)->value, 0, sizeof(char) * (loc.len - 1));
-    strncpy(((ast_expr_lit_str_t*)node)->value, loc.ptr + 1, loc.len - 2);
-    break;
-  }
-  case TOK_LIT_CHAR:
-  {
-    node = (ast_node_t*)ast_expr_lit_char_init();
-    ((ast_expr_lit_char_t*)node)->value = '\0';
-    break;
-  }
-  case TOK_LIT_BOOL:
-  {
-    node = (ast_node_t*)ast_expr_lit_bool_init();
-    ((ast_expr_lit_bool_t*)node)->value = strncmp(loc.ptr, "true", 4) == 0;
-    break;
-  }
-  case TOK_LIT_NULL:
-    node = (ast_node_t*)ast_expr_lit_null_init();
-    break;
-  default:
-    error_bag_put_parser_unexpected_token(ctx->par->errors, loc);
-    return;
-  }
-
-  node->tok = elem->tok;
-
-  stack_push(ctx->node_stack, node);
+  stack_push(ctx->node_stack, elem->node);
 }
 
 void shyd_ast_expr_op(shyd_ctx_t* ctx, shyd_elem_t* elem)
