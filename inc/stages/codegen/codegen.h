@@ -220,6 +220,17 @@ LLVMValueRef codegen_build_complex_ne(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs,
  */
 LLVMValueRef codegen_build_vector_add(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
 
+/**
+ * \brief Builds an LLVM instruction to subtract two vectors.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] desc Pointer to the type descriptor of the vectors.
+ * \param[in] llvm_lhs The LLVM value reference of the left-hand argument.
+ * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+
 TAU_EXTERN_C_END
 
 #endif

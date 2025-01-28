@@ -637,3 +637,16 @@ LLVMValueRef codegen_build_vector_add(codegen_ctx_t* ctx, typedesc_vec_t* desc, 
 
   return NULL;
 }
+
+LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs)
+{
+  if (typedesc_is_integer(desc->base_type))
+    return LLVMBuildSub(ctx->llvm_builder, llvm_lhs, llvm_rhs, "");
+
+  if (typedesc_is_float(desc->base_type))
+    return LLVMBuildFSub(ctx->llvm_builder, llvm_lhs, llvm_rhs, "");
+
+  UNREACHABLE();
+
+  return NULL;
+}
