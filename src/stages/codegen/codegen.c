@@ -651,6 +651,30 @@ LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_vec_t* desc, 
   return NULL;
 }
 
+LLVMValueRef codegen_build_vector_mul(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_scalar)
+{
+  if (typedesc_is_integer(desc->base_type))
+    for (size_t i = 0; i < desc->size; i++)
+    {
+      LLVMValueRef llvm_index = LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), i, false);
+      LLVMValueRef llvm_value = LLVMBuildExtractElement(ctx->llvm_builder, llvm_vec, llvm_index, "");
+      llvm_value = LLVMBuildMul(ctx->llvm_builder, llvm_value, llvm_scalar, "");
+      llvm_vec = LLVMBuildInsertElement(ctx->llvm_builder, llvm_vec, llvm_value, llvm_index, "");
+    }
+  else if (typedesc_is_float(desc->base_type))
+    for (size_t i = 0; i < desc->size; i++)
+    {
+      LLVMValueRef llvm_index = LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), i, false);
+      LLVMValueRef llvm_value = LLVMBuildExtractElement(ctx->llvm_builder, llvm_vec, llvm_index, "");
+      llvm_value = LLVMBuildFMul(ctx->llvm_builder, llvm_value, llvm_scalar, "");
+      llvm_vec = LLVMBuildInsertElement(ctx->llvm_builder, llvm_vec, llvm_value, llvm_index, "");
+    }
+  else
+    UNREACHABLE();
+
+  return llvm_vec;
+}
+
 LLVMValueRef codegen_build_vector_eq(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs)
 {
   LLVMValueRef llvm_vec_value = NULL;

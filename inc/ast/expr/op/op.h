@@ -99,6 +99,10 @@ typedef enum op_subkind_t
   OP_ARIT_SUB_FLOAT, ///< Arithmetic float subtraction
   OP_ARIT_SUB_COMPLEX, ///< Arithmetic complex subtraction
   OP_ARIT_SUB_VECTOR, ///< Arithmetic vector subtraction
+  OP_ARIT_MUL_INTEGER, ///< Arithmetic integer multiplication
+  OP_ARIT_MUL_FLOAT, ///< Arithmetic float multiplication
+  OP_ARIT_MUL_COMPLEX, ///< Arithmetic complex multiplication
+  OP_ARIT_MUL_VECTOR, ///< Arithmetic vector-scalar multiplication
   OP_CMP_EQ_INTEGER, ///< Integer equality comparison
   OP_CMP_EQ_FLOAT, ///< Float equality comparison
   OP_CMP_EQ_COMPLEX, ///< Complex equality comparison

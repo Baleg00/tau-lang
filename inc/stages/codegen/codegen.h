@@ -232,6 +232,17 @@ LLVMValueRef codegen_build_vector_add(codegen_ctx_t* ctx, typedesc_vec_t* desc, 
 LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
 
 /**
+ * \brief Builds an LLVM instruction to multiply a vector by a scalar.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] desc Pointer to the type descriptor of the vectors.
+ * \param[in] llvm_vec The LLVM value reference of the vector.
+ * \param[in] llvm_scalar The LLVM value reference of the scalar.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_vector_mul(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_scalar);
+
+/**
  * \brief Builds an LLVM instruction to compare two vectors for equality.
  *
  * \param[in] ctx Pointer to the code generation context to be used.
