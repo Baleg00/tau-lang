@@ -115,6 +115,7 @@
 #include "ast/stmt/while.h"
 #include "ast/type/fun.h"
 #include "ast/type/id.h"
+#include "ast/type/mat.h"
 #include "ast/type/mbr.h"
 #include "ast/type/modif/array.h"
 #include "ast/type/modif/modif.h"
