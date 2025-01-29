@@ -20,6 +20,22 @@ static void parser_skip_newlines(parser_t* par)
   }
 }
 
+static ast_node_t* parser_cstr_to_prim(const char* cstr)
+{
+  if (strncmp(cstr, "i8" , 2) == 0) return (ast_node_t*)ast_type_prim_i8_init();
+  if (strncmp(cstr, "u8" , 2) == 0) return (ast_node_t*)ast_type_prim_u8_init();
+  if (strncmp(cstr, "i16", 3) == 0) return (ast_node_t*)ast_type_prim_i16_init();
+  if (strncmp(cstr, "u16", 3) == 0) return (ast_node_t*)ast_type_prim_u16_init();
+  if (strncmp(cstr, "i32", 3) == 0) return (ast_node_t*)ast_type_prim_i32_init();
+  if (strncmp(cstr, "u32", 3) == 0) return (ast_node_t*)ast_type_prim_u32_init();
+  if (strncmp(cstr, "i64", 3) == 0) return (ast_node_t*)ast_type_prim_i64_init();
+  if (strncmp(cstr, "u64", 3) == 0) return (ast_node_t*)ast_type_prim_u64_init();
+  if (strncmp(cstr, "f32", 3) == 0) return (ast_node_t*)ast_type_prim_f32_init();
+  if (strncmp(cstr, "f64", 3) == 0) return (ast_node_t*)ast_type_prim_f64_init();
+
+  UNREACHABLE();
+}
+
 parser_t* parser_init(void)
 {
   parser_t* par = (parser_t*)malloc(sizeof(parser_t));
@@ -309,18 +325,46 @@ ast_node_t* parser_parse_type_vec(parser_t* par)
 
   node->size = size;
 
-       if (strncmp(size_end, "i8" , 2) == 0) node->base_type = (ast_node_t*)ast_type_prim_i8_init();
-  else if (strncmp(size_end, "u8" , 2) == 0) node->base_type = (ast_node_t*)ast_type_prim_u8_init();
-  else if (strncmp(size_end, "i16", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_i16_init();
-  else if (strncmp(size_end, "u16", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_u16_init();
-  else if (strncmp(size_end, "i32", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_i32_init();
-  else if (strncmp(size_end, "u32", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_u32_init();
-  else if (strncmp(size_end, "i64", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_i64_init();
-  else if (strncmp(size_end, "u64", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_u64_init();
-  else if (strncmp(size_end, "f32", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_f32_init();
-  else if (strncmp(size_end, "f64", 3) == 0) node->base_type = (ast_node_t*)ast_type_prim_f64_init();
-  else UNREACHABLE();
+  node->base_type = parser_cstr_to_prim(size_end);
+  node->base_type->tok = node->tok;
 
+  return (ast_node_t*)node;
+}
+
+ast_node_t* parser_parse_type_mat(parser_t* par)
+{
+  ast_type_mat_t* node = ast_type_mat_init();
+  node->tok = parser_next(par);
+
+  string_view_t tok_view = token_to_string_view(node->tok);
+  const char* tok_cstr = string_view_begin(tok_view);
+
+  const char* rows_end = NULL;
+  size_t rows = strtoull(tok_cstr + 3, &rows_end, 10);
+
+  ASSERT(errno != ERANGE);
+  ASSERT(rows > 0);
+
+  node->rows = rows;
+
+  const char* size_end = rows_end;
+
+  if (*rows_end == 'x')
+  {
+    const char* cols_end = NULL;
+    size_t cols = strtoull(rows_end + 1, &cols_end, 10);
+
+    ASSERT(errno != ERANGE);
+    ASSERT(cols > 0);
+
+    node->cols = cols;
+
+    size_end = cols_end;
+  }
+  else
+    node->cols = rows;
+
+  node->base_type = parser_cstr_to_prim(size_end);
   node->base_type->tok = node->tok;
 
   return (ast_node_t*)node;
@@ -358,6 +402,7 @@ ast_node_t* parser_parse_type(parser_t* par)
   case TOK_PUNCT_QUESTION:     return parser_parse_type_opt     (par);
   case TOK_KW_FUN:             return parser_parse_type_fun     (par);
   case TOK_KW_VEC:             return parser_parse_type_vec     (par);
+  case TOK_KW_MAT:             return parser_parse_type_mat     (par);
   case TOK_KW_I8:
     node = (ast_node_t*)ast_type_prim_i8_init();
     node->tok = parser_expect(par, TOK_KW_I8);
