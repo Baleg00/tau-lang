@@ -36,15 +36,16 @@ void ast_expr_lit_vec_nameres(nameres_ctx_t* ctx, ast_expr_lit_vec_t* node)
 
 void ast_expr_lit_vec_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_vec_t* node)
 {
+  VECTOR_FOR_LOOP(i, node->values)
+    ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->values, i));
+
   typedesc_t* base_desc = NULL;
 
   VECTOR_FOR_LOOP(i, node->values)
   {
     ast_node_t* value_node = (ast_node_t*)vector_get(node->values, i);
 
-    ast_node_typecheck(ctx, value_node);
-
-    typedesc_t* value_desc = typetable_lookup(ctx->typetable, value_node);
+    typedesc_t* value_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, value_node));
 
     if (!typedesc_is_integer(value_desc) && !typedesc_is_float(value_desc))
     {
@@ -74,21 +75,31 @@ void ast_expr_lit_vec_codegen(codegen_ctx_t* ctx, ast_expr_lit_vec_t* node)
 
   LLVMValueRef* llvm_values = (LLVMValueRef*)malloc(vector_size(node->values) * sizeof(LLVMValueRef));
 
-  VECTOR_FOR_LOOP(i, node->values)
-  {
-    ast_expr_t* value_node = (ast_expr_t*)vector_get(node->values, i);
-
-    typedesc_t* value_desc = typetable_lookup(ctx->typetable, (ast_node_t*)value_node);
-
-    LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, value_node);
-    llvm_value = codegen_build_arithmetic_cast(ctx, llvm_value, typedesc_remove_ref_mut(value_desc), desc->base_type);
-
-    llvm_values[i] = llvm_value;
-  }
+  if (typedesc_is_integer(desc->base_type))
+    VECTOR_FOR_LOOP(i, node->values)
+      llvm_values[i] = LLVMConstInt(desc->base_type->llvm_type, 0, false);
+  else if (typedesc_is_float(desc->base_type))
+    VECTOR_FOR_LOOP(i, node->values)
+      llvm_values[i] = LLVMConstReal(desc->base_type->llvm_type, 0.0);
+  else
+    UNREACHABLE();
 
   node->llvm_value = LLVMConstVector(llvm_values, (uint32_t)vector_size(node->values));
 
   free(llvm_values);
+
+  VECTOR_FOR_LOOP(i, node->values)
+  {
+    ast_expr_t* value_node = (ast_expr_t*)vector_get(node->values, i);
+    typedesc_t* value_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, (ast_node_t*)value_node));
+
+    LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, value_node);
+    llvm_value = codegen_build_arithmetic_cast(ctx, llvm_value, value_desc, desc->base_type);
+
+    LLVMValueRef llvm_index = LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), i, false);
+
+    node->llvm_value = LLVMBuildInsertElement(ctx->llvm_builder, node->llvm_value, llvm_value, llvm_index, "");
+  }
 }
 
 void ast_expr_lit_vec_dump_json(FILE* stream, ast_expr_lit_vec_t* node)
