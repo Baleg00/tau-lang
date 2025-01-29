@@ -19,6 +19,7 @@ void typedesc_free(typedesc_t* desc)
   case TYPEDESC_REF:    typedesc_ref_free   ((typedesc_ref_t*   )desc); break;
   case TYPEDESC_OPT:    typedesc_opt_free   ((typedesc_opt_t*   )desc); break;
   case TYPEDESC_VEC:    typedesc_vec_free   ((typedesc_vec_t*   )desc); break;
+  case TYPEDESC_MAT:    typedesc_mat_free   ((typedesc_mat_t*   )desc); break;
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -66,6 +67,7 @@ bool typedesc_is_builtin(typedesc_t* desc)
   switch (desc->kind)
   {
   case TYPEDESC_VEC:
+  case TYPEDESC_MAT:
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -136,6 +138,11 @@ bool typedesc_is_complex(typedesc_t* desc)
 bool typedesc_is_vector(typedesc_t* desc)
 {
   return desc->kind == TYPEDESC_VEC;
+}
+
+bool typedesc_is_matrix(typedesc_t* desc)
+{
+  return desc->kind == TYPEDESC_MAT;
 }
 
 bool typedesc_is_arithmetic(typedesc_t* desc)
@@ -380,6 +387,7 @@ bool typedesc_is_implicitly_direct_convertible(typedesc_t* src_desc, typedesc_t*
   case TYPEDESC_REF:    return typedesc_ref_is_implicitly_direct_convertible   ((typedesc_ref_t*   )src_desc, dst_desc);
   case TYPEDESC_OPT:    return typedesc_opt_is_implicitly_direct_convertible   ((typedesc_opt_t*   )src_desc, dst_desc);
   case TYPEDESC_VEC:    return typedesc_vec_is_implicitly_direct_convertible   ((typedesc_vec_t*   )src_desc, dst_desc);
+  case TYPEDESC_MAT:    return typedesc_mat_is_implicitly_direct_convertible   ((typedesc_mat_t*   )src_desc, dst_desc);
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -418,6 +426,7 @@ bool typedesc_is_implicitly_indirect_convertible(typedesc_t* src_desc, typedesc_
   case TYPEDESC_REF:    return typedesc_ref_is_implicitly_indirect_convertible   ((typedesc_ref_t*   )src_desc, dst_desc);
   case TYPEDESC_OPT:    return typedesc_opt_is_implicitly_indirect_convertible   ((typedesc_opt_t*   )src_desc, dst_desc);
   case TYPEDESC_VEC:    return typedesc_vec_is_implicitly_indirect_convertible   ((typedesc_vec_t*   )src_desc, dst_desc);
+  case TYPEDESC_MAT:    return typedesc_mat_is_implicitly_indirect_convertible   ((typedesc_mat_t*   )src_desc, dst_desc);
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:
@@ -456,6 +465,7 @@ bool typedesc_is_explicitly_convertible(typedesc_t* src_desc, typedesc_t* dst_de
   case TYPEDESC_REF:    return typedesc_ref_is_explicitly_convertible   ((typedesc_ref_t*   )src_desc, dst_desc);
   case TYPEDESC_OPT:    return typedesc_opt_is_explicitly_convertible   ((typedesc_opt_t*   )src_desc, dst_desc);
   case TYPEDESC_VEC:    return typedesc_vec_is_explicitly_convertible   ((typedesc_vec_t*   )src_desc, dst_desc);
+  case TYPEDESC_MAT:    return typedesc_mat_is_explicitly_convertible   ((typedesc_mat_t*   )src_desc, dst_desc);
   case TYPEDESC_I8:
   case TYPEDESC_I16:
   case TYPEDESC_I32:

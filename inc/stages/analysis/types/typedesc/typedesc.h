@@ -23,6 +23,7 @@
 #include "stages/analysis/types/typedesc/decl.h"
 #include "stages/analysis/types/typedesc/enum.h"
 #include "stages/analysis/types/typedesc/fun.h"
+#include "stages/analysis/types/typedesc/mat.h"
 #include "stages/analysis/types/typedesc/modif.h"
 #include "stages/analysis/types/typedesc/mut.h"
 #include "stages/analysis/types/typedesc/opt.h"

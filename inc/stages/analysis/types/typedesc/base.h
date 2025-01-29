@@ -38,6 +38,7 @@ typedef enum typedesc_kind_e
   TYPEDESC_REF,    ///< Reference type.
   TYPEDESC_OPT,    ///< Optional type.
   TYPEDESC_VEC,    ///< Vector type.
+  TYPEDESC_MAT,    ///< Matrix type.
   TYPEDESC_I8,     ///< Built-in type `i8`.
   TYPEDESC_I16,    ///< Built-in type `i16`.
   TYPEDESC_I32,    ///< Built-in type `i32`.
@@ -127,6 +128,14 @@ bool typedesc_is_complex(typedesc_t* desc);
  * \returns `true` if the descriptor is a vector type, otherwise `false`.
  */
 bool typedesc_is_vector(typedesc_t* desc);
+
+/**
+ * \brief Checks if the given type descriptor is a matrix type.
+ *
+ * \param[in] desc The type descriptor.
+ * \returns `true` if the descriptor is a matrix type, otherwise `false`.
+ */
+bool typedesc_is_matrix(typedesc_t* desc);
 
 /**
  * \brief Checks if the given type descriptor is an arithmetic type.
