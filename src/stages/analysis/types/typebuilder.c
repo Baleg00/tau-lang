@@ -42,6 +42,7 @@ struct typebuilder_t
   set_t* set_opt;
   set_t* set_fun;
   set_t* set_vec;
+  set_t* set_mat;
   set_t* set_struct;
   set_t* set_union;
   set_t* set_enum;
@@ -126,6 +127,29 @@ static int typebuilder_cmp_vec(const void* lhs, const void* rhs)
 
   uint64_t lhs_hash = hash_digest(&lhs_desc->size, sizeof(size_t));
   uint64_t rhs_hash = hash_digest(&rhs_desc->size, sizeof(size_t));
+
+  lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->base_type, sizeof(typedesc_t*));
+  rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->base_type, sizeof(typedesc_t*));
+
+  if (lhs_hash < rhs_hash)
+    return -1;
+
+  if (lhs_hash > rhs_hash)
+    return 1;
+
+  return 0;
+}
+
+static int typebuilder_cmp_mat(const void* lhs, const void* rhs)
+{
+  typedesc_mat_t* lhs_desc = (typedesc_mat_t*)lhs;
+  typedesc_mat_t* rhs_desc = (typedesc_mat_t*)rhs;
+
+  uint64_t lhs_hash = hash_digest(&lhs_desc->rows, sizeof(size_t));
+  uint64_t rhs_hash = hash_digest(&rhs_desc->rows, sizeof(size_t));
+
+  lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->cols, sizeof(size_t));
+  rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->cols, sizeof(size_t));
 
   lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->base_type, sizeof(typedesc_t*));
   rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->base_type, sizeof(typedesc_t*));
@@ -287,6 +311,7 @@ typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef l
   builder->set_opt    = set_init(typebuilder_cmp_opt   );
   builder->set_fun    = set_init(typebuilder_cmp_fun   );
   builder->set_vec    = set_init(typebuilder_cmp_vec   );
+  builder->set_mat    = set_init(typebuilder_cmp_mat   );
   builder->set_struct = set_init(typebuilder_cmp_struct);
   builder->set_union  = set_init(typebuilder_cmp_union );
   builder->set_enum   = set_init(typebuilder_cmp_enum  );
@@ -323,6 +348,7 @@ void typebuilder_free(typebuilder_t* builder)
   set_for_each(builder->set_opt,    (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_fun,    (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_vec,    (set_for_each_func_t)typedesc_free);
+  set_for_each(builder->set_mat,    (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_struct, (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_union,  (set_for_each_func_t)typedesc_free);
   set_for_each(builder->set_enum,   (set_for_each_func_t)typedesc_free);
@@ -335,6 +361,7 @@ void typebuilder_free(typebuilder_t* builder)
   set_free(builder->set_opt);
   set_free(builder->set_fun);
   set_free(builder->set_vec);
+  set_free(builder->set_mat);
   set_free(builder->set_struct);
   set_free(builder->set_union);
   set_free(builder->set_enum);
@@ -473,6 +500,30 @@ typedesc_t* typebuilder_build_vec(typebuilder_t* builder, size_t size, typedesc_
   desc->llvm_type = LLVMVectorType(base_type->llvm_type, (uint32_t)size);
 
   set_add(builder->set_vec, desc);
+
+  return (typedesc_t*)desc;
+}
+
+typedesc_t* typebuilder_build_mat(typebuilder_t* builder, size_t rows, size_t cols, typedesc_t* base_type)
+{
+  ASSERT(typedesc_is_integer(base_type) || typedesc_is_float(base_type));
+
+  typedesc_mat_t* desc = typedesc_mat_init();
+  desc->rows = rows;
+  desc->cols = cols;
+  desc->base_type = base_type;
+
+  typedesc_t* result = (typedesc_t*)set_get(builder->set_mat, desc);
+
+  if (result != NULL)
+  {
+    typedesc_free((typedesc_t*)desc);
+    return result;
+  }
+
+  desc->llvm_type = LLVMVectorType(base_type->llvm_type, (uint32_t)(rows * cols));
+
+  set_add(builder->set_mat, desc);
 
   return (typedesc_t*)desc;
 }

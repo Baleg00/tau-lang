@@ -106,6 +106,17 @@ typedesc_t* typebuilder_build_opt(typebuilder_t* builder, typedesc_t* base_type)
 typedesc_t* typebuilder_build_vec(typebuilder_t* builder, size_t size, typedesc_t* base_type);
 
 /**
+ * \brief Builds a matrix type.
+ *
+ * \param[in] builder Pointer to the type builder.
+ * \param[in] rows The number of rows in the matrix.
+ * \param[in] cols The number of columns in the matrix.
+ * \param[in] base_type The base type of the matrix.
+ * \returns A pointer to the newly created matrix type descriptor.
+ */
+typedesc_t* typebuilder_build_mat(typebuilder_t* builder, size_t rows, size_t cols, typedesc_t* base_type);
+
+/**
  * \brief Builds a signed 8-bit integer type.
  *
  * \param[in] builder Pointer to the type builder.
