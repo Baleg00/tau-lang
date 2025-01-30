@@ -97,6 +97,17 @@ LLVMValueRef codegen_build_arithmetic_cast(codegen_ctx_t* ctx, LLVMValueRef llvm
 LLVMValueRef codegen_build_vector_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc);
 
 /**
+ * \brief Builds an LLVM cast instruction to perform a matrix cast.
+ *
+ * \param[in] ctx Pointer to the code generation context.
+ * \param[in] llvm_value The LLVM value reference.
+ * \param[in] src_desc Pointer to the source type descriptor.
+ * \param[in] dst_desc Pointer to the target type descriptor.
+ * \returns The result of the cast instruction.
+ */
+LLVMValueRef codegen_build_matrix_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc);
+
+/**
  * \brief Builds an LLVM instruction to wrap a value into an optional.
  *
  * \param[in] ctx Pointer to the code generation context.
