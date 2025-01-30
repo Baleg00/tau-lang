@@ -853,3 +853,20 @@ LLVMValueRef codegen_build_matrix_add(codegen_ctx_t* ctx, typedesc_t* desc, LLVM
 
   return NULL;
 }
+
+LLVMValueRef codegen_build_matrix_sub(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs)
+{
+  ASSERT(desc->kind == TYPEDESC_MAT);
+
+  typedesc_mat_t* mat_desc = (typedesc_mat_t*)desc;
+
+  if (typedesc_is_integer(mat_desc->base_type))
+    return LLVMBuildSub(ctx->llvm_builder, llvm_lhs, llvm_rhs, "");
+
+  if (typedesc_is_float(mat_desc->base_type))
+    return LLVMBuildFSub(ctx->llvm_builder, llvm_lhs, llvm_rhs, "");
+
+  UNREACHABLE();
+
+  return NULL;
+}
