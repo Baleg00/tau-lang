@@ -95,6 +95,7 @@ typedef enum op_subkind_t
   OP_ARIT_ADD_FLOAT, ///< Arithmetic float addition
   OP_ARIT_ADD_COMPLEX, ///< Arithmetic complex addition
   OP_ARIT_ADD_VECTOR, ///< Arithmetic vector addition
+  OP_ARIT_ADD_MATRIX, ///< Arithmetic matrix addition
   OP_ARIT_SUB_INTEGER, ///< Arithmetic integer subtraction
   OP_ARIT_SUB_FLOAT, ///< Arithmetic float subtraction
   OP_ARIT_SUB_COMPLEX, ///< Arithmetic complex subtraction

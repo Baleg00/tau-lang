@@ -64,6 +64,7 @@ typedef enum error_kind_t
   ERROR_TYPECHECK_EXPECTED_ARRAY,
   ERROR_TYPECHECK_EXPECTED_REFERENCE,
   ERROR_TYPECHECK_EXPECTED_VECTOR,
+  ERROR_TYPECHECK_EXPECTED_MATRIX,
   ERROR_TYPECHECK_EXPECTED_INTEGER_OR_FLOAT,
   ERROR_TYPECHECK_INCOMPATIBLE_RETURN_TYPE,
   ERROR_TYPECHECK_TOO_MANY_FUNCTION_PARAMETERS,
@@ -73,6 +74,7 @@ typedef enum error_kind_t
   ERROR_TYPECHECK_ILLEGAL_CONVERSION,
   ERROR_TYPECHECK_INTEGER_LITERAL_TOO_LARGE,
   ERROR_TYPECHECK_INCOMPATIBLE_VECTOR_DIMENSIONS,
+  ERROR_TYPECHECK_INCOMPATIBLE_MATRIX_DIMENSIONS,
 
   ERROR_CTRLFLOW_BREAK_OUTSIDE_LOOP,
   ERROR_CTRLFLOW_CONTINUE_OUTSIDE_LOOP,
@@ -129,6 +131,7 @@ typedef struct error_t
       expected_array,
       expected_reference,
       expected_vector,
+      expected_matrix,
       incompatible_return_type,
       too_many_function_parameters,
       too_few_function_parameters,
@@ -137,6 +140,7 @@ typedef struct error_t
       illegal_conversion,
       integer_literal_too_large,
       incompatible_vector_dimensions,
+      incompatible_matrix_dimensions,
       expected_integer_or_float,
       break_outside_loop,
       continue_outside_loop,
@@ -543,6 +547,14 @@ void error_bag_put_typecheck_expected_vector(error_bag_t* bag, location_t loc);
  * \param[in] bag Pointer to the bag to be used.
  * \param[in] loc The location of the error.
  */
+void error_bag_put_typecheck_expected_matrix(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
 void error_bag_put_typecheck_incompatible_return_type(error_bag_t* bag, location_t loc);
 
 /**
@@ -600,6 +612,14 @@ void error_bag_put_typecheck_integer_literal_too_large(error_bag_t* bag, locatio
  * \param[in] loc The location of the error.
  */
 void error_bag_put_typecheck_incompatible_vector_dimensions(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_incompatible_matrix_dimensions(error_bag_t* bag, location_t loc);
 
 /**
  * \brief Adds a specific error to the error bag.

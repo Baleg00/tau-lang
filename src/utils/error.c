@@ -271,6 +271,11 @@ static void error_print_typecheck_expected_vector(error_t error)
   error_print_helper_snippet(error.expected_vector.loc, "Expected a vector.");
 }
 
+static void error_print_typecheck_expected_matrix(error_t error)
+{
+  error_print_helper_snippet(error.expected_matrix.loc, "Expected a matrix.");
+}
+
 static void error_print_typecheck_expected_integer_or_float(error_t error)
 {
   error_print_helper_snippet(error.expected_integer_or_float.loc, "Expected integer or float.");
@@ -314,6 +319,11 @@ static void error_print_typecheck_integer_literal_too_large(error_t error)
 static void error_print_typecheck_incompatible_vector_dimensions(error_t error)
 {
   error_print_helper_snippet(error.incompatible_vector_dimensions.loc, "Incompatible vector dimensions.");
+}
+
+static void error_print_typecheck_incompatible_matrix_dimensions(error_t error)
+{
+  error_print_helper_snippet(error.incompatible_matrix_dimensions.loc, "Incompatible matrix dimensions.");
 }
 
 static void error_print_ctrlflow_break_outside_loop(error_t error)
@@ -371,6 +381,7 @@ void error_print(error_t error)
   case ERROR_TYPECHECK_EXPECTED_ARRAY:                 error_print_typecheck_expected_array                (error); break;
   case ERROR_TYPECHECK_EXPECTED_REFERENCE:             error_print_typecheck_expected_reference            (error); break;
   case ERROR_TYPECHECK_EXPECTED_VECTOR:                error_print_typecheck_expected_vector               (error); break;
+  case ERROR_TYPECHECK_EXPECTED_MATRIX:                error_print_typecheck_expected_matrix               (error); break;
   case ERROR_TYPECHECK_EXPECTED_INTEGER_OR_FLOAT:      error_print_typecheck_expected_integer_or_float     (error); break;
   case ERROR_TYPECHECK_INCOMPATIBLE_RETURN_TYPE:       error_print_typecheck_incompatible_return_type      (error); break;
   case ERROR_TYPECHECK_TOO_MANY_FUNCTION_PARAMETERS:   error_print_typecheck_too_many_function_parameters  (error); break;
@@ -380,6 +391,7 @@ void error_print(error_t error)
   case ERROR_TYPECHECK_ILLEGAL_CONVERSION:             error_print_typecheck_illegal_conversion            (error); break;
   case ERROR_TYPECHECK_INTEGER_LITERAL_TOO_LARGE:      error_print_typecheck_integer_literal_too_large     (error); break;
   case ERROR_TYPECHECK_INCOMPATIBLE_VECTOR_DIMENSIONS: error_print_typecheck_incompatible_vector_dimensions(error); break;
+  case ERROR_TYPECHECK_INCOMPATIBLE_MATRIX_DIMENSIONS: error_print_typecheck_incompatible_matrix_dimensions(error); break;
   case ERROR_CTRLFLOW_BREAK_OUTSIDE_LOOP:              error_print_ctrlflow_break_outside_loop             (error); break;
   case ERROR_CTRLFLOW_CONTINUE_OUTSIDE_LOOP:           error_print_ctrlflow_continue_outside_loop          (error); break;
   case ERROR_CTRLFLOW_RETURN_INSIDE_DEFER:             error_print_ctrlflow_return_inside_defer            (error); break;
@@ -823,6 +835,16 @@ void error_bag_put_typecheck_expected_vector(error_bag_t* bag, location_t loc)
   });
 }
 
+void error_bag_put_typecheck_expected_matrix(error_bag_t* bag, location_t loc)
+{
+  error_bag_put(bag, (error_t){
+    .kind = ERROR_TYPECHECK_EXPECTED_MATRIX,
+    .expected_matrix = {
+      .loc = loc
+    }
+  });
+}
+
 void error_bag_put_typecheck_incompatible_return_type(error_bag_t* bag, location_t loc)
 {
   error_bag_put(bag, (error_t){
@@ -898,6 +920,16 @@ void error_bag_put_typecheck_incompatible_vector_dimensions(error_bag_t* bag, lo
   error_bag_put(bag, (error_t){
     .kind = ERROR_TYPECHECK_INCOMPATIBLE_VECTOR_DIMENSIONS,
     .incompatible_vector_dimensions = {
+      .loc = loc
+    }
+  });
+}
+
+void error_bag_put_typecheck_incompatible_matrix_dimensions(error_bag_t* bag, location_t loc)
+{
+  error_bag_put(bag, (error_t){
+    .kind = ERROR_TYPECHECK_INCOMPATIBLE_MATRIX_DIMENSIONS,
+    .incompatible_matrix_dimensions = {
       .loc = loc
     }
   });
