@@ -38,6 +38,7 @@
 #include "ast/expr/lit/flt.h"
 #include "ast/expr/lit/int.h"
 #include "ast/expr/lit/lit.h"
+#include "ast/expr/lit/mat.h"
 #include "ast/expr/lit/null.h"
 #include "ast/expr/lit/str.h"
 #include "ast/expr/lit/vec.h"
