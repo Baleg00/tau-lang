@@ -45,6 +45,7 @@ typedef enum error_kind_t
   ERROR_PARSER_MISSING_UNARY_ARGUMENT,
   ERROR_PARSER_MISSING_BINARY_ARGUMENT,
   ERROR_PARSER_MISSING_CALLEE,
+  ERROR_PARSER_INCONSISTENT_MATRIX_DIMENSIONS,
 
   ERROR_NAMERES_SYMBOL_COLLISION,
   ERROR_NAMERES_UNDEFINED_SYMBOL,
@@ -109,6 +110,7 @@ typedef struct error_t
       missing_unary_argument,
       missing_binary_argument,
       missing_callee,
+      inconsistent_matrix_dimensions,
       ill_formed_integer,
       ill_formed_float,
       invalid_integer_suffix,
@@ -396,6 +398,14 @@ void error_bag_put_parser_missing_callee(error_bag_t* bag, location_t loc);
  * \param[in] loc The location of the error.
  */
 void error_bag_put_parser_missing_binary_argument(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_parser_inconsistent_matrix_dimensions(error_bag_t* bag, location_t loc);
 
 /**
  * \brief Adds a specific error to the error bag.

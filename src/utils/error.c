@@ -168,6 +168,11 @@ static void error_print_parser_missing_callee(error_t error)
   error_print_helper_snippet(error.missing_callee.loc, "Missing callee.");
 }
 
+static void error_print_parser_inconsistent_matrix_dimensions(error_t error)
+{
+  error_print_helper_snippet(error.inconsistent_matrix_dimensions.loc, "Inconsistent matrix dimensions.");
+}
+
 static void error_print_nameres_symbol_collision(error_t error)
 {
   location_t new_symbol_loc = error.symbol_collision.new_symbol_loc;
@@ -351,6 +356,7 @@ void error_print(error_t error)
   case ERROR_PARSER_MISSING_UNARY_ARGUMENT:            error_print_parser_missing_unary_argument           (error); break;
   case ERROR_PARSER_MISSING_BINARY_ARGUMENT:           error_print_parser_missing_binary_argument          (error); break;
   case ERROR_PARSER_MISSING_CALLEE:                    error_print_parser_missing_callee                   (error); break;
+  case ERROR_PARSER_INCONSISTENT_MATRIX_DIMENSIONS:    error_print_parser_inconsistent_matrix_dimensions   (error); break;
   case ERROR_NAMERES_SYMBOL_COLLISION:                 error_print_nameres_symbol_collision                (error); break;
   case ERROR_NAMERES_UNDEFINED_SYMBOL:                 error_print_nameres_undefined_symbol                (error); break;
   case ERROR_NAMERES_EXPECTED_EXPRESSION_SYMBOL:       error_print_nameres_expected_expression_symbol      (error); break;
@@ -640,6 +646,16 @@ void error_bag_put_parser_missing_binary_argument(error_bag_t* bag, location_t l
   error_bag_put(bag, (error_t){
     .kind = ERROR_PARSER_MISSING_BINARY_ARGUMENT,
     .missing_binary_argument = {
+      .loc = loc
+    }
+  });
+}
+
+void error_bag_put_parser_inconsistent_matrix_dimensions(error_bag_t* bag, location_t loc)
+{
+  error_bag_put(bag, (error_t){
+    .kind = ERROR_PARSER_INCONSISTENT_MATRIX_DIMENSIONS,
+    .inconsistent_matrix_dimensions = {
       .loc = loc
     }
   });

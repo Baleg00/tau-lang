@@ -279,24 +279,77 @@ bool shyd_parse_punct_bracket_right(shyd_ctx_t* ctx)
   return true;
 }
 
-bool shyd_parse_lit_vec(shyd_ctx_t* ctx)
+bool shyd_parse_lit_vec_or_mat(shyd_ctx_t* ctx)
 {
   if (ctx->prev_term)
     return false;
 
-  ast_expr_lit_vec_t* node = ast_expr_lit_vec_init();
-  node->tok = parser_current(ctx->par);
+  token_t* token = parser_current(ctx->par);
+
+  vector_t* values = vector_init();
+
+  bool is_matrix = false;
+  size_t cols = 0;
+  size_t last_cols = 0;
 
   parser_expect(ctx->par, TOK_PUNCT_BRACKET_ANGLE_LEFT);
 
-  parser_parse_delimited_list(ctx->par, node->values, TOK_PUNCT_COMMA, parser_parse_expr);
+  for (;;)
+  {
+    vector_push(values, parser_parse_expr(ctx->par));
+
+    if (is_matrix)
+      last_cols++;
+    else
+      cols++;
+
+    if (!parser_consume(ctx->par, TOK_PUNCT_COMMA))
+    {
+      if (parser_consume(ctx->par, TOK_PUNCT_SEMICOLON))
+      {
+        if (!is_matrix)
+          is_matrix = true;
+        else if (last_cols != cols)
+          error_bag_put_parser_inconsistent_matrix_dimensions(ctx->par->errors, token_location(token));
+
+        last_cols = 0;
+      }
+      else
+        break;
+    }
+  }
+
+  if (is_matrix && last_cols != cols)
+    error_bag_put_parser_inconsistent_matrix_dimensions(ctx->par->errors, token_location(token));
 
   parser_expect(ctx->par, TOK_PUNCT_BRACKET_ANGLE_RIGHT);
 
-  ASSERT(vector_size(node->values) > 0);
+  ASSERT(vector_size(values) > 0);
 
   shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_TERM);
-  elem->node = (ast_node_t*)node;
+
+  if (is_matrix)
+  {
+    ast_expr_lit_mat_t* mat_node = ast_expr_lit_mat_init();
+    mat_node->tok = token;
+    mat_node->rows = vector_size(values) / cols;
+    mat_node->cols = cols;
+
+    vector_extend(mat_node->values, values);
+
+    elem->node = (ast_node_t*)mat_node;
+  }
+  else
+  {
+    ast_expr_lit_vec_t* vec_node = ast_expr_lit_vec_init();
+    vec_node->tok = token;
+
+    vector_extend(vec_node->values, values);
+
+    elem->node = (ast_node_t*)vec_node;
+  }
+
+  vector_free(values);
 
   queue_offer(ctx->out_queue, elem);
 
@@ -464,7 +517,7 @@ bool shyd_parse_postfix_next(shyd_ctx_t* ctx)
   case TOK_PUNCT_PAREN_RIGHT:         return shyd_parse_punct_paren_right(ctx);
   case TOK_PUNCT_BRACKET_LEFT:        return shyd_parse_punct_bracket_left(ctx);
   case TOK_PUNCT_BRACKET_RIGHT:       return shyd_parse_punct_bracket_right(ctx);
-  case TOK_PUNCT_BRACKET_ANGLE_LEFT:  return shyd_parse_lit_vec(ctx);
+  case TOK_PUNCT_BRACKET_ANGLE_LEFT:  return shyd_parse_lit_vec_or_mat(ctx);
   default: NOOP();
   }
 

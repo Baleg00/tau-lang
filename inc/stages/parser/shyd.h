@@ -153,6 +153,14 @@ bool shyd_parse_punct_bracket_left(shyd_ctx_t* ctx);
 bool shyd_parse_punct_bracket_right(shyd_ctx_t* ctx);
 
 /**
+ * \brief Parses a literal vector or matrix expression.
+ *
+ * \param[in] ctx Pointer to the shunting yard context to be used.
+ * \return `true` if a literal was parsed successfully, `false` otherwise.
+ */
+bool shyd_parse_lit_vec_or_mat(shyd_ctx_t* ctx);
+
+/**
  * \brief Parses a call operation expression.
  * 
  * \param[in] ctx Pointer to the shunting yard context to be used.
