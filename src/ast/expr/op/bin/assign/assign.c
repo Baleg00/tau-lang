@@ -64,7 +64,9 @@ void ast_expr_op_bin_assign_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_assign_t
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
+
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
 
   LLVMBuildStore(ctx->llvm_builder, llvm_rhs_value, ((ast_expr_t*)node->lhs)->llvm_value);
   node->llvm_value = ((ast_expr_t*)node->lhs)->llvm_value;

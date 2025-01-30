@@ -64,11 +64,11 @@ void ast_expr_op_bin_subs_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_subs_t* no
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
+  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
 
-  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->rhs)->llvm_value, lhs_desc);
 
   LLVMValueRef llvm_ptr_value = ((ast_expr_t*)node->lhs)->llvm_value;
-  LLVMTypeRef llvm_base_type = ((typedesc_array_t*)lhs_desc)->base_type->llvm_type;
+  LLVMTypeRef llvm_base_type = ((typedesc_array_t*)typedesc_remove_ref_mut(lhs_desc))->base_type->llvm_type;
   node->llvm_value = LLVMBuildGEP2(ctx->llvm_builder, llvm_base_type, llvm_ptr_value, &llvm_rhs_value, 1, "");
 }

@@ -75,14 +75,14 @@ static void ast_expr_op_bin_arit_mul_typecheck_vector(typecheck_ctx_t* ctx, ast_
 
 static void ast_expr_op_bin_arit_mul_codegen_scalar(codegen_ctx_t* ctx, ast_expr_op_bin_arit_mul_t* node, typedesc_t* desc)
 {
-  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
-  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
+  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
 
-  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
-  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
 
-  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, desc);
-  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, desc);
+  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, typedesc_remove_ref_mut(lhs_desc), desc);
+  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, typedesc_remove_ref_mut(rhs_desc), desc);
 
   switch (node->op_subkind)
   {
@@ -95,31 +95,44 @@ static void ast_expr_op_bin_arit_mul_codegen_scalar(codegen_ctx_t* ctx, ast_expr
 
 static void ast_expr_op_bin_arit_mul_codegen_vector(codegen_ctx_t* ctx, ast_expr_op_bin_arit_mul_t* node, typedesc_t* desc)
 {
-  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
-  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
+  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
 
-  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
-  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
 
-  LLVMValueRef llvm_vec_value = llvm_lhs_value;
-  LLVMValueRef llvm_scalar_value = llvm_rhs_value;
+  lhs_desc = typedesc_remove_ref_mut(lhs_desc);
+  rhs_desc = typedesc_remove_ref_mut(rhs_desc);
 
-  typedesc_t* vec_desc = lhs_desc;
-  typedesc_t* scalar_desc = rhs_desc;
+  LLVMValueRef llvm_vec_value = NULL;
+  LLVMValueRef llvm_scalar_value = NULL;
 
-  if (typedesc_is_arithmetic(lhs_desc))
+  typedesc_t* vec_desc = NULL;
+  typedesc_t* scalar_desc = NULL;
+
+  if (typedesc_is_arithmetic(lhs_desc) && typedesc_is_vector(rhs_desc))
   {
-    llvm_vec_value = llvm_rhs_value;
     llvm_scalar_value = llvm_lhs_value;
+    llvm_vec_value = llvm_rhs_value;
 
-    vec_desc = rhs_desc;
     scalar_desc = lhs_desc;
+    vec_desc = rhs_desc;
   }
+  else if (typedesc_is_vector(lhs_desc) && typedesc_is_arithmetic(rhs_desc))
+  {
+    llvm_vec_value = llvm_lhs_value;
+    llvm_scalar_value = llvm_rhs_value;
+
+    vec_desc = lhs_desc;
+    scalar_desc = rhs_desc;
+  }
+  else
+    UNREACHABLE();
 
   llvm_vec_value = codegen_build_vector_cast(ctx, llvm_vec_value, vec_desc, desc);
   llvm_scalar_value = codegen_build_arithmetic_cast(ctx, llvm_scalar_value, scalar_desc, ((typedesc_vec_t*)desc)->base_type);
 
-  node->llvm_value = codegen_build_vector_mul(ctx, (typedesc_vec_t*)desc, llvm_vec_value, llvm_scalar_value);
+  node->llvm_value = codegen_build_vector_mul(ctx, desc, llvm_vec_value, llvm_scalar_value);
 }
 
 ast_expr_op_bin_arit_mul_t* ast_expr_op_bin_arit_mul_init(void)

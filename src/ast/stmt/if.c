@@ -68,7 +68,9 @@ void ast_stmt_if_codegen(codegen_ctx_t* ctx, ast_stmt_if_t* node)
 
   ast_node_codegen(ctx, node->cond);
 
-  LLVMValueRef llvm_cond_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->cond);
+  typedesc_t* cond_desc = typetable_lookup(ctx->typetable, node->cond);
+
+  LLVMValueRef llvm_cond_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->cond)->llvm_value, cond_desc);
 
   LLVMBuildCondBr(ctx->llvm_builder, llvm_cond_value, node->llvm_then, node->stmt_else != NULL ? node->llvm_else : node->llvm_end);
   LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_then);

@@ -56,9 +56,11 @@ void ast_expr_op_un_arit_neg_codegen(codegen_ctx_t* ctx, ast_expr_op_un_arit_neg
 
   ast_expr_t* expr = (ast_expr_t*)node->expr;
 
-  typedesc_t* expr_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->expr));
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
 
-  LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, expr);
+  LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, expr->llvm_value, expr_desc);
+
+  expr_desc = typedesc_remove_ref_mut(expr_desc);
 
   if (typedesc_is_integer(expr_desc))
   {

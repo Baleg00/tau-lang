@@ -56,5 +56,7 @@ void ast_expr_op_un_arit_pos_codegen(codegen_ctx_t* ctx, ast_expr_op_un_arit_pos
 
   ast_expr_t* expr = (ast_expr_t*)node->expr;
 
-  node->llvm_value = codegen_build_load_if_ref(ctx, expr);
+  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
+
+  node->llvm_value = codegen_build_load_if_ref(ctx, expr->llvm_value, expr_desc);
 }

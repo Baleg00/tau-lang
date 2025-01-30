@@ -51,11 +51,14 @@ static void ast_expr_op_bin_cmp_eq_typecheck_vector(typecheck_ctx_t* ctx, ast_ex
 
 static void ast_expr_op_bin_cmp_eq_codegen_scalar(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_eq_t* node)
 {
-  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
-  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
+  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
 
-  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
-  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
+
+  lhs_desc = typedesc_remove_ref_mut(lhs_desc);
+  rhs_desc = typedesc_remove_ref_mut(rhs_desc);
 
   typedesc_t* promoted_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_desc, rhs_desc);
 
@@ -73,17 +76,20 @@ static void ast_expr_op_bin_cmp_eq_codegen_scalar(codegen_ctx_t* ctx, ast_expr_o
 
 static void ast_expr_op_bin_cmp_eq_codegen_vector(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_eq_t* node)
 {
-  typedesc_vec_t* lhs_desc = (typedesc_vec_t*)typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
-  typedesc_vec_t* rhs_desc = (typedesc_vec_t*)typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
+  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
 
-  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
-  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
 
-  typedesc_t* promoted_base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_desc->base_type, rhs_desc->base_type);
-  typedesc_vec_t* promoted_vec_desc = (typedesc_vec_t*)typebuilder_build_vec(ctx->typebuilder, lhs_desc->size, promoted_base_desc);
+  typedesc_vec_t* lhs_vec_desc = (typedesc_vec_t*)typedesc_remove_ref_mut(lhs_desc);
+  typedesc_vec_t* rhs_vec_desc = (typedesc_vec_t*)typedesc_remove_ref_mut(rhs_desc);
 
-  llvm_lhs_value = codegen_build_vector_cast(ctx, llvm_lhs_value, (typedesc_t*)lhs_desc, (typedesc_t*)promoted_vec_desc);
-  llvm_rhs_value = codegen_build_vector_cast(ctx, llvm_rhs_value, (typedesc_t*)rhs_desc, (typedesc_t*)promoted_vec_desc);
+  typedesc_t* promoted_base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_vec_desc->base_type, rhs_vec_desc->base_type);
+  typedesc_t* promoted_vec_desc = typebuilder_build_vec(ctx->typebuilder, lhs_vec_desc->size, promoted_base_desc);
+
+  llvm_lhs_value = codegen_build_vector_cast(ctx, llvm_lhs_value, (typedesc_t*)lhs_vec_desc, promoted_vec_desc);
+  llvm_rhs_value = codegen_build_vector_cast(ctx, llvm_rhs_value, (typedesc_t*)rhs_vec_desc, promoted_vec_desc);
 
   node->llvm_value = codegen_build_vector_eq(ctx, promoted_vec_desc, llvm_lhs_value, llvm_rhs_value);
 }

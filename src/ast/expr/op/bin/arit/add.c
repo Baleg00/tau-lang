@@ -123,23 +123,23 @@ void ast_expr_op_bin_arit_add_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_arit_a
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
-  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->rhs);
+  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
+  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
 
-  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
-  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
+  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
 
   switch (node->op_subkind)
   {
   case OP_ARIT_ADD_INTEGER:
   case OP_ARIT_ADD_FLOAT:
   case OP_ARIT_ADD_COMPLEX:
-    llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, desc);
-    llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, desc);
+    llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, typedesc_remove_ref_mut(lhs_desc), desc);
+    llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, typedesc_remove_ref_mut(rhs_desc), desc);
     break;
   case OP_ARIT_ADD_VECTOR:
-    llvm_lhs_value = codegen_build_vector_cast(ctx, llvm_lhs_value, lhs_desc, desc);
-    llvm_rhs_value = codegen_build_vector_cast(ctx, llvm_rhs_value, rhs_desc, desc);
+    llvm_lhs_value = codegen_build_vector_cast(ctx, llvm_lhs_value, typedesc_remove_ref_mut(lhs_desc), desc);
+    llvm_rhs_value = codegen_build_vector_cast(ctx, llvm_rhs_value, typedesc_remove_ref_mut(rhs_desc), desc);
     break;
   default:
     UNREACHABLE();
@@ -150,7 +150,7 @@ void ast_expr_op_bin_arit_add_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_arit_a
   case OP_ARIT_ADD_INTEGER: node->llvm_value = LLVMBuildAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, ""); break;
   case OP_ARIT_ADD_FLOAT:   node->llvm_value = LLVMBuildFAdd(ctx->llvm_builder, llvm_lhs_value, llvm_rhs_value, ""); break;
   case OP_ARIT_ADD_COMPLEX: node->llvm_value = codegen_build_complex_add(ctx, llvm_lhs_value, llvm_rhs_value); break;
-  case OP_ARIT_ADD_VECTOR:  node->llvm_value = codegen_build_vector_add(ctx, (typedesc_vec_t*)desc, llvm_lhs_value, llvm_rhs_value); break;
+  case OP_ARIT_ADD_VECTOR:  node->llvm_value = codegen_build_vector_add(ctx, desc, llvm_lhs_value, llvm_rhs_value); break;
   default: UNREACHABLE();
   }
 }

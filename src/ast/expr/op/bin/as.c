@@ -53,10 +53,13 @@ void ast_expr_op_bin_as_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_as_t* node)
   typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  typedesc_t* lhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->lhs));
-  typedesc_t* rhs_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->rhs));
+  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
+  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
 
-  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, (ast_expr_t*)node->lhs);
+  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
+
+  lhs_desc = typedesc_remove_ref_mut(lhs_desc);
+  rhs_desc = typedesc_remove_ref_mut(rhs_desc);
 
   if (typedesc_is_arithmetic(lhs_desc) && typedesc_is_arithmetic(rhs_desc))
     node->llvm_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, rhs_desc);

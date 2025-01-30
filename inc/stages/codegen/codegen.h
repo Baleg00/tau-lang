@@ -23,11 +23,6 @@ TAU_EXTERN_C_BEGIN
 typedef struct ast_decl_fun_t ast_decl_fun_t;
 
 /**
- * \see ast/expr/expr.h
- */
-typedef struct ast_expr_t ast_expr_t;
-
-/**
  * \brief Code generation context.
  */
 typedef struct codegen_ctx_t
@@ -65,14 +60,15 @@ codegen_ctx_t* codegen_ctx_init(typebuilder_t* typebuilder, typetable_t* typetab
 void codegen_ctx_free(codegen_ctx_t* ctx);
 
 /**
- * \brief Builds an LLVM `load` instruction if `node` has a reference type.
+ * \brief Builds an LLVM `load` instruction if the value has a reference type.
  *
  * \param[in] ctx Pointer to the code generation context.
- * \param[in] node Pointer to the expression node.
+ * \param[in] llvm_value The LLVM value reference.
+ * \param[in] desc Pointer to the type descriptor of the value.
  * \returns The result of the `load` instruction if `node` has a reference type,
  * otherwise the `llvm_value` of `node`.
  */
-LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, ast_expr_t* node);
+LLVMValueRef codegen_build_load_if_ref(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* desc);
 
 /**
  * \brief Builds an LLVM cast instruction to perform an arithmetic cast.
@@ -116,7 +112,7 @@ LLVMValueRef codegen_build_matrix_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_val
  * \param[in] dst_desc Pointer to the type descriptor of the optional.
  * \returns The wrapped LLVM value reference.
  */
-LLVMValueRef codegen_build_opt_wrap(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_opt_t* dst_desc);
+LLVMValueRef codegen_build_opt_wrap(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* src_desc, typedesc_t* dst_desc);
 
 /**
  * \brief Builds an LLVM instruction to unwrap a value from an optional without
@@ -127,7 +123,7 @@ LLVMValueRef codegen_build_opt_wrap(codegen_ctx_t* ctx, LLVMValueRef llvm_value,
  * \param[in] desc Pointer to the type descriptor of the optional.
  * \returns The unwrapped LLVM value reference.
  */
-LLVMValueRef codegen_build_opt_unwrap_unchecked(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_opt_t* desc);
+LLVMValueRef codegen_build_opt_unwrap_unchecked(codegen_ctx_t* ctx, LLVMValueRef llvm_value, typedesc_t* desc);
 
 /**
  * \brief Builds an LLVM cast instruction to perform an implicit cast.
@@ -229,7 +225,7 @@ LLVMValueRef codegen_build_complex_ne(codegen_ctx_t* ctx, LLVMValueRef llvm_lhs,
  * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
  * \returns The result of the instruction.
  */
-LLVMValueRef codegen_build_vector_add(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+LLVMValueRef codegen_build_vector_add(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
 
 /**
  * \brief Builds an LLVM instruction to subtract two vectors.
@@ -240,7 +236,7 @@ LLVMValueRef codegen_build_vector_add(codegen_ctx_t* ctx, typedesc_vec_t* desc, 
  * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
  * \returns The result of the instruction.
  */
-LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
 
 /**
  * \brief Builds an LLVM instruction to multiply a vector by a scalar.
@@ -251,7 +247,7 @@ LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_vec_t* desc, 
  * \param[in] llvm_scalar The LLVM value reference of the scalar.
  * \returns The result of the instruction.
  */
-LLVMValueRef codegen_build_vector_mul(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_scalar);
+LLVMValueRef codegen_build_vector_mul(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_scalar);
 
 /**
  * \brief Builds an LLVM instruction to compare two vectors for equality.
@@ -262,7 +258,7 @@ LLVMValueRef codegen_build_vector_mul(codegen_ctx_t* ctx, typedesc_vec_t* desc, 
  * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
  * \returns The result of the instruction.
  */
-LLVMValueRef codegen_build_vector_eq(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+LLVMValueRef codegen_build_vector_eq(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
 
 /**
  * \brief Builds an LLVM instruction to compare two vectors for inequality.
@@ -273,7 +269,7 @@ LLVMValueRef codegen_build_vector_eq(codegen_ctx_t* ctx, typedesc_vec_t* desc, L
  * \param[in] llvm_rhs The LLVM value reference of the right-hand argument.
  * \returns The result of the instruction.
  */
-LLVMValueRef codegen_build_vector_ne(codegen_ctx_t* ctx, typedesc_vec_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+LLVMValueRef codegen_build_vector_ne(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
 
 TAU_EXTERN_C_END
 

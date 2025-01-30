@@ -96,17 +96,18 @@ void ast_expr_op_call_codegen(codegen_ctx_t* ctx, ast_expr_op_call_t* node)
       ast_expr_t* param = (ast_expr_t*)vector_get(node->params, i);
       ast_node_codegen(ctx, (ast_node_t*)param);
 
+      typedesc_t* param_desc = typetable_lookup(ctx->typetable, (ast_node_t*)param);
+
       LLVMValueRef llvm_param_value = param->llvm_value;
 
       if (i < vector_size(fun_desc->param_types))
       {
         typedesc_t* expected_param_desc = (typedesc_t*)vector_get(fun_desc->param_types, i);
-        typedesc_t* actual_param_desc = typetable_lookup(ctx->typetable, (ast_node_t*)param);
 
-        llvm_param_value = codegen_build_implicit_cast(ctx, llvm_param_value, actual_param_desc, expected_param_desc);
+        llvm_param_value = codegen_build_implicit_cast(ctx, llvm_param_value, param_desc, expected_param_desc);
       }
       else
-        llvm_param_value = codegen_build_load_if_ref(ctx, param);
+        llvm_param_value = codegen_build_load_if_ref(ctx, param->llvm_value, param_desc);
 
       llvm_param_values[i] = llvm_param_value;
     }

@@ -91,10 +91,10 @@ void ast_expr_lit_vec_codegen(codegen_ctx_t* ctx, ast_expr_lit_vec_t* node)
   VECTOR_FOR_LOOP(i, node->values)
   {
     ast_expr_t* value_node = (ast_expr_t*)vector_get(node->values, i);
-    typedesc_t* value_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, (ast_node_t*)value_node));
+    typedesc_t* value_desc = typetable_lookup(ctx->typetable, (ast_node_t*)value_node);
 
-    LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, value_node);
-    llvm_value = codegen_build_arithmetic_cast(ctx, llvm_value, value_desc, desc->base_type);
+    LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, value_node->llvm_value, value_desc);
+    llvm_value = codegen_build_arithmetic_cast(ctx, llvm_value, typedesc_remove_ref_mut(value_desc), desc->base_type);
 
     LLVMValueRef llvm_index = LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), i, false);
 
