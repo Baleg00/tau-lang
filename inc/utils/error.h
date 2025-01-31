@@ -75,6 +75,7 @@ typedef enum error_kind_t
   ERROR_TYPECHECK_INTEGER_LITERAL_TOO_LARGE,
   ERROR_TYPECHECK_INCOMPATIBLE_VECTOR_DIMENSIONS,
   ERROR_TYPECHECK_INCOMPATIBLE_MATRIX_DIMENSIONS,
+  ERROR_TYPECHECK_INCOMPATIBLE_MATRIX_VECTOR_DIMENSIONS,
 
   ERROR_CTRLFLOW_BREAK_OUTSIDE_LOOP,
   ERROR_CTRLFLOW_CONTINUE_OUTSIDE_LOOP,
@@ -141,6 +142,7 @@ typedef struct error_info_t
       integer_literal_too_large,
       incompatible_vector_dimensions,
       incompatible_matrix_dimensions,
+      incompatible_matrix_vector_dimensions,
       expected_integer_or_float,
       break_outside_loop,
       continue_outside_loop,
@@ -620,6 +622,14 @@ void error_bag_put_typecheck_incompatible_vector_dimensions(error_bag_t* bag, lo
  * \param[in] loc The location of the error.
  */
 void error_bag_put_typecheck_incompatible_matrix_dimensions(error_bag_t* bag, location_t loc);
+
+/**
+ * \brief Adds a specific error to the error bag.
+ *
+ * \param[in] bag Pointer to the bag to be used.
+ * \param[in] loc The location of the error.
+ */
+void error_bag_put_typecheck_incompatible_matrix_vector_dimensions(error_bag_t* bag, location_t loc);
 
 /**
  * \brief Adds a specific error to the error bag.

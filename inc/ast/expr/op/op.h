@@ -106,6 +106,7 @@ typedef enum op_subkind_t
   OP_ARIT_MUL_COMPLEX, ///< Arithmetic complex multiplication
   OP_ARIT_MUL_VECTOR_SCALAR, ///< Arithmetic vector-scalar multiplication
   OP_ARIT_MUL_MATRIX_SCALAR, ///< Arithmetic matrix-scalar multiplication
+  OP_ARIT_MUL_MATRIX_VECTOR, ///< Arithmetic matrix-vector multiplication
   OP_CMP_EQ_INTEGER, ///< Integer equality comparison
   OP_CMP_EQ_FLOAT, ///< Float equality comparison
   OP_CMP_EQ_COMPLEX, ///< Complex equality comparison
