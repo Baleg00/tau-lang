@@ -247,7 +247,7 @@ LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_t* desc, LLVM
  * \param[in] llvm_scalar The LLVM value reference of the scalar.
  * \returns The result of the instruction.
  */
-LLVMValueRef codegen_build_vector_mul(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_scalar);
+LLVMValueRef codegen_build_vector_mul_scalar(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_scalar);
 
 /**
  * \brief Builds an LLVM instruction to compare two vectors for equality.
@@ -292,6 +292,17 @@ LLVMValueRef codegen_build_matrix_add(codegen_ctx_t* ctx, typedesc_t* desc, LLVM
  * \returns The result of the instruction.
  */
 LLVMValueRef codegen_build_matrix_sub(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs);
+
+/**
+ * \brief Builds an LLVM instruction to multiply a matrix by a scalar.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] desc Pointer to the type descriptor of the matrix.
+ * \param[in] llvm_mat The LLVM value reference of the matrix.
+ * \param[in] llvm_scalar The LLVM value reference of the scalar.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_matrix_mul_scalar(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_mat, LLVMValueRef llvm_scalar);
 
 TAU_EXTERN_C_END
 

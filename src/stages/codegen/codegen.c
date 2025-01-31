@@ -753,7 +753,7 @@ LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_t* desc, LLVM
   return NULL;
 }
 
-LLVMValueRef codegen_build_vector_mul(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_scalar)
+LLVMValueRef codegen_build_vector_mul_scalar(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_scalar)
 {
   ASSERT(desc->kind == TYPEDESC_VEC);
 
@@ -869,4 +869,32 @@ LLVMValueRef codegen_build_matrix_sub(codegen_ctx_t* ctx, typedesc_t* desc, LLVM
   UNREACHABLE();
 
   return NULL;
+}
+
+LLVMValueRef codegen_build_matrix_mul_scalar(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_mat, LLVMValueRef llvm_scalar)
+{
+  ASSERT(desc->kind == TYPEDESC_MAT);
+
+  typedesc_mat_t* mat_desc = (typedesc_mat_t*)desc;
+
+  if (typedesc_is_integer(mat_desc->base_type))
+    for (size_t i = 0; i < mat_desc->rows * mat_desc->cols; i++)
+    {
+      LLVMValueRef llvm_index = LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), i, false);
+      LLVMValueRef llvm_value = LLVMBuildExtractElement(ctx->llvm_builder, llvm_mat, llvm_index, "");
+      llvm_value = LLVMBuildMul(ctx->llvm_builder, llvm_value, llvm_scalar, "");
+      llvm_mat = LLVMBuildInsertElement(ctx->llvm_builder, llvm_mat, llvm_value, llvm_index, "");
+    }
+  else if (typedesc_is_float(mat_desc->base_type))
+    for (size_t i = 0; i < mat_desc->rows * mat_desc->cols; i++)
+    {
+      LLVMValueRef llvm_index = LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), i, false);
+      LLVMValueRef llvm_value = LLVMBuildExtractElement(ctx->llvm_builder, llvm_mat, llvm_index, "");
+      llvm_value = LLVMBuildFMul(ctx->llvm_builder, llvm_value, llvm_scalar, "");
+      llvm_mat = LLVMBuildInsertElement(ctx->llvm_builder, llvm_mat, llvm_value, llvm_index, "");
+    }
+  else
+    UNREACHABLE();
+
+  return llvm_mat;
 }
