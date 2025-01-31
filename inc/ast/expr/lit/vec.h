@@ -20,6 +20,7 @@ TAU_EXTERN_C_BEGIN
 typedef struct ast_expr_lit_vec_t
 {
   AST_EXPR_LIT_HEADER;
+  bool is_row;
   vector_t* values;
 } ast_expr_lit_vec_t;
 

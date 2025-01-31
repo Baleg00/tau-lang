@@ -36,7 +36,7 @@ void ast_type_vec_typecheck(typecheck_ctx_t* ctx, ast_type_vec_t* node)
 
   typedesc_t* base_desc = typetable_lookup(ctx->typetable, node->base_type);
 
-  typedesc_t* desc = typebuilder_build_vec(ctx->typebuilder, false, node->size, base_desc);
+  typedesc_t* desc = typebuilder_build_vec(ctx->typebuilder, node->is_row, node->size, base_desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
@@ -51,7 +51,7 @@ void ast_type_vec_codegen(codegen_ctx_t* ctx, ast_type_vec_t* node)
 
 void ast_type_vec_dump_json(FILE* stream, ast_type_vec_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\",\"size\":%zu,\"base_type\":", ast_kind_to_cstr(node->kind), node->size);
+  fprintf(stream, "{\"kind\":\"%s\",\"is_row\":%s,\"size\":%zu,\"base_type\":", ast_kind_to_cstr(node->kind), node->is_row ? "true" : "false", node->size);
   ast_node_dump_json(stream, node->base_type);
   fputc('}', stream);
 }
