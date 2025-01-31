@@ -460,6 +460,7 @@ LLVMValueRef codegen_build_vector_cast(codegen_ctx_t* ctx, LLVMValueRef llvm_val
   typedesc_vec_t* dst_vec_desc = (typedesc_vec_t*)dst_desc;
 
   ASSERT(src_vec_desc->size == dst_vec_desc->size);
+  ASSERT(src_vec_desc->is_row == dst_vec_desc->is_row);
 
   if (typedesc_is_integer(src_vec_desc->base_type))
     return codegen_build_vector_cast_from_integer(ctx, llvm_value, src_vec_desc, dst_vec_desc);
