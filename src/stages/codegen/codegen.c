@@ -782,6 +782,47 @@ LLVMValueRef codegen_build_vector_mul_scalar(codegen_ctx_t* ctx, typedesc_t* des
   return llvm_vec;
 }
 
+LLVMValueRef codegen_build_vector_mul_matrix(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_mat)
+{
+  ASSERT(desc->kind == TYPEDESC_MAT);
+
+  typedesc_mat_t* mat_desc = (typedesc_mat_t*)desc;
+
+  LLVMValueRef* llvm_col_indices = (LLVMValueRef*)malloc(sizeof(LLVMValueRef) * mat_desc->rows);
+
+  LLVMTypeRef llvm_index_type = LLVMInt32TypeInContext(ctx->llvm_ctx);
+  LLVMValueRef llvm_poison_mat = LLVMGetPoison(mat_desc->llvm_type);
+
+  LLVMValueRef llvm_result_vec = LLVMGetUndef(LLVMVectorType(mat_desc->base_type->llvm_type, (uint32_t)mat_desc->cols));
+
+  for (size_t i = 0; i < mat_desc->cols; i++)
+  {
+    for (size_t j = 0; j < mat_desc->rows; j++)
+      llvm_col_indices[j] = LLVMConstInt(llvm_index_type, i + j * mat_desc->cols, false);
+
+    LLVMValueRef llvm_index_vec = LLVMConstVector(llvm_col_indices, (uint32_t)mat_desc->rows);
+    LLVMValueRef llvm_col_vec = LLVMBuildShuffleVector(ctx->llvm_builder, llvm_mat, llvm_poison_mat, llvm_index_vec, "");
+
+    LLVMValueRef llvm_product = LLVMBuildMul(ctx->llvm_builder, llvm_col_vec, llvm_vec, "");
+
+    LLVMValueRef llvm_sum = LLVMConstInt(llvm_index_type, 0, false);
+
+    for (size_t j = 0; j < mat_desc->rows; j++)
+    {
+      LLVMValueRef llvm_index = LLVMConstInt(llvm_index_type, j, false);
+      LLVMValueRef llvm_element = LLVMBuildExtractElement(ctx->llvm_builder, llvm_product, llvm_index, "");
+      llvm_sum = LLVMBuildAdd(ctx->llvm_builder, llvm_sum, llvm_element, "");
+    }
+
+    LLVMValueRef llvm_index = LLVMConstInt(llvm_index_type, i, false);
+    llvm_result_vec = LLVMBuildInsertElement(ctx->llvm_builder, llvm_result_vec, llvm_sum, llvm_index, "");
+  }
+
+  free(llvm_col_indices);
+
+  return llvm_result_vec;
+}
+
 LLVMValueRef codegen_build_vector_eq(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_lhs, LLVMValueRef llvm_rhs)
 {
   ASSERT(desc->kind == TYPEDESC_VEC);

@@ -250,6 +250,17 @@ LLVMValueRef codegen_build_vector_sub(codegen_ctx_t* ctx, typedesc_t* desc, LLVM
 LLVMValueRef codegen_build_vector_mul_scalar(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_scalar);
 
 /**
+ * \brief Builds an LLVM instruction to right-multiply a vector by a matrix.
+ *
+ * \param[in] ctx Pointer to the code generation context to be used.
+ * \param[in] desc Pointer to the type descriptor of the matrix.
+ * \param[in] llvm_vec The LLVM value reference of the vector.
+ * \param[in] llvm_mat The LLVM value reference of the matrix.
+ * \returns The result of the instruction.
+ */
+LLVMValueRef codegen_build_vector_mul_matrix(codegen_ctx_t* ctx, typedesc_t* desc, LLVMValueRef llvm_vec, LLVMValueRef llvm_mat);
+
+/**
  * \brief Builds an LLVM instruction to compare two vectors for equality.
  *
  * \param[in] ctx Pointer to the code generation context to be used.
