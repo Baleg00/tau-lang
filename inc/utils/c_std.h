@@ -11,6 +11,7 @@
 #define TAU_C_STD_H
 
 #include <ctype.h>
+#include <errno.h>
 #include <limits.h>
 #include <math.h>
 #include <stdarg.h>

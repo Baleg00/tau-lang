@@ -7,8 +7,6 @@
 
 #include "stages/parser/shyd.h"
 
-#include <errno.h>
-
 #include "ast/ast.h"
 
 static ast_node_t* shyd_parse_expr_term_id(shyd_ctx_t* ctx)
