@@ -20,6 +20,7 @@ TAU_EXTERN_C_BEGIN
 typedef struct typedesc_vec_t
 {
   TYPEDESC_HEADER;
+  bool is_row;           ///< `true` if the vector is a row vector, `false` otherwise.
   size_t size;           ///< The size of the vector.
   typedesc_t* base_type; ///< The base type of the vector.
 } typedesc_vec_t;

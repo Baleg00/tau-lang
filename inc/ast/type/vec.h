@@ -20,6 +20,7 @@ TAU_EXTERN_C_BEGIN
 typedef struct ast_type_vec_t
 {
   AST_TYPE_HEADER;
+  bool is_row;           ///< `true` if the vector is a row vector, `false` otherwise.
   size_t size;           ///< The size of the vector.
   ast_node_t* base_type; ///< The primitive base type of the vector.
 } ast_type_vec_t;

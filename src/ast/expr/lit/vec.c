@@ -60,7 +60,7 @@ void ast_expr_lit_vec_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_vec_t* node)
       base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, base_desc, value_desc);
   }
 
-  typedesc_t* desc = typebuilder_build_vec(ctx->typebuilder, vector_size(node->values), base_desc);
+  typedesc_t* desc = typebuilder_build_vec(ctx->typebuilder, false, vector_size(node->values), base_desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }

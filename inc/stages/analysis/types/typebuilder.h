@@ -99,11 +99,12 @@ typedesc_t* typebuilder_build_opt(typebuilder_t* builder, typedesc_t* base_type)
  * \brief Builds a vector type.
  *
  * \param[in] builder Pointer to the type builder.
+ * \param[in] is_row `true` if the vector is a row vector, `false` otherwise.
  * \param[in] size The size of the vector.
  * \param[in] base_type The base type of the vector.
  * \returns A pointer to the newly created vector type descriptor.
  */
-typedesc_t* typebuilder_build_vec(typebuilder_t* builder, size_t size, typedesc_t* base_type);
+typedesc_t* typebuilder_build_vec(typebuilder_t* builder, bool is_row, size_t size, typedesc_t* base_type);
 
 /**
  * \brief Builds a matrix type.

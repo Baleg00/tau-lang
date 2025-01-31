@@ -86,7 +86,7 @@ static void ast_expr_op_bin_cmp_eq_codegen_vector(codegen_ctx_t* ctx, ast_expr_o
   typedesc_vec_t* rhs_vec_desc = (typedesc_vec_t*)typedesc_remove_ref_mut(rhs_desc);
 
   typedesc_t* promoted_base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_vec_desc->base_type, rhs_vec_desc->base_type);
-  typedesc_t* promoted_vec_desc = typebuilder_build_vec(ctx->typebuilder, lhs_vec_desc->size, promoted_base_desc);
+  typedesc_t* promoted_vec_desc = typebuilder_build_vec(ctx->typebuilder, false, lhs_vec_desc->size, promoted_base_desc);
 
   llvm_lhs_value = codegen_build_vector_cast(ctx, llvm_lhs_value, (typedesc_t*)lhs_vec_desc, promoted_vec_desc);
   llvm_rhs_value = codegen_build_vector_cast(ctx, llvm_rhs_value, (typedesc_t*)rhs_vec_desc, promoted_vec_desc);

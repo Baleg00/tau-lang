@@ -128,6 +128,9 @@ static int typebuilder_cmp_vec(const void* lhs, const void* rhs)
   uint64_t lhs_hash = hash_digest(&lhs_desc->size, sizeof(size_t));
   uint64_t rhs_hash = hash_digest(&rhs_desc->size, sizeof(size_t));
 
+  lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->is_row, sizeof(bool));
+  rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->is_row, sizeof(bool));
+
   lhs_hash = hash_combine_with_data(lhs_hash, &lhs_desc->base_type, sizeof(typedesc_t*));
   rhs_hash = hash_combine_with_data(rhs_hash, &rhs_desc->base_type, sizeof(typedesc_t*));
 
@@ -481,11 +484,12 @@ typedesc_t* typebuilder_build_opt(typebuilder_t* builder, typedesc_t* base_type)
   return (typedesc_t*)desc;
 }
 
-typedesc_t* typebuilder_build_vec(typebuilder_t* builder, size_t size, typedesc_t* base_type)
+typedesc_t* typebuilder_build_vec(typebuilder_t* builder, bool is_row, size_t size, typedesc_t* base_type)
 {
   ASSERT(typedesc_is_integer(base_type) || typedesc_is_float(base_type));
 
   typedesc_vec_t* desc = typedesc_vec_init();
+  desc->is_row = is_row;
   desc->size = size;
   desc->base_type = base_type;
 

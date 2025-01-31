@@ -85,10 +85,12 @@ static bool lexer_is_kw_vec(const char* str, size_t len)
   if (len < 6)
     return false;
 
-  if (strncmp(str, "vec", 3) != 0)
+  if (strncmp(str, "vec", 3) == 0)
+    str += 3;
+  else if (strncmp(str, "rvec", 4) == 0)
+    str += 4;
+  else
     return false;
-
-  str += 3;
 
   if (!isdigit(*str))
     return false;

@@ -70,7 +70,7 @@ static void ast_expr_op_bin_arit_add_typecheck_vector(typecheck_ctx_t* ctx, ast_
     report_warning_mixed_signedness(token_location(node->tok));
 
   typedesc_t* base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_vec_desc->base_type, rhs_vec_desc->base_type);
-  typedesc_t* vec_desc = typebuilder_build_vec(ctx->typebuilder, lhs_vec_desc->size, base_desc);
+  typedesc_t* vec_desc = typebuilder_build_vec(ctx->typebuilder, false, lhs_vec_desc->size, base_desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, vec_desc);
 

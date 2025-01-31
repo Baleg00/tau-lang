@@ -317,8 +317,21 @@ ast_node_t* parser_parse_type_vec(parser_t* par)
   string_view_t tok_view = token_to_string_view(node->tok);
   const char* tok_cstr = string_view_begin(tok_view);
 
+  if (strncmp(tok_cstr, "vec", 3) == 0)
+  {
+    node->is_row = false;
+    tok_cstr += 3;
+  }
+  else if (strncmp(tok_cstr, "rvec", 4) == 0)
+  {
+    node->is_row = true;
+    tok_cstr += 4;
+  }
+  else
+    UNREACHABLE();
+
   const char* size_end = NULL;
-  size_t size = strtoull(tok_cstr + 3, &size_end, 10);
+  size_t size = strtoull(tok_cstr, &size_end, 10);
 
   ASSERT(errno != ERANGE);
   ASSERT(size > 0);

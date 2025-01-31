@@ -66,7 +66,7 @@ static void ast_expr_op_bin_arit_mul_typecheck_vector_scalar(typecheck_ctx_t* ct
     report_warning_mixed_signedness(token_location(node->tok));
 
   typedesc_t* base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_vec_desc->base_type, rhs_desc);
-  typedesc_t* vec_desc = typebuilder_build_vec(ctx->typebuilder, lhs_vec_desc->size, base_desc);
+  typedesc_t* vec_desc = typebuilder_build_vec(ctx->typebuilder, false, lhs_vec_desc->size, base_desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, vec_desc);
 
@@ -132,7 +132,7 @@ static void ast_expr_op_bin_arit_mul_typecheck_matrix_vector(typecheck_ctx_t* ct
   }
 
   typedesc_t* base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_mat_desc->base_type, rhs_vec_desc->base_type);
-  typedesc_t* vec_desc = typebuilder_build_vec(ctx->typebuilder, lhs_mat_desc->rows, base_desc);
+  typedesc_t* vec_desc = typebuilder_build_vec(ctx->typebuilder, false, lhs_mat_desc->rows, base_desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, vec_desc);
 
@@ -217,7 +217,7 @@ static void ast_expr_op_bin_arit_mul_codegen_matrix_vector(codegen_ctx_t* ctx, a
   typedesc_vec_t* result_vec_desc = (typedesc_vec_t*)typetable_lookup(ctx->typetable, (ast_node_t*)node);
 
   typedesc_t* promoted_mat_desc = typebuilder_build_mat(ctx->typebuilder, lhs_mat_desc->rows, lhs_mat_desc->cols, result_vec_desc->base_type);
-  typedesc_t* promoted_vec_desc = typebuilder_build_vec(ctx->typebuilder, lhs_mat_desc->cols, result_vec_desc->base_type);
+  typedesc_t* promoted_vec_desc = typebuilder_build_vec(ctx->typebuilder, false, lhs_mat_desc->cols, result_vec_desc->base_type);
 
   llvm_lhs_value = codegen_build_matrix_cast(ctx, llvm_lhs_value, typedesc_remove_ref_mut(lhs_desc), promoted_mat_desc);
   llvm_rhs_value = codegen_build_vector_cast(ctx, llvm_rhs_value, typedesc_remove_ref_mut(rhs_desc), promoted_vec_desc);

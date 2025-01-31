@@ -36,7 +36,7 @@ void ast_type_vec_typecheck(typecheck_ctx_t* ctx, ast_type_vec_t* node)
 
   typedesc_t* base_desc = typetable_lookup(ctx->typetable, node->base_type);
 
-  typedesc_t* desc = typebuilder_build_vec(ctx->typebuilder, node->size, base_desc);
+  typedesc_t* desc = typebuilder_build_vec(ctx->typebuilder, false, node->size, base_desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
 }
