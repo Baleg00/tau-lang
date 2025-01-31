@@ -84,7 +84,7 @@ typedef enum error_kind_t
 /**
  * \brief Represents a compiler error.
  */
-typedef struct error_t
+typedef struct error_info_t
 {
   error_kind_t kind;
 
@@ -164,7 +164,7 @@ typedef struct error_t
       location_t inner_symbol_loc;
     } shadowed_symbol;
   };
-} error_t;
+} error_info_t;
 
 /**
  * \brief Represents a container for errors.
@@ -176,7 +176,7 @@ typedef struct error_bag_t error_bag_t;
  *
  * \param[in] error The error to be printed.
  */
-void error_print(error_t error);
+void error_print(error_info_t error);
 
 /**
  * \brief Initializes a new error bag.
@@ -207,7 +207,7 @@ void error_bag_print(const error_bag_t* bag);
  * \param[in] error The error to add to the bag.
  * \returns `true` if the error was added to the bag, `false` otherwise.
  */
-bool error_bag_put(error_bag_t* bag, error_t error);
+bool error_bag_put(error_bag_t* bag, error_info_t error);
 
 /**
  * \brief Takes an error out of the error bag.
@@ -216,7 +216,7 @@ bool error_bag_put(error_bag_t* bag, error_t error);
  * \param[out] dst Pointer to memory to write the error into if the bag is not empty.
  * \returns `true` if an error was written to `dst`, `false` otherwise.
  */
-bool error_bag_get(error_bag_t* restrict bag, error_t* restrict dst);
+bool error_bag_get(error_bag_t* restrict bag, error_info_t* restrict dst);
 
 /**
  * \brief Checks whether the error bag is empty.
