@@ -63,14 +63,14 @@ static void ast_expr_op_bin_arit_add_typecheck_vector(typecheck_ctx_t* ctx, ast_
   typedesc_vec_t* lhs_vec_desc = (typedesc_vec_t*)lhs_desc;
   typedesc_vec_t* rhs_vec_desc = (typedesc_vec_t*)rhs_desc;
 
-  if (lhs_vec_desc->size != rhs_vec_desc->size)
+  if (lhs_vec_desc->size != rhs_vec_desc->size || lhs_vec_desc->is_row != rhs_vec_desc->is_row)
     error_bag_put_typecheck_incompatible_vector_dimensions(ctx->errors, token_location(node->tok));
 
   if (typedesc_is_signed(lhs_vec_desc->base_type) != typedesc_is_signed(rhs_vec_desc->base_type))
     report_warning_mixed_signedness(token_location(node->tok));
 
   typedesc_t* base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_vec_desc->base_type, rhs_vec_desc->base_type);
-  typedesc_t* vec_desc = typebuilder_build_vec(ctx->typebuilder, false, lhs_vec_desc->size, base_desc);
+  typedesc_t* vec_desc = typebuilder_build_vec(ctx->typebuilder, lhs_vec_desc->is_row, lhs_vec_desc->size, base_desc);
 
   typetable_insert(ctx->typetable, (ast_node_t*)node, vec_desc);
 
