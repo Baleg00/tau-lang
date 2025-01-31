@@ -28,6 +28,7 @@
 #include "utils/noreturn.h"
 #include "utils/offsetof.h"
 #include "utils/os_detect.h"
+#include "utils/swap.h"
 #include "utils/unreachable.h"
 #include "utils/unused.h"
 #include "utils/io/log.h"
