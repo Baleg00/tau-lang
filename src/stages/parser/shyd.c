@@ -286,7 +286,7 @@ bool shyd_parse_lit_vec_or_mat(shyd_ctx_t* ctx)
 
   vector_t* values = vector_init();
 
-  bool is_matrix = false;
+  bool is_matrix_or_row_vec = false;
   size_t cols = 0;
   size_t last_cols = 0;
 
@@ -296,7 +296,7 @@ bool shyd_parse_lit_vec_or_mat(shyd_ctx_t* ctx)
   {
     vector_push(values, parser_parse_expr(ctx->par));
 
-    if (is_matrix)
+    if (is_matrix_or_row_vec)
       last_cols++;
     else
       cols++;
@@ -305,8 +305,8 @@ bool shyd_parse_lit_vec_or_mat(shyd_ctx_t* ctx)
     {
       if (parser_consume(ctx->par, TOK_PUNCT_SEMICOLON))
       {
-        if (!is_matrix)
-          is_matrix = true;
+        if (!is_matrix_or_row_vec)
+          is_matrix_or_row_vec = true;
         else if (last_cols != cols)
           error_bag_put_parser_inconsistent_matrix_dimensions(ctx->par->errors, token_location(token));
 
@@ -317,25 +317,39 @@ bool shyd_parse_lit_vec_or_mat(shyd_ctx_t* ctx)
     }
   }
 
-  if (is_matrix && last_cols != cols)
+  if (is_matrix_or_row_vec && last_cols != cols)
     error_bag_put_parser_inconsistent_matrix_dimensions(ctx->par->errors, token_location(token));
 
   parser_expect(ctx->par, TOK_PUNCT_BRACKET_ANGLE_RIGHT);
 
   ASSERT(vector_size(values) > 0);
+  ASSERT(cols > 0);
 
   shyd_elem_t* elem = shyd_elem_init(ctx, SHYD_TERM);
 
-  if (is_matrix)
+  if (is_matrix_or_row_vec)
   {
-    ast_expr_lit_mat_t* mat_node = ast_expr_lit_mat_init();
-    mat_node->tok = token;
-    mat_node->rows = vector_size(values) / cols;
-    mat_node->cols = cols;
+    if (cols > 1)
+    {
+      ast_expr_lit_mat_t* mat_node = ast_expr_lit_mat_init();
+      mat_node->tok = token;
+      mat_node->rows = vector_size(values) / cols;
+      mat_node->cols = cols;
 
-    vector_extend(mat_node->values, values);
+      vector_extend(mat_node->values, values);
 
-    elem->node = (ast_node_t*)mat_node;
+      elem->node = (ast_node_t*)mat_node;
+    }
+    else
+    {
+      ast_expr_lit_vec_t* vec_node = ast_expr_lit_vec_init();
+      vec_node->tok = token;
+
+      vec_node->is_row = true;
+      vector_extend(vec_node->values, values);
+
+      elem->node = (ast_node_t*)vec_node;
+    }
   }
   else
   {
