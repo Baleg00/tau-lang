@@ -6,10 +6,12 @@ add_compile_options(${TAU_COMPILE_OPTIONS})
 get_property(TAU_COMPILE_DEFINITIONS GLOBAL PROPERTY TAU_COMPILE_DEFINITIONS_PROPERTY)
 add_compile_definitions(TAU_TEST ${TAU_COMPILE_DEFINITIONS})
 
-# Retrieve Tau and LLVM libraries and link them to later targets.
-get_property(TAU_LIBRARIES GLOBAL PROPERTY TAU_LIBRARIES_PROPERTY)
+# Retrieve LLVM libraries and link them to later targets.
 get_property(LLVM_LIBRARIES GLOBAL PROPERTY LLVM_LIBRARIES_PROPERTY)
-link_libraries(${TAU_LIBRARIES} ${LLVM_LIBRARIES})
+link_libraries(${LLVM_LIBRARIES})
+
+# Link Tau static library to later targets.
+link_libraries(TAU_LIB)
 
 # Define test names corresponding to modules/components to be tested.
 set(TAU_TEST_NAMES

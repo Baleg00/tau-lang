@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13.0)
 project(Tau
   VERSION 0.1.0
   DESCRIPTION "A strictly typed, compiled, general purpose programming language."
-  LANGUAGES C
+  LANGUAGES C CXX
 )
 
 # Include the CTest module and enable testing for the project.
