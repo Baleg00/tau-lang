@@ -19,8 +19,8 @@ add_executable(tauc ${PROJECT_SOURCE_DIR}/src/main.c)
 target_link_libraries(tauc PUBLIC TAU_LIB)
 
 # Retrieve LLVM libraries and link them to the main executable.
-get_property(LLVM_LIBRARIES GLOBAL PROPERTY LLVM_LIBRARIES_PROPERTY)
-target_link_libraries(tauc PUBLIC ${LLVM_LIBRARIES})
+#get_property(LLVM_LIBRARIES GLOBAL PROPERTY LLVM_LIBRARIES_PROPERTY)
+target_link_libraries(tauc PUBLIC "LLVM-19")
 
 # Install the main executable for both Debug and Release configurations.
 install(TARGETS tauc CONFIGURATIONS Debug Release)
