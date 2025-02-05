@@ -9,7 +9,7 @@
 
 #include "utils/common.h"
 
-#ifdef TAU_OS_WINDOWS
+#if TAU_OS_WINDOWS
 
 #include <windows.h>
 

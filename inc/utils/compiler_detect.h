@@ -11,18 +11,24 @@
 #define TAU_COMPILER_DETECT_H
 
 #if defined(__clang__)
-# define TAU_COMPILER_CLANG
+# define TAU_COMPILER_CLANG 1
+#else
+# define TAU_COMPILER_CLANG 0
 #endif
 
-#if defined(_MSC_VER) && !defined(TAU_COMPILER_CLANG)
-# define TAU_COMPILER_MSVC
+#if defined(_MSC_VER) && !TAU_COMPILER_CLANG
+# define TAU_COMPILER_MSVC 1
+#else
+# define TAU_COMPILER_MSVC 0
 #endif
 
-#if defined(__GNUC__) && !defined(TAU_COMPILER_CLANG)
-# define TAU_COMPILER_GCC
+#if defined(__GNUC__) && !TAU_COMPILER_CLANG
+# define TAU_COMPILER_GCC 1
+#else
+# define TAU_COMPILER_GCC 0
 #endif
 
-#if !defined(TAU_COMPILER_CLANG) && !defined(TAU_COMPILER_MSVC) && !defined(TAU_COMPILER_GCC)
+#if !TAU_COMPILER_CLANG && !TAU_COMPILER_MSVC && !TAU_COMPILER_GCC
 # error "Unknown compiler!"
 #endif
 

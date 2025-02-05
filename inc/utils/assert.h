@@ -15,7 +15,7 @@
 #include "utils/debugbreak.h"
 #include "utils/io/log.h"
 
-#ifdef TAU_DEBUG
+#if TAU_DEBUG
 
 /**
  * \brief Asserts a condition and triggers a fatal error if the condition is `false`.

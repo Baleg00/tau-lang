@@ -34,8 +34,10 @@ message(VERBOSE "Tau Options: ${_TAU_COMPILE_OPTIONS}")
 set(_TAU_COMPILE_DEFINITIONS
   TAU_VERSION="${CMAKE_PROJECT_VERSION}"            # Define the Tau version using the project's version.
   $<$<C_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>  # Disable security warnings on MSVC.
-  $<$<CONFIG:Debug>:TAU_DEBUG>                      # Define TAU_DEBUG in Debug mode.
-  $<$<CONFIG:Release>:TAU_RELEASE>                  # Define TAU_RELEASE in Release mode.
+  $<$<CONFIG:Debug>:TAU_RELEASE=0>                  # Define TAU_DEBUG in Debug mode.
+  $<$<CONFIG:Debug>:TAU_DEBUG=1>
+  $<$<CONFIG:Release>:TAU_RELEASE=1>                # Define TAU_RELEASE in Release mode.
+  $<$<CONFIG:Release>:TAU_DEBUG=0>
 )
 
 # Store the compile definitions in a global property for later use.

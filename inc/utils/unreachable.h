@@ -15,7 +15,7 @@
 #include "utils/debugbreak.h"
 #include "utils/io/log.h"
 
-#ifdef TAU_DEBUG
+#if TAU_DEBUG
 
 /// Marks a code path as unreachable and triggers a fatal error.
 # define UNREACHABLE()\
