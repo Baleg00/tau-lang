@@ -61,7 +61,6 @@ static void command_env_var_free(command_env_var_t* var)
   free(var);
 }
 
-#if defined(WIN32) || defined(_WIN32)
 #if TAU_OS_WINDOWS
 
 #include <windows.h>
