@@ -194,6 +194,74 @@ size_t file_read(path_t* path, char* buf, size_t len)
   return (size_t)bytes_read;
 }
 
+#elif TAU_OS_LINUX
+
+bool file_is_directory(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return false;
+}
+
+bool file_is_regular_file(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return false;
+}
+
+bool file_is_block_file(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return false;
+}
+
+bool file_is_character_file(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return false;
+}
+
+bool file_is_pipe(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return false;
+}
+
+bool file_is_socket(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return false;
+}
+
+bool file_is_symlink(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return false;
+}
+
+bool file_exists(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return false;
+}
+
+bool file_empty(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return false;
+}
+
+size_t file_size(path_t* UNUSED(path))
+{
+  UNREACHABLE();
+  return 0;
+}
+
+size_t file_read(path_t* UNUSED(path), char* UNUSED(buf), size_t UNUSED(len))
+{
+  UNREACHABLE();
+  return 0;
+}
+
 #else
 # error "File operations are not implemented for operating system!"
 #endif

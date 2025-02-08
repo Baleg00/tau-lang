@@ -408,6 +408,60 @@ void command_reset(command_t* cmd)
   vector_clear(cmd->env);
 }
 
+#elif TAU_OS_LINUX
+
+command_t* command_init(const char* UNUSED(prog))
+{
+  UNREACHABLE();
+  return NULL;
+}
+
+void command_free(command_t* UNUSED(cmd))
+{
+  UNREACHABLE();
+}
+
+void command_add_arg(command_t* UNUSED(cmd), const char* UNUSED(arg))
+{
+  UNREACHABLE();
+}
+
+void command_set_cwd(command_t* UNUSED(cmd), const char* UNUSED(cwd))
+{
+  UNREACHABLE();
+}
+
+void command_add_env(command_t* UNUSED(cmd), const char* UNUSED(key), const char* UNUSED(value))
+{
+  UNREACHABLE();
+}
+
+void command_set_stdin(command_t* UNUSED(cmd), FILE* UNUSED(stream))
+{
+  UNREACHABLE();
+}
+
+void command_set_stdout(command_t* UNUSED(cmd), FILE* UNUSED(stream))
+{
+  UNREACHABLE();
+}
+
+void command_set_stderr(command_t* UNUSED(cmd), FILE* UNUSED(stream))
+{
+  UNREACHABLE();
+}
+
+int command_run(command_t* UNUSED(cmd))
+{
+  UNREACHABLE();
+  return EXIT_FAILURE;
+}
+
+void command_reset(command_t* UNUSED(cmd))
+{
+  UNREACHABLE();
+}
+
 #else
 # error "Commands are not implemented for this platform!"
 #endif
