@@ -1,0 +1,83 @@
+name: CMake Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        build_type: [Release]
+        c_compiler: [gcc, clang, cl]
+        include:
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cxx_compiler: g++
+          - os: ubuntu-latest
+            c_compiler: clang
+            cxx_compiler: clang++
+          - os: windows-latest
+            c_compiler: cl
+            cxx_compiler: cl
+        exclude:
+          - os: windows-latest
+            c_compiler: gcc
+          - os: windows-latest
+            c_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: cl
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt update
+          sudo apt install -y cmake ninja-build libpfm4-dev clang
+          sudo wget https://apt.llvm.org/llvm.sh
+          sudo chmod +x llvm.sh
+          sudo ./llvm.sh
+
+      - name: Setup MSVC Developer Command Prompt (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: llvm/actions/setup-windows@main
+
+      - name: Install dependencies (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: crazy-max/ghaction-chocolatey@v3
+        with:
+          args: install -y cmake llvm
+
+      - name: Configure CMake (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          cmake -S . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }}
+
+      - name: Configure CMake (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }}
+
+      - name: Build project
+        run: cmake --build build --config ${{ matrix.build_type }}
+
+      - name: Run tests (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        working-directory: build
+        run: ctest --output-on-failure
+
+      - name: Run tests (Windows)
+        if: startsWith(matrix.os, 'windows')
+        working-directory: build
+        run: ctest --output-on-failure -C ${{ matrix.build_type }}
