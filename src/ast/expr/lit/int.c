@@ -85,6 +85,6 @@ void ast_expr_lit_int_codegen(codegen_ctx_t* ctx, ast_expr_lit_int_t* node)
 void ast_expr_lit_int_dump_json(FILE* stream, ast_expr_lit_int_t* node)
 {
   fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
-  fprintf(stream, ",\"value\":%llu", node->value);
+  fprintf(stream, ",\"value\":%" PRIu64, node->value);
   fputc('}', stream);
 }
