@@ -1,6 +1,6 @@
 # Find the LLVM package and ensure that it is found.
 # This is required for building the project (using CONFIG mode to locate the package).
-find_package(LLVM 19.1.7 REQUIRED CONFIG)
+find_package(LLVM 19.1.0 REQUIRED CONFIG)
 
 # Output details about the LLVM package for verbose builds.
 message(VERBOSE "Found LLVM ${LLVM_PACKAGE_VERSION}")
