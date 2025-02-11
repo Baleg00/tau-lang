@@ -25,7 +25,7 @@
 
 #include "utils/extern_c.h"
 
-#ifdef TAU_DEBUG
+#if TAU_DEBUG
 # ifndef TAU_MEMTRACE_IMPL
 /**
  * \brief Macro for memory allocation using memtrace_malloc.

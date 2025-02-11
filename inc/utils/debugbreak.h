@@ -10,7 +10,7 @@
 #ifndef TAU_DEBUGBREAK_H
 #define TAU_DEBUGBREAK_H
 
-#ifdef TAU_DEBUG
+#if TAU_DEBUG
 
 # ifdef _MSC_VER
 

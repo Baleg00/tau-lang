@@ -11,22 +11,30 @@
 #define TAU_OS_DETECT_H
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__WINDOWS__)
-# define TAU_OS_WINDOWS
+# define TAU_OS_WINDOWS 1
+#else
+# define TAU_OS_WINDOWS 0
 #endif
 
 #if defined(__APPLE__) && defined(__MACH__) || defined(__DARWIN__) || defined(macintosh) || defined(Macintosh)
-# define TAU_OS_MACOS
+# define TAU_OS_MACOS 1
+#else
+# define TAU_OS_MACOS 0
 #endif
 
 #if defined(__linux__) || defined(__linux) || defined(linux) || defined(__gnu_linux__)
-# define TAU_OS_LINUX
+# define TAU_OS_LINUX 1
+#else
+# define TAU_OS_LINUX 0
 #endif
 
-#if defined(TAU_OS_MACOS) || defined(TAU_OS_LINUX) || defined(unix) || defined(__unix__) || defined(__unix)
-# define TAU_OS_UNIX
+#if TAU_OS_MACOS || TAU_OS_LINUX || defined(unix) || defined(__unix__) || defined(__unix)
+# define TAU_OS_UNIX 1
+#else
+# define TAU_OS_UNIX 0
 #endif
 
-#if !defined(TAU_OS_WINDOWS) && !defined(TAU_OS_MACOS) && !defined(TAU_OS_LINUX)
+#if !TAU_OS_WINDOWS && !TAU_OS_MACOS && !TAU_OS_LINUX
 # error "Unknown operating system!"
 #endif
 

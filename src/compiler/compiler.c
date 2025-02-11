@@ -273,7 +273,7 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
   LLVMPassBuilderOptionsRef llvm_pass_builder_options = LLVMCreatePassBuilderOptions();
   LLVMPassBuilderOptionsSetVerifyEach(llvm_pass_builder_options, true);
 
-#ifdef TAU_DEBUG
+#if TAU_DEBUG
   LLVMPassBuilderOptionsSetDebugLogging(llvm_pass_builder_options, true);
 #endif
 

@@ -14,25 +14,26 @@ include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
-# Map LLVM components to corresponding library names and store them in the _LLVM_LIBRARIES variable.
-#llvm_map_components_to_libnames(_LLVM_LIBRARIES
-#  support
-#  core
-#  irreader
-#  executionengine
-#  jitlink
-#  mcjit
-#  exegesisx86
-#  x86targetmca
-#  x86codegen
-#  x86disassembler
-#  x86asmparser
-#  x86desc
-#  x86info
-#  passes
-#)
+# List of required LLVM components.
+set(TAU_LLVM_COMPONENTS
+    support
+    core
+    irreader
+    executionengine
+    jitlink
+    mcjit
+    exegesisx86
+    x86targetmca
+    x86codegen
+    x86disassembler
+    x86asmparser
+    x86desc
+    x86info
+    passes
+)
+set_property(GLOBAL PROPERTY TAU_LLVM_COMPONENTS_PROPERTY ${TAU_LLVM_COMPONENTS})
 
-
-# Store the list of LLVM libraries in a global property for later use.
-#set_property(GLOBAL PROPERTY LLVM_LIBRARIES_PROPERTY ${_LLVM_LIBRARIES})
-#message(VERBOSE "LLVM Libraries: ${_LLVM_LIBRARIES}")
+# If TAU_LLVM_SHARED is ON, LLVM shared library will be used for linking.
+# Otherwise, static libraries will be used.
+option(TAU_LLVM_SHARED "Link to LLVM shared library." OFF)
+message(VERBOSE "Use LLVM shared library: ${TAU_LLVM_SHARED}")

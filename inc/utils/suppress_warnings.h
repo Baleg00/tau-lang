@@ -17,7 +17,9 @@
 #ifndef TAU_SUPPRESS_WARNINGS_H
 #define TAU_SUPPRESS_WARNINGS_H
 
-#if defined(_MSC_VER) && !defined(__clang__)
+#include "utils/compiler_detect.h"
+
+#if TAU_COMPILER_MSVC
 // enumerator in switch of enum is not explicitly handled by a case label
 # pragma warning(disable: 4061)
 
@@ -50,7 +52,7 @@
 
 // unsafe function pointer conversion
 # pragma warning(disable: 4191)
-#elif defined(__GNUC__)
+#elif TAU_COMPILER_GCC
 // enumerator in switch of enum is not explicitly handled by a case label
 # pragma GCC diagnostic ignored "-Wswitch-enum"
 
@@ -68,7 +70,7 @@
 
 // function is unused
 # pragma GCC diagnostic ignored "-Wunused-function"
-#elif defined(__clang__)
+#elif TAU_COMPILER_CLANG
 // enumerator in switch of enum is not explicitly handled by a case label
 # pragma clang diagnostic ignored "-Wswitch-enum"
 

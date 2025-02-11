@@ -61,7 +61,7 @@ static void command_env_var_free(command_env_var_t* var)
   free(var);
 }
 
-#if defined(WIN32) || defined(_WIN32)
+#if TAU_OS_WINDOWS
 
 #include <windows.h>
 
@@ -408,46 +408,58 @@ void command_reset(command_t* cmd)
   vector_clear(cmd->env);
 }
 
-#elif defined TAU_OS_LINUX
+#elif TAU_OS_LINUX
 
-command_t* command_init(const char* UNUSED(prog)) {
+command_t* command_init(const char* UNUSED(prog))
+{
+  UNREACHABLE();
   return NULL;
 }
 
-void command_free(command_t* UNUSED(cmd)) {
-
+void command_free(command_t* UNUSED(cmd))
+{
+  UNREACHABLE();
 }
 
-void command_add_arg(command_t* UNUSED(cmd), const char* UNUSED(arg)) {
-  
+void command_add_arg(command_t* UNUSED(cmd), const char* UNUSED(arg))
+{
+  UNREACHABLE();
 }
 
-void command_set_cwd(command_t* UNUSED(cmd), const char* UNUSED(cwd)) {
-
+void command_set_cwd(command_t* UNUSED(cmd), const char* UNUSED(cwd))
+{
+  UNREACHABLE();
 }
 
-void command_add_env(command_t* UNUSED(cmd), const char* UNUSED(key), const char* UNUSED(value)) {
-
+void command_add_env(command_t* UNUSED(cmd), const char* UNUSED(key), const char* UNUSED(value))
+{
+  UNREACHABLE();
 }
 
-void command_set_stdin(command_t* UNUSED(cmd), FILE* UNUSED(stream)) {
-
+void command_set_stdin(command_t* UNUSED(cmd), FILE* UNUSED(stream))
+{
+  UNREACHABLE();
 }
 
-void command_set_stdout(command_t* UNUSED(cmd), FILE* UNUSED(stream)) {
-
+void command_set_stdout(command_t* UNUSED(cmd), FILE* UNUSED(stream))
+{
+  UNREACHABLE();
 }
 
-void command_set_stderr(command_t* UNUSED(cmd), FILE* UNUSED(stream)) {
-
+void command_set_stderr(command_t* UNUSED(cmd), FILE* UNUSED(stream))
+{
+  UNREACHABLE();
 }
 
-int command_run(command_t* UNUSED(cmd)) {
-  return 0;
+int command_run(command_t* UNUSED(cmd))
+{
+  UNREACHABLE();
+  return EXIT_FAILURE;
 }
 
-void command_reset(command_t* UNUSED(cmd)) {
-
+void command_reset(command_t* UNUSED(cmd))
+{
+  UNREACHABLE();
 }
 
 #else

@@ -18,9 +18,14 @@ add_executable(tauc ${PROJECT_SOURCE_DIR}/src/main.c)
 # Link Tau static library to the main executable.
 target_link_libraries(tauc PUBLIC TAU_LIB)
 
-# Retrieve LLVM libraries and link them to the main executable.
-#get_property(LLVM_LIBRARIES GLOBAL PROPERTY LLVM_LIBRARIES_PROPERTY)
-target_link_libraries(tauc PUBLIC "LLVM-19")
+# Retrieve required LLVM components.
+get_property(TAU_LLVM_COMPONENTS GLOBAL PROPERTY TAU_LLVM_COMPONENTS_PROPERTY)
+
+if(TAU_LLVM_SHARED)
+    llvm_config(tauc USE_SHARED ${TAU_LLVM_COMPONENTS})
+else()
+    llvm_config(tauc ${TAU_LLVM_COMPONENTS})
+endif()
 
 # Install the main executable for both Debug and Release configurations.
 install(TARGETS tauc CONFIGURATIONS Debug Release)
