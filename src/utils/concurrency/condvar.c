@@ -28,28 +28,25 @@ void condvar_wait(condvar_t* condvar, mutex_t* mutex)
 
 bool condvar_wait_for(condvar_t* restrict condvar, mutex_t* restrict mutex, const struct timespec* restrict timeout)
 {
-  return pthread_cond_timedwait(&condvar->native_handle, &mutex->native_handle, timeout) == 0;
+  struct timespec now;
+  timespec_get(&now, TIME_UTC);
+
+  struct timespec timepoint;
+  timepoint.tv_sec = now.tv_sec + timeout->tv_sec;
+  timepoint.tv_nsec = now.tv_nsec + timeout->tv_nsec;
+
+  if (timepoint.tv_nsec >= 1000000000)
+  {
+    timepoint.tv_sec++;
+    timepoint.tv_nsec -= 1000000000;
+  }
+
+  return pthread_cond_timedwait(&condvar->native_handle, &mutex->native_handle, &timepoint) == 0;
 }
 
 bool condvar_wait_until(condvar_t* restrict condvar, mutex_t* restrict mutex, const struct timespec* restrict timepoint)
 {
-  struct timespec now;
-  timespec_get(&now, TIME_UTC);
-
-  struct timespec diff;
-  diff.tv_sec = timepoint->tv_sec - now.tv_sec;
-  diff.tv_nsec = timepoint->tv_nsec - now.tv_nsec;
-
-  if (diff.tv_nsec < 0)
-  {
-    diff.tv_sec--;
-    diff.tv_nsec += 1000000000;
-  }
-
-  if (diff.tv_sec < 0)
-    return false;
-
-  return pthread_cond_timedwait(&condvar->native_handle, &mutex->native_handle, &diff) == 0;
+  return pthread_cond_timedwait(&condvar->native_handle, &mutex->native_handle, timepoint) == 0;
 }
 
 void condvar_signal(condvar_t* condvar)
