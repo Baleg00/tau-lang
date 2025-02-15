@@ -25,6 +25,12 @@ void thread_self(thread_t* thread)
   thread->native_handle = pthread_self();
 }
 
+void thread_sleep(const struct timespec* duration)
+{
+  int result = nanosleep(duration, NULL);
+  ASSERT(result == 0);
+}
+
 void* thread_join(thread_t* thread)
 {
   void* thread_result = NULL;

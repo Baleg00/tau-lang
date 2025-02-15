@@ -59,6 +59,13 @@ void thread_free(thread_t* thread);
 void thread_self(thread_t* thread);
 
 /**
+ * \brief Suspends the execution of the calling thread for a specific duration.
+ *
+ * \param[in] duration Duration to sleep for.
+ */
+void thread_sleep(const struct timespec* duration);
+
+/**
  * \brief Wait for a thread to finish execution and free its resources.
  *
  * \param[in] thread Pointer to thread to join.
