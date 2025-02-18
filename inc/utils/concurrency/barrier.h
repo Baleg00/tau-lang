@@ -78,7 +78,7 @@ bool barrier_wait_for(barrier_t* restrict barrier, const struct timespec* restri
  *
  * \param[in] barrier Pointer to barrier to be used.
  * \param[in] timepoint Time point to wait until.
- * \returns `true` if the current barrier phase completed within the timeout duration, `false` otherwise.
+ * \returns `true` if the current barrier phase completed before the time point, `false` otherwise.
  */
 bool barrier_wait_until(barrier_t* restrict barrier, const struct timespec* restrict timepoint);
 
