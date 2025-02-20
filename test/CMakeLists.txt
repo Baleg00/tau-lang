@@ -9,33 +9,17 @@ add_compile_definitions(TAU_TEST ${TAU_COMPILE_DEFINITIONS})
 # Link Tau static library to later targets.
 link_libraries(TAU_LIB)
 
-# Define test names corresponding to modules/components to be tested.
-set(TAU_TEST_NAMES
-  ARENA
-  HASH
-  LIST
-  QUEUE
-  SET
-  STACK
-  STR
-  STR_VIEW
-  TYPEDESC
-  VECTOR
-  LEXER
-  COMMAND
-)
+file(GLOB_RECURSE TAU_TEST_SOURCE_FILES  ${PROJECT_SOURCE_DIR}/test/*.c)
 
 # Retrieve required LLVM components.
 get_property(TAU_LLVM_COMPONENTS GLOBAL PROPERTY TAU_LLVM_COMPONENTS_PROPERTY)
 
-# Iterate over each name in `TAU_TEST_NAMES` to create an executable and a corresponding test.
-foreach(NAME IN ITEMS ${TAU_TEST_NAMES})
-  string(TOLOWER ${NAME} NAME_LOWER)
-  set(TARGET TAU_TEST_${NAME})
+# Iterate over each source file to create an executable and a corresponding test.
+foreach(TEST_FILE IN ITEMS ${TAU_TEST_SOURCE_FILES})
+  get_filename_component(TARGET ${TEST_FILE} NAME_WE)
 
   # Define an executable target, excluding it from the default build target and register it as a test.
-  # The source file for each test is assumed to be located in the `test` directory.
-  add_executable(${TARGET} ${PROJECT_SOURCE_DIR}/test/${NAME_LOWER}_test.c)
+  add_executable(${TARGET} ${TEST_FILE})
 
   if(TAU_LLVM_SHARED)
     llvm_config(${TARGET} USE_SHARED ${TAU_LLVM_COMPONENTS})

@@ -15,7 +15,7 @@
 #include "utils/common.h"
 #include "utils/memory/memtrace.h"
 
-#define LEXER_MAX_BUFFER_SIZE 256
+#define LEXER_MAX_WORD_SIZE 256
 
 static const struct
 {
@@ -381,7 +381,7 @@ token_t* lexer_read_word(lexer_t* lex)
 
   size_t len = lexer_skip(lex, lexer_is_word);
 
-  if (len > LEXER_MAX_BUFFER_SIZE - 1)
+  if (len > LEXER_MAX_WORD_SIZE - 2)
   {
     location_t loc = lexer_location(lex);
 
@@ -390,11 +390,9 @@ token_t* lexer_read_word(lexer_t* lex)
     error_bag_put_lexer_identifier_too_long(lex->errors, loc);
   }
 
-  char buf[LEXER_MAX_BUFFER_SIZE];
+  char buf[LEXER_MAX_WORD_SIZE];
 
   strncpy(buf, lex->src + tok->pos, len);
-
-  buf[len] = '\0';
 
   if (lexer_is_kw_vec(buf, len))
   {
