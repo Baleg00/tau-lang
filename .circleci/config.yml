@@ -1,0 +1,8 @@
+jobs:
+  build:
+    docker:
+      - image: cimg/base:2025.03
+    steps:
+      - checkout
+      - run: sudo apt-get update && sudo apt-get install -y cowsay
+      - run: cowsay Continuous Integration Rocks!
