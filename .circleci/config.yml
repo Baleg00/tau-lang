@@ -1,33 +1,67 @@
 version: 2.1
-jobs:
-  build:
+
+executors:
+  linux-executor:
     docker:
       - image: cimg/base:2025.03
+    resource_class: small
+    working_directory: ~/tau-lang
+
+jobs:
+  setup:
+    executor: linux-executor
     steps:
       - run:
-          name: Update apt
-          command: sudo apt update
+          name: Install Dependencies
+          command: |
+            sudo apt update
+            sudo apt -y install g++ clang ninja-build git cmake zlib1g-dev libzstd-dev libpfm4-dev llvm
+      - persist_to_workspace:
+          root: /
+          paths:
+            - usr/bin
+            - usr/lib
+            - usr/share
+            - usr/include
+
+  build:
+    executor: linux-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /
       - run:
-          name: Install gcc
-          command: sudo apt -y install gcc g++
+          name: Configure CMake
+          command: |
+            mkdir build
+            cmake -B build -G Ninja
       - run:
-          name: Install clang
-          command: sudo apt -y install clang
+          name: Build Project
+          command: cmake --build build --config Release -j 4
+      - persist_to_workspace:
+          root: build
+          paths:
+            - "*"
+
+  test:
+    executor: linux-executor
+    steps:
+      - attach_workspace:
+          at: /
+      - attach_workspace:
+          at: ~/tau-lang/build
       - run:
-          name: Install git
-          command: sudo apt -y install git
-      - run:
-          name: Install cmake
-          command: sudo apt -y install cmake
-      - run:
-          name: Install zlib
-          command: sudo apt -y install zlib1g-dev
-      - run:
-          name: Install zstd
-          command: sudo apt -y install libzstd-dev
-      - run:
-          name: Install pfm
-          command: sudo apt -y install libpfm4-dev
-      - run:
-          name: Install llvm
-          command: sudo apt -y install llvm
+          name: Run Tests
+          command: ctest --test-dir build --output-on-failure
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - setup
+      - build:
+          requires:
+            - setup
+      - test:
+          requires:
+            - build
