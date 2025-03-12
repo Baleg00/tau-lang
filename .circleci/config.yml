@@ -8,28 +8,15 @@ executors:
     working_directory: ~/tau-lang
 
 jobs:
-  setup:
+  build:
     executor: linux-executor
     steps:
       - run:
           name: Install Dependencies
           command: |
             sudo apt update
-            sudo apt -y install g++ clang ninja-build git cmake zlib1g-dev libzstd-dev libpfm4-dev llvm
-      - persist_to_workspace:
-          root: /
-          paths:
-            - usr/bin
-            - usr/lib
-            - usr/share
-            - usr/include
-
-  build:
-    executor: linux-executor
-    steps:
+            sudo apt -y install g++ clang ninja-build cmake zlib1g-dev libzstd-dev libpfm4-dev llvm-18-dev llvm-18-runtime
       - checkout
-      - attach_workspace:
-          at: /
       - run:
           name: Configure CMake
           command: |
@@ -47,8 +34,6 @@ jobs:
     executor: linux-executor
     steps:
       - attach_workspace:
-          at: /
-      - attach_workspace:
           at: ~/tau-lang/build
       - run:
           name: Run Tests
@@ -58,10 +43,7 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - setup
       - build:
-          requires:
-            - setup
       - test:
           requires:
             - build
