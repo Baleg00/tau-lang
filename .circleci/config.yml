@@ -3,7 +3,7 @@ version: 2.1
 executors:
   linux-executor:
     docker:
-      - image: ubuntu-2404:2024.11.1
+      - image: cimg/base:2025.03-20.04
     resource_class: small
     working_directory: ~/tau-lang
 
