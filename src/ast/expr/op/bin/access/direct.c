@@ -5,30 +5,30 @@
  * \license This project is released under the Apache 2.0 license.
  */
 
-#include "ast/expr/op/bin/access.h"
+#include "ast/expr/op/bin/access/direct.h"
 
 #include "ast/ast.h"
 #include "ast/registry.h"
 
-ast_expr_op_bin_access_t* ast_expr_op_bin_access_init(void)
+ast_expr_op_bin_access_direct_t* ast_expr_op_bin_access_direct_init(void)
 {
-  ast_expr_op_bin_access_t* node = (ast_expr_op_bin_access_t*)malloc(sizeof(ast_expr_op_bin_access_t));
+  ast_expr_op_bin_access_direct_t* node = (ast_expr_op_bin_access_direct_t*)malloc(sizeof(ast_expr_op_bin_access_direct_t));
   CLEAROBJ(node);
 
   ast_registry_register((ast_node_t*)node);
 
   node->kind = AST_EXPR_OP_BINARY;
-  node->op_kind = OP_ACCESS;
+  node->op_kind = OP_ACCESS_DIRECT;
 
   return node;
 }
 
-void ast_expr_op_bin_access_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_access_t* node)
+void ast_expr_op_bin_access_direct_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_access_direct_t* node)
 {
   ast_node_nameres(ctx, node->lhs);
 }
 
-void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_access_t* node)
+void ast_expr_op_bin_access_direct_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_access_direct_t* node)
 {
   ast_node_typecheck(ctx, node->lhs);
 
@@ -123,7 +123,7 @@ void ast_expr_op_bin_access_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_acce
   }
 }
 
-void ast_expr_op_bin_access_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_access_t* node)
+void ast_expr_op_bin_access_direct_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_access_direct_t* node)
 {
   ast_node_codegen(ctx, node->lhs);
 

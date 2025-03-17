@@ -43,6 +43,7 @@
 #include "ast/expr/lit/str.h"
 #include "ast/expr/lit/vec.h"
 #include "ast/expr/op/bin/access.h"
+#include "ast/expr/op/bin/access/direct.h"
 #include "ast/expr/op/bin/arit/add.h"
 #include "ast/expr/op/bin/arit/div.h"
 #include "ast/expr/op/bin/arit/mod.h"

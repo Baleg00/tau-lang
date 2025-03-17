@@ -63,6 +63,7 @@ void ast_expr_op_bin_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_t* node)
   case OP_ASSIGN_BIT_RSH:  ast_expr_op_bin_assign_bit_rsh_nameres (ctx, (ast_expr_op_bin_assign_bit_rsh_t* )node); break;
   case OP_SUBS:            ast_expr_op_bin_subs_nameres           (ctx, (ast_expr_op_bin_subs_t*           )node); break;
   case OP_ACCESS:          ast_expr_op_bin_access_nameres         (ctx, (ast_expr_op_bin_access_t*         )node); break;
+  case OP_ACCESS_DIRECT:   ast_expr_op_bin_access_direct_nameres  (ctx, (ast_expr_op_bin_access_direct_t*  )node); break;
   default: UNREACHABLE();
   }
 }
@@ -103,6 +104,7 @@ void ast_expr_op_bin_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_t* node)
   case OP_ASSIGN_BIT_RSH:  ast_expr_op_bin_assign_bit_rsh_typecheck (ctx, (ast_expr_op_bin_assign_bit_rsh_t* )node); break;
   case OP_SUBS:            ast_expr_op_bin_subs_typecheck           (ctx, (ast_expr_op_bin_subs_t*           )node); break;
   case OP_ACCESS:          ast_expr_op_bin_access_typecheck         (ctx, (ast_expr_op_bin_access_t*         )node); break;
+  case OP_ACCESS_DIRECT:   ast_expr_op_bin_access_direct_typecheck  (ctx, (ast_expr_op_bin_access_direct_t*  )node); break;
   default: UNREACHABLE();
   }
 }
@@ -143,6 +145,7 @@ void ast_expr_op_bin_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_t* node)
   case OP_ASSIGN_BIT_RSH:  ast_expr_op_bin_assign_bit_rsh_codegen (ctx, (ast_expr_op_bin_assign_bit_rsh_t* )node); break;
   case OP_SUBS:            ast_expr_op_bin_subs_codegen           (ctx, (ast_expr_op_bin_subs_t*           )node); break;
   case OP_ACCESS:          ast_expr_op_bin_access_codegen         (ctx, (ast_expr_op_bin_access_t*         )node); break;
+  case OP_ACCESS_DIRECT:   ast_expr_op_bin_access_direct_codegen  (ctx, (ast_expr_op_bin_access_direct_t*  )node); break;
   default: UNREACHABLE();
   }
 }

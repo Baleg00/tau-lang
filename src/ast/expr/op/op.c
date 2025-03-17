@@ -54,7 +54,7 @@ const char* op_kind_to_cstr(op_kind_t kind)
   case OP_SUBS:             return "OP_SUBS";
   case OP_IND:              return "OP_IND";
   case OP_ADDR:             return "OP_ADDR";
-  case OP_ACCESS:           return "OP_ACCESS";
+  case OP_ACCESS_DIRECT:    return "OP_ACCESS_DIRECT";
   case OP_ACCESS_IND:       return "OP_ACCESS_IND";
   case OP_ACCESS_OPT:       return "OP_ACCESS_OPT";
   case OP_UNWRAP_SAFE:      return "OP_UNWRAP_SAFE";
@@ -72,7 +72,7 @@ int op_precedence(op_kind_t kind)
 {
   switch (kind)
   {
-  case OP_ACCESS:
+  case OP_ACCESS_DIRECT:
   case OP_ACCESS_IND:
   case OP_ACCESS_OPT:
   case OP_ARIT_INC_POST:
@@ -193,7 +193,7 @@ bool op_is_binary(op_kind_t kind)
   case OP_ASSIGN_BIT_LSH:
   case OP_ASSIGN_BIT_RSH:
   case OP_SUBS:
-  case OP_ACCESS:
+  case OP_ACCESS_DIRECT:
   case OP_ACCESS_IND:
   case OP_ACCESS_OPT:
   case OP_RANGE:
@@ -345,7 +345,7 @@ bool op_is_left_assoc(op_kind_t kind)
   case OP_CMP_GT:
   case OP_CMP_GE:
   case OP_SUBS:
-  case OP_ACCESS:
+  case OP_ACCESS_DIRECT:
   case OP_ACCESS_IND:
   case OP_ACCESS_OPT:
   case OP_UNWRAP_SAFE:

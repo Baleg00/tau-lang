@@ -76,7 +76,7 @@ typedef enum op_kind_t
   OP_SUBS, ///< Subscript operator `[]`
   OP_IND, ///< Indirection operator `*`
   OP_ADDR, ///< Address-of operator `&`
-  OP_ACCESS, ///< Access operator `.`
+  OP_ACCESS_DIRECT, ///< Direct-access operator `.`
   OP_ACCESS_IND, ///< Indirect-access operator `*.`
   OP_ACCESS_OPT, ///< Optional-access operator `?.`
   OP_UNWRAP_SAFE, ///< Safe optional unwrap operator `?`

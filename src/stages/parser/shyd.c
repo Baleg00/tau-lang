@@ -576,7 +576,7 @@ void shyd_ast_expr_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem)
 
   switch (elem->op)
   {
-  case OP_ACCESS: node = (ast_expr_op_bin_t*)ast_expr_op_bin_access_init(); break;
+  case OP_ACCESS_DIRECT: node = (ast_expr_op_bin_t*)ast_expr_op_bin_access_direct_init(); break;
   default: node = ast_expr_op_bin_init(); break;
   }
 
