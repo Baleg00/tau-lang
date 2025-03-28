@@ -12,17 +12,19 @@
 
 #include <stdnoreturn.h>
 
+#include "utils/compiler_detect.h"
+
 #ifdef noreturn
 
 /// Tells the compiler that a function cannot return.
 # define NORETURN noreturn
 
-#elif defined(_MSC_VER)
+#elif TAU_COMPILER_MSVC
 
 /// Tells the compiler that a function cannot return.
 # define NORETURN __declspec(noreturn)
 
-#elif defined(__clang__) || defined(__GNUC__)
+#elif TAU_COMPILER_CLANG || TAU_COMPILER_GCC
 
 /// Tells the compiler that a function cannot return.
 # define NORETURN __attribute__((noreturn))

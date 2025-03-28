@@ -7,7 +7,9 @@
 
 #include "utils/timer.h"
 
-#ifdef _WIN32
+#include "utils/os_detect.h"
+
+#if TAU_OS_WINDOWS
 # include <windows.h>
 #else
 # include <time.h>
@@ -15,11 +17,11 @@
 
 uint64_t timer_freq(void)
 {
-#ifdef _WIN32
+#if TAU_OS_WINDOWS
   LARGE_INTEGER f;
   QueryPerformanceFrequency(&f);
   return (uint64_t)f.QuadPart;
-#elif defined(__unix) || defined(__unix__) || defined(__gnu_linux__) || defined(__linux__)
+#elif TAU_OS_UNIX
   struct timespec ts;
   clock_getres(CLOCK_MONOTONIC, &ts);
   return (uint64_t)(ts.tv_sec * 1000000ull + ts.tv_nsec);
@@ -30,11 +32,11 @@ uint64_t timer_freq(void)
 
 uint64_t timer_now(void)
 {
-#ifdef _WIN32
+#if TAU_OS_WINDOWS
   LARGE_INTEGER t;
   QueryPerformanceCounter(&t);
   return (uint64_t)t.QuadPart;
-#elif defined(__unix) || defined(__unix__) || defined(__gnu_linux__) || defined(__linux__)
+#elif TAU_OS_UNIX
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC, &ts);
   return (uint64_t)(ts.tv_sec * 1000000ull + ts.tv_nsec);
