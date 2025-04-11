@@ -480,7 +480,7 @@ bool shyd_parse_expr_op(shyd_ctx_t* ctx)
   case TOK_PUNCT_GREATER_GREATER_EQUAL: op = OP_ASSIGN_BIT_RSH;   break;
   case TOK_PUNCT_GREATER_EQUAL:         op = OP_CMP_GE;           break;
   case TOK_PUNCT_BANG_EQUAL:            op = OP_CMP_NE;           break;
-  case TOK_PUNCT_DOT:                   op = OP_ACCESS;           break;
+  case TOK_PUNCT_DOT:                   op = OP_ACCESS_DIRECT;    break;
   case TOK_PUNCT_DOT_DOT:               op = OP_RANGE;            break;
   case TOK_PUNCT_QUESTION_DOT:          op = OP_ACCESS_OPT;       break;
   case TOK_PUNCT_EQUAL:                 op = OP_ASSIGN;           break;
