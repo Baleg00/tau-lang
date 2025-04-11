@@ -740,12 +740,12 @@ token_t* lexer_read_punctuation(lexer_t* lex)
       kind = TOK_PUNCT_MINUS_MINUS;
     else if (lexer_consume(lex, '='))
       kind = TOK_PUNCT_MINUS_EQUAL;
+    else if (lexer_consume(lex, '>'))
+      kind = TOK_PUNCT_MINUS_GREATER;
     else
       kind = TOK_PUNCT_MINUS;
   else if (lexer_consume(lex, '*'))
-    if (lexer_consume(lex, '.'))
-      kind = TOK_PUNCT_ASTERISK_DOT;
-    else if (lexer_consume(lex, '='))
+    if (lexer_consume(lex, '='))
       kind = TOK_PUNCT_ASTERISK_EQUAL;
     else
       kind = TOK_PUNCT_ASTERISK;

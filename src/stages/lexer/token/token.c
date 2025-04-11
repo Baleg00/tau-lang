@@ -66,9 +66,9 @@ static const struct
   { TOK_PUNCT_MINUS, 1 },
   { TOK_PUNCT_MINUS_MINUS, 2 },
   { TOK_PUNCT_MINUS_EQUAL, 2 },
+  { TOK_PUNCT_MINUS_GREATER, 2 },
   { TOK_PUNCT_ASTERISK, 1 },
   { TOK_PUNCT_ASTERISK_EQUAL, 2 },
-  { TOK_PUNCT_ASTERISK_DOT, 2 },
   { TOK_PUNCT_SLASH, 1 },
   { TOK_PUNCT_SLASH_EQUAL, 2 },
   { TOK_PUNCT_PERCENT, 1 },
@@ -484,9 +484,9 @@ const char* token_kind_to_cstr(token_kind_t kind)
   case TOK_PUNCT_MINUS:                 return "TOK_PUNCT_MINUS";
   case TOK_PUNCT_MINUS_MINUS:           return "TOK_PUNCT_MINUS_MINUS";
   case TOK_PUNCT_MINUS_EQUAL:           return "TOK_PUNCT_MINUS_EQUAL";
+  case TOK_PUNCT_MINUS_GREATER:         return "TOK_PUNCT_MINUS_GREATER";
   case TOK_PUNCT_ASTERISK:              return "TOK_PUNCT_ASTERISK";
   case TOK_PUNCT_ASTERISK_EQUAL:        return "TOK_PUNCT_ASTERISK_EQUAL";
-  case TOK_PUNCT_ASTERISK_DOT:          return "TOK_PUNCT_ASTERISK_DOT";
   case TOK_PUNCT_SLASH:                 return "TOK_PUNCT_SLASH";
   case TOK_PUNCT_SLASH_EQUAL:           return "TOK_PUNCT_SLASH_EQUAL";
   case TOK_PUNCT_PERCENT:               return "TOK_PUNCT_PERCENT";
@@ -630,9 +630,9 @@ bool token_is_punctuation(token_t* tok)
   case TOK_PUNCT_MINUS:
   case TOK_PUNCT_MINUS_MINUS:
   case TOK_PUNCT_MINUS_EQUAL:
+  case TOK_PUNCT_MINUS_GREATER:
   case TOK_PUNCT_ASTERISK:
   case TOK_PUNCT_ASTERISK_EQUAL:
-  case TOK_PUNCT_ASTERISK_DOT:
   case TOK_PUNCT_SLASH:
   case TOK_PUNCT_SLASH_EQUAL:
   case TOK_PUNCT_PERCENT:
