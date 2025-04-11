@@ -2,85 +2,89 @@
 
 #include "utils/memory/arena.h"
 
-test()
-  describe("arena")
-    describe("arena_init")
-      it("should initialize an arena with default capacity")
-        arena_t* arena = arena_init();
+TEST_CASE(arena_init)
+{
+  arena_t* arena = arena_init();
 
-        assert_not_null(arena);
+  TEST_ASSERT_NOT_NULL(arena);
 
-        arena_free(arena);
-      end()
-    end()
+  arena_free(arena);
+}
 
-    describe("arena_init_with_capacity and arena_capacity")
-      it("should initialize an arena with specified capacity")
-        size_t capacity = 1024;
-        arena_t* arena = arena_init_with_capacity(capacity);
+TEST_CASE(arena_init_with_capacity)
+{
+  size_t capacity = 1024;
+  arena_t* arena = arena_init_with_capacity(capacity);
 
-        assert_not_null(arena);
-        assert_equal(arena_capacity(arena), capacity);
+  TEST_ASSERT_NOT_NULL(arena);
+  TEST_ASSERT_EQUAL(arena_capacity(arena), capacity);
 
-        arena_free(arena);
-      end()
-    end()
+  arena_free(arena);
+}
 
-    describe("allocator_allocate")
-      it("should allocate memory from the arena")
-        arena_t* arena = arena_init();
+TEST_CASE(arena_alloc)
+{
+  arena_t* arena = arena_init();
 
-        size_t size = 16;
-        void* mem = arena_alloc(arena, size);
+  size_t size = 16;
+  void* mem = arena_alloc(arena, size);
 
-        assert_not_null(mem);
+  TEST_ASSERT_NOT_NULL(mem);
 
-        arena_free(arena);
-      end()
+  arena_free(arena);
+}
 
-      it("should return NULL if allocation fails due to insufficient capacity")
-        arena_t* arena = arena_init();
+TEST_CASE(arena_alloc_fail)
+{
+  arena_t* arena = arena_init();
 
-        size_t capacity = arena_capacity(arena);
-        void* mem = arena_alloc(arena, capacity + 1);
+  size_t capacity = arena_capacity(arena);
+  void* mem = arena_alloc(arena, capacity + 1);
 
-        assert_null(mem);
+  TEST_ASSERT_NULL(mem);
 
-        arena_free(arena);
-      end()
+  arena_free(arena);
+}
 
-      it("should extend arena with default capacity if arena is full")
-        arena_t* arena = arena_init();
+TEST_CASE(arena_alloc_extend)
+{
+  arena_t* arena = arena_init();
 
-        size_t capacity = arena_capacity(arena);
-        void* mem1 = arena_alloc(arena, capacity);
+  size_t capacity = arena_capacity(arena);
+  void* mem1 = arena_alloc(arena, capacity);
 
-        assert_not_null(mem1);
+  TEST_ASSERT_NOT_NULL(mem1);
 
-        size_t size = 16;
-        void* mem2 = arena_alloc(arena, size);
+  size_t size = 16;
+  void* mem2 = arena_alloc(arena, size);
 
-        assert_not_null(mem2);
+  TEST_ASSERT_NOT_NULL(mem2);
 
-        arena_free(arena);
-      end()
+  arena_free(arena);
+}
 
-      it("should extend arena with specified capacity if arena is full")
-        size_t capacity = 1024;
-        arena_t* arena = arena_init_with_capacity(capacity);
+TEST_CASE(arena_capacity_alloc_extend)
+{
+  size_t capacity = 1024;
+  arena_t* arena = arena_init_with_capacity(capacity);
 
-        void* mem1 = arena_alloc(arena, capacity);
+  void* mem1 = arena_alloc(arena, capacity);
 
-        assert_not_null(mem1);
+  TEST_ASSERT_NOT_NULL(mem1);
 
-        size_t size = 16;
-        void* mem2 = arena_alloc(arena, size);
+  size_t size = 16;
+  void* mem2 = arena_alloc(arena, size);
 
-        assert_not_null(mem2);
+  TEST_ASSERT_NOT_NULL(mem2);
 
-        arena_free(arena);
-      end()
-    end()
-  end()
-end()
+  arena_free(arena);
+}
 
+TEST_MAIN()
+{
+  TEST_RUN(arena_init);
+  TEST_RUN(arena_init_with_capacity);
+  TEST_RUN(arena_alloc);
+  TEST_RUN(arena_alloc_extend);
+  TEST_RUN(arena_capacity_alloc_extend);
+}

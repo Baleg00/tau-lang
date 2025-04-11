@@ -2,107 +2,76 @@
 
 #include "utils/collections/stack.h"
 
-test()
+TEST_CASE(stack_init)
+{
+  stack_t* stack = stack_init();
 
-  stack_t* stack;
+  TEST_ASSERT_NOT_NULL(stack);
+  TEST_ASSERT_TRUE(stack_empty(stack));
 
-  describe("stack")
-    describe("stack_init")
-      before_each()
-        stack = stack_init();
-      end()
+  stack_free(stack);
+}
 
-      it("should not return NULL")
-        assert_not_null(stack);
+TEST_CASE(stack_push)
+{
+  int data1 = 1, data2 = 2, data3 = 3;
 
-        stack_free(stack);
-      end()
-    end()
+  stack_t* stack = stack_init();
 
-    describe("stack_push")
-      before_each()
-        stack = stack_init();
-      end()
+  TEST_ASSERT_TRUE(stack_empty(stack));
 
-      it("should push data onto the stack")
-        int data = 1;
+  stack_push(stack, &data1);
+  stack_push(stack, &data2);
+  stack_push(stack, &data3);
 
-        stack_push(stack, &data);
+  TEST_ASSERT_FALSE(stack_empty(stack));
 
-        assert_false(stack_empty(stack));
+  stack_free(stack);
+}
 
-        stack_free(stack);
-      end()
+TEST_CASE(stack_pop)
+{
+  int data1 = 1, data2 = 2, data3 = 3;
 
-      it("should push multiple items onto the stack")
-        int data1 = 1, data2 = 2, data3 = 3;
+  stack_t* stack = stack_init();
 
-        stack_push(stack, &data1);
-        stack_push(stack, &data2);
-        stack_push(stack, &data3);
+  TEST_ASSERT_TRUE(stack_empty(stack));
 
-        assert_false(stack_empty(stack));
+  stack_push(stack, &data1);
+  stack_push(stack, &data2);
+  stack_push(stack, &data3);
 
-        stack_free(stack);
-      end()
-    end()
+  TEST_ASSERT_FALSE(stack_empty(stack));
 
-    describe("stack_pop")
-      before_each()
-        stack = stack_init();
-      end()
+  TEST_ASSERT_PTR_EQUAL(stack_pop(stack), &data3);
+  TEST_ASSERT_PTR_EQUAL(stack_pop(stack), &data2);
+  TEST_ASSERT_PTR_EQUAL(stack_pop(stack), &data1);
 
-      it("should pop the top item from the stack")
-        int data = 1;
+  TEST_ASSERT_TRUE(stack_empty(stack));
 
-        stack_push(stack, &data);
-        void* popped_data = stack_pop(stack);
+  stack_free(stack);
+}
 
-        assert_equal(popped_data, &data);
+TEST_CASE(stack_top)
+{
+  int data1 = 1, data2 = 2, data3 = 3;
 
-        stack_free(stack);
-      end()
-    end()
+  stack_t* stack = stack_init();
 
-    describe("stack_top")
-      before_each()
-        stack = stack_init();
-      end()
+  stack_push(stack, &data1);
+  TEST_ASSERT_PTR_EQUAL(stack_top(stack), &data1);
+  stack_push(stack, &data2);
+  TEST_ASSERT_PTR_EQUAL(stack_top(stack), &data2);
+  stack_push(stack, &data3);
+  TEST_ASSERT_PTR_EQUAL(stack_top(stack), &data3);
 
-      it("should return the top item from the stack without removing it")
-        int data = 1;
+  stack_free(stack);
+}
 
-        stack_push(stack, &data);
-        void* top_data = stack_top(stack);
-
-        assert_equal(top_data, &data);
-        assert_false(stack_empty(stack));
-
-        stack_free(stack);
-      end()
-    end()
-
-    describe("stack_empty")
-      before_each()
-        stack = stack_init();
-      end()
-
-      it("should return true if stack is empty")
-        assert_true(stack_empty(stack));
-
-        stack_free(stack);
-      end()
-
-      it("should return false if stack is not empty")
-        int data = 1;
-        stack_push(stack, &data);
-
-        assert_false(stack_empty(stack));
-
-        stack_free(stack);
-      end()
-    end()
-  end()
-
-end()
-
+TEST_MAIN()
+{
+  TEST_RUN(stack_init);
+  TEST_RUN(stack_push);
+  TEST_RUN(stack_pop);
+  TEST_RUN(stack_top);
+}

@@ -1,334 +1,157 @@
+/**
+ * \file
+ *
+ * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
+ * \license This project is released under the Apache 2.0 license.
+ */
+
 #ifndef TAU_TEST_H
 #define TAU_TEST_H
 
+#ifndef TAU_TEST
+# error "TAU_TEST must be defined when using `test.h`!"
+#endif
+
+#include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
-#include <stdbool.h>
 #include <string.h>
-#include <time.h>
-#include <setjmp.h>
 
 #include "utils/esc_seq.h"
 
-#ifndef TAU_TEST
-# error "TAU_TEST must be defined when using test.h"
-#endif
+#define TEST_MAIN()\
+  void test_main_impl(void);\
+  int main(void) {\
+    g_test_main_result = EXIT_SUCCESS;\
+    test_main_impl();\
+    return g_test_main_result;\
+  }\
+  void test_main_impl(void)
 
-/** Indicates the kind of a test context. */
-typedef enum test_context_kind_e
+#define TEST_CASE(TEST_NAME)\
+  void test_case_##TEST_NAME##_impl(void);\
+  void test_case_##TEST_NAME(void)\
+  {\
+    printf(ESC_FG_BRIGHT_BLACK "[" #TEST_NAME "]" ESC_RESET "\n");\
+    g_test_case_status = TEST_STATUS_PASSED;\
+    test_case_##TEST_NAME##_impl();\
+    switch (g_test_case_status) {\
+    case TEST_STATUS_PASSED: printf(ESC_FG_GREEN "PASSED" ESC_RESET "\n"); break;\
+    case TEST_STATUS_IGNORED: printf(ESC_FG_YELLOW "IGNORED" ESC_RESET "\n"); break;\
+    case TEST_STATUS_FAILED: fprintf(stderr, ESC_FG_RED "FAILED" ESC_RESET "\n"); break;\
+    default: break;\
+    }\
+  }\
+  void test_case_##TEST_NAME##_impl(void)
+
+#define TEST_RUN(TEST_NAME)\
+  do {\
+    test_case_##TEST_NAME();\
+    if (g_test_case_status == TEST_STATUS_FAILED)\
+      g_test_main_result = EXIT_FAILURE;\
+  } while (0)
+
+#define TEST_PASS()\
+  do {\
+    g_test_case_status = TEST_STATUS_PASSED;\
+    return;\
+  } while (0)
+
+#define TEST_PASS_REASON(MSG)\
+  do {\
+    printf(ESC_FG_GREEN "Pass: " MSG ESC_RESET "\n");\
+    g_test_case_status = TEST_STATUS_PASSED;\
+    return;\
+  } while (0)
+
+#define TEST_IGNORE()\
+  do {\
+    g_test_case_status = TEST_STATUS_IGNORED;\
+    return;\
+  } while (0)
+
+#define TEST_IGNORE_REASON(MSG)\
+  do {\
+    printf(ESC_FG_YELLOW "Ignore: " MSG ESC_RESET "\n");\
+    g_test_case_status = TEST_STATUS_IGNORED;\
+    return;\
+  } while (0)
+
+#define TEST_FAIL()\
+  do {\
+    g_test_case_status = TEST_STATUS_FAILED;\
+    return;\
+  } while (0)
+
+#define TEST_FAIL_REASON(MSG)\
+  do {\
+    fprintf(stderr, ESC_FG_RED "Fail: " MSG ESC_RESET "\n");\
+    g_test_case_status = TEST_STATUS_FAILED;\
+    return;\
+  } while (0)
+
+#define TEST_LOG(MSG, ...)\
+  do {\
+    printf(ESC_FG_BRIGHT_BLACK MSG ESC_RESET "\n", ##__VA_ARGS__);\
+  } while (0)
+
+#define TEST_ASSERT(COND)\
+  test_assert((COND), __FILE__, __LINE__, "TEST_ASSERT(" #COND ")")
+
+#define TEST_ASSERT_TRUE(COND)\
+  test_assert((COND), __FILE__, __LINE__, "TEST_ASSERT_TRUE(" #COND ")")
+
+#define TEST_ASSERT_FALSE(COND)\
+  test_assert(!(COND), __FILE__, __LINE__, "TEST_ASSERT_FALSE(" #COND ")")
+
+#define TEST_ASSERT_NULL(PTR)\
+  test_assert((const void*)(PTR) == NULL, __FILE__, __LINE__, "TEST_ASSERT_NULL(" #PTR ")")
+
+#define TEST_ASSERT_NOT_NULL(PTR)\
+  test_assert((const void*)(PTR) != NULL, __FILE__, __LINE__, "TEST_ASSERT_NOT_NULL(" #PTR ")")
+
+#define TEST_ASSERT_EQUAL(ACTUAL, EXPECTED)\
+  test_assert((ACTUAL) == (EXPECTED), __FILE__, __LINE__, "TEST_ASSERT_EQUAL(" #ACTUAL ", " #EXPECTED ")")
+
+#define TEST_ASSERT_NOT_EQUAL(ACTUAL, NOT_EXPECTED)\
+  test_assert((ACTUAL) != (NOT_EXPECTED), __FILE__, __LINE__, "TEST_ASSERT_NOT_EQUAL(" #ACTUAL ", " #NOT_EXPECTED ")")
+
+#define TEST_ASSERT_PTR_EQUAL(ACTUAL, EXPECTED)\
+  test_assert((void*)(ACTUAL) == (void*)(EXPECTED), __FILE__, __LINE__, "TEST_ASSERT_PTR_EQUAL(" #ACTUAL ", " #EXPECTED ")")
+
+#define TEST_ASSERT_PTR_NOT_EQUAL(ACTUAL, NOT_EXPECTED)\
+  test_assert((void*)(ACTUAL) != (void*)(NOT_EXPECTED), __FILE__, __LINE__, "TEST_ASSERT_PTR_NOT_EQUAL(" #ACTUAL ", " #NOT_EXPECTED ")")
+
+#define TEST_ASSERT_STR_EQUAL(ACTUAL, EXPECTED)\
+  test_assert(strcmp((const char*)(ACTUAL), (const char*)(EXPECTED)) == 0, __FILE__, __LINE__, "TEST_ASSERT_STR_EQUAL(" #ACTUAL ", " #EXPECTED ")")
+
+#define TEST_ASSERT_STR_NOT_EQUAL(ACTUAL, NOT_EXPECTED)\
+  test_assert(strcmp((const char*)(ACTUAL), (const char*)(NOT_EXPECTED)) != 0, __FILE__, __LINE__, "TEST_ASSERT_STR_NOT_EQUAL(" #ACTUAL ", " #NOT_EXPECTED ")")
+
+#define TEST_ASSERT_MEM_EQUAL(ACTUAL, EXPECTED, SIZE)\
+  test_assert(memcmp((const void*)(ACTUAL), (const void*)(EXPECTED), (SIZE)) == 0, __FILE__, __LINE__, "TEST_ASSERT_MEM_EQUAL(" #ACTUAL ", " #EXPECTED, ", " #SIZE ")")
+
+#define TEST_ASSERT_MEM_NOT_EQUAL(ACTUAL, NOT_EXPECTED, SIZE)\
+  test_assert(memcmp((const void*)(ACTUAL), (const void*)(NOT_EXPECTED), (SIZE)) != 0, __FILE__, __LINE__, "TEST_ASSERT_MEM_NOT_EQUAL(" #ACTUAL ", " #NOT_EXPECTED, ", " #SIZE ")")
+
+#define test_assert(COND, FILE, LINE, MSG)\
+  do {\
+    if (!(COND)) {\
+      fprintf(stderr, ESC_FG_BRIGHT_BLACK "(%s:%d) " ESC_FG_RED "Assertion failed: %s" ESC_RESET "\n", FILE, LINE, MSG);\
+      g_test_case_status = TEST_STATUS_FAILED;\
+      return;\
+    }\
+  } while (0)
+
+typedef enum test_status_t
 {
-  TEST_CONTEXT_TEST,
-  TEST_CONTEXT_BEFORE,
-  TEST_CONTEXT_AFTER,
-  TEST_CONTEXT_BEFORE_EACH,
-  TEST_CONTEXT_AFTER_EACH,
-  TEST_CONTEXT_DESCRIBE,
-  TEST_CONTEXT_IT,
-} test_context_kind_t;
+  TEST_STATUS_PASSED,
+  TEST_STATUS_IGNORED,
+  TEST_STATUS_FAILED,
+} test_status_t;
 
-/** Represents a test context. */
-typedef struct test_context_t test_context_t;
-
-struct test_context_t
-{
-  test_context_kind_t kind; /** Context kind. */
-
-  test_context_t* parent; /** Parent context. */
-  size_t depth; /** Context depth. */
-
-  double time_begin; /** Context begin timestamp. */
-  double time_end; /** Context end timestamp. */
-
-  volatile int result; /** Context result. (EXIT_SUCCESS or EXIT_FAILURE) */
-  
-  volatile bool has_before_jmp_buf; /** Indicates that the context has a before block. */
-  jmp_buf before_jmp_buf; /** Jump buffer of the context's before block. */
-
-  volatile bool has_after_jmp_buf; /** Indicates that the context has an after block. */
-  jmp_buf after_jmp_buf; /** Jump buffer of the context's after block. */
-  
-  volatile bool has_before_each_jmp_buf; /** Indicates that the context has a before_each block. */
-  jmp_buf before_each_jmp_buf; /** Jump buffer of the context's before_each block. */
-  
-  volatile bool has_after_each_jmp_buf; /** Indicates that the context has an after_each block. */
-  jmp_buf after_each_jmp_buf; /** Jump buffer of the context's after_each block. */
-  
-  jmp_buf exit_jmp_buf; /** Jump buffer for exiting the context. */
-
-  jmp_buf return_jmp_buf; /** Jump buffer to return to. */
-};
-
-#define _timer_begin()\
-  do {\
-    _ctx.time_begin = (double)clock() / (double)CLOCKS_PER_SEC;\
-  } while (0)\
-
-#define _timer_end()\
-  do {\
-    _ctx.time_end = (double)clock() / (double)CLOCKS_PER_SEC;\
-  } while (0)\
-
-#define _timer_elapsed()\
-  ((_ctx.time_end - _ctx.time_begin) * 1000.0)
-
-#define _print_indent(COUNT)\
-  do {\
-    for (size_t i = 1; i < (COUNT); ++i)\
-    {\
-      printf("  ");\
-    }\
-  } while (0)\
-
-#define _do_before()\
-  do {\
-    if (_ctx.parent->has_before_jmp_buf)\
-    {\
-      _ctx.parent->has_before_jmp_buf = false;\
-      if (setjmp(_ctx.parent->return_jmp_buf) == 0)\
-      {\
-        longjmp(_ctx.parent->before_jmp_buf, 1);\
-      }\
-    }\
-  } while (0)\
-
-#define _do_after()\
-  do {\
-    if (_ctx.has_after_jmp_buf)\
-    {\
-      _ctx.has_after_jmp_buf = false;\
-      if (setjmp(_ctx.return_jmp_buf) == 0)\
-      {\
-        longjmp(_ctx.after_jmp_buf, 1);\
-      }\
-    }\
-  } while (0)\
-
-#define _do_before_each()\
-  do {\
-    if (_ctx.parent->has_before_each_jmp_buf)\
-    {\
-      if (setjmp(_ctx.parent->return_jmp_buf) == 0)\
-      {\
-        longjmp(_ctx.parent->before_each_jmp_buf, 1);\
-      }\
-    }\
-  } while (0)\
-
-#define _do_after_each()\
-  do {\
-    if (_ctx.parent->has_after_each_jmp_buf)\
-    {\
-      if (setjmp(_ctx.parent->return_jmp_buf) == 0)\
-      {\
-        longjmp(_ctx.parent->after_each_jmp_buf, 1);\
-      }\
-    }\
-  } while (0)\
-
-#define end()\
-    switch (_ctx.kind)\
-    {\
-    case TEST_CONTEXT_TEST:\
-    {\
-      _do_after();\
-      return _ctx.result;\
-    }\
-    case TEST_CONTEXT_BEFORE:\
-    {\
-      longjmp(_ctx.parent->return_jmp_buf, 1);\
-    }\
-    case TEST_CONTEXT_AFTER:\
-    {\
-      longjmp(_ctx.parent->return_jmp_buf, 1);\
-    }\
-    case TEST_CONTEXT_BEFORE_EACH:\
-    {\
-      longjmp(_ctx.parent->return_jmp_buf, 1);\
-    }\
-    case TEST_CONTEXT_AFTER_EACH:\
-    {\
-      longjmp(_ctx.parent->return_jmp_buf, 1);\
-    }\
-    case TEST_CONTEXT_DESCRIBE:\
-    {\
-      _do_after_each();\
-      _do_after();\
-      if (_ctx.result == EXIT_FAILURE)\
-      {\
-        _ctx.parent->result = EXIT_FAILURE;\
-      }\
-      longjmp(_ctx.exit_jmp_buf, 1);\
-    }\
-    case TEST_CONTEXT_IT:\
-    {\
-      _timer_end();\
-      _do_after_each();\
-      _do_after();\
-      printf(ESC_FG_BRIGHT_GREEN " passed" ESC_FG_BRIGHT_BLACK " (%.0lf ms)\n" ESC_RESET, _timer_elapsed());\
-      longjmp(_ctx.exit_jmp_buf, 1);\
-    }\
-    }\
-  }
-
-#define test()\
-  int main(void)\
-  {\
-    test_context_t _ctx = {\
-      .kind = TEST_CONTEXT_TEST,\
-      .parent = NULL,\
-      .depth = 0,\
-      .result = EXIT_SUCCESS,\
-      .has_before_jmp_buf = false,\
-      .has_after_jmp_buf = false,\
-      .has_before_each_jmp_buf = false,\
-      .has_after_each_jmp_buf = false,\
-    };\
-    if (setjmp(_ctx.exit_jmp_buf) != 0)\
-    {\
-      return _ctx.result;\
-    }\
-
-#define before()\
-  for (;;)\
-  {\
-    test_context_t* _parent = &_ctx;\
-    test_context_t _ctx = {\
-      .kind = TEST_CONTEXT_BEFORE,\
-      .parent = _parent,\
-    };\
-    if (setjmp(_ctx.parent->before_jmp_buf) == 0)\
-    {\
-      _ctx.parent->has_before_jmp_buf = true;\
-      break;\
-    }\
-
-#define after()\
-  for (;;)\
-  {\
-    test_context_t* _parent = &_ctx;\
-    test_context_t _ctx = {\
-      .kind = TEST_CONTEXT_AFTER,\
-      .parent = _parent,\
-    };\
-    if (setjmp(_ctx.parent->after_jmp_buf) == 0)\
-    {\
-      _ctx.parent->has_after_jmp_buf = true;\
-      break;\
-    }\
-
-#define before_each()\
-  for (;;)\
-  {\
-    test_context_t* _parent = &_ctx;\
-    test_context_t _ctx = {\
-      .kind = TEST_CONTEXT_BEFORE_EACH,\
-      .parent = _parent,\
-    };\
-    if (setjmp(_ctx.parent->before_each_jmp_buf) == 0)\
-    {\
-      _ctx.parent->has_before_each_jmp_buf = true;\
-      break;\
-    }\
-
-#define after_each()\
-  for (;;)\
-  {\
-    test_context_t* _parent = &_ctx;\
-    test_context_t _ctx = {\
-      .kind = TEST_CONTEXT_AFTER_EACH,\
-      .parent = _parent,\
-    };\
-    if (setjmp(_ctx.parent->after_each_jmp_buf) == 0)\
-    {\
-      _ctx.parent->has_after_each_jmp_buf = true;\
-      break;\
-    }\
-
-#define describe(WHAT)\
-  for (;;)\
-  {\
-    test_context_t* _parent = &_ctx;\
-    test_context_t _ctx = {\
-      .kind = TEST_CONTEXT_DESCRIBE,\
-      .parent = _parent,\
-      .depth = _parent->depth + 1,\
-      .result = EXIT_SUCCESS,\
-      .has_before_each_jmp_buf = false,\
-      .has_after_each_jmp_buf = false,\
-    };\
-    if (setjmp(_ctx.exit_jmp_buf) != 0)\
-    {\
-      break;\
-    }\
-    _do_before();\
-    _do_before_each();\
-    _print_indent(_ctx.depth);\
-    printf("%s\n", (WHAT));\
-
-#define it(SHOULD)\
-  for (;;)\
-  {\
-    test_context_t* _parent = &_ctx;\
-    test_context_t _ctx = {\
-      .kind = TEST_CONTEXT_IT,\
-      .parent = _parent,\
-      .depth = _parent->depth + 1,\
-      .result = EXIT_SUCCESS,\
-    };\
-    if (setjmp(_ctx.exit_jmp_buf) != 0)\
-    {\
-      break;\
-    }\
-    _do_before();\
-    _do_before_each();\
-    _timer_begin();\
-    _print_indent(_ctx.depth);\
-    printf(ESC_FG_BRIGHT_BLACK "%s" ESC_RESET, (SHOULD));\
-
-#define _assert_impl(COND, STR)\
-  do {\
-    if (!(COND))\
-    {\
-      printf(ESC_FG_BRIGHT_RED " failed\n");\
-      _print_indent(_ctx.depth + 1);\
-      printf("%s\n" ESC_RESET, (STR));\
-      _ctx.parent->result = EXIT_FAILURE;\
-      longjmp(_ctx.exit_jmp_buf, 1);\
-    }\
-  } while (0)\
-
-#define assert_true(COND)\
-  _assert_impl((bool)(COND), "assert_true(" #COND ")")
-
-#define assert_false(COND)\
-  _assert_impl(!(bool)(COND), "assert_false(" #COND ")")
-
-#define assert_null(VALUE)\
-  _assert_impl((void*)(VALUE) == NULL, "assert_null(" #VALUE ")")
-
-#define assert_not_null(VALUE)\
-  _assert_impl((void*)(VALUE) != NULL, "assert_not_null(" #VALUE ")")
-
-#define assert_equal(ACTUAL, EXPECTED)\
-  _assert_impl((ACTUAL) == (EXPECTED), "assert_equal(" #ACTUAL ", " #EXPECTED ")")
-
-#define assert_not_equal(ACTUAL, EXPECTED)\
-  _assert_impl((ACTUAL) != (EXPECTED), "assert_not_equal(" #ACTUAL ", " #EXPECTED ")")
-
-#define assert_ptr_equal(ACTUAL, EXPECTED)\
-  _assert_impl((void*)(ACTUAL) == (void*)(EXPECTED), "assert_ptr_equal(" #ACTUAL ", " #EXPECTED ")")
-
-#define assert_ptr_not_equal(ACTUAL, EXPECTED)\
-  _assert_impl((void*)(ACTUAL) != (void*)(EXPECTED), "assert_ptr_not_equal(" #ACTUAL ", " #EXPECTED ")")
-
-#define assert_str_equal(ACTUAL, EXPECTED)\
-  _assert_impl(strcmp((ACTUAL), (EXPECTED)) == 0, "assert_str_equal(" #ACTUAL ", " #EXPECTED ")")
-
-#define assert_str_n_equal(ACTUAL, EXPECTED, MAX_LEN)\
-  _assert_impl(strncmp((ACTUAL), (EXPECTED), (MAX_LEN)) == 0, "assert_str_n_equal(" #ACTUAL ", " #EXPECTED ", " #MAX_LEN ")")
-
-#define assert_str_not_equal(ACTUAL, EXPECTED)\
-  _assert_impl(strcmp((ACTUAL), (EXPECTED)) != 0, "assert_str_not_equal(" #ACTUAL ", " #EXPECTED ")")
+static test_status_t g_test_case_status = TEST_STATUS_PASSED;
+static int g_test_main_result = 0;
 
 #endif
