@@ -457,8 +457,8 @@ bool shyd_parse_expr_op(shyd_ctx_t* ctx)
   case TOK_PUNCT_BANG:                  op = ctx->prev_term ? OP_UNWRAP_UNSAFE : OP_LOGIC_NOT;    break;
   case TOK_PUNCT_PLUS_EQUAL:            op = OP_ASSIGN_ARIT_ADD;  break;
   case TOK_PUNCT_MINUS_EQUAL:           op = OP_ASSIGN_ARIT_SUB;  break;
+  case TOK_PUNCT_MINUS_GREATER:         op = OP_ACCESS_IND;       break;
   case TOK_PUNCT_ASTERISK_EQUAL:        op = OP_ASSIGN_ARIT_MUL;  break;
-  case TOK_PUNCT_ASTERISK_DOT:          op = OP_ACCESS_IND;       break;
   case TOK_PUNCT_SLASH:                 op = OP_ARIT_DIV;         break;
   case TOK_PUNCT_SLASH_EQUAL:           op = OP_ASSIGN_ARIT_DIV;  break;
   case TOK_PUNCT_PERCENT:               op = OP_ARIT_MOD;         break;

@@ -95,9 +95,9 @@ typedef enum token_kind_e
   TOK_PUNCT_MINUS, ///< Punctuation `-`
   TOK_PUNCT_MINUS_MINUS, ///< Punctuation `--`
   TOK_PUNCT_MINUS_EQUAL, ///< Punctuation `-=`
+  TOK_PUNCT_MINUS_GREATER, ///< Punctuation `->`
   TOK_PUNCT_ASTERISK, ///< Punctuation `*`
   TOK_PUNCT_ASTERISK_EQUAL, ///< Punctuation `*=`
-  TOK_PUNCT_ASTERISK_DOT, ///< Punctuation `*.`
   TOK_PUNCT_SLASH, ///< Punctuation `/`
   TOK_PUNCT_SLASH_EQUAL, ///< Punctuation `/=`
   TOK_PUNCT_PERCENT, ///< Punctuation `%`
