@@ -10,9 +10,11 @@
 #ifndef TAU_UNUSED_H
 #define TAU_UNUSED_H
 
+#include "utils/compiler_detect.h"
+
 #ifndef UNUSED
 
-# if defined(_MSC_VER) && !defined(__clang__)
+# if TAU_COMPILER_MSVC && !TAU_COMPILER_CLANG
 
 /**
  * \brief Marks a parameter as unused to suppress warnings.
@@ -21,7 +23,7 @@
  */
 #   define UNUSED(X) _Pragma("warning(suppress:4100)") unused_##X
 
-# elif defined(__clang__) || defined(__GNUC__)
+# elif TAU_COMPILER_CLANG || TAU_COMPILER_GCC
 
 /**
  * \brief Marks a parameter as unused to suppress warnings.

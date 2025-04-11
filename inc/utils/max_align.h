@@ -13,7 +13,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if defined(_MSC_VER) && !defined(__clang__)
+#include "utils/compiler_detect.h"
+
+#if TAU_COMPILER_MSVC && !TAU_COMPILER_CLANG
 
 /**
  * \brief A type whose alignment requirement is at least as strict

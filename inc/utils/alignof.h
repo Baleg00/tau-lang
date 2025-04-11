@@ -12,9 +12,10 @@
 
 #include <stdalign.h>
 
+#include "utils/compiler_detect.h"
 #include "utils/offsetof.h"
 
-#if (defined(_MSC_VER) && defined(__alignof_is_defined)) || defined(__clang__) || defined(__GNUC__)
+#if (TAU_COMPILER_MSVC && defined(__alignof_is_defined)) || TAU_COMPILER_CLANG || TAU_COMPILER_GCC
 
 /**
  * \brief Returns the alignment requirement of a type.

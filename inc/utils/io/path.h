@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "utils/os_detect.h"
 #include "utils/str.h"
 #include "utils/str_view.h"
 
@@ -27,7 +28,7 @@
 /// Cross-platform directory separator C-string.
 #define PATH_GENERIC_DIRECTORY_SEPARATOR_CSTR "/"
 
-#if defined(TAU_OS_WINDOWS)
+#if TAU_OS_WINDOWS
 /// Platform specific directory separator character.
 # define PATH_NATIVE_DIRECTORY_SEPARATOR_CHAR '\\'
 
