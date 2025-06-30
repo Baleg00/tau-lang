@@ -196,70 +196,135 @@ size_t file_read(path_t* path, char* buf, size_t len)
 
 #elif TAU_OS_LINUX
 
-bool file_is_directory(path_t* UNUSED(path))
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
+bool file_is_directory(path_t *path)
 {
-  UNREACHABLE();
-  return false;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char *path_cstr = string_view_begin(path_str_view);
+
+  struct stat st;
+
+  return stat(path_cstr, &st) == 0 && S_ISDIR(st.st_mode);
 }
 
-bool file_is_regular_file(path_t* UNUSED(path))
+bool file_is_regular_file(path_t *path)
 {
-  UNREACHABLE();
-  return false;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char *path_cstr = string_view_begin(path_str_view);
+
+  struct stat st;
+
+  return stat(path_cstr, &st) == 0 && S_ISREG(st.st_mode);
 }
 
-bool file_is_block_file(path_t* UNUSED(path))
+bool file_is_block_file(path_t *path)
 {
-  UNREACHABLE();
-  return false;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char *path_cstr = string_view_begin(path_str_view);
+
+  struct stat st;
+
+  return stat(path_cstr, &st) == 0 && S_ISBLK(st.st_mode);
 }
 
-bool file_is_character_file(path_t* UNUSED(path))
+bool file_is_character_file(path_t *path)
 {
-  UNREACHABLE();
-  return false;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char *path_cstr = string_view_begin(path_str_view);
+
+  struct stat st;
+
+  return stat(path_cstr, &st) == 0 && S_ISCHR(st.st_mode);
 }
 
-bool file_is_pipe(path_t* UNUSED(path))
+bool file_is_pipe(path_t *path)
 {
-  UNREACHABLE();
-  return false;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char* path_cstr = string_view_begin(path_str_view);
+
+  struct stat st;
+
+  return stat(path_cstr, &st) == 0 && S_ISFIFO(st.st_mode);
 }
 
-bool file_is_socket(path_t* UNUSED(path))
+bool file_is_socket(path_t *path)
 {
-  UNREACHABLE();
-  return false;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char* path_cstr = string_view_begin(path_str_view);
+
+  struct stat st;
+
+  return stat(path_cstr, &st) == 0 && S_ISSOCK(st.st_mode);
 }
 
-bool file_is_symlink(path_t* UNUSED(path))
+bool file_is_symlink(path_t *path)
 {
-  UNREACHABLE();
-  return false;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char* path_cstr = string_view_begin(path_str_view);
+
+  struct stat st;
+
+  return lstat(path_cstr, &st) == 0 && S_ISLNK(st.st_mode);
 }
 
-bool file_exists(path_t* UNUSED(path))
+bool file_exists(path_t *path)
 {
-  UNREACHABLE();
-  return false;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char* path_cstr = string_view_begin(path_str_view);
+
+  return access(path_cstr, F_OK) == 0;
 }
 
-bool file_empty(path_t* UNUSED(path))
+bool file_empty(path_t *path)
 {
-  UNREACHABLE();
-  return false;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char* path_cstr = string_view_begin(path_str_view);
+
+  struct stat st;
+
+  return stat(path_cstr, &st) == 0 && (st.st_size == 0);
 }
 
-size_t file_size(path_t* UNUSED(path))
+size_t file_size(path_t *path)
 {
-  UNREACHABLE();
-  return 0;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char* path_cstr = string_view_begin(path_str_view);
+
+  struct stat st;
+
+  return stat(path_cstr, &st) == 0 ? st.st_size : 0;
 }
 
-size_t file_read(path_t* UNUSED(path), char* UNUSED(buf), size_t UNUSED(len))
+size_t file_read(path_t *path, char *buf, size_t len)
 {
-  UNREACHABLE();
-  return 0;
+  string_view_t path_str_view = path_to_string_view(path);
+  const char* path_cstr = string_view_begin(path_str_view);
+
+  int fd = open(path_cstr, O_RDONLY);
+
+  if (fd == -1)
+    return 0;
+
+  size_t bytes_read = 0;
+
+  if (buf)
+  {
+    bytes_read = read(fd, buf, len);
+  }
+  else
+  {
+    struct stat st;
+
+    if (fstat(fd, &st) == 0)
+      bytes_read = st.st_size;
+  }
+
+  close(fd);
+
+  return bytes_read;
 }
 
 #else
