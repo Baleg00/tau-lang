@@ -107,7 +107,30 @@ void ast_expr_op_call_codegen(codegen_ctx_t* ctx, ast_expr_op_call_t* node)
         llvm_param_value = codegen_build_implicit_cast(ctx, llvm_param_value, param_desc, expected_param_desc);
       }
       else
+      {
         llvm_param_value = codegen_build_load_if_ref(ctx, param->llvm_value, param_desc);
+
+        // C default argument promotions for variadic functions
+        if (fun_desc->callconv == CALLCONV_CDECL && fun_desc->is_vararg)
+        {
+          typedesc_t* dst_desc = NULL;
+
+          typedesc_t* param_base_desc = typedesc_remove_ref_mut(param_desc);
+
+          switch (param_base_desc->kind)
+          {
+          case TYPEDESC_I8:
+          case TYPEDESC_I16:
+          case TYPEDESC_U8:
+          case TYPEDESC_U16: dst_desc = typebuilder_build_i32(ctx->typebuilder); break;
+          case TYPEDESC_F32: dst_desc = typebuilder_build_f64(ctx->typebuilder); break;
+          default: NOOP();
+          }
+
+          if (dst_desc != NULL)
+            llvm_param_value = codegen_build_arithmetic_cast(ctx, llvm_param_value, param_base_desc, dst_desc);
+        }
+      }
 
       llvm_param_values[i] = llvm_param_value;
     }
