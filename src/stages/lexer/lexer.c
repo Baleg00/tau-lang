@@ -390,7 +390,7 @@ token_t* lexer_read_word(lexer_t* lex)
     error_bag_put_lexer_identifier_too_long(lex->errors, loc);
   }
 
-  char buf[LEXER_MAX_WORD_SIZE];
+  char buf[LEXER_MAX_WORD_SIZE] = { 0 };
 
   strncpy(buf, lex->src + tok->pos, len);
 
