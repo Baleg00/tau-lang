@@ -22,6 +22,7 @@
 #include "utils/c_std.h"
 #include "utils/debugbreak.h"
 #include "utils/extern_c.h"
+#include "utils/ignore.h"
 #include "utils/max_align.h"
 #include "utils/minmax.h"
 #include "utils/noop.h"
