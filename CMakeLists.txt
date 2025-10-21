@@ -14,6 +14,9 @@ enable_testing()
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Include operating system detection configuration file.
+include(OSDetectConfig.cmake)
+
 # Include LLVM configuration file.
 include(LLVMConfig.cmake)
 
