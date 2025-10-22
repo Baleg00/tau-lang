@@ -11,12 +11,12 @@
 #define TAU_OS_DETECT_H
 
 /// Defined as 1 if building for Windows, 0 otherwise
-#cmakedefine01 TAU_OS_WINDOWS
+#define TAU_OS_WINDOWS ${TAU_OS_WINDOWS}
 
 /// Defined as 1 if building for macOS (Darwin), 0 otherwise
-#cmakedefine01 TAU_OS_DARWIN
+#define TAU_OS_DARWIN ${TAU_OS_DARWIN}
 
 /// Defined as 1 if building for Linux, 0 otherwise
-#cmakedefine01 TAU_OS_LINUX
+#define TAU_OS_LINUX ${TAU_OS_LINUX}
 
 #endif

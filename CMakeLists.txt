@@ -6,25 +6,55 @@ project(Tau
   LANGUAGES C CXX
 )
 
-# Include the CTest module and enable testing for the project.
+option(TAU_LLVM_SHARED "Link to LLVM shared library" OFF)
+option(TAU_CODE_COVERAGE "Enable code coverage support" OFF)
+set(TAU_CODE_COVERAGE_DIR ${CMAKE_BINARY_DIR}/coverage CACHE STRING "Code coverage ouput directory")
+
 include(CTest)
 enable_testing()
 
-# Specify the C standard to be used (C17) and enforce it as a requirement.
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Include operating system detection configuration file.
-include(OSDetectConfig.cmake)
+include(cmake/CodeCoverageConfig.cmake)
+include(cmake/LLVMConfig.cmake)
+include(cmake/OSDetectConfig.cmake)
+include(cmake/TauConfig.cmake)
+include(cmake/TestConfig.cmake)
 
-# Include LLVM configuration file.
-include(LLVMConfig.cmake)
+tau_os_detect_configure_file()
 
-# Include Tau configuration file.
-include(TauConfig.cmake)
+tau_find_llvm()
 
-# Add the `src` directory, which contains the source files for the project.
-add_subdirectory(${PROJECT_SOURCE_DIR}/src)
+tau_add_library(tau)
+tau_target_configure(tau)
+tau_target_llvm_configure(tau ${TAU_LLVM_SHARED})
 
-# Add the `test` directory, which contains the unit tests.
-add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+if (TAU_CODE_COVERAGE)
+  tau_target_code_coverage_configure(tau)
+endif ()
+
+tau_add_tests(TAU_TEST_TARGET_LIST)
+
+foreach (TEST_TARGET IN LISTS TAU_TEST_TARGET_LIST)
+  tau_target_configure(${TEST_TARGET})
+  tau_target_llvm_configure(${TEST_TARGET} ${TAU_LLVM_SHARED})
+  target_link_libraries(${TEST_TARGET} PRIVATE tau)
+
+  if (TAU_CODE_COVERAGE)
+    tau_target_code_coverage_configure(${TEST_TARGET})
+  endif ()
+endforeach ()
+
+tau_add_executable(tauc)
+tau_target_configure(tauc)
+tau_target_llvm_configure(tauc ${TAU_LLVM_SHARED})
+target_link_libraries(tauc PRIVATE tau)
+
+if (TAU_CODE_COVERAGE)
+  tau_target_code_coverage_configure(tauc)
+endif ()
+
+tau_add_code_coverage_target()
+
+install(TARGETS tauc CONFIGURATIONS Debug Release RelWithDebInfo MinSizeRel)
