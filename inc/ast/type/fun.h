@@ -18,28 +18,28 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST function type node.
  */
-typedef struct ast_type_fun_t
+typedef struct tau_ast_type_fun_t
 {
-  AST_TYPE_HEADER;
-  vector_t* params; // Vector of associated parameter types.
-  ast_node_t* return_type; // The associated return type.
-  callconv_kind_t callconv; // The associated calling convention.
+  TAU_AST_TYPE_HEADER;
+  tau_vector_t* params; // Vector of associated parameter types.
+  tau_ast_node_t* return_type; // The associated return type.
+  tau_callconv_kind_t callconv; // The associated calling convention.
   bool is_vararg; // Is function variadic (C-style, only works with specific calling conventions).
-} ast_type_fun_t;
+} tau_ast_type_fun_t;
 
 /**
  * \brief Initializes a new AST function type node.
  * 
  * \returns Pointer to the newly initialized AST node.
  */
-ast_type_fun_t* ast_type_fun_init(void);
+tau_ast_type_fun_t* tau_ast_type_fun_init(void);
 
 /**
  * \brief Frees all memory allocated by an AST function type node.
  * 
  * \param[in] node Pointer to the AST node to be freed.
  */
-void ast_type_fun_free(ast_type_fun_t* node);
+void tau_ast_type_fun_free(tau_ast_type_fun_t* node);
 
 /**
  * \brief Performs name resolution pass on an AST function type node.
@@ -47,7 +47,7 @@ void ast_type_fun_free(ast_type_fun_t* node);
  * \param[in] ctx Pointer to the name resolution context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_type_fun_nameres(nameres_ctx_t* ctx, ast_type_fun_t* node);
+void tau_ast_type_fun_nameres(tau_nameres_ctx_t* ctx, tau_ast_type_fun_t* node);
 
 /**
  * \brief Performs type check pass on an AST function type node.
@@ -55,7 +55,7 @@ void ast_type_fun_nameres(nameres_ctx_t* ctx, ast_type_fun_t* node);
  * \param[in] ctx Pointer to the type check context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_type_fun_typecheck(typecheck_ctx_t* ctx, ast_type_fun_t* node);
+void tau_ast_type_fun_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_type_fun_t* node);
 
 /**
  * \brief Performs code generation pass on an AST function type node.
@@ -63,7 +63,7 @@ void ast_type_fun_typecheck(typecheck_ctx_t* ctx, ast_type_fun_t* node);
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_type_fun_codegen(codegen_ctx_t* ctx, ast_type_fun_t* node);
+void tau_ast_type_fun_codegen(tau_codegen_ctx_t* ctx, tau_ast_type_fun_t* node);
 
 /**
  * \brief Writes a JSON dump of an AST function type node into a stream.
@@ -71,7 +71,7 @@ void ast_type_fun_codegen(codegen_ctx_t* ctx, ast_type_fun_t* node);
  * \param[in] stream The stream to be written to.
  * \param[in] node Pointer to the AST node to be dumped.
 */
-void ast_type_fun_dump_json(FILE* stream, ast_type_fun_t* node);
+void tau_ast_type_fun_dump_json(FILE* stream, tau_ast_type_fun_t* node);
 
 TAU_EXTERN_C_END
 

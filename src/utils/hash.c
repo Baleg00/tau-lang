@@ -7,7 +7,7 @@
 
 #include "utils/hash.h"
 
-uint64_t hash_digest(const void* data, size_t size)
+uint64_t tau_hash_digest(const void* data, size_t size)
 {
   /**
    * FNV-1a hash
@@ -32,12 +32,12 @@ uint64_t hash_digest(const void* data, size_t size)
   return h;
 }
 
-uint64_t hash_combine_with_data(uint64_t seed, const void* data, size_t size)
+uint64_t tau_hash_combine_with_data(uint64_t seed, const void* data, size_t size)
 {
-  return hash_combine_with_hash(seed, hash_digest(data, size));
+  return tau_hash_combine_with_hash(seed, tau_hash_digest(data, size));
 }
 
-uint64_t hash_combine_with_hash(uint64_t seed, uint64_t hash)
+uint64_t tau_hash_combine_with_hash(uint64_t seed, uint64_t hash)
 {
   return seed ^ (hash + 0x9E3779B9ULL + (seed << 6) + (seed >> 2));
 }

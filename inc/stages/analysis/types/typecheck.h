@@ -26,16 +26,16 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Type check context.
  */
-typedef struct typecheck_ctx_t
+typedef struct tau_typecheck_ctx_t
 {
-  typebuilder_t* typebuilder;
-  typetable_t* typetable;
+  tau_typebuilder_t* typebuilder;
+  tau_typetable_t* typetable;
 
-  typedesc_fun_t* fun_desc; ///< Type descriptor of the containing function declaration.
-  typedesc_enum_t* enum_desc; ///< Type descriptor of the containing enum declaration.
+  tau_typedesc_fun_t* fun_desc; ///< Type descriptor of the containing function declaration.
+  tau_typedesc_enum_t* enum_desc; ///< Type descriptor of the containing enum declaration.
 
-  error_bag_t* errors; ///< Associated error bag to add errors to.
-} typecheck_ctx_t;
+  tau_error_bag_t* errors; ///< Associated error bag to add errors to.
+} tau_typecheck_ctx_t;
 
 /**
  * \brief Initializes a new type check context.
@@ -45,14 +45,14 @@ typedef struct typecheck_ctx_t
  * \param[in] errors Pointer to the error bag to be used.
  * \returns Pointer to the newly initialized type check context.
  */
-typecheck_ctx_t* typecheck_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable, error_bag_t* errors);
+tau_typecheck_ctx_t* tau_typecheck_ctx_init(tau_typebuilder_t* typebuilder, tau_typetable_t* typetable, tau_error_bag_t* errors);
 
 /**
  * \brief Frees all memory allocated by a type check context.
  * 
  * \param[in] ctx Pointer to the type check context to be freed.
  */
-void typecheck_ctx_free(typecheck_ctx_t* ctx);
+void tau_typecheck_ctx_free(tau_typecheck_ctx_t* ctx);
 
 /**
  * \brief Poisons an AST node in the typetable.
@@ -60,7 +60,7 @@ void typecheck_ctx_free(typecheck_ctx_t* ctx);
  * \param[in] ctx Pointer to the type check context to be used.
  * \param[in] node Pointer to the AST node to be poisoned.
  */
-void typecheck_poison(typecheck_ctx_t* ctx, ast_node_t* node);
+void tau_typecheck_poison(tau_typecheck_ctx_t* ctx, tau_ast_node_t* node);
 
 TAU_EXTERN_C_END
 

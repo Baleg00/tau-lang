@@ -9,57 +9,57 @@
 
 #include "ast/registry.h"
 
-ast_prog_t* ast_prog_init(void)
+tau_ast_prog_t* tau_ast_prog_init(void)
 {
-  ast_prog_t* node = (ast_prog_t*)malloc(sizeof(ast_prog_t));
-  CLEAROBJ(node);
+  tau_ast_prog_t* node = (tau_ast_prog_t*)malloc(sizeof(tau_ast_prog_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_PROG;
-  node->decls = vector_init();
+  node->kind = TAU_AST_PROG;
+  node->decls = tau_vector_init();
 
   return node;
 }
 
-void ast_prog_free(ast_prog_t* node)
+void tau_ast_prog_free(tau_ast_prog_t* node)
 {
-  vector_free(node->decls);
+  tau_vector_free(node->decls);
   free(node);
 }
 
-void ast_prog_nameres(nameres_ctx_t* ctx, ast_prog_t* node)
+void tau_ast_prog_nameres(tau_nameres_ctx_t* ctx, tau_ast_prog_t* node)
 {
-  node->scope = nameres_ctx_scope_begin(ctx);
+  node->scope = tau_nameres_ctx_scope_begin(ctx);
 
-  VECTOR_FOR_LOOP(i, node->decls)
-    ast_node_nameres(ctx, (ast_node_t*)vector_get(node->decls, i));
+  TAU_VECTOR_FOR_LOOP(i, node->decls)
+    tau_ast_node_nameres(ctx, (tau_ast_node_t*)tau_vector_get(node->decls, i));
 
-  nameres_ctx_scope_end(ctx);
+  tau_nameres_ctx_scope_end(ctx);
 }
 
-void ast_prog_typecheck(typecheck_ctx_t* ctx, ast_prog_t* node)
+void tau_ast_prog_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_prog_t* node)
 {
-  VECTOR_FOR_LOOP(i, node->decls)
-    ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->decls, i));
+  TAU_VECTOR_FOR_LOOP(i, node->decls)
+    tau_ast_node_typecheck(ctx, (tau_ast_node_t*)tau_vector_get(node->decls, i));
 }
 
-void ast_prog_ctrlflow(ctrlflow_ctx_t* ctx, ast_prog_t* node)
+void tau_ast_prog_ctrlflow(tau_ctrlflow_ctx_t* ctx, tau_ast_prog_t* node)
 {
-  VECTOR_FOR_LOOP(i, node->decls)
-    ast_node_ctrlflow(ctx, (ast_node_t*)vector_get(node->decls, i));
+  TAU_VECTOR_FOR_LOOP(i, node->decls)
+    tau_ast_node_ctrlflow(ctx, (tau_ast_node_t*)tau_vector_get(node->decls, i));
 }
 
-void ast_prog_codegen(codegen_ctx_t* ctx, ast_prog_t* node)
+void tau_ast_prog_codegen(tau_codegen_ctx_t* ctx, tau_ast_prog_t* node)
 {
-  VECTOR_FOR_LOOP(i, node->decls)
-    ast_node_codegen(ctx, (ast_node_t*)vector_get(node->decls, i));
+  TAU_VECTOR_FOR_LOOP(i, node->decls)
+    tau_ast_node_codegen(ctx, (tau_ast_node_t*)tau_vector_get(node->decls, i));
 }
 
-void ast_prog_dump_json(FILE* stream, ast_prog_t* node)
+void tau_ast_prog_dump_json(FILE* stream, tau_ast_prog_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"", tau_ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"decls\":");
-  ast_node_dump_json_vector(stream, node->decls);
+  tau_ast_node_dump_json_vector(stream, node->decls);
   fputc('}', stream);
 }

@@ -15,8 +15,8 @@
 /**
  * \brief Header for all AST expression nodes.
  */
-#define AST_EXPR_HEADER\
-  AST_NODE_HEADER;\
+#define TAU_AST_EXPR_HEADER\
+  TAU_AST_NODE_HEADER;\
   LLVMTypeRef llvm_type;\
   LLVMValueRef llvm_value
 
@@ -25,10 +25,10 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST expression node.
  */
-typedef struct ast_expr_t
+typedef struct tau_ast_expr_t
 {
-  AST_EXPR_HEADER;
-} ast_expr_t;
+  TAU_AST_EXPR_HEADER;
+} tau_ast_expr_t;
 
 TAU_EXTERN_C_END
 

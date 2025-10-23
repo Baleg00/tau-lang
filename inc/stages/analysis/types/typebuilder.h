@@ -31,7 +31,7 @@ TAU_EXTERN_C_BEGIN
  * including freeing it when the builder is destroyed. Avoid manually freeing
  * types that are returned by a type builder to prevent double-free errors.
  */
-typedef struct typebuilder_t typebuilder_t;
+typedef struct tau_typebuilder_t tau_typebuilder_t;
 
 /**
  * \brief Initializes a new type builder.
@@ -40,14 +40,14 @@ typedef struct typebuilder_t typebuilder_t;
  * \param[in] llvm_layout The LLVM target data layout to be used.
  * \returns A pointer to the newly initialized type builder.
  */
-typebuilder_t* typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef llvm_layout);
+tau_typebuilder_t* tau_typebuilder_init(LLVMContextRef llvm_context, LLVMTargetDataRef llvm_layout);
 
 /**
  * \brief Frees the resources associated with the type builder.
  *
  * \param[in] builder Pointer to the type builder to be freed.
  */
-void typebuilder_free(typebuilder_t* builder);
+void tau_typebuilder_free(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a mutable version of the provided base type.
@@ -56,7 +56,7 @@ void typebuilder_free(typebuilder_t* builder);
  * \param[in] base_type The base type to be modified.
  * \returns A pointer to the newly created mutable type descriptor.
  */
-typedesc_t* typebuilder_build_mut(typebuilder_t* builder, typedesc_t* base_type);
+tau_typedesc_t* tau_typebuilder_build_mut(tau_typebuilder_t* builder, tau_typedesc_t* base_type);
 
 /**
  * \brief Builds a pointer type with the provided base type.
@@ -65,7 +65,7 @@ typedesc_t* typebuilder_build_mut(typebuilder_t* builder, typedesc_t* base_type)
  * \param[in] base_type The base type for the pointer.
  * \returns A pointer to the newly created pointer type descriptor.
  */
-typedesc_t* typebuilder_build_ptr(typebuilder_t* builder, typedesc_t* base_type);
+tau_typedesc_t* tau_typebuilder_build_ptr(tau_typebuilder_t* builder, tau_typedesc_t* base_type);
 
 /**
  * \brief Builds an array type with the provided base type.
@@ -75,7 +75,7 @@ typedesc_t* typebuilder_build_ptr(typebuilder_t* builder, typedesc_t* base_type)
  * \param[in] base_type The base type for the array.
  * \returns A pointer to the newly created array type descriptor.
  */
-typedesc_t* typebuilder_build_array(typebuilder_t* builder, size_t length, typedesc_t* base_type);
+tau_typedesc_t* tau_typebuilder_build_array(tau_typebuilder_t* builder, size_t length, tau_typedesc_t* base_type);
 
 /**
  * \brief Builds a reference type with the provided base type.
@@ -84,7 +84,7 @@ typedesc_t* typebuilder_build_array(typebuilder_t* builder, size_t length, typed
  * \param[in] base_type The base type for the reference.
  * \returns A pointer to the newly created reference type descriptor.
  */
-typedesc_t* typebuilder_build_ref(typebuilder_t* builder, typedesc_t* base_type);
+tau_typedesc_t* tau_typebuilder_build_ref(tau_typebuilder_t* builder, tau_typedesc_t* base_type);
 
 /**
  * \brief Builds an optional type with the provided base type.
@@ -93,7 +93,7 @@ typedesc_t* typebuilder_build_ref(typebuilder_t* builder, typedesc_t* base_type)
  * \param[in] base_type The base type for the optional.
  * \returns A pointer to the newly created optional type descriptor.
  */
-typedesc_t* typebuilder_build_opt(typebuilder_t* builder, typedesc_t* base_type);
+tau_typedesc_t* tau_typebuilder_build_opt(tau_typebuilder_t* builder, tau_typedesc_t* base_type);
 
 /**
  * \brief Builds a vector type.
@@ -103,7 +103,7 @@ typedesc_t* typebuilder_build_opt(typebuilder_t* builder, typedesc_t* base_type)
  * \param[in] base_type The base type of the vector.
  * \returns A pointer to the newly created vector type descriptor.
  */
-typedesc_t* typebuilder_build_vec(typebuilder_t* builder, size_t size, typedesc_t* base_type);
+tau_typedesc_t* tau_typebuilder_build_vec(tau_typebuilder_t* builder, size_t size, tau_typedesc_t* base_type);
 
 /**
  * \brief Builds a matrix type.
@@ -114,7 +114,7 @@ typedesc_t* typebuilder_build_vec(typebuilder_t* builder, size_t size, typedesc_
  * \param[in] base_type The base type of the matrix.
  * \returns A pointer to the newly created matrix type descriptor.
  */
-typedesc_t* typebuilder_build_mat(typebuilder_t* builder, size_t rows, size_t cols, typedesc_t* base_type);
+tau_typedesc_t* tau_typebuilder_build_mat(tau_typebuilder_t* builder, size_t rows, size_t cols, tau_typedesc_t* base_type);
 
 /**
  * \brief Builds a signed 8-bit integer type.
@@ -122,7 +122,7 @@ typedesc_t* typebuilder_build_mat(typebuilder_t* builder, size_t rows, size_t co
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 8-bit integer type descriptor.
  */
-typedesc_t* typebuilder_build_i8(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_i8(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a signed 16-bit integer type.
@@ -130,7 +130,7 @@ typedesc_t* typebuilder_build_i8(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 16-bit integer type descriptor.
  */
-typedesc_t* typebuilder_build_i16(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_i16(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a signed 32-bit integer type.
@@ -138,7 +138,7 @@ typedesc_t* typebuilder_build_i16(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 32-bit integer type descriptor.
  */
-typedesc_t* typebuilder_build_i32(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_i32(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a signed 64-bit integer type.
@@ -146,7 +146,7 @@ typedesc_t* typebuilder_build_i32(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 64-bit integer type descriptor.
  */
-typedesc_t* typebuilder_build_i64(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_i64(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a signed size type.
@@ -154,7 +154,7 @@ typedesc_t* typebuilder_build_i64(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created size type descriptor.
  */
-typedesc_t* typebuilder_build_isize(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_isize(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds an unsigned 8-bit integer type.
@@ -162,7 +162,7 @@ typedesc_t* typebuilder_build_isize(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 8-bit integer type descriptor.
  */
-typedesc_t* typebuilder_build_u8(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_u8(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds an unsigned 16-bit integer type.
@@ -170,7 +170,7 @@ typedesc_t* typebuilder_build_u8(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 16-bit integer type descriptor.
  */
-typedesc_t* typebuilder_build_u16(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_u16(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds an unsigned 32-bit integer type.
@@ -178,7 +178,7 @@ typedesc_t* typebuilder_build_u16(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 32-bit integer type descriptor.
  */
-typedesc_t* typebuilder_build_u32(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_u32(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds an unsigned 64-bit integer type.
@@ -186,7 +186,7 @@ typedesc_t* typebuilder_build_u32(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 64-bit integer type descriptor.
  */
-typedesc_t* typebuilder_build_u64(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_u64(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds an unsigned size type.
@@ -194,7 +194,7 @@ typedesc_t* typebuilder_build_u64(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created size type descriptor.
  */
-typedesc_t* typebuilder_build_usize(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_usize(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds an integer type that satisfies the specified requirements.
@@ -204,7 +204,7 @@ typedesc_t* typebuilder_build_usize(typebuilder_t* builder);
  * \param[in] is_signed `true` if the integer type should be signed, `false` otherwise.
  * \returns A pointer to the newly created integer type descriptor.
  */
-typedesc_t* typebuilder_build_integer(typebuilder_t* builder, size_t bits, bool is_signed);
+tau_typedesc_t* tau_typebuilder_build_integer(tau_typebuilder_t* builder, size_t bits, bool is_signed);
 
 /**
  * \brief Builds a 32-bit floating-point type.
@@ -212,7 +212,7 @@ typedesc_t* typebuilder_build_integer(typebuilder_t* builder, size_t bits, bool 
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 32-bit floating-point type descriptor.
  */
-typedesc_t* typebuilder_build_f32(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_f32(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a 64-bit floating-point type.
@@ -220,7 +220,7 @@ typedesc_t* typebuilder_build_f32(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 64-bit floating-point type descriptor.
  */
-typedesc_t* typebuilder_build_f64(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_f64(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a 64-bit complex floating-point type.
@@ -228,7 +228,7 @@ typedesc_t* typebuilder_build_f64(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 64-bit complex floating-point type descriptor.
  */
-typedesc_t* typebuilder_build_c64(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_c64(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a 128-bit complex floating-point type.
@@ -236,7 +236,7 @@ typedesc_t* typebuilder_build_c64(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created 128-bit complex floating-point type descriptor.
  */
-typedesc_t* typebuilder_build_c128(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_c128(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a character type.
@@ -244,7 +244,7 @@ typedesc_t* typebuilder_build_c128(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created character type descriptor.
  */
-typedesc_t* typebuilder_build_char(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_char(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a boolean type.
@@ -252,7 +252,7 @@ typedesc_t* typebuilder_build_char(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created boolean type descriptor.
  */
-typedesc_t* typebuilder_build_bool(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_bool(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a unit type.
@@ -260,7 +260,7 @@ typedesc_t* typebuilder_build_bool(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created unit type descriptor.
  */
-typedesc_t* typebuilder_build_unit(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_unit(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a poison type.
@@ -268,7 +268,7 @@ typedesc_t* typebuilder_build_unit(typebuilder_t* builder);
  * \param[in] builder Pointer to the type builder.
  * \returns A pointer to the newly created poison type descriptor.
  */
-typedesc_t* typebuilder_build_poison(typebuilder_t* builder);
+tau_typedesc_t* tau_typebuilder_build_poison(tau_typebuilder_t* builder);
 
 /**
  * \brief Builds a function type with the provided return type and parameter types.
@@ -281,7 +281,7 @@ typedesc_t* typebuilder_build_poison(typebuilder_t* builder);
  * \param[in] callconv The function calling convention.
  * \returns A pointer to the newly created function type descriptor.
  */
-typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_type, typedesc_t* param_types[], size_t param_count, bool is_vararg, callconv_kind_t callconv);
+tau_typedesc_t* tau_typebuilder_build_fun(tau_typebuilder_t* builder, tau_typedesc_t* return_type, tau_typedesc_t* param_types[], size_t param_count, bool is_vararg, tau_callconv_kind_t callconv);
 
 /**
  * \brief Builds a struct type with the provided identifier and field types.
@@ -292,7 +292,7 @@ typedesc_t* typebuilder_build_fun(typebuilder_t* builder, typedesc_t* return_typ
  * \param[in] field_count The number of fields.
  * \returns A pointer to the newly created struct type descriptor.
  */
-typedesc_t* typebuilder_build_struct(typebuilder_t* builder, ast_node_t* node, typedesc_t* field_types[], size_t field_count);
+tau_typedesc_t* tau_typebuilder_build_struct(tau_typebuilder_t* builder, tau_ast_node_t* node, tau_typedesc_t* field_types[], size_t field_count);
 
 /**
  * \brief Builds an opaque struct type for the provided AST node.
@@ -301,7 +301,7 @@ typedesc_t* typebuilder_build_struct(typebuilder_t* builder, ast_node_t* node, t
  * \param[in] node The AST node of the struct type.
  * \returns A pointer to the newly created struct type descriptor.
  */
-typedesc_t* typebuilder_build_struct_opaque(typebuilder_t* builder, ast_node_t* node);
+tau_typedesc_t* tau_typebuilder_build_struct_opaque(tau_typebuilder_t* builder, tau_ast_node_t* node);
 
 /**
  * \brief Builds a union type with the provided identifier and field types.
@@ -312,7 +312,7 @@ typedesc_t* typebuilder_build_struct_opaque(typebuilder_t* builder, ast_node_t* 
  * \param[in] field_count The number of fields.
  * \returns A pointer to the newly created union type descriptor.
  */
-typedesc_t* typebuilder_build_union(typebuilder_t* builder, ast_node_t* node, typedesc_t* field_types[], size_t field_count);
+tau_typedesc_t* tau_typebuilder_build_union(tau_typebuilder_t* builder, tau_ast_node_t* node, tau_typedesc_t* field_types[], size_t field_count);
 
 /**
  * \brief Builds an enum type with the provided identifier.
@@ -321,7 +321,7 @@ typedesc_t* typebuilder_build_union(typebuilder_t* builder, ast_node_t* node, ty
  * \param[in] node The AST node of the enum type.
  * \returns A pointer to the newly created enum type descriptor.
  */
-typedesc_t* typebuilder_build_enum(typebuilder_t* builder, ast_node_t* node);
+tau_typedesc_t* tau_typebuilder_build_enum(tau_typebuilder_t* builder, tau_ast_node_t* node);
 
 /**
  * \brief Builds a type variable with the provided identifier.
@@ -330,7 +330,7 @@ typedesc_t* typebuilder_build_enum(typebuilder_t* builder, ast_node_t* node);
  * \param[in] id The type variable's identifier.
  * \returns A pointer to the newly created type variable.
  */
-typedesc_t* typebuilder_build_var(typebuilder_t* builder, uint64_t id);
+tau_typedesc_t* tau_typebuilder_build_var(tau_typebuilder_t* builder, uint64_t id);
 
 /**
  * \brief Sets the body of an opaque struct type.
@@ -341,7 +341,7 @@ typedesc_t* typebuilder_build_var(typebuilder_t* builder, uint64_t id);
  * \param[in] field_count The number of fields.
  * \returns A pointer to the modified struct type descriptor.
  */
-typedesc_t* typebuilder_struct_set_body(typebuilder_t* builder, typedesc_t* desc, typedesc_t* field_types[], size_t field_count);
+tau_typedesc_t* tau_typebuilder_struct_set_body(tau_typebuilder_t* builder, tau_typedesc_t* desc, tau_typedesc_t* field_types[], size_t field_count);
 
 /**
  * \brief Builds a promoted arithmetic type.
@@ -351,7 +351,7 @@ typedesc_t* typebuilder_struct_set_body(typebuilder_t* builder, typedesc_t* desc
  * \param[in] rhs_desc Pointer to the right-hand type descriptor to be used.
  * \returns Pointer to the descriptor of the promoted arithmetic type.
  */
-typedesc_t* typebuilder_build_promoted_arithmetic(typebuilder_t* builder, typedesc_t* lhs_desc, typedesc_t* rhs_desc);
+tau_typedesc_t* tau_typebuilder_build_promoted_arithmetic(tau_typebuilder_t* builder, tau_typedesc_t* lhs_desc, tau_typedesc_t* rhs_desc);
 
 TAU_EXTERN_C_END
 

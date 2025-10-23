@@ -9,42 +9,42 @@
 
 #include "ast/registry.h"
 
-ast_stmt_expr_t* ast_stmt_expr_init(void)
+tau_ast_stmt_expr_t* tau_ast_stmt_expr_init(void)
 {
-  ast_stmt_expr_t* node = (ast_stmt_expr_t*)malloc(sizeof(ast_stmt_expr_t));
-  CLEAROBJ(node);
+  tau_ast_stmt_expr_t* node = (tau_ast_stmt_expr_t*)malloc(sizeof(tau_ast_stmt_expr_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_STMT_EXPR;
+  node->kind = TAU_AST_STMT_EXPR;
 
   return node;
 }
 
-void ast_stmt_expr_free(ast_stmt_expr_t* node)
+void tau_ast_stmt_expr_free(tau_ast_stmt_expr_t* node)
 {
   free(node);
 }
 
-void ast_stmt_expr_nameres(nameres_ctx_t* ctx, ast_stmt_expr_t* node)
+void tau_ast_stmt_expr_nameres(tau_nameres_ctx_t* ctx, tau_ast_stmt_expr_t* node)
 {
-  ast_node_nameres(ctx, node->expr);
+  tau_ast_node_nameres(ctx, node->expr);
 }
 
-void ast_stmt_expr_typecheck(typecheck_ctx_t* ctx, ast_stmt_expr_t* node)
+void tau_ast_stmt_expr_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_stmt_expr_t* node)
 {
-  ast_node_typecheck(ctx, node->expr);
+  tau_ast_node_typecheck(ctx, node->expr);
 }
 
-void ast_stmt_expr_codegen(codegen_ctx_t* ctx, ast_stmt_expr_t* node)
+void tau_ast_stmt_expr_codegen(tau_codegen_ctx_t* ctx, tau_ast_stmt_expr_t* node)
 {
-  ast_node_codegen(ctx, node->expr);
+  tau_ast_node_codegen(ctx, node->expr);
 }
 
-void ast_stmt_expr_dump_json(FILE* stream, ast_stmt_expr_t* node)
+void tau_ast_stmt_expr_dump_json(FILE* stream, tau_ast_stmt_expr_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"", tau_ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"expr\":");
-  ast_node_dump_json(stream, node->expr);
+  tau_ast_node_dump_json(stream, node->expr);
   fputc('}', stream);
 }

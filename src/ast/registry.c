@@ -9,26 +9,26 @@
 
 #include "utils/collections/vector.h"
 
-#define AST_REGISTRY_DEFAULT_CAPACITY ((size_t)(1 << 8))
+#define TAU_AST_REGISTRY_DEFAULT_CAPACITY ((size_t)(1 << 8))
 
 /**
  * \brief Vector of all registered AST nodes.
  */
-static vector_t* g_ast_registry_nodes = NULL;
+static tau_vector_t* g_ast_registry_nodes = NULL;
 
-void ast_registry_register(ast_node_t* node)
+void tau_ast_registry_register(tau_ast_node_t* node)
 {
   if (g_ast_registry_nodes == NULL)
-    g_ast_registry_nodes = vector_init_with_capacity(AST_REGISTRY_DEFAULT_CAPACITY);
+    g_ast_registry_nodes = tau_vector_init_with_capacity(TAU_AST_REGISTRY_DEFAULT_CAPACITY);
 
-  vector_push(g_ast_registry_nodes, node);
+  tau_vector_push(g_ast_registry_nodes, node);
 }
 
-void ast_registry_free(void)
+void tau_ast_registry_free(void)
 {
-  for (size_t i = 0; i < vector_size(g_ast_registry_nodes); i++)
-    ast_node_free((ast_node_t*)vector_get(g_ast_registry_nodes, i));
+  for (size_t i = 0; i < tau_vector_size(g_ast_registry_nodes); i++)
+    tau_ast_node_free((tau_ast_node_t*)tau_vector_get(g_ast_registry_nodes, i));
 
-  vector_free(g_ast_registry_nodes);
+  tau_vector_free(g_ast_registry_nodes);
   g_ast_registry_nodes = NULL;
 }

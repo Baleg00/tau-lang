@@ -9,14 +9,14 @@
 
 #include "utils/common.h"
 
-environment_t* environment_init(symtable_t* symtable, typebuilder_t* typebuilder, typetable_t* typetable, LLVMContextRef llvm_context, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_module, LLVMBuilderRef llvm_builder)
+tau_environment_t* tau_environment_init(tau_symtable_t* symtable, tau_typebuilder_t* typebuilder, tau_typetable_t* typetable, LLVMContextRef llvm_context, LLVMTargetDataRef llvm_layout, LLVMModuleRef llvm_module, LLVMBuilderRef llvm_builder)
 {
-  environment_t* env = (environment_t*)malloc(sizeof(environment_t));
-  ASSERT(env != NULL);
+  tau_environment_t* env = (tau_environment_t*)malloc(sizeof(tau_environment_t));
+  TAU_ASSERT(env != NULL);
 
-  env->paths = vector_init();
-  env->sources = vector_init();
-  env->tokens = vector_init();
+  env->paths = tau_vector_init();
+  env->sources = tau_vector_init();
+  env->tokens = tau_vector_init();
   env->symtable = symtable;
   env->typebuilder = typebuilder;
   env->typetable = typetable;
@@ -28,23 +28,23 @@ environment_t* environment_init(symtable_t* symtable, typebuilder_t* typebuilder
   return env;
 }
 
-void environment_free(environment_t* env)
+void tau_environment_free(tau_environment_t* env)
 {
-  vector_free(env->paths);
-  vector_free(env->sources);
-  vector_free(env->tokens);
+  tau_vector_free(env->paths);
+  tau_vector_free(env->sources);
+  tau_vector_free(env->tokens);
   free(env);
 }
 
-void environment_merge(environment_t* dest, environment_t* src)
+void tau_environment_merge(tau_environment_t* dest, tau_environment_t* src)
 {
-  symtable_merge(dest->symtable, src->symtable);
-  typetable_merge(dest->typetable, src->typetable);
+  tau_symtable_merge(dest->symtable, src->symtable);
+  tau_typetable_merge(dest->typetable, src->typetable);
 
   if (LLVMLinkModules2(dest->llvm_module, src->llvm_module))
   {
-    log_error("env", "Failed to link modules.");
+    tau_log_error("env", "Failed to link modules.");
   }
 
-  environment_free(src);
+  tau_environment_free(src);
 }

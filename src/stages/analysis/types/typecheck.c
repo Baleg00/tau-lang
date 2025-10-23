@@ -9,10 +9,10 @@
 
 #include "utils/common.h"
 
-typecheck_ctx_t* typecheck_ctx_init(typebuilder_t* typebuilder, typetable_t* typetable, error_bag_t* errors)
+tau_typecheck_ctx_t* tau_typecheck_ctx_init(tau_typebuilder_t* typebuilder, tau_typetable_t* typetable, tau_error_bag_t* errors)
 {
-  typecheck_ctx_t* ctx = (typecheck_ctx_t*)malloc(sizeof(typecheck_ctx_t));
-  CLEAROBJ(ctx);
+  tau_typecheck_ctx_t* ctx = (tau_typecheck_ctx_t*)malloc(sizeof(tau_typecheck_ctx_t));
+  TAU_CLEAROBJ(ctx);
 
   ctx->typebuilder = typebuilder;
   ctx->typetable = typetable;
@@ -21,14 +21,14 @@ typecheck_ctx_t* typecheck_ctx_init(typebuilder_t* typebuilder, typetable_t* typ
   return ctx;
 }
 
-void typecheck_ctx_free(typecheck_ctx_t* ctx)
+void tau_typecheck_ctx_free(tau_typecheck_ctx_t* ctx)
 {
   free(ctx);
 }
 
-void typecheck_poison(typecheck_ctx_t* ctx, ast_node_t* node)
+void tau_typecheck_poison(tau_typecheck_ctx_t* ctx, tau_ast_node_t* node)
 {
-  typedesc_t* poison_desc = typebuilder_build_poison(ctx->typebuilder);
+  tau_typedesc_t* poison_desc = tau_typebuilder_build_poison(ctx->typebuilder);
 
-  typetable_insert(ctx->typetable, node, poison_desc);
+  tau_typetable_insert(ctx->typetable, node, poison_desc);
 }

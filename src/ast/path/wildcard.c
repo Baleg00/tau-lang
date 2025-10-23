@@ -9,24 +9,24 @@
 
 #include "ast/registry.h"
 
-ast_path_wildcard_t* ast_path_wildcard_init(void)
+tau_ast_path_wildcard_t* tau_ast_path_wildcard_init(void)
 {
-  ast_path_wildcard_t* node = (ast_path_wildcard_t*)malloc(sizeof(ast_path_wildcard_t));
-  CLEAROBJ(node);
+  tau_ast_path_wildcard_t* node = (tau_ast_path_wildcard_t*)malloc(sizeof(tau_ast_path_wildcard_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_PATH_WILDCARD;
+  node->kind = TAU_AST_PATH_WILDCARD;
 
   return node;
 }
 
-void ast_path_wildcard_free(ast_path_wildcard_t* node)
+void tau_ast_path_wildcard_free(tau_ast_path_wildcard_t* node)
 {
   free(node);
 }
 
-void ast_path_wildcard_dump_json(FILE* stream, ast_path_wildcard_t* node)
+void tau_ast_path_wildcard_dump_json(FILE* stream, tau_ast_path_wildcard_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"}", tau_ast_kind_to_cstr(node->kind));
 }

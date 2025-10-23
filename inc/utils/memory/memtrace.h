@@ -28,37 +28,37 @@
 #if TAU_DEBUG
 # ifndef TAU_MEMTRACE_IMPL
 /**
- * \brief Macro for memory allocation using memtrace_malloc.
+ * \brief Macro for memory allocation using tau_memtrace_malloc.
  *
  * \param[in] SIZE The size of the memory to allocate.
  * \returns A pointer to the allocated memory.
  */
-#   define malloc(SIZE) memtrace_malloc((SIZE), __FILE__, __LINE__, __func__)
+#   define malloc(SIZE) tau_memtrace_malloc((SIZE), __FILE__, __LINE__, __func__)
 
 /**
- * \brief Macro for array allocation using memtrace_calloc.
+ * \brief Macro for array allocation using tau_memtrace_calloc.
  *
  * \param[in] COUNT The number of elements in the array.
  * \param[in] SIZE The size of each element in the array.
  * \returns A pointer to the allocated memory.
  */
-#   define calloc(COUNT, SIZE) memtrace_calloc((COUNT), (SIZE), __FILE__, __LINE__, __func__)
+#   define calloc(COUNT, SIZE) tau_memtrace_calloc((COUNT), (SIZE), __FILE__, __LINE__, __func__)
 
 /**
- * \brief Macro for memory reallocation using memtrace_realloc.
+ * \brief Macro for memory reallocation using tau_memtrace_realloc.
  *
  * \param[in] PTR A pointer to the previously allocated memory block.
  * \param[in] SIZE The new size of the memory block.
  * \returns A pointer to the reallocated memory block.
  */
-#   define realloc(PTR, SIZE) memtrace_realloc((PTR), (SIZE), __FILE__, __LINE__, __func__)
+#   define realloc(PTR, SIZE) tau_memtrace_realloc((PTR), (SIZE), __FILE__, __LINE__, __func__)
 
 /**
- * \brief Macro for memory deallocation using memtrace_free.
+ * \brief Macro for memory deallocation using tau_memtrace_free.
  *
  * \param[in] PTR A pointer to the memory block to deallocate.
  */
-#   define free(PTR) memtrace_free((PTR), __FILE__, __LINE__, __func__)
+#   define free(PTR) tau_memtrace_free((PTR), __FILE__, __LINE__, __func__)
 # endif
 #endif
 
@@ -74,7 +74,7 @@ TAU_EXTERN_C_BEGIN
  * \param[in] func The function name where the memory allocation occurs.
  * \returns A pointer to the allocated memory.
  */
-void* memtrace_malloc(size_t size, const char* file, int line, const char* func);
+void* tau_memtrace_malloc(size_t size, const char* file, int line, const char* func);
 
 /**
  * \brief Allocates memory for an array of elements and tracks the allocation
@@ -87,7 +87,7 @@ void* memtrace_malloc(size_t size, const char* file, int line, const char* func)
  * \param[in] func The function name where the memory allocation occurs.
  * \returns A pointer to the allocated memory.
  */
-void* memtrace_calloc(size_t count, size_t size, const char* file, int line, const char* func);
+void* tau_memtrace_calloc(size_t count, size_t size, const char* file, int line, const char* func);
 
 /**
  * \brief Changes the size of the memory block pointed to by `ptr` and tracks
@@ -100,7 +100,7 @@ void* memtrace_calloc(size_t count, size_t size, const char* file, int line, con
  * \param[in] func The function name where the memory reallocation occurs.
  * \returns A pointer to the reallocated memory block.
  */
-void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const char* func);
+void* tau_memtrace_realloc(void* ptr, size_t size, const char* file, int line, const char* func);
 
 /**
  * \brief Deallocates the memory block pointed to by `ptr` and tracks the
@@ -111,49 +111,49 @@ void* memtrace_realloc(void* ptr, size_t size, const char* file, int line, const
  * \param[in] line The line number in the source file where the memory deallocation occurs.
  * \param[in] func The function name where the memory deallocation occurs.
  */
-void memtrace_free(void* ptr, const char* file, int line, const char* func);
+void tau_memtrace_free(void* ptr, const char* file, int line, const char* func);
 
 /**
  * \brief Returns the total amount of memory allocated by the program.
  *
  * \returns The total size of memory allocated.
  */
-size_t memtrace_stat_total_alloc(void);
+size_t tau_memtrace_stat_total_alloc(void);
 
 /**
  * \brief Returns the current amount of memory used by the program.
  *
  * \returns The current memory usage.
  */
-size_t memtrace_stat_cur_alloc(void);
+size_t tau_memtrace_stat_cur_alloc(void);
 
 /**
  * \brief Returns the peak amount of memory used by the program.
  *
  * \returns The peak memory usage.
  */
-size_t memtrace_stat_peak_alloc(void);
+size_t tau_memtrace_stat_peak_alloc(void);
 
 /**
  * \brief Returns the total number of memory allocation requests.
  *
  * \returns The total count of memory allocations.
  */
-size_t memtrace_stat_alloc_count(void);
+size_t tau_memtrace_stat_alloc_count(void);
 
 /**
  * \brief Returns the average size of memory allocated per allocation.
  *
  * \return The average size of memory allocated.
  */
-size_t memtrace_stat_avg_alloc_size(void);
+size_t tau_memtrace_stat_avg_alloc_size(void);
 
 /**
  * \brief Returns the average lifetime of allocated memory in milliseconds.
  *
  * \returns The average lifetime of allocated memory in milliseconds.
  */
-double memtrace_stat_avg_lifetime(void);
+double tau_memtrace_stat_avg_lifetime(void);
 
 TAU_EXTERN_C_END
 

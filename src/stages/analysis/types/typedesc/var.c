@@ -7,17 +7,17 @@
 
 #include "stages/analysis/types/typedesc/var.h"
 
-typedesc_var_t* typedesc_var_init(void)
+tau_typedesc_var_t* tau_typedesc_var_init(void)
 {
-  typedesc_var_t* desc = (typedesc_var_t*)malloc(sizeof(typedesc_var_t));
-  CLEAROBJ(desc);
+  tau_typedesc_var_t* desc = (tau_typedesc_var_t*)malloc(sizeof(tau_typedesc_var_t));
+  TAU_CLEAROBJ(desc);
 
-  desc->kind = TYPEDESC_VAR;
+  desc->kind = TAU_TYPEDESC_VAR;
 
   return desc;
 }
 
-void typedesc_var_free(typedesc_var_t* desc)
+void tau_typedesc_var_free(tau_typedesc_var_t* desc)
 {
   free(desc);
 }

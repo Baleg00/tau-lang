@@ -21,24 +21,24 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST poison node.
  */
-typedef struct ast_poison_t
+typedef struct tau_ast_poison_t
 {
-  AST_NODE_HEADER;
-} ast_poison_t;
+  TAU_AST_NODE_HEADER;
+} tau_ast_poison_t;
 
 /**
  * \brief Initializes a new AST poison node.
  *
  * \returns Pointer to the newly initialized AST node.
  */
-ast_poison_t* ast_poison_init(void);
+tau_ast_poison_t* tau_ast_poison_init(void);
 
 /**
  * \brief Frees all memory allocated by an AST poison node.
  *
  * \param[in] node Pointer to the AST node to be freed.
  */
-void ast_poison_free(ast_poison_t* node);
+void tau_ast_poison_free(tau_ast_poison_t* node);
 
 /**
  * \brief Writes a JSON dump of an AST poison node into a stream.
@@ -46,7 +46,7 @@ void ast_poison_free(ast_poison_t* node);
  * \param[in] stream The stream to be written to.
  * \param[in] node Pointer to the AST node to be dumped.
 */
-void ast_poison_dump_json(FILE* stream, ast_poison_t* node);
+void tau_ast_poison_dump_json(FILE* stream, tau_ast_poison_t* node);
 
 TAU_EXTERN_C_END
 

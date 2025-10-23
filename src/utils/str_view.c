@@ -9,49 +9,49 @@
 
 #include "utils/common.h"
 
-string_view_t string_view_init(const char* buf)
+tau_string_view_t tau_string_view_init(const char* buf)
 {
-  return string_view_init_with_length(buf, strlen(buf));
+  return tau_string_view_init_with_length(buf, strlen(buf));
 }
 
-string_view_t string_view_init_with_length(const char* buf, size_t len)
+tau_string_view_t tau_string_view_init_with_length(const char* buf, size_t len)
 {
-  return (string_view_t){ .buf = buf, .len = len };
+  return (tau_string_view_t){ .buf = buf, .len = len };
 }
 
-const char* string_view_begin(string_view_t str)
+const char* tau_string_view_begin(tau_string_view_t str)
 {
   return str.buf;
 }
 
-const char* string_view_end(string_view_t str)
+const char* tau_string_view_end(tau_string_view_t str)
 {
   return str.buf + str.len;
 }
 
-size_t string_view_length(string_view_t str)
+size_t tau_string_view_length(tau_string_view_t str)
 {
   return str.len;
 }
 
-string_view_t string_view_substr(string_view_t str, size_t pos, size_t len)
+tau_string_view_t tau_string_view_substr(tau_string_view_t str, size_t pos, size_t len)
 {
-  ASSERT(pos + len <= str.len);
+  TAU_ASSERT(pos + len <= str.len);
 
-  return (string_view_t){ .buf = str.buf + pos, .len = len };
+  return (tau_string_view_t){ .buf = str.buf + pos, .len = len };
 }
 
-int string_view_compare(string_view_t lhs, string_view_t rhs)
+int tau_string_view_compare(tau_string_view_t lhs, tau_string_view_t rhs)
 {
-  return strncmp(lhs.buf, rhs.buf, MIN(lhs.len, rhs.len));
+  return strncmp(lhs.buf, rhs.buf, TAU_MIN(lhs.len, rhs.len));
 }
 
-int string_view_compare_cstr(string_view_t lhs, const char* rhs)
+int tau_string_view_compare_cstr(tau_string_view_t lhs, const char* rhs)
 {
   return strncmp(lhs.buf, rhs, lhs.len);
 }
 
-bool string_view_starts_with(string_view_t str, string_view_t prefix)
+bool tau_string_view_starts_with(tau_string_view_t str, tau_string_view_t prefix)
 {
   if (prefix.len > str.len)
     return false;
@@ -59,7 +59,7 @@ bool string_view_starts_with(string_view_t str, string_view_t prefix)
   return strncmp(str.buf, prefix.buf, prefix.len) == 0;
 }
 
-bool string_view_starts_with_cstr(string_view_t str, const char* prefix)
+bool tau_string_view_starts_with_cstr(tau_string_view_t str, const char* prefix)
 {
   size_t prefix_len = strlen(prefix);
 
@@ -69,7 +69,7 @@ bool string_view_starts_with_cstr(string_view_t str, const char* prefix)
   return strncmp(str.buf, prefix, prefix_len) == 0;
 }
 
-bool string_view_ends_with(string_view_t str, string_view_t suffix)
+bool tau_string_view_ends_with(tau_string_view_t str, tau_string_view_t suffix)
 {
   if (suffix.len > str.len)
     return false;
@@ -77,7 +77,7 @@ bool string_view_ends_with(string_view_t str, string_view_t suffix)
   return strncmp(str.buf + str.len - suffix.len, suffix.buf, suffix.len) == 0;
 }
 
-bool string_view_ends_with_cstr(string_view_t str, const char* suffix)
+bool tau_string_view_ends_with_cstr(tau_string_view_t str, const char* suffix)
 {
   size_t suffix_len = strlen(suffix);
 
@@ -87,7 +87,7 @@ bool string_view_ends_with_cstr(string_view_t str, const char* suffix)
   return strncmp(str.buf + str.len - suffix_len, suffix, suffix_len) == 0;
 }
 
-bool string_view_contains(string_view_t str, string_view_t sub)
+bool tau_string_view_contains(tau_string_view_t str, tau_string_view_t sub)
 {
   if (sub.len > str.len)
     return false;
@@ -112,7 +112,7 @@ bool string_view_contains(string_view_t str, string_view_t sub)
   return false;
 }
 
-bool string_view_contains_cstr(string_view_t str, const char* sub)
+bool tau_string_view_contains_cstr(tau_string_view_t str, const char* sub)
 {
   size_t sub_len = strlen(sub);
 
@@ -139,7 +139,7 @@ bool string_view_contains_cstr(string_view_t str, const char* sub)
   return false;
 }
 
-size_t string_view_find(string_view_t str, string_view_t sub)
+size_t tau_string_view_find(tau_string_view_t str, tau_string_view_t sub)
 {
   if (sub.len > str.len)
     return str.len;
@@ -164,7 +164,7 @@ size_t string_view_find(string_view_t str, string_view_t sub)
   return str.len;
 }
 
-size_t string_view_find_cstr(string_view_t str, const char* sub)
+size_t tau_string_view_find_cstr(tau_string_view_t str, const char* sub)
 {
   size_t sub_len = strlen(sub);
 
@@ -191,7 +191,7 @@ size_t string_view_find_cstr(string_view_t str, const char* sub)
   return str.len;
 }
 
-int string_view_printf(FILE* stream, string_view_t fmt, ...)
+int tau_string_view_printf(FILE* stream, tau_string_view_t fmt, ...)
 {
   va_list args;
   va_start(args, fmt);
@@ -209,7 +209,7 @@ int string_view_printf(FILE* stream, string_view_t fmt, ...)
   return result;
 }
 
-int string_view_print_escaped(FILE* stream, string_view_t str)
+int tau_string_view_print_escaped(FILE* stream, tau_string_view_t str)
 {
   int result = 0;
 

@@ -7,41 +7,41 @@
 
 #include "stages/analysis/types/typedesc/mut.h"
 
-typedesc_mut_t* typedesc_mut_init(void)
+tau_typedesc_mut_t* tau_typedesc_mut_init(void)
 {
-  typedesc_mut_t* desc = (typedesc_mut_t*)malloc(sizeof(typedesc_mut_t));
-  CLEAROBJ(desc);
+  tau_typedesc_mut_t* desc = (tau_typedesc_mut_t*)malloc(sizeof(tau_typedesc_mut_t));
+  TAU_CLEAROBJ(desc);
 
-  desc->kind = TYPEDESC_MUT;
+  desc->kind = TAU_TYPEDESC_MUT;
 
   return desc;
 }
 
-void typedesc_mut_free(typedesc_mut_t* desc)
+void tau_typedesc_mut_free(tau_typedesc_mut_t* desc)
 {
   free(desc);
 }
 
-bool typedesc_mut_is_implicitly_direct_convertible(typedesc_mut_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_mut_is_implicitly_direct_convertible(tau_typedesc_mut_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (typedesc_is_ref(dst_desc))
+  if (tau_typedesc_is_ref(dst_desc))
     return false;
 
-  return typedesc_is_implicitly_direct_convertible(src_desc->base_type, typedesc_remove_mut(dst_desc));
+  return tau_typedesc_is_implicitly_direct_convertible(src_desc->base_type, tau_typedesc_remove_mut(dst_desc));
 }
 
-bool typedesc_mut_is_implicitly_indirect_convertible(typedesc_mut_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_mut_is_implicitly_indirect_convertible(tau_typedesc_mut_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (typedesc_is_ref(dst_desc))
+  if (tau_typedesc_is_ref(dst_desc))
     return false;
 
-  return typedesc_is_implicitly_indirect_convertible(src_desc->base_type, typedesc_remove_mut(dst_desc));
+  return tau_typedesc_is_implicitly_indirect_convertible(src_desc->base_type, tau_typedesc_remove_mut(dst_desc));
 }
 
-bool typedesc_mut_is_explicitly_convertible(typedesc_mut_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_mut_is_explicitly_convertible(tau_typedesc_mut_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (typedesc_is_ref(dst_desc))
+  if (tau_typedesc_is_ref(dst_desc))
     return false;
 
-  return typedesc_is_explicitly_convertible(src_desc->base_type, typedesc_remove_mut(dst_desc));
+  return tau_typedesc_is_explicitly_convertible(src_desc->base_type, tau_typedesc_remove_mut(dst_desc));
 }

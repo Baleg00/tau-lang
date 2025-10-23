@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief OFFSETOF utility macro.
+ * \brief TAU_OFFSETOF utility macro.
  *
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
@@ -21,7 +21,7 @@
  * \param[in] MEMBER The member within the structure.
  * \returns The offset of the member.
  */
-# define OFFSETOF(TYPE, MEMBER) offsetof(TYPE, MEMBER)
+# define TAU_OFFSETOF(TYPE, MEMBER) offsetof(TYPE, MEMBER)
 
 #else
 
@@ -32,7 +32,7 @@
  * \param[in] MEMBER The member within the structure.
  * \returns The offset of the member.
  */
-# define OFFSETOF(TYPE, MEMBER) (size_t)(&((TYPE*)NULL)->MEMBER)
+# define TAU_OFFSETOF(TYPE, MEMBER) (size_t)(&((TYPE*)NULL)->MEMBER)
 
 #endif
 

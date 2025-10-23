@@ -17,24 +17,24 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Type descriptor for mutable types.
  */
-typedef struct typedesc_mut_t
+typedef struct tau_typedesc_mut_t
 {
-  TYPEDESC_MODIF_HEADER;
-} typedesc_mut_t;
+  TAU_TYPEDESC_MODIF_HEADER;
+} tau_typedesc_mut_t;
 
 /**
  * \brief Initializes a new mutable type descriptor.
  * 
  * \returns Pointer to the newly initialized type descriptor.
 */
-typedesc_mut_t* typedesc_mut_init(void);
+tau_typedesc_mut_t* tau_typedesc_mut_init(void);
 
 /**
  * \brief Frees all memory allocated by an mutable type descriptor.
  * 
  * \param[in] desc Pointer to the type descriptor to be freed.
  */
-void typedesc_mut_free(typedesc_mut_t* desc);
+void tau_typedesc_mut_free(tau_typedesc_mut_t* desc);
 
 /**
  * \brief Checks if a mutable type is implicitly direct convertible to another type.
@@ -43,7 +43,7 @@ void typedesc_mut_free(typedesc_mut_t* desc);
  * \param[in] dst_desc Pointer to the destination type descriptor.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_mut_is_implicitly_direct_convertible(typedesc_mut_t* src_desc, typedesc_t* dst_desc);
+bool tau_typedesc_mut_is_implicitly_direct_convertible(tau_typedesc_mut_t* src_desc, tau_typedesc_t* dst_desc);
 
 /**
  * \brief Checks if a mutable type is implicitly indirect convertible to another type.
@@ -52,7 +52,7 @@ bool typedesc_mut_is_implicitly_direct_convertible(typedesc_mut_t* src_desc, typ
  * \param[in] dst_desc Pointer to the destination type descriptor.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_mut_is_implicitly_indirect_convertible(typedesc_mut_t* src_desc, typedesc_t* dst_desc);
+bool tau_typedesc_mut_is_implicitly_indirect_convertible(tau_typedesc_mut_t* src_desc, tau_typedesc_t* dst_desc);
 
 /**
  * \brief Checks if a mutable type is explicitly convertible to another type.
@@ -61,7 +61,7 @@ bool typedesc_mut_is_implicitly_indirect_convertible(typedesc_mut_t* src_desc, t
  * \param[in] dst_desc Pointer to the destination type descriptor.
  * \returns `true` if the explicit conversion is possible, `false` otherwise.
  */
-bool typedesc_mut_is_explicitly_convertible(typedesc_mut_t* src_desc, typedesc_t* dst_desc);
+bool tau_typedesc_mut_is_explicitly_convertible(tau_typedesc_mut_t* src_desc, tau_typedesc_t* dst_desc);
 
 TAU_EXTERN_C_END
 

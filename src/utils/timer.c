@@ -15,7 +15,7 @@
 # include <time.h>
 #endif
 
-uint64_t timer_freq(void)
+uint64_t tau_timer_freq(void)
 {
 #if TAU_OS_WINDOWS
   LARGE_INTEGER f;
@@ -30,7 +30,7 @@ uint64_t timer_freq(void)
 #endif
 }
 
-uint64_t timer_now(void)
+uint64_t tau_timer_now(void)
 {
 #if TAU_OS_WINDOWS
   LARGE_INTEGER t;

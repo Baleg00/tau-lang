@@ -2,11 +2,11 @@
 
 int main(int argc, const char* argv[])
 {
-  compiler_t* compiler = compiler_init();
+  tau_compiler_t* compiler = tau_compiler_init();
 
-  int result = compiler_main(compiler, argc, argv);
+  int result = tau_compiler_main(compiler, argc, argv);
 
-  compiler_free(compiler);
+  tau_compiler_free(compiler);
 
   return result;
 }

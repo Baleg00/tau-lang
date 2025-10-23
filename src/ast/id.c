@@ -9,28 +9,28 @@
 
 #include "ast/registry.h"
 
-ast_id_t* ast_id_init(void)
+tau_ast_id_t* tau_ast_id_init(void)
 {
-  ast_id_t* node = (ast_id_t*)malloc(sizeof(ast_id_t));
-  CLEAROBJ(node);
+  tau_ast_id_t* node = (tau_ast_id_t*)malloc(sizeof(tau_ast_id_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_ID;
+  node->kind = TAU_AST_ID;
 
   return node;
 }
 
-void ast_id_free(ast_id_t* node)
+void tau_ast_id_free(tau_ast_id_t* node)
 {
   free(node);
 }
 
-void ast_id_dump_json(FILE* stream, ast_id_t* node)
+void tau_ast_id_dump_json(FILE* stream, tau_ast_id_t* node)
 {
-  location_t loc = token_location(node->tok);
+  tau_location_t loc = tau_token_location(node->tok);
 
   fprintf(stream, "{\"kind\":\"%s\",\"id\":\"%.*s\"}",
-    ast_kind_to_cstr(node->kind),
+    tau_ast_kind_to_cstr(node->kind),
     (int)loc.len, loc.ptr);
 }

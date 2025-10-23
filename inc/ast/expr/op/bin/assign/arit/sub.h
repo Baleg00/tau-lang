@@ -18,10 +18,10 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST binary arithmetic subtraction assignment operation expression node.
  */
-typedef struct ast_expr_op_bin_assign_arit_sub_t
+typedef struct tau_ast_expr_op_bin_assign_arit_sub_t
 {
-  AST_EXPR_OP_BIN_HEADER;
-} ast_expr_op_bin_assign_arit_sub_t;
+  TAU_AST_EXPR_OP_BIN_HEADER;
+} tau_ast_expr_op_bin_assign_arit_sub_t;
 
 /**
  * \brief Initializes a new AST binary arithmetic subtraction assignment operation
@@ -29,7 +29,7 @@ typedef struct ast_expr_op_bin_assign_arit_sub_t
  * 
  * \returns Pointer to the newly initialized AST node.
  */
-ast_expr_op_bin_assign_arit_sub_t* ast_expr_op_bin_assign_arit_sub_init(void);
+tau_ast_expr_op_bin_assign_arit_sub_t* tau_ast_expr_op_bin_assign_arit_sub_init(void);
 
 /**
  * \brief Performs name resolution pass on an AST binary arithmetic subtraction
@@ -38,7 +38,7 @@ ast_expr_op_bin_assign_arit_sub_t* ast_expr_op_bin_assign_arit_sub_init(void);
  * \param[in] ctx Pointer to the name resolution context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_expr_op_bin_assign_arit_sub_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_assign_arit_sub_t* node);
+void tau_ast_expr_op_bin_assign_arit_sub_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_op_bin_assign_arit_sub_t* node);
 
 /**
  * \brief Performs type check pass on an AST binary arithmetic subtraction
@@ -47,7 +47,7 @@ void ast_expr_op_bin_assign_arit_sub_nameres(nameres_ctx_t* ctx, ast_expr_op_bin
  * \param[in] ctx Pointer to the type check context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_expr_op_bin_assign_arit_sub_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_assign_arit_sub_t* node);
+void tau_ast_expr_op_bin_assign_arit_sub_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_bin_assign_arit_sub_t* node);
 
 /**
  * \brief Performs code generation pass on an AST binary arithmetic subtraction
@@ -56,7 +56,7 @@ void ast_expr_op_bin_assign_arit_sub_typecheck(typecheck_ctx_t* ctx, ast_expr_op
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_expr_op_bin_assign_arit_sub_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_assign_arit_sub_t* node);
+void tau_ast_expr_op_bin_assign_arit_sub_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_op_bin_assign_arit_sub_t* node);
 
 TAU_EXTERN_C_END
 

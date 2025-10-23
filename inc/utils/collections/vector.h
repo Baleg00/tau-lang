@@ -26,25 +26,25 @@ TAU_EXTERN_C_BEGIN
  * \param[in] VAR The name of the index variable.
  * \param[in] VEC The vector to iterate over.
 */
-#define VECTOR_FOR_LOOP(VAR, VEC)\
+#define TAU_VECTOR_FOR_LOOP(VAR, VEC)\
   for (\
     size_t (VAR) = 0;\
-    (VAR) < ((VEC) == NULL ? 0 : vector_size(VEC));\
+    (VAR) < ((VEC) == NULL ? 0 : tau_vector_size(VEC));\
     (VAR)++\
   )
 
-/// Utility function pointer type for `vector_for_each` function.
-typedef void(*vector_for_each_func_t)(void*);
+/// Utility function pointer type for `tau_vector_for_each` function.
+typedef void(*tau_vector_for_each_func_t)(void*);
 
 /// Represents a vector (dynamic array).
-typedef struct vector_t vector_t;
+typedef struct tau_vector_t tau_vector_t;
 
 /**
  * \brief Initializes a new vector.
  *
  * \returns A pointer to the newly initialized vector.
  */
-vector_t* vector_init(void);
+tau_vector_t* tau_vector_init(void);
 
 /**
  * \brief Initializes a new vector with the specified capacity.
@@ -52,7 +52,7 @@ vector_t* vector_init(void);
  * \param[in] capacity The capacity of the vector.
  * \returns A pointer to the newly initialized vector.
  */
-vector_t* vector_init_with_capacity(size_t capacity);
+tau_vector_t* tau_vector_init_with_capacity(size_t capacity);
 
 /**
  * \brief Initializes a new vector from a memory buffer.
@@ -61,14 +61,14 @@ vector_t* vector_init_with_capacity(size_t capacity);
  * \param[in] length The number of elements in the buffer.
  * \returns Pointer to the initialized vector.
  */
-vector_t* vector_init_from_buffer(void* buffer, size_t length);
+tau_vector_t* tau_vector_init_from_buffer(void* buffer, size_t length);
 
 /**
  * \brief Frees the resources associated with the vector.
  *
  * \param[in] vec Pointer to the vector to be freed.
  */
-void vector_free(vector_t* vec);
+void tau_vector_free(tau_vector_t* vec);
 
 /**
  * \brief Creates a copy of a vector.
@@ -76,7 +76,7 @@ void vector_free(vector_t* vec);
  * \param[in] vec Pointer to the vector to copy.
  * \returns Pointer to the copied vector.
  */
-vector_t* vector_copy(const vector_t* vec);
+tau_vector_t* tau_vector_copy(const tau_vector_t* vec);
 
 /**
  * \brief Retrieves the element at the specified index.
@@ -85,7 +85,7 @@ vector_t* vector_copy(const vector_t* vec);
  * \param[in] idx Index of the element to retrieve.
  * \returns A pointer to the element at the specified index.
  */
-void* vector_get(const vector_t* vec, size_t idx);
+void* tau_vector_get(const tau_vector_t* vec, size_t idx);
 
 /**
  * \brief Sets the element at the specified index.
@@ -94,7 +94,7 @@ void* vector_get(const vector_t* vec, size_t idx);
  * \param[in] idx Index of the element to set.
  * \param[in] data Pointer to the data to set.
  */
-void vector_set(const vector_t* restrict vec, size_t idx, void* restrict data);
+void tau_vector_set(const tau_vector_t* restrict vec, size_t idx, void* restrict data);
 
 /**
  * \brief Retrieves the data stored in the front of a vector.
@@ -102,7 +102,7 @@ void vector_set(const vector_t* restrict vec, size_t idx, void* restrict data);
  * \param[in] vec Pointer to the vector.
  * \returns Pointer to the data at the front of the vector.
  */
-void* vector_front(const vector_t* vec);
+void* tau_vector_front(const tau_vector_t* vec);
 
 /**
  * \brief Retrieves the data stored in the back of a vector.
@@ -110,7 +110,7 @@ void* vector_front(const vector_t* vec);
  * \param[in] vec Pointer to the vector.
  * \returns Pointer to the data at the back of the vector.
  */
-void* vector_back(const vector_t* vec);
+void* tau_vector_back(const tau_vector_t* vec);
 
 /**
  * \brief Appends an element to the end of the vector.
@@ -118,7 +118,7 @@ void* vector_back(const vector_t* vec);
  * \param[in,out] vec Pointer to the vector.
  * \param[in] data Pointer to the data to be appended.
  */
-void vector_push(vector_t* restrict vec, void* restrict data);
+void tau_vector_push(tau_vector_t* restrict vec, void* restrict data);
 
 /**
  * \brief Removes and returns the last element of the vector.
@@ -126,7 +126,7 @@ void vector_push(vector_t* restrict vec, void* restrict data);
  * \param[in,out] vec Pointer to the vector.
  * \returns A pointer to the removed element.
  */
-void* vector_pop(vector_t* vec);
+void* tau_vector_pop(tau_vector_t* vec);
 
 /**
  * \brief Inserts an element at the specified index, shifting other elements to
@@ -136,7 +136,7 @@ void* vector_pop(vector_t* vec);
  * \param[in] idx Index at which the element should be inserted.
  * \param[in] data Pointer to the data to be inserted.
  */
-void vector_insert(vector_t* restrict vec, size_t idx, void* restrict data);
+void tau_vector_insert(tau_vector_t* restrict vec, size_t idx, void* restrict data);
 
 /**
  * \brief Appends all elements of a vector to another vector.
@@ -144,7 +144,7 @@ void vector_insert(vector_t* restrict vec, size_t idx, void* restrict data);
  * \param[in,out] dest Pointer to the vector to extend.
  * \param[in] src Pointer to the vector to append.
  */
-void vector_extend(vector_t* restrict dest, const vector_t* restrict src);
+void tau_vector_extend(tau_vector_t* restrict dest, const tau_vector_t* restrict src);
 
 /**
  * \brief Removes and returns the element at the specified index, shifting other
@@ -154,23 +154,23 @@ void vector_extend(vector_t* restrict dest, const vector_t* restrict src);
  * \param[in] idx Index of the element to be removed.
  * \returns A pointer to the removed element.
  */
-void* vector_remove(vector_t* vec, size_t idx);
+void* tau_vector_remove(tau_vector_t* vec, size_t idx);
 
 /**
  * \brief Removes all elements from the vector.
  *
  * \param[in,out] vec Pointer to the vector.
  */
-void vector_clear(vector_t* vec);
+void tau_vector_clear(tau_vector_t* vec);
 
 /**
  * \brief Finds the index of the first occurrence of a specified element.
  * 
  * \param[in] vec Pointer to the vector.
  * \param[in] data Pointer to the data to be found.
- * \returns The index of the element if it is present, `vector_size(vec)` otherwise.
+ * \returns The index of the element if it is present, `tau_vector_size(vec)` otherwise.
  */
-size_t vector_find(const vector_t* restrict vec, void* restrict data);
+size_t tau_vector_find(const tau_vector_t* restrict vec, void* restrict data);
 
 /**
  * \brief Returns the number of elements in the vector.
@@ -178,7 +178,7 @@ size_t vector_find(const vector_t* restrict vec, void* restrict data);
  * \param[in] vec Pointer to the vector.
  * \returns The number of elements in the vector.
  */
-size_t vector_size(const vector_t* vec);
+size_t tau_vector_size(const tau_vector_t* vec);
 
 /**
  * \brief Checks if the vector is empty.
@@ -186,7 +186,7 @@ size_t vector_size(const vector_t* vec);
  * \param[in] vec Pointer to the vector.
  * \returns `true` if the vector is empty, `false` otherwise.
  */
-bool vector_empty(const vector_t* vec);
+bool tau_vector_empty(const tau_vector_t* vec);
 
 /**
  * \brief Applies a given function to each element of the vector.
@@ -194,7 +194,7 @@ bool vector_empty(const vector_t* vec);
  * \param[in] vec Pointer to the vector.
  * \param[in] func The function to be applied to each element.
  */
-void vector_for_each(const vector_t* vec, vector_for_each_func_t func);
+void tau_vector_for_each(const tau_vector_t* vec, tau_vector_for_each_func_t func);
 
 /**
  * \brief Writes every element of a vector into a memory buffer.
@@ -205,7 +205,7 @@ void vector_for_each(const vector_t* vec, vector_for_each_func_t func);
  * \param vec Pointer to the vector.
  * \param buffer Pointer to the memory buffer.
  */
-void vector_to_buffer(const vector_t* restrict vec, void* restrict buffer);
+void tau_vector_to_buffer(const tau_vector_t* restrict vec, void* restrict buffer);
 
 TAU_EXTERN_C_END
 

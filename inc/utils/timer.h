@@ -28,12 +28,12 @@
  * \param[in] NAME The name for identifying the measurement.
  * \param[in] STMT The statement to be executed and timed.
  */
-#define time_it(NAME, STMT)\
+#define tau_time_it(NAME, STMT)\
   do {\
-    uint64_t time_it_begin = timer_now();\
+    uint64_t time_it_begin = tau_timer_now();\
     { STMT; }\
-    uint64_t time_it_end = timer_now();\
-    log_debug("timer", "[" ESC_FG_BRIGHT_BLACK NAME ESC_RESET "] Elapsed time: %.6g ms", (double)(time_it_end - time_it_begin) / (double)timer_freq() * 1000.0);\
+    uint64_t time_it_end = tau_timer_now();\
+    tau_log_debug("timer", "[" TAU_ESC_FG_BRIGHT_BLACK NAME TAU_ESC_RESET "] Elapsed time: %.6g ms", (double)(time_it_end - time_it_begin) / (double)tau_timer_freq() * 1000.0);\
   } while (0)\
 
 TAU_EXTERN_C_BEGIN
@@ -43,14 +43,14 @@ TAU_EXTERN_C_BEGIN
  * 
  * \returns The frequency of the timer.
  */
-uint64_t timer_freq(void);
+uint64_t tau_timer_freq(void);
 
 /**
  * \brief Returns the current value of the timer in ticks.
  * 
  * \returns The current value of the timer.
  */
-uint64_t timer_now(void);
+uint64_t tau_timer_now(void);
 
 TAU_EXTERN_C_END
 

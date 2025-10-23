@@ -10,142 +10,142 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 
-static void ast_expr_op_bin_cmp_ne_typecheck_scalar(typecheck_ctx_t* ctx, ast_expr_op_bin_cmp_ne_t* node, typedesc_t* lhs_desc, typedesc_t* rhs_desc)
+static void tau_ast_expr_op_bin_cmp_ne_typecheck_scalar(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_bin_cmp_ne_t* node, tau_typedesc_t* lhs_desc, tau_typedesc_t* rhs_desc)
 {
-  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
-    error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->lhs->tok));
+  if (!tau_typedesc_is_arithmetic(tau_typedesc_remove_ref_mut(lhs_desc)))
+    tau_error_bag_put_typecheck_expected_arithmetic(ctx->errors, tau_token_location(node->lhs->tok));
 
-  if (!typedesc_is_arithmetic(typedesc_remove_ref_mut(rhs_desc)))
-    error_bag_put_typecheck_expected_arithmetic(ctx->errors, token_location(node->rhs->tok));
+  if (!tau_typedesc_is_arithmetic(tau_typedesc_remove_ref_mut(rhs_desc)))
+    tau_error_bag_put_typecheck_expected_arithmetic(ctx->errors, tau_token_location(node->rhs->tok));
 
-  typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);
+  tau_typedesc_t* desc = tau_typebuilder_build_bool(ctx->typebuilder);
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 
-  typedesc_t* promoted_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_desc, rhs_desc);
+  tau_typedesc_t* promoted_desc = tau_typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_desc, rhs_desc);
 
-  if (typedesc_is_integer(promoted_desc))
+  if (tau_typedesc_is_integer(promoted_desc))
     node->op_subkind = OP_CMP_NE_INTEGER;
-  else if (typedesc_is_float(promoted_desc))
+  else if (tau_typedesc_is_float(promoted_desc))
     node->op_subkind = OP_CMP_NE_FLOAT;
-  else if (typedesc_is_complex(promoted_desc))
+  else if (tau_typedesc_is_complex(promoted_desc))
     node->op_subkind = OP_CMP_NE_COMPLEX;
   else
-    UNREACHABLE();
+    TAU_UNREACHABLE();
 }
 
-static void ast_expr_op_bin_cmp_ne_typecheck_vector(typecheck_ctx_t* ctx, ast_expr_op_bin_cmp_ne_t* node, typedesc_t* lhs_desc, typedesc_t* rhs_desc)
+static void tau_ast_expr_op_bin_cmp_ne_typecheck_vector(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_bin_cmp_ne_t* node, tau_typedesc_t* lhs_desc, tau_typedesc_t* rhs_desc)
 {
-  if (!typedesc_is_vector(typedesc_remove_ref_mut(lhs_desc)))
-    error_bag_put_typecheck_expected_vector(ctx->errors, token_location(node->lhs->tok));
+  if (!tau_typedesc_is_vector(tau_typedesc_remove_ref_mut(lhs_desc)))
+    tau_error_bag_put_typecheck_expected_vector(ctx->errors, tau_token_location(node->lhs->tok));
 
-  if (!typedesc_is_vector(typedesc_remove_ref_mut(rhs_desc)))
-    error_bag_put_typecheck_expected_vector(ctx->errors, token_location(node->rhs->tok));
+  if (!tau_typedesc_is_vector(tau_typedesc_remove_ref_mut(rhs_desc)))
+    tau_error_bag_put_typecheck_expected_vector(ctx->errors, tau_token_location(node->rhs->tok));
 
-  typedesc_t* desc = typebuilder_build_bool(ctx->typebuilder);
+  tau_typedesc_t* desc = tau_typebuilder_build_bool(ctx->typebuilder);
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 
   node->op_subkind = OP_CMP_NE_VECTOR;
 }
 
-static void ast_expr_op_bin_cmp_ne_codegen_scalar(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_ne_t* node)
+static void tau_ast_expr_op_bin_cmp_ne_codegen_scalar(tau_codegen_ctx_t* ctx, tau_ast_expr_op_bin_cmp_ne_t* node)
 {
-  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
-  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
+  tau_typedesc_t* lhs_desc = tau_typetable_lookup(ctx->typetable, node->lhs);
+  tau_typedesc_t* rhs_desc = tau_typetable_lookup(ctx->typetable, node->rhs);
 
-  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
-  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
+  LLVMValueRef llvm_lhs_value = tau_codegen_build_load_if_ref(ctx, ((tau_ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
+  LLVMValueRef llvm_rhs_value = tau_codegen_build_load_if_ref(ctx, ((tau_ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
 
-  lhs_desc = typedesc_remove_ref_mut(lhs_desc);
-  rhs_desc = typedesc_remove_ref_mut(rhs_desc);
+  lhs_desc = tau_typedesc_remove_ref_mut(lhs_desc);
+  rhs_desc = tau_typedesc_remove_ref_mut(rhs_desc);
 
-  typedesc_t* promoted_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_desc, rhs_desc);
+  tau_typedesc_t* promoted_desc = tau_typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_desc, rhs_desc);
 
-  llvm_lhs_value = codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
-  llvm_rhs_value = codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
+  llvm_lhs_value = tau_codegen_build_arithmetic_cast(ctx, llvm_lhs_value, lhs_desc, promoted_desc);
+  llvm_rhs_value = tau_codegen_build_arithmetic_cast(ctx, llvm_rhs_value, rhs_desc, promoted_desc);
 
   switch (node->op_subkind)
   {
   case OP_CMP_NE_INTEGER: node->llvm_value = LLVMBuildICmp(ctx->llvm_builder, LLVMIntNE, llvm_lhs_value, llvm_rhs_value, ""); break;
   case OP_CMP_NE_FLOAT: node->llvm_value = LLVMBuildFCmp(ctx->llvm_builder, LLVMRealONE, llvm_lhs_value, llvm_rhs_value, ""); break;
-  case OP_CMP_NE_COMPLEX: node->llvm_value = codegen_build_complex_ne(ctx, llvm_lhs_value, llvm_rhs_value); break;
-  default: UNREACHABLE();
+  case OP_CMP_NE_COMPLEX: node->llvm_value = tau_codegen_build_complex_ne(ctx, llvm_lhs_value, llvm_rhs_value); break;
+  default: TAU_UNREACHABLE();
   }
 }
 
-static void ast_expr_op_bin_cmp_ne_codegen_vector(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_ne_t* node)
+static void tau_ast_expr_op_bin_cmp_ne_codegen_vector(tau_codegen_ctx_t* ctx, tau_ast_expr_op_bin_cmp_ne_t* node)
 {
-  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
-  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
+  tau_typedesc_t* lhs_desc = tau_typetable_lookup(ctx->typetable, node->lhs);
+  tau_typedesc_t* rhs_desc = tau_typetable_lookup(ctx->typetable, node->rhs);
 
-  LLVMValueRef llvm_lhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
-  LLVMValueRef llvm_rhs_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
+  LLVMValueRef llvm_lhs_value = tau_codegen_build_load_if_ref(ctx, ((tau_ast_expr_t*)node->lhs)->llvm_value, lhs_desc);
+  LLVMValueRef llvm_rhs_value = tau_codegen_build_load_if_ref(ctx, ((tau_ast_expr_t*)node->rhs)->llvm_value, rhs_desc);
 
-  typedesc_vec_t* lhs_vec_desc = (typedesc_vec_t*)typedesc_remove_ref_mut(lhs_desc);
-  typedesc_vec_t* rhs_vec_desc = (typedesc_vec_t*)typedesc_remove_ref_mut(rhs_desc);
+  tau_typedesc_vec_t* lhs_vec_desc = (tau_typedesc_vec_t*)tau_typedesc_remove_ref_mut(lhs_desc);
+  tau_typedesc_vec_t* rhs_vec_desc = (tau_typedesc_vec_t*)tau_typedesc_remove_ref_mut(rhs_desc);
 
-  typedesc_t* promoted_base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_vec_desc->base_type, rhs_vec_desc->base_type);
-  typedesc_t* promoted_vec_desc = typebuilder_build_vec(ctx->typebuilder, lhs_vec_desc->size, promoted_base_desc);
+  tau_typedesc_t* promoted_base_desc = tau_typebuilder_build_promoted_arithmetic(ctx->typebuilder, lhs_vec_desc->base_type, rhs_vec_desc->base_type);
+  tau_typedesc_t* promoted_vec_desc = tau_typebuilder_build_vec(ctx->typebuilder, lhs_vec_desc->size, promoted_base_desc);
 
-  llvm_lhs_value = codegen_build_vector_cast(ctx, llvm_lhs_value, (typedesc_t*)lhs_vec_desc, promoted_vec_desc);
-  llvm_rhs_value = codegen_build_vector_cast(ctx, llvm_rhs_value, (typedesc_t*)rhs_vec_desc, promoted_vec_desc);
+  llvm_lhs_value = tau_codegen_build_vector_cast(ctx, llvm_lhs_value, (tau_typedesc_t*)lhs_vec_desc, promoted_vec_desc);
+  llvm_rhs_value = tau_codegen_build_vector_cast(ctx, llvm_rhs_value, (tau_typedesc_t*)rhs_vec_desc, promoted_vec_desc);
 
-  node->llvm_value = codegen_build_vector_ne(ctx, promoted_vec_desc, llvm_lhs_value, llvm_rhs_value);
+  node->llvm_value = tau_codegen_build_vector_ne(ctx, promoted_vec_desc, llvm_lhs_value, llvm_rhs_value);
 }
 
-ast_expr_op_bin_cmp_ne_t* ast_expr_op_bin_cmp_ne_init(void)
+tau_ast_expr_op_bin_cmp_ne_t* tau_ast_expr_op_bin_cmp_ne_init(void)
 {
-  ast_expr_op_bin_cmp_ne_t* node = (ast_expr_op_bin_cmp_ne_t*)malloc(sizeof(ast_expr_op_bin_cmp_ne_t));
-  CLEAROBJ(node);
+  tau_ast_expr_op_bin_cmp_ne_t* node = (tau_ast_expr_op_bin_cmp_ne_t*)malloc(sizeof(tau_ast_expr_op_bin_cmp_ne_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_EXPR_OP_BINARY;
+  node->kind = TAU_AST_EXPR_OP_BINARY;
   node->op_kind = OP_CMP_NE;
 
   return node;
 }
 
-void ast_expr_op_bin_cmp_ne_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_cmp_ne_t* node)
+void tau_ast_expr_op_bin_cmp_ne_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_op_bin_cmp_ne_t* node)
 {
-  ast_node_nameres(ctx, node->lhs);
-  ast_node_nameres(ctx, node->rhs);
+  tau_ast_node_nameres(ctx, node->lhs);
+  tau_ast_node_nameres(ctx, node->rhs);
 }
 
-void ast_expr_op_bin_cmp_ne_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_cmp_ne_t* node)
+void tau_ast_expr_op_bin_cmp_ne_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_bin_cmp_ne_t* node)
 {
-  ast_node_typecheck(ctx, node->lhs);
-  ast_node_typecheck(ctx, node->rhs);
+  tau_ast_node_typecheck(ctx, node->lhs);
+  tau_ast_node_typecheck(ctx, node->rhs);
 
-  typedesc_t* lhs_desc = typetable_lookup(ctx->typetable, node->lhs);
-  ASSERT(lhs_desc != NULL);
+  tau_typedesc_t* lhs_desc = tau_typetable_lookup(ctx->typetable, node->lhs);
+  TAU_ASSERT(lhs_desc != NULL);
 
-  typedesc_t* rhs_desc = typetable_lookup(ctx->typetable, node->rhs);
-  ASSERT(rhs_desc != NULL);
+  tau_typedesc_t* rhs_desc = tau_typetable_lookup(ctx->typetable, node->rhs);
+  TAU_ASSERT(rhs_desc != NULL);
 
-  if (typedesc_is_arithmetic(typedesc_remove_ref_mut(lhs_desc)))
-    ast_expr_op_bin_cmp_ne_typecheck_scalar(ctx, node, lhs_desc, rhs_desc);
-  else if (typedesc_is_vector(typedesc_remove_ref_mut(lhs_desc)))
-    ast_expr_op_bin_cmp_ne_typecheck_vector(ctx, node, lhs_desc, rhs_desc);
+  if (tau_typedesc_is_arithmetic(tau_typedesc_remove_ref_mut(lhs_desc)))
+    tau_ast_expr_op_bin_cmp_ne_typecheck_scalar(ctx, node, lhs_desc, rhs_desc);
+  else if (tau_typedesc_is_vector(tau_typedesc_remove_ref_mut(lhs_desc)))
+    tau_ast_expr_op_bin_cmp_ne_typecheck_vector(ctx, node, lhs_desc, rhs_desc);
   else
-    UNREACHABLE();
+    TAU_UNREACHABLE();
 }
 
-void ast_expr_op_bin_cmp_ne_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_ne_t* node)
+void tau_ast_expr_op_bin_cmp_ne_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_op_bin_cmp_ne_t* node)
 {
-  ast_node_codegen(ctx, node->lhs);
-  ast_node_codegen(ctx, node->rhs);
+  tau_ast_node_codegen(ctx, node->lhs);
+  tau_ast_node_codegen(ctx, node->rhs);
 
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  tau_typedesc_t* desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
   switch (node->op_subkind)
   {
   case OP_CMP_NE_INTEGER:
   case OP_CMP_NE_FLOAT:
-  case OP_CMP_NE_COMPLEX: ast_expr_op_bin_cmp_ne_codegen_scalar(ctx, node); break;
-  case OP_CMP_NE_VECTOR: ast_expr_op_bin_cmp_ne_codegen_vector(ctx, node); break;
-  default: UNREACHABLE();
+  case OP_CMP_NE_COMPLEX: tau_ast_expr_op_bin_cmp_ne_codegen_scalar(ctx, node); break;
+  case OP_CMP_NE_VECTOR: tau_ast_expr_op_bin_cmp_ne_codegen_vector(ctx, node); break;
+  default: TAU_UNREACHABLE();
   }
 }

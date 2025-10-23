@@ -7,32 +7,32 @@
 
 #include "stages/analysis/types/typedesc/poison.h"
 
-typedesc_poison_t* typedesc_poison_init(void)
+tau_typedesc_poison_t* tau_typedesc_poison_init(void)
 {
-  typedesc_poison_t* desc = (typedesc_poison_t*)malloc(sizeof(typedesc_poison_t));
-  CLEAROBJ(desc);
+  tau_typedesc_poison_t* desc = (tau_typedesc_poison_t*)malloc(sizeof(tau_typedesc_poison_t));
+  TAU_CLEAROBJ(desc);
 
-  desc->kind = TYPEDESC_POISON;
+  desc->kind = TAU_TYPEDESC_POISON;
 
   return desc;
 }
 
-void typedesc_poison_free(typedesc_poison_t* desc)
+void tau_typedesc_poison_free(tau_typedesc_poison_t* desc)
 {
   free(desc);
 }
 
-bool typedesc_poison_is_implicitly_direct_convertible(typedesc_poison_t* UNUSED(src_desc), typedesc_t* UNUSED(dst_desc))
+bool tau_typedesc_poison_is_implicitly_direct_convertible(tau_typedesc_poison_t* TAU_UNUSED(src_desc), tau_typedesc_t* TAU_UNUSED(dst_desc))
 {
   return false;
 }
 
-bool typedesc_poison_is_implicitly_indirect_convertible(typedesc_poison_t* UNUSED(src_desc), typedesc_t* UNUSED(dst_desc))
+bool tau_typedesc_poison_is_implicitly_indirect_convertible(tau_typedesc_poison_t* TAU_UNUSED(src_desc), tau_typedesc_t* TAU_UNUSED(dst_desc))
 {
   return false;
 }
 
-bool typedesc_poison_is_explicitly_convertible(typedesc_poison_t* UNUSED(src_desc), typedesc_t* UNUSED(dst_desc))
+bool tau_typedesc_poison_is_explicitly_convertible(tau_typedesc_poison_t* TAU_UNUSED(src_desc), tau_typedesc_t* TAU_UNUSED(dst_desc))
 {
   return false;
 }

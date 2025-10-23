@@ -15,19 +15,19 @@
 /**
  * \brief Header for all declaration type descriptors.
  */
-#define TYPEDESC_DECL_HEADER\
-  TYPEDESC_HEADER;\
-  ast_node_t* node /** Declaration node. */
+#define TAU_TYPEDESC_DECL_HEADER\
+  TAU_TYPEDESC_HEADER;\
+  tau_ast_node_t* node /** Declaration node. */
 
 TAU_EXTERN_C_BEGIN
 
 /**
  * \brief Type descriptor for declaration types.
  */
-typedef struct typedesc_decl_t
+typedef struct tau_typedesc_decl_t
 {
-  TYPEDESC_DECL_HEADER;
-} typedesc_decl_t;
+  TAU_TYPEDESC_DECL_HEADER;
+} tau_typedesc_decl_t;
 
 TAU_EXTERN_C_END
 

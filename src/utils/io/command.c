@@ -13,19 +13,19 @@
 /**
  * \brief Represents an environment variable.
  */
-typedef struct command_env_var_t
+typedef struct tau_command_env_var_t
 {
-  string_t* key;   ///< The key of the environment variable.
-  string_t* value; ///< The value of the environment variable.
-} command_env_var_t;
+  tau_string_t* key;   ///< The key of the environment variable.
+  tau_string_t* value; ///< The value of the environment variable.
+} tau_command_env_var_t;
 
-struct command_t
+struct tau_command_t
 {
-  string_t* prog;
-  string_t* cwd;
+  tau_string_t* prog;
+  tau_string_t* cwd;
 
-  vector_t* args;
-  vector_t* env;
+  tau_vector_t* args;
+  tau_vector_t* env;
 
   FILE* stream_in;
   FILE* stream_out;
@@ -39,12 +39,12 @@ struct command_t
  * \param[in] value The value of the environment variable.
  * \returns Pointer to the newly initialized environment variable.
  */
-static command_env_var_t* command_env_var_init(const char* key, const char* value)
+static tau_command_env_var_t* tau_command_env_var_init(const char* key, const char* value)
 {
-  command_env_var_t* var = (command_env_var_t*)malloc(sizeof(command_env_var_t));
+  tau_command_env_var_t* var = (tau_command_env_var_t*)malloc(sizeof(tau_command_env_var_t));
 
-  var->key = string_init_with_cstr(key);
-  var->value = string_init_with_cstr(value);
+  var->key = tau_string_init_with_cstr(key);
+  var->value = tau_string_init_with_cstr(value);
 
   return var;
 }
@@ -54,10 +54,10 @@ static command_env_var_t* command_env_var_init(const char* key, const char* valu
  *
  * \param[in] var Pointer to the environment variable to be freed.
  */
-static void command_env_var_free(command_env_var_t* var)
+static void tau_command_env_var_free(tau_command_env_var_t* var)
 {
-  string_free(var->key);
-  string_free(var->value);
+  tau_string_free(var->key);
+  tau_string_free(var->value);
   free(var);
 }
 
@@ -147,32 +147,32 @@ static void cstr_to_tstr_free(LPTSTR tstr)
  * \param[in] cmd Pointer to the command to be used.
  * \returns Space separated commandline TCHAR string.
  */
-static LPTSTR command_get_commandline_tstr(command_t* cmd)
+static LPTSTR tau_command_get_commandline_tstr(tau_command_t* cmd)
 {
-  string_t* commandline_str = string_init();
-  string_append(commandline_str, cmd->prog);
+  tau_string_t* commandline_str = tau_string_init();
+  tau_string_append(commandline_str, cmd->prog);
 
-  VECTOR_FOR_LOOP(i, cmd->args)
+  TAU_VECTOR_FOR_LOOP(i, cmd->args)
   {
-    string_t* arg = (string_t*)vector_get(cmd->args, i);
+    tau_string_t* arg = (tau_string_t*)tau_vector_get(cmd->args, i);
 
-    string_append_cstr(commandline_str, " ");
-    string_append(commandline_str, arg);
+    tau_string_append_cstr(commandline_str, " ");
+    tau_string_append(commandline_str, arg);
   }
 
-  LPTSTR commandline_tstr = cstr_to_tstr(string_begin(commandline_str), string_length(commandline_str) + 1);
+  LPTSTR commandline_tstr = cstr_to_tstr(tau_string_begin(commandline_str), tau_string_length(commandline_str) + 1);
 
-  string_free(commandline_str);
+  tau_string_free(commandline_str);
 
   return commandline_tstr;
 }
 
 /**
- * \brief Frees a TCHAR string created by the `command_get_commandline_tstr` function.
+ * \brief Frees a TCHAR string created by the `tau_command_get_commandline_tstr` function.
  *
  * \param[in] tstr The TCHAR string to be freed.
  */
-static void command_get_commandline_tstr_free(LPTSTR tstr)
+static void tau_command_get_commandline_tstr_free(LPTSTR tstr)
 {
   cstr_to_tstr_free(tstr);
 }
@@ -183,7 +183,7 @@ static void command_get_commandline_tstr_free(LPTSTR tstr)
  * \param[in] cmd Pointer to the command to be used.
  * \returns TCHAR string of environment variables.
  */
-static LPTSTR command_get_environment_tstr(command_t* cmd)
+static LPTSTR tau_command_get_environment_tstr(tau_command_t* cmd)
 {
   LPTSTR default_env_tstr = GetEnvironmentStrings();
 
@@ -200,12 +200,12 @@ static LPTSTR command_get_environment_tstr(command_t* cmd)
 
   size_t cmd_env_len = 0;
 
-  VECTOR_FOR_LOOP(i, cmd->env)
+  TAU_VECTOR_FOR_LOOP(i, cmd->env)
   {
-    command_env_var_t* var = (command_env_var_t*)vector_get(cmd->env, i);
+    tau_command_env_var_t* var = (tau_command_env_var_t*)tau_vector_get(cmd->env, i);
 
-    cmd_env_len += string_length(var->key) + 1; // key + '='
-    cmd_env_len += string_length(var->value) + 1; // value + '\0'
+    cmd_env_len += tau_string_length(var->key) + 1; // key + '='
+    cmd_env_len += tau_string_length(var->value) + 1; // value + '\0'
   }
 
   cmd_env_len += 1; // '\0'
@@ -213,17 +213,17 @@ static LPTSTR command_get_environment_tstr(command_t* cmd)
   char* cmd_env_cstr = (char*)malloc(sizeof(char) * cmd_env_len);
   char* cmd_env_ptr = cmd_env_cstr;
 
-  VECTOR_FOR_LOOP(i, cmd->env)
+  TAU_VECTOR_FOR_LOOP(i, cmd->env)
   {
-    command_env_var_t* var = (command_env_var_t*)vector_get(cmd->env, i);
+    tau_command_env_var_t* var = (tau_command_env_var_t*)tau_vector_get(cmd->env, i);
 
-    strcpy(cmd_env_ptr, string_begin(var->key));
-    cmd_env_ptr += string_length(var->key);
+    strcpy(cmd_env_ptr, tau_string_begin(var->key));
+    cmd_env_ptr += tau_string_length(var->key);
 
     *cmd_env_ptr++ = '=';
 
-    strcpy(cmd_env_ptr, string_begin(var->value));
-    cmd_env_ptr += string_length(var->value);
+    strcpy(cmd_env_ptr, tau_string_begin(var->value));
+    cmd_env_ptr += tau_string_length(var->value);
 
     *cmd_env_ptr++ = '\0';
   }
@@ -246,23 +246,23 @@ static LPTSTR command_get_environment_tstr(command_t* cmd)
 }
 
 /**
- * \brief Frees a TCHAR string created by the `command_get_environment_tstr` function.
+ * \brief Frees a TCHAR string created by the `tau_command_get_environment_tstr` function.
  *
  * \param[in] tstr The TCHAR string to be freed.
  */
-static void command_get_environment_tstr_free(LPTSTR tstr)
+static void tau_command_get_environment_tstr_free(LPTSTR tstr)
 {
   free(tstr);
 }
 
-command_t* command_init(const char* prog)
+tau_command_t* tau_command_init(const char* prog)
 {
-  command_t* cmd = (command_t*)malloc(sizeof(command_t));
+  tau_command_t* cmd = (tau_command_t*)malloc(sizeof(tau_command_t));
 
-  cmd->prog = string_init_with_cstr(prog);
+  cmd->prog = tau_string_init_with_cstr(prog);
   cmd->cwd = NULL;
-  cmd->args = vector_init();
-  cmd->env = vector_init();
+  cmd->args = tau_vector_init();
+  cmd->env = tau_vector_init();
   cmd->stream_in = NULL;
   cmd->stream_out = NULL;
   cmd->stream_err = NULL;
@@ -270,65 +270,65 @@ command_t* command_init(const char* prog)
   return cmd;
 }
 
-void command_free(command_t* cmd)
+void tau_command_free(tau_command_t* cmd)
 {
-  string_free(cmd->prog);
+  tau_string_free(cmd->prog);
 
   if (cmd->cwd != NULL)
-    string_free(cmd->cwd);
+    tau_string_free(cmd->cwd);
 
-  vector_for_each(cmd->args, string_free);
-  vector_free(cmd->args);
+  tau_vector_for_each(cmd->args, tau_string_free);
+  tau_vector_free(cmd->args);
 
-  vector_for_each(cmd->env, command_env_var_free);
-  vector_free(cmd->env);
+  tau_vector_for_each(cmd->env, tau_command_env_var_free);
+  tau_vector_free(cmd->env);
 
   free(cmd);
 }
 
-void command_add_arg(command_t* cmd, const char* arg)
+void tau_command_add_arg(tau_command_t* cmd, const char* arg)
 {
-  vector_push(cmd->args, string_init_with_cstr(arg));
+  tau_vector_push(cmd->args, tau_string_init_with_cstr(arg));
 }
 
-void command_set_cwd(command_t* cmd, const char* cwd)
+void tau_command_set_cwd(tau_command_t* cmd, const char* cwd)
 {
   if (cmd->cwd != NULL)
   {
-    string_clear(cmd->cwd);
-    string_append_cstr(cmd->cwd, cwd);
+    tau_string_clear(cmd->cwd);
+    tau_string_append_cstr(cmd->cwd, cwd);
   }
   else
   {
-    cmd->cwd = string_init_with_cstr(cwd);
+    cmd->cwd = tau_string_init_with_cstr(cwd);
   }
 }
 
-void command_add_env(command_t* cmd, const char* key, const char* value)
+void tau_command_add_env(tau_command_t* cmd, const char* key, const char* value)
 {
-  vector_push(cmd->env, command_env_var_init(key, value));
+  tau_vector_push(cmd->env, tau_command_env_var_init(key, value));
 }
 
-void command_set_stdin(command_t* cmd, FILE* stream)
+void tau_command_set_stdin(tau_command_t* cmd, FILE* stream)
 {
   cmd->stream_in = stream;
 }
 
-void command_set_stdout(command_t* cmd, FILE* stream)
+void tau_command_set_stdout(tau_command_t* cmd, FILE* stream)
 {
   cmd->stream_out = stream;
 }
 
-void command_set_stderr(command_t* cmd, FILE* stream)
+void tau_command_set_stderr(tau_command_t* cmd, FILE* stream)
 {
   cmd->stream_err = stream;
 }
 
-int command_run(command_t* cmd)
+int tau_command_run(tau_command_t* cmd)
 {
-  LPTSTR commandline_tstr = command_get_commandline_tstr(cmd);
-  LPTSTR environemnt_tstr = command_get_environment_tstr(cmd);
-  LPTSTR cwd_tstr = cmd->cwd == NULL ? NULL : cstr_to_tstr(string_begin(cmd->cwd), string_length(cmd->cwd) + 1);
+  LPTSTR commandline_tstr = tau_command_get_commandline_tstr(cmd);
+  LPTSTR environemnt_tstr = tau_command_get_environment_tstr(cmd);
+  LPTSTR cwd_tstr = cmd->cwd == NULL ? NULL : cstr_to_tstr(tau_string_begin(cmd->cwd), tau_string_length(cmd->cwd) + 1);
 
   DWORD flags = 0;
 
@@ -373,12 +373,12 @@ int command_run(command_t* cmd)
   if (cwd_tstr != NULL)
     cstr_to_tstr_free(cwd_tstr);
 
-  command_get_environment_tstr_free(environemnt_tstr);
-  command_get_commandline_tstr_free(commandline_tstr);
+  tau_command_get_environment_tstr_free(environemnt_tstr);
+  tau_command_get_commandline_tstr_free(commandline_tstr);
 
   if (!result)
   {
-    log_error("windows", "CreateProcess failed! (%d)", error);
+    tau_log_error("windows", "CreateProcess failed! (%d)", error);
     return error;
   }
 
@@ -393,73 +393,73 @@ int command_run(command_t* cmd)
   return (int)exit_code;
 }
 
-void command_reset(command_t* cmd)
+void tau_command_reset(tau_command_t* cmd)
 {
   if (cmd->cwd != NULL)
   {
-    string_free(cmd->cwd);
+    tau_string_free(cmd->cwd);
     cmd->cwd = NULL;
   }
 
-  vector_for_each(cmd->args, string_free);
-  vector_clear(cmd->args);
+  tau_vector_for_each(cmd->args, tau_string_free);
+  tau_vector_clear(cmd->args);
 
-  vector_for_each(cmd->env, command_env_var_free);
-  vector_clear(cmd->env);
+  tau_vector_for_each(cmd->env, tau_command_env_var_free);
+  tau_vector_clear(cmd->env);
 }
 
 #elif TAU_OS_LINUX
 
-command_t* command_init(const char* UNUSED(prog))
+tau_command_t* tau_command_init(const char* TAU_UNUSED(prog))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
   return NULL;
 }
 
-void command_free(command_t* UNUSED(cmd))
+void tau_command_free(tau_command_t* TAU_UNUSED(cmd))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
 }
 
-void command_add_arg(command_t* UNUSED(cmd), const char* UNUSED(arg))
+void tau_command_add_arg(tau_command_t* TAU_UNUSED(cmd), const char* TAU_UNUSED(arg))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
 }
 
-void command_set_cwd(command_t* UNUSED(cmd), const char* UNUSED(cwd))
+void tau_command_set_cwd(tau_command_t* TAU_UNUSED(cmd), const char* TAU_UNUSED(cwd))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
 }
 
-void command_add_env(command_t* UNUSED(cmd), const char* UNUSED(key), const char* UNUSED(value))
+void tau_command_add_env(tau_command_t* TAU_UNUSED(cmd), const char* TAU_UNUSED(key), const char* TAU_UNUSED(value))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
 }
 
-void command_set_stdin(command_t* UNUSED(cmd), FILE* UNUSED(stream))
+void tau_command_set_stdin(tau_command_t* TAU_UNUSED(cmd), FILE* TAU_UNUSED(stream))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
 }
 
-void command_set_stdout(command_t* UNUSED(cmd), FILE* UNUSED(stream))
+void tau_command_set_stdout(tau_command_t* TAU_UNUSED(cmd), FILE* TAU_UNUSED(stream))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
 }
 
-void command_set_stderr(command_t* UNUSED(cmd), FILE* UNUSED(stream))
+void tau_command_set_stderr(tau_command_t* TAU_UNUSED(cmd), FILE* TAU_UNUSED(stream))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
 }
 
-int command_run(command_t* UNUSED(cmd))
+int tau_command_run(tau_command_t* TAU_UNUSED(cmd))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
   return EXIT_FAILURE;
 }
 
-void command_reset(command_t* UNUSED(cmd))
+void tau_command_reset(tau_command_t* TAU_UNUSED(cmd))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
 }
 
 #else

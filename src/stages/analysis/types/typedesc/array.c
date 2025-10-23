@@ -7,63 +7,63 @@
 
 #include "stages/analysis/types/typedesc/array.h"
 
-typedesc_array_t* typedesc_array_init(void)
+tau_typedesc_array_t* tau_typedesc_array_init(void)
 {
-  typedesc_array_t* desc = (typedesc_array_t*)malloc(sizeof(typedesc_array_t));
-  CLEAROBJ(desc);
+  tau_typedesc_array_t* desc = (tau_typedesc_array_t*)malloc(sizeof(tau_typedesc_array_t));
+  TAU_CLEAROBJ(desc);
 
-  desc->kind = TYPEDESC_ARRAY;
+  desc->kind = TAU_TYPEDESC_ARRAY;
 
   return desc;
 }
 
-void typedesc_array_free(typedesc_array_t* desc)
+void tau_typedesc_array_free(tau_typedesc_array_t* desc)
 {
   free(desc);
 }
 
-bool typedesc_array_is_implicitly_direct_convertible(typedesc_array_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_array_is_implicitly_direct_convertible(tau_typedesc_array_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (typedesc_is_opt(dst_desc))
-    return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
+  if (tau_typedesc_is_opt(dst_desc))
+    return tau_typedesc_is_implicitly_direct_convertible((tau_typedesc_t*)src_desc, tau_typedesc_remove_opt(dst_desc));
 
-  if (!typedesc_is_array(dst_desc))
+  if (!tau_typedesc_is_array(dst_desc))
     return false;
 
-  typedesc_array_t* dst_array_desc = (typedesc_array_t*)dst_desc;
+  tau_typedesc_array_t* dst_array_desc = (tau_typedesc_array_t*)dst_desc;
 
   if (src_desc->length < dst_array_desc->length)
     return false;
 
-  if (!typedesc_is_mut(src_desc->base_type) && typedesc_is_mut(dst_array_desc->base_type))
+  if (!tau_typedesc_is_mut(src_desc->base_type) && tau_typedesc_is_mut(dst_array_desc->base_type))
     return false;
 
-  return typedesc_is_implicitly_indirect_convertible(typedesc_remove_mut(src_desc->base_type), typedesc_remove_mut(dst_desc));
+  return tau_typedesc_is_implicitly_indirect_convertible(tau_typedesc_remove_mut(src_desc->base_type), tau_typedesc_remove_mut(dst_desc));
 }
 
-bool typedesc_array_is_implicitly_indirect_convertible(typedesc_array_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_array_is_implicitly_indirect_convertible(tau_typedesc_array_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (!typedesc_is_array(dst_desc))
+  if (!tau_typedesc_is_array(dst_desc))
     return false;
 
-  typedesc_array_t* dst_array_desc = (typedesc_array_t*)dst_desc;
+  tau_typedesc_array_t* dst_array_desc = (tau_typedesc_array_t*)dst_desc;
 
   if (src_desc->length < dst_array_desc->length)
     return false;
 
-  if (!typedesc_is_mut(src_desc->base_type) && typedesc_is_mut(dst_array_desc->base_type))
+  if (!tau_typedesc_is_mut(src_desc->base_type) && tau_typedesc_is_mut(dst_array_desc->base_type))
     return false;
 
-  return typedesc_is_implicitly_indirect_convertible(typedesc_remove_mut(src_desc->base_type), typedesc_remove_mut(dst_desc));
+  return tau_typedesc_is_implicitly_indirect_convertible(tau_typedesc_remove_mut(src_desc->base_type), tau_typedesc_remove_mut(dst_desc));
 }
 
-bool typedesc_array_is_explicitly_convertible(typedesc_array_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_array_is_explicitly_convertible(tau_typedesc_array_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (typedesc_is_opt(dst_desc))
-    return typedesc_is_explicitly_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
+  if (tau_typedesc_is_opt(dst_desc))
+    return tau_typedesc_is_explicitly_convertible((tau_typedesc_t*)src_desc, tau_typedesc_remove_opt(dst_desc));
 
-  if (!typedesc_is_array(dst_desc))
+  if (!tau_typedesc_is_array(dst_desc))
     return false;
 
-  return typedesc_is_explicitly_convertible(src_desc->base_type, typedesc_remove_array(dst_desc));
+  return tau_typedesc_is_explicitly_convertible(src_desc->base_type, tau_typedesc_remove_array(dst_desc));
 }

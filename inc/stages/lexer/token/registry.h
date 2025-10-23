@@ -25,7 +25,7 @@ TAU_EXTERN_C_BEGIN
  * \param[in] path Path to the source file.
  * \param[in] src The contents of the source file.
  */
-void token_registry_register_file(const char* path, const char* src);
+void tau_token_registry_register_file(const char* path, const char* src);
 
 /**
  * \brief Adds a new token to the registry.
@@ -35,7 +35,7 @@ void token_registry_register_file(const char* path, const char* src);
  * \param[in] pos The position of the token in the source file.
  * \returns Pointer to the newly registered token.
  */
-token_t* token_registry_token_init(const char* path, token_kind_t kind, size_t pos);
+tau_token_t* tau_token_registry_token_init(const char* path, tau_token_kind_t kind, size_t pos);
 
 /**
  * \brief Retrieves the path and contents of the source file associated with a token.
@@ -44,12 +44,12 @@ token_t* token_registry_token_init(const char* path, token_kind_t kind, size_t p
  * \param[out] path Pointer to a variable where the path is to be written.
  * \param[out] src Pointer to a variable where the contents are to be written.
  */
-void token_registry_path_and_src(token_t* tok, const char** path, const char** src);
+void tau_token_registry_path_and_src(tau_token_t* tok, const char** path, const char** src);
 
 /**
  * \brief Frees all registered tokens.
  */
-void token_registry_free(void);
+void tau_token_registry_free(void);
 
 TAU_EXTERN_C_END
 

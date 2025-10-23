@@ -9,32 +9,32 @@
 
 #include "utils/collections/list.h"
 
-queue_t* queue_init(void)
+tau_queue_t* tau_queue_init(void)
 {
-  return (queue_t*)list_init();
+  return (tau_queue_t*)tau_list_init();
 }
 
-void queue_free(queue_t* que)
+void tau_queue_free(tau_queue_t* que)
 {
-  list_free((list_t*)que);
+  tau_list_free((tau_list_t*)que);
 }
 
-void queue_offer(queue_t* que, void* data)
+void tau_queue_offer(tau_queue_t* que, void* data)
 {
-  list_push_front((list_t*)que, data);
+  tau_list_push_front((tau_list_t*)que, data);
 }
 
-void* queue_poll(queue_t* que)
+void* tau_queue_poll(tau_queue_t* que)
 {
-  return list_pop_back((list_t*)que);
+  return tau_list_pop_back((tau_list_t*)que);
 }
 
-void* queue_peek(const queue_t* que)
+void* tau_queue_peek(const tau_queue_t* que)
 {
-  return list_back((const list_t*)que);
+  return tau_list_back((const tau_list_t*)que);
 }
 
-bool queue_empty(const queue_t* que)
+bool tau_queue_empty(const tau_queue_t* que)
 {
-  return list_empty((const list_t*)que);
+  return tau_list_empty((const tau_list_t*)que);
 }

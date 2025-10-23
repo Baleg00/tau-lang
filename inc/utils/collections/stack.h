@@ -24,21 +24,21 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Stack data structure.
  */
-typedef struct stack_t stack_t;
+typedef struct tau_stack_t tau_stack_t;
 
 /**
  * \brief Initializes a new empty stack.
  *
  * \returns Pointer to the initialized stack.
  */
-stack_t* stack_init(void);
+tau_stack_t* tau_stack_init(void);
 
 /**
  * \brief Frees the resources associated with a stack.
  *
  * \param[in] stack Pointer to the stack to free.
  */
-void stack_free(stack_t* stack);
+void tau_stack_free(tau_stack_t* stack);
 
 /**
  * \brief Adds the given data to the top of a stack.
@@ -46,7 +46,7 @@ void stack_free(stack_t* stack);
  * \param[in,out] stack Pointer to the stack.
  * \param[in] data Pointer to the data to be added.
  */
-void stack_push(stack_t* restrict stack, void* restrict data);
+void tau_stack_push(tau_stack_t* restrict stack, void* restrict data);
 
 /**
  * \brief Removes and returns the data stored at the top of a stack.
@@ -54,14 +54,14 @@ void stack_push(stack_t* restrict stack, void* restrict data);
  * \param[in,out] stack Pointer to the stack.
  * \returns Pointer to the data removed from the top of the stack.
  */
-void* stack_pop(stack_t* stack);
+void* tau_stack_pop(tau_stack_t* stack);
 
 /**
  * \brief Removes all data from a stack.
  *
  * \param[in,out] stack Pointer to the stack to be cleared.
  */
-void stack_clear(stack_t* stack);
+void tau_stack_clear(tau_stack_t* stack);
 
 /**
  * \brief Retrieves the data stored at the top of a stack.
@@ -69,7 +69,7 @@ void stack_clear(stack_t* stack);
  * \param[in] stack Pointer to the stack.
  * \returns Pointer to the data at the top of the stack.
  */
-void* stack_top(const stack_t* stack);
+void* tau_stack_top(const tau_stack_t* stack);
 
 /**
  * \brief Checks if a stack is empty.
@@ -77,7 +77,7 @@ void* stack_top(const stack_t* stack);
  * \param[in] stack Pointer to the stack.
  * \returns `true` if the stack is empty, `false` otherwise.
  */
-bool stack_empty(const stack_t* stack);
+bool tau_stack_empty(const tau_stack_t* stack);
 
 TAU_EXTERN_C_END
 

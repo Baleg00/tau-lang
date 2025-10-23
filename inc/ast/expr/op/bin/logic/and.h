@@ -18,17 +18,17 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST binary arithmetic logical AND expression node.
  */
-typedef struct ast_expr_op_bin_logic_and_t
+typedef struct tau_ast_expr_op_bin_logic_and_t
 {
-  AST_EXPR_OP_BIN_HEADER;
-} ast_expr_op_bin_logic_and_t;
+  TAU_AST_EXPR_OP_BIN_HEADER;
+} tau_ast_expr_op_bin_logic_and_t;
 
 /**
  * \brief Initializes a new AST binary logical AND operation expression node.
  * 
  * \returns Pointer to the newly initialized AST node.
  */
-ast_expr_op_bin_logic_and_t* ast_expr_op_bin_logic_and_init(void);
+tau_ast_expr_op_bin_logic_and_t* tau_ast_expr_op_bin_logic_and_init(void);
 
 /**
  * \brief Performs name resolution pass on an AST binary logical AND operation
@@ -37,7 +37,7 @@ ast_expr_op_bin_logic_and_t* ast_expr_op_bin_logic_and_init(void);
  * \param[in] ctx Pointer to the name resolution context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_expr_op_bin_logic_and_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_logic_and_t* node);
+void tau_ast_expr_op_bin_logic_and_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_op_bin_logic_and_t* node);
 
 /**
  * \brief Performs type check pass on an AST binary logical AND operation
@@ -46,7 +46,7 @@ void ast_expr_op_bin_logic_and_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_logic
  * \param[in] ctx Pointer to the type check context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_expr_op_bin_logic_and_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_logic_and_t* node);
+void tau_ast_expr_op_bin_logic_and_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_bin_logic_and_t* node);
 
 /**
  * \brief Performs code generation pass on an AST binary logical AND operation
@@ -55,7 +55,7 @@ void ast_expr_op_bin_logic_and_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_l
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_expr_op_bin_logic_and_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_logic_and_t* node);
+void tau_ast_expr_op_bin_logic_and_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_op_bin_logic_and_t* node);
 
 TAU_EXTERN_C_END
 

@@ -8,9 +8,9 @@
 #include "utils/collections/vector.h"
 
 /// The initial number of elements a vector should be able to hold.
-#define VECTOR_INITIAL_CAPACITY ((size_t)16)
+#define TAU_VECTOR_INITIAL_CAPACITY ((size_t)16)
 
-struct vector_t
+struct tau_vector_t
 {
   size_t size;     ///< The number of elements in the vector.
   size_t capacity; ///< The maximum number of elements the vector can hold.
@@ -23,42 +23,42 @@ struct vector_t
  * \param[in,out] vec Pointer to the vector to be expanded.
  * \param[in] new_capacity The new capacity of the vector.
  */
-static void vector_expand(vector_t* vec, size_t new_capacity)
+static void tau_vector_expand(tau_vector_t* vec, size_t new_capacity)
 {
   if (vec->capacity >= new_capacity)
     return;
 
   vec->capacity = new_capacity;
   vec->data = (void**)realloc(vec->data, sizeof(void*) * vec->capacity);
-  ASSERT(vec->data != NULL);
+  TAU_ASSERT(vec->data != NULL);
 }
 
-vector_t* vector_init(void)
+tau_vector_t* tau_vector_init(void)
 {
-  return vector_init_with_capacity(VECTOR_INITIAL_CAPACITY);
+  return tau_vector_init_with_capacity(TAU_VECTOR_INITIAL_CAPACITY);
 }
 
-vector_t* vector_init_with_capacity(size_t capacity)
+tau_vector_t* tau_vector_init_with_capacity(size_t capacity)
 {
-  ASSERT(capacity > 0);
+  TAU_ASSERT(capacity > 0);
 
-  vector_t* vec = (vector_t*)malloc(sizeof(vector_t));
-  ASSERT(vec != NULL);
+  tau_vector_t* vec = (tau_vector_t*)malloc(sizeof(tau_vector_t));
+  TAU_ASSERT(vec != NULL);
 
   vec->size = 0;
   vec->capacity = capacity;
   vec->data = (void**)malloc(sizeof(void*) * capacity);
-  ASSERT(vec->data != NULL);
+  TAU_ASSERT(vec->data != NULL);
 
   return vec;
 }
 
-vector_t* vector_init_from_buffer(void* buffer, size_t length)
+tau_vector_t* tau_vector_init_from_buffer(void* buffer, size_t length)
 {
   if (length == 0)
-    return vector_init();
+    return tau_vector_init();
 
-  vector_t* vec = vector_init_with_capacity(length);
+  tau_vector_t* vec = tau_vector_init_with_capacity(length);
 
   memcpy(vec->data, buffer, sizeof(void*) * length);
   vec->size = length;
@@ -66,15 +66,15 @@ vector_t* vector_init_from_buffer(void* buffer, size_t length)
   return vec;
 }
 
-void vector_free(vector_t* vec)
+void tau_vector_free(tau_vector_t* vec)
 {
   free(vec->data);
   free(vec);
 }
 
-vector_t* vector_copy(const vector_t* vec)
+tau_vector_t* tau_vector_copy(const tau_vector_t* vec)
 {
-  vector_t* new_vec = vector_init_with_capacity(vec->size);
+  tau_vector_t* new_vec = tau_vector_init_with_capacity(vec->size);
 
   new_vec->size = vec->size;
   memcpy(new_vec->data, vec->data, sizeof(void*) * vec->size);
@@ -82,43 +82,43 @@ vector_t* vector_copy(const vector_t* vec)
   return new_vec;
 }
 
-void* vector_get(const vector_t* vec, size_t idx)
+void* tau_vector_get(const tau_vector_t* vec, size_t idx)
 {
   return vec->data[idx];
 }
 
-void vector_set(const vector_t* restrict vec, size_t idx, void* restrict data)
+void tau_vector_set(const tau_vector_t* restrict vec, size_t idx, void* restrict data)
 {
   vec->data[idx] = data;
 }
 
-void* vector_front(const vector_t* vec)
+void* tau_vector_front(const tau_vector_t* vec)
 {
   return vec->data[0];
 }
 
-void* vector_back(const vector_t* vec)
+void* tau_vector_back(const tau_vector_t* vec)
 {
   return vec->data[vec->size - 1];
 }
 
-void vector_push(vector_t* restrict vec, void* restrict data)
+void tau_vector_push(tau_vector_t* restrict vec, void* restrict data)
 {
   if (vec->size + 1 >= vec->capacity)
-    vector_expand(vec, vec->capacity << 1);
+    tau_vector_expand(vec, vec->capacity << 1);
 
   vec->data[vec->size++] = data;
 }
 
-void* vector_pop(vector_t* vec)
+void* tau_vector_pop(tau_vector_t* vec)
 {
   return vec->data[--vec->size];
 }
 
-void vector_insert(vector_t* restrict vec, size_t idx, void* restrict data)
+void tau_vector_insert(tau_vector_t* restrict vec, size_t idx, void* restrict data)
 {
   if (vec->size + 1 >= vec->capacity)
-    vector_expand(vec, vec->capacity << 1);
+    tau_vector_expand(vec, vec->capacity << 1);
 
   memmove(vec->data + idx + 1, vec->data + idx, sizeof(void*) * (vec->size - idx));
 
@@ -126,21 +126,21 @@ void vector_insert(vector_t* restrict vec, size_t idx, void* restrict data)
   vec->size++;
 }
 
-void vector_extend(vector_t* restrict dest, const vector_t* restrict src)
+void tau_vector_extend(tau_vector_t* restrict dest, const tau_vector_t* restrict src)
 {
   size_t new_capacity = dest->capacity;
 
   while (new_capacity < dest->size + src->size)
     new_capacity <<= 1;
 
-  vector_expand(dest, new_capacity);
+  tau_vector_expand(dest, new_capacity);
 
   memcpy(dest->data + dest->size, src->data, sizeof(void*) * src->size);
 
   dest->size += src->size;
 }
 
-void* vector_remove(vector_t* vec, size_t idx)
+void* tau_vector_remove(tau_vector_t* vec, size_t idx)
 {
   void* temp = vec->data[idx];
 
@@ -151,16 +151,16 @@ void* vector_remove(vector_t* vec, size_t idx)
   return temp;
 }
 
-void vector_clear(vector_t* vec)
+void tau_vector_clear(tau_vector_t* vec)
 {
   vec->size = 0;
-  vec->capacity = VECTOR_INITIAL_CAPACITY;
+  vec->capacity = TAU_VECTOR_INITIAL_CAPACITY;
 
-  vec->data = (void**)realloc(vec->data, sizeof(void*) * VECTOR_INITIAL_CAPACITY);
-  ASSERT(vec->data != NULL);
+  vec->data = (void**)realloc(vec->data, sizeof(void*) * TAU_VECTOR_INITIAL_CAPACITY);
+  TAU_ASSERT(vec->data != NULL);
 }
 
-size_t vector_find(const vector_t* restrict vec, void* restrict data)
+size_t tau_vector_find(const tau_vector_t* restrict vec, void* restrict data)
 {
   size_t i = 0;
 
@@ -171,23 +171,23 @@ size_t vector_find(const vector_t* restrict vec, void* restrict data)
   return i;
 }
 
-size_t vector_size(const vector_t* vec)
+size_t tau_vector_size(const tau_vector_t* vec)
 {
   return vec->size;
 }
 
-bool vector_empty(const vector_t* vec)
+bool tau_vector_empty(const tau_vector_t* vec)
 {
   return vec->size == 0;
 }
 
-void vector_for_each(const vector_t* vec, vector_for_each_func_t func)
+void tau_vector_for_each(const tau_vector_t* vec, tau_vector_for_each_func_t func)
 {
   for (size_t i = 0; i < vec->size; ++i)
     func(vec->data[i]);
 }
 
-void vector_to_buffer(const vector_t* restrict vec, void* restrict buffer)
+void tau_vector_to_buffer(const tau_vector_t* restrict vec, void* restrict buffer)
 {
   memcpy(buffer, vec->data, sizeof(void*) * vec->size);
 }

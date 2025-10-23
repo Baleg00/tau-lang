@@ -9,92 +9,92 @@
 
 #include "ast/registry.h"
 
-ast_expr_lit_vec_t* ast_expr_lit_vec_init(void)
+tau_ast_expr_lit_vec_t* tau_ast_expr_lit_vec_init(void)
 {
-  ast_expr_lit_vec_t* node = (ast_expr_lit_vec_t*)malloc(sizeof(ast_expr_lit_vec_t));
-  CLEAROBJ(node);
+  tau_ast_expr_lit_vec_t* node = (tau_ast_expr_lit_vec_t*)malloc(sizeof(tau_ast_expr_lit_vec_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_EXPR_LIT_VEC;
-  node->values = vector_init();
+  node->kind = TAU_AST_EXPR_LIT_VEC;
+  node->values = tau_vector_init();
 
   return node;
 }
 
-void ast_expr_lit_vec_free(ast_expr_lit_vec_t* node)
+void tau_ast_expr_lit_vec_free(tau_ast_expr_lit_vec_t* node)
 {
-  vector_free(node->values);
+  tau_vector_free(node->values);
   free(node);
 }
 
-void ast_expr_lit_vec_nameres(nameres_ctx_t* ctx, ast_expr_lit_vec_t* node)
+void tau_ast_expr_lit_vec_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_lit_vec_t* node)
 {
-  VECTOR_FOR_LOOP(i, node->values)
-    ast_node_nameres(ctx, (ast_node_t*)vector_get(node->values, i));
+  TAU_VECTOR_FOR_LOOP(i, node->values)
+    tau_ast_node_nameres(ctx, (tau_ast_node_t*)tau_vector_get(node->values, i));
 }
 
-void ast_expr_lit_vec_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_vec_t* node)
+void tau_ast_expr_lit_vec_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_lit_vec_t* node)
 {
-  VECTOR_FOR_LOOP(i, node->values)
-    ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->values, i));
+  TAU_VECTOR_FOR_LOOP(i, node->values)
+    tau_ast_node_typecheck(ctx, (tau_ast_node_t*)tau_vector_get(node->values, i));
 
-  typedesc_t* base_desc = NULL;
+  tau_typedesc_t* base_desc = NULL;
 
-  VECTOR_FOR_LOOP(i, node->values)
+  TAU_VECTOR_FOR_LOOP(i, node->values)
   {
-    ast_node_t* value_node = (ast_node_t*)vector_get(node->values, i);
+    tau_ast_node_t* value_node = (tau_ast_node_t*)tau_vector_get(node->values, i);
 
-    typedesc_t* value_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, value_node));
+    tau_typedesc_t* value_desc = tau_typedesc_remove_ref_mut(tau_typetable_lookup(ctx->typetable, value_node));
 
-    if (!typedesc_is_integer(value_desc) && !typedesc_is_float(value_desc))
+    if (!tau_typedesc_is_integer(value_desc) && !tau_typedesc_is_float(value_desc))
     {
-      error_bag_put_typecheck_expected_integer_or_float(ctx->errors, token_location(value_node->tok));
-      typecheck_poison(ctx, (ast_node_t*)node);
+      tau_error_bag_put_typecheck_expected_integer_or_float(ctx->errors, tau_token_location(value_node->tok));
+      tau_typecheck_poison(ctx, (tau_ast_node_t*)node);
       return;
     }
 
     if (base_desc == NULL)
       base_desc = value_desc;
     else
-      base_desc = typebuilder_build_promoted_arithmetic(ctx->typebuilder, base_desc, value_desc);
+      base_desc = tau_typebuilder_build_promoted_arithmetic(ctx->typebuilder, base_desc, value_desc);
   }
 
-  typedesc_t* desc = typebuilder_build_vec(ctx->typebuilder, vector_size(node->values), base_desc);
+  tau_typedesc_t* desc = tau_typebuilder_build_vec(ctx->typebuilder, tau_vector_size(node->values), base_desc);
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 }
 
-void ast_expr_lit_vec_codegen(codegen_ctx_t* ctx, ast_expr_lit_vec_t* node)
+void tau_ast_expr_lit_vec_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_lit_vec_t* node)
 {
-  VECTOR_FOR_LOOP(i, node->values)
-    ast_node_codegen(ctx, (ast_node_t*)vector_get(node->values, i));
+  TAU_VECTOR_FOR_LOOP(i, node->values)
+    tau_ast_node_codegen(ctx, (tau_ast_node_t*)tau_vector_get(node->values, i));
 
-  typedesc_vec_t* desc = (typedesc_vec_t*)typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  tau_typedesc_vec_t* desc = (tau_typedesc_vec_t*)tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  LLVMValueRef* llvm_values = (LLVMValueRef*)malloc(vector_size(node->values) * sizeof(LLVMValueRef));
+  LLVMValueRef* llvm_values = (LLVMValueRef*)malloc(tau_vector_size(node->values) * sizeof(LLVMValueRef));
 
-  if (typedesc_is_integer(desc->base_type))
-    VECTOR_FOR_LOOP(i, node->values)
+  if (tau_typedesc_is_integer(desc->base_type))
+    TAU_VECTOR_FOR_LOOP(i, node->values)
       llvm_values[i] = LLVMConstInt(desc->base_type->llvm_type, 0, false);
-  else if (typedesc_is_float(desc->base_type))
-    VECTOR_FOR_LOOP(i, node->values)
+  else if (tau_typedesc_is_float(desc->base_type))
+    TAU_VECTOR_FOR_LOOP(i, node->values)
       llvm_values[i] = LLVMConstReal(desc->base_type->llvm_type, 0.0);
   else
-    UNREACHABLE();
+    TAU_UNREACHABLE();
 
-  node->llvm_value = LLVMConstVector(llvm_values, (uint32_t)vector_size(node->values));
+  node->llvm_value = LLVMConstVector(llvm_values, (uint32_t)tau_vector_size(node->values));
 
   free(llvm_values);
 
-  VECTOR_FOR_LOOP(i, node->values)
+  TAU_VECTOR_FOR_LOOP(i, node->values)
   {
-    ast_expr_t* value_node = (ast_expr_t*)vector_get(node->values, i);
-    typedesc_t* value_desc = typetable_lookup(ctx->typetable, (ast_node_t*)value_node);
+    tau_ast_expr_t* value_node = (tau_ast_expr_t*)tau_vector_get(node->values, i);
+    tau_typedesc_t* value_desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)value_node);
 
-    LLVMValueRef llvm_value = codegen_build_load_if_ref(ctx, value_node->llvm_value, value_desc);
-    llvm_value = codegen_build_arithmetic_cast(ctx, llvm_value, typedesc_remove_ref_mut(value_desc), desc->base_type);
+    LLVMValueRef llvm_value = tau_codegen_build_load_if_ref(ctx, value_node->llvm_value, value_desc);
+    llvm_value = tau_codegen_build_arithmetic_cast(ctx, llvm_value, tau_typedesc_remove_ref_mut(value_desc), desc->base_type);
 
     LLVMValueRef llvm_index = LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), i, false);
 
@@ -102,9 +102,9 @@ void ast_expr_lit_vec_codegen(codegen_ctx_t* ctx, ast_expr_lit_vec_t* node)
   }
 }
 
-void ast_expr_lit_vec_dump_json(FILE* stream, ast_expr_lit_vec_t* node)
+void tau_ast_expr_lit_vec_dump_json(FILE* stream, tau_ast_expr_lit_vec_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\",\"values\":", ast_kind_to_cstr(node->kind));
-  ast_node_dump_json_vector(stream, node->values);
+  fprintf(stream, "{\"kind\":\"%s\",\"values\":", tau_ast_kind_to_cstr(node->kind));
+  tau_ast_node_dump_json_vector(stream, node->values);
   fputc('}', stream);
 }

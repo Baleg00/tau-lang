@@ -9,37 +9,37 @@
 
 #include "utils/collections/vector.h"
 
-stack_t* stack_init(void)
+tau_stack_t* tau_stack_init(void)
 {
-  return (stack_t*)vector_init();
+  return (tau_stack_t*)tau_vector_init();
 }
 
-void stack_free(stack_t* stack)
+void tau_stack_free(tau_stack_t* stack)
 {
-  vector_free((vector_t*)stack);
+  tau_vector_free((tau_vector_t*)stack);
 }
 
-void stack_push(stack_t* restrict stack, void* restrict data)
+void tau_stack_push(tau_stack_t* restrict stack, void* restrict data)
 {
-  vector_push((vector_t* restrict)stack, data);
+  tau_vector_push((tau_vector_t* restrict)stack, data);
 }
 
-void* stack_pop(stack_t* stack)
+void* tau_stack_pop(tau_stack_t* stack)
 {
-  return vector_pop((vector_t*)stack);
+  return tau_vector_pop((tau_vector_t*)stack);
 }
 
-void stack_clear(stack_t* stack)
+void tau_stack_clear(tau_stack_t* stack)
 {
-  vector_clear((vector_t*)stack);
+  tau_vector_clear((tau_vector_t*)stack);
 }
 
-void* stack_top(const stack_t* stack)
+void* tau_stack_top(const tau_stack_t* stack)
 {
-  return vector_back((const vector_t*)stack);
+  return tau_vector_back((const tau_vector_t*)stack);
 }
 
-bool stack_empty(const stack_t* stack)
+bool tau_stack_empty(const tau_stack_t* stack)
 {
-  return vector_empty((const vector_t*)stack);
+  return tau_vector_empty((const tau_vector_t*)stack);
 }

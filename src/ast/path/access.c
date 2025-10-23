@@ -9,29 +9,29 @@
 
 #include "ast/registry.h"
 
-ast_path_access_t* ast_path_access_init(void)
+tau_ast_path_access_t* tau_ast_path_access_init(void)
 {
-  ast_path_access_t* node = (ast_path_access_t*)malloc(sizeof(ast_path_access_t));
-  CLEAROBJ(node);
+  tau_ast_path_access_t* node = (tau_ast_path_access_t*)malloc(sizeof(tau_ast_path_access_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_PATH_ACCESS;
+  node->kind = TAU_AST_PATH_ACCESS;
 
   return node;
 }
 
-void ast_path_access_free(ast_path_access_t* node)
+void tau_ast_path_access_free(tau_ast_path_access_t* node)
 {
   free(node);
 }
 
-void ast_path_access_dump_json(FILE* stream, ast_path_access_t* node)
+void tau_ast_path_access_dump_json(FILE* stream, tau_ast_path_access_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"", tau_ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"lhs\":");
-  ast_node_dump_json(stream, node->lhs);
+  tau_ast_node_dump_json(stream, node->lhs);
   fprintf(stream, ",\"rhs\":");
-  ast_node_dump_json(stream, node->rhs);
+  tau_ast_node_dump_json(stream, node->rhs);
   fputc('}', stream);
 }

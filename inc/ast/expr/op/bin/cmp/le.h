@@ -18,10 +18,10 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST binary arithmetic less-or-equal comparison expression node.
  */
-typedef struct ast_expr_op_bin_cmp_le_t
+typedef struct tau_ast_expr_op_bin_cmp_le_t
 {
-  AST_EXPR_OP_BIN_HEADER;
-} ast_expr_op_bin_cmp_le_t;
+  TAU_AST_EXPR_OP_BIN_HEADER;
+} tau_ast_expr_op_bin_cmp_le_t;
 
 /**
  * \brief Initializes a new AST binary less-or-equal comparison operation expression
@@ -29,7 +29,7 @@ typedef struct ast_expr_op_bin_cmp_le_t
  * 
  * \returns Pointer to the newly initialized AST node.
  */
-ast_expr_op_bin_cmp_le_t* ast_expr_op_bin_cmp_le_init(void);
+tau_ast_expr_op_bin_cmp_le_t* tau_ast_expr_op_bin_cmp_le_init(void);
 
 /**
  * \brief Performs name resolution pass on an AST binary less-or-equal comparison
@@ -38,7 +38,7 @@ ast_expr_op_bin_cmp_le_t* ast_expr_op_bin_cmp_le_init(void);
  * \param[in] ctx Pointer to the name resolution context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_expr_op_bin_cmp_le_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_cmp_le_t* node);
+void tau_ast_expr_op_bin_cmp_le_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_op_bin_cmp_le_t* node);
 
 /**
  * \brief Performs type check pass on an AST binary less-or-equal comparison
@@ -47,7 +47,7 @@ void ast_expr_op_bin_cmp_le_nameres(nameres_ctx_t* ctx, ast_expr_op_bin_cmp_le_t
  * \param[in] ctx Pointer to the type check context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_expr_op_bin_cmp_le_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_cmp_le_t* node);
+void tau_ast_expr_op_bin_cmp_le_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_bin_cmp_le_t* node);
 
 /**
  * \brief Performs code generation pass on an AST binary less-or-equal comparison
@@ -56,7 +56,7 @@ void ast_expr_op_bin_cmp_le_typecheck(typecheck_ctx_t* ctx, ast_expr_op_bin_cmp_
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_expr_op_bin_cmp_le_codegen(codegen_ctx_t* ctx, ast_expr_op_bin_cmp_le_t* node);
+void tau_ast_expr_op_bin_cmp_le_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_op_bin_cmp_le_t* node);
 
 TAU_EXTERN_C_END
 

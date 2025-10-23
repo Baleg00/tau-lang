@@ -10,41 +10,41 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 
-ast_expr_op_un_sizeof_t* ast_expr_op_un_sizeof_init(void)
+tau_ast_expr_op_un_sizeof_t* tau_ast_expr_op_un_sizeof_init(void)
 {
-  ast_expr_op_un_sizeof_t* node = (ast_expr_op_un_sizeof_t*)malloc(sizeof(ast_expr_op_un_sizeof_t));
-  CLEAROBJ(node);
+  tau_ast_expr_op_un_sizeof_t* node = (tau_ast_expr_op_un_sizeof_t*)malloc(sizeof(tau_ast_expr_op_un_sizeof_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_EXPR_OP_UNARY;
+  node->kind = TAU_AST_EXPR_OP_UNARY;
   node->op_kind = OP_SIZEOF;
 
   return node;
 }
 
-void ast_expr_op_un_sizeof_nameres(nameres_ctx_t* ctx, ast_expr_op_un_sizeof_t* node)
+void tau_ast_expr_op_un_sizeof_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_op_un_sizeof_t* node)
 {
-  ast_node_nameres(ctx, node->expr);
+  tau_ast_node_nameres(ctx, node->expr);
 }
 
-void ast_expr_op_un_sizeof_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_sizeof_t* node)
+void tau_ast_expr_op_un_sizeof_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_un_sizeof_t* node)
 {
-  ast_node_typecheck(ctx, node->expr);
+  tau_ast_node_typecheck(ctx, node->expr);
 
-  typedesc_t* desc = typebuilder_build_usize(ctx->typebuilder);
+  tau_typedesc_t* desc = tau_typebuilder_build_usize(ctx->typebuilder);
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 }
 
-void ast_expr_op_un_sizeof_codegen(codegen_ctx_t* ctx, ast_expr_op_un_sizeof_t* node)
+void tau_ast_expr_op_un_sizeof_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_op_un_sizeof_t* node)
 {
-  ast_node_codegen(ctx, node->expr);
+  tau_ast_node_codegen(ctx, node->expr);
 
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  tau_typedesc_t* desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  ast_expr_t* expr = (ast_expr_t*)node->expr;
+  tau_ast_expr_t* expr = (tau_ast_expr_t*)node->expr;
 
   uint64_t value = LLVMABISizeOfType(ctx->llvm_layout, expr->llvm_type);
   node->llvm_value = LLVMConstInt(node->llvm_type, value, false);

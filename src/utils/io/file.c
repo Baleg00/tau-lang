@@ -19,13 +19,13 @@
  * \param[in] path Pointer to the path to be used.
  * \returns File or directory attributes if no error occurred, INVALID_FILE_ATTRIBUTES otherwise.
  */
-static DWORD file_attributes(path_t* path)
+static DWORD tau_file_attributes(tau_path_t* path)
 {
-  string_t* path_str = path_to_string(path);
+  tau_string_t* tau_path_str = tau_path_to_string(path);
 
-  DWORD attrs = GetFileAttributesA(string_begin(path_str));
+  DWORD attrs = GetFileAttributesA(tau_string_begin(tau_path_str));
 
-  string_free(path_str);
+  tau_string_free(tau_path_str);
 
   return attrs;
 }
@@ -36,12 +36,12 @@ static DWORD file_attributes(path_t* path)
  * \param[in] path Pointer to the path to be used.
  * \returns File type if no error occurred, FILE_TYPE_UNKNOWN otherwise.
  */
-static DWORD file_type(path_t* path)
+static DWORD tau_file_type(tau_path_t* path)
 {
-  string_t* path_str = path_to_string(path);
+  tau_string_t* tau_path_str = tau_path_to_string(path);
 
   HANDLE handle = CreateFileA(
-    string_begin(path_str),
+    tau_string_begin(tau_path_str),
     GENERIC_READ,
     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
     NULL,
@@ -50,7 +50,7 @@ static DWORD file_type(path_t* path)
     NULL
   );
 
-  string_free(path_str);
+  tau_string_free(tau_path_str);
 
   if (handle == INVALID_HANDLE_VALUE)
     return FILE_TYPE_UNKNOWN;
@@ -62,9 +62,9 @@ static DWORD file_type(path_t* path)
   return type;
 }
 
-bool file_is_directory(path_t* path)
+bool tau_file_is_directory(tau_path_t* path)
 {
-  DWORD attrs = file_attributes(path);
+  DWORD attrs = tau_file_attributes(path);
 
   if (attrs == INVALID_FILE_ATTRIBUTES)
     return false;
@@ -72,9 +72,9 @@ bool file_is_directory(path_t* path)
   return attrs & FILE_ATTRIBUTE_DIRECTORY;
 }
 
-bool file_is_regular_file(path_t* path)
+bool tau_file_is_regular_file(tau_path_t* path)
 {
-  DWORD type = file_type(path);
+  DWORD type = tau_file_type(path);
 
   if (type == FILE_TYPE_UNKNOWN)
     return false;
@@ -82,14 +82,14 @@ bool file_is_regular_file(path_t* path)
   return type == FILE_TYPE_DISK;
 }
 
-bool file_is_block_file(path_t* UNUSED(path))
+bool tau_file_is_block_file(tau_path_t* TAU_UNUSED(path))
 {
   return false;
 }
 
-bool file_is_character_file(path_t* path)
+bool tau_file_is_character_file(tau_path_t* path)
 {
-  DWORD type = file_type(path);
+  DWORD type = tau_file_type(path);
 
   if (type == FILE_TYPE_UNKNOWN)
     return false;
@@ -97,9 +97,9 @@ bool file_is_character_file(path_t* path)
   return type == FILE_TYPE_CHAR;
 }
 
-bool file_is_pipe(path_t* path)
+bool tau_file_is_pipe(tau_path_t* path)
 {
-  DWORD type = file_type(path);
+  DWORD type = tau_file_type(path);
 
   if (type == FILE_TYPE_UNKNOWN)
     return false;
@@ -107,14 +107,14 @@ bool file_is_pipe(path_t* path)
   return type == FILE_TYPE_PIPE;
 }
 
-bool file_is_socket(path_t* UNUSED(path))
+bool tau_file_is_socket(tau_path_t* TAU_UNUSED(path))
 {
   return false;
 }
 
-bool file_is_symlink(path_t* path)
+bool tau_file_is_symlink(tau_path_t* path)
 {
-  DWORD attrs = file_attributes(path);
+  DWORD attrs = tau_file_attributes(path);
 
   if (attrs == INVALID_FILE_ATTRIBUTES)
     return false;
@@ -122,24 +122,24 @@ bool file_is_symlink(path_t* path)
   return attrs & FILE_ATTRIBUTE_REPARSE_POINT;
 }
 
-bool file_exists(path_t* path)
+bool tau_file_exists(tau_path_t* path)
 {
-  DWORD attrs = file_attributes(path);
+  DWORD attrs = tau_file_attributes(path);
 
   return attrs != INVALID_FILE_ATTRIBUTES && !(attrs & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-bool file_empty(path_t* path)
+bool tau_file_empty(tau_path_t* path)
 {
-  return file_size(path) == 0;
+  return tau_file_size(path) == 0;
 }
 
-size_t file_size(path_t* path)
+size_t tau_file_size(tau_path_t* path)
 {
-  string_t* path_str = path_to_string(path);
+  tau_string_t* tau_path_str = tau_path_to_string(path);
 
   HANDLE handle = CreateFileA(
-    string_begin(path_str),
+    tau_string_begin(tau_path_str),
     GENERIC_READ,
     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
     NULL,
@@ -148,7 +148,7 @@ size_t file_size(path_t* path)
     NULL
   );
 
-  string_free(path_str);
+  tau_string_free(tau_path_str);
 
   if (handle == INVALID_HANDLE_VALUE)
     return 0;
@@ -162,15 +162,15 @@ size_t file_size(path_t* path)
   return (size_t)size.QuadPart;
 }
 
-size_t file_read(path_t* path, char* buf, size_t len)
+size_t tau_file_read(tau_path_t* path, char* buf, size_t len)
 {
   if (buf == NULL)
-    return file_size(path);
+    return tau_file_size(path);
 
-  string_t* path_str = path_to_string(path);
+  tau_string_t* tau_path_str = tau_path_to_string(path);
 
   HANDLE handle = CreateFileA(
-    string_begin(path_str),
+    tau_string_begin(tau_path_str),
     GENERIC_READ,
     FILE_SHARE_READ,
     NULL,
@@ -179,7 +179,7 @@ size_t file_read(path_t* path, char* buf, size_t len)
     NULL
   );
 
-  string_free(path_str);
+  tau_string_free(tau_path_str);
 
   if (handle == INVALID_HANDLE_VALUE)
     return 0;
@@ -200,110 +200,110 @@ size_t file_read(path_t* path, char* buf, size_t len)
 #include <unistd.h>
 #include <sys/stat.h>
 
-bool file_is_directory(path_t *path)
+bool tau_file_is_directory(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char *path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char *tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
   struct stat st;
 
-  return stat(path_cstr, &st) == 0 && S_ISDIR(st.st_mode);
+  return stat(tau_path_cstr, &st) == 0 && S_ISDIR(st.st_mode);
 }
 
-bool file_is_regular_file(path_t *path)
+bool tau_file_is_regular_file(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char *path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char *tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
   struct stat st;
 
-  return stat(path_cstr, &st) == 0 && S_ISREG(st.st_mode);
+  return stat(tau_path_cstr, &st) == 0 && S_ISREG(st.st_mode);
 }
 
-bool file_is_block_file(path_t *path)
+bool tau_file_is_block_file(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char *path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char *tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
   struct stat st;
 
-  return stat(path_cstr, &st) == 0 && S_ISBLK(st.st_mode);
+  return stat(tau_path_cstr, &st) == 0 && S_ISBLK(st.st_mode);
 }
 
-bool file_is_character_file(path_t *path)
+bool tau_file_is_character_file(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char *path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char *tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
   struct stat st;
 
-  return stat(path_cstr, &st) == 0 && S_ISCHR(st.st_mode);
+  return stat(tau_path_cstr, &st) == 0 && S_ISCHR(st.st_mode);
 }
 
-bool file_is_pipe(path_t *path)
+bool tau_file_is_pipe(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char* path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char* tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
   struct stat st;
 
-  return stat(path_cstr, &st) == 0 && S_ISFIFO(st.st_mode);
+  return stat(tau_path_cstr, &st) == 0 && S_ISFIFO(st.st_mode);
 }
 
-bool file_is_socket(path_t *path)
+bool tau_file_is_socket(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char* path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char* tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
   struct stat st;
 
-  return stat(path_cstr, &st) == 0 && S_ISSOCK(st.st_mode);
+  return stat(tau_path_cstr, &st) == 0 && S_ISSOCK(st.st_mode);
 }
 
-bool file_is_symlink(path_t *path)
+bool tau_file_is_symlink(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char* path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char* tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
   struct stat st;
 
-  return lstat(path_cstr, &st) == 0 && S_ISLNK(st.st_mode);
+  return lstat(tau_path_cstr, &st) == 0 && S_ISLNK(st.st_mode);
 }
 
-bool file_exists(path_t *path)
+bool tau_file_exists(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char* path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char* tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
-  return access(path_cstr, F_OK) == 0;
+  return access(tau_path_cstr, F_OK) == 0;
 }
 
-bool file_empty(path_t *path)
+bool tau_file_empty(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char* path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char* tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
   struct stat st;
 
-  return stat(path_cstr, &st) == 0 && (st.st_size == 0);
+  return stat(tau_path_cstr, &st) == 0 && (st.st_size == 0);
 }
 
-size_t file_size(path_t *path)
+size_t tau_file_size(tau_path_t *path)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char* path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char* tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
   struct stat st;
 
-  return stat(path_cstr, &st) == 0 ? st.st_size : 0;
+  return stat(tau_path_cstr, &st) == 0 ? st.st_size : 0;
 }
 
-size_t file_read(path_t *path, char *buf, size_t len)
+size_t tau_file_read(tau_path_t *path, char *buf, size_t len)
 {
-  string_view_t path_str_view = path_to_string_view(path);
-  const char* path_cstr = string_view_begin(path_str_view);
+  tau_string_view_t tau_path_str_view = tau_path_to_string_view(path);
+  const char* tau_path_cstr = tau_string_view_begin(tau_path_str_view);
 
-  int fd = open(path_cstr, O_RDONLY);
+  int fd = open(tau_path_cstr, O_RDONLY);
 
   if (fd == -1)
     return 0;

@@ -9,45 +9,45 @@
 
 #include "ast/registry.h"
 
-ast_expr_lit_char_t* ast_expr_lit_char_init(void)
+tau_ast_expr_lit_char_t* tau_ast_expr_lit_char_init(void)
 {
-  ast_expr_lit_char_t* node = (ast_expr_lit_char_t*)malloc(sizeof(ast_expr_lit_char_t));
-  CLEAROBJ(node);
+  tau_ast_expr_lit_char_t* node = (tau_ast_expr_lit_char_t*)malloc(sizeof(tau_ast_expr_lit_char_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_EXPR_LIT_CHAR;
+  node->kind = TAU_AST_EXPR_LIT_CHAR;
 
   return node;
 }
 
-void ast_expr_lit_char_free(ast_expr_lit_char_t* node)
+void tau_ast_expr_lit_char_free(tau_ast_expr_lit_char_t* node)
 {
   free(node);
 }
 
-void ast_expr_lit_char_nameres(nameres_ctx_t* UNUSED(ctx), ast_expr_lit_char_t* UNUSED(node))
+void tau_ast_expr_lit_char_nameres(tau_nameres_ctx_t* TAU_UNUSED(ctx), tau_ast_expr_lit_char_t* TAU_UNUSED(node))
 {
 }
 
-void ast_expr_lit_char_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_char_t* node)
+void tau_ast_expr_lit_char_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_lit_char_t* node)
 {
-  typedesc_t* desc = typebuilder_build_char(ctx->typebuilder);
+  tau_typedesc_t* desc = tau_typebuilder_build_char(ctx->typebuilder);
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 }
 
-void ast_expr_lit_char_codegen(codegen_ctx_t* ctx, ast_expr_lit_char_t* node)
+void tau_ast_expr_lit_char_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_lit_char_t* node)
 {
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  tau_typedesc_t* desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
   node->llvm_value = LLVMConstInt(node->llvm_type, node->value, false);
 }
 
-void ast_expr_lit_char_dump_json(FILE* stream, ast_expr_lit_char_t* node)
+void tau_ast_expr_lit_char_dump_json(FILE* stream, tau_ast_expr_lit_char_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"", tau_ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"value\":%" PRIu32, node->value);
   fputc('}', stream);
 }

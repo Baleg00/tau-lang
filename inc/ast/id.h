@@ -17,24 +17,24 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST identifier node.
  */
-typedef struct ast_id_t
+typedef struct tau_ast_id_t
 {
-  AST_NODE_HEADER;
-} ast_id_t;
+  TAU_AST_NODE_HEADER;
+} tau_ast_id_t;
 
 /**
  * \brief Initializes a new AST identifier node.
  * 
  * \returns Pointer to the newly initialized AST node.
  */
-ast_id_t* ast_id_init(void);
+tau_ast_id_t* tau_ast_id_init(void);
 
 /**
  * \brief Frees all memory allocated by an AST identifier node.
  * 
  * \param[in] node Pointer to the AST node to be freed.
  */
-void ast_id_free(ast_id_t* node);
+void tau_ast_id_free(tau_ast_id_t* node);
 
 /**
  * \brief Writes a JSON dump of an AST identifier node into a stream.
@@ -42,7 +42,7 @@ void ast_id_free(ast_id_t* node);
  * \param[in] stream The stream to be written to.
  * \param[in] node Pointer to the AST node to be dumped.
 */
-void ast_id_dump_json(FILE* stream, ast_id_t* node);
+void tau_ast_id_dump_json(FILE* stream, tau_ast_id_t* node);
 
 TAU_EXTERN_C_END
 

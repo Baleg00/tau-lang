@@ -7,12 +7,12 @@
 
 #include "utils/concurrency/semaphore.h"
 
-bool semaphore_init(semaphore_t* sem, size_t count)
+bool tau_semaphore_init(tau_semaphore_t* sem, size_t count)
 {
-  if (!mutex_init(&sem->lock))
+  if (!tau_mutex_init(&sem->lock))
     return false;
 
-  if (!condvar_init(&sem->cond))
+  if (!tau_condvar_init(&sem->cond))
     return false;
 
   sem->count = count;
@@ -20,75 +20,75 @@ bool semaphore_init(semaphore_t* sem, size_t count)
   return true;
 }
 
-void semaphore_free(semaphore_t* sem)
+void tau_semaphore_free(tau_semaphore_t* sem)
 {
-  mutex_free(&sem->lock);
-  condvar_free(&sem->cond);
+  tau_mutex_free(&sem->lock);
+  tau_condvar_free(&sem->cond);
 }
 
-size_t semaphore_get_count(semaphore_t* sem)
+size_t tau_semaphore_get_count(tau_semaphore_t* sem)
 {
-  mutex_lock(&sem->lock);
+  tau_mutex_lock(&sem->lock);
 
   size_t count = sem->count;
 
-  mutex_unlock(&sem->lock);
+  tau_mutex_unlock(&sem->lock);
 
   return count;
 }
 
-void semaphore_acquire(semaphore_t* sem)
+void tau_semaphore_acquire(tau_semaphore_t* sem)
 {
-  semaphore_acquire_n(sem, 1);
+  tau_semaphore_acquire_n(sem, 1);
 }
 
-void semaphore_acquire_n(semaphore_t* sem, size_t n)
+void tau_semaphore_acquire_n(tau_semaphore_t* sem, size_t n)
 {
-  mutex_lock(&sem->lock);
+  tau_mutex_lock(&sem->lock);
 
   while (sem->count < n)
-    condvar_wait(&sem->cond, &sem->lock);
+    tau_condvar_wait(&sem->cond, &sem->lock);
 
   sem->count -= n;
 
-  mutex_unlock(&sem->lock);
+  tau_mutex_unlock(&sem->lock);
 }
 
-bool semaphore_try_acquire(semaphore_t* sem)
+bool tau_semaphore_try_acquire(tau_semaphore_t* sem)
 {
-  return semaphore_try_acquire_n(sem, 1);
+  return tau_semaphore_try_acquire_n(sem, 1);
 }
 
-bool semaphore_try_acquire_n(semaphore_t* sem, size_t n)
+bool tau_semaphore_try_acquire_n(tau_semaphore_t* sem, size_t n)
 {
-  mutex_lock(&sem->lock);
+  tau_mutex_lock(&sem->lock);
 
   if (sem->count < n)
   {
-    mutex_unlock(&sem->lock);
+    tau_mutex_unlock(&sem->lock);
     return false;
   }
 
   sem->count -= n;
 
-  mutex_unlock(&sem->lock);
+  tau_mutex_unlock(&sem->lock);
 
   return true;
 }
 
-void semaphore_release(semaphore_t* sem)
+void tau_semaphore_release(tau_semaphore_t* sem)
 {
-  semaphore_release_n(sem, 1);
+  tau_semaphore_release_n(sem, 1);
 }
 
-void semaphore_release_n(semaphore_t* sem, size_t n)
+void tau_semaphore_release_n(tau_semaphore_t* sem, size_t n)
 {
-  mutex_lock(&sem->lock);
+  tau_mutex_lock(&sem->lock);
 
   sem->count += n;
 
   for (size_t i = 0; i < n; i++)
-    condvar_signal(&sem->cond);
+    tau_condvar_signal(&sem->cond);
 
-  mutex_unlock(&sem->lock);
+  tau_mutex_unlock(&sem->lock);
 }

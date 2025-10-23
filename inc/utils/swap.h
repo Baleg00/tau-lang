@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief SWAP utility macro.
+ * \brief TAU_SWAP utility macro.
  *
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
@@ -14,15 +14,13 @@
 #include <stdint.h>
 #include <string.h>
 
-#ifndef SWAP
-
 /**
  * \brief Swaps the values of `a` and `b`.
  *
  * \param[in,out] a Value to be swapped.
  * \param[in,out] b Value to be swapped.
  */
-# define SWAP(a, b)\
+#define TAU_SWAP(a, b)\
   do {\
     void* _a = &(a);\
     void* _b = &(b);\
@@ -32,7 +30,5 @@
     memmove(_a, _b, _size);\
     memcpy(_b, _temp, _size);\
   } while (0)
-
-#endif
 
 #endif

@@ -7,166 +7,166 @@
 
 #include "stages/analysis/types/typedesc/prim.h"
 
-static typedesc_prim_t* typedesc_prim_init(typedesc_kind_t kind)
+static tau_typedesc_prim_t* tau_typedesc_prim_init(tau_typedesc_kind_t kind)
 {
-  typedesc_prim_t* desc = (typedesc_prim_t*)malloc(sizeof(typedesc_prim_t));
-  CLEAROBJ(desc);
+  tau_typedesc_prim_t* desc = (tau_typedesc_prim_t*)malloc(sizeof(tau_typedesc_prim_t));
+  TAU_CLEAROBJ(desc);
 
   desc->kind = kind;
 
   return desc;
 }
 
-typedesc_prim_t* typedesc_prim_i8_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_i8_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_I8);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_I8);
 }
 
-typedesc_prim_t* typedesc_prim_i16_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_i16_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_I16);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_I16);
 }
 
-typedesc_prim_t* typedesc_prim_i32_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_i32_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_I32);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_I32);
 }
 
-typedesc_prim_t* typedesc_prim_i64_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_i64_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_I64);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_I64);
 }
 
-typedesc_prim_t* typedesc_prim_isize_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_isize_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_ISIZE);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_ISIZE);
 }
 
-typedesc_prim_t* typedesc_prim_u8_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_u8_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_U8);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_U8);
 }
 
-typedesc_prim_t* typedesc_prim_u16_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_u16_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_U16);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_U16);
 }
 
-typedesc_prim_t* typedesc_prim_u32_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_u32_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_U32);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_U32);
 }
 
-typedesc_prim_t* typedesc_prim_u64_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_u64_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_U64);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_U64);
 }
 
-typedesc_prim_t* typedesc_prim_usize_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_usize_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_USIZE);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_USIZE);
 }
 
-typedesc_prim_t* typedesc_prim_f32_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_f32_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_F32);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_F32);
 }
 
-typedesc_prim_t* typedesc_prim_f64_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_f64_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_F64);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_F64);
 }
 
-typedesc_prim_t* typedesc_prim_c64_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_c64_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_C64);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_C64);
 }
 
-typedesc_prim_t* typedesc_prim_c128_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_c128_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_C128);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_C128);
 }
 
-typedesc_prim_t* typedesc_prim_char_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_char_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_CHAR);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_CHAR);
 }
 
-typedesc_prim_t* typedesc_prim_bool_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_bool_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_BOOL);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_BOOL);
 }
 
-typedesc_prim_t* typedesc_prim_unit_init(void)
+tau_typedesc_prim_t* tau_typedesc_prim_unit_init(void)
 {
-  return typedesc_prim_init(TYPEDESC_UNIT);
+  return tau_typedesc_prim_init(TAU_TYPEDESC_UNIT);
 }
 
-void typedesc_prim_free(typedesc_prim_t* desc)
+void tau_typedesc_prim_free(tau_typedesc_prim_t* desc)
 {
   free(desc);
 }
 
-bool typedesc_prim_is_implicitly_direct_convertible(typedesc_prim_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_prim_is_implicitly_direct_convertible(tau_typedesc_prim_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (typedesc_is_opt(dst_desc))
-    return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
+  if (tau_typedesc_is_opt(dst_desc))
+    return tau_typedesc_is_implicitly_direct_convertible((tau_typedesc_t*)src_desc, tau_typedesc_remove_opt(dst_desc));
 
-  dst_desc = typedesc_remove_mut(dst_desc);
+  dst_desc = tau_typedesc_remove_mut(dst_desc);
 
-  if ((typedesc_t*)src_desc == dst_desc)
+  if ((tau_typedesc_t*)src_desc == dst_desc)
     return true;
 
-  if (typedesc_is_arithmetic((typedesc_t*)src_desc) && typedesc_is_arithmetic(dst_desc))
+  if (tau_typedesc_is_arithmetic((tau_typedesc_t*)src_desc) && tau_typedesc_is_arithmetic(dst_desc))
   {
-    if (typedesc_is_float((typedesc_t*)src_desc))
+    if (tau_typedesc_is_float((tau_typedesc_t*)src_desc))
     {
-      if (typedesc_is_float(dst_desc))
-        return !(src_desc->kind == TYPEDESC_F64 && dst_desc->kind == TYPEDESC_F32);
+      if (tau_typedesc_is_float(dst_desc))
+        return !(src_desc->kind == TAU_TYPEDESC_F64 && dst_desc->kind == TAU_TYPEDESC_F32);
 
-      if (typedesc_is_integer(dst_desc))
+      if (tau_typedesc_is_integer(dst_desc))
         return false;
 
-      if (typedesc_is_complex(dst_desc))
-        return !(src_desc->kind == TYPEDESC_F64 && dst_desc->kind == TYPEDESC_C64);
+      if (tau_typedesc_is_complex(dst_desc))
+        return !(src_desc->kind == TAU_TYPEDESC_F64 && dst_desc->kind == TAU_TYPEDESC_C64);
     }
 
-    if (typedesc_is_integer((typedesc_t*)src_desc))
+    if (tau_typedesc_is_integer((tau_typedesc_t*)src_desc))
     {
-      if (typedesc_is_integer(dst_desc))
+      if (tau_typedesc_is_integer(dst_desc))
       {
-        if (typedesc_is_signed((typedesc_t*)src_desc) == typedesc_is_signed(dst_desc))
-          return typedesc_integer_bits((typedesc_t*)src_desc) <= typedesc_integer_bits(dst_desc);
+        if (tau_typedesc_is_signed((tau_typedesc_t*)src_desc) == tau_typedesc_is_signed(dst_desc))
+          return tau_typedesc_integer_bits((tau_typedesc_t*)src_desc) <= tau_typedesc_integer_bits(dst_desc);
 
-        if (typedesc_is_signed((typedesc_t*)src_desc) && typedesc_is_unsigned(dst_desc))
+        if (tau_typedesc_is_signed((tau_typedesc_t*)src_desc) && tau_typedesc_is_unsigned(dst_desc))
           return false;
 
-        return typedesc_integer_bits((typedesc_t*)src_desc) < typedesc_integer_bits(dst_desc);
+        return tau_typedesc_integer_bits((tau_typedesc_t*)src_desc) < tau_typedesc_integer_bits(dst_desc);
       }
 
-      if (dst_desc->kind == TYPEDESC_F32)
-        return typedesc_integer_bits((typedesc_t*)src_desc) <= 16;
+      if (dst_desc->kind == TAU_TYPEDESC_F32)
+        return tau_typedesc_integer_bits((tau_typedesc_t*)src_desc) <= 16;
 
-      if (dst_desc->kind == TYPEDESC_F64)
-        return typedesc_integer_bits((typedesc_t*)src_desc) <= 32;
+      if (dst_desc->kind == TAU_TYPEDESC_F64)
+        return tau_typedesc_integer_bits((tau_typedesc_t*)src_desc) <= 32;
 
-      if (dst_desc->kind == TYPEDESC_C64)
-        return typedesc_integer_bits((typedesc_t*)src_desc) <= 16;
+      if (dst_desc->kind == TAU_TYPEDESC_C64)
+        return tau_typedesc_integer_bits((tau_typedesc_t*)src_desc) <= 16;
 
-      if (dst_desc->kind == TYPEDESC_C128)
-        return typedesc_integer_bits((typedesc_t*)src_desc) <= 32;
+      if (dst_desc->kind == TAU_TYPEDESC_C128)
+        return tau_typedesc_integer_bits((tau_typedesc_t*)src_desc) <= 32;
     }
   }
 
   return false;
 }
 
-bool typedesc_prim_is_implicitly_indirect_convertible(typedesc_prim_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_prim_is_implicitly_indirect_convertible(tau_typedesc_prim_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  return (typedesc_t*)src_desc == dst_desc;
+  return (tau_typedesc_t*)src_desc == dst_desc;
 }
 
-bool typedesc_prim_is_explicitly_convertible(typedesc_prim_t* UNUSED(src_desc), typedesc_t* dst_desc)
+bool tau_typedesc_prim_is_explicitly_convertible(tau_typedesc_prim_t* TAU_UNUSED(src_desc), tau_typedesc_t* dst_desc)
 {
-  return typedesc_is_arithmetic(typedesc_remove_mut(dst_desc));
+  return tau_typedesc_is_arithmetic(tau_typedesc_remove_mut(dst_desc));
 }

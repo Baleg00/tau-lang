@@ -7,35 +7,35 @@
 
 #include "stages/analysis/types/typedesc/enum.h"
 
-typedesc_enum_t* typedesc_enum_init(void)
+tau_typedesc_enum_t* tau_typedesc_enum_init(void)
 {
-  typedesc_enum_t* desc = (typedesc_enum_t*)malloc(sizeof(typedesc_enum_t));
-  CLEAROBJ(desc);
+  tau_typedesc_enum_t* desc = (tau_typedesc_enum_t*)malloc(sizeof(tau_typedesc_enum_t));
+  TAU_CLEAROBJ(desc);
 
-  desc->kind = TYPEDESC_ENUM;
+  desc->kind = TAU_TYPEDESC_ENUM;
 
   return desc;
 }
 
-void typedesc_enum_free(typedesc_enum_t* desc)
+void tau_typedesc_enum_free(tau_typedesc_enum_t* desc)
 {
   free(desc);
 }
 
-bool typedesc_enum_is_implicitly_direct_convertible(typedesc_enum_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_enum_is_implicitly_direct_convertible(tau_typedesc_enum_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (typedesc_is_opt(dst_desc))
-    return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
+  if (tau_typedesc_is_opt(dst_desc))
+    return tau_typedesc_is_implicitly_direct_convertible((tau_typedesc_t*)src_desc, tau_typedesc_remove_opt(dst_desc));
 
-  return (typedesc_t*)src_desc == dst_desc;
+  return (tau_typedesc_t*)src_desc == dst_desc;
 }
 
-bool typedesc_enum_is_implicitly_indirect_convertible(typedesc_enum_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_enum_is_implicitly_indirect_convertible(tau_typedesc_enum_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  return (typedesc_t*)src_desc == dst_desc;
+  return (tau_typedesc_t*)src_desc == dst_desc;
 }
 
-bool typedesc_enum_is_explicitly_convertible(typedesc_enum_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_enum_is_explicitly_convertible(tau_typedesc_enum_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  return (typedesc_t*)src_desc == typedesc_remove_mut(dst_desc);
+  return (tau_typedesc_t*)src_desc == tau_typedesc_remove_mut(dst_desc);
 }

@@ -28,11 +28,11 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Represents a lightweight, readonly, non-owning string.
  */
-typedef struct string_view_t
+typedef struct tau_string_view_t
 {
   size_t len; // Length of the string (excluding the terminating null character).
   const char* buf; // Pointer to character buffer.
-} string_view_t;
+} tau_string_view_t;
 
 /**
  * \brief Initializes a new string view.
@@ -40,7 +40,7 @@ typedef struct string_view_t
  * \param[in] buf Pointer to the character buffer to be used.
  * \returns Pointer to the newly initialized string view.
  */
-string_view_t string_view_init(const char* buf);
+tau_string_view_t tau_string_view_init(const char* buf);
 
 /**
  * \brief Initializes a new string view.
@@ -49,7 +49,7 @@ string_view_t string_view_init(const char* buf);
  * \param[in] len Number of characters in the buffer.
  * \returns Pointer to the newly initialized string view.
  */
-string_view_t string_view_init_with_length(const char* buf, size_t len);
+tau_string_view_t tau_string_view_init_with_length(const char* buf, size_t len);
 
 /**
  * \brief Returns a pointer to the beginning of a string view.
@@ -57,7 +57,7 @@ string_view_t string_view_init_with_length(const char* buf, size_t len);
  * \param[in] str The string view.
  * \returns Pointer to beginning of the string view.
  */
-const char* string_view_begin(string_view_t str);
+const char* tau_string_view_begin(tau_string_view_t str);
 
 /**
  * \brief Returns a pointer to the end of a string view.
@@ -65,7 +65,7 @@ const char* string_view_begin(string_view_t str);
  * \param[in] str The string view.
  * \returns Pointer to end of the string view.
 */
-const char* string_view_end(string_view_t str);
+const char* tau_string_view_end(tau_string_view_t str);
 
 /**
  * \brief Returns the length of a string view.
@@ -75,7 +75,7 @@ const char* string_view_end(string_view_t str);
  * \param[in] str The string view.
  * \returns The length of the string view.
 */
-size_t string_view_length(string_view_t str);
+size_t tau_string_view_length(tau_string_view_t str);
 
 /**
  * \brief Creates a new sub-string from another string view.
@@ -85,7 +85,7 @@ size_t string_view_length(string_view_t str);
  * \param[in] len The length of the sub-string.
  * \returns Pointer to the new sub-string.
 */
-string_view_t string_view_substr(string_view_t str, size_t pos, size_t len);
+tau_string_view_t tau_string_view_substr(tau_string_view_t str, size_t pos, size_t len);
 
 /**
  * \brief Compares two string views lexicographically.
@@ -95,7 +95,7 @@ string_view_t string_view_substr(string_view_t str, size_t pos, size_t len);
  * \returns Zero if the strings views are the same, a negative value if `lhs`
  * comes before `rhs`, and a positive value if `lhs` comes after `rhs`.
 */
-int string_view_compare(string_view_t lhs, string_view_t rhs);
+int tau_string_view_compare(tau_string_view_t lhs, tau_string_view_t rhs);
 
 /**
  * \brief Compares a string view and a c-string lexicographically.
@@ -105,7 +105,7 @@ int string_view_compare(string_view_t lhs, string_view_t rhs);
  * \returns Zero if the strings are the same, a negative value if `lhs` comes
  * before `rhs`, and a positive value if `lhs` comes after `rhs`.
 */
-int string_view_compare_cstr(string_view_t lhs, const char* rhs);
+int tau_string_view_compare_cstr(tau_string_view_t lhs, const char* rhs);
 
 /**
  * \brief Checks if a string view starts with the specified prefix.
@@ -115,7 +115,7 @@ int string_view_compare_cstr(string_view_t lhs, const char* rhs);
  * \returns `true` if the string view starts with the specified prefix, `false`
  * otherwise.
  */
-bool string_view_starts_with(string_view_t str, string_view_t prefix);
+bool tau_string_view_starts_with(tau_string_view_t str, tau_string_view_t prefix);
 
 /**
  * \brief Checks if a string view starts with the specified c-string prefix.
@@ -125,7 +125,7 @@ bool string_view_starts_with(string_view_t str, string_view_t prefix);
  * \returns `true` if the string view starts with the specified prefix, `false`
  * otherwise.
  */
-bool string_view_starts_with_cstr(string_view_t str, const char* prefix);
+bool tau_string_view_starts_with_cstr(tau_string_view_t str, const char* prefix);
 
 /**
  * \brief Checks if a string view ends with the specified suffix.
@@ -135,7 +135,7 @@ bool string_view_starts_with_cstr(string_view_t str, const char* prefix);
  * \returns `true` if the string view ends with the specified suffix, `false`
  * otherwise.
  */
-bool string_view_ends_with(string_view_t str, string_view_t suffix);
+bool tau_string_view_ends_with(tau_string_view_t str, tau_string_view_t suffix);
 
 /**
  * \brief Checks if a string view ends with the specified c-string suffix.
@@ -145,7 +145,7 @@ bool string_view_ends_with(string_view_t str, string_view_t suffix);
  * \returns `true` if the string view ends with the specified suffix, `false`
  * otherwise.
  */
-bool string_view_ends_with_cstr(string_view_t str, const char* suffix);
+bool tau_string_view_ends_with_cstr(tau_string_view_t str, const char* suffix);
 
 /**
  * \brief Checks if a string view contains the specified sub-string.
@@ -155,7 +155,7 @@ bool string_view_ends_with_cstr(string_view_t str, const char* suffix);
  * \returns `true` if the string view contains the specified sub-string, `false`
  * otherwise.
  */
-bool string_view_contains(string_view_t str, string_view_t sub);
+bool tau_string_view_contains(tau_string_view_t str, tau_string_view_t sub);
 
 /**
  * \brief Checks if a string view contains the specified c-sub-string.
@@ -165,7 +165,7 @@ bool string_view_contains(string_view_t str, string_view_t sub);
  * \returns `true` if the string view contains the specified sub-string, `false`
  * otherwise.
  */
-bool string_view_contains_cstr(string_view_t str, const char* sub);
+bool tau_string_view_contains_cstr(tau_string_view_t str, const char* sub);
 
 /**
  * \brief Finds the first occurrence of a sub-string.
@@ -174,7 +174,7 @@ bool string_view_contains_cstr(string_view_t str, const char* sub);
  * \param sub The sub-string.
  * \returns The position of the first occurrence of the sub-string.
  */
-size_t string_view_find(string_view_t str, string_view_t sub);
+size_t tau_string_view_find(tau_string_view_t str, tau_string_view_t sub);
 
 /**
  * \brief Finds the first occurrence of a c-string.
@@ -183,7 +183,7 @@ size_t string_view_find(string_view_t str, string_view_t sub);
  * \param sub Pointer to the c-string.
  * \returns The position of the first occurrence of the c-string.
  */
-size_t string_view_find_cstr(string_view_t str, const char* sub);
+size_t tau_string_view_find_cstr(tau_string_view_t str, const char* sub);
 
 /**
  * \brief Uses a string view as a format specifier and writes to a stream.
@@ -193,7 +193,7 @@ size_t string_view_find_cstr(string_view_t str, const char* sub);
  * \param ... Arguments according to the format string view.
  * \returns The number of characters written.
  */
-int string_view_printf(FILE* stream, string_view_t fmt, ...);
+int tau_string_view_printf(FILE* stream, tau_string_view_t fmt, ...);
 
 /**
  * \brief Writes the escaped version of a string view to a stream.
@@ -202,7 +202,7 @@ int string_view_printf(FILE* stream, string_view_t fmt, ...);
  * \param str The string view to be printed.
  * \returns The number of characters written.
  */
-int string_view_print_escaped(FILE* stream, string_view_t str);
+int tau_string_view_print_escaped(FILE* stream, tau_string_view_t str);
 
 TAU_EXTERN_C_END
 

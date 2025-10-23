@@ -17,26 +17,26 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST generic parameter declaration node.
  */
-typedef struct ast_decl_generic_param_t
+typedef struct tau_ast_decl_generic_param_t
 {
-  AST_DECL_HEADER;
-  ast_node_t* type; ///< Pointer to the associated type.
-  ast_node_t* expr; ///< Pointer to the associated default value expression, or NULL.
-} ast_decl_generic_param_t;
+  TAU_AST_DECL_HEADER;
+  tau_ast_node_t* type; ///< Pointer to the associated type.
+  tau_ast_node_t* expr; ///< Pointer to the associated default value expression, or NULL.
+} tau_ast_decl_generic_param_t;
 
 /**
  * \brief Initializes a new AST generic parameter declaration node.
  * 
  * \returns Pointer to the newly initialized AST node.
  */
-ast_decl_generic_param_t* ast_decl_generic_param_init(void);
+tau_ast_decl_generic_param_t* tau_ast_decl_generic_param_init(void);
 
 /**
  * \brief Frees all memory allocated by an AST generic parameter declaration node.
  * 
  * \param[in] node Pointer to the AST node to be freed.
  */
-void ast_decl_generic_param_free(ast_decl_generic_param_t* node);
+void tau_ast_decl_generic_param_free(tau_ast_decl_generic_param_t* node);
 
 /**
  * \brief Performs name resolution pass on an AST generic parameter declaration node.
@@ -44,7 +44,7 @@ void ast_decl_generic_param_free(ast_decl_generic_param_t* node);
  * \param[in] ctx Pointer to the name resolution context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_decl_generic_param_nameres(nameres_ctx_t* ctx, ast_decl_generic_param_t* node);
+void tau_ast_decl_generic_param_nameres(tau_nameres_ctx_t* ctx, tau_ast_decl_generic_param_t* node);
 
 /**
  * \brief Writes a JSON dump of an AST generic parameter declaration node into a stream.
@@ -52,7 +52,7 @@ void ast_decl_generic_param_nameres(nameres_ctx_t* ctx, ast_decl_generic_param_t
  * \param[in] stream The stream to be written to.
  * \param[in] node Pointer to the AST node to be dumped.
 */
-void ast_decl_generic_param_dump_json(FILE* stream, ast_decl_generic_param_t* node);
+void tau_ast_decl_generic_param_dump_json(FILE* stream, tau_ast_decl_generic_param_t* node);
 
 TAU_EXTERN_C_END
 

@@ -29,7 +29,7 @@ TAU_EXTERN_C_BEGIN
  * \param[in] size The size of the data in bytes.
  * \returns The generated hash value.
  */
-uint64_t hash_digest(const void* data, size_t size);
+uint64_t tau_hash_digest(const void* data, size_t size);
 
 /**
  * \brief Combines a seed with the hash value of a given data.
@@ -39,7 +39,7 @@ uint64_t hash_digest(const void* data, size_t size);
  * \param[in] size Size of the data in bytes.
  * \returns The combined hash value.
  */
-uint64_t hash_combine_with_data(uint64_t seed, const void* data, size_t size);
+uint64_t tau_hash_combine_with_data(uint64_t seed, const void* data, size_t size);
 
 /**
  * \brief Combines a seed with a hash value.
@@ -48,7 +48,7 @@ uint64_t hash_combine_with_data(uint64_t seed, const void* data, size_t size);
  * \param[in] hash The hash to combine with the seed.
  * \returns The combined hash value.
  */
-uint64_t hash_combine_with_hash(uint64_t seed, uint64_t hash);
+uint64_t tau_hash_combine_with_hash(uint64_t seed, uint64_t hash);
 
 TAU_EXTERN_C_END
 

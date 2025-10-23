@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief UNREACHABLE utility macro.
+ * \brief TAU_UNREACHABLE utility macro.
  *
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
@@ -18,17 +18,17 @@
 #if TAU_DEBUG
 
 /// Marks a code path as unreachable and triggers a fatal error.
-# define UNREACHABLE()\
+# define TAU_UNREACHABLE()\
   do {\
-    log_fatal("unreachable", "%s:%d", __FILE__, __LINE__);\
-    DEBUGBREAK();\
+    tau_log_fatal("unreachable", "%s:%d", __FILE__, __LINE__);\
+    TAU_DEBUGBREAK();\
     exit(EXIT_FAILURE);\
   } while (0)
 
 #else
 
 /// Marks a code path as unreachable and triggers a fatal error.
-# define UNREACHABLE() ((void)0)
+# define TAU_UNREACHABLE() ((void)0)
 
 #endif
 

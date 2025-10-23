@@ -11,42 +11,42 @@
 
 #include <unistd.h>
 
-bool thread_init(thread_t* thread, thread_func_t func, void* arg)
+bool tau_thread_init(tau_thread_t* thread, tau_thread_func_t func, void* arg)
 {
   return pthread_create(&thread->native_handle, NULL, func, arg) == 0;
 }
 
-void thread_free(thread_t* UNUSED(thread))
+void tau_thread_free(tau_thread_t* TAU_UNUSED(thread))
 {
 }
 
-void thread_self(thread_t* thread)
+void tau_thread_self(tau_thread_t* thread)
 {
   thread->native_handle = pthread_self();
 }
 
-void thread_sleep(const struct timespec* duration)
+void tau_thread_sleep(const struct timespec* duration)
 {
   int result = nanosleep(duration, NULL);
-  ASSERT(result == 0);
+  TAU_ASSERT(result == 0);
 }
 
-void* thread_join(thread_t* thread)
+void* tau_thread_join(tau_thread_t* thread)
 {
-  void* thread_result = NULL;
+  void* tau_thread_result = NULL;
 
-  int join_status = pthread_join(thread->native_handle, &thread_result);
-  ASSERT(join_status == 0);
+  int join_status = pthread_join(thread->native_handle, &tau_thread_result);
+  TAU_ASSERT(join_status == 0);
 
-  return thread_result;
+  return tau_thread_result;
 }
 
-void thread_detach(thread_t* thread)
+void tau_thread_detach(tau_thread_t* thread)
 {
   pthread_detach(thread->native_handle);
 }
 
-bool thread_equal(thread_t* thread1, thread_t* thread2)
+bool tau_thread_equal(tau_thread_t* thread1, tau_thread_t* thread2)
 {
   return pthread_equal(thread1->native_handle, thread2->native_handle) != 0;
 }

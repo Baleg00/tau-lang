@@ -7,59 +7,59 @@
 
 #include "stages/analysis/types/typedesc/vec.h"
 
-typedesc_vec_t* typedesc_vec_init(void)
+tau_typedesc_vec_t* tau_typedesc_vec_init(void)
 {
-  typedesc_vec_t* desc = (typedesc_vec_t*)malloc(sizeof(typedesc_vec_t));
-  CLEAROBJ(desc);
+  tau_typedesc_vec_t* desc = (tau_typedesc_vec_t*)malloc(sizeof(tau_typedesc_vec_t));
+  TAU_CLEAROBJ(desc);
 
-  desc->kind = TYPEDESC_VEC;
+  desc->kind = TAU_TYPEDESC_VEC;
 
   return desc;
 }
 
-void typedesc_vec_free(typedesc_vec_t* desc)
+void tau_typedesc_vec_free(tau_typedesc_vec_t* desc)
 {
   free(desc);
 }
 
-bool typedesc_vec_is_implicitly_direct_convertible(typedesc_vec_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_vec_is_implicitly_direct_convertible(tau_typedesc_vec_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (typedesc_is_opt(dst_desc))
-    return typedesc_is_implicitly_direct_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
+  if (tau_typedesc_is_opt(dst_desc))
+    return tau_typedesc_is_implicitly_direct_convertible((tau_typedesc_t*)src_desc, tau_typedesc_remove_opt(dst_desc));
 
-  if (!typedesc_is_vector(dst_desc))
+  if (!tau_typedesc_is_vector(dst_desc))
     return false;
 
-  typedesc_vec_t* dst_vec_desc = (typedesc_vec_t*)dst_desc;
+  tau_typedesc_vec_t* dst_vec_desc = (tau_typedesc_vec_t*)dst_desc;
 
   if (src_desc->size != dst_vec_desc->size)
     return false;
 
-  return typedesc_is_implicitly_direct_convertible(src_desc->base_type, dst_vec_desc->base_type);
+  return tau_typedesc_is_implicitly_direct_convertible(src_desc->base_type, dst_vec_desc->base_type);
 }
 
-bool typedesc_vec_is_implicitly_indirect_convertible(typedesc_vec_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_vec_is_implicitly_indirect_convertible(tau_typedesc_vec_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (!typedesc_is_vector(dst_desc))
+  if (!tau_typedesc_is_vector(dst_desc))
     return false;
 
-  typedesc_vec_t* dst_vec_desc = (typedesc_vec_t*)dst_desc;
+  tau_typedesc_vec_t* dst_vec_desc = (tau_typedesc_vec_t*)dst_desc;
 
   if (src_desc->size != dst_vec_desc->size)
     return false;
 
-  return typedesc_is_implicitly_indirect_convertible(src_desc->base_type, dst_vec_desc->base_type);
+  return tau_typedesc_is_implicitly_indirect_convertible(src_desc->base_type, dst_vec_desc->base_type);
 }
 
-bool typedesc_vec_is_explicitly_convertible(typedesc_vec_t* src_desc, typedesc_t* dst_desc)
+bool tau_typedesc_vec_is_explicitly_convertible(tau_typedesc_vec_t* src_desc, tau_typedesc_t* dst_desc)
 {
-  if (typedesc_is_opt(dst_desc))
-    return typedesc_is_explicitly_convertible((typedesc_t*)src_desc, typedesc_remove_opt(dst_desc));
+  if (tau_typedesc_is_opt(dst_desc))
+    return tau_typedesc_is_explicitly_convertible((tau_typedesc_t*)src_desc, tau_typedesc_remove_opt(dst_desc));
 
-  if (!typedesc_is_vector(dst_desc))
+  if (!tau_typedesc_is_vector(dst_desc))
     return false;
 
-  typedesc_vec_t* dst_vec_desc = (typedesc_vec_t*)dst_desc;
+  tau_typedesc_vec_t* dst_vec_desc = (tau_typedesc_vec_t*)dst_desc;
 
-  return typedesc_is_explicitly_convertible(src_desc->base_type, dst_vec_desc->base_type);
+  return tau_typedesc_is_explicitly_convertible(src_desc->base_type, dst_vec_desc->base_type);
 }

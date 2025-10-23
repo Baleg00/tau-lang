@@ -24,9 +24,9 @@
  * \returns NULL if insertion was successful, otherwise a pointer to the
  * colliding symbol.
  */
-static symbol_t* symtable_insert_no_expand(symtable_t* table, symbol_t* new_sym)
+static tau_symbol_t* tau_symtable_insert_no_expand(tau_symtable_t* table, tau_symbol_t* new_sym)
 {
-  size_t h = (size_t)hash_digest(new_sym->id, new_sym->len);
+  size_t h = (size_t)tau_hash_digest(new_sym->id, new_sym->len);
   size_t idx = h % table->capacity;
 
   if (table->buckets[idx] == NULL)
@@ -39,13 +39,13 @@ static symbol_t* symtable_insert_no_expand(symtable_t* table, symbol_t* new_sym)
     return NULL;
   }
 
-  symbol_t* last = NULL;
+  tau_symbol_t* last = NULL;
 
-  for (symbol_t* sym = table->buckets[idx]; sym != NULL; last = sym, sym = sym->next)
+  for (tau_symbol_t* sym = table->buckets[idx]; sym != NULL; last = sym, sym = sym->next)
     if (sym->len == new_sym->len && strncmp(sym->id, new_sym->id, sym->len) == 0)
       return sym;
 
-  ASSERT(last != NULL);
+  TAU_ASSERT(last != NULL);
 
   table->size++;
 
@@ -62,38 +62,38 @@ static symbol_t* symtable_insert_no_expand(symtable_t* table, symbol_t* new_sym)
  * \param[in,out] table Pointer to the symbol table to be expanded.
  * \param[in] new_capacity The new capacity of the symbol table.
  */
-static void symtable_expand(symtable_t* table, size_t new_capacity)
+static void tau_symtable_expand(tau_symtable_t* table, size_t new_capacity)
 {
   if (new_capacity <= table->capacity)
     return;
 
-  size_t symbol_count = table->size;
+  size_t tau_symbol_count = table->size;
 
-  symbol_t** symbols = (symbol_t**)malloc(symbol_count * sizeof(symbol_t*));
-  ASSERT(symbols != NULL);
+  tau_symbol_t** symbols = (tau_symbol_t**)malloc(tau_symbol_count * sizeof(tau_symbol_t*));
+  TAU_ASSERT(symbols != NULL);
 
-  for (size_t i = 0, j = 0; i < table->capacity && j < symbol_count; ++i)
-    for (symbol_t* sym = table->buckets[i]; sym != NULL; sym = sym->next, ++j)
+  for (size_t i = 0, j = 0; i < table->capacity && j < tau_symbol_count; ++i)
+    for (tau_symbol_t* sym = table->buckets[i]; sym != NULL; sym = sym->next, ++j)
       symbols[j] = sym;
 
   table->size = 0;
   table->capacity = new_capacity;
 
-  table->buckets = (symbol_t**)realloc(table->buckets, table->capacity * sizeof(symbol_t*));
-  ASSERT(table->buckets != NULL);
+  table->buckets = (tau_symbol_t**)realloc(table->buckets, table->capacity * sizeof(tau_symbol_t*));
+  TAU_ASSERT(table->buckets != NULL);
 
-  memset(table->buckets, 0, table->capacity * sizeof(symbol_t*));
+  memset(table->buckets, 0, table->capacity * sizeof(tau_symbol_t*));
 
-  for (size_t i = 0; i < symbol_count; ++i)
-    symtable_insert_no_expand(table, symbols[i]);
+  for (size_t i = 0; i < tau_symbol_count; ++i)
+    tau_symtable_insert_no_expand(table, symbols[i]);
 
   free(symbols);
 }
 
-symbol_t* symbol_init(const char* id, size_t len, ast_node_t* node)
+tau_symbol_t* tau_symbol_init(const char* id, size_t len, tau_ast_node_t* node)
 {
-  symbol_t* sym = (symbol_t*)malloc(sizeof(symbol_t));
-  ASSERT(sym != NULL);
+  tau_symbol_t* sym = (tau_symbol_t*)malloc(sizeof(tau_symbol_t));
+  TAU_ASSERT(sym != NULL);
 
   sym->parent = NULL;
   sym->id = id;
@@ -103,80 +103,80 @@ symbol_t* symbol_init(const char* id, size_t len, ast_node_t* node)
   return sym;
 }
 
-symbol_t* symbol_init_with_str_view(string_view_t id, ast_node_t* node)
+tau_symbol_t* tau_symbol_init_with_str_view(tau_string_view_t id, tau_ast_node_t* node)
 {
-  return symbol_init(id.buf, id.len, node);
+  return tau_symbol_init(id.buf, id.len, node);
 }
 
-void symbol_free(symbol_t* sym)
+void tau_symbol_free(tau_symbol_t* sym)
 {
   free(sym);
 }
 
-symtable_t* symtable_init(symtable_t* parent)
+tau_symtable_t* tau_symtable_init(tau_symtable_t* parent)
 {
-  symtable_t* table = (symtable_t*)malloc(sizeof(symtable_t));
-  ASSERT(table != NULL);
+  tau_symtable_t* table = (tau_symtable_t*)malloc(sizeof(tau_symtable_t));
+  TAU_ASSERT(table != NULL);
 
   if (parent != NULL)
-    vector_push(parent->children, table);
+    tau_vector_push(parent->children, table);
 
   table->parent = parent;
-  table->children = vector_init();
+  table->children = tau_vector_init();
   table->size = 0;
   table->capacity = SYMTABLE_INITIAL_CAPACITY;
-  table->buckets = (symbol_t**)calloc(table->capacity, sizeof(symbol_t*));
-  ASSERT(table->buckets != NULL);
+  table->buckets = (tau_symbol_t**)calloc(table->capacity, sizeof(tau_symbol_t*));
+  TAU_ASSERT(table->buckets != NULL);
 
   return table;
 }
 
-void symtable_free(symtable_t* table)
+void tau_symtable_free(tau_symtable_t* table)
 {
-  vector_for_each(table->children, (vector_for_each_func_t)symtable_free);
-  vector_free(table->children);
+  tau_vector_for_each(table->children, (tau_vector_for_each_func_t)tau_symtable_free);
+  tau_vector_free(table->children);
 
   for (size_t i = 0, j = 0; i < table->capacity && j < table->size; ++i)
-    for (symbol_t *next, *sym = table->buckets[i]; sym != NULL; sym = next, ++j)
+    for (tau_symbol_t *next, *sym = table->buckets[i]; sym != NULL; sym = next, ++j)
     {
       next = sym->next;
-      symbol_free(sym);
+      tau_symbol_free(sym);
     }
 
   free(table->buckets);
   free(table);
 }
 
-symbol_t* symtable_insert(symtable_t* table, symbol_t* new_sym)
+tau_symbol_t* tau_symtable_insert(tau_symtable_t* table, tau_symbol_t* new_sym)
 {
   if ((double)table->size + 1 >= SYMTABLE_LOAD_FACTOR * (double)table->capacity)
-    symtable_expand(table, table->capacity << 1);
+    tau_symtable_expand(table, table->capacity << 1);
 
-  return symtable_insert_no_expand(table, new_sym);
+  return tau_symtable_insert_no_expand(table, new_sym);
 }
 
-symbol_t* symtable_get(symtable_t* table, const char* id, size_t len)
+tau_symbol_t* tau_symtable_get(tau_symtable_t* table, const char* id, size_t len)
 {
-  size_t h = (size_t)hash_digest(id, len);
+  size_t h = (size_t)tau_hash_digest(id, len);
   size_t idx = h % table->capacity;
 
-  for (symbol_t* sym = table->buckets[idx]; sym != NULL; sym = sym->next)
+  for (tau_symbol_t* sym = table->buckets[idx]; sym != NULL; sym = sym->next)
     if (sym->len == len && strncmp(sym->id, id, sym->len) == 0)
       return sym;
 
   return NULL;
 }
 
-symbol_t* symtable_get_with_str_view(symtable_t* table, string_view_t id)
+tau_symbol_t* tau_symtable_get_with_str_view(tau_symtable_t* table, tau_string_view_t id)
 {
-  return symtable_get(table, id.buf, id.len);
+  return tau_symtable_get(table, id.buf, id.len);
 }
 
-symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len)
+tau_symbol_t* tau_symtable_lookup(tau_symtable_t* table, const char* id, size_t len)
 {
   while (table != NULL)
   {
-    symbol_t* sym = symtable_get(table, id, len);
+    tau_symbol_t* sym = tau_symtable_get(table, id, len);
 
     if (sym != NULL)
       return sym;
@@ -187,12 +187,12 @@ symbol_t* symtable_lookup(symtable_t* table, const char* id, size_t len)
   return NULL;
 }
 
-symbol_t* symtable_lookup_with_str_view(symtable_t* table, string_view_t id)
+tau_symbol_t* tau_symtable_lookup_with_str_view(tau_symtable_t* table, tau_string_view_t id)
 {
-  return symtable_lookup(table, id.buf, id.len);
+  return tau_symtable_lookup(table, id.buf, id.len);
 }
 
-void symtable_merge(symtable_t* dest, symtable_t* src)
+void tau_symtable_merge(tau_symtable_t* dest, tau_symtable_t* src)
 {
   size_t new_capacity = dest->capacity;
 
@@ -200,29 +200,29 @@ void symtable_merge(symtable_t* dest, symtable_t* src)
     new_capacity <<= 1;
 
   if (dest->capacity < new_capacity)
-    symtable_expand(dest, new_capacity);
+    tau_symtable_expand(dest, new_capacity);
 
   for (size_t i = 0, j = 0; i < src->capacity && j < src->size; ++i)
-    for (symbol_t* sym = src->buckets[i], *next = NULL; sym != NULL; sym = next, ++j)
+    for (tau_symbol_t* sym = src->buckets[i], *next = NULL; sym != NULL; sym = next, ++j)
     {
       next = sym->next;
 
-      symtable_insert_no_expand(dest, sym);
+      tau_symtable_insert_no_expand(dest, sym);
     }
 
   src->size = 0;
-  memset(src->buckets, 0, sizeof(symbol_t*) * src->capacity);
+  memset(src->buckets, 0, sizeof(tau_symbol_t*) * src->capacity);
 
-  vector_extend(dest->children, src->children);
+  tau_vector_extend(dest->children, src->children);
 
-  for (size_t i = 0; i < vector_size(src->children); ++i)
+  for (size_t i = 0; i < tau_vector_size(src->children); ++i)
   {
-    symtable_t* child = (symtable_t*)vector_get(src->children, i);
+    tau_symtable_t* child = (tau_symtable_t*)tau_vector_get(src->children, i);
 
     child->parent = dest;
   }
 
-  vector_clear(src->children);
+  tau_vector_clear(src->children);
 
-  symtable_free(src);
+  tau_symtable_free(src);
 }
