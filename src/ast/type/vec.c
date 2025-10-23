@@ -9,49 +9,49 @@
 
 #include "ast/registry.h"
 
-ast_type_vec_t* ast_type_vec_init(void)
+tau_ast_type_vec_t* tau_ast_type_vec_init(void)
 {
-  ast_type_vec_t* node = (ast_type_vec_t*)malloc(sizeof(ast_type_vec_t));
-  CLEAROBJ(node);
+  tau_ast_type_vec_t* node = (tau_ast_type_vec_t*)malloc(sizeof(tau_ast_type_vec_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_TYPE_VEC;
+  node->kind = TAU_AST_TYPE_VEC;
 
   return node;
 }
 
-void ast_type_vec_free(ast_type_vec_t* node)
+void tau_ast_type_vec_free(tau_ast_type_vec_t* node)
 {
   free(node);
 }
 
-void ast_type_vec_nameres(nameres_ctx_t* UNUSED(ctx), ast_type_vec_t* UNUSED(node))
+void tau_ast_type_vec_nameres(tau_nameres_ctx_t* TAU_UNUSED(ctx), tau_ast_type_vec_t* TAU_UNUSED(node))
 {
 }
 
-void ast_type_vec_typecheck(typecheck_ctx_t* ctx, ast_type_vec_t* node)
+void tau_ast_type_vec_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_type_vec_t* node)
 {
-  ast_node_typecheck(ctx, node->base_type);
+  tau_ast_node_typecheck(ctx, node->base_type);
 
-  typedesc_t* base_desc = typetable_lookup(ctx->typetable, node->base_type);
+  tau_typedesc_t* base_desc = tau_typetable_lookup(ctx->typetable, node->base_type);
 
-  typedesc_t* desc = typebuilder_build_vec(ctx->typebuilder, node->size, base_desc);
+  tau_typedesc_t* desc = tau_typebuilder_build_vec(ctx->typebuilder, node->size, base_desc);
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 }
 
-void ast_type_vec_codegen(codegen_ctx_t* ctx, ast_type_vec_t* node)
+void tau_ast_type_vec_codegen(tau_codegen_ctx_t* ctx, tau_ast_type_vec_t* node)
 {
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
-  ASSERT(desc != NULL);
+  tau_typedesc_t* desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
+  TAU_ASSERT(desc != NULL);
 
   node->llvm_type = desc->llvm_type;
 }
 
-void ast_type_vec_dump_json(FILE* stream, ast_type_vec_t* node)
+void tau_ast_type_vec_dump_json(FILE* stream, tau_ast_type_vec_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\",\"size\":%zu,\"base_type\":", ast_kind_to_cstr(node->kind), node->size);
-  ast_node_dump_json(stream, node->base_type);
+  fprintf(stream, "{\"kind\":\"%s\",\"size\":%zu,\"base_type\":", tau_ast_kind_to_cstr(node->kind), node->size);
+  tau_ast_node_dump_json(stream, node->base_type);
   fputc('}', stream);
 }

@@ -10,141 +10,141 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 
-ast_decl_fun_t* ast_decl_fun_init(void)
+tau_ast_decl_fun_t* tau_ast_decl_fun_init(void)
 {
-  ast_decl_fun_t* node = (ast_decl_fun_t*)malloc(sizeof(ast_decl_fun_t));
-  CLEAROBJ(node);
+  tau_ast_decl_fun_t* node = (tau_ast_decl_fun_t*)malloc(sizeof(tau_ast_decl_fun_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_DECL_FUN;
-  node->params = vector_init();
+  node->kind = TAU_AST_DECL_FUN;
+  node->params = tau_vector_init();
 
   return node;
 }
 
-void ast_decl_fun_free(ast_decl_fun_t* node)
+void tau_ast_decl_fun_free(tau_ast_decl_fun_t* node)
 {
-  vector_free(node->params);
+  tau_vector_free(node->params);
   free(node);
 }
 
-void ast_decl_fun_nameres(nameres_ctx_t* ctx, ast_decl_fun_t* node)
+void tau_ast_decl_fun_nameres(tau_nameres_ctx_t* ctx, tau_ast_decl_fun_t* node)
 {
-  symtable_t* scope = nameres_ctx_scope_cur(ctx);
+  tau_symtable_t* scope = tau_nameres_ctx_scope_cur(ctx);
 
-  string_view_t id_view = token_to_string_view(node->id->tok);
-  symbol_t* sym = symbol_init_with_str_view(id_view, (ast_node_t*)node);
+  tau_string_view_t id_view = tau_token_to_string_view(node->id->tok);
+  tau_symbol_t* sym = tau_symbol_init_with_str_view(id_view, (tau_ast_node_t*)node);
 
-  symbol_t* collision = symtable_insert(scope, sym);
+  tau_symbol_t* collision = tau_symtable_insert(scope, sym);
 
   if (collision != NULL)
   {
-    error_bag_put_nameres_symbol_collision(ctx->errors, token_location(node->tok), token_location(collision->node->tok));
+    tau_error_bag_put_nameres_symbol_collision(ctx->errors, tau_token_location(node->tok), tau_token_location(collision->node->tok));
     return;
   }
 
-  node->scope = nameres_ctx_scope_begin(ctx);
+  node->scope = tau_nameres_ctx_scope_begin(ctx);
 
-  VECTOR_FOR_LOOP(i, node->params)
+  TAU_VECTOR_FOR_LOOP(i, node->params)
   {
-    ast_node_nameres(ctx, (ast_node_t*)vector_get(node->params, i));
+    tau_ast_node_nameres(ctx, (tau_ast_node_t*)tau_vector_get(node->params, i));
   }
 
-  ast_node_nameres(ctx, node->return_type);
+  tau_ast_node_nameres(ctx, node->return_type);
 
   if (node->stmt != NULL)
   {
-    ast_node_nameres(ctx, node->stmt);
+    tau_ast_node_nameres(ctx, node->stmt);
   }
 
-  nameres_ctx_scope_end(ctx);
+  tau_nameres_ctx_scope_end(ctx);
 }
 
-void ast_decl_fun_typecheck(typecheck_ctx_t* ctx, ast_decl_fun_t* node)
+void tau_ast_decl_fun_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_decl_fun_t* node)
 {
-  VECTOR_FOR_LOOP(i, node->params)
+  TAU_VECTOR_FOR_LOOP(i, node->params)
   {
-    ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->params, i));
+    tau_ast_node_typecheck(ctx, (tau_ast_node_t*)tau_vector_get(node->params, i));
   }
 
-  ast_node_typecheck(ctx, node->return_type);
+  tau_ast_node_typecheck(ctx, node->return_type);
 
-  size_t param_count = vector_size(node->params);
-  typedesc_t** param_types = NULL;
+  size_t param_count = tau_vector_size(node->params);
+  tau_typedesc_t** param_types = NULL;
 
   if (param_count > 0)
   {
-    param_types = (typedesc_t**)malloc(sizeof(typedesc_t*) * param_count);
+    param_types = (tau_typedesc_t**)malloc(sizeof(tau_typedesc_t*) * param_count);
   }
 
-  VECTOR_FOR_LOOP(i, node->params)
+  TAU_VECTOR_FOR_LOOP(i, node->params)
   {
-    ASSERT(param_types != NULL);
+    TAU_ASSERT(param_types != NULL);
 
-    typedesc_t* param_desc = typetable_lookup(ctx->typetable, (ast_node_t*)vector_get(node->params, i));
-    ASSERT(param_desc != NULL);
+    tau_typedesc_t* param_desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)tau_vector_get(node->params, i));
+    TAU_ASSERT(param_desc != NULL);
 
     param_types[i] = param_desc;
   }
 
-  typedesc_t* return_desc = typetable_lookup(ctx->typetable, node->return_type);
-  ASSERT(return_desc != NULL);
+  tau_typedesc_t* return_desc = tau_typetable_lookup(ctx->typetable, node->return_type);
+  TAU_ASSERT(return_desc != NULL);
 
-  typedesc_t* desc = typebuilder_build_fun(ctx->typebuilder, return_desc, param_types, param_count, node->is_vararg, node->callconv);
+  tau_typedesc_t* desc = tau_typebuilder_build_fun(ctx->typebuilder, return_desc, param_types, param_count, node->is_vararg, node->callconv);
 
   if (param_types != NULL)
   {
     free(param_types);
   }
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 
-  ctx->fun_desc = (typedesc_fun_t*)desc;
+  ctx->fun_desc = (tau_typedesc_fun_t*)desc;
 
   if (node->stmt != NULL)
   {
-    ast_node_typecheck(ctx, node->stmt);
+    tau_ast_node_typecheck(ctx, node->stmt);
   }
 
   ctx->fun_desc = NULL;
 }
 
-void ast_decl_fun_ctrlflow(ctrlflow_ctx_t* ctx, ast_decl_fun_t* node)
+void tau_ast_decl_fun_ctrlflow(tau_ctrlflow_ctx_t* ctx, tau_ast_decl_fun_t* node)
 {
   if (node->stmt != NULL)
   {
-    ast_node_ctrlflow(ctx, node->stmt);
+    tau_ast_node_ctrlflow(ctx, node->stmt);
   }
 }
 
-void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)
+void tau_ast_decl_fun_codegen(tau_codegen_ctx_t* ctx, tau_ast_decl_fun_t* node)
 {
-  ast_node_codegen(ctx, node->return_type);
+  tau_ast_node_codegen(ctx, node->return_type);
 
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  tau_typedesc_t* desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  string_t* id_str = token_to_string(node->id->tok);
+  tau_string_t* id_str = tau_token_to_string(node->id->tok);
 
-  node->llvm_value = LLVMAddFunction(ctx->llvm_mod, string_begin(id_str), node->llvm_type);
+  node->llvm_value = LLVMAddFunction(ctx->llvm_mod, tau_string_begin(id_str), node->llvm_type);
 
-  string_free(id_str);
+  tau_string_free(id_str);
 
   LLVMCallConv llvm_callconv = LLVMCCallConv;
 
   switch (node->callconv)
   {
-  case CALLCONV_TAU:
-  case CALLCONV_CDECL:      llvm_callconv = LLVMCCallConv;             break;
-  case CALLCONV_STDCALL:    llvm_callconv = LLVMX86StdcallCallConv;    break;
-  case CALLCONV_WIN64:      llvm_callconv = LLVMWin64CallConv;         break;
-  case CALLCONV_SYSV64:     llvm_callconv = LLVMX8664SysVCallConv;     break;
-  case CALLCONV_AAPCS:      llvm_callconv = LLVMARMAAPCSCallConv;      break;
-  case CALLCONV_FASTCALL:   llvm_callconv = LLVMFastCallConv;          break;
-  case CALLCONV_VECTORCALL: llvm_callconv = LLVMX86VectorCallCallConv; break;
-  case CALLCONV_THISCALL:   llvm_callconv = LLVMX86ThisCallCallConv;   break;
-  default: UNREACHABLE();
+  case TAU_CALLCONV_TAU:
+  case TAU_CALLCONV_CDECL:      llvm_callconv = LLVMCCallConv;             break;
+  case TAU_CALLCONV_STDCALL:    llvm_callconv = LLVMX86StdcallCallConv;    break;
+  case TAU_CALLCONV_WIN64:      llvm_callconv = LLVMWin64CallConv;         break;
+  case TAU_CALLCONV_SYSV64:     llvm_callconv = LLVMX8664SysVCallConv;     break;
+  case TAU_CALLCONV_AAPCS:      llvm_callconv = LLVMARMAAPCSCallConv;      break;
+  case TAU_CALLCONV_FASTCALL:   llvm_callconv = LLVMFastCallConv;          break;
+  case TAU_CALLCONV_VECTORCALL: llvm_callconv = LLVMX86VectorCallCallConv; break;
+  case TAU_CALLCONV_THISCALL:   llvm_callconv = LLVMX86ThisCallCallConv;   break;
+  default: TAU_UNREACHABLE();
   }
 
   LLVMSetFunctionCallConv(node->llvm_value, llvm_callconv);
@@ -157,32 +157,32 @@ void ast_decl_fun_codegen(codegen_ctx_t* ctx, ast_decl_fun_t* node)
 
     ctx->fun_node = node;
 
-    VECTOR_FOR_LOOP(i, node->params)
+    TAU_VECTOR_FOR_LOOP(i, node->params)
     {
       ctx->param_idx = i;
-      ast_node_codegen(ctx, (ast_node_t*)vector_get(node->params, i));
+      tau_ast_node_codegen(ctx, (tau_ast_node_t*)tau_vector_get(node->params, i));
     }
 
-    ast_node_codegen(ctx, node->stmt);
+    tau_ast_node_codegen(ctx, node->stmt);
 
     ctx->fun_node = NULL;
   }
 }
 
-void ast_decl_fun_dump_json(FILE* stream, ast_decl_fun_t* node)
+void tau_ast_decl_fun_dump_json(FILE* stream, tau_ast_decl_fun_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"", tau_ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"id\":");
-  ast_node_dump_json(stream, node->id);
+  tau_ast_node_dump_json(stream, node->id);
   fprintf(stream, ",\"is_pub\":%s", node->is_pub ? "true" : "false");
   fprintf(stream, ",\"is_extern\":%s", node->is_extern ? "true" : "false");
   fprintf(stream, ",\"is_vararg\":%s", node->is_vararg ? "true" : "false");
-  fprintf(stream, ",\"callconv\":\"%s\"", callconv_kind_to_cstr(node->callconv));
+  fprintf(stream, ",\"callconv\":\"%s\"", tau_callconv_kind_to_cstr(node->callconv));
   fprintf(stream, ",\"params\":");
-  ast_node_dump_json_vector(stream, node->params);
+  tau_ast_node_dump_json_vector(stream, node->params);
   fprintf(stream, ",\"return_type\":");
-  ast_node_dump_json(stream, node->return_type);
+  tau_ast_node_dump_json(stream, node->return_type);
   fprintf(stream, ",\"stmt\":");
-  ast_node_dump_json(stream, node->stmt);
+  tau_ast_node_dump_json(stream, node->stmt);
   fputc('}', stream);
 }

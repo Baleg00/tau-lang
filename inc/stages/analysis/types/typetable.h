@@ -25,7 +25,7 @@ TAU_EXTERN_C_BEGIN
 /**
  * \see ast/node.h 
  */
-typedef struct ast_node_t ast_node_t;
+typedef struct tau_ast_node_t tau_ast_node_t;
 
 /**
  * \brief Represents a type table.
@@ -36,21 +36,21 @@ typedef struct ast_node_t ast_node_t;
  * type checking and resolution during compilation. It owns neither the AST nodes
  * nor the associated type descriptors.
  */
-typedef struct typetable_t typetable_t;
+typedef struct tau_typetable_t tau_typetable_t;
 
 /**
  * \brief Initializes a new typetable.
  *
  * \returns A pointer to the created typetable.
  */
-typetable_t* typetable_init(void);
+tau_typetable_t* tau_typetable_init(void);
 
 /**
  * \brief Frees the memory associated with a typetable.
  *
  * \param[in] table Pointer to the typetable to free.
  */
-void typetable_free(typetable_t* table);
+void tau_typetable_free(tau_typetable_t* table);
 
 /**
  * \brief Inserts a type descriptor associated with an AST node into the
@@ -63,7 +63,7 @@ void typetable_free(typetable_t* table);
  * \returns Pointer to the old type descriptor if an overwrite occurred, `NULL`
  * otherwise.
  */
-typedesc_t* typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* desc);
+tau_typedesc_t* tau_typetable_insert(tau_typetable_t* table, tau_ast_node_t* node, tau_typedesc_t* desc);
 
 /**
  * \brief Looks up and retrieves the type descriptor associated with an AST node
@@ -74,7 +74,7 @@ typedesc_t* typetable_insert(typetable_t* table, ast_node_t* node, typedesc_t* d
  *
  * \returns A pointer to the type descriptor if found, or NULL if not found.
  */
-typedesc_t* typetable_lookup(typetable_t* table, ast_node_t* node);
+tau_typedesc_t* tau_typetable_lookup(tau_typetable_t* table, tau_ast_node_t* node);
 
 /**
  * \brief Merges a type table into another. The source type table is freed
@@ -83,7 +83,7 @@ typedesc_t* typetable_lookup(typetable_t* table, ast_node_t* node);
  * \param[in,out] dest Pointer to the type table to merge into.
  * \param[in] src Pointer to the type table to be merged.
  */
-void typetable_merge(typetable_t* dest, typetable_t* src);
+void tau_typetable_merge(tau_typetable_t* dest, tau_typetable_t* src);
 
 TAU_EXTERN_C_END
 

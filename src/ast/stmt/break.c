@@ -10,67 +10,67 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 
-ast_stmt_break_t* ast_stmt_break_init(void)
+tau_ast_stmt_break_t* tau_ast_stmt_break_init(void)
 {
-  ast_stmt_break_t* node = (ast_stmt_break_t*)malloc(sizeof(ast_stmt_break_t));
-  CLEAROBJ(node);
+  tau_ast_stmt_break_t* node = (tau_ast_stmt_break_t*)malloc(sizeof(tau_ast_stmt_break_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_STMT_BREAK;
+  node->kind = TAU_AST_STMT_BREAK;
 
   return node;
 }
 
-void ast_stmt_break_free(ast_stmt_break_t* node)
+void tau_ast_stmt_break_free(tau_ast_stmt_break_t* node)
 {
   free(node);
 }
 
-void ast_stmt_break_nameres(nameres_ctx_t* UNUSED(ctx), ast_stmt_break_t* UNUSED(node))
+void tau_ast_stmt_break_nameres(tau_nameres_ctx_t* TAU_UNUSED(ctx), tau_ast_stmt_break_t* TAU_UNUSED(node))
 {
 }
 
-void ast_stmt_break_typecheck(typecheck_ctx_t* UNUSED(ctx), ast_stmt_break_t* UNUSED(node))
+void tau_ast_stmt_break_typecheck(tau_typecheck_ctx_t* TAU_UNUSED(ctx), tau_ast_stmt_break_t* TAU_UNUSED(node))
 {
 }
 
-void ast_stmt_break_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_break_t* node)
+void tau_ast_stmt_break_ctrlflow(tau_ctrlflow_ctx_t* ctx, tau_ast_stmt_break_t* node)
 {
-  if (vector_empty(ctx->stmts))
+  if (tau_vector_empty(ctx->stmts))
   {
-    error_bag_put_ctrlflow_break_outside_loop(ctx->errors, token_location(node->tok));
+    tau_error_bag_put_ctrlflow_break_outside_loop(ctx->errors, tau_token_location(node->tok));
     return;
   }
 
-  for (int i = (int)vector_size(ctx->stmts) - 1; i >= 0; i--)
+  for (int i = (int)tau_vector_size(ctx->stmts) - 1; i >= 0; i--)
   {
-    ast_node_t* stmt_node = (ast_node_t*)vector_get(ctx->stmts, (size_t)i);
+    tau_ast_node_t* stmt_node = (tau_ast_node_t*)tau_vector_get(ctx->stmts, (size_t)i);
 
     switch (stmt_node->kind)
     {
-    case AST_STMT_WHILE:
-    case AST_STMT_DO_WHILE:
-    case AST_STMT_LOOP: node->loop = stmt_node; return;
-    default: NOOP();
+    case TAU_AST_STMT_WHILE:
+    case TAU_AST_STMT_DO_WHILE:
+    case TAU_AST_STMT_LOOP: node->loop = stmt_node; return;
+    default: TAU_NOOP();
     }
   }
 
-  error_bag_put_ctrlflow_break_outside_loop(ctx->errors, token_location(node->tok));
+  tau_error_bag_put_ctrlflow_break_outside_loop(ctx->errors, tau_token_location(node->tok));
 }
 
-void ast_stmt_break_codegen(codegen_ctx_t* ctx, ast_stmt_break_t* node)
+void tau_ast_stmt_break_codegen(tau_codegen_ctx_t* ctx, tau_ast_stmt_break_t* node)
 {
   switch (node->loop->kind)
   {
-  case AST_STMT_WHILE:    LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_while_t*   )node->loop)->llvm_end); break;
-  case AST_STMT_DO_WHILE: LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_do_while_t*)node->loop)->llvm_end); break;
-  case AST_STMT_LOOP:     LLVMBuildBr(ctx->llvm_builder, ((ast_stmt_loop_t*    )node->loop)->llvm_end); break;
-  default: UNREACHABLE();
+  case TAU_AST_STMT_WHILE:    LLVMBuildBr(ctx->llvm_builder, ((tau_ast_stmt_while_t*   )node->loop)->llvm_end); break;
+  case TAU_AST_STMT_DO_WHILE: LLVMBuildBr(ctx->llvm_builder, ((tau_ast_stmt_do_while_t*)node->loop)->llvm_end); break;
+  case TAU_AST_STMT_LOOP:     LLVMBuildBr(ctx->llvm_builder, ((tau_ast_stmt_loop_t*    )node->loop)->llvm_end); break;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void ast_stmt_break_dump_json(FILE* stream, ast_stmt_break_t* node)
+void tau_ast_stmt_break_dump_json(FILE* stream, tau_ast_stmt_break_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"}", tau_ast_kind_to_cstr(node->kind));
 }

@@ -15,18 +15,18 @@
 /**
  * \brief Header for all AST statement nodes.
  */
-#define AST_STMT_HEADER\
-  AST_NODE_HEADER
+#define TAU_AST_STMT_HEADER\
+  TAU_AST_NODE_HEADER
 
 TAU_EXTERN_C_BEGIN
 
 /**
  * \brief AST statement node.
  */
-typedef struct ast_stmt_t
+typedef struct tau_ast_stmt_t
 {
-  AST_STMT_HEADER;
-} ast_stmt_t;
+  TAU_AST_STMT_HEADER;
+} tau_ast_stmt_t;
 
 TAU_EXTERN_C_END
 

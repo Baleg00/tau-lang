@@ -15,19 +15,19 @@
 /**
  * \brief Header for all modifier type descriptors.
  */
-#define TYPEDESC_MODIF_HEADER\
-  TYPEDESC_HEADER;\
-  typedesc_t* base_type /** Underlying type. */
+#define TAU_TYPEDESC_MODIF_HEADER\
+  TAU_TYPEDESC_HEADER;\
+  tau_typedesc_t* base_type /** Underlying type. */
 
 TAU_EXTERN_C_BEGIN
 
 /**
  * \brief Type descriptor for type modifiers.
  */
-typedef struct typedesc_modif_t
+typedef struct tau_typedesc_modif_t
 {
-  TYPEDESC_MODIF_HEADER;
-} typedesc_modif_t;
+  TAU_TYPEDESC_MODIF_HEADER;
+} tau_typedesc_modif_t;
 
 TAU_EXTERN_C_END
 

@@ -9,24 +9,24 @@
 
 #include "ast/registry.h"
 
-ast_poison_t* ast_poison_init(void)
+tau_ast_poison_t* tau_ast_poison_init(void)
 {
-  ast_poison_t* node = (ast_poison_t*)malloc(sizeof(ast_poison_t));
-  CLEAROBJ(node);
+  tau_ast_poison_t* node = (tau_ast_poison_t*)malloc(sizeof(tau_ast_poison_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_POISON;
+  node->kind = TAU_AST_POISON;
 
   return node;
 }
 
-void ast_poison_free(ast_poison_t* node)
+void tau_ast_poison_free(tau_ast_poison_t* node)
 {
   free(node);
 }
 
-void ast_poison_dump_json(FILE* stream, ast_poison_t* node)
+void tau_ast_poison_dump_json(FILE* stream, tau_ast_poison_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"}", tau_ast_kind_to_cstr(node->kind));
 }

@@ -7,18 +7,18 @@
 
 #include "utils/collections/list.h"
 
-struct list_node_t
+struct tau_list_node_t
 {
   void* data;        ///< Pointer to the stored data.
-  list_t* owner;     ///< Pointer to the list which the node belongs to.
-  list_node_t* prev; ///< Pointer to the previous node or NULL.
-  list_node_t* next; ///< Pointer to the next node or NULL.
+  tau_list_t* owner;     ///< Pointer to the list which the node belongs to.
+  tau_list_node_t* prev; ///< Pointer to the previous node or NULL.
+  tau_list_node_t* next; ///< Pointer to the next node or NULL.
 };
 
-struct list_t
+struct tau_list_t
 {
-  list_node_t* head; ///< Pointer to the first node in the list or NULL.
-  list_node_t* tail; ///< Pointer to the last node in the list or NULL.
+  tau_list_node_t* head; ///< Pointer to the first node in the list or NULL.
+  tau_list_node_t* tail; ///< Pointer to the last node in the list or NULL.
   size_t len;        ///< Number of nodes in the list.
 };
 
@@ -28,10 +28,10 @@ struct list_t
  * \param[in] data The data to be stored in the node.
  * \returns Pointer to the initialized list node.
  */
-static list_node_t* list_node_init(void* data)
+static tau_list_node_t* tau_list_node_init(void* data)
 {
-  list_node_t* node = (list_node_t*)malloc(sizeof(list_node_t));
-  ASSERT(node != NULL);
+  tau_list_node_t* node = (tau_list_node_t*)malloc(sizeof(tau_list_node_t));
+  TAU_ASSERT(node != NULL);
 
   node->data = data;
   node->owner = NULL;
@@ -46,35 +46,35 @@ static list_node_t* list_node_init(void* data)
  *
  * \param[in] node Pointer to the list node to free.
  */
-static void list_node_free(list_node_t* node)
+static void tau_list_node_free(tau_list_node_t* node)
 {
   free(node);
 }
 
-list_node_t* list_node_prev(list_node_t* node)
+tau_list_node_t* tau_list_node_prev(tau_list_node_t* node)
 {
   return node->prev;
 }
 
-list_node_t* list_node_next(list_node_t* node)
+tau_list_node_t* tau_list_node_next(tau_list_node_t* node)
 {
   return node->next;
 }
 
-void* list_node_get(const list_node_t* node)
+void* tau_list_node_get(const tau_list_node_t* node)
 {
   return node->data;
 }
 
-void list_node_set(list_node_t* restrict node, void* restrict data)
+void tau_list_node_set(tau_list_node_t* restrict node, void* restrict data)
 {
   node->data = data;
 }
 
-list_t* list_init(void)
+tau_list_t* tau_list_init(void)
 {
-  list_t* list = (list_t*)malloc(sizeof(list_t));
-  ASSERT(list != NULL);
+  tau_list_t* list = (tau_list_t*)malloc(sizeof(tau_list_t));
+  TAU_ASSERT(list != NULL);
 
   list->len = 0;
   list->head = NULL;
@@ -83,60 +83,60 @@ list_t* list_init(void)
   return list;
 }
 
-list_t* list_init_from_buffer(const void* buffer, size_t length)
+tau_list_t* tau_list_init_from_buffer(const void* buffer, size_t length)
 {
-  list_t* list = list_init();
+  tau_list_t* list = tau_list_init();
 
   for (size_t i = 0; i < length; i++)
-    list_push_back(list, ((void* const*)buffer)[i]);
+    tau_list_push_back(list, ((void* const*)buffer)[i]);
 
   return list;
 }
 
-void list_free(list_t* list)
+void tau_list_free(tau_list_t* list)
 {
-  for (list_node_t *node = list->head, *next; node != NULL; node = next)
+  for (tau_list_node_t *node = list->head, *next; node != NULL; node = next)
   {
     next = node->next;
-    list_node_free(node);
+    tau_list_node_free(node);
   }
 
   free(list);
 }
 
-list_t* list_copy(const list_t* list)
+tau_list_t* tau_list_copy(const tau_list_t* list)
 {
-  list_t* new_list = list_init();
+  tau_list_t* new_list = tau_list_init();
 
-  LIST_FOR_LOOP(node, list)
-    list_push_back(new_list, node->data);
+  TAU_LIST_FOR_LOOP(node, list)
+    tau_list_push_back(new_list, node->data);
 
   return new_list;
 }
 
-void* list_front(const list_t* list)
+void* tau_list_front(const tau_list_t* list)
 {
   return list->head->data;
 }
 
-void* list_back(const list_t* list)
+void* tau_list_back(const tau_list_t* list)
 {
   return list->tail->data;
 }
 
-list_node_t* list_front_node(const list_t* list)
+tau_list_node_t* tau_list_front_node(const tau_list_t* list)
 {
   return list->head;
 }
 
-list_node_t* list_back_node(const list_t* list)
+tau_list_node_t* tau_list_back_node(const tau_list_t* list)
 {
   return list->tail;
 }
 
-list_node_t* list_push_front(list_t* restrict list, void* restrict data)
+tau_list_node_t* tau_list_push_front(tau_list_t* restrict list, void* restrict data)
 {
-  list_node_t* new_node = list_node_init(data);
+  tau_list_node_t* new_node = tau_list_node_init(data);
 
   new_node->owner = list;
   new_node->next = list->head;
@@ -154,9 +154,9 @@ list_node_t* list_push_front(list_t* restrict list, void* restrict data)
   return new_node;
 }
 
-list_node_t* list_push_back(list_t* restrict list, void* restrict data)
+tau_list_node_t* tau_list_push_back(tau_list_t* restrict list, void* restrict data)
 {
-  list_node_t* new_node = list_node_init(data);
+  tau_list_node_t* new_node = tau_list_node_init(data);
 
   new_node->owner = list;
   new_node->prev = list->tail;
@@ -174,9 +174,9 @@ list_node_t* list_push_back(list_t* restrict list, void* restrict data)
   return new_node;
 }
 
-void* list_pop_front(list_t* list)
+void* tau_list_pop_front(tau_list_t* list)
 {
-  list_node_t* node = list->head;
+  tau_list_node_t* node = list->head;
 
   if (list->head == list->tail)
     list->head = list->tail = NULL;
@@ -190,14 +190,14 @@ void* list_pop_front(list_t* list)
 
   void* data = node->data;
 
-  list_node_free(node);
+  tau_list_node_free(node);
 
   return data;
 }
 
-void* list_pop_back(list_t* list)
+void* tau_list_pop_back(tau_list_t* list)
 {
-  list_node_t* node = list->tail;
+  tau_list_node_t* node = list->tail;
 
   if (list->head == list->tail)
     list->head = list->tail = NULL;
@@ -211,17 +211,17 @@ void* list_pop_back(list_t* list)
 
   void* data = node->data;
 
-  list_node_free(node);
+  tau_list_node_free(node);
 
   return data;
 }
 
-list_node_t* list_insert_before(list_node_t* restrict node, void* restrict data)
+tau_list_node_t* tau_list_insert_before(tau_list_node_t* restrict node, void* restrict data)
 {
   if (node->owner->head == node)
-    return list_push_front(node->owner, data);
+    return tau_list_push_front(node->owner, data);
 
-  list_node_t* new_node = list_node_init(data);
+  tau_list_node_t* new_node = tau_list_node_init(data);
 
   new_node->owner = node->owner;
   new_node->prev = node->prev;
@@ -235,12 +235,12 @@ list_node_t* list_insert_before(list_node_t* restrict node, void* restrict data)
   return new_node;
 }
 
-list_node_t* list_insert_after(list_node_t* restrict node, void* restrict data)
+tau_list_node_t* tau_list_insert_after(tau_list_node_t* restrict node, void* restrict data)
 {
   if (node->owner->tail == node)
-    return list_push_back(node->owner, data);
+    return tau_list_push_back(node->owner, data);
 
-  list_node_t* new_node = list_node_init(data);
+  tau_list_node_t* new_node = tau_list_node_init(data);
 
   new_node->owner = node->owner;
   new_node->prev = node;
@@ -254,13 +254,13 @@ list_node_t* list_insert_after(list_node_t* restrict node, void* restrict data)
   return new_node;
 }
 
-void* list_remove(list_node_t* node)
+void* tau_list_remove(tau_list_node_t* node)
 {
   if (node->owner->head == node)
-    return list_pop_front(node->owner);
+    return tau_list_pop_front(node->owner);
 
   if (node->owner->tail == node)
-    return list_pop_back(node->owner);
+    return tau_list_pop_back(node->owner);
 
   --node->owner->len;
   node->prev->next = node->next;
@@ -268,27 +268,27 @@ void* list_remove(list_node_t* node)
 
   void* data = node->data;
 
-  list_node_free(node);
+  tau_list_node_free(node);
 
   return data;
 }
 
-void* list_remove_before(list_node_t* node)
+void* tau_list_remove_before(tau_list_node_t* node)
 {
-  return list_remove(node->prev);
+  return tau_list_remove(node->prev);
 }
 
-void* list_remove_after(list_node_t* node)
+void* tau_list_remove_after(tau_list_node_t* node)
 {
-  return list_remove(node->next);
+  return tau_list_remove(node->next);
 }
 
-void list_clear(list_t* list)
+void tau_list_clear(tau_list_t* list)
 {
-  for (list_node_t* node = list->head, *next; node != NULL; node = next)
+  for (tau_list_node_t* node = list->head, *next; node != NULL; node = next)
   {
     next = node->next;
-    list_node_free(node);
+    tau_list_node_free(node);
   }
 
   list->head = NULL;
@@ -296,26 +296,26 @@ void list_clear(list_t* list)
   list->len = 0;
 }
 
-bool list_empty(const list_t* list)
+bool tau_list_empty(const tau_list_t* list)
 {
   return list->len == 0;
 }
 
-size_t list_size(const list_t* list)
+size_t tau_list_size(const tau_list_t* list)
 {
   return list->len;
 }
 
-void list_for_each(list_t* list, list_for_each_func_t func)
+void tau_list_for_each(tau_list_t* list, tau_list_for_each_func_t func)
 {
-  LIST_FOR_LOOP(node, list)
+  TAU_LIST_FOR_LOOP(node, list)
     func(node->data);
 }
 
-void list_to_buffer(const list_t* restrict list, void* restrict buffer)
+void tau_list_to_buffer(const tau_list_t* restrict list, void* restrict buffer)
 {
   size_t i = 0;
 
-  LIST_FOR_LOOP(node, list)
+  TAU_LIST_FOR_LOOP(node, list)
     ((void**)buffer)[i++] = node->data;
 }

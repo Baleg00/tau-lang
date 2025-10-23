@@ -19,14 +19,14 @@ TAU_EXTERN_C_BEGIN
  *
  * \returns Pointer to the newly initialized GCC linker.
  */
-linker_t* linker_gcc_init(void);
+tau_linker_t* tau_linker_gcc_init(void);
 
 /**
  * \brief Frees all allocated memory associated with a linker.
  *
  * \param[in] linker Pointer to the linker to be freed.
  */
-void linker_gcc_free(linker_t* linker);
+void tau_linker_gcc_free(tau_linker_t* linker);
 
 /**
  * \brief Adds an object file to the linker.
@@ -34,7 +34,7 @@ void linker_gcc_free(linker_t* linker);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] path Path to the object file.
  */
-void linker_gcc_add_object(linker_t* linker, const char* path);
+void tau_linker_gcc_add_object(tau_linker_t* linker, const char* path);
 
 /**
  * \brief Adds a directory to be searched for libraries to the linker.
@@ -42,7 +42,7 @@ void linker_gcc_add_object(linker_t* linker, const char* path);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] path Path to the directory.
  */
-void linker_gcc_add_library_directory(linker_t* linker, const char* path);
+void tau_linker_gcc_add_library_directory(tau_linker_t* linker, const char* path);
 
 /**
  * \brief Adds a static library given its name to the linker.
@@ -50,7 +50,7 @@ void linker_gcc_add_library_directory(linker_t* linker, const char* path);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] name Name of the static library.
  */
-void linker_gcc_add_static_library_by_name(linker_t* linker, const char* name);
+void tau_linker_gcc_add_static_library_by_name(tau_linker_t* linker, const char* name);
 
 /**
  * \brief Adds a static library given its path to the linker.
@@ -58,7 +58,7 @@ void linker_gcc_add_static_library_by_name(linker_t* linker, const char* name);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] path Path to the static library.
  */
-void linker_gcc_add_static_library_by_path(linker_t* linker, const char* path);
+void tau_linker_gcc_add_static_library_by_path(tau_linker_t* linker, const char* path);
 
 /**
  * \brief Adds a dynamic library given its name to the linker.
@@ -66,7 +66,7 @@ void linker_gcc_add_static_library_by_path(linker_t* linker, const char* path);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] name Name of the dynamic library.
  */
-void linker_gcc_add_dynamic_library_by_name(linker_t* linker, const char* name);
+void tau_linker_gcc_add_dynamic_library_by_name(tau_linker_t* linker, const char* name);
 
 /**
  * \brief Adds a dynamic library given its path to the linker.
@@ -74,7 +74,7 @@ void linker_gcc_add_dynamic_library_by_name(linker_t* linker, const char* name);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] path Path to the dynamic library.
  */
-void linker_gcc_add_dynamic_library_by_path(linker_t* linker, const char* path);
+void tau_linker_gcc_add_dynamic_library_by_path(tau_linker_t* linker, const char* path);
 
 /**
  * \brief Sets the output kind of the linker.
@@ -82,7 +82,7 @@ void linker_gcc_add_dynamic_library_by_path(linker_t* linker, const char* path);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] kind The output kind.
  */
-void linker_gcc_set_output_kind(linker_t* linker, linker_output_kind_t kind);
+void tau_linker_gcc_set_output_kind(tau_linker_t* linker, tau_linker_output_kind_t kind);
 
 /**
  * \brief Sets the output file of the linker.
@@ -90,7 +90,7 @@ void linker_gcc_set_output_kind(linker_t* linker, linker_output_kind_t kind);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] file Path to the output file.
  */
-void linker_gcc_set_output_file(linker_t* linker, const char* file);
+void tau_linker_gcc_set_output_file(tau_linker_t* linker, const char* file);
 
 /**
  * \brief Sets the optimization level of the linker.
@@ -98,7 +98,7 @@ void linker_gcc_set_output_file(linker_t* linker, const char* file);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] level The optimization level.
  */
-void linker_gcc_set_optimization_level(linker_t* linker, linker_optimization_level_t level);
+void tau_linker_gcc_set_optimization_level(tau_linker_t* linker, tau_linker_optimization_level_t level);
 
 /**
  * \brief Enables or disables the generation of debugging information for the linker.
@@ -106,7 +106,7 @@ void linker_gcc_set_optimization_level(linker_t* linker, linker_optimization_lev
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] debugging `true` to enable debugging, `false` to disable debugging.
  */
-void linker_gcc_set_debugging(linker_t* linker, bool debugging);
+void tau_linker_gcc_set_debugging(tau_linker_t* linker, bool debugging);
 
 /**
  * \brief Sets the entry point of the generated file for the linker.
@@ -114,7 +114,7 @@ void linker_gcc_set_debugging(linker_t* linker, bool debugging);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] entry The name of the entry point.
  */
-void linker_gcc_set_entry_point(linker_t* linker, const char* entry);
+void tau_linker_gcc_set_entry_point(tau_linker_t* linker, const char* entry);
 
 /**
  * \brief Sets the symbol visibility for the linker.
@@ -122,7 +122,7 @@ void linker_gcc_set_entry_point(linker_t* linker, const char* entry);
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] visibility The symbol visibility kind.
  */
-void linker_gcc_set_visibility(linker_t* linker, linker_visibility_t visibility);
+void tau_linker_gcc_set_visibility(tau_linker_t* linker, tau_linker_visibility_t visibility);
 
 /**
  * \brief Adds a custom flag to the linker.
@@ -130,7 +130,7 @@ void linker_gcc_set_visibility(linker_t* linker, linker_visibility_t visibility)
  * \param[in] linker Pointer to the linker to be used.
  * \param[in] flag The custom flag.
  */
-void linker_gcc_add_flag(linker_t* linker, const char* flag);
+void tau_linker_gcc_add_flag(tau_linker_t* linker, const char* flag);
 
 /**
  * \brief Executes the linking process.
@@ -138,7 +138,7 @@ void linker_gcc_add_flag(linker_t* linker, const char* flag);
  * \param[in] linker Pointer to the linker to be used.
  * \returns `true` if linking was successful, `false` otherwise.
  */
-bool linker_gcc_link(linker_t* linker);
+bool tau_linker_gcc_link(tau_linker_t* linker);
 
 TAU_EXTERN_C_END
 

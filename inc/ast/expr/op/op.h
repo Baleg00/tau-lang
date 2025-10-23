@@ -15,8 +15,8 @@
 /**
  * \brief Header for all AST operation expression nodes.
  */
-#define AST_EXPR_OP_HEADER\
-  AST_EXPR_HEADER;\
+#define TAU_AST_EXPR_OP_HEADER\
+  TAU_AST_EXPR_HEADER;\
   op_kind_t op_kind;\
   op_subkind_t op_subkind
 
@@ -119,10 +119,10 @@ typedef enum op_subkind_t
 /**
  * \brief AST operation expression node.
  */
-typedef struct ast_expr_op_t
+typedef struct tau_ast_expr_op_t
 {
-  AST_EXPR_OP_HEADER;
-} ast_expr_op_t;
+  TAU_AST_EXPR_OP_HEADER;
+} tau_ast_expr_op_t;
 
 /**
  * \brief Returns a C-string representation of an operator kind.

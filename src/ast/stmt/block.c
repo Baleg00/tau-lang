@@ -9,69 +9,69 @@
 
 #include "ast/registry.h"
 
-ast_stmt_block_t* ast_stmt_block_init(void)
+tau_ast_stmt_block_t* tau_ast_stmt_block_init(void)
 {
-  ast_stmt_block_t* node = (ast_stmt_block_t*)malloc(sizeof(ast_stmt_block_t));
-  CLEAROBJ(node);
+  tau_ast_stmt_block_t* node = (tau_ast_stmt_block_t*)malloc(sizeof(tau_ast_stmt_block_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_STMT_BLOCK;
-  node->stmts = vector_init();
+  node->kind = TAU_AST_STMT_BLOCK;
+  node->stmts = tau_vector_init();
 
   return node;
 }
 
-void ast_stmt_block_free(ast_stmt_block_t* node)
+void tau_ast_stmt_block_free(tau_ast_stmt_block_t* node)
 {
-  vector_free(node->stmts);
+  tau_vector_free(node->stmts);
   free(node);
 }
 
-void ast_stmt_block_nameres(nameres_ctx_t* ctx, ast_stmt_block_t* node)
+void tau_ast_stmt_block_nameres(tau_nameres_ctx_t* ctx, tau_ast_stmt_block_t* node)
 {
-  node->scope = nameres_ctx_scope_begin(ctx);
+  node->scope = tau_nameres_ctx_scope_begin(ctx);
 
-  VECTOR_FOR_LOOP(i, node->stmts)
+  TAU_VECTOR_FOR_LOOP(i, node->stmts)
   {
-    ast_node_nameres(ctx, (ast_node_t*)vector_get(node->stmts, i));
+    tau_ast_node_nameres(ctx, (tau_ast_node_t*)tau_vector_get(node->stmts, i));
   }
 
-  nameres_ctx_scope_end(ctx);
+  tau_nameres_ctx_scope_end(ctx);
 }
 
-void ast_stmt_block_typecheck(typecheck_ctx_t* ctx, ast_stmt_block_t* node)
+void tau_ast_stmt_block_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_stmt_block_t* node)
 {
-  VECTOR_FOR_LOOP(i, node->stmts)
+  TAU_VECTOR_FOR_LOOP(i, node->stmts)
   {
-    ast_node_typecheck(ctx, (ast_node_t*)vector_get(node->stmts, i));
-  }
-}
-
-void ast_stmt_block_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_block_t* node)
-{
-  ctrlflow_ctx_block_begin(ctx, node);
-
-  VECTOR_FOR_LOOP(i, node->stmts)
-  {
-    ast_node_ctrlflow(ctx, (ast_node_t*)vector_get(node->stmts, i));
-  }
-
-  ctrlflow_ctx_block_end(ctx);
-}
-
-void ast_stmt_block_codegen(codegen_ctx_t* ctx, ast_stmt_block_t* node)
-{
-  VECTOR_FOR_LOOP(i, node->stmts)
-  {
-    ast_node_codegen(ctx, (ast_node_t*)vector_get(node->stmts, i));
+    tau_ast_node_typecheck(ctx, (tau_ast_node_t*)tau_vector_get(node->stmts, i));
   }
 }
 
-void ast_stmt_block_dump_json(FILE* stream, ast_stmt_block_t* node)
+void tau_ast_stmt_block_ctrlflow(tau_ctrlflow_ctx_t* ctx, tau_ast_stmt_block_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  tau_ctrlflow_ctx_block_begin(ctx, node);
+
+  TAU_VECTOR_FOR_LOOP(i, node->stmts)
+  {
+    tau_ast_node_ctrlflow(ctx, (tau_ast_node_t*)tau_vector_get(node->stmts, i));
+  }
+
+  tau_ctrlflow_ctx_block_end(ctx);
+}
+
+void tau_ast_stmt_block_codegen(tau_codegen_ctx_t* ctx, tau_ast_stmt_block_t* node)
+{
+  TAU_VECTOR_FOR_LOOP(i, node->stmts)
+  {
+    tau_ast_node_codegen(ctx, (tau_ast_node_t*)tau_vector_get(node->stmts, i));
+  }
+}
+
+void tau_ast_stmt_block_dump_json(FILE* stream, tau_ast_stmt_block_t* node)
+{
+  fprintf(stream, "{\"kind\":\"%s\"", tau_ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"stmts\":");
-  ast_node_dump_json_vector(stream, node->stmts);
+  tau_ast_node_dump_json_vector(stream, node->stmts);
   fputc('}', stream);
 }

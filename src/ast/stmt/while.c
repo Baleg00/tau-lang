@@ -10,55 +10,55 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 
-ast_stmt_while_t* ast_stmt_while_init(void)
+tau_ast_stmt_while_t* tau_ast_stmt_while_init(void)
 {
-  ast_stmt_while_t* node = (ast_stmt_while_t*)malloc(sizeof(ast_stmt_while_t));
-  CLEAROBJ(node);
+  tau_ast_stmt_while_t* node = (tau_ast_stmt_while_t*)malloc(sizeof(tau_ast_stmt_while_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_STMT_WHILE;
+  node->kind = TAU_AST_STMT_WHILE;
 
   return node;
 }
 
-void ast_stmt_while_free(ast_stmt_while_t* node)
+void tau_ast_stmt_while_free(tau_ast_stmt_while_t* node)
 {
   free(node);
 }
 
-void ast_stmt_while_nameres(nameres_ctx_t* ctx, ast_stmt_while_t* node)
+void tau_ast_stmt_while_nameres(tau_nameres_ctx_t* ctx, tau_ast_stmt_while_t* node)
 {
-  node->scope = nameres_ctx_scope_begin(ctx);
+  node->scope = tau_nameres_ctx_scope_begin(ctx);
 
-  ast_node_nameres(ctx, node->cond);
-  ast_node_nameres(ctx, node->stmt);
+  tau_ast_node_nameres(ctx, node->cond);
+  tau_ast_node_nameres(ctx, node->stmt);
 
-  nameres_ctx_scope_end(ctx);
+  tau_nameres_ctx_scope_end(ctx);
 }
 
-void ast_stmt_while_typecheck(typecheck_ctx_t* ctx, ast_stmt_while_t* node)
+void tau_ast_stmt_while_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_stmt_while_t* node)
 {
-  ast_node_typecheck(ctx, node->cond);
-  ast_node_typecheck(ctx, node->stmt);
+  tau_ast_node_typecheck(ctx, node->cond);
+  tau_ast_node_typecheck(ctx, node->stmt);
 
-  typedesc_t* cond_desc = typetable_lookup(ctx->typetable, node->cond);
-  ASSERT(cond_desc != NULL);
+  tau_typedesc_t* cond_desc = tau_typetable_lookup(ctx->typetable, node->cond);
+  TAU_ASSERT(cond_desc != NULL);
 
-  if (typedesc_remove_ref_mut(cond_desc)->kind != TYPEDESC_BOOL)
-    error_bag_put_typecheck_expected_bool(ctx->errors, token_location(node->cond->tok));
+  if (tau_typedesc_remove_ref_mut(cond_desc)->kind != TAU_TYPEDESC_BOOL)
+    tau_error_bag_put_typecheck_expected_bool(ctx->errors, tau_token_location(node->cond->tok));
 }
 
-void ast_stmt_while_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_while_t* node)
+void tau_ast_stmt_while_ctrlflow(tau_ctrlflow_ctx_t* ctx, tau_ast_stmt_while_t* node)
 {
-  ctrlflow_ctx_while_begin(ctx, node);
+  tau_ctrlflow_ctx_while_begin(ctx, node);
 
-  ast_node_ctrlflow(ctx, node->stmt);
+  tau_ast_node_ctrlflow(ctx, node->stmt);
 
-  ctrlflow_ctx_while_end(ctx);
+  tau_ctrlflow_ctx_while_end(ctx);
 }
 
-void ast_stmt_while_codegen(codegen_ctx_t* ctx, ast_stmt_while_t* node)
+void tau_ast_stmt_while_codegen(tau_codegen_ctx_t* ctx, tau_ast_stmt_while_t* node)
 {
   node->llvm_cond = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "while_cond");
   node->llvm_loop = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "while_loop");
@@ -68,29 +68,29 @@ void ast_stmt_while_codegen(codegen_ctx_t* ctx, ast_stmt_while_t* node)
   LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_cond);
   LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_cond);
 
-  ast_node_codegen(ctx, node->cond);
+  tau_ast_node_codegen(ctx, node->cond);
 
-  typedesc_t* cond_desc = typetable_lookup(ctx->typetable, node->cond);
+  tau_typedesc_t* cond_desc = tau_typetable_lookup(ctx->typetable, node->cond);
 
-  LLVMValueRef llvm_cond_value = codegen_build_load_if_ref(ctx, ((ast_expr_t*)node->cond)->llvm_value, cond_desc);
+  LLVMValueRef llvm_cond_value = tau_codegen_build_load_if_ref(ctx, ((tau_ast_expr_t*)node->cond)->llvm_value, cond_desc);
 
   LLVMBuildCondBr(ctx->llvm_builder, llvm_cond_value, node->llvm_loop, node->llvm_end);
   LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_loop);
   LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_loop);
 
-  ast_node_codegen(ctx, node->stmt);
+  tau_ast_node_codegen(ctx, node->stmt);
 
   LLVMBuildBr(ctx->llvm_builder, node->llvm_cond);
   LLVMAppendExistingBasicBlock(ctx->fun_node->llvm_value, node->llvm_end);
   LLVMPositionBuilderAtEnd(ctx->llvm_builder, node->llvm_end);
 }
 
-void ast_stmt_while_dump_json(FILE* stream, ast_stmt_while_t* node)
+void tau_ast_stmt_while_dump_json(FILE* stream, tau_ast_stmt_while_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"", tau_ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"cond\":");
-  ast_node_dump_json(stream, node->cond);
+  tau_ast_node_dump_json(stream, node->cond);
   fprintf(stream, ",\"stmt\":");
-  ast_node_dump_json(stream, node->stmt);
+  tau_ast_node_dump_json(stream, node->stmt);
   fputc('}', stream);
 }

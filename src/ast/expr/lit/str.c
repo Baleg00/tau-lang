@@ -9,54 +9,54 @@
 
 #include "ast/registry.h"
 
-ast_expr_lit_str_t* ast_expr_lit_str_init(void)
+tau_ast_expr_lit_str_t* tau_ast_expr_lit_str_init(void)
 {
-  ast_expr_lit_str_t* node = (ast_expr_lit_str_t*)malloc(sizeof(ast_expr_lit_str_t));
-  CLEAROBJ(node);
+  tau_ast_expr_lit_str_t* node = (tau_ast_expr_lit_str_t*)malloc(sizeof(tau_ast_expr_lit_str_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_EXPR_LIT_STR;
+  node->kind = TAU_AST_EXPR_LIT_STR;
 
   return node;
 }
 
-void ast_expr_lit_str_free(ast_expr_lit_str_t* node)
+void tau_ast_expr_lit_str_free(tau_ast_expr_lit_str_t* node)
 {
   free(node->value);
   free(node);
 }
 
-void ast_expr_lit_str_nameres(nameres_ctx_t* UNUSED(ctx), ast_expr_lit_str_t* UNUSED(node))
+void tau_ast_expr_lit_str_nameres(tau_nameres_ctx_t* TAU_UNUSED(ctx), tau_ast_expr_lit_str_t* TAU_UNUSED(node))
 {
 }
 
-void ast_expr_lit_str_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_str_t* node)
+void tau_ast_expr_lit_str_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_lit_str_t* node)
 {
-  typedesc_t* desc = typebuilder_build_ptr(ctx->typebuilder, typebuilder_build_u8(ctx->typebuilder));
+  tau_typedesc_t* desc = tau_typebuilder_build_ptr(ctx->typebuilder, tau_typebuilder_build_u8(ctx->typebuilder));
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 }
 
-void ast_expr_lit_str_codegen(codegen_ctx_t* ctx, ast_expr_lit_str_t* node)
+void tau_ast_expr_lit_str_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_lit_str_t* node)
 {
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  tau_typedesc_t* desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
   node->llvm_value = LLVMBuildGlobalStringPtr(ctx->llvm_builder, node->value, "global_str");
 }
 
-void ast_expr_lit_str_dump_json(FILE* stream, ast_expr_lit_str_t* node)
+void tau_ast_expr_lit_str_dump_json(FILE* stream, tau_ast_expr_lit_str_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"", tau_ast_kind_to_cstr(node->kind));
 
-  string_t* str = string_init_with_cstr(node->value);
-  string_t* escaped = string_escape(str);
+  tau_string_t* str = tau_string_init_with_cstr(node->value);
+  tau_string_t* escaped = tau_string_escape(str);
 
-  fprintf(stream, ",\"value\":\"%s\"", string_begin(escaped));
+  fprintf(stream, ",\"value\":\"%s\"", tau_string_begin(escaped));
 
-  string_free(escaped);
-  string_free(str);
+  tau_string_free(escaped);
+  tau_string_free(str);
 
   fputc('}', stream);
 }

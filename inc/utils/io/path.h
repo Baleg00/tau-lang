@@ -23,23 +23,23 @@
 #include "utils/str_view.h"
 
 /// Cross-platform directory separator character.
-#define PATH_GENERIC_DIRECTORY_SEPARATOR_CHAR '/'
+#define TAU_PATH_GENERIC_DIRECTORY_SEPARATOR_CHAR '/'
 
 /// Cross-platform directory separator C-string.
-#define PATH_GENERIC_DIRECTORY_SEPARATOR_CSTR "/"
+#define TAU_PATH_GENERIC_DIRECTORY_SEPARATOR_CSTR "/"
 
 #if TAU_OS_WINDOWS
 /// Platform specific directory separator character.
-# define PATH_NATIVE_DIRECTORY_SEPARATOR_CHAR '\\'
+# define TAU_PATH_NATIVE_DIRECTORY_SEPARATOR_CHAR '\\'
 
 /// Platform specific directory separator C-string.
-# define PATH_NATIVE_DIRECTORY_SEPARATOR_CSTR "\\"
+# define TAU_PATH_NATIVE_DIRECTORY_SEPARATOR_CSTR "\\"
 #else
 /// Platform specific directory separator character.
-# define PATH_NATIVE_DIRECTORY_SEPARATOR_CHAR '/'
+# define TAU_PATH_NATIVE_DIRECTORY_SEPARATOR_CHAR '/'
 
 /// Platform specific directory separator C-string.
-# define PATH_NATIVE_DIRECTORY_SEPARATOR_CSTR "/"
+# define TAU_PATH_NATIVE_DIRECTORY_SEPARATOR_CSTR "/"
 #endif
 
 TAU_EXTERN_C_BEGIN
@@ -47,14 +47,14 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Represents a file system path.
  */
-typedef struct path_t path_t;
+typedef struct tau_path_t tau_path_t;
 
 /**
  * \brief Initializes a new empty path.
  *
  * \returns Pointer to the newly initialized path.
  */
-path_t* path_init(void);
+tau_path_t* tau_path_init(void);
 
 /**
  * \brief Initializes a new path using a C-string.
@@ -62,7 +62,7 @@ path_t* path_init(void);
  * \param[in] cstr C-string path to be used.
  * \returns Pointer to the newly initialized path.
  */
-path_t* path_init_with_cstr(const char* cstr);
+tau_path_t* tau_path_init_with_cstr(const char* cstr);
 
 /**
  * \brief Initializes a new path using a C-string and its length.
@@ -71,14 +71,14 @@ path_t* path_init_with_cstr(const char* cstr);
  * \param[in] len The length of the C-string.
  * \returns Pointer to the newly initialized path.
  */
-path_t* path_init_with_cstr_and_length(const char* cstr, size_t len);
+tau_path_t* tau_path_init_with_cstr_and_length(const char* cstr, size_t len);
 
 /**
  * \brief Frees all memory associated with a path.
  *
  * \param[in] path Pointer to the path to be freed.
  */
-void path_free(path_t* path);
+void tau_path_free(tau_path_t* path);
 
 /**
  * \brief Creates a copy of a path.
@@ -86,7 +86,7 @@ void path_free(path_t* path);
  * \param[in] path Pointer to the path to be copied.
  * \returns Pointer to the newly initialized path copy.
  */
-path_t* path_copy(path_t* path);
+tau_path_t* tau_path_copy(tau_path_t* path);
 
 /**
  * \brief Replaces a path with another path.
@@ -94,7 +94,7 @@ path_t* path_copy(path_t* path);
  * \param[in,out] path Pointer to the path to be replaced.
  * \param[in] other Pointer to the path to be used as replacement.
  */
-void path_replace(path_t* path, path_t* other);
+void tau_path_replace(tau_path_t* path, tau_path_t* other);
 
 /**
  * \brief Replaces a path with a C-string.
@@ -102,14 +102,14 @@ void path_replace(path_t* path, path_t* other);
  * \param[in,out] path Pointer to the path to be replaced.
  * \param[in] cstr The C-string to be used as replacement.
  */
-void path_replace_with_cstr(path_t* path, const char* cstr);
+void tau_path_replace_with_cstr(tau_path_t* path, const char* cstr);
 
 /**
  * \brief Clears the stored path string.
  *
  * \param[in,out] path Pointer to the path to be cleared.
  */
-void path_clear(path_t* path);
+void tau_path_clear(tau_path_t* path);
 
 /**
  * \brief Writes a path to a C-string buffer.
@@ -122,7 +122,7 @@ void path_clear(path_t* path);
  * \param[in] size The maximum number of characters to be written to the output buffer.
  * \returns The number of characters written to the output buffer.
  */
-size_t path_to_cstr(path_t* path, char* buf, size_t size);
+size_t tau_path_to_cstr(tau_path_t* path, char* buf, size_t size);
 
 /**
  * \brief Returns the string value of a path.
@@ -130,7 +130,7 @@ size_t path_to_cstr(path_t* path, char* buf, size_t size);
  * \param[in] path Pointer to the path to be used.
  * \returns The path as a string.
  */
-string_t* path_to_string(path_t* path);
+tau_string_t* tau_path_to_string(tau_path_t* path);
 
 /**
  * \brief Returns a string view of a path.
@@ -138,7 +138,7 @@ string_t* path_to_string(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns A string view of the path.
  */
-string_view_t path_to_string_view(path_t* path);
+tau_string_view_t tau_path_to_string_view(tau_path_t* path);
 
 /**
  * \brief Checks whether a path is relative.
@@ -146,7 +146,7 @@ string_view_t path_to_string_view(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path is relative, `false` otherwise.
  */
-bool path_is_relative(path_t* path);
+bool tau_path_is_relative(tau_path_t* path);
 
 /**
  * \brief Checks whether a path is absolute.
@@ -154,7 +154,7 @@ bool path_is_relative(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path is absolute, `false` otherwise.
  */
-bool path_is_absolute(path_t* path);
+bool tau_path_is_absolute(tau_path_t* path);
 
 /**
  * \brief Checks whether a path in string format is empty.
@@ -162,7 +162,7 @@ bool path_is_absolute(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path in string format is empty, `false` otherwise.
  */
-bool path_empty(path_t* path);
+bool tau_path_empty(tau_path_t* path);
 
 /**
  * \brief Joins two paths using a directory separator.
@@ -171,7 +171,7 @@ bool path_empty(path_t* path);
  * \param[in] second Pointer to the second path to be used.
  * \returns Pointer to the newly initialized joined path.
  */
-path_t* path_join(path_t* first, path_t* second);
+tau_path_t* tau_path_join(tau_path_t* first, tau_path_t* second);
 
 /**
  * \brief Joins two paths using a directory separator.
@@ -180,7 +180,7 @@ path_t* path_join(path_t* first, path_t* second);
  * \param[in] cstr C-string to be used.
  * \returns Pointer to the newly initialized joined path.
  */
-path_t* path_join_cstr(path_t* first, const char* cstr);
+tau_path_t* tau_path_join_cstr(tau_path_t* first, const char* cstr);
 
 /**
  * \brief Appends a path to another using a directory separator.
@@ -188,7 +188,7 @@ path_t* path_join_cstr(path_t* first, const char* cstr);
  * \param[in,out] path Pointer to the path to be appended to.
  * \param[in] other Pointer to the path to be appended.
  */
-void path_append(path_t* path, path_t* other);
+void tau_path_append(tau_path_t* path, tau_path_t* other);
 
 /**
  * \brief Appends a path to another using a directory separator.
@@ -196,7 +196,7 @@ void path_append(path_t* path, path_t* other);
  * \param[in,out] path Pointer to the path to be appended to.
  * \param[in] cstr C-string to be appended.
  */
-void path_append_cstr(path_t* path, const char* cstr);
+void tau_path_append_cstr(tau_path_t* path, const char* cstr);
 
 /**
  * \brief Check whether the path has a filename component.
@@ -204,7 +204,7 @@ void path_append_cstr(path_t* path, const char* cstr);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path has a filename component, `false` otherwise.
  */
-bool path_has_filename(path_t* path);
+bool tau_path_has_filename(tau_path_t* path);
 
 /**
  * \brief Check whether the path has an extension component.
@@ -212,7 +212,7 @@ bool path_has_filename(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path has an extension component, `false` otherwise.
  */
-bool path_has_extension(path_t* path);
+bool tau_path_has_extension(tau_path_t* path);
 
 /**
  * \brief Check whether the path has a parent directory.
@@ -220,7 +220,7 @@ bool path_has_extension(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path has a parent directory, `false` otherwise.
  */
-bool path_has_parent(path_t* path);
+bool tau_path_has_parent(tau_path_t* path);
 
 /**
  * \brief Check whether the path has a stem component.
@@ -228,7 +228,7 @@ bool path_has_parent(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path has a stem component, `false` otherwise.
  */
-bool path_has_stem(path_t* path);
+bool tau_path_has_stem(tau_path_t* path);
 
 /**
  * \brief Extracts the filename component of a path.
@@ -236,7 +236,7 @@ bool path_has_stem(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns Pointer to the filename component if present, NULL otherwise.
  */
-path_t* path_filename(path_t* path);
+tau_path_t* tau_path_filename(tau_path_t* path);
 
 /**
  * \brief Extracts the extension component of a path.
@@ -244,7 +244,7 @@ path_t* path_filename(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns Pointer to the extension component if present, NULL otherwise.
  */
-path_t* path_extension(path_t* path);
+tau_path_t* tau_path_extension(tau_path_t* path);
 
 /**
  * \brief Retrieves the path of the parent directory.
@@ -252,7 +252,7 @@ path_t* path_extension(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns Pointer to the path of the parent directory.
  */
-path_t* path_parent(path_t* path);
+tau_path_t* tau_path_parent(tau_path_t* path);
 
 /**
  * \brief Extracts the stem component of a path.
@@ -260,7 +260,7 @@ path_t* path_parent(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns Pointer to the stem component if present, NULL otherwise.
  */
-path_t* path_stem(path_t* path);
+tau_path_t* tau_path_stem(tau_path_t* path);
 
 /**
  * \brief Replaces the filename component in a path.
@@ -269,7 +269,7 @@ path_t* path_stem(path_t* path);
  * \param[in] filename The filename to be used as replacement.
  * \returns Pointer to the new path with the replaced filename if present, NULL otherwise.
  */
-path_t* path_replace_filename(path_t* path, const char* filename);
+tau_path_t* tau_path_replace_filename(tau_path_t* path, const char* filename);
 
 /**
  * \brief Replaces the extension component in a path.
@@ -278,7 +278,7 @@ path_t* path_replace_filename(path_t* path, const char* filename);
  * \param[in] extension The extension to be used as replacement.
  * \returns Pointer to the new path with the replaced extension if present, NULL otherwise.
  */
-path_t* path_replace_extension(path_t* path, const char* extension);
+tau_path_t* tau_path_replace_extension(tau_path_t* path, const char* extension);
 
 /**
  * \brief Lexicographically compares two paths.
@@ -288,7 +288,7 @@ path_t* path_replace_extension(path_t* path, const char* extension);
  * \returns Negative value if lhs appears before rhs in lexicographical order, positive value if lhs appears
  * after rhs, zero if lhs and rhs compare equal.
  */
-int path_compare(path_t* lhs, path_t* rhs);
+int tau_path_compare(tau_path_t* lhs, tau_path_t* rhs);
 
 TAU_EXTERN_C_END
 

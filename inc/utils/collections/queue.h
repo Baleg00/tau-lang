@@ -25,21 +25,21 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Queue data structure.
  */
-typedef struct queue_t queue_t;
+typedef struct tau_queue_t tau_queue_t;
 
 /**
  * \brief Initializes a new empty queue.
  *
  * \returns Pointer to the initialized queue.
  */
-queue_t* queue_init(void);
+tau_queue_t* tau_queue_init(void);
 
 /**
  * \brief Frees the resources associated with a queue.
  *
  * \param[in] que Pointer to the queue to free.
  */
-void queue_free(queue_t* que);
+void tau_queue_free(tau_queue_t* que);
 
 /**
  * \brief Adds the given data to the back of a queue.
@@ -47,7 +47,7 @@ void queue_free(queue_t* que);
  * \param[in,out] que Pointer to the queue.
  * \param[in] data Pointer to the data to be added.
  */
-void queue_offer(queue_t* que, void* data);
+void tau_queue_offer(tau_queue_t* que, void* data);
 
 /**
  * \brief Removes and returns the data stored at the front of a queue.
@@ -55,7 +55,7 @@ void queue_offer(queue_t* que, void* data);
  * \param[in,out] que Pointer to the queue.
  * \returns Pointer to the data removed from the front of the queue.
  */
-void* queue_poll(queue_t* que);
+void* tau_queue_poll(tau_queue_t* que);
 
 /**
  * \brief Retrieves the data stored at the front of a queue.
@@ -63,7 +63,7 @@ void* queue_poll(queue_t* que);
  * \param[in] que Pointer to the queue.
  * \returns Pointer to the data at the front of the queue.
  */
-void* queue_peek(const queue_t* que);
+void* tau_queue_peek(const tau_queue_t* que);
 
 /**
  * \brief Checks if a queue is empty.
@@ -71,7 +71,7 @@ void* queue_peek(const queue_t* que);
  * \param[in] que Pointer to the queue.
  * \returns `true` if the queue is empty, `false` otherwise.
  */
-bool queue_empty(const queue_t* que);
+bool tau_queue_empty(const tau_queue_t* que);
 
 TAU_EXTERN_C_END
 

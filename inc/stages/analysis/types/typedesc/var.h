@@ -17,26 +17,26 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Type variable.
  */
-typedef struct typedesc_var_t
+typedef struct tau_typedesc_var_t
 {
-  TYPEDESC_HEADER;
+  TAU_TYPEDESC_HEADER;
   uint64_t id; // The associated type variable identifier.
-  typedesc_t* subst; // The substituted type descriptor or `NULL`.
-} typedesc_var_t;
+  tau_typedesc_t* subst; // The substituted type descriptor or `NULL`.
+} tau_typedesc_var_t;
 
 /**
  * \brief Initializes a new type variable.
  * 
  * \returns Pointer to the newly initialized type variable.
 */
-typedesc_var_t* typedesc_var_init(void);
+tau_typedesc_var_t* tau_typedesc_var_init(void);
 
 /**
  * \brief Frees all memory allocated by an type variable.
  * 
  * \param[in] desc Pointer to the type variable to be freed.
  */
-void typedesc_var_free(typedesc_var_t* desc);
+void tau_typedesc_var_free(tau_typedesc_var_t* desc);
 
 TAU_EXTERN_C_END
 

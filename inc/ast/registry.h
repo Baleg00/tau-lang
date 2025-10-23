@@ -23,12 +23,12 @@ TAU_EXTERN_C_BEGIN
  * 
  * \param[in] node Pointer to the node to be added.
  */
-void ast_registry_register(ast_node_t* node);
+void tau_ast_registry_register(tau_ast_node_t* node);
 
 /**
  * \brief Frees all registered AST nodes. 
  */
-void ast_registry_free(void);
+void tau_ast_registry_free(void);
 
 TAU_EXTERN_C_END
 

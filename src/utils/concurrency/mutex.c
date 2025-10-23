@@ -9,34 +9,34 @@
 
 #if TAU_OS_LINUX
 
-bool mutex_init(mutex_t* mutex)
+bool tau_mutex_init(tau_mutex_t* mutex)
 {
   return pthread_mutex_init(&mutex->native_handle, NULL) == 0;
 }
 
-void mutex_free(mutex_t* mutex)
+void tau_mutex_free(tau_mutex_t* mutex)
 {
   int result = pthread_mutex_destroy(&mutex->native_handle);
-  ASSERT(result == 0);
+  TAU_ASSERT(result == 0);
 }
 
-void mutex_lock(mutex_t* mutex)
+void tau_mutex_lock(tau_mutex_t* mutex)
 {
   int result = pthread_mutex_lock(&mutex->native_handle);
-  ASSERT(result == 0);
+  TAU_ASSERT(result == 0);
 }
 
-bool mutex_try_lock(mutex_t* mutex)
+bool tau_mutex_try_lock(tau_mutex_t* mutex)
 {
   return pthread_mutex_trylock(&mutex->native_handle) == 0;
 }
 
-bool mutex_try_lock_for(mutex_t* restrict mutex, const struct timespec* restrict timeout)
+bool tau_mutex_try_lock_for(tau_mutex_t* restrict mutex, const struct timespec* restrict timeout)
 {
   return pthread_mutex_timedlock(&mutex->native_handle, timeout) == 0;
 }
 
-bool mutex_try_lock_until(mutex_t* restrict mutex, const struct timespec* restrict timepoint)
+bool tau_mutex_try_lock_until(tau_mutex_t* restrict mutex, const struct timespec* restrict timepoint)
 {
   struct timespec now;
   timespec_get(&now, TIME_UTC);
@@ -57,10 +57,10 @@ bool mutex_try_lock_until(mutex_t* restrict mutex, const struct timespec* restri
   return pthread_mutex_timedlock(&mutex->native_handle, &diff) == 0;
 }
 
-void mutex_unlock(mutex_t* mutex)
+void tau_mutex_unlock(tau_mutex_t* mutex)
 {
   int result = pthread_mutex_unlock(&mutex->native_handle);
-  ASSERT(result == 0);
+  TAU_ASSERT(result == 0);
 }
 
 #else

@@ -17,25 +17,25 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST expression statement node.
  */
-typedef struct ast_stmt_expr_t
+typedef struct tau_ast_stmt_expr_t
 {
-  AST_STMT_HEADER;
-  ast_node_t* expr; // The associated expression.
-} ast_stmt_expr_t;
+  TAU_AST_STMT_HEADER;
+  tau_ast_node_t* expr; // The associated expression.
+} tau_ast_stmt_expr_t;
 
 /**
  * \brief Initializes a new AST expression statement node.
  * 
  * \returns Pointer to the newly initialized AST node.
  */
-ast_stmt_expr_t* ast_stmt_expr_init(void);
+tau_ast_stmt_expr_t* tau_ast_stmt_expr_init(void);
 
 /**
  * \brief Frees all memory allocated by an AST expression statement node.
  * 
  * \param[in] node Pointer to the AST node to be freed.
  */
-void ast_stmt_expr_free(ast_stmt_expr_t* node);
+void tau_ast_stmt_expr_free(tau_ast_stmt_expr_t* node);
 
 /**
  * \brief Performs name resolution pass on an AST expression statement node.
@@ -43,7 +43,7 @@ void ast_stmt_expr_free(ast_stmt_expr_t* node);
  * \param[in] ctx Pointer to the name resolution context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_stmt_expr_nameres(nameres_ctx_t* ctx, ast_stmt_expr_t* node);
+void tau_ast_stmt_expr_nameres(tau_nameres_ctx_t* ctx, tau_ast_stmt_expr_t* node);
 
 /**
  * \brief Performs type check pass on an AST expression statement node.
@@ -51,7 +51,7 @@ void ast_stmt_expr_nameres(nameres_ctx_t* ctx, ast_stmt_expr_t* node);
  * \param[in] ctx Pointer to the type check context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_stmt_expr_typecheck(typecheck_ctx_t* ctx, ast_stmt_expr_t* node);
+void tau_ast_stmt_expr_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_stmt_expr_t* node);
 
 /**
  * \brief Performs code generation pass on an AST expression statement node.
@@ -59,7 +59,7 @@ void ast_stmt_expr_typecheck(typecheck_ctx_t* ctx, ast_stmt_expr_t* node);
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_stmt_expr_codegen(codegen_ctx_t* ctx, ast_stmt_expr_t* node);
+void tau_ast_stmt_expr_codegen(tau_codegen_ctx_t* ctx, tau_ast_stmt_expr_t* node);
 
 /**
  * \brief Writes a JSON dump of an AST expression statement node into a stream.
@@ -67,7 +67,7 @@ void ast_stmt_expr_codegen(codegen_ctx_t* ctx, ast_stmt_expr_t* node);
  * \param[in] stream The stream to be written to.
  * \param[in] node Pointer to the AST node to be dumped.
 */
-void ast_stmt_expr_dump_json(FILE* stream, ast_stmt_expr_t* node);
+void tau_ast_stmt_expr_dump_json(FILE* stream, tau_ast_stmt_expr_t* node);
 
 TAU_EXTERN_C_END
 

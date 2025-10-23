@@ -9,9 +9,9 @@
 
 #include "utils/common.h"
 
-struct argparse_ctx_t
+struct tau_argparse_ctx_t
 {
-  const argparse_option_t* opts;
+  const tau_argparse_option_t* opts;
   size_t opt_count;
 
   const char** argv;
@@ -20,9 +20,9 @@ struct argparse_ctx_t
   size_t idx;
 };
 
-argparse_ctx_t* argparse_ctx_init(const argparse_option_t opts[], size_t opt_count, const char* argv[], int argc)
+tau_argparse_ctx_t* tau_argparse_ctx_init(const tau_argparse_option_t opts[], size_t opt_count, const char* argv[], int argc)
 {
-  argparse_ctx_t* ctx = (argparse_ctx_t*)malloc(sizeof(argparse_ctx_t));
+  tau_argparse_ctx_t* ctx = (tau_argparse_ctx_t*)malloc(sizeof(tau_argparse_ctx_t));
 
   ctx->opts = opts;
   ctx->opt_count = opt_count;
@@ -33,15 +33,15 @@ argparse_ctx_t* argparse_ctx_init(const argparse_option_t opts[], size_t opt_cou
   return ctx;
 }
 
-void argparse_ctx_free(argparse_ctx_t* ctx)
+void tau_argparse_ctx_free(tau_argparse_ctx_t* ctx)
 {
   free(ctx);
 }
 
-int argparse_fetch(argparse_ctx_t* ctx)
+int tau_argparse_fetch(tau_argparse_ctx_t* ctx)
 {
   if (ctx->idx >= ctx->argc)
-    return ARGPARSE_EOA;
+    return TAU_ARGPARSE_EOA;
 
   const char* arg = ctx->argv[ctx->idx++];
 
@@ -52,7 +52,7 @@ int argparse_fetch(argparse_ctx_t* ctx)
         if (strcmp(arg + 2, ctx->opts[i].long_name) == 0)
           return ctx->opts[i].id;
 
-    return ARGPARSE_UNKNOWN;
+    return TAU_ARGPARSE_UNKNOWN;
   }
 
   if (strncmp("-", arg, 1) == 0)
@@ -62,19 +62,19 @@ int argparse_fetch(argparse_ctx_t* ctx)
         if (strcmp(arg + 1, ctx->opts[i].short_name) == 0)
           return ctx->opts[i].id;
 
-    return ARGPARSE_UNKNOWN;
+    return TAU_ARGPARSE_UNKNOWN;
   }
 
-  return ARGPARSE_UNKNOWN;
+  return TAU_ARGPARSE_UNKNOWN;
 }
 
-size_t argparse_print_options(argparse_ctx_t* ctx, FILE* stream)
+size_t tau_argparse_print_options(tau_argparse_ctx_t* ctx, FILE* stream)
 {
   size_t result = 0;
 
   for (size_t i = 0; i < ctx->opt_count; ++i)
   {
-    const argparse_option_t* opt = ctx->opts + i;
+    const tau_argparse_option_t* opt = ctx->opts + i;
 
     result += fprintf(stream, "\t");
 
@@ -109,22 +109,22 @@ size_t argparse_print_options(argparse_ctx_t* ctx, FILE* stream)
   return result;
 }
 
-size_t argparse_get_index(argparse_ctx_t* ctx)
+size_t tau_argparse_get_index(tau_argparse_ctx_t* ctx)
 {
   return ctx->idx;
 }
 
-void argparse_set_index(argparse_ctx_t* ctx, size_t idx)
+void tau_argparse_set_index(tau_argparse_ctx_t* ctx, size_t idx)
 {
   ctx->idx = idx;
 }
 
-const char* argparse_get_arg(argparse_ctx_t* ctx)
+const char* tau_argparse_get_arg(tau_argparse_ctx_t* ctx)
 {
   return ctx->argv[ctx->argc];
 }
 
-const char* argparse_get_arg_at(argparse_ctx_t* ctx, size_t idx)
+const char* tau_argparse_get_arg_at(tau_argparse_ctx_t* ctx, size_t idx)
 {
   if (idx >= ctx->argc)
     return NULL;
@@ -132,7 +132,7 @@ const char* argparse_get_arg_at(argparse_ctx_t* ctx, size_t idx)
   return ctx->argv[idx];
 }
 
-const char* argparse_next_arg(argparse_ctx_t* ctx)
+const char* tau_argparse_next_arg(tau_argparse_ctx_t* ctx)
 {
   if (ctx->idx >= ctx->argc)
     return NULL;

@@ -15,9 +15,9 @@
 /**
  * \brief Header for all AST declaration nodes.
  */
-#define AST_DECL_HEADER\
-  AST_NODE_HEADER;\
-  ast_node_t* id; /** The associated identifier. */\
+#define TAU_AST_DECL_HEADER\
+  TAU_AST_NODE_HEADER;\
+  tau_ast_node_t* id; /** The associated identifier. */\
   bool is_pub /** Is declaration public (in case it is a member). */
 
 TAU_EXTERN_C_BEGIN
@@ -25,10 +25,10 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST declaration node.
  */
-typedef struct ast_decl_t
+typedef struct tau_ast_decl_t
 {
-  AST_DECL_HEADER;
-} ast_decl_t;
+  TAU_AST_DECL_HEADER;
+} tau_ast_decl_t;
 
 TAU_EXTERN_C_END
 

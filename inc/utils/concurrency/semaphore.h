@@ -16,11 +16,12 @@
 TAU_EXTERN_C_BEGIN
 
 /// Represents a semaphore for controlling access to resources.
-typedef struct semaphore_t {
-  mutex_t lock;
-  condvar_t cond;
+typedef struct tau_semaphore_t
+{
+  tau_mutex_t lock;
+  tau_condvar_t cond;
   size_t count;
-} semaphore_t;
+} tau_semaphore_t;
 
 /**
  * \brief Initializes a new semaphore.
@@ -29,14 +30,14 @@ typedef struct semaphore_t {
  * \param[in] count The initial count value.
  * \returns `true` if semaphore was successfully initialized, `false` otherwise.
  */
-bool semaphore_init(semaphore_t* sem, size_t count);
+bool tau_semaphore_init(tau_semaphore_t* sem, size_t count);
 
 /**
  * \brief Frees all resources associated with a semaphore.
  *
  * \param[in] sem Pointer to semaphore to be freed.
  */
-void semaphore_free(semaphore_t* sem);
+void tau_semaphore_free(tau_semaphore_t* sem);
 
 /**
  * \brief Retrieves the counter of a semaphore.
@@ -44,14 +45,14 @@ void semaphore_free(semaphore_t* sem);
  * \param[in] sem Pointer to semaphore to be used.
  * \returns Counter of the semaphore.
  */
-size_t semaphore_get_count(semaphore_t* sem);
+size_t tau_semaphore_get_count(tau_semaphore_t* sem);
 
 /**
  * \brief Decreases the counter of a semaphore, or blocks until it can.
  *
  * \param[in] sem Pointer to semaphore to be used.
  */
-void semaphore_acquire(semaphore_t* sem);
+void tau_semaphore_acquire(tau_semaphore_t* sem);
 
 /**
  * \brief Decreases the counter of a semaphore by `n`, or blocks until it can.
@@ -59,7 +60,7 @@ void semaphore_acquire(semaphore_t* sem);
  * \param[in] sem Pointer to semaphore to be used.
  * \param[in] n Number to decrease the counter by.
  */
-void semaphore_acquire_n(semaphore_t* sem, size_t n);
+void tau_semaphore_acquire_n(tau_semaphore_t* sem, size_t n);
 
 /**
  * \brief Tries to decrease the counter of a semaphore.
@@ -67,7 +68,7 @@ void semaphore_acquire_n(semaphore_t* sem, size_t n);
  * \param[in] sem Pointer to semaphore to be used.
  * \returns `true` if the counter was decreased successfully, `false` otherwise.
  */
-bool semaphore_try_acquire(semaphore_t* sem);
+bool tau_semaphore_try_acquire(tau_semaphore_t* sem);
 
 /**
  * \brief Tries to decrease the counter of a semaphore by `n`.
@@ -76,14 +77,14 @@ bool semaphore_try_acquire(semaphore_t* sem);
  * \param[in] n Number to decrease the counter by.
  * \returns `true` if the counter was decreased by `n` successfully, `false` otherwise.
  */
-bool semaphore_try_acquire_n(semaphore_t* sem, size_t n);
+bool tau_semaphore_try_acquire_n(tau_semaphore_t* sem, size_t n);
 
 /**
  * \brief Increments the counter of a semaphore.
  *
  * \param[in] sem Pointer to semaphore to be used.
  */
-void semaphore_release(semaphore_t* sem);
+void tau_semaphore_release(tau_semaphore_t* sem);
 
 /**
  * \brief Increments the counter of a semaphore by `n`.
@@ -91,7 +92,7 @@ void semaphore_release(semaphore_t* sem);
  * \param[in] sem Pointer to semaphore to be used.
  * \param[in] n Number to increment the counter by.
  */
-void semaphore_release_n(semaphore_t* sem, size_t n);
+void tau_semaphore_release_n(tau_semaphore_t* sem, size_t n);
 
 TAU_EXTERN_C_END
 

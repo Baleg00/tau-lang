@@ -17,25 +17,25 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST type identifier node.
  */
-typedef struct ast_type_id_t
+typedef struct tau_ast_type_id_t
 {
-  AST_TYPE_HEADER;
-  ast_node_t* decl;
-} ast_type_id_t;
+  TAU_AST_TYPE_HEADER;
+  tau_ast_node_t* decl;
+} tau_ast_type_id_t;
 
 /**
  * \brief Initializes a new AST type identifier node.
  * 
  * \returns Pointer to the newly initialized AST node.
  */
-ast_type_id_t* ast_type_id_init(void);
+tau_ast_type_id_t* tau_ast_type_id_init(void);
 
 /**
  * \brief Frees all memory allocated by an AST type identifier node.
  * 
  * \param[in] node Pointer to the AST node to be freed.
  */
-void ast_type_id_free(ast_type_id_t* node);
+void tau_ast_type_id_free(tau_ast_type_id_t* node);
 
 /**
  * \brief Performs name resolution pass on an AST type identifier node.
@@ -43,7 +43,7 @@ void ast_type_id_free(ast_type_id_t* node);
  * \param[in] ctx Pointer to the name resolution context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node);
+void tau_ast_type_id_nameres(tau_nameres_ctx_t* ctx, tau_ast_type_id_t* node);
 
 /**
  * \brief Performs type check pass on an AST type identifier node.
@@ -51,7 +51,7 @@ void ast_type_id_nameres(nameres_ctx_t* ctx, ast_type_id_t* node);
  * \param[in] ctx Pointer to the type check context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_type_id_typecheck(typecheck_ctx_t* ctx, ast_type_id_t* node);
+void tau_ast_type_id_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_type_id_t* node);
 
 /**
  * \brief Performs code generation pass on an AST type identifier node.
@@ -59,7 +59,7 @@ void ast_type_id_typecheck(typecheck_ctx_t* ctx, ast_type_id_t* node);
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_type_id_codegen(codegen_ctx_t* ctx, ast_type_id_t* node);
+void tau_ast_type_id_codegen(tau_codegen_ctx_t* ctx, tau_ast_type_id_t* node);
 
 /**
  * \brief Writes a JSON dump of an AST array type node into a stream.
@@ -67,7 +67,7 @@ void ast_type_id_codegen(codegen_ctx_t* ctx, ast_type_id_t* node);
  * \param[in] stream The stream to be written to.
  * \param[in] node Pointer to the AST node to be dumped.
 */
-void ast_type_id_dump_json(FILE* stream, ast_type_id_t* node);
+void tau_ast_type_id_dump_json(FILE* stream, tau_ast_type_id_t* node);
 
 TAU_EXTERN_C_END
 

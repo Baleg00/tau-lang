@@ -20,18 +20,18 @@
  * \details The member variables of a chunk act like a header and the actual
  * memory from which the arena allocates follows right after.
  */
-typedef struct arena_chunk_t arena_chunk_t;
+typedef struct tau_arena_chunk_t tau_arena_chunk_t;
 
-struct arena_chunk_t
+struct tau_arena_chunk_t
 {
   size_t size; // Number of allocated bytes in the chunk.
-  arena_chunk_t* next; // Pointer to the next chunk or `NULL`.
+  tau_arena_chunk_t* next; // Pointer to the next chunk or `NULL`.
 };
 
-struct arena_t
+struct tau_arena_t
 {
   size_t capacity; // Capacity of a chunk.
-  arena_chunk_t* head; // Pointer to the first chunk.
+  tau_arena_chunk_t* head; // Pointer to the first chunk.
 };
 
 /**
@@ -41,7 +41,7 @@ struct arena_t
  * \param[in] alignment The alignment requirement.
  * \returns Rounded up size.
 */
-static size_t arena_round(size_t size, size_t alignment)
+static size_t tau_arena_round(size_t size, size_t alignment)
 {
   return (size + alignment - 1) / alignment * alignment;
 }
@@ -52,12 +52,12 @@ static size_t arena_round(size_t size, size_t alignment)
  * \param[in] cap The capacity of the chunk.
  * \returns Pointer to the newly initialized chunk.
  */
-static arena_chunk_t* arena_chunk_init_with_capacity(size_t cap)
+static tau_arena_chunk_t* tau_arena_chunk_init_with_capacity(size_t cap)
 {
-  size_t chunk_size = arena_round(sizeof(arena_chunk_t), ALIGNOF(max_align_t)) + cap;
+  size_t chunk_size = tau_arena_round(sizeof(tau_arena_chunk_t), TAU_ALIGNOF(max_align_t)) + cap;
 
-  arena_chunk_t* chunk = (arena_chunk_t*)malloc(chunk_size);
-  ASSERT(chunk != NULL);
+  tau_arena_chunk_t* chunk = (tau_arena_chunk_t*)malloc(chunk_size);
+  TAU_ASSERT(chunk != NULL);
 
   chunk->size = 0;
   chunk->next = NULL;
@@ -65,15 +65,15 @@ static arena_chunk_t* arena_chunk_init_with_capacity(size_t cap)
   return chunk;
 }
 
-arena_t* arena_init(void)
+tau_arena_t* tau_arena_init(void)
 {
-  return arena_init_with_capacity(ARENA_DEFAULT_CAPACITY);
+  return tau_arena_init_with_capacity(ARENA_DEFAULT_CAPACITY);
 }
 
-arena_t* arena_init_with_capacity(size_t cap)
+tau_arena_t* tau_arena_init_with_capacity(size_t cap)
 {
-  arena_t* arena = (arena_t*)malloc(sizeof(arena_t));
-  ASSERT(arena != NULL);
+  tau_arena_t* arena = (tau_arena_t*)malloc(sizeof(tau_arena_t));
+  TAU_ASSERT(arena != NULL);
 
   arena->capacity = cap;
   arena->head = NULL;
@@ -81,9 +81,9 @@ arena_t* arena_init_with_capacity(size_t cap)
   return arena;
 }
 
-void arena_free(arena_t* arena)
+void tau_arena_free(tau_arena_t* arena)
 {
-  for (arena_chunk_t *chunk = arena->head, *next = NULL; chunk != NULL; chunk = next)
+  for (tau_arena_chunk_t *chunk = arena->head, *next = NULL; chunk != NULL; chunk = next)
   {
     next = chunk->next;
     free(chunk);
@@ -92,16 +92,16 @@ void arena_free(arena_t* arena)
   free(arena);
 }
 
-size_t arena_capacity(arena_t* arena)
+size_t tau_arena_capacity(tau_arena_t* arena)
 {
   return arena->capacity;
 }
 
-bool arena_owns(arena_t* arena, void* ptr)
+bool tau_arena_owns(tau_arena_t* arena, void* ptr)
 {
-  for (arena_chunk_t* chunk = arena->head; chunk != NULL; chunk = chunk->next)
+  for (tau_arena_chunk_t* chunk = arena->head; chunk != NULL; chunk = chunk->next)
   {
-    void* begin = (uint8_t*)chunk + arena_round(sizeof(arena_chunk_t), ALIGNOF(max_align_t));
+    void* begin = (uint8_t*)chunk + tau_arena_round(sizeof(tau_arena_chunk_t), TAU_ALIGNOF(max_align_t));
     void* end = (uint8_t*)begin + chunk->size;
 
     if (begin <= ptr && ptr < end)
@@ -111,43 +111,43 @@ bool arena_owns(arena_t* arena, void* ptr)
   return false;
 }
 
-void* arena_alloc(arena_t* arena, size_t size)
+void* tau_arena_alloc(tau_arena_t* arena, size_t size)
 {
-  return arena_alloc_aligned(arena, size, ALIGNOF(max_align_t));
+  return tau_arena_alloc_aligned(arena, size, TAU_ALIGNOF(max_align_t));
 }
 
-void* arena_alloc_aligned(arena_t* arena, size_t size, size_t alignment)
+void* tau_arena_alloc_aligned(tau_arena_t* arena, size_t size, size_t alignment)
 {
   if (size > arena->capacity)
   {
-    log_warn("arena", "Allocation size larger than capacity.");
+    tau_log_warn("arena", "Allocation size larger than capacity.");
 
     return NULL;
   }
 
   if (arena->head == NULL)
-    arena->head = arena_chunk_init_with_capacity(arena->capacity);
+    arena->head = tau_arena_chunk_init_with_capacity(arena->capacity);
 
-  arena_chunk_t* last_chunk = NULL;
+  tau_arena_chunk_t* last_chunk = NULL;
 
-  for (arena_chunk_t* chunk = arena->head; chunk != NULL; last_chunk = chunk, chunk = chunk->next)
+  for (tau_arena_chunk_t* chunk = arena->head; chunk != NULL; last_chunk = chunk, chunk = chunk->next)
   {
-    size_t new_size = arena_round(chunk->size, MIN(ALIGNOF(max_align_t), alignment)) + size;
+    size_t new_size = tau_arena_round(chunk->size, TAU_MIN(TAU_ALIGNOF(max_align_t), alignment)) + size;
 
     if (new_size > arena->capacity)
       continue;
 
-    void* ptr = (uint8_t*)chunk + arena_round(sizeof(arena_chunk_t), ALIGNOF(max_align_t)) + new_size - size;
+    void* ptr = (uint8_t*)chunk + tau_arena_round(sizeof(tau_arena_chunk_t), TAU_ALIGNOF(max_align_t)) + new_size - size;
 
     chunk->size = new_size;
 
     return ptr;
   }
 
-  arena_chunk_t* chunk = arena_chunk_init_with_capacity(arena->capacity);
+  tau_arena_chunk_t* chunk = tau_arena_chunk_init_with_capacity(arena->capacity);
   last_chunk->next = chunk;
 
-  void* ptr = (uint8_t*)chunk + arena_round(sizeof(arena_chunk_t), ALIGNOF(max_align_t));
+  void* ptr = (uint8_t*)chunk + tau_arena_round(sizeof(tau_arena_chunk_t), TAU_ALIGNOF(max_align_t));
 
   chunk->size = size;
 

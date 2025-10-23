@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief NORETURN utility macro.
+ * \brief TAU_NORETURN utility macro.
  *
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
@@ -17,22 +17,22 @@
 #ifdef noreturn
 
 /// Tells the compiler that a function cannot return.
-# define NORETURN noreturn
+# define TAU_NORETURN noreturn
 
 #elif TAU_COMPILER_MSVC
 
 /// Tells the compiler that a function cannot return.
-# define NORETURN __declspec(noreturn)
+# define TAU_NORETURN __declspec(noreturn)
 
 #elif TAU_COMPILER_CLANG || TAU_COMPILER_GCC
 
 /// Tells the compiler that a function cannot return.
-# define NORETURN __attribute__((noreturn))
+# define TAU_NORETURN __attribute__((noreturn))
 
 #else
 
 /// Tells the compiler that a function cannot return.
-# define NORETURN
+# define TAU_NORETURN
 
 #endif
 

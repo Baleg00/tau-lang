@@ -17,25 +17,25 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief AST literal boolean expression node.
  */
-typedef struct ast_expr_lit_bool_t
+typedef struct tau_ast_expr_lit_bool_t
 {
-  AST_EXPR_LIT_HEADER;
+  TAU_AST_EXPR_LIT_HEADER;
   bool value; // The associated boolean value.
-} ast_expr_lit_bool_t;
+} tau_ast_expr_lit_bool_t;
 
 /**
  * \brief Initializes a new AST literal boolean expression node.
  * 
  * \returns Pointer to the newly initialized AST node.
  */
-ast_expr_lit_bool_t* ast_expr_lit_bool_init(void);
+tau_ast_expr_lit_bool_t* tau_ast_expr_lit_bool_init(void);
 
 /**
  * \brief Frees all memory allocated by an AST literal boolean expression node.
  * 
  * \param[in] node Pointer to the AST node to be freed.
  */
-void ast_expr_lit_bool_free(ast_expr_lit_bool_t* node);
+void tau_ast_expr_lit_bool_free(tau_ast_expr_lit_bool_t* node);
 
 /**
  * \brief Performs name resolution pass on an AST literal boolean expression node.
@@ -43,7 +43,7 @@ void ast_expr_lit_bool_free(ast_expr_lit_bool_t* node);
  * \param[in] ctx Pointer to the name resolution context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_expr_lit_bool_nameres(nameres_ctx_t* ctx, ast_expr_lit_bool_t* node);
+void tau_ast_expr_lit_bool_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_lit_bool_t* node);
 
 /**
  * \brief Performs type check pass on an AST literal boolean expression node.
@@ -51,7 +51,7 @@ void ast_expr_lit_bool_nameres(nameres_ctx_t* ctx, ast_expr_lit_bool_t* node);
  * \param[in] ctx Pointer to the type check context.
  * \param[in,out] node Pointer to the AST node to be visited.
  */
-void ast_expr_lit_bool_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_bool_t* node);
+void tau_ast_expr_lit_bool_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_lit_bool_t* node);
 
 /**
  * \brief Performs code generation pass on an AST literal boolean expression node.
@@ -59,7 +59,7 @@ void ast_expr_lit_bool_typecheck(typecheck_ctx_t* ctx, ast_expr_lit_bool_t* node
  * \param[in] ctx Pointer to the code generation context.
  * \param[in] node Pointer to the AST node to be visited.
  */
-void ast_expr_lit_bool_codegen(codegen_ctx_t* ctx, ast_expr_lit_bool_t* node);
+void tau_ast_expr_lit_bool_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_lit_bool_t* node);
 
 /**
  * \brief Writes a JSON dump of an AST literal boolean expression node into a stream.
@@ -67,7 +67,7 @@ void ast_expr_lit_bool_codegen(codegen_ctx_t* ctx, ast_expr_lit_bool_t* node);
  * \param[in] stream The stream to be written to.
  * \param[in] node Pointer to the AST node to be dumped.
 */
-void ast_expr_lit_bool_dump_json(FILE* stream, ast_expr_lit_bool_t* node);
+void tau_ast_expr_lit_bool_dump_json(FILE* stream, tau_ast_expr_lit_bool_t* node);
 
 TAU_EXTERN_C_END
 

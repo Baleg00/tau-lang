@@ -7,42 +7,42 @@
 
 #include "ast/callconv.h"
 
-const char* callconv_kind_to_cstr(callconv_kind_t kind)
+const char* tau_callconv_kind_to_cstr(tau_callconv_kind_t kind)
 {
   switch (kind)
   {
-  case CALLCONV_UNKNOWN:    return "unknown";
-  case CALLCONV_TAU:        return "Tau";
-  case CALLCONV_CDECL:      return "cdecl";
-  case CALLCONV_STDCALL:    return "stdcall";
-  case CALLCONV_WIN64:      return "win64";
-  case CALLCONV_SYSV64:     return "sysv64";
-  case CALLCONV_AAPCS:      return "aapcs";
-  case CALLCONV_FASTCALL:   return "fastcall";
-  case CALLCONV_VECTORCALL: return "vectorcall";
-  case CALLCONV_THISCALL:   return "thiscall";
-  default: UNREACHABLE();
+  case TAU_CALLCONV_UNKNOWN:    return "unknown";
+  case TAU_CALLCONV_TAU:        return "Tau";
+  case TAU_CALLCONV_CDECL:      return "cdecl";
+  case TAU_CALLCONV_STDCALL:    return "stdcall";
+  case TAU_CALLCONV_WIN64:      return "win64";
+  case TAU_CALLCONV_SYSV64:     return "sysv64";
+  case TAU_CALLCONV_AAPCS:      return "aapcs";
+  case TAU_CALLCONV_FASTCALL:   return "fastcall";
+  case TAU_CALLCONV_VECTORCALL: return "vectorcall";
+  case TAU_CALLCONV_THISCALL:   return "thiscall";
+  default: TAU_UNREACHABLE();
   }
 
   return NULL;
 }
 
-size_t callconv_mangle(callconv_kind_t kind, char* buf, size_t len)
+size_t tau_callconv_mangle(tau_callconv_kind_t kind, char* buf, size_t len)
 {
   const char* mangled_callconv = NULL;
 
   switch (kind)
   {
-  case CALLCONV_TAU:        mangled_callconv = "C"; break;
-  case CALLCONV_CDECL:      mangled_callconv = "C"; break;
-  case CALLCONV_STDCALL:    mangled_callconv = "S"; break;
-  case CALLCONV_WIN64:      mangled_callconv = "W"; break;
-  case CALLCONV_SYSV64:     mangled_callconv = "Y"; break;
-  case CALLCONV_AAPCS:      mangled_callconv = "A"; break;
-  case CALLCONV_FASTCALL:   mangled_callconv = "F"; break;
-  case CALLCONV_VECTORCALL: mangled_callconv = "V"; break;
-  case CALLCONV_THISCALL:   mangled_callconv = "T"; break;
-  default: UNREACHABLE();
+  case TAU_CALLCONV_TAU:        mangled_callconv = "C"; break;
+  case TAU_CALLCONV_CDECL:      mangled_callconv = "C"; break;
+  case TAU_CALLCONV_STDCALL:    mangled_callconv = "S"; break;
+  case TAU_CALLCONV_WIN64:      mangled_callconv = "W"; break;
+  case TAU_CALLCONV_SYSV64:     mangled_callconv = "Y"; break;
+  case TAU_CALLCONV_AAPCS:      mangled_callconv = "A"; break;
+  case TAU_CALLCONV_FASTCALL:   mangled_callconv = "F"; break;
+  case TAU_CALLCONV_VECTORCALL: mangled_callconv = "V"; break;
+  case TAU_CALLCONV_THISCALL:   mangled_callconv = "T"; break;
+  default: TAU_UNREACHABLE();
   }
 
   return snprintf(buf, len, "%s", mangled_callconv);

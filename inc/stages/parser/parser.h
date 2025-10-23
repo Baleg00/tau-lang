@@ -35,38 +35,38 @@ TAU_EXTERN_C_BEGIN
  * associated with a declaration until the actual declaration parsing occurs.
  * This allows for proper handling of modifiers like 'pub' and 'extern'.
  */
-typedef struct parser_decl_context_t
+typedef struct tau_parser_decl_context_t
 {
   bool is_pub; ///< Is the declaration being parsed public.
   bool is_extern; ///< Is the declaration being parsed external.
-  callconv_kind_t callconv; ///< Calling convention of external function declaration.
-} parser_decl_context_t;
+  tau_callconv_kind_t callconv; ///< Calling convention of external function declaration.
+} tau_parser_decl_context_t;
 
 /**
  * \brief Represents a syntax analyzer.
  */
-typedef struct parser_t
+typedef struct tau_parser_t
 {
-  vector_t* tokens; ///< Vector of tokens to be processed.
+  tau_vector_t* tokens; ///< Vector of tokens to be processed.
   size_t cur; ///< Current token index.
   bool ignore_newlines; ///< Ignore newlines while parsing.
-  stack_t* parents; ///< Stack of parent declarations.
-  parser_decl_context_t decl_ctx; ///< Context for the declaration being parsed.
-  error_bag_t* errors; ///< Associated error bag.
-} parser_t;
+  tau_stack_t* parents; ///< Stack of parent declarations.
+  tau_parser_decl_context_t decl_ctx; ///< Context for the declaration being parsed.
+  tau_error_bag_t* errors; ///< Associated error bag.
+} tau_parser_t;
 
 /**
  * \brief Function pointer type to be used when parsing delimited or terminated
  * list of nodes.
  */
-typedef ast_node_t*(*parse_func_t)(parser_t*);
+typedef tau_ast_node_t*(*parse_func_t)(tau_parser_t*);
 
 /**
  * \brief Initializes a new parser.
  * 
  * \returns Pointer to the newly initialized parser.
  */
-parser_t* parser_init(void);
+tau_parser_t* tau_parser_init(void);
 
 /**
  * \brief Destroys a parser.
@@ -75,7 +75,7 @@ parser_t* parser_init(void);
  * 
  * \param[in] par Parser to be destroyed.
  */
-void parser_free(parser_t* par);
+void tau_parser_free(tau_parser_t* par);
 
 /**
  * \brief Returns current token to be processed.
@@ -83,7 +83,7 @@ void parser_free(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Current token.
  */
-token_t* parser_current(parser_t* par);
+tau_token_t* tau_parser_current(tau_parser_t* par);
 
 /**
  * \brief Returns the current token and advances to the next one.
@@ -94,7 +94,7 @@ token_t* parser_current(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Next token or an EOF token if there is no next token.
  */
-token_t* parser_next(parser_t* par);
+tau_token_t* tau_parser_next(tau_parser_t* par);
 
 /**
  * \brief Returns next token without advancing.
@@ -102,7 +102,7 @@ token_t* parser_next(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Next token or an EOF token if there is no next token.
  */
-token_t* parser_peek(parser_t* par);
+tau_token_t* tau_parser_peek(tau_parser_t* par);
 
 /**
  * \brief Checks if the current token's kind matches the specified one and
@@ -112,7 +112,7 @@ token_t* parser_peek(parser_t* par);
  * \param[in] kind Expected token kind.
  * \returns True if token kinds match, false otherwise.
  */
-bool parser_consume(parser_t* par, token_kind_t kind);
+bool tau_parser_consume(tau_parser_t* par, tau_token_kind_t kind);
 
 /**
  * \brief Checks if the current token's kind matches the specified one and
@@ -123,7 +123,7 @@ bool parser_consume(parser_t* par, token_kind_t kind);
  * \param[in] kind Expected token kind.
  * \returns Current token or `NULL`.
  */
-token_t* parser_expect(parser_t* par, token_kind_t kind);
+tau_token_t* tau_parser_expect(tau_parser_t* par, tau_token_kind_t kind);
 
 /**
  * \brief Queries whether the parser ignores newlines when fetching tokens or not.
@@ -131,7 +131,7 @@ token_t* parser_expect(parser_t* par, token_kind_t kind);
  * \param[in] par Parser to be used.
  * \returns `true` if the parser ignores newlines, `false` otherwise.
  */
-bool parser_get_ignore_newline(parser_t* par);
+bool tau_parser_get_ignore_newline(tau_parser_t* par);
 
 /**
  * \brief Sets whether the parser should ignore newlines when fetching tokens
@@ -140,28 +140,28 @@ bool parser_get_ignore_newline(parser_t* par);
  * \param[in] par Parser to be used.
  * \param[in] ignore `true` if newlines should be ignored, `false` otherwise.
  */
-void parser_set_ignore_newline(parser_t* par, bool ignore);
+void tau_parser_set_ignore_newline(tau_parser_t* par, bool ignore);
 
 /**
  * \brief Clears the parser's declaration context.
  * 
  * \param[in] par Parser to be used.
  */
-void parser_decl_context_clear(parser_t* par);
+void tau_parser_decl_context_clear(tau_parser_t* par);
 
 /**
  * \brief Parses a public modifier and updates the declaration context.
  * 
  * \param[in] par Parser to be used.
  */
-void parser_parse_decl_context_pub(parser_t* par);
+void tau_parser_parse_decl_context_pub(tau_parser_t* par);
 
 /**
  * \brief Parses an external modifier and updates the declaration context.
  * 
  * \param[in] par Parser to be used.
  */
-void parser_parse_decl_context_extern(parser_t* par);
+void tau_parser_parse_decl_context_extern(tau_parser_t* par);
 
 /**
  * \brief Parses a list of nodes delimited by a specific token.
@@ -174,7 +174,7 @@ void parser_parse_decl_context_extern(parser_t* par);
  * \param[in] delim Delimiter token kind.
  * \param[in] parse_func Function to be used for parsing a node.
  */
-void parser_parse_delimited_list(parser_t* par, vector_t* dest, token_kind_t delim, parse_func_t parse_func);
+void tau_parser_parse_delimited_list(tau_parser_t* par, tau_vector_t* dest, tau_token_kind_t delim, parse_func_t parse_func);
 
 /**
  * \brief Parses a list of nodes terminated by a specific token.
@@ -187,7 +187,7 @@ void parser_parse_delimited_list(parser_t* par, vector_t* dest, token_kind_t del
  * \param[in] termin Terminator token kind.
  * \param[in] parse_func Function to be used for parsing a node.
  */
-void parser_parse_terminated_list(parser_t* par, vector_t* dest, token_kind_t termin, parse_func_t parse_func);
+void tau_parser_parse_terminated_list(tau_parser_t* par, tau_vector_t* dest, tau_token_kind_t termin, parse_func_t parse_func);
 
 /**
  * \brief Parses a string literal and returns the corresponding calling convention kind.
@@ -195,7 +195,7 @@ void parser_parse_terminated_list(parser_t* par, vector_t* dest, token_kind_t te
  * \param[in] par Parser to be used.
  * \returns The calling convention kind.
  */
-callconv_kind_t parser_parse_callconv(parser_t* par);
+tau_callconv_kind_t tau_parser_parse_callconv(tau_parser_t* par);
 
 /**
  * \brief Parses an identifier token.
@@ -203,7 +203,7 @@ callconv_kind_t parser_parse_callconv(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Identifier node.
  */
-ast_node_t* parser_parse_id(parser_t* par);
+tau_ast_node_t* tau_parser_parse_id(tau_parser_t* par);
 
 /**
  * \brief Parses a type identifier.
@@ -211,7 +211,7 @@ ast_node_t* parser_parse_id(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Type identifier node.
  */
-ast_node_t* parser_parse_type_id(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_id(tau_parser_t* par);
 
 /**
  * \brief Parses a mutable type.
@@ -221,7 +221,7 @@ ast_node_t* parser_parse_type_id(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Mutable type node.
  */
-ast_node_t* parser_parse_type_mut(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_mut(tau_parser_t* par);
 
 /**
  * \brief Parses a pointer type.
@@ -231,7 +231,7 @@ ast_node_t* parser_parse_type_mut(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Pointer type node.
  */
-ast_node_t* parser_parse_type_ptr(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_ptr(tau_parser_t* par);
 
 /**
  * \brief Parses a sized or unsized array type.
@@ -243,7 +243,7 @@ ast_node_t* parser_parse_type_ptr(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Array type node.
  */
-ast_node_t* parser_parse_type_array(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_array(tau_parser_t* par);
 
 /**
  * \brief Parses a reference type.
@@ -253,7 +253,7 @@ ast_node_t* parser_parse_type_array(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Reference type node.
  */
-ast_node_t* parser_parse_type_ref(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_ref(tau_parser_t* par);
 
 /**
  * \brief Parses an optional type.
@@ -263,7 +263,7 @@ ast_node_t* parser_parse_type_ref(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Optional type node.
  */
-ast_node_t* parser_parse_type_opt(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_opt(tau_parser_t* par);
 
 /**
  * \brief Parses a function type.
@@ -276,7 +276,7 @@ ast_node_t* parser_parse_type_opt(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Function type node.
  */
-ast_node_t* parser_parse_type_fun(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_fun(tau_parser_t* par);
 
 /**
  * \brief Parses a vector type.
@@ -284,7 +284,7 @@ ast_node_t* parser_parse_type_fun(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Vector type node.
  */
-ast_node_t* parser_parse_type_vec(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_vec(tau_parser_t* par);
 
 /**
  * \brief Parses a matrix type.
@@ -292,7 +292,7 @@ ast_node_t* parser_parse_type_vec(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Matrix type node.
  */
-ast_node_t* parser_parse_type_mat(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_mat(tau_parser_t* par);
 
 /**
  * \brief Parses a type that may be defined inside another one.
@@ -303,7 +303,7 @@ ast_node_t* parser_parse_type_mat(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Member type node.
  */
-ast_node_t* parser_parse_type_member(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type_member(tau_parser_t* par);
 
 /**
  * \brief Parses a type.
@@ -311,7 +311,7 @@ ast_node_t* parser_parse_type_member(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Type node.
  */
-ast_node_t* parser_parse_type(parser_t* par);
+tau_ast_node_t* tau_parser_parse_type(tau_parser_t* par);
 
 /**
  * \brief Parses an expression.
@@ -319,7 +319,7 @@ ast_node_t* parser_parse_type(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Expression node.
  */
-ast_node_t* parser_parse_expr(parser_t* par);
+tau_ast_node_t* tau_parser_parse_expr(tau_parser_t* par);
 
 /**
  * \brief Parses an if-statement.
@@ -333,7 +333,7 @@ ast_node_t* parser_parse_expr(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns If-statement node.
  */
-ast_node_t* parser_parse_stmt_if(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_if(tau_parser_t* par);
 
 /**
  * \brief Parses a for-loop.
@@ -347,7 +347,7 @@ ast_node_t* parser_parse_stmt_if(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns For-loop node.
  */
-ast_node_t* parser_parse_stmt_for(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_for(tau_parser_t* par);
 
 /**
  * \brief Parses the loop variable of a for-loop.
@@ -355,7 +355,7 @@ ast_node_t* parser_parse_stmt_for(parser_t* par);
  * \param[in] par Parser to be used.
  * \return Loop variable node.
  */
-ast_node_t* parser_parse_stmt_for_var(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_for_var(tau_parser_t* par);
 
 /**
  * \brief Parses a while-loop.
@@ -368,7 +368,7 @@ ast_node_t* parser_parse_stmt_for_var(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns While-loop node.
  */
-ast_node_t* parser_parse_stmt_while(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_while(tau_parser_t* par);
 
 /**
  * \brief Parses a do-while-loop.
@@ -381,7 +381,7 @@ ast_node_t* parser_parse_stmt_while(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Do-while-loop node.
  */
-ast_node_t* parser_parse_stmt_do_while(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_do_while(tau_parser_t* par);
 
 /**
  * \brief Parses a loop.
@@ -391,7 +391,7 @@ ast_node_t* parser_parse_stmt_do_while(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Loop node.
  */
-ast_node_t* parser_parse_stmt_loop(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_loop(tau_parser_t* par);
 
 /**
  * \brief Parses a break-statement.
@@ -402,7 +402,7 @@ ast_node_t* parser_parse_stmt_loop(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Break-statement node.
  */
-ast_node_t* parser_parse_stmt_break(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_break(tau_parser_t* par);
 
 /**
  * \brief Parses a continue-statement.
@@ -414,7 +414,7 @@ ast_node_t* parser_parse_stmt_break(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Continue-statement node.
  */
-ast_node_t* parser_parse_stmt_continue(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_continue(tau_parser_t* par);
 
 /**
  * \brief Parses a return-statement.
@@ -427,7 +427,7 @@ ast_node_t* parser_parse_stmt_continue(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Return-statement node.
  */
-ast_node_t* parser_parse_stmt_return(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_return(tau_parser_t* par);
 
 /**
  * \brief Parses a defer-statement.
@@ -438,7 +438,7 @@ ast_node_t* parser_parse_stmt_return(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Defer-statement node.
  */
-ast_node_t* parser_parse_stmt_defer(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_defer(tau_parser_t* par);
 
 /**
  * \brief Parses a block-statement.
@@ -450,7 +450,7 @@ ast_node_t* parser_parse_stmt_defer(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Block-statement node.
  */
-ast_node_t* parser_parse_stmt_block(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_block(tau_parser_t* par);
 
 /**
  * \brief Parses an expression as a statement.
@@ -458,7 +458,7 @@ ast_node_t* parser_parse_stmt_block(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Expression-statement node.
  */
-ast_node_t* parser_parse_stmt_expr(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt_expr(tau_parser_t* par);
 
 /**
  * \brief Parses a statement.
@@ -466,7 +466,7 @@ ast_node_t* parser_parse_stmt_expr(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Statement node.
  */
-ast_node_t* parser_parse_stmt(parser_t* par);
+tau_ast_node_t* tau_parser_parse_stmt(tau_parser_t* par);
 
 /**
  * \brief Parses a variable declaration.
@@ -478,7 +478,7 @@ ast_node_t* parser_parse_stmt(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Variable declaration node.
  */
-ast_node_t* parser_parse_decl_var(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_var(tau_parser_t* par);
 
 /**
  * \brief Parses a function declaration.
@@ -490,7 +490,7 @@ ast_node_t* parser_parse_decl_var(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Function declaration node.
  */
-ast_node_t* parser_parse_decl_fun(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_fun(tau_parser_t* par);
 
 /**
  * \brief Parses a generic function declaration.
@@ -498,7 +498,7 @@ ast_node_t* parser_parse_decl_fun(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Generic function declaration node.
  */
-ast_node_t* parser_parse_decl_generic_fun(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_generic_fun(tau_parser_t* par);
 
 /**
  * \brief Parses a struct declaration.
@@ -510,7 +510,7 @@ ast_node_t* parser_parse_decl_generic_fun(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Struct declaration node.
  */
-ast_node_t* parser_parse_decl_struct(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_struct(tau_parser_t* par);
 
 /**
  * \brief Parses a struct member declaration.
@@ -518,7 +518,7 @@ ast_node_t* parser_parse_decl_struct(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Struct member declaration node.
  */
-ast_node_t* parser_parse_decl_struct_member(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_struct_member(tau_parser_t* par);
 
 /**
  * \brief Parses a union declaration.
@@ -530,7 +530,7 @@ ast_node_t* parser_parse_decl_struct_member(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Union declaration node.
  */
-ast_node_t* parser_parse_decl_union(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_union(tau_parser_t* par);
 
 /**
  * \brief Parses a union member declaration.
@@ -538,7 +538,7 @@ ast_node_t* parser_parse_decl_union(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Union member declaration node.
  */
-ast_node_t* parser_parse_decl_union_member(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_union_member(tau_parser_t* par);
 
 /**
  * \brief Parses an enum declaration.
@@ -550,7 +550,7 @@ ast_node_t* parser_parse_decl_union_member(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Enum declaration node.
  */
-ast_node_t* parser_parse_decl_enum(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_enum(tau_parser_t* par);
 
 /**
  * \brief Parses a module declaration.
@@ -562,7 +562,7 @@ ast_node_t* parser_parse_decl_enum(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Module declaration node.
  */
-ast_node_t* parser_parse_decl_mod(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_mod(tau_parser_t* par);
 
 /**
  * \brief Parses a type alias declaration.
@@ -570,7 +570,7 @@ ast_node_t* parser_parse_decl_mod(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Module declaration node.
  */
-ast_node_t* parser_parse_decl_type_alias(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_type_alias(tau_parser_t* par);
 
 /**
  * \brief Parses a declaration.
@@ -578,7 +578,7 @@ ast_node_t* parser_parse_decl_type_alias(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Declaration node.
  */
-ast_node_t* parser_parse_decl(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl(tau_parser_t* par);
 
 /**
  * \brief Parses a declaration inside a module.
@@ -586,7 +586,7 @@ ast_node_t* parser_parse_decl(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Declaration node.
  */
-ast_node_t* parser_parse_decl_in_mod(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_in_mod(tau_parser_t* par);
 
 /**
  * \brief Parses a top level declaration.
@@ -594,7 +594,7 @@ ast_node_t* parser_parse_decl_in_mod(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Declaration node.
  */
-ast_node_t* parser_parse_decl_top_level(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_top_level(tau_parser_t* par);
 
 /**
  * \brief Parses a simple function parameter.
@@ -602,7 +602,7 @@ ast_node_t* parser_parse_decl_top_level(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Parameter node.
  */
-ast_node_t* parser_parse_decl_param(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_param(tau_parser_t* par);
 
 /**
  * \brief Parses a generic parameter.
@@ -610,7 +610,7 @@ ast_node_t* parser_parse_decl_param(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Generic parameter node.
  */
-ast_node_t* parser_parse_decl_generic_param(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_generic_param(tau_parser_t* par);
 
 /**
  * \brief Parses an enumerator in an enum declaration.
@@ -618,7 +618,7 @@ ast_node_t* parser_parse_decl_generic_param(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Enumerator node.
  */
-ast_node_t* parser_parse_decl_enum_constant(parser_t* par);
+tau_ast_node_t* tau_parser_parse_decl_enum_constant(tau_parser_t* par);
 
 /**
  * \brief Parses a path segment.
@@ -626,7 +626,7 @@ ast_node_t* parser_parse_decl_enum_constant(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Path segment node.
  */
-ast_node_t* parser_parse_path_segment(parser_t* par);
+tau_ast_node_t* tau_parser_parse_path_segment(tau_parser_t* par);
 
 /**
  * \brief Parses a path wildcard.
@@ -634,7 +634,7 @@ ast_node_t* parser_parse_path_segment(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Path wildcard node.
  */
-ast_node_t* parser_parse_path_wildcard(parser_t* par);
+tau_ast_node_t* tau_parser_parse_path_wildcard(tau_parser_t* par);
 
 /**
  * \brief Parses a path list.
@@ -642,7 +642,7 @@ ast_node_t* parser_parse_path_wildcard(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Path list node.
  */
-ast_node_t* parser_parse_path_list(parser_t* par);
+tau_ast_node_t* tau_parser_parse_path_list(tau_parser_t* par);
 
 /**
  * \brief Parses a path.
@@ -650,7 +650,7 @@ ast_node_t* parser_parse_path_list(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Path node.
  */
-ast_node_t* parser_parse_path(parser_t* par);
+tau_ast_node_t* tau_parser_parse_path(tau_parser_t* par);
 
 /**
  * \brief Parses a use directive.
@@ -658,7 +658,7 @@ ast_node_t* parser_parse_path(parser_t* par);
  * \param[in] par Parser to be used.
  * \returns Use directive node.
  */
-ast_node_t* parser_parse_use_directive(parser_t* par);
+tau_ast_node_t* tau_parser_parse_use_directive(tau_parser_t* par);
 
 /**
  * \brief Processes a list of tokens and produces an abstract syntax tree.
@@ -668,7 +668,7 @@ ast_node_t* parser_parse_use_directive(parser_t* par);
  * \param[in] errors Pointer to the error bag to add errors to.
  * \returns Pointer to the root node.
  */
-ast_node_t* parser_parse(parser_t* par, vector_t* tokens, error_bag_t* errors);
+tau_ast_node_t* tau_parser_parse(tau_parser_t* par, tau_vector_t* tokens, tau_error_bag_t* errors);
 
 TAU_EXTERN_C_END
 

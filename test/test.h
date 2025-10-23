@@ -33,13 +33,13 @@
   void test_case_##TEST_NAME##_impl(void);\
   void test_case_##TEST_NAME(void)\
   {\
-    printf(ESC_FG_BRIGHT_BLACK "[" #TEST_NAME "]" ESC_RESET "\n");\
+    printf(TAU_ESC_FG_BRIGHT_BLACK "[" #TEST_NAME "]" TAU_ESC_RESET "\n");\
     g_test_case_status = TEST_STATUS_PASSED;\
     test_case_##TEST_NAME##_impl();\
     switch (g_test_case_status) {\
-    case TEST_STATUS_PASSED: printf(ESC_FG_GREEN "PASSED" ESC_RESET "\n"); break;\
-    case TEST_STATUS_IGNORED: printf(ESC_FG_YELLOW "IGNORED" ESC_RESET "\n"); break;\
-    case TEST_STATUS_FAILED: fprintf(stderr, ESC_FG_RED "FAILED" ESC_RESET "\n"); break;\
+    case TEST_STATUS_PASSED: printf(TAU_ESC_FG_GREEN "PASSED" TAU_ESC_RESET "\n"); break;\
+    case TEST_STATUS_IGNORED: printf(TAU_ESC_FG_YELLOW "IGNORED" TAU_ESC_RESET "\n"); break;\
+    case TEST_STATUS_FAILED: fprintf(stderr, TAU_ESC_FG_RED "FAILED" TAU_ESC_RESET "\n"); break;\
     default: break;\
     }\
   }\
@@ -60,7 +60,7 @@
 
 #define TEST_PASS_REASON(MSG)\
   do {\
-    printf(ESC_FG_GREEN "Pass: " MSG ESC_RESET "\n");\
+    printf(TAU_ESC_FG_GREEN "Pass: " MSG TAU_ESC_RESET "\n");\
     g_test_case_status = TEST_STATUS_PASSED;\
     return;\
   } while (0)
@@ -73,7 +73,7 @@
 
 #define TEST_IGNORE_REASON(MSG)\
   do {\
-    printf(ESC_FG_YELLOW "Ignore: " MSG ESC_RESET "\n");\
+    printf(TAU_ESC_FG_YELLOW "Ignore: " MSG TAU_ESC_RESET "\n");\
     g_test_case_status = TEST_STATUS_IGNORED;\
     return;\
   } while (0)
@@ -86,14 +86,14 @@
 
 #define TEST_FAIL_REASON(MSG)\
   do {\
-    fprintf(stderr, ESC_FG_RED "Fail: " MSG ESC_RESET "\n");\
+    fprintf(stderr, TAU_ESC_FG_RED "Fail: " MSG TAU_ESC_RESET "\n");\
     g_test_case_status = TEST_STATUS_FAILED;\
     return;\
   } while (0)
 
 #define TEST_LOG(MSG, ...)\
   do {\
-    printf(ESC_FG_BRIGHT_BLACK MSG ESC_RESET "\n", ##__VA_ARGS__);\
+    printf(TAU_ESC_FG_BRIGHT_BLACK MSG TAU_ESC_RESET "\n", ##__VA_ARGS__);\
   } while (0)
 
 #define TEST_ASSERT(COND)\
@@ -138,7 +138,7 @@
 #define test_assert(COND, FILE, LINE, MSG)\
   do {\
     if (!(COND)) {\
-      fprintf(stderr, ESC_FG_BRIGHT_BLACK "(%s:%d) " ESC_FG_RED "Assertion failed: %s" ESC_RESET "\n", FILE, LINE, MSG);\
+      fprintf(stderr, TAU_ESC_FG_BRIGHT_BLACK "(%s:%d) " TAU_ESC_FG_RED "Assertion failed: %s" TAU_ESC_RESET "\n", FILE, LINE, MSG);\
       g_test_case_status = TEST_STATUS_FAILED;\
       return;\
     }\

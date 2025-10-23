@@ -9,7 +9,7 @@
 
 #include "utils/common.h"
 
-struct string_t
+struct tau_string_t
 {
   size_t cap; // Maxmimum capacity of the buffer.
   size_t len; // Length of the string (excluding the terminating null character).
@@ -17,19 +17,19 @@ struct string_t
   bool owning; // `true` if the buffer is owned by the string, `false` otherwise.
 };
 
-string_t* string_init(void)
+tau_string_t* tau_string_init(void)
 {
-  return string_init_with_capacity(1);
+  return tau_string_init_with_capacity(1);
 }
 
-string_t* string_init_with_cstr(const char* cstr)
+tau_string_t* tau_string_init_with_cstr(const char* cstr)
 {
-  return string_init_with_cstr_and_length(cstr, strlen(cstr));
+  return tau_string_init_with_cstr_and_length(cstr, strlen(cstr));
 }
 
-string_t* string_init_with_cstr_and_length(const char* cstr, size_t len)
+tau_string_t* tau_string_init_with_cstr_and_length(const char* cstr, size_t len)
 {
-  string_t* str = string_init_with_capacity(len + 1);
+  tau_string_t* str = tau_string_init_with_capacity(len + 1);
 
   memcpy(str->buf, cstr, len);
   str->buf[len] = '\0';
@@ -38,13 +38,13 @@ string_t* string_init_with_cstr_and_length(const char* cstr, size_t len)
   return str;
 }
 
-string_t* string_init_with_capacity(size_t cap)
+tau_string_t* tau_string_init_with_capacity(size_t cap)
 {
-  string_t* str = (string_t*)malloc(sizeof(string_t));
-  ASSERT(str != NULL);
+  tau_string_t* str = (tau_string_t*)malloc(sizeof(tau_string_t));
+  TAU_ASSERT(str != NULL);
 
   str->buf = (char*)calloc(cap, sizeof(char));
-  ASSERT(str->buf != NULL);
+  TAU_ASSERT(str->buf != NULL);
 
   str->cap = cap;
   str->len = 0;
@@ -53,12 +53,12 @@ string_t* string_init_with_capacity(size_t cap)
   return str;
 }
 
-string_t* string_init_with_buffer(char* buf, size_t cap)
+tau_string_t* tau_string_init_with_buffer(char* buf, size_t cap)
 {
-  ASSERT(buf != NULL);
+  TAU_ASSERT(buf != NULL);
 
-  string_t* str = (string_t*)malloc(sizeof(string_t));
-  ASSERT(str != NULL);
+  tau_string_t* str = (tau_string_t*)malloc(sizeof(tau_string_t));
+  TAU_ASSERT(str != NULL);
 
   str->buf = buf;
   str->cap = cap;
@@ -68,7 +68,7 @@ string_t* string_init_with_buffer(char* buf, size_t cap)
   return str;
 }
 
-void string_free(string_t* str)
+void tau_string_free(tau_string_t* str)
 {
   if (str->owning)
     free(str->buf);
@@ -76,53 +76,53 @@ void string_free(string_t* str)
   free(str);
 }
 
-char* string_begin(const string_t* str)
+char* tau_string_begin(const tau_string_t* str)
 {
   return str->buf;
 }
 
-char* string_end(const string_t* str)
+char* tau_string_end(const tau_string_t* str)
 {
   return str->buf + str->len;
 }
 
-size_t string_length(const string_t* str)
+size_t tau_string_length(const tau_string_t* str)
 {
   return str->len;
 }
 
-size_t string_capacity(const string_t* str)
+size_t tau_string_capacity(const tau_string_t* str)
 {
   return str->cap;
 }
 
-void string_reserve(string_t* str, size_t cap)
+void tau_string_reserve(tau_string_t* str, size_t cap)
 {
   if (str->cap >= cap)
     return;
 
-  ASSERT(str->owning);
+  TAU_ASSERT(str->owning);
 
   char* new_buf = (char*)realloc(str->buf, cap * sizeof(char));
-  ASSERT(new_buf != NULL);
+  TAU_ASSERT(new_buf != NULL);
 
   str->cap = cap;
   str->buf = new_buf;
 }
 
-void string_fit(string_t* str)
+void tau_string_fit(tau_string_t* str)
 {
   if (!str->owning)
     return;
 
   char* new_buf = (char*)realloc(str->buf, str->len + 1);
-  ASSERT(new_buf != NULL);
+  TAU_ASSERT(new_buf != NULL);
 
   str->cap = str->len + 1;
   str->buf = new_buf;
 }
 
-int string_printf(FILE* restrict stream, const string_t* restrict fmt, ...)
+int tau_string_printf(FILE* restrict stream, const tau_string_t* restrict fmt, ...)
 {
   va_list args;
   va_start(args, fmt);
@@ -134,7 +134,7 @@ int string_printf(FILE* restrict stream, const string_t* restrict fmt, ...)
   return result;
 }
 
-int string_print_escaped(FILE* restrict stream, const string_t* restrict str)
+int tau_string_print_escaped(FILE* restrict stream, const tau_string_t* restrict str)
 {
   int result = 0;
 
@@ -157,35 +157,35 @@ int string_print_escaped(FILE* restrict stream, const string_t* restrict str)
   return result;
 }
 
-void string_append(string_t* restrict str, const string_t* restrict other)
+void tau_string_append(tau_string_t* restrict str, const tau_string_t* restrict other)
 {
-  string_append_cstr(str, other->buf);
+  tau_string_append_cstr(str, other->buf);
 }
 
-void string_append_cstr(string_t* restrict str, const char* restrict other)
+void tau_string_append_cstr(tau_string_t* restrict str, const char* restrict other)
 {
   size_t other_len = strlen(other);
 
   if (str->cap < str->len + other_len + 1)
-    string_reserve(str, str->len + other_len + 1);
+    tau_string_reserve(str, str->len + other_len + 1);
 
   str->len += other_len;
   strcat(str->buf, other);
 }
 
-void string_insert(string_t* restrict str, size_t pos, const string_t* restrict other)
+void tau_string_insert(tau_string_t* restrict str, size_t pos, const tau_string_t* restrict other)
 {
-  string_insert_cstr(str, pos, other->buf);
+  tau_string_insert_cstr(str, pos, other->buf);
 }
 
-void string_insert_cstr(string_t* restrict str, size_t pos, const char* restrict other)
+void tau_string_insert_cstr(tau_string_t* restrict str, size_t pos, const char* restrict other)
 {
-  ASSERT(pos <= str->len);
+  TAU_ASSERT(pos <= str->len);
 
   size_t other_len = strlen(other);
   size_t new_len = str->len + other_len;
 
-  string_reserve(str, new_len + 1);
+  tau_string_reserve(str, new_len + 1);
 
   memmove(str->buf + pos + other_len, str->buf + pos, str->len - pos + 1);
   memcpy(str->buf + pos, other, other_len);
@@ -193,27 +193,27 @@ void string_insert_cstr(string_t* restrict str, size_t pos, const char* restrict
   str->len = new_len;
 }
 
-void string_erase(string_t* str, size_t pos, size_t len)
+void tau_string_erase(tau_string_t* str, size_t pos, size_t len)
 {
-  ASSERT(pos + len <= str->len);
+  TAU_ASSERT(pos + len <= str->len);
 
   memmove(str->buf + pos, str->buf + pos + len, str->len - pos - len + 1);
 }
 
-void string_clear(string_t* str)
+void tau_string_clear(tau_string_t* str)
 {
   str->buf[0] = '\0';
   str->len = 0;
 }
 
-string_t* string_copy(const string_t* str)
+tau_string_t* tau_string_copy(const tau_string_t* str)
 {
-  return string_init_with_cstr(str->buf);
+  return tau_string_init_with_cstr(str->buf);
 }
 
-string_t* string_substr(const string_t* str, size_t begin, size_t len)
+tau_string_t* tau_string_substr(const tau_string_t* str, size_t begin, size_t len)
 {
-  string_t* result = string_init_with_capacity(len + 1);
+  tau_string_t* result = tau_string_init_with_capacity(len + 1);
 
   result->len = len;
   strncpy(result->buf, str->buf + begin, len);
@@ -221,17 +221,17 @@ string_t* string_substr(const string_t* str, size_t begin, size_t len)
   return result;
 }
 
-int string_compare(const string_t* lhs, const string_t* rhs)
+int tau_string_compare(const tau_string_t* lhs, const tau_string_t* rhs)
 {
   return strcmp(lhs->buf, rhs->buf);
 }
 
-int string_compare_cstr(const string_t* restrict lhs, const char* restrict rhs)
+int tau_string_compare_cstr(const tau_string_t* restrict lhs, const char* restrict rhs)
 {
   return strcmp(lhs->buf, rhs);
 }
 
-string_t* string_escape(const string_t* str)
+tau_string_t* tau_string_escape(const tau_string_t* str)
 {
   size_t len = str->len;
 
@@ -251,7 +251,7 @@ string_t* string_escape(const string_t* str)
       ++len;
     }
 
-  string_t* result = string_init_with_capacity(len + 1);
+  tau_string_t* result = tau_string_init_with_capacity(len + 1);
   result->len = len;
 
   for (char *ch = str->buf, *rch = result->buf; *ch != '\0'; ++ch, ++rch)
@@ -273,32 +273,32 @@ string_t* string_escape(const string_t* str)
   return result;
 }
 
-bool string_starts_with(const string_t* restrict str, const string_t* restrict prefix)
+bool tau_string_starts_with(const tau_string_t* restrict str, const tau_string_t* restrict prefix)
 {
-  return string_starts_with_cstr(str, prefix->buf);
+  return tau_string_starts_with_cstr(str, prefix->buf);
 }
 
-bool string_starts_with_cstr(const string_t* restrict str, const char* restrict prefix)
+bool tau_string_starts_with_cstr(const tau_string_t* restrict str, const char* restrict prefix)
 {
-  return strncmp(str->buf, prefix, MIN(str->len, strlen(prefix))) == 0;
+  return strncmp(str->buf, prefix, TAU_MIN(str->len, strlen(prefix))) == 0;
 }
 
-bool string_ends_with(const string_t* restrict str, const string_t* restrict suffix)
+bool tau_string_ends_with(const tau_string_t* restrict str, const tau_string_t* restrict suffix)
 {
-  return string_ends_with_cstr(str, suffix->buf);
+  return tau_string_ends_with_cstr(str, suffix->buf);
 }
 
-bool string_ends_with_cstr(const string_t* restrict str, const char* restrict suffix)
+bool tau_string_ends_with_cstr(const tau_string_t* restrict str, const char* restrict suffix)
 {
   return strcmp(str->buf + (str->len - strlen(suffix)), suffix) == 0;
 }
 
-bool string_contains(const string_t* restrict str, const string_t* restrict sub)
+bool tau_string_contains(const tau_string_t* restrict str, const tau_string_t* restrict sub)
 {
-  return string_contains_cstr(str, sub->buf);
+  return tau_string_contains_cstr(str, sub->buf);
 }
 
-bool string_contains_cstr(const string_t* restrict str, const char* restrict sub)
+bool tau_string_contains_cstr(const tau_string_t* restrict str, const char* restrict sub)
 {
   size_t sub_len = strlen(sub);
 
@@ -325,31 +325,31 @@ bool string_contains_cstr(const string_t* restrict str, const char* restrict sub
   return false;
 }
 
-void string_replace(string_t* restrict str, size_t pos, size_t len, const string_t* restrict rep)
+void tau_string_replace(tau_string_t* restrict str, size_t pos, size_t len, const tau_string_t* restrict rep)
 {
-  string_replace_with_csubstr(str, pos, len, rep->buf, 0);
+  tau_string_replace_with_csubstr(str, pos, len, rep->buf, 0);
 }
 
-void string_replace_with_substr(string_t* restrict str, size_t pos, size_t len, const string_t* restrict rep, size_t rep_pos)
+void tau_string_replace_with_substr(tau_string_t* restrict str, size_t pos, size_t len, const tau_string_t* restrict rep, size_t rep_pos)
 {
-  string_replace_with_csubstr(str, pos, len, rep->buf, rep_pos);
+  tau_string_replace_with_csubstr(str, pos, len, rep->buf, rep_pos);
 }
 
-void string_replace_with_cstr(string_t* restrict str, size_t pos, size_t len, const char* restrict rep)
+void tau_string_replace_with_cstr(tau_string_t* restrict str, size_t pos, size_t len, const char* restrict rep)
 {
-  string_replace_with_csubstr(str, pos, len, rep, 0);
+  tau_string_replace_with_csubstr(str, pos, len, rep, 0);
 }
 
-void string_replace_with_csubstr(string_t* restrict str, size_t pos, size_t len, const char* restrict rep, size_t rep_pos)
+void tau_string_replace_with_csubstr(tau_string_t* restrict str, size_t pos, size_t len, const char* restrict rep, size_t rep_pos)
 {
   size_t rep_len = strlen(rep);
 
-  ASSERT(pos <= str->len);
-  ASSERT((rep_len > 0 && rep_pos < rep_len) || rep_pos == 0);
+  TAU_ASSERT(pos <= str->len);
+  TAU_ASSERT((rep_len > 0 && rep_pos < rep_len) || rep_pos == 0);
 
   size_t new_len = str->len - len + rep_len - rep_pos;
 
-  string_reserve(str, new_len + 1);
+  tau_string_reserve(str, new_len + 1);
 
   memmove(str->buf + pos + rep_len - rep_pos, str->buf + pos + len, str->len - pos - len + 1);
   memcpy(str->buf + pos, rep + rep_pos, rep_len - rep_pos);
@@ -357,12 +357,12 @@ void string_replace_with_csubstr(string_t* restrict str, size_t pos, size_t len,
   str->len = new_len;
 }
 
-size_t string_find(const string_t* restrict str, const string_t* restrict sub)
+size_t tau_string_find(const tau_string_t* restrict str, const tau_string_t* restrict sub)
 {
-  return string_find_cstr(str, sub->buf);
+  return tau_string_find_cstr(str, sub->buf);
 }
 
-size_t string_find_cstr(const string_t* restrict str, const char* restrict sub)
+size_t tau_string_find_cstr(const tau_string_t* restrict str, const char* restrict sub)
 {
   size_t sub_len = strlen(sub);
 

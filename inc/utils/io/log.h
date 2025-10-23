@@ -32,55 +32,55 @@ TAU_EXTERN_C_BEGIN
  *
  * \param[in] ... The message to log, formatted as a printf-style format string.
  */
-#define log_trace(...) log_log(LOG_LEVEL_TRACE, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define tau_log_trace(...) tau_log_log(TAU_LOG_LEVEL_TRACE, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 /**
  * \brief Logs a message with the DEBUG log level.
  *
  * \param[in] ... The message to log, formatted as a printf-style format string.
  */
-#define log_debug(...) log_log(LOG_LEVEL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define tau_log_debug(...) tau_log_log(TAU_LOG_LEVEL_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 /**
  * \brief Logs a message with the INFO log level.
  *
  * \param[in] ... The message to log, formatted as a printf-style format string.
  */
-#define log_info(...)  log_log(LOG_LEVEL_INFO , __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define tau_log_info(...)  tau_log_log(TAU_LOG_LEVEL_INFO , __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 /**
  * \brief Logs a message with the WARN log level.
  *
  * \param[in] ... The message to log, formatted as a printf-style format string.
  */
-#define log_warn(...)  log_log(LOG_LEVEL_WARN , __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define tau_log_warn(...)  tau_log_log(TAU_LOG_LEVEL_WARN , __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 /**
  * \brief Logs a message with the ERROR log level.
  *
  * \param[in] ... The message to log, formatted as a printf-style format string.
  */
-#define log_error(...) log_log(LOG_LEVEL_ERROR, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define tau_log_error(...) tau_log_log(TAU_LOG_LEVEL_ERROR, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 /**
  * \brief Logs a message with the FATAL log level.
  *
  * \param[in] ... The message to log, formatted as a printf-style format string.
  */
-#define log_fatal(...) log_log(LOG_LEVEL_FATAL, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define tau_log_fatal(...) tau_log_log(TAU_LOG_LEVEL_FATAL, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 /**
  * \brief Enumeration of log levels.
  */
-typedef enum log_level_e
+typedef enum tau_log_level_e
 {
-  LOG_LEVEL_TRACE, // Low-level, highly detailed behaviour.
-  LOG_LEVEL_DEBUG, // Diagnostic messages.
-  LOG_LEVEL_INFO,  // Normal behaviour, informative messages.
-  LOG_LEVEL_WARN,  // Abnormal or unexpected behaviour.
-  LOG_LEVEL_ERROR, // Severe issue or failure.
-  LOG_LEVEL_FATAL, // Critical failure and program termination.
-} log_level_t;
+  TAU_LOG_LEVEL_TRACE, // Low-level, highly detailed behaviour.
+  TAU_LOG_LEVEL_DEBUG, // Diagnostic messages.
+  TAU_LOG_LEVEL_INFO,  // Normal behaviour, informative messages.
+  TAU_LOG_LEVEL_WARN,  // Abnormal or unexpected behaviour.
+  TAU_LOG_LEVEL_ERROR, // Severe issue or failure.
+  TAU_LOG_LEVEL_FATAL, // Critical failure and program termination.
+} tau_log_level_t;
 
 /**
  * \brief Logs a message with the specified log level.
@@ -93,7 +93,7 @@ typedef enum log_level_e
  * \param[in] fmt The format string of the log message.
  * \param[in] ... Additional arguments for the format string.
  */
-void log_log(log_level_t lvl, const char* file, int line, const char* func, const char* name, const char* fmt, ...);
+void tau_log_log(tau_log_level_t lvl, const char* file, int line, const char* func, const char* name, const char* fmt, ...);
 
 /**
  * \brief Converts a log level to its corresponding string representation.
@@ -101,7 +101,7 @@ void log_log(log_level_t lvl, const char* file, int line, const char* func, cons
  * \param[in] lvl The log level to convert.
  * \returns Pointer to the string representation of the log level.
  */
-const char* log_level_to_string(log_level_t lvl);
+const char* tau_log_level_to_string(tau_log_level_t lvl);
 
 /**
  * \brief Converts a log level to its corresponding color representation.
@@ -109,49 +109,49 @@ const char* log_level_to_string(log_level_t lvl);
  * \param[in] lvl The log level to convert.
  * \returns Pointer to the color representation of the log level.
  */
-const char* log_level_to_color(log_level_t lvl);
+const char* tau_log_level_to_color(tau_log_level_t lvl);
 
 /**
  * \brief Sets the log level for filtering log messages.
  *
  * \param[in] lvl The log level to set.
  */
-void log_set_level(log_level_t lvl);
+void tau_log_set_level(tau_log_level_t lvl);
 
 /**
  * \brief Retrieves the current log level.
  *
  * \returns The current log level.
  */
-log_level_t log_get_level(void);
+tau_log_level_t tau_log_get_level(void);
 
 /**
  * \brief Sets the output stream for logging messages.
  *
  * \param[in] stream The output stream to set.
  */
-void log_set_stream(FILE* stream);
+void tau_log_set_stream(FILE* stream);
 
 /**
  * \brief Retrieves the current output stream for logging messages.
  *
  * \returns The current output stream.
  */
-FILE* log_get_stream(void);
+FILE* tau_log_get_stream(void);
 
 /**
  * \brief Sets the verbosity mode for logging messages.
  *
  * \param[in] value The verbosity mode to set.
  */
-void log_set_verbose(bool value);
+void tau_log_set_verbose(bool value);
 
 /**
  * \brief Retrieves the current verbosity mode for logging messages.
  *
  * \returns The current verbosity mode.
  */
-bool log_get_verbose(void);
+bool tau_log_get_verbose(void);
 
 TAU_EXTERN_C_END
 

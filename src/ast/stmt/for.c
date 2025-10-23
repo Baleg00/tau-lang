@@ -9,59 +9,59 @@
 
 #include "ast/registry.h"
 
-ast_stmt_for_t* ast_stmt_for_init(void)
+tau_ast_stmt_for_t* tau_ast_stmt_for_init(void)
 {
-  ast_stmt_for_t* node = (ast_stmt_for_t*)malloc(sizeof(ast_stmt_for_t));
-  CLEAROBJ(node);
+  tau_ast_stmt_for_t* node = (tau_ast_stmt_for_t*)malloc(sizeof(tau_ast_stmt_for_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_STMT_FOR;
+  node->kind = TAU_AST_STMT_FOR;
 
   return node;
 }
 
-void ast_stmt_for_free(ast_stmt_for_t* node)
+void tau_ast_stmt_for_free(tau_ast_stmt_for_t* node)
 {
   free(node);
 }
 
-void ast_stmt_for_nameres(nameres_ctx_t* UNUSED(ctx), ast_stmt_for_t* UNUSED(node))
+void tau_ast_stmt_for_nameres(tau_nameres_ctx_t* TAU_UNUSED(ctx), tau_ast_stmt_for_t* TAU_UNUSED(node))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
   // TODO
 }
 
-void ast_stmt_for_typecheck(typecheck_ctx_t* UNUSED(ctx), ast_stmt_for_t* UNUSED(node))
+void tau_ast_stmt_for_typecheck(tau_typecheck_ctx_t* TAU_UNUSED(ctx), tau_ast_stmt_for_t* TAU_UNUSED(node))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
   // TODO
 }
 
-void ast_stmt_for_ctrlflow(ctrlflow_ctx_t* ctx, ast_stmt_for_t* node)
+void tau_ast_stmt_for_ctrlflow(tau_ctrlflow_ctx_t* ctx, tau_ast_stmt_for_t* node)
 {
-  ctrlflow_ctx_for_begin(ctx, node);
+  tau_ctrlflow_ctx_for_begin(ctx, node);
 
-  UNREACHABLE();
+  TAU_UNREACHABLE();
   // TODO
 
-  ctrlflow_ctx_for_end(ctx);
+  tau_ctrlflow_ctx_for_end(ctx);
 }
 
-void ast_stmt_for_codegen(codegen_ctx_t* UNUSED(ctx), ast_stmt_for_t* UNUSED(node))
+void tau_ast_stmt_for_codegen(tau_codegen_ctx_t* TAU_UNUSED(ctx), tau_ast_stmt_for_t* TAU_UNUSED(node))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
   // TODO
 }
 
-void ast_stmt_for_dump_json(FILE* stream, ast_stmt_for_t* node)
+void tau_ast_stmt_for_dump_json(FILE* stream, tau_ast_stmt_for_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"", tau_ast_kind_to_cstr(node->kind));
   fprintf(stream, ",\"var\":");
-  ast_node_dump_json(stream, node->var);
+  tau_ast_node_dump_json(stream, node->var);
   fprintf(stream, ",\"range\":");
-  ast_node_dump_json(stream, node->range);
+  tau_ast_node_dump_json(stream, node->range);
   fprintf(stream, ",\"stmt\":");
-  ast_node_dump_json(stream, node->stmt);
+  tau_ast_node_dump_json(stream, node->stmt);
   fputc('}', stream);
 }

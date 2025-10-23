@@ -47,61 +47,61 @@ TAU_EXTERN_C_BEGIN
  * \returns `true` if LLVM and all of its components were initialized successfully,
  * otherwise `false`.
  */
-bool llvm_init(void);
+bool tau_llvm_init(void);
 
 /**
  * \brief Frees all resources associated with LLVM.
  */
-void llvm_free(void);
+void tau_llvm_free(void);
 
 /**
  * \brief Gets the current LLVM context.
  * 
  * \returns The current LLVM context.
  */
-LLVMContextRef llvm_get_context(void);
+LLVMContextRef tau_llvm_get_context(void);
 
 /**
  * \brief Gets the current LLVM target.
  * 
  * \returns The current LLVM target.
  */
-LLVMTargetRef llvm_get_target(void);
+LLVMTargetRef tau_llvm_get_target(void);
 
 /**
  * \brief Gets the current LLVM target data layout.
  * 
  * \returns The current LLVM target data layout.
  */
-LLVMTargetDataRef llvm_get_data(void);
+LLVMTargetDataRef tau_llvm_get_data(void);
 
 /**
  * \brief Gets the current LLVM target machine.
  * 
  * \returns The current LLVM target machine.
  */
-LLVMTargetMachineRef llvm_get_machine(void);
+LLVMTargetMachineRef tau_llvm_get_machine(void);
 
 /**
  * \brief Gets the current LLVM target triple.
  * 
  * \returns The current LLVM target triple.
  */
-const char* llvm_get_target_triple(void);
+const char* tau_llvm_get_target_triple(void);
 
 /**
  * \brief Gets the host CPU name.
  * 
  * \returns The host CPU name.
  */
-const char* llvm_get_cpu_name(void);
+const char* tau_llvm_get_cpu_name(void);
 
 /**
  * \brief Gets the host CPU's features.
  * 
  * \returns The host CPU's features.
  */
-const char* llvm_get_cpu_features(void);
+const char* tau_llvm_get_cpu_features(void);
 
 TAU_EXTERN_C_END
 

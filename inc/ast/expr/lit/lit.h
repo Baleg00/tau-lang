@@ -15,18 +15,18 @@
 /**
  * \brief Header for all AST literal expression nodes.
  */
-#define AST_EXPR_LIT_HEADER\
-  AST_EXPR_HEADER
+#define TAU_AST_EXPR_LIT_HEADER\
+  TAU_AST_EXPR_HEADER
 
 TAU_EXTERN_C_BEGIN
 
 /**
  * \brief AST literal expression node.
  */
-typedef struct ast_expr_lit_t
+typedef struct tau_ast_expr_lit_t
 {
-  AST_EXPR_LIT_HEADER;
-} ast_expr_lit_t;
+  TAU_AST_EXPR_LIT_HEADER;
+} tau_ast_expr_lit_t;
 
 TAU_EXTERN_C_END
 

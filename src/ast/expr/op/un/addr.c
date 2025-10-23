@@ -10,51 +10,51 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 
-ast_expr_op_un_addr_t* ast_expr_op_un_addr_init(void)
+tau_ast_expr_op_un_addr_t* tau_ast_expr_op_un_addr_init(void)
 {
-  ast_expr_op_un_addr_t* node = (ast_expr_op_un_addr_t*)malloc(sizeof(ast_expr_op_un_addr_t));
-  CLEAROBJ(node);
+  tau_ast_expr_op_un_addr_t* node = (tau_ast_expr_op_un_addr_t*)malloc(sizeof(tau_ast_expr_op_un_addr_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_EXPR_OP_UNARY;
+  node->kind = TAU_AST_EXPR_OP_UNARY;
   node->op_kind = OP_IND;
 
   return node;
 }
 
-void ast_expr_op_un_addr_nameres(nameres_ctx_t* ctx, ast_expr_op_un_addr_t* node)
+void tau_ast_expr_op_un_addr_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_op_un_addr_t* node)
 {
-  ast_node_nameres(ctx, node->expr);
+  tau_ast_node_nameres(ctx, node->expr);
 }
 
-void ast_expr_op_un_addr_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_addr_t* node)
+void tau_ast_expr_op_un_addr_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_un_addr_t* node)
 {
-  ast_node_typecheck(ctx, node->expr);
+  tau_ast_node_typecheck(ctx, node->expr);
 
-  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
-  ASSERT(expr_desc != NULL);
+  tau_typedesc_t* expr_desc = tau_typetable_lookup(ctx->typetable, node->expr);
+  TAU_ASSERT(expr_desc != NULL);
 
-  if (!typedesc_is_ref(expr_desc))
+  if (!tau_typedesc_is_ref(expr_desc))
   {
-    error_bag_put_typecheck_expected_reference(ctx->errors, token_location(node->expr->tok));
-    typecheck_poison(ctx, (ast_node_t*)node);
+    tau_error_bag_put_typecheck_expected_reference(ctx->errors, tau_token_location(node->expr->tok));
+    tau_typecheck_poison(ctx, (tau_ast_node_t*)node);
     return;
   }
 
-  typedesc_t* desc = typebuilder_build_ptr(ctx->typebuilder, typedesc_remove_ref(expr_desc));
+  tau_typedesc_t* desc = tau_typebuilder_build_ptr(ctx->typebuilder, tau_typedesc_remove_ref(expr_desc));
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 }
 
-void ast_expr_op_un_addr_codegen(codegen_ctx_t* ctx, ast_expr_op_un_addr_t* node)
+void tau_ast_expr_op_un_addr_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_op_un_addr_t* node)
 {
-  ast_node_codegen(ctx, node->expr);
+  tau_ast_node_codegen(ctx, node->expr);
 
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  tau_typedesc_t* desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  ast_expr_t* expr = (ast_expr_t*)node->expr;
+  tau_ast_expr_t* expr = (tau_ast_expr_t*)node->expr;
 
   node->llvm_value = expr->llvm_value;
 }

@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief ASSERT utility macro.
+ * \brief TAU_ASSERT utility macro.
  *
  * \copyright Copyright (c) 2023 Róna Balázs. All rights reserved.
  * \license This project is released under the Apache 2.0 license.
@@ -22,11 +22,11 @@
  *
  * \param[in] COND The condition to check.
  */
-# define ASSERT(COND)\
+# define TAU_ASSERT(COND)\
   do {\
     if (!(COND)) {\
-      log_fatal("assert", "%s:%d Assertion failed: %s", __FILE__, __LINE__, #COND);\
-      DEBUGBREAK();\
+      tau_log_fatal("assert", "%s:%d Assertion failed: %s", __FILE__, __LINE__, #COND);\
+      TAU_DEBUGBREAK();\
       exit(EXIT_FAILURE);\
     }\
   } while (0)
@@ -38,7 +38,7 @@
  *
  * \param[in] COND The condition to check.
  */
-# define ASSERT(COND) ((void)(COND))
+# define TAU_ASSERT(COND) ((void)(COND))
 
 #endif
 

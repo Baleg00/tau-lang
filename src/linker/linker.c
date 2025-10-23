@@ -10,165 +10,165 @@
 #include "linker/gcc.h"
 #include "linker/msvc.h"
 
-linker_t* linker_init(linker_kind_t kind)
+tau_linker_t* tau_linker_init(tau_linker_kind_t kind)
 {
   switch (kind)
   {
-  case LINKER_GCC:  return linker_gcc_init ();
-  case LINKER_MSVC: return linker_msvc_init();
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  return tau_linker_gcc_init ();
+  case TAU_LINKER_MSVC: return tau_linker_msvc_init();
+  default: TAU_UNREACHABLE();
   }
 
   return NULL;
 }
 
-void linker_free(linker_t* linker)
+void tau_linker_free(tau_linker_t* linker)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_free (linker); return;
-  case LINKER_MSVC: linker_msvc_free(linker); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_free (linker); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_free(linker); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_add_object(linker_t* linker, const char* path)
+void tau_linker_add_object(tau_linker_t* linker, const char* path)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_add_object (linker, path); return;
-  case LINKER_MSVC: linker_msvc_add_object(linker, path); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_add_object (linker, path); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_add_object(linker, path); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_add_library_directory(linker_t* linker, const char* path)
+void tau_linker_add_library_directory(tau_linker_t* linker, const char* path)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_add_library_directory (linker, path); return;
-  case LINKER_MSVC: linker_msvc_add_library_directory(linker, path); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_add_library_directory (linker, path); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_add_library_directory(linker, path); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_add_static_library_by_name(linker_t* linker, const char* name)
+void tau_linker_add_static_library_by_name(tau_linker_t* linker, const char* name)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_add_static_library_by_name (linker, name); return;
-  case LINKER_MSVC: linker_msvc_add_static_library_by_name(linker, name); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_add_static_library_by_name (linker, name); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_add_static_library_by_name(linker, name); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_add_static_library_by_path(linker_t* linker, const char* path)
+void tau_linker_add_static_library_by_path(tau_linker_t* linker, const char* path)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_add_static_library_by_path (linker, path); return;
-  case LINKER_MSVC: linker_msvc_add_static_library_by_path(linker, path); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_add_static_library_by_path (linker, path); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_add_static_library_by_path(linker, path); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_add_dynamic_library_by_name(linker_t* linker, const char* name)
+void tau_linker_add_dynamic_library_by_name(tau_linker_t* linker, const char* name)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_add_dynamic_library_by_path (linker, name); return;
-  case LINKER_MSVC: linker_msvc_add_dynamic_library_by_path(linker, name); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_add_dynamic_library_by_path (linker, name); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_add_dynamic_library_by_path(linker, name); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_add_dynamic_library_by_path(linker_t* linker, const char* path)
+void tau_linker_add_dynamic_library_by_path(tau_linker_t* linker, const char* path)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_add_dynamic_library_by_path (linker, path); return;
-  case LINKER_MSVC: linker_msvc_add_dynamic_library_by_path(linker, path); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_add_dynamic_library_by_path (linker, path); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_add_dynamic_library_by_path(linker, path); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_set_output_kind(linker_t* linker, linker_output_kind_t kind)
+void tau_linker_set_output_kind(tau_linker_t* linker, tau_linker_output_kind_t kind)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_set_output_kind (linker, kind); return;
-  case LINKER_MSVC: linker_msvc_set_output_kind(linker, kind); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_set_output_kind (linker, kind); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_set_output_kind(linker, kind); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_set_output_file(linker_t* linker, const char* file)
+void tau_linker_set_output_file(tau_linker_t* linker, const char* file)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_set_output_file (linker, file); return;
-  case LINKER_MSVC: linker_msvc_set_output_file(linker, file); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_set_output_file (linker, file); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_set_output_file(linker, file); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_set_optimization_level(linker_t* linker, linker_optimization_level_t level)
+void tau_linker_set_optimization_level(tau_linker_t* linker, tau_linker_optimization_level_t level)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_set_optimization_level (linker, level); return;
-  case LINKER_MSVC: linker_msvc_set_optimization_level(linker, level); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_set_optimization_level (linker, level); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_set_optimization_level(linker, level); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_set_debugging(linker_t* linker, bool debugging)
+void tau_linker_set_debugging(tau_linker_t* linker, bool debugging)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_set_debugging (linker, debugging); return;
-  case LINKER_MSVC: linker_msvc_set_debugging(linker, debugging); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_set_debugging (linker, debugging); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_set_debugging(linker, debugging); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_set_entry_point(linker_t* linker, const char* entry)
+void tau_linker_set_entry_point(tau_linker_t* linker, const char* entry)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_set_entry_point (linker, entry); return;
-  case LINKER_MSVC: linker_msvc_set_entry_point(linker, entry); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_set_entry_point (linker, entry); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_set_entry_point(linker, entry); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_set_visibility(linker_t* linker, linker_visibility_t visibility)
+void tau_linker_set_visibility(tau_linker_t* linker, tau_linker_visibility_t visibility)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_set_visibility (linker, visibility); return;
-  case LINKER_MSVC: linker_msvc_set_visibility(linker, visibility); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_set_visibility (linker, visibility); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_set_visibility(linker, visibility); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-void linker_add_flag(linker_t* linker, const char* flag)
+void tau_linker_add_flag(tau_linker_t* linker, const char* flag)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  linker_gcc_add_flag (linker, flag); return;
-  case LINKER_MSVC: linker_msvc_add_flag(linker, flag); return;
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  tau_linker_gcc_add_flag (linker, flag); return;
+  case TAU_LINKER_MSVC: tau_linker_msvc_add_flag(linker, flag); return;
+  default: TAU_UNREACHABLE();
   }
 }
 
-bool linker_link(linker_t* linker)
+bool tau_linker_link(tau_linker_t* linker)
 {
   switch (linker->kind)
   {
-  case LINKER_GCC:  return linker_gcc_link (linker);
-  case LINKER_MSVC: return linker_msvc_link(linker);
-  default: UNREACHABLE();
+  case TAU_LINKER_GCC:  return tau_linker_gcc_link (linker);
+  case TAU_LINKER_MSVC: return tau_linker_msvc_link(linker);
+  default: TAU_UNREACHABLE();
   }
 
   return false;

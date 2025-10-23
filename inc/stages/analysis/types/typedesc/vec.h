@@ -17,26 +17,26 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Type descriptor for vector types.
  */
-typedef struct typedesc_vec_t
+typedef struct tau_typedesc_vec_t
 {
-  TYPEDESC_HEADER;
+  TAU_TYPEDESC_HEADER;
   size_t size;           ///< The size of the vector.
-  typedesc_t* base_type; ///< The base type of the vector.
-} typedesc_vec_t;
+  tau_typedesc_t* base_type; ///< The base type of the vector.
+} tau_typedesc_vec_t;
 
 /**
  * \brief Initializes a new vector type descriptor.
  *
  * \returns Pointer to the newly initialized type descriptor.
 */
-typedesc_vec_t* typedesc_vec_init(void);
+tau_typedesc_vec_t* tau_typedesc_vec_init(void);
 
 /**
  * \brief Frees all memory allocated by a vector type descriptor.
  *
  * \param[in] desc Pointer to the type descriptor to be freed.
  */
-void typedesc_vec_free(typedesc_vec_t* desc);
+void tau_typedesc_vec_free(tau_typedesc_vec_t* desc);
 
 /**
  * \brief Checks if a vector type is implicitly direct convertible to another type.
@@ -45,7 +45,7 @@ void typedesc_vec_free(typedesc_vec_t* desc);
  * \param[in] dst_desc Pointer to the destination type descriptor.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_vec_is_implicitly_direct_convertible(typedesc_vec_t* src_desc, typedesc_t* dst_desc);
+bool tau_typedesc_vec_is_implicitly_direct_convertible(tau_typedesc_vec_t* src_desc, tau_typedesc_t* dst_desc);
 
 /**
  * \brief Checks if a vector type is implicitly indirect convertible to another type.
@@ -54,7 +54,7 @@ bool typedesc_vec_is_implicitly_direct_convertible(typedesc_vec_t* src_desc, typ
  * \param[in] dst_desc Pointer to the destination type descriptor.
  * \returns `true` if the implicit conversion is possible, `false` otherwise.
  */
-bool typedesc_vec_is_implicitly_indirect_convertible(typedesc_vec_t* src_desc, typedesc_t* dst_desc);
+bool tau_typedesc_vec_is_implicitly_indirect_convertible(tau_typedesc_vec_t* src_desc, tau_typedesc_t* dst_desc);
 
 /**
  * \brief Checks if a vector type is explicitly convertible to another type.
@@ -63,7 +63,7 @@ bool typedesc_vec_is_implicitly_indirect_convertible(typedesc_vec_t* src_desc, t
  * \param[in] dst_desc Pointer to the type descriptor to check conversion into.
  * \returns `true` if the explicit conversion is possible, `false` otherwise.
  */
-bool typedesc_vec_is_explicitly_convertible(typedesc_vec_t* src_desc, typedesc_t* dst_desc);
+bool tau_typedesc_vec_is_explicitly_convertible(tau_typedesc_vec_t* src_desc, tau_typedesc_t* dst_desc);
 
 TAU_EXTERN_C_END
 

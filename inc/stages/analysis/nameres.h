@@ -29,12 +29,12 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Name resolution context.
  */
-typedef struct nameres_ctx_t
+typedef struct tau_nameres_ctx_t
 {
-  symtable_t* global_scope; ///< The symbol table of the global scope.
-  stack_t* scopes; ///< Current scope stack.
-  error_bag_t* errors; ///< Associated error bag to add errors to.
-} nameres_ctx_t;
+  tau_symtable_t* global_scope; ///< The symbol table of the global scope.
+  tau_stack_t* scopes; ///< Current scope stack.
+  tau_error_bag_t* errors; ///< Associated error bag to add errors to.
+} tau_nameres_ctx_t;
 
 /**
  * \brief Initializes a new name resolution context.
@@ -43,14 +43,14 @@ typedef struct nameres_ctx_t
  * \param[in] errors Pointer to the error bag to be used.
  * \returns Pointer to the newly initialized name resolution context.
  */
-nameres_ctx_t* nameres_ctx_init(symtable_t* symtable, error_bag_t* errors);
+tau_nameres_ctx_t* tau_nameres_ctx_init(tau_symtable_t* symtable, tau_error_bag_t* errors);
 
 /**
  * \brief Frees all memory allocated by a name resolution context.
  * 
  * \param[in] ctx Pointer to the name resolution context to be freed.
  */
-void nameres_ctx_free(nameres_ctx_t* ctx);
+void tau_nameres_ctx_free(tau_nameres_ctx_t* ctx);
 
 /**
  * \brief Begins a new scope and returns it.
@@ -58,14 +58,14 @@ void nameres_ctx_free(nameres_ctx_t* ctx);
  * \param[in] ctx Pointer to the name resolution context.
  * \returns Pointer to the new scope.
  */
-symtable_t* nameres_ctx_scope_begin(nameres_ctx_t* ctx);
+tau_symtable_t* tau_nameres_ctx_scope_begin(tau_nameres_ctx_t* ctx);
 
 /**
  * \brief Ends the current scope.
  * 
  * \param[in] ctx Pointer to the name resolution context.
  */
-void nameres_ctx_scope_end(nameres_ctx_t* ctx);
+void tau_nameres_ctx_scope_end(tau_nameres_ctx_t* ctx);
 
 /**
  * \brief Returns the current scope.
@@ -73,7 +73,7 @@ void nameres_ctx_scope_end(nameres_ctx_t* ctx);
  * \param[in] ctx Pointer to the name resolution context.
  * \returns Pointer to the current scope.
  */
-symtable_t* nameres_ctx_scope_cur(nameres_ctx_t* ctx);
+tau_symtable_t* tau_nameres_ctx_scope_cur(tau_nameres_ctx_t* ctx);
 
 TAU_EXTERN_C_END
 

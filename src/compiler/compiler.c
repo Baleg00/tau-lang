@@ -22,234 +22,234 @@
 #include "utils/timer.h"
 #include "utils/io/file.h"
 
-struct compiler_t
+struct tau_compiler_t
 {
-  options_ctx_t* options;
+  tau_options_ctx_t* options;
 };
 
-static void compiler_dump_tokens(path_t* path, vector_t* tokens)
+static void tau_compiler_dump_tokens(tau_path_t* path, tau_vector_t* tokens)
 {
-  path_t* tokens_path = path_replace_extension(path, "tokens.json");
+  tau_path_t* tokens_path = tau_path_replace_extension(path, "tokens.json");
 
-  string_t* tokens_path_str = path_to_string(tokens_path);
+  tau_string_t* tokens_path_str = tau_path_to_string(tokens_path);
 
-  FILE* tokens_file = fopen(string_begin(tokens_path_str), "w");
-  ASSERT(tokens_file != NULL);
+  FILE* tokens_file = fopen(tau_string_begin(tokens_path_str), "w");
+  TAU_ASSERT(tokens_file != NULL);
 
-  string_free(tokens_path_str);
-  path_free(tokens_path);
+  tau_string_free(tokens_path_str);
+  tau_path_free(tokens_path);
 
-  token_json_dump_vector(tokens_file, tokens);
+  tau_token_json_dump_vector(tokens_file, tokens);
 
   fclose(tokens_file);
 }
 
-static void compiler_dump_ast(path_t* path, ast_node_t* root)
+static void tau_compiler_dump_ast(tau_path_t* path, tau_ast_node_t* root)
 {
-  path_t* ast_path = path_replace_extension(path, "ast.json");
+  tau_path_t* tau_ast_path = tau_path_replace_extension(path, "ast.json");
 
-  string_t* ast_path_str = path_to_string(ast_path);
+  tau_string_t* tau_ast_path_str = tau_path_to_string(tau_ast_path);
 
-  FILE* ast_file = fopen(string_begin(ast_path_str), "w");
-  ASSERT(ast_file != NULL);
+  FILE* tau_ast_file = fopen(tau_string_begin(tau_ast_path_str), "w");
+  TAU_ASSERT(tau_ast_file != NULL);
 
-  string_free(ast_path_str);
-  path_free(ast_path);
+  tau_string_free(tau_ast_path_str);
+  tau_path_free(tau_ast_path);
 
-  ast_node_dump_json(ast_file, root);
+  tau_ast_node_dump_json(tau_ast_file, root);
 
-  fclose(ast_file);
+  fclose(tau_ast_file);
 }
 
-static void compiler_emit_ll(path_t* path, LLVMModuleRef llvm_module)
+static void tau_compiler_emit_ll(tau_path_t* path, LLVMModuleRef llvm_module)
 {
-  path_t* ll_path = path_replace_extension(path, "ll");
+  tau_path_t* ll_path = tau_path_replace_extension(path, "ll");
 
-  string_t* ll_path_str = path_to_string(ll_path);
+  tau_string_t* ll_path_str = tau_path_to_string(ll_path);
 
-  char* error_str = NULL;
+  char* tau_error_str = NULL;
 
-  if (LLVMPrintModuleToFile(llvm_module, string_begin(ll_path_str), &error_str))
+  if (LLVMPrintModuleToFile(llvm_module, tau_string_begin(ll_path_str), &tau_error_str))
   {
-    log_error("LLVM", "Failed to emit LL file (%s): %s", string_begin(ll_path_str), error_str);
-    LLVMDisposeMessage(error_str);
+    tau_log_error("LLVM", "Failed to emit LL file (%s): %s", tau_string_begin(ll_path_str), tau_error_str);
+    LLVMDisposeMessage(tau_error_str);
   }
 
-  string_free(ll_path_str);
-  path_free(ll_path);
+  tau_string_free(ll_path_str);
+  tau_path_free(ll_path);
 }
 
-static void compiler_emit_bc(path_t* path, LLVMModuleRef llvm_module)
+static void tau_compiler_emit_bc(tau_path_t* path, LLVMModuleRef llvm_module)
 {
-  path_t* bc_path = path_replace_extension(path, "bc");
+  tau_path_t* bc_path = tau_path_replace_extension(path, "bc");
 
-  string_t* bc_path_str = path_to_string(bc_path);
+  tau_string_t* bc_path_str = tau_path_to_string(bc_path);
 
-  if (LLVMWriteBitcodeToFile(llvm_module, string_begin(bc_path_str)))
-    log_error("LLVM", "Failed to emit bitcode file (%s).", string_begin(bc_path_str));
+  if (LLVMWriteBitcodeToFile(llvm_module, tau_string_begin(bc_path_str)))
+    tau_log_error("LLVM", "Failed to emit bitcode file (%s).", tau_string_begin(bc_path_str));
 
-  string_free(bc_path_str);
-  path_free(bc_path);
+  tau_string_free(bc_path_str);
+  tau_path_free(bc_path);
 }
 
-static void compiler_emit_obj(path_t* path, LLVMModuleRef llvm_module)
+static void tau_compiler_emit_obj(tau_path_t* path, LLVMModuleRef llvm_module)
 {
-  path_t* obj_path = path_replace_extension(path, "obj");
+  tau_path_t* obj_path = tau_path_replace_extension(path, "obj");
 
-  string_t* obj_path_str = path_to_string(obj_path);
+  tau_string_t* obj_path_str = tau_path_to_string(obj_path);
 
-  char* error_str = NULL;
+  char* tau_error_str = NULL;
 
-  if (LLVMTargetMachineEmitToFile(llvm_get_machine(), llvm_module, string_begin(obj_path_str), LLVMObjectFile, &error_str))
+  if (LLVMTargetMachineEmitToFile(tau_llvm_get_machine(), llvm_module, tau_string_begin(obj_path_str), LLVMObjectFile, &tau_error_str))
   {
-    log_error("LLVM", "Failed to emit object file (%s): %s", string_begin(obj_path_str), error_str);
-    LLVMDisposeMessage(error_str);
+    tau_log_error("LLVM", "Failed to emit object file (%s): %s", tau_string_begin(obj_path_str), tau_error_str);
+    LLVMDisposeMessage(tau_error_str);
   }
 
-  string_free(obj_path_str);
-  path_free(obj_path);
+  tau_string_free(obj_path_str);
+  tau_path_free(obj_path);
 }
 
-static void compiler_emit_asm(path_t* path, LLVMModuleRef llvm_module)
+static void tau_compiler_emit_asm(tau_path_t* path, LLVMModuleRef llvm_module)
 {
-  path_t* asm_path = path_replace_extension(path, "asm");
+  tau_path_t* asm_path = tau_path_replace_extension(path, "asm");
 
-  string_t* asm_path_str = path_to_string(asm_path);
+  tau_string_t* asm_path_str = tau_path_to_string(asm_path);
 
-  char* error_str = NULL;
+  char* tau_error_str = NULL;
 
-  if (LLVMTargetMachineEmitToFile(llvm_get_machine(), llvm_module, string_begin(asm_path_str), LLVMAssemblyFile, &error_str))
+  if (LLVMTargetMachineEmitToFile(tau_llvm_get_machine(), llvm_module, tau_string_begin(asm_path_str), LLVMAssemblyFile, &tau_error_str))
   {
-    log_error("LLVM", "Failed to emit assembly file (%s): %s", string_begin(asm_path_str), error_str);
-    LLVMDisposeMessage(error_str);
+    tau_log_error("LLVM", "Failed to emit assembly file (%s): %s", tau_string_begin(asm_path_str), tau_error_str);
+    LLVMDisposeMessage(tau_error_str);
   }
 
-  string_free(asm_path_str);
-  path_free(asm_path);
+  tau_string_free(asm_path_str);
+  tau_path_free(asm_path);
 }
 
-environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
+tau_environment_t* tau_compiler_process_file(tau_compiler_t* compiler, tau_path_t* path)
 {
-  if (!file_exists(path))
+  if (!tau_file_exists(path))
   {
-    string_t* path_str = path_to_string(path);
+    tau_string_t* tau_path_str = tau_path_to_string(path);
 
-    log_error("main", "File does not exist: %s", string_begin(path_str));
+    tau_log_error("main", "File does not exist: %s", tau_string_begin(tau_path_str));
 
-    string_free(path_str);
+    tau_string_free(tau_path_str);
 
     return NULL;
   }
 
-  environment_t* env = environment_init(
-    symtable_init(NULL),
-    typebuilder_init(llvm_get_context(), llvm_get_data()),
-    typetable_init(),
-    llvm_get_context(),
-    llvm_get_data(),
-    LLVMModuleCreateWithNameInContext("module", llvm_get_context()),
-    LLVMCreateBuilderInContext(llvm_get_context())
+  tau_environment_t* env = tau_environment_init(
+    tau_symtable_init(NULL),
+    tau_typebuilder_init(tau_llvm_get_context(), tau_llvm_get_data()),
+    tau_typetable_init(),
+    tau_llvm_get_context(),
+    tau_llvm_get_data(),
+    LLVMModuleCreateWithNameInContext("module", tau_llvm_get_context()),
+    LLVMCreateBuilderInContext(tau_llvm_get_context())
   );
 
-  size_t path_len = path_to_cstr(path, NULL, 0);
-  char* path_cstr = (char*)malloc(sizeof(char) * (path_len + 1));
-  path_to_cstr(path, path_cstr, path_len + 1);
+  size_t tau_path_len = tau_path_to_cstr(path, NULL, 0);
+  char* tau_path_cstr = (char*)malloc(sizeof(char) * (tau_path_len + 1));
+  tau_path_to_cstr(path, tau_path_cstr, tau_path_len + 1);
 
-  vector_push(env->paths, path_cstr);
+  tau_vector_push(env->paths, tau_path_cstr);
 
-  size_t src_len = file_read(path, NULL, 0);
+  size_t src_len = tau_file_read(path, NULL, 0);
   char* src_cstr = (char*)malloc((src_len + 1) * sizeof(char));
-  file_read(path, src_cstr, src_len + 1);
+  tau_file_read(path, src_cstr, src_len + 1);
 
-  vector_push(env->sources, src_cstr);
+  tau_vector_push(env->sources, src_cstr);
 
-  error_bag_t* errors = error_bag_init(10);
+  tau_error_bag_t* errors = tau_error_bag_init(10);
 
   {
-    lexer_t* lexer = lexer_init();
+    tau_lexer_t* lexer = tau_lexer_init();
 
-    time_it("lexer", lexer_lex(lexer, path_cstr, src_cstr, env->tokens, errors));
+    tau_time_it("lexer", tau_lexer_lex(lexer, tau_path_cstr, src_cstr, env->tokens, errors));
 
-    lexer_free(lexer);
+    tau_lexer_free(lexer);
 
-    if (!error_bag_empty(errors))
+    if (!tau_error_bag_empty(errors))
     {
-      error_bag_print(errors);
-      error_bag_free(errors);
+      tau_error_bag_print(errors);
+      tau_error_bag_free(errors);
       exit(EXIT_FAILURE);
     }
   }
 
-  if (options_get_dump_tokens(compiler->options))
-    compiler_dump_tokens(path, env->tokens);
+  if (tau_options_get_dump_tokens(compiler->options))
+    tau_compiler_dump_tokens(path, env->tokens);
 
-  ast_node_t* root_node = NULL;
+  tau_ast_node_t* root_node = NULL;
 
   {
-    parser_t* parser = parser_init();
+    tau_parser_t* parser = tau_parser_init();
 
-    time_it("parser", root_node = parser_parse(parser, env->tokens, errors));
+    tau_time_it("parser", root_node = tau_parser_parse(parser, env->tokens, errors));
 
-    parser_free(parser);
+    tau_parser_free(parser);
 
-    if (!error_bag_empty(errors))
+    if (!tau_error_bag_empty(errors))
     {
-      error_bag_print(errors);
-      error_bag_free(errors);
+      tau_error_bag_print(errors);
+      tau_error_bag_free(errors);
       exit(EXIT_FAILURE);
     }
   }
 
-  if (options_get_dump_ast(compiler->options))
-    compiler_dump_ast(path, root_node);
+  if (tau_options_get_dump_ast(compiler->options))
+    tau_compiler_dump_ast(path, root_node);
 
   {
-    nameres_ctx_t* nameres_ctx = nameres_ctx_init(env->symtable, errors);
+    tau_nameres_ctx_t* tau_nameres_ctx = tau_nameres_ctx_init(env->symtable, errors);
 
-    time_it("analysis:nameres", ast_node_nameres(nameres_ctx, root_node));
+    tau_time_it("analysis:nameres", tau_ast_node_nameres(tau_nameres_ctx, root_node));
 
-    nameres_ctx_free(nameres_ctx);
+    tau_nameres_ctx_free(tau_nameres_ctx);
 
-    if (!error_bag_empty(errors))
+    if (!tau_error_bag_empty(errors))
     {
-      error_bag_print(errors);
-      error_bag_free(errors);
-      exit(EXIT_FAILURE);
-    }
-  }
-
-  {
-    typecheck_ctx_t* typecheck_ctx = typecheck_ctx_init(env->typebuilder, env->typetable, errors);
-
-    time_it("analysis:typecheck", ast_node_typecheck(typecheck_ctx, root_node));
-
-    typecheck_ctx_free(typecheck_ctx);
-
-    if (!error_bag_empty(errors))
-    {
-      error_bag_print(errors);
-      error_bag_free(errors);
+      tau_error_bag_print(errors);
+      tau_error_bag_free(errors);
       exit(EXIT_FAILURE);
     }
   }
 
   {
-    ctrlflow_ctx_t* ctrlflow_ctx = ctrlflow_ctx_init(errors);
+    tau_typecheck_ctx_t* tau_typecheck_ctx = tau_typecheck_ctx_init(env->typebuilder, env->typetable, errors);
 
-    time_it("analysis:ctrlflow", ast_node_ctrlflow(ctrlflow_ctx, root_node));
+    tau_time_it("analysis:typecheck", tau_ast_node_typecheck(tau_typecheck_ctx, root_node));
 
-    ctrlflow_ctx_free(ctrlflow_ctx);
+    tau_typecheck_ctx_free(tau_typecheck_ctx);
 
-    if (!error_bag_empty(errors))
+    if (!tau_error_bag_empty(errors))
     {
-      error_bag_print(errors);
-      error_bag_free(errors);
+      tau_error_bag_print(errors);
+      tau_error_bag_free(errors);
       exit(EXIT_FAILURE);
     }
   }
 
   {
-    codegen_ctx_t* codegen_ctx = codegen_ctx_init(
+    tau_ctrlflow_ctx_t* tau_ctrlflow_ctx = tau_ctrlflow_ctx_init(errors);
+
+    tau_time_it("analysis:ctrlflow", tau_ast_node_ctrlflow(tau_ctrlflow_ctx, root_node));
+
+    tau_ctrlflow_ctx_free(tau_ctrlflow_ctx);
+
+    if (!tau_error_bag_empty(errors))
+    {
+      tau_error_bag_print(errors);
+      tau_error_bag_free(errors);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  {
+    tau_codegen_ctx_t* tau_codegen_ctx = tau_codegen_ctx_init(
       env->typebuilder,
       env->typetable,
       env->llvm_context,
@@ -258,15 +258,15 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
       env->llvm_builder
     );
 
-    time_it("codegen", ast_node_codegen(codegen_ctx, root_node));
+    tau_time_it("codegen", tau_ast_node_codegen(tau_codegen_ctx, root_node));
 
-    codegen_ctx_free(codegen_ctx);
+    tau_codegen_ctx_free(tau_codegen_ctx);
   }
 
-  error_bag_free(errors);
+  tau_error_bag_free(errors);
 
-  if (options_get_dump_ll(compiler->options))
-    compiler_emit_ll(path, env->llvm_module);
+  if (tau_options_get_dump_ll(compiler->options))
+    tau_compiler_emit_ll(path, env->llvm_module);
 
   LLVMVerifyModule(env->llvm_module, LLVMAbortProcessAction, NULL);
 
@@ -277,94 +277,94 @@ environment_t* compiler_process_file(compiler_t* compiler, path_t* path)
   LLVMPassBuilderOptionsSetDebugLogging(llvm_pass_builder_options, true);
 #endif
 
-  // LLVMRunPasses(llvm_module, "default<O3>", llvm_get_machine(), llvm_pass_builder_options);
+  // LLVMRunPasses(llvm_module, "default<O3>", tau_llvm_get_machine(), llvm_pass_builder_options);
 
   LLVMDisposePassBuilderOptions(llvm_pass_builder_options);
 
-  if (options_get_dump_bc(compiler->options))
-    compiler_emit_bc(path, env->llvm_module);
+  if (tau_options_get_dump_bc(compiler->options))
+    tau_compiler_emit_bc(path, env->llvm_module);
 
-  if (options_get_dump_asm(compiler->options))
-    compiler_emit_asm(path, env->llvm_module);
+  if (tau_options_get_dump_asm(compiler->options))
+    tau_compiler_emit_asm(path, env->llvm_module);
 
-  compiler_emit_obj(path, env->llvm_module);
+  tau_compiler_emit_obj(path, env->llvm_module);
 
   return env;
 }
 
-compiler_t* compiler_init(void)
+tau_compiler_t* tau_compiler_init(void)
 {
-  compiler_t* compiler = (compiler_t*)malloc(sizeof(compiler_t));
+  tau_compiler_t* compiler = (tau_compiler_t*)malloc(sizeof(tau_compiler_t));
 
-  log_set_stream(stdout);
-  crumb_set_stream(stdout);
+  tau_log_set_stream(stdout);
+  tau_crumb_set_stream(stdout);
 
-  compiler->options = options_ctx_init();
+  compiler->options = tau_options_ctx_init();
 
   return compiler;
 }
 
-void compiler_free(compiler_t* compiler)
+void tau_compiler_free(tau_compiler_t* compiler)
 {
-  if (!options_get_should_exit(compiler->options))
+  if (!tau_options_get_should_exit(compiler->options))
   {
-    ast_registry_free();
-    token_registry_free();
-    llvm_free();
+    tau_ast_registry_free();
+    tau_token_registry_free();
+    tau_llvm_free();
   }
 
-  options_ctx_free(compiler->options);
+  tau_options_ctx_free(compiler->options);
 
   free(compiler);
 }
 
-int compiler_main(compiler_t* compiler, int argc, const char* argv[])
+int tau_compiler_main(tau_compiler_t* compiler, int argc, const char* argv[])
 {
-  options_parse(compiler->options, argc, argv);
+  tau_options_parse(compiler->options, argc, argv);
 
-  if (options_get_should_exit(compiler->options))
+  if (tau_options_get_should_exit(compiler->options))
     return EXIT_SUCCESS;
 
-  log_set_verbose(options_get_is_verbose(compiler->options));
-  log_set_level(options_get_log_level(compiler->options));
+  tau_log_set_verbose(tau_options_get_is_verbose(compiler->options));
+  tau_log_set_level(tau_options_get_log_level(compiler->options));
 
-  time_it("LLVM:init", llvm_init());
+  tau_time_it("LLVM:init", tau_llvm_init());
 
-  if (vector_empty(options_get_input_files(compiler->options)))
+  if (tau_vector_empty(tau_options_get_input_files(compiler->options)))
   {
-    log_fatal("main", "No input files provided! ");
+    tau_log_fatal("main", "No input files provided! ");
     return EXIT_FAILURE;
   }
 
-  vector_t* input_files = options_get_input_files(compiler->options);
+  tau_vector_t* input_files = tau_options_get_input_files(compiler->options);
 
-  VECTOR_FOR_LOOP(i, input_files)
+  TAU_VECTOR_FOR_LOOP(i, input_files)
   {
-    const char* path_cstr = (const char*)vector_get(input_files, i);
-    path_t* path = path_init_with_cstr(path_cstr);
+    const char* tau_path_cstr = (const char*)tau_vector_get(input_files, i);
+    tau_path_t* path = tau_path_init_with_cstr(tau_path_cstr);
 
-    environment_t* env = compiler_process_file(compiler, path);
+    tau_environment_t* env = tau_compiler_process_file(compiler, path);
 
-    VECTOR_FOR_LOOP(i, env->paths)
+    TAU_VECTOR_FOR_LOOP(i, env->paths)
     {
-      free(vector_get(env->paths, i));
+      free(tau_vector_get(env->paths, i));
     }
 
-    VECTOR_FOR_LOOP(i, env->sources)
+    TAU_VECTOR_FOR_LOOP(i, env->sources)
     {
-      free(vector_get(env->sources, i));
+      free(tau_vector_get(env->sources, i));
     }
 
     LLVMDisposeBuilder(env->llvm_builder);
     LLVMDisposeModule(env->llvm_module);
 
-    typetable_free(env->typetable);
-    typebuilder_free(env->typebuilder);
-    symtable_free(env->symtable);
+    tau_typetable_free(env->typetable);
+    tau_typebuilder_free(env->typebuilder);
+    tau_symtable_free(env->symtable);
 
-    environment_free(env);
+    tau_environment_free(env);
 
-    path_free(path);
+    tau_path_free(path);
   }
 
   return EXIT_SUCCESS;

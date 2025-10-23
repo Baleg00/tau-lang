@@ -9,24 +9,24 @@
 
 #if TAU_OS_LINUX
 
-bool condvar_init(condvar_t* condvar)
+bool tau_condvar_init(tau_condvar_t* condvar)
 {
   return pthread_cond_init(&condvar->native_handle, NULL) == 0;
 }
 
-void condvar_free(condvar_t* condvar)
+void tau_condvar_free(tau_condvar_t* condvar)
 {
   int result = pthread_cond_destroy(&condvar->native_handle);
-  ASSERT(result == 0);
+  TAU_ASSERT(result == 0);
 }
 
-void condvar_wait(condvar_t* condvar, mutex_t* mutex)
+void tau_condvar_wait(tau_condvar_t* condvar, tau_mutex_t* mutex)
 {
   int result = pthread_cond_wait(&condvar->native_handle, &mutex->native_handle);
-  ASSERT(result == 0);
+  TAU_ASSERT(result == 0);
 }
 
-bool condvar_wait_for(condvar_t* restrict condvar, mutex_t* restrict mutex, const struct timespec* restrict timeout)
+bool tau_condvar_wait_for(tau_condvar_t* restrict condvar, tau_mutex_t* restrict mutex, const struct timespec* restrict timeout)
 {
   struct timespec now;
   timespec_get(&now, TIME_UTC);
@@ -44,21 +44,21 @@ bool condvar_wait_for(condvar_t* restrict condvar, mutex_t* restrict mutex, cons
   return pthread_cond_timedwait(&condvar->native_handle, &mutex->native_handle, &timepoint) == 0;
 }
 
-bool condvar_wait_until(condvar_t* restrict condvar, mutex_t* restrict mutex, const struct timespec* restrict timepoint)
+bool tau_condvar_wait_until(tau_condvar_t* restrict condvar, tau_mutex_t* restrict mutex, const struct timespec* restrict timepoint)
 {
   return pthread_cond_timedwait(&condvar->native_handle, &mutex->native_handle, timepoint) == 0;
 }
 
-void condvar_signal(condvar_t* condvar)
+void tau_condvar_signal(tau_condvar_t* condvar)
 {
   int result = pthread_cond_signal(&condvar->native_handle);
-  ASSERT(result == 0);
+  TAU_ASSERT(result == 0);
 }
 
-void condvar_broadcast(condvar_t* condvar)
+void tau_condvar_broadcast(tau_condvar_t* condvar)
 {
   int result = pthread_cond_broadcast(&condvar->native_handle);
-  ASSERT(result == 0);
+  TAU_ASSERT(result == 0);
 }
 
 #else

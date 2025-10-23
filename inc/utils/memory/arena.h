@@ -30,14 +30,14 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Represents an arena allocator.
  */
-typedef struct arena_t arena_t;
+typedef struct tau_arena_t tau_arena_t;
 
 /**
  * \brief Initializes a new arena allocator.
  * 
  * \returns Pointer to the initialized arena allocator.
  */
-arena_t* arena_init(void);
+tau_arena_t* tau_arena_init(void);
 
 /**
  * \brief Initializes a new arena allocator with a specified capacity.
@@ -45,14 +45,14 @@ arena_t* arena_init(void);
  * \param[in] cap The capacity of the arena in bytes.
  * \returns Pointer to the initialized arena allocator.
  */
-arena_t* arena_init_with_capacity(size_t cap);
+tau_arena_t* tau_arena_init_with_capacity(size_t cap);
 
 /**
  * \brief Frees all memory associated with an arena allocator.
  *
  * \param[in] arena Pointer to the arena allocator to be freed.
  */
-void arena_free(arena_t* arena);
+void tau_arena_free(tau_arena_t* arena);
 
 /**
  * \brief Retrieves the capacity of an arena allocator.
@@ -60,7 +60,7 @@ void arena_free(arena_t* arena);
  * \param[in] arena Pointer to the arena allocator.
  * \returns The capacity of the arena allocator in bytes.
  */
-size_t arena_capacity(arena_t* arena);
+size_t tau_arena_capacity(tau_arena_t* arena);
 
 /**
  * \brief Checks if an arena owns a pointer (aka it points to a memory region
@@ -70,7 +70,7 @@ size_t arena_capacity(arena_t* arena);
  * \param[in] ptr The pointer to be checked.
  * \returns `true` if the arena owns the pointer, `false` otherwise.
  */
-bool arena_owns(arena_t* arena, void* ptr);
+bool tau_arena_owns(tau_arena_t* arena, void* ptr);
 
 /**
  * \brief Allocates memory using an arena allocator.
@@ -79,7 +79,7 @@ bool arena_owns(arena_t* arena, void* ptr);
  * \param[in] size The number of bytes to be allocated.
  * \returns Pointer to the newly allocated memory or `NULL`.
  */
-void* arena_alloc(arena_t* arena, size_t size);
+void* tau_arena_alloc(tau_arena_t* arena, size_t size);
 
 /**
  * \brief Allocates aligned memory using an arena allocator.
@@ -89,7 +89,7 @@ void* arena_alloc(arena_t* arena, size_t size);
  * \param[in] alignment The alignment requirement.
  * \returns Pointer to the newly allocated memory or `NULL`.
  */
-void* arena_alloc_aligned(arena_t* arena, size_t size, size_t alignment);
+void* tau_arena_alloc_aligned(tau_arena_t* arena, size_t size, size_t alignment);
 
 TAU_EXTERN_C_END
 

@@ -27,7 +27,7 @@ TAU_EXTERN_C_BEGIN
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path refers to a directory, `false` otherwise.
  */
-bool file_is_directory(path_t* path);
+bool tau_file_is_directory(tau_path_t* path);
 
 /**
  * \brief Checks whether a path refers to a regular file.
@@ -35,7 +35,7 @@ bool file_is_directory(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path refers to a regular file, `false` otherwise.
  */
-bool file_is_regular_file(path_t* path);
+bool tau_file_is_regular_file(tau_path_t* path);
 
 /**
  * \brief Checks whether a path refers to a block file.
@@ -43,7 +43,7 @@ bool file_is_regular_file(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path refers to a block file, `false` otherwise.
  */
-bool file_is_block_file(path_t* path);
+bool tau_file_is_block_file(tau_path_t* path);
 
 /**
  * \brief Checks whether a path refers to a character file.
@@ -51,7 +51,7 @@ bool file_is_block_file(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path refers to a character file, `false` otherwise.
  */
-bool file_is_character_file(path_t* path);
+bool tau_file_is_character_file(tau_path_t* path);
 
 /**
  * \brief Checks whether a path refers to a named pipe.
@@ -59,7 +59,7 @@ bool file_is_character_file(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path refers to a named pipe, `false` otherwise.
  */
-bool file_is_pipe(path_t* path);
+bool tau_file_is_pipe(tau_path_t* path);
 
 /**
  * \brief Checks whether a path refers to a named IPC socket.
@@ -67,7 +67,7 @@ bool file_is_pipe(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path refers to a named IPC socket, `false` otherwise.
  */
-bool file_is_socket(path_t* path);
+bool tau_file_is_socket(tau_path_t* path);
 
 /**
  * \brief Checks whether a path refers to a symbolic link.
@@ -75,7 +75,7 @@ bool file_is_socket(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path refers to a symbolic link, `false` otherwise.
  */
-bool file_is_symlink(path_t* path);
+bool tau_file_is_symlink(tau_path_t* path);
 
 /**
  * \brief Checks whether a path refers to an existing file system object.
@@ -83,7 +83,7 @@ bool file_is_symlink(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path refers to an existing file system object, `false` otherwise.
  */
-bool file_exists(path_t* path);
+bool tau_file_exists(tau_path_t* path);
 
 /**
  * \brief Checks whether a path refers to an empty file.
@@ -91,7 +91,7 @@ bool file_exists(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns `true` if the path refers to an empty file, `false` otherwise.
  */
-bool file_empty(path_t* path);
+bool tau_file_empty(tau_path_t* path);
 
 /**
  * \brief Retrieves the size of a file in bytes.
@@ -99,7 +99,7 @@ bool file_empty(path_t* path);
  * \param[in] path Pointer to the path to be used.
  * \returns The size of the file in bytes if path refers to a file, 0 otherwise.
  */
-size_t file_size(path_t* path);
+size_t tau_file_size(tau_path_t* path);
 
 /**
  * \brief Reads the contents of a file and stores it in the provided buffer.
@@ -113,7 +113,7 @@ size_t file_size(path_t* path);
  * \returns The number of characters written into the buffer, excluding the
  * null-terminator.
  */
-size_t file_read(path_t* path, char* buf, size_t len);
+size_t tau_file_read(tau_path_t* path, char* buf, size_t len);
 
 TAU_EXTERN_C_END
 

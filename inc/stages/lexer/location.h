@@ -28,7 +28,7 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Location in the source code.
  */
-typedef struct location_t
+typedef struct tau_location_t
 {
   const char* path; // Path to the source file.
   const char* src; // Pointer to beginning of the source string.
@@ -36,7 +36,7 @@ typedef struct location_t
   size_t row; // The row number in the source file.
   size_t col; // The column number in the row.
   size_t len; // The character length of marked location.
-} location_t;
+} tau_location_t;
 
 /**
  * \brief Dump the JSON representation of a location to a file stream.
@@ -45,7 +45,7 @@ typedef struct location_t
  * \param[in] stream Pointer to the file stream where the JSON dump will be
  * written.
  */
-void location_json_dump(location_t loc, FILE* stream);
+void tau_location_json_dump(tau_location_t loc, FILE* stream);
 
 /**
  * \brief Creates a string from a location.
@@ -53,7 +53,7 @@ void location_json_dump(location_t loc, FILE* stream);
  * \param loc Pointer to the location.
  * \returns Pointer to the string.
  */
-string_t* location_to_string(location_t loc);
+tau_string_t* tau_location_to_string(tau_location_t loc);
 
 /**
  * \brief Creates a string view of a location.
@@ -61,7 +61,7 @@ string_t* location_to_string(location_t loc);
  * \param loc Pointer to the location.
  * \returns The string view.
  */
-string_view_t location_to_string_view(location_t loc);
+tau_string_view_t tau_location_to_string_view(tau_location_t loc);
 
 TAU_EXTERN_C_END
 

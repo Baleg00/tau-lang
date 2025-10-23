@@ -29,37 +29,37 @@ TAU_EXTERN_C_BEGIN
 /**
  * \brief Enumeration of element kinds.
  */
-typedef enum shyd_elem_kind_t
+typedef enum tau_shyd_elem_kind_t
 {
-  SHYD_TERM,
-  SHYD_TYPE,
-  SHYD_OP,
-  SHYD_PAREN_OPEN,
-  SHYD_BRACKET_OPEN,
-} shyd_elem_kind_t;
+  TAU_SHYD_TERM,
+  TAU_SHYD_TYPE,
+  TAU_SHYD_OP,
+  TAU_SHYD_PAREN_OPEN,
+  TAU_SHYD_BRACKET_OPEN,
+} tau_shyd_elem_kind_t;
 
 /**
  * \brief Shunting yard element.
  */
-typedef struct shyd_elem_t
+typedef struct tau_shyd_elem_t
 {
-  shyd_elem_kind_t kind;
-  token_t* tok;
-  ast_node_t* node;
+  tau_shyd_elem_kind_t kind;
+  tau_token_t* tok;
+  tau_ast_node_t* node;
   op_kind_t op;
-} shyd_elem_t;
+} tau_shyd_elem_t;
 
 /**
  * \brief Shunting yard context.
  */
-typedef struct shyd_ctx_t
+typedef struct tau_shyd_ctx_t
 {
-  parser_t* par;       ///< Pointer to the parser to be used.
-  queue_t* out_queue;  ///< Queue of shunting yard output elements.
-  stack_t* op_stack;   ///< Stack of shunting yard operator elements.
-  stack_t* node_stack; ///< Stack of result AST nodes.
+  tau_parser_t* par;       ///< Pointer to the parser to be used.
+  tau_queue_t* out_queue;  ///< Queue of shunting yard output elements.
+  tau_stack_t* op_stack;   ///< Stack of shunting yard operator elements.
+  tau_stack_t* node_stack; ///< Stack of result AST nodes.
   bool prev_term;      ///< `true` if the previously parsed element was a term, `false` otherwise.
-} shyd_ctx_t;
+} tau_shyd_ctx_t;
 
 /**
  * \brief Initializes a new shunting yard context.
@@ -67,14 +67,14 @@ typedef struct shyd_ctx_t
  * \param[in] par Pointer to the parser to be used.
  * \returns Pointer to the newly initialized shunting yard context.
  */
-shyd_ctx_t* shyd_ctx_init(parser_t* par);
+tau_shyd_ctx_t* tau_shyd_ctx_init(tau_parser_t* par);
 
 /**
  * \brief Frees all memory associated with a shunting yard context.
  * 
  * \param[in] ctx Pointer to the shunting yard context to be freed.
  */
-void shyd_ctx_free(shyd_ctx_t* ctx);
+void tau_shyd_ctx_free(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Initializes a new shunting yard element.
@@ -83,14 +83,14 @@ void shyd_ctx_free(shyd_ctx_t* ctx);
  * \param[in] kind Element kind.
  * \returns Pointer to the newly initialized shunting yard element.
  */
-shyd_elem_t* shyd_elem_init(shyd_ctx_t* ctx, shyd_elem_kind_t kind);
+tau_shyd_elem_t* tau_shyd_elem_init(tau_shyd_ctx_t* ctx, tau_shyd_elem_kind_t kind);
 
 /**
  * \brief Frees all memory associated with a shunting yard element.
  * 
  * \param[in] elem Pointer to the shunting yard element to be freed.
  */
-void shyd_elem_free(shyd_elem_t* elem);
+void tau_shyd_elem_free(tau_shyd_elem_t* elem);
 
 /**
  * \brief Move elements from the operator stack into the output queue until an
@@ -101,7 +101,7 @@ void shyd_elem_free(shyd_elem_t* elem);
  * \returns `true` if an element of the specified kind was encountered, `false`
  * otherwise.
  */
-bool shyd_op_flush_until_elem(shyd_ctx_t* ctx, shyd_elem_kind_t kind);
+bool tau_shyd_op_flush_until_elem(tau_shyd_ctx_t* ctx, tau_shyd_elem_kind_t kind);
 
 /**
  * \brief Move elements from the operator stack into the output queue according
@@ -110,7 +110,7 @@ bool shyd_op_flush_until_elem(shyd_ctx_t* ctx, shyd_elem_kind_t kind);
  * \param[in] ctx Pointer to the shunting yard context to be used.
  * \param[in] op Next operator kind.
  */
-void shyd_op_flush_for_op(shyd_ctx_t* ctx, op_kind_t op);
+void tau_shyd_op_flush_for_op(tau_shyd_ctx_t* ctx, op_kind_t op);
 
 /**
  * \brief Parses an expression that contains a type (e.g. sizeof, alignof).
@@ -118,7 +118,7 @@ void shyd_op_flush_for_op(shyd_ctx_t* ctx, op_kind_t op);
  * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a typed expression was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_expr_typed(shyd_ctx_t* ctx);
+bool tau_shyd_parse_expr_typed(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a left parenthesis.
@@ -126,7 +126,7 @@ bool shyd_parse_expr_typed(shyd_ctx_t* ctx);
  * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a left parenthesis was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_punct_paren_left(shyd_ctx_t* ctx);
+bool tau_shyd_parse_punct_paren_left(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a right parenthesis.
@@ -134,7 +134,7 @@ bool shyd_parse_punct_paren_left(shyd_ctx_t* ctx);
  * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a right parenthesis was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_punct_paren_right(shyd_ctx_t* ctx);
+bool tau_shyd_parse_punct_paren_right(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a left bracket.
@@ -142,7 +142,7 @@ bool shyd_parse_punct_paren_right(shyd_ctx_t* ctx);
  * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a left bracket was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_punct_bracket_left(shyd_ctx_t* ctx);
+bool tau_shyd_parse_punct_bracket_left(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a right bracket.
@@ -150,7 +150,7 @@ bool shyd_parse_punct_bracket_left(shyd_ctx_t* ctx);
  * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a right bracket was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_punct_bracket_right(shyd_ctx_t* ctx);
+bool tau_shyd_parse_punct_bracket_right(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a literal vector or matrix expression.
@@ -158,7 +158,7 @@ bool shyd_parse_punct_bracket_right(shyd_ctx_t* ctx);
  * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a literal was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_lit_vec_or_mat(shyd_ctx_t* ctx);
+bool tau_shyd_parse_lit_vec_or_mat(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a call operation expression.
@@ -167,7 +167,7 @@ bool shyd_parse_lit_vec_or_mat(shyd_ctx_t* ctx);
  * \return `true` if a call operation expression was parsed successfully,
  * `false` otherwise.
  */
-bool shyd_parse_expr_op_call(shyd_ctx_t* ctx);
+bool tau_shyd_parse_expr_op_call(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses a generic specialization operation expression.
@@ -176,7 +176,7 @@ bool shyd_parse_expr_op_call(shyd_ctx_t* ctx);
  * \return `true` if a generic specialization operation expression was parsed
  * successfully, `false` otherwise.
  */
-bool shyd_parse_expr_op_spec(shyd_ctx_t* ctx);
+bool tau_shyd_parse_expr_op_spec(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses an expression term.
@@ -184,7 +184,7 @@ bool shyd_parse_expr_op_spec(shyd_ctx_t* ctx);
  * \param[in] ctx Pointer to the shunting yard context to be used.
  * \return `true` if a term was parsed successfully, `false` otherwise.
  */
-bool shyd_parse_expr_term(shyd_ctx_t* ctx);
+bool tau_shyd_parse_expr_term(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses an operation expression.
@@ -193,7 +193,7 @@ bool shyd_parse_expr_term(shyd_ctx_t* ctx);
  * \return `true` if an operation expression was parsed successfully,
  * `false` otherwise.
  */
-bool shyd_parse_expr_op(shyd_ctx_t* ctx);
+bool tau_shyd_parse_expr_op(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses the next element of an expression.
@@ -202,7 +202,7 @@ bool shyd_parse_expr_op(shyd_ctx_t* ctx);
  * \returns `true` if the expression may have more terms to be parsed, `false`
  * otherwise.
  */
-bool shyd_parse_postfix_next(shyd_ctx_t* ctx);
+bool tau_shyd_parse_postfix_next(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Parses an expression and stores the resulting elements in the output
@@ -210,7 +210,7 @@ bool shyd_parse_postfix_next(shyd_ctx_t* ctx);
  * 
  * \param[in] ctx Pointer to the shunting yard context to be used.
  */
-void shyd_parse_postfix(shyd_ctx_t* ctx);
+void tau_shyd_parse_postfix(tau_shyd_ctx_t* ctx);
 
 /**
  * \brief Creates an AST unary operator expression node and pushes it onto the
@@ -219,7 +219,7 @@ void shyd_parse_postfix(shyd_ctx_t* ctx);
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard unary operator element.
  */
-void shyd_ast_expr_term(shyd_ctx_t* ctx, shyd_elem_t* elem);
+void tau_shyd_ast_expr_term(tau_shyd_ctx_t* ctx, tau_shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST unary operator expression node and pushes it onto the
@@ -228,7 +228,7 @@ void shyd_ast_expr_term(shyd_ctx_t* ctx, shyd_elem_t* elem);
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard unary operator element.
  */
-void shyd_ast_expr_op_un(shyd_ctx_t* ctx, shyd_elem_t* elem);
+void tau_shyd_ast_expr_op_un(tau_shyd_ctx_t* ctx, tau_shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST binary operator expression node and pushes it onto the
@@ -237,7 +237,7 @@ void shyd_ast_expr_op_un(shyd_ctx_t* ctx, shyd_elem_t* elem);
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard binary operator element.
  */
-void shyd_ast_expr_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem);
+void tau_shyd_ast_expr_op_bin(tau_shyd_ctx_t* ctx, tau_shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST call operator expression node and pushes it onto the
@@ -246,7 +246,7 @@ void shyd_ast_expr_op_bin(shyd_ctx_t* ctx, shyd_elem_t* elem);
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard call operator element.
  */
-void shyd_ast_expr_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem);
+void tau_shyd_ast_expr_op_call(tau_shyd_ctx_t* ctx, tau_shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST generic specialization operator expression node and
@@ -255,7 +255,7 @@ void shyd_ast_expr_op_call(shyd_ctx_t* ctx, shyd_elem_t* elem);
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard specialization operator element.
  */
-void shyd_ast_expr_op_spec(shyd_ctx_t* ctx, shyd_elem_t* elem);
+void tau_shyd_ast_expr_op_spec(tau_shyd_ctx_t* ctx, tau_shyd_elem_t* elem);
 
 /**
  * \brief Creates an AST operator expression node and pushes it onto the node
@@ -264,7 +264,7 @@ void shyd_ast_expr_op_spec(shyd_ctx_t* ctx, shyd_elem_t* elem);
  * \param[in] ctx Pointer to the shunting yard context.
  * \param[in] elem Pointer to the shunting yard operator element.
  */
-void shyd_ast_expr_op(shyd_ctx_t* ctx, shyd_elem_t* elem);
+void tau_shyd_ast_expr_op(tau_shyd_ctx_t* ctx, tau_shyd_elem_t* elem);
 
 /**
  * \brief Parses an expression.
@@ -272,7 +272,7 @@ void shyd_ast_expr_op(shyd_ctx_t* ctx, shyd_elem_t* elem);
  * \param[in] par Pointer to the parser to be used.
  * \returns Expression node.
  */
-ast_node_t* shyd_parse_expr(parser_t* par);
+tau_ast_node_t* tau_shyd_parse_expr(tau_parser_t* par);
 
 TAU_EXTERN_C_END
 

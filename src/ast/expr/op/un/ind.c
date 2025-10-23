@@ -10,50 +10,50 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 
-ast_expr_op_un_ind_t* ast_expr_op_un_ind_init(void)
+tau_ast_expr_op_un_ind_t* tau_ast_expr_op_un_ind_init(void)
 {
-  ast_expr_op_un_ind_t* node = (ast_expr_op_un_ind_t*)malloc(sizeof(ast_expr_op_un_ind_t));
-  CLEAROBJ(node);
+  tau_ast_expr_op_un_ind_t* node = (tau_ast_expr_op_un_ind_t*)malloc(sizeof(tau_ast_expr_op_un_ind_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_EXPR_OP_UNARY;
+  node->kind = TAU_AST_EXPR_OP_UNARY;
   node->op_kind = OP_IND;
 
   return node;
 }
 
-void ast_expr_op_un_ind_nameres(nameres_ctx_t* ctx, ast_expr_op_un_ind_t* node)
+void tau_ast_expr_op_un_ind_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_op_un_ind_t* node)
 {
-  ast_node_nameres(ctx, node->expr);
+  tau_ast_node_nameres(ctx, node->expr);
 }
 
-void ast_expr_op_un_ind_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_ind_t* node)
+void tau_ast_expr_op_un_ind_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_un_ind_t* node)
 {
-  ast_node_typecheck(ctx, node->expr);
+  tau_ast_node_typecheck(ctx, node->expr);
 
-  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
-  ASSERT(expr_desc != NULL);
+  tau_typedesc_t* expr_desc = tau_typetable_lookup(ctx->typetable, node->expr);
+  TAU_ASSERT(expr_desc != NULL);
 
-  if (!typedesc_is_ptr(typedesc_remove_ref_mut(expr_desc)))
+  if (!tau_typedesc_is_ptr(tau_typedesc_remove_ref_mut(expr_desc)))
   {
-    error_bag_put_typecheck_expected_pointer(ctx->errors, token_location(node->expr->tok));
-    typecheck_poison(ctx, (ast_node_t*)node);
+    tau_error_bag_put_typecheck_expected_pointer(ctx->errors, tau_token_location(node->expr->tok));
+    tau_typecheck_poison(ctx, (tau_ast_node_t*)node);
     return;
   }
 
-  typedesc_t* pointed_desc = ((typedesc_ptr_t*)typedesc_remove_ref_mut(expr_desc))->base_type;
-  typedesc_t* desc = typebuilder_build_ref(ctx->typebuilder, pointed_desc);
+  tau_typedesc_t* pointed_desc = ((tau_typedesc_ptr_t*)tau_typedesc_remove_ref_mut(expr_desc))->base_type;
+  tau_typedesc_t* desc = tau_typebuilder_build_ref(ctx->typebuilder, pointed_desc);
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 }
 
-void ast_expr_op_un_ind_codegen(codegen_ctx_t* ctx, ast_expr_op_un_ind_t* node)
+void tau_ast_expr_op_un_ind_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_op_un_ind_t* node)
 {
-  ast_node_codegen(ctx, node->expr);
+  tau_ast_node_codegen(ctx, node->expr);
 
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  tau_typedesc_t* desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  node->llvm_value = ((ast_expr_t*)node->expr)->llvm_value;
+  node->llvm_value = ((tau_ast_expr_t*)node->expr)->llvm_value;
 }

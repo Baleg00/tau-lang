@@ -9,40 +9,40 @@
 
 #include "ast/registry.h"
 
-ast_expr_lit_null_t* ast_expr_lit_null_init(void)
+tau_ast_expr_lit_null_t* tau_ast_expr_lit_null_init(void)
 {
-  ast_expr_lit_null_t* node = (ast_expr_lit_null_t*)malloc(sizeof(ast_expr_lit_null_t));
-  CLEAROBJ(node);
+  tau_ast_expr_lit_null_t* node = (tau_ast_expr_lit_null_t*)malloc(sizeof(tau_ast_expr_lit_null_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_EXPR_LIT_NULL;
+  node->kind = TAU_AST_EXPR_LIT_NULL;
 
   return node;
 }
 
-void ast_expr_lit_null_free(ast_expr_lit_null_t* node)
+void tau_ast_expr_lit_null_free(tau_ast_expr_lit_null_t* node)
 {
   free(node);
 }
 
-void ast_expr_lit_null_nameres(nameres_ctx_t* UNUSED(ctx), ast_expr_lit_null_t* UNUSED(node))
+void tau_ast_expr_lit_null_nameres(tau_nameres_ctx_t* TAU_UNUSED(ctx), tau_ast_expr_lit_null_t* TAU_UNUSED(node))
 {
 }
 
-void ast_expr_lit_null_typecheck(typecheck_ctx_t* UNUSED(ctx), ast_expr_lit_null_t* UNUSED(node))
+void tau_ast_expr_lit_null_typecheck(tau_typecheck_ctx_t* TAU_UNUSED(ctx), tau_ast_expr_lit_null_t* TAU_UNUSED(node))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
   // TODO
 }
 
-void ast_expr_lit_null_codegen(codegen_ctx_t* UNUSED(ctx), ast_expr_lit_null_t* UNUSED(node))
+void tau_ast_expr_lit_null_codegen(tau_codegen_ctx_t* TAU_UNUSED(ctx), tau_ast_expr_lit_null_t* TAU_UNUSED(node))
 {
-  UNREACHABLE();
+  TAU_UNREACHABLE();
   // TODO
 }
 
-void ast_expr_lit_null_dump_json(FILE* stream, ast_expr_lit_null_t* node)
+void tau_ast_expr_lit_null_dump_json(FILE* stream, tau_ast_expr_lit_null_t* node)
 {
-  fprintf(stream, "{\"kind\":\"%s\"}", ast_kind_to_cstr(node->kind));
+  fprintf(stream, "{\"kind\":\"%s\"}", tau_ast_kind_to_cstr(node->kind));
 }

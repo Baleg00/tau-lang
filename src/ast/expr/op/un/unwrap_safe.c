@@ -10,54 +10,54 @@
 #include "ast/ast.h"
 #include "ast/registry.h"
 
-ast_expr_op_un_unwrap_safe_t* ast_expr_op_un_unwrap_safe_init(void)
+tau_ast_expr_op_un_unwrap_safe_t* tau_ast_expr_op_un_unwrap_safe_init(void)
 {
-  ast_expr_op_un_unwrap_safe_t* node = (ast_expr_op_un_unwrap_safe_t*)malloc(sizeof(ast_expr_op_un_unwrap_safe_t));
-  CLEAROBJ(node);
+  tau_ast_expr_op_un_unwrap_safe_t* node = (tau_ast_expr_op_un_unwrap_safe_t*)malloc(sizeof(tau_ast_expr_op_un_unwrap_safe_t));
+  TAU_CLEAROBJ(node);
 
-  ast_registry_register((ast_node_t*)node);
+  tau_ast_registry_register((tau_ast_node_t*)node);
 
-  node->kind = AST_EXPR_OP_UNARY;
+  node->kind = TAU_AST_EXPR_OP_UNARY;
   node->op_kind = OP_UNWRAP_SAFE;
 
   return node;
 }
 
-void ast_expr_op_un_unwrap_safe_nameres(nameres_ctx_t* ctx, ast_expr_op_un_unwrap_safe_t* node)
+void tau_ast_expr_op_un_unwrap_safe_nameres(tau_nameres_ctx_t* ctx, tau_ast_expr_op_un_unwrap_safe_t* node)
 {
-  ast_node_nameres(ctx, node->expr);
+  tau_ast_node_nameres(ctx, node->expr);
 }
 
-void ast_expr_op_un_unwrap_safe_typecheck(typecheck_ctx_t* ctx, ast_expr_op_un_unwrap_safe_t* node)
+void tau_ast_expr_op_un_unwrap_safe_typecheck(tau_typecheck_ctx_t* ctx, tau_ast_expr_op_un_unwrap_safe_t* node)
 {
-  ast_node_typecheck(ctx, node->expr);
+  tau_ast_node_typecheck(ctx, node->expr);
 
-  typedesc_t* expr_desc = typetable_lookup(ctx->typetable, node->expr);
-  ASSERT(expr_desc != NULL);
+  tau_typedesc_t* expr_desc = tau_typetable_lookup(ctx->typetable, node->expr);
+  TAU_ASSERT(expr_desc != NULL);
 
-  if (!typedesc_is_opt(typedesc_remove_ref_mut(expr_desc)))
+  if (!tau_typedesc_is_opt(tau_typedesc_remove_ref_mut(expr_desc)))
   {
-    error_bag_put_typecheck_expected_optional(ctx->errors, token_location(node->expr->tok));
-    typecheck_poison(ctx, (ast_node_t*)node);
+    tau_error_bag_put_typecheck_expected_optional(ctx->errors, tau_token_location(node->expr->tok));
+    tau_typecheck_poison(ctx, (tau_ast_node_t*)node);
     return;
   }
 
-  typedesc_opt_t* opt_desc = (typedesc_opt_t*)typedesc_remove_ref_mut(expr_desc);
-  typedesc_t* desc = opt_desc->base_type;
+  tau_typedesc_opt_t* opt_desc = (tau_typedesc_opt_t*)tau_typedesc_remove_ref_mut(expr_desc);
+  tau_typedesc_t* desc = opt_desc->base_type;
 
-  typetable_insert(ctx->typetable, (ast_node_t*)node, desc);
+  tau_typetable_insert(ctx->typetable, (tau_ast_node_t*)node, desc);
 }
 
-void ast_expr_op_un_unwrap_safe_codegen(codegen_ctx_t* ctx, ast_expr_op_un_unwrap_safe_t* node)
+void tau_ast_expr_op_un_unwrap_safe_codegen(tau_codegen_ctx_t* ctx, tau_ast_expr_op_un_unwrap_safe_t* node)
 {
-  ast_node_codegen(ctx, node->expr);
+  tau_ast_node_codegen(ctx, node->expr);
 
-  typedesc_t* desc = typetable_lookup(ctx->typetable, (ast_node_t*)node);
+  tau_typedesc_t* desc = tau_typetable_lookup(ctx->typetable, (tau_ast_node_t*)node);
   node->llvm_type = desc->llvm_type;
 
-  ast_expr_t* expr = (ast_expr_t*)node->expr;
+  tau_ast_expr_t* expr = (tau_ast_expr_t*)node->expr;
 
-  typedesc_t* expr_desc = typedesc_remove_ref_mut(typetable_lookup(ctx->typetable, node->expr));
+  tau_typedesc_t* expr_desc = tau_typedesc_remove_ref_mut(tau_typetable_lookup(ctx->typetable, node->expr));
 
   LLVMBasicBlockRef llvm_cond_block = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "unwrap_safe_cond");
   LLVMBasicBlockRef llvm_exit_block = LLVMCreateBasicBlockInContext(ctx->llvm_ctx, "unwrap_safe_exit");
@@ -78,7 +78,7 @@ void ast_expr_op_un_unwrap_safe_codegen(codegen_ctx_t* ctx, ast_expr_op_un_unwra
     LLVMInt32TypeInContext(ctx->llvm_ctx)
   };
 
-  LLVMTypeRef llvm_exit_type = LLVMFunctionType(LLVMVoidTypeInContext(ctx->llvm_ctx), llvm_param_types, COUNTOF(llvm_param_types), false);
+  LLVMTypeRef llvm_exit_type = LLVMFunctionType(LLVMVoidTypeInContext(ctx->llvm_ctx), llvm_param_types, TAU_COUNTOF(llvm_param_types), false);
   LLVMValueRef llvm_exit_func = LLVMAddFunction(ctx->llvm_mod, "exit", llvm_exit_type);
   LLVMSetFunctionCallConv(llvm_exit_func, LLVMCCallConv);
 
@@ -89,12 +89,12 @@ void ast_expr_op_un_unwrap_safe_codegen(codegen_ctx_t* ctx, ast_expr_op_un_unwra
     LLVMConstInt(LLVMInt32TypeInContext(ctx->llvm_ctx), 1, false)
   };
 
-  LLVMBuildCall2(ctx->llvm_builder, llvm_exit_type, llvm_exit_func, llvm_args, COUNTOF(llvm_args), "");
+  LLVMBuildCall2(ctx->llvm_builder, llvm_exit_type, llvm_exit_func, llvm_args, TAU_COUNTOF(llvm_args), "");
   LLVMBuildUnreachable(ctx->llvm_builder);
 
   LLVMInsertExistingBasicBlockAfterInsertBlock(ctx->llvm_builder, llvm_end_block);
   LLVMPositionBuilderAtEnd(ctx->llvm_builder, llvm_end_block);
 
   LLVMValueRef llvm_value_ptr = LLVMBuildStructGEP2(ctx->llvm_builder, expr_desc->llvm_type, expr->llvm_value, 1, "");
-  node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, ((typedesc_opt_t*)expr_desc)->base_type->llvm_type, llvm_value_ptr, "");
+  node->llvm_value = LLVMBuildLoad2(ctx->llvm_builder, ((tau_typedesc_opt_t*)expr_desc)->base_type->llvm_type, llvm_value_ptr, "");
 }

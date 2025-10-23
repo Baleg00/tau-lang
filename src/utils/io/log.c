@@ -10,11 +10,11 @@
 #include "utils/common.h"
 #include "utils/esc_seq.h"
 
-static log_level_t g_log_level = LOG_LEVEL_TRACE;
+static tau_log_level_t g_log_level = TAU_LOG_LEVEL_TRACE;
 static FILE* g_log_stream = NULL;
 static bool g_log_verbose = false;
 
-void log_log(log_level_t lvl, const char* file, int line, const char* UNUSED(func), const char* name, const char* fmt, ...)
+void tau_log_log(tau_log_level_t lvl, const char* file, int line, const char* TAU_UNUSED(func), const char* name, const char* fmt, ...)
 {
   if (lvl < g_log_level || g_log_stream == NULL)
     return;
@@ -27,12 +27,12 @@ void log_log(log_level_t lvl, const char* file, int line, const char* UNUSED(fun
     size_t len = strftime(time_buf, sizeof(time_buf), "%H:%M:%S", localtime(&tm));
     time_buf[len] = '\0';
 
-    fprintf(g_log_stream, ESC_FG_BRIGHT_BLACK "%s:%d %s " ESC_RESET,
+    fprintf(g_log_stream, TAU_ESC_FG_BRIGHT_BLACK "%s:%d %s " TAU_ESC_RESET,
       file, line, time_buf);
   }
 
-  fprintf(g_log_stream, "[%s%s:%s" ESC_RESET "]> ",
-    log_level_to_color(lvl), log_level_to_string(lvl), name);
+  fprintf(g_log_stream, "[%s%s:%s" TAU_ESC_RESET "]> ",
+    tau_log_level_to_color(lvl), tau_log_level_to_string(lvl), name);
 
   va_list args;
   va_start(args, fmt);
@@ -44,60 +44,60 @@ void log_log(log_level_t lvl, const char* file, int line, const char* UNUSED(fun
   fputc('\n', g_log_stream);
 }
 
-const char* log_level_to_string(log_level_t lvl)
+const char* tau_log_level_to_string(tau_log_level_t lvl)
 {
   switch (lvl)
   {
-  case LOG_LEVEL_TRACE: return "TRACE";
-  case LOG_LEVEL_DEBUG: return "DEBUG";
-  case LOG_LEVEL_INFO:  return "INFO";
-  case LOG_LEVEL_WARN:  return "WARN";
-  case LOG_LEVEL_ERROR: return "ERROR";
-  case LOG_LEVEL_FATAL: return "FATAL";
+  case TAU_LOG_LEVEL_TRACE: return "TRACE";
+  case TAU_LOG_LEVEL_DEBUG: return "DEBUG";
+  case TAU_LOG_LEVEL_INFO:  return "INFO";
+  case TAU_LOG_LEVEL_WARN:  return "WARN";
+  case TAU_LOG_LEVEL_ERROR: return "ERROR";
+  case TAU_LOG_LEVEL_FATAL: return "FATAL";
   default: return "";
   }
 }
 
-const char* log_level_to_color(log_level_t lvl)
+const char* tau_log_level_to_color(tau_log_level_t lvl)
 {
   switch (lvl)
   {
-  case LOG_LEVEL_TRACE: return ESC_FG_BRIGHT_BLACK;
-  case LOG_LEVEL_DEBUG: return ESC_FG_CYAN;
-  case LOG_LEVEL_INFO:  return ESC_FG_WHITE;
-  case LOG_LEVEL_WARN:  return ESC_FG_YELLOW;
-  case LOG_LEVEL_ERROR: return ESC_FG_RED;
-  case LOG_LEVEL_FATAL: return ESC_BG_RED;
+  case TAU_LOG_LEVEL_TRACE: return TAU_ESC_FG_BRIGHT_BLACK;
+  case TAU_LOG_LEVEL_DEBUG: return TAU_ESC_FG_CYAN;
+  case TAU_LOG_LEVEL_INFO:  return TAU_ESC_FG_WHITE;
+  case TAU_LOG_LEVEL_WARN:  return TAU_ESC_FG_YELLOW;
+  case TAU_LOG_LEVEL_ERROR: return TAU_ESC_FG_RED;
+  case TAU_LOG_LEVEL_FATAL: return TAU_ESC_BG_RED;
   default: return "";
   }
 }
 
-void log_set_level(log_level_t lvl)
+void tau_log_set_level(tau_log_level_t lvl)
 {
   g_log_level = lvl;
 }
 
-log_level_t log_get_level(void)
+tau_log_level_t tau_log_get_level(void)
 {
   return g_log_level;
 }
 
-void log_set_stream(FILE* stream)
+void tau_log_set_stream(FILE* stream)
 {
   g_log_stream = stream;
 }
 
-FILE* log_get_stream(void)
+FILE* tau_log_get_stream(void)
 {
   return g_log_stream;
 }
 
-void log_set_verbose(bool value)
+void tau_log_set_verbose(bool value)
 {
   g_log_verbose = value;
 }
 
-bool log_get_verbose(void)
+bool tau_log_get_verbose(void)
 {
   return g_log_verbose;
 }
