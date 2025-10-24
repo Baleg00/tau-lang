@@ -14,6 +14,8 @@
 
 #if TAU_OS_LINUX
 # include <pthread.h>
+#elif TAU_OS_WINDOWS
+# include <windows.h>
 #endif
 
 TAU_EXTERN_C_BEGIN
@@ -23,6 +25,9 @@ typedef struct tau_mutex_t
 {
 #if TAU_OS_LINUX
   pthread_mutex_t native_handle;
+#elif TAU_OS_WINDOWS
+  HANDLE native_handle;
+  CRITICAL_SECTION critical_sec;
 #endif
 } tau_mutex_t;
 
