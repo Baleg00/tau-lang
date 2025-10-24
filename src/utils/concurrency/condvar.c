@@ -61,6 +61,60 @@ void tau_condvar_broadcast(tau_condvar_t* condvar)
   TAU_ASSERT(result == 0);
 }
 
+#elif TAU_OS_WINDOWS
+
+bool tau_condvar_init(tau_condvar_t* condvar)
+{
+  InitializeConditionVariable(&condvar->native_handle);
+  return true;
+}
+
+void tau_condvar_free(tau_condvar_t* TAU_UNUSED(condvar))
+{
+}
+
+void tau_condvar_wait(tau_condvar_t* condvar, tau_mutex_t* mutex)
+{
+  BOOL result = SleepConditionVariableCS(&condvar->native_handle, &mutex->critical_sec, INFINITE);
+  TAU_ASSERT(result == TRUE);
+}
+
+bool tau_condvar_wait_for(tau_condvar_t* restrict condvar, tau_mutex_t* restrict mutex, const struct timespec* restrict timeout)
+{
+  return SleepConditionVariableCS(&condvar->native_handle, &mutex->critical_sec, (DWORD)(timeout->tv_sec * 1000 + timeout->tv_nsec / 1000000)) == TRUE;
+}
+
+bool tau_condvar_wait_until(tau_condvar_t* restrict condvar, tau_mutex_t* restrict mutex, const struct timespec* restrict timepoint)
+{
+  struct timespec now;
+  timespec_get(&now, TIME_UTC);
+
+  struct timespec diff;
+  diff.tv_sec = timepoint->tv_sec - now.tv_sec;
+  diff.tv_nsec = timepoint->tv_nsec - now.tv_nsec;
+
+  if (diff.tv_nsec < 0)
+  {
+    diff.tv_sec--;
+    diff.tv_nsec += 1000000000;
+  }
+
+  if (diff.tv_sec < 0)
+    return false;
+
+  return tau_condvar_wait_for(condvar, mutex, &diff);
+}
+
+void tau_condvar_signal(tau_condvar_t* condvar)
+{
+  WakeConditionVariable(&condvar->native_handle);
+}
+
+void tau_condvar_broadcast(tau_condvar_t* condvar)
+{
+  WakeAllConditionVariable(&condvar->native_handle);
+}
+
 #else
 # error "Condition variables are not implemented for this platform!"
 #endif
