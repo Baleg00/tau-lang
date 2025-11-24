@@ -26,7 +26,6 @@ typedef struct tau_mutex_t
 #if TAU_OS_LINUX
   pthread_mutex_t native_handle;
 #elif TAU_OS_WINDOWS
-  HANDLE native_handle;
   CRITICAL_SECTION critical_sec;
 #endif
 } tau_mutex_t;
@@ -60,24 +59,6 @@ void tau_mutex_lock(tau_mutex_t* mutex);
  * \returns `true` if the lock was acquired successfully, `false` otherwise.
  */
 bool tau_mutex_try_lock(tau_mutex_t* mutex);
-
-/**
- * \brief Tries to lock a mutex. If another thread already has the lock, blocks for the specified duration.
- *
- * \param[in] mutex Pointer to lock to be used.
- * \param[in] timeout Duration to block for.
- * \returns `true` if the lock was acquired successfully, `false` otherwise.
- */
-bool tau_mutex_try_lock_for(tau_mutex_t* restrict mutex, const struct timespec* restrict timeout);
-
-/**
- * \brief Tries to lock a mutex. If another thread already has the lock, blocks until the specified time point.
- *
- * \param[in] mutex Pointer to lock to be used.
- * \param[in] timepoint Time point to block until.
- * \returns `true` if the lock was acquired successfully, `false` otherwise.
- */
-bool tau_mutex_try_lock_until(tau_mutex_t* restrict mutex, const struct timespec* restrict timepoint);
 
 /**
  * \brief Unlocks a mutex.
