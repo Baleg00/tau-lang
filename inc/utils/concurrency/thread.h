@@ -14,17 +14,11 @@
 
 #if TAU_OS_LINUX
 # include <pthread.h>
+#elif TAU_OS_WINDOWS
+# include <windows.h>
 #endif
 
 TAU_EXTERN_C_BEGIN
-
-/// Represents a thread.
-typedef struct tau_thread_t
-{
-#if TAU_OS_LINUX
-  pthread_t native_handle;
-#endif
-} tau_thread_t;
 
 /**
  * \brief Function pointer type for thread worker functions.
@@ -33,6 +27,19 @@ typedef struct tau_thread_t
  * \returns User-defined return value.
  */
 typedef void*(*tau_thread_func_t)(void* arg);
+
+/// Represents a thread.
+typedef struct tau_thread_t
+{
+#if TAU_OS_LINUX
+  pthread_t native_handle;
+#elif TAU_OS_WINDOWS
+  HANDLE native_handle;
+  tau_thread_func_t func;
+  void* arg;
+  void* ret;
+#endif
+} tau_thread_t;
 
 /**
  * \brief Initializes and starts a new thread.

@@ -53,8 +53,7 @@ target_link_libraries(tauc PRIVATE tau)
 
 if (TAU_CODE_COVERAGE)
   tau_target_code_coverage_configure(tauc)
+  tau_add_code_coverage_target()
 endif ()
-
-tau_add_code_coverage_target()
 
 install(TARGETS tauc CONFIGURATIONS Debug Release RelWithDebInfo MinSizeRel)

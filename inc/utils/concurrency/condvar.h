@@ -13,6 +13,10 @@
 #include "utils/common.h"
 #include "utils/concurrency/mutex.h"
 
+#if TAU_OS_WINDOWS
+# include <windows.h>
+#endif
+
 TAU_EXTERN_C_BEGIN
 
 /// Represents a condition variable for thread synchronization.
@@ -20,6 +24,8 @@ typedef struct tau_condvar_t
 {
 #if TAU_OS_LINUX
   pthread_cond_t native_handle;
+#elif TAU_OS_WINDOWS
+  CONDITION_VARIABLE native_handle;
 #endif
 } tau_condvar_t;
 
