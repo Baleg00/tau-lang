@@ -19,6 +19,6 @@ function(tau_os_detect_configure_file)
     message(SEND_ERROR "Unknown target OS: ${CMAKE_SYSTEM_NAME}")
   endif ()
 
-  configure_file(${PROJECT_SOURCE_DIR}/inc/utils/os_detect.h.in
-    ${PROJECT_SOURCE_DIR}/inc/utils/os_detect.h)
+  configure_file(${PROJECT_SOURCE_DIR}/include/utils/os_detect.h.in
+    ${PROJECT_SOURCE_DIR}/include/utils/os_detect.h)
 endfunction()

@@ -26,12 +26,15 @@ tau_os_detect_configure_file()
 
 tau_find_llvm()
 
-tau_add_library(tau)
-tau_target_configure(tau)
-tau_target_llvm_configure(tau ${TAU_LLVM_SHARED})
+file(GLOB_RECURSE TAU_SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
+list(REMOVE_ITEM TAU_SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/main.c)
+add_library(libtau STATIC EXCLUDE_FROM_ALL ${TAU_SOURCE_FILES})
+
+tau_target_configure(libtau)
+tau_target_llvm_configure(libtau ${TAU_LLVM_SHARED})
 
 if (TAU_CODE_COVERAGE)
-  tau_target_code_coverage_configure(tau)
+  tau_target_code_coverage_configure(libtau)
 endif ()
 
 tau_add_tests(TAU_TEST_TARGET_LIST)
@@ -39,17 +42,17 @@ tau_add_tests(TAU_TEST_TARGET_LIST)
 foreach (TEST_TARGET IN LISTS TAU_TEST_TARGET_LIST)
   tau_target_configure(${TEST_TARGET})
   tau_target_llvm_configure(${TEST_TARGET} ${TAU_LLVM_SHARED})
-  target_link_libraries(${TEST_TARGET} PRIVATE tau)
+  target_link_libraries(${TEST_TARGET} PRIVATE libtau)
 
   if (TAU_CODE_COVERAGE)
     tau_target_code_coverage_configure(${TEST_TARGET})
   endif ()
 endforeach ()
 
-tau_add_executable(tauc)
+add_executable(tauc ${PROJECT_SOURCE_DIR}/src/main.c)
 tau_target_configure(tauc)
 tau_target_llvm_configure(tauc ${TAU_LLVM_SHARED})
-target_link_libraries(tauc PRIVATE tau)
+target_link_libraries(tauc PRIVATE libtau)
 
 if (TAU_CODE_COVERAGE)
   tau_target_code_coverage_configure(tauc)

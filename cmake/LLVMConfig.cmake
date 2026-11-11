@@ -1,5 +1,5 @@
 macro(tau_find_llvm)
-  find_package(LLVM 18.1.0 REQUIRED CONFIG)
+  find_package(LLVM REQUIRED CONFIG)
 
   message(VERBOSE "Found LLVM ${LLVM_PACKAGE_VERSION}")
   message(VERBOSE "Using LLVMConfig.cmake in: ${LLVM_DIR}")

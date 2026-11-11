@@ -48,19 +48,8 @@ function(tau_target_configure TARGET)
     TAU_DEBUG=$<CONFIG:Debug> # Define TAU_DEBUG as 1 on debug build, 0 otherwise.
   )
 
-  target_include_directories(${TARGET} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
+  target_include_directories(${TARGET} PRIVATE ${PROJECT_SOURCE_DIR}/include)
   target_compile_options(${TARGET} PRIVATE ${TAU_COMPILE_OPTIONS})
   target_link_options(${TARGET} PRIVATE ${TAU_LINK_OPTIONS})
   target_compile_definitions(${TARGET} PRIVATE ${TAU_COMPILE_DEFINITIONS})
-endfunction()
-
-function(tau_add_library TARGET)
-  file(GLOB_RECURSE TAU_SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
-  list(REMOVE_ITEM TAU_SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/main.c)
-
-  add_library(${TARGET} STATIC EXCLUDE_FROM_ALL ${TAU_SOURCE_FILES})
-endfunction()
-
-function(tau_add_executable TARGET)
-  add_executable(${TARGET} ${PROJECT_SOURCE_DIR}/src/main.c)
 endfunction()
